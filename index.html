@@ -1084,12 +1084,12 @@ function openM(id){
     document.getElementById('tModTit').textContent='Add Task ✨';
     document.getElementById('editTId').value='';
     document.getElementById('delTBtn').style.display='none';
-
+  }
   if(id==='fwModal'){
     togFW('water');
     document.querySelector('[data-g="fwt"][data-v="water"]').classList.add('on');
     SBV.fwt='water';
-
+  }
   document.getElementById(id).classList.add('show');
 }
 
