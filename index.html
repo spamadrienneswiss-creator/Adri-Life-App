@@ -15,21 +15,6 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
 #syncBar.show{display:block;animation:syncAnim 1s ease infinite}
 @keyframes syncAnim{0%{transform:scaleX(0)}50%{transform:scaleX(0.7)}100%{transform:scaleX(1)}}
 
-/* PIN SCREEN */
-#pinScreen{position:fixed;inset:0;z-index:9998;background:linear-gradient(160deg,#c9a0a0,#a99fc9,#8aafc9);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px}
-.pin-logo{font-family:'Playfair Display',serif;font-size:32px;color:white;margin-bottom:8px}
-.pin-sub{font-size:14px;color:rgba(255,255,255,.8);margin-bottom:48px;font-weight:600;text-align:center}
-.pin-dots{display:flex;gap:16px;margin-bottom:40px}
-.pin-dot{width:16px;height:16px;border-radius:50%;border:2px solid rgba(255,255,255,.6);transition:all .2s}
-.pin-dot.filled{background:white;border-color:white}
-.pin-pad{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;width:100%;max-width:280px}
-.pin-btn{aspect-ratio:1;border-radius:50%;border:none;background:rgba(255,255,255,.2);color:white;font-family:'Quicksand',sans-serif;font-size:22px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center}
-.pin-btn:active{background:rgba(255,255,255,.4);transform:scale(.95)}
-.pin-btn.zero{grid-column:2}.pin-btn.del{background:rgba(255,255,255,.1);font-size:18px}
-.pin-err{color:rgba(255,255,255,.9);font-size:13px;margin-top:16px;min-height:20px;font-weight:600}
-.pin-skip{color:rgba(255,255,255,.6);font-size:12px;margin-top:24px;cursor:pointer;text-decoration:underline;text-align:center}
-#pinScreen.hidden{display:none}
-
 /* HEADER */
 .hdr{padding:18px 20px 13px;position:sticky;top:0;z-index:100;box-shadow:0 2px 20px rgba(0,0,0,.1)}
 .hdr-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:2px}
@@ -212,21 +197,6 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     <div class="loading-dot"></div>
   </div>
   <p style="margin-top:20px;font-size:13px;color:var(--textl)">Syncing your data...</p>
-</div>
-
-<!-- PIN -->
-<div id="pinScreen" class="hidden">
-  <div class="pin-logo">✨ Adri's Life</div>
-  <div class="pin-sub" id="pinSub">Enter your PIN</div>
-  <div class="pin-dots"><div class="pin-dot" id="pd0"></div><div class="pin-dot" id="pd1"></div><div class="pin-dot" id="pd2"></div><div class="pin-dot" id="pd3"></div></div>
-  <div class="pin-pad">
-    <button class="pin-btn" onclick="pinK('1')">1</button><button class="pin-btn" onclick="pinK('2')">2</button><button class="pin-btn" onclick="pinK('3')">3</button>
-    <button class="pin-btn" onclick="pinK('4')">4</button><button class="pin-btn" onclick="pinK('5')">5</button><button class="pin-btn" onclick="pinK('6')">6</button>
-    <button class="pin-btn" onclick="pinK('7')">7</button><button class="pin-btn" onclick="pinK('8')">8</button><button class="pin-btn" onclick="pinK('9')">9</button>
-    <button class="pin-btn zero" onclick="pinK('0')">0</button><button class="pin-btn del" onclick="pinDel()">⌫</button>
-  </div>
-  <div class="pin-err" id="pinErr"></div>
-  <div class="pin-skip" onclick="pinSkip()">Skip — set PIN later</div>
 </div>
 
 <!-- HEADER -->
@@ -597,8 +567,6 @@ var RTNS = JSON.parse(localStorage.getItem('aRtns')||'null')||{
 };
 
 var S = {
-  pin: localStorage.getItem('aPin')||'',
-  skip: localStorage.getItem('aPinSkip')==='1',
   gCal:parseInt(localStorage.getItem('aGCal'))||1900,
   gPro:parseInt(localStorage.getItem('aGPro'))||120,
   gFib:parseInt(localStorage.getItem('aGFib'))||75,
@@ -608,7 +576,6 @@ var S = {
 };
 
 var SBV={}, CF='all', DELTED=null, UNDO_T=null;
-var PE='';
 var firebaseLoaded = false;
 
 // ═══════════════════════════════════════════════
@@ -663,20 +630,6 @@ function fbDelete(col, id){
   if(!window.db) return;
   window.fsDeleteDoc(window.fsDoc(window.db, col, id)).then(hideSync);
 }
-
-// ═══════════════════════════════════════════════
-// PIN
-// ═══════════════════════════════════════════════
-function pinK(k){if(PE.length>=4)return;PE+=k;updPD();if(PE.length===4)setTimeout(chkPin,150);}
-function pinDel(){PE=PE.slice(0,-1);updPD();}
-function updPD(){for(var i=0;i<4;i++)document.getElementById('pd'+i).className='pin-dot'+(i<PE.length?' filled':'');}
-function chkPin(){
-  if(!S.pin){S.pin=PE;localStorage.setItem('aPin',S.pin);unlock();}
-  else if(PE===S.pin){unlock();}
-  else{document.getElementById('pinErr').textContent='Incorrect PIN. Try again.';PE='';updPD();setTimeout(function(){document.getElementById('pinErr').textContent='';},2000);}
-}
-function pinSkip(){S.skip=true;localStorage.setItem('aPinSkip','1');unlock();}
-function unlock(){document.getElementById('pinScreen').classList.add('hidden');}
 
 // ═══════════════════════════════════════════════
 // INIT
@@ -1048,25 +1001,25 @@ function expD(type){
     var d=TASKS.filter(function(t){return t.done;});
     txt+='\nCOMPLETED ('+d.length+'):\n';
     d.forEach(function(t){txt+='✓ '+t.title+'\n';});
-
+  }
   if(type==='wigs'){
     txt='WIG ORDERS — '+date+'\n'+'='.repeat(40)+'\n\n';
     WIGS.forEach(function(w){txt+='CLIENT: '+w.client+'\nWIG: '+w.char+'\nTYPE: '+w.ty+'\nPRICE: $'+(w.price||'?')+'\nDEPOSIT: '+w.dep+'\nSTATUS: '+w.st+'\nCA: '+w.ca+'\nNOTES: '+(w.notes||'none')+'\n\n';});
     txt+='\nTOTAL: $'+WIGS.reduce(function(s,w){return s+(parseFloat(w.price)||0);},0).toFixed(2);
-
+  }
   if(type==='expenses'){
     txt='EXPENSES — '+date+'\nDATE\tDESCRIPTION\tTYPE\tCATEGORY\tAMOUNT\n';
     EXPENSES.forEach(function(e){txt+=e.date+'\t'+e.desc+'\t'+e.ty+'\t'+e.cat+'\t$'+e.amt.toFixed(2)+'\n';});
     var b=EXPENSES.filter(function(e){return e.ty==='business';}).reduce(function(s,e){return s+e.amt;},0);
     var p=EXPENSES.filter(function(e){return e.ty==='personal';}).reduce(function(s,e){return s+e.amt;},0);
     txt+='\nBUSINESS: $'+b.toFixed(2)+'\nPERSONAL: $'+p.toFixed(2);
-
+  }
   if(type==='food'){
     var log=getTL();var t=getTot();
     txt='FOOD LOG — '+date+'\nFOOD\tSERVING\tCAL\tPROTEIN\tFIBER\tCARBS\tFAT\n';
     log.forEach(function(f){txt+=f.name+'\t'+(f.sv||'1srv')+'\t'+f.cal+'\t'+f.pro+'g\t'+f.fib+'g\t'+f.crb+'g\t'+f.fat+'g\n';});
     txt+='\nTOTALS: Cal:'+Math.round(t.cal)+'/'+S.gCal+' Protein:'+Math.round(t.pro)+'g/'+S.gPro+'g';
-
+  }
   document.getElementById('expTxt').value=txt;
   openM('expModal2');
 }
@@ -1139,7 +1092,7 @@ setTimeout(function(){
   if(!firebaseLoaded){
     startApp();
     document.getElementById('syncStatus').textContent='⚠️ Offline mode';
-
+  }
 }, 5000);
 
 setInterval(updDate, 60000);
