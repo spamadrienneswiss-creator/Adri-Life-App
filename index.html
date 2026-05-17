@@ -379,7 +379,7 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
 
 <div class="fab-wrap">
   <div class="fab-r"><span class="fab-lb">Log $</span><button class="fab-mi f2" onclick="openM('expModal')">💸</button></div>
-  <div class="fab-r"><span class="fab-lb">Add Wig</span><button class="fab-mi f3" onclick="openM('wigModal')">🪄</button></div>
+  <div class="fab-r"><span class="fab-lb">Food/Water</span><button class="fab-mi f3" onclick="openM('fwModal')">🍽️</button></div>
   <button class="fab-m" onclick="openM('taskModal')">+</button>
 </div>
 
@@ -1048,25 +1048,25 @@ function expD(type){
     var d=TASKS.filter(function(t){return t.done;});
     txt+='\nCOMPLETED ('+d.length+'):\n';
     d.forEach(function(t){txt+='✓ '+t.title+'\n';});
-  }
+
   if(type==='wigs'){
     txt='WIG ORDERS — '+date+'\n'+'='.repeat(40)+'\n\n';
     WIGS.forEach(function(w){txt+='CLIENT: '+w.client+'\nWIG: '+w.char+'\nTYPE: '+w.ty+'\nPRICE: $'+(w.price||'?')+'\nDEPOSIT: '+w.dep+'\nSTATUS: '+w.st+'\nCA: '+w.ca+'\nNOTES: '+(w.notes||'none')+'\n\n';});
     txt+='\nTOTAL: $'+WIGS.reduce(function(s,w){return s+(parseFloat(w.price)||0);},0).toFixed(2);
-  }
+
   if(type==='expenses'){
     txt='EXPENSES — '+date+'\nDATE\tDESCRIPTION\tTYPE\tCATEGORY\tAMOUNT\n';
     EXPENSES.forEach(function(e){txt+=e.date+'\t'+e.desc+'\t'+e.ty+'\t'+e.cat+'\t$'+e.amt.toFixed(2)+'\n';});
     var b=EXPENSES.filter(function(e){return e.ty==='business';}).reduce(function(s,e){return s+e.amt;},0);
     var p=EXPENSES.filter(function(e){return e.ty==='personal';}).reduce(function(s,e){return s+e.amt;},0);
     txt+='\nBUSINESS: $'+b.toFixed(2)+'\nPERSONAL: $'+p.toFixed(2);
-  }
+
   if(type==='food'){
     var log=getTL();var t=getTot();
     txt='FOOD LOG — '+date+'\nFOOD\tSERVING\tCAL\tPROTEIN\tFIBER\tCARBS\tFAT\n';
     log.forEach(function(f){txt+=f.name+'\t'+(f.sv||'1srv')+'\t'+f.cal+'\t'+f.pro+'g\t'+f.fib+'g\t'+f.crb+'g\t'+f.fat+'g\n';});
     txt+='\nTOTALS: Cal:'+Math.round(t.cal)+'/'+S.gCal+' Protein:'+Math.round(t.pro)+'g/'+S.gPro+'g';
-  }
+
   document.getElementById('expTxt').value=txt;
   openM('expModal2');
 }
@@ -1084,12 +1084,12 @@ function openM(id){
     document.getElementById('tModTit').textContent='Add Task ✨';
     document.getElementById('editTId').value='';
     document.getElementById('delTBtn').style.display='none';
-  }
+
   if(id==='fwModal'){
     togFW('water');
     document.querySelector('[data-g="fwt"][data-v="water"]').classList.add('on');
     SBV.fwt='water';
-  }
+
   document.getElementById(id).classList.add('show');
 }
 
@@ -1118,14 +1118,14 @@ function startApp(){
   renderFL();
   updM();
 
-  // Show PIN if set
-  if(S.pin && !S.skip){
-    document.getElementById('pinScreen').classList.remove('hidden');
-    if(!S.pin){document.getElementById('pinSub').textContent='Set a 4-digit PIN to protect your app';}
-  } else if(!S.pin && !S.skip){
-    document.getElementById('pinScreen').classList.remove('hidden');
-    document.getElementById('pinSub').textContent='Set a 4-digit PIN (or skip)';
-  }
+
+
+
+
+
+
+
+
 }
 
 // Wait for Firebase then start
@@ -1139,7 +1139,7 @@ setTimeout(function(){
   if(!firebaseLoaded){
     startApp();
     document.getElementById('syncStatus').textContent='⚠️ Offline mode';
-  }
+
 }, 5000);
 
 setInterval(updDate, 60000);
