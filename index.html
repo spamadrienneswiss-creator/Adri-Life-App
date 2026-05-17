@@ -1130,8 +1130,8 @@ function startApp(){
 
 // Wait for Firebase then start
 window.addEventListener('firebaseReady', function(){
-  initFirebase();
   startApp();
+  initFirebase();
 });
 
 // Fallback if Firebase takes too long
