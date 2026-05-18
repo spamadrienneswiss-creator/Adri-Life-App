@@ -211,6 +211,22 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
 .color-swatch{width:34px;height:34px;border-radius:50%;border:3px solid transparent;cursor:pointer;transition:transform .15s;box-shadow:var(--sh2)}
 .color-swatch.on{border-color:var(--text);transform:scale(1.15)}
 .notes-big{min-height:260px;resize:vertical;font-size:14px;line-height:1.6}
+/* PROJECTS & GOALS */
+.proj-card{background:white;border-radius:var(--r);padding:14px;margin-bottom:12px;box-shadow:var(--sh)}
+.proj-hd{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;gap:8px}
+.proj-title{font-size:15px;font-weight:700;color:var(--text);margin-bottom:4px;line-height:1.3}
+.proj-step{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid #f0ebe6}
+.proj-step:last-child{border-bottom:none}
+.proj-step.done .rlb{text-decoration:line-through;color:var(--textl)}
+.proj-step .rchk{width:20px;height:20px;border-radius:50%;border:2px solid #ddd;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:10px;cursor:pointer;transition:all .2s}
+.proj-step.done .rchk{background:var(--sage);border-color:var(--sage);color:white}
+.proj-exp{width:100%;padding:8px;background:none;border:1.5px dashed #ddd;border-radius:9px;font-family:'Quicksand',sans-serif;font-size:12px;color:var(--textl);cursor:pointer;margin-top:8px;font-weight:600}
+.tmpl-row{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding-bottom:4px;margin-bottom:14px}
+.tmpl-row::-webkit-scrollbar{display:none}
+.tmpl-chip{flex-shrink:0;padding:8px 14px;border-radius:20px;border:2px solid #ede8e3;background:white;font-family:'Quicksand',sans-serif;font-size:12px;font-weight:700;color:var(--textl);cursor:pointer;white-space:nowrap}
+.tmpl-chip:active{background:var(--blue-light);border-color:var(--blue);color:var(--blue)}
+.pin-btn{background:none;border:none;font-size:16px;cursor:pointer;padding:3px;opacity:.5;transition:opacity .2s}
+.pin-btn.on{opacity:1}
 
 /* SUBTASKS */
 .tc-wrap{margin-bottom:8px}
@@ -266,6 +282,8 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
 <div class="tabs">
   <button class="tab-btn on" data-tab="today" onclick="goTab('today',this)">☀️ Today</button>
   <button class="tab-btn" data-tab="tasks" onclick="goTab('tasks',this)">📋 Tasks</button>
+  <button class="tab-btn" data-tab="projects" onclick="goTab('projects',this)">📁 Projects</button>
+  <button class="tab-btn" data-tab="goals" onclick="goTab('goals',this)">🎯 Goals</button>
   <button class="tab-btn" data-tab="routines" onclick="goTab('routines',this)">🔄 Routines</button>
   <button class="tab-btn" data-tab="food" onclick="goTab('food',this)">🍽️ Food</button>
   <button class="tab-btn" data-tab="wigs" onclick="goTab('wigs',this)">🪄 Wigs</button>
@@ -302,6 +320,25 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
   <div id="todaySo"><div class="empty"><div class="emj">📝</div><p>Add tasks to see them here.</p></div></div>
   <div class="sh">🌙 Evening Routine</div>
   <div class="rc pm" id="todayPM"><div class="rt">🌙 PM Routine</div></div>
+  <div id="pinnedSection" style="display:none">
+    <div class="sh">📌 Pinned</div>
+    <div id="pinnedList"></div>
+  </div>
+</div>
+
+<!-- PROJECTS -->
+<div class="view" id="v-projects">
+  <button class="ok-btn" style="margin-bottom:14px" onclick="openNewProj()">📁 New Project</button>
+  <div class="sh">📋 Load from Template</div>
+  <div class="tmpl-row" id="tmplBar"></div>
+  <div class="sh">Active Projects</div>
+  <div id="projList"><div class="empty"><div class="emj">📁</div><p>No projects yet. Create one or load a template!</p></div></div>
+</div>
+
+<!-- GOALS -->
+<div class="view" id="v-goals">
+  <button class="ok-btn" style="margin-bottom:14px;background:linear-gradient(135deg,var(--sage),var(--teal))" onclick="openNewGoal()">🎯 New Goal</button>
+  <div id="goalList"><div class="empty"><div class="emj">🎯</div><p>No goals yet. Add one to get started!</p></div></div>
 </div>
 
 <!-- TASKS -->
@@ -543,6 +580,48 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
   <button class="cn-btn" onclick="closeM('expModal2')">Close</button>
 </div></div>
 
+<!-- PROJECT MODAL -->
+<div class="ov" id="projModal"><div class="mod">
+  <div class="mh"></div><div class="mtit" id="pmTit">New Project 📁</div>
+  <input type="hidden" id="pmId">
+  <div class="fg"><label class="fl">Project Name</label><input class="fi" id="pmN" placeholder="e.g. Europe Trip 2026"></div>
+  <div class="fg"><label class="fl">Category</label><div class="bg bg3" id="projCatBtns"></div></div>
+  <div class="fg"><label class="fl">Notes</label><textarea class="fi" id="pmNotes" placeholder="Details, links, context..."></textarea></div>
+  <button class="ok-btn" onclick="saveProj()">Save Project 📁</button>
+  <button class="del-btn" id="pmDel" onclick="delProjEdit()" style="display:none">🗑️ Delete Project</button>
+  <button class="cn-btn" onclick="closeM('projModal')">Cancel</button>
+</div></div>
+
+<!-- GOAL MODAL -->
+<div class="ov" id="goalModal"><div class="mod">
+  <div class="mh"></div><div class="mtit" id="gmTit">New Goal 🎯</div>
+  <input type="hidden" id="gmId">
+  <div class="fg"><label class="fl">Goal Name</label><input class="fi" id="gmN" placeholder="e.g. 50 service hours this month"></div>
+  <div class="fg"><label class="fl">Category</label>
+    <div class="bg bg3">
+      <button class="sb" data-g="gcat" data-v="spiritual" onclick="pSB(this)">🌱 Spiritual</button>
+      <button class="sb" data-g="gcat" data-v="health" onclick="pSB(this)">💚 Health</button>
+      <button class="sb" data-g="gcat" data-v="hobbies" onclick="pSB(this)">🌸 Hobbies</button>
+      <button class="sb" data-g="gcat" data-v="learning" onclick="pSB(this)">📚 Learning</button>
+      <button class="sb" data-g="gcat" data-v="financial" onclick="pSB(this)">💰 Financial</button>
+      <button class="sb" data-g="gcat" data-v="work" onclick="pSB(this)">🪄 Work</button>
+      <button class="sb" data-g="gcat" data-v="home" onclick="pSB(this)">🏠 Home</button>
+      <button class="sb" data-g="gcat" data-v="people" onclick="pSB(this)">💛 People</button>
+      <button class="sb" data-g="gcat" data-v="misc" onclick="pSB(this)">✨ Misc</button>
+    </div>
+  </div>
+  <div class="fg"><label class="fl">Target (optional)</label>
+    <div style="display:flex;gap:8px">
+      <input class="fi" type="number" id="gmTarget" placeholder="50" style="width:90px">
+      <input class="fi" id="gmUnit" placeholder="hours / days / lbs / ..." style="flex:1">
+    </div>
+  </div>
+  <div class="fg"><label class="fl">Notes</label><textarea class="fi" id="gmNotes" placeholder="Why this goal matters..."></textarea></div>
+  <button class="ok-btn" style="background:linear-gradient(135deg,var(--sage),var(--teal))" onclick="saveGoal()">Save Goal 🎯</button>
+  <button class="del-btn" id="gmDel" onclick="delGoalEdit()" style="display:none">🗑️ Delete Goal</button>
+  <button class="cn-btn" onclick="closeM('goalModal')">Cancel</button>
+</div></div>
+
 <!-- SETTINGS VIEW -->
 <div class="view" id="v-settings">
   <div class="card">
@@ -563,6 +642,11 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     <div class="set-sec-t">🏷️ Task Categories</div>
     <div id="catList"></div>
     <button class="add-btn" onclick="openAddCat()">➕ Add Category</button>
+  </div>
+  <div class="card">
+    <div class="set-sec-t">📋 Project Templates</div>
+    <div style="font-size:12px;color:var(--textl);margin-bottom:10px">Tap any template from the Projects tab to load it instantly as a new project.</div>
+    <div id="tmplSettingsList"></div>
   </div>
   <div class="card">
     <div class="set-sec-t">🔄 Routines</div>
@@ -673,6 +757,19 @@ window.dispatchEvent(new Event('firebaseReady'));
 var TASKS = [];
 var EXPENSES = [];
 var WIGS = [];
+var PROJECTS = [];
+var GOALS = [];
+var OPEN_PROJ = {}, OPEN_GOAL = {};
+
+var GCATMAP = {spiritual:{n:'🌱 Spiritual',c:'#6a5a90',bg:'var(--lav-light)'},health:{n:'💚 Health',c:'#4a7a4a',bg:'#e8f5e8'},hobbies:{n:'🌸 Hobbies',c:'#8a5060',bg:'var(--rose-light)'},learning:{n:'📚 Learning',c:'#4a7a9b',bg:'var(--blue-light)'},financial:{n:'💰 Financial',c:'#8a5a30',bg:'var(--peach-light)'},work:{n:'🪄 Work',c:'var(--rose)',bg:'var(--rose-light)'},home:{n:'🏠 Home',c:'#3a7570',bg:'var(--teal-light)'},people:{n:'💛 People',c:'#8a7030',bg:'#fff8e1'},misc:{n:'✨ Misc',c:'#7a6e68',bg:'#f5f0eb'}};
+
+var TMPLS = JSON.parse(localStorage.getItem('aTmpls')||'null')||[
+  {id:'trip',name:'Trip Planning',emoji:'✈️',steps:['Research destinations','Set budget','Book flights','Book accommodation','Plan itinerary','Sort travel insurance','Exchange currency','Pack bags','Download offline maps']},
+  {id:'pack',name:'Packing List',emoji:'🧳',steps:['Clothes (tops, bottoms, layers)','Toiletries','Documents (passport, ID, cards)','Medications','Phone + charger','Headphones','Snacks','Travel pillow']},
+  {id:'clean',name:'Deep Clean',emoji:'🧹',steps:['Vacuum all rooms','Mop floors','Clean bathrooms','Wipe down kitchen','Dust all surfaces','Clean windows','Laundry','Organize clutter']},
+  {id:'meal',name:'Meal Prep',emoji:'🍽️',steps:['Plan the week\'s meals','Make grocery list','Shop for groceries','Prep proteins','Prep grains','Prep vegetables','Portion meals','Clean up kitchen']},
+  {id:'event',name:'Event Planning',emoji:'🎉',steps:['Set date and venue','Make guest list','Send invites','Plan food/drinks','Decorations','Music/entertainment','Day-of checklist','Thank you notes']},
+];
 var FDB = JSON.parse(localStorage.getItem('aFDB')||'null')||[
   {id:'f1',name:'Greek Yogurt',sv:'1 cup',cal:130,pro:22,fib:0,crb:9,fat:0},
   {id:'f2',name:'Chicken Breast',sv:'4oz',cal:185,pro:35,fib:0,crb:0,fat:4},
@@ -749,6 +846,24 @@ function initFirebase(){
     snap.forEach(function(d){ WIGS.push(d.data()); });
     WIGS.sort(function(a,b){ return (b.created||'') > (a.created||'') ? 1 : -1; });
     renderW();
+  });
+
+  // Listen to projects
+  window.fsOnSnapshot(window.fsCollection(window.db,'projects'), function(snap){
+    PROJECTS = [];
+    snap.forEach(function(d){ PROJECTS.push(d.data()); });
+    PROJECTS.sort(function(a,b){ return (b.created||'') > (a.created||'') ? 1 : -1; });
+    renderProjects();
+    renderPinned();
+  });
+
+  // Listen to goals
+  window.fsOnSnapshot(window.fsCollection(window.db,'goals'), function(snap){
+    GOALS = [];
+    snap.forEach(function(d){ GOALS.push(d.data()); });
+    GOALS.sort(function(a,b){ return (b.created||'') > (a.created||'') ? 1 : -1; });
+    renderGoals();
+    renderPinned();
   });
 }
 
@@ -1272,6 +1387,359 @@ document.querySelectorAll('.ov').forEach(function(o){
 });
 
 // ═══════════════════════════════════════════════
+// PROJECTS
+// ═══════════════════════════════════════════════
+function projHTML(p){
+  var steps=p.steps||[];
+  var done=steps.filter(function(s){return s.done;}).length;
+  var pct=steps.length?Math.round(done/steps.length*100):0;
+  var ci=catMap[p.cat]||catMap.mis;
+  var open=OPEN_PROJ[p.id];
+  var stepsHTML=steps.map(function(s){
+    var sid=s.id.replace(/'/g,"\\'");
+    return'<div class="proj-step'+(s.done?' done':'')+'">'+
+      '<div class="rchk" onclick="togProjStep(\''+p.id+'\',\''+sid+'\')">'+  (s.done?'✓':'')+'</div>'+
+      '<div class="rlb" style="flex:1;font-size:13px">'+s.title+'</div>'+
+      (!s.done?'<button class="sub-del" onclick="sendStepToTask(\''+p.id+'\',\''+sid+'\')" title="Send to Tasks">📋</button>':'')+
+      '<button class="sub-del" onclick="delProjStep(\''+p.id+'\',\''+sid+'\')">✕</button>'+
+    '</div>';
+  }).join('');
+  return'<div class="proj-card">'+
+    '<div class="proj-hd">'+
+      '<div style="flex:1">'+
+        '<div class="proj-title">'+p.title+'</div>'+
+        '<span class="ttag" style="background:'+ci.bg+';color:'+ci.c+'">'+ci.n+'</span>'+
+      '</div>'+
+      '<div style="display:flex;gap:2px;flex-shrink:0">'+
+        '<button class="pin-btn'+(p.pinned?' on':'')+'" onclick="togProjPin(\''+p.id+'\')">📌</button>'+
+        '<button class="tact" onclick="editProj(\''+p.id+'\')">✏️</button>'+
+        '<button class="tact" onclick="delProj(\''+p.id+'\')">🗑️</button>'+
+      '</div>'+
+    '</div>'+
+    (steps.length?'<div style="margin:8px 0"><div class="pt" style="margin-bottom:3px"><span style="font-size:11px;color:var(--textl)">'+done+'/'+steps.length+' steps</span><span style="font-size:11px;font-weight:700;color:var(--sage)">'+pct+'%</span></div><div class="pb"><div class="pf pf-pro" style="width:'+pct+'%"></div></div></div>':'')+
+    '<div class="sub-panel" id="psp-'+p.id+'" style="display:'+(open?'block':'none')+'">'+
+      stepsHTML+
+      '<div class="sub-add" style="margin-top:8px">'+
+        '<input class="sub-inp" id="psai-'+p.id+'" placeholder="Add step..." onkeydown="if(event.key===\'Enter\')addProjStep(\''+p.id+'\')">'+
+        '<button class="sub-add-btn" onclick="addProjStep(\''+p.id+'\')">+</button>'+
+      '</div>'+
+      (!steps.every(function(s){return s.done;})?'<button onclick="sendAllToTasks(\''+p.id+'\')" style="margin-top:8px;width:100%;padding:8px;border-radius:9px;border:1.5px solid var(--blue);background:var(--blue-light);color:var(--blue);font-family:\'Quicksand\',sans-serif;font-size:12px;font-weight:700;cursor:pointer">📋 Send All Incomplete to Task List</button>':'')+
+    '</div>'+
+    '<button class="proj-exp" onclick="togProjPanel(\''+p.id+'\')">'+
+      (steps.length?'▾ '+steps.length+' step'+(steps.length!==1?'s':'')+(open?' (tap to close)':''):'➕ Add steps')+
+    '</button>'+
+  '</div>';
+}
+
+function renderProjects(){
+  var el=document.getElementById('projList');if(!el)return;
+  el.innerHTML=PROJECTS.length?PROJECTS.map(projHTML).join(''):'<div class="empty"><div class="emj">📁</div><p>No projects yet.</p></div>';
+}
+
+function togProjPanel(id){
+  var p=document.getElementById('psp-'+id);if(!p)return;
+  var open=p.style.display!=='none';
+  p.style.display=open?'none':'block';
+  OPEN_PROJ[id]=!open;
+  renderProjects();
+}
+
+function openNewProj(){
+  SBV={};
+  document.querySelectorAll('[data-g]').forEach(function(b){b.classList.remove('on');});
+  document.getElementById('pmTit').textContent='New Project 📁';
+  document.getElementById('pmId').value='';
+  document.getElementById('pmN').value='';
+  document.getElementById('pmNotes').value='';
+  document.getElementById('pmDel').style.display='none';
+  renderProjCatBtns();
+  document.getElementById('projModal').classList.add('show');
+}
+
+function renderProjCatBtns(){
+  var el=document.getElementById('projCatBtns');if(!el)return;
+  el.innerHTML=CATS.map(function(c){return'<button class="sb" data-g="pcat" data-v="'+c.id+'" onclick="pSB(this)">'+c.emoji+' '+c.name+'</button>';}).join('');
+}
+
+function editProj(id){
+  var p=PROJECTS.find(function(p){return p.id===id;});if(!p)return;
+  SBV={};
+  document.querySelectorAll('[data-g]').forEach(function(b){b.classList.remove('on');});
+  document.getElementById('pmTit').textContent='Edit Project ✏️';
+  document.getElementById('pmId').value=id;
+  document.getElementById('pmN').value=p.title;
+  document.getElementById('pmNotes').value=p.notes||'';
+  document.getElementById('pmDel').style.display='block';
+  renderProjCatBtns();
+  setTimeout(function(){
+    document.querySelectorAll('[data-g="pcat"]').forEach(function(b){if(b.dataset.v===p.cat){b.classList.add('on');SBV.pcat=p.cat;}});
+  },30);
+  document.getElementById('projModal').classList.add('show');
+}
+
+function saveProj(){
+  var title=document.getElementById('pmN').value.trim();
+  if(!title){alert('Please enter a project name!');return;}
+  var id=document.getElementById('pmId').value||Date.now().toString();
+  var existing=PROJECTS.find(function(p){return p.id===id;});
+  var proj={id:id,title:title,cat:SBV.pcat||(existing&&existing.cat)||'mis',
+    notes:document.getElementById('pmNotes').value.trim(),
+    pinned:existing?existing.pinned:false,
+    steps:existing?existing.steps||[]:[],
+    created:existing?existing.created:new Date().toISOString()};
+  fbSave('projects',id,proj);
+  closeM('projModal');
+}
+
+function delProjEdit(){
+  var id=document.getElementById('pmId').value;
+  if(id&&confirm('Delete this project?')){fbDelete('projects',id);closeM('projModal');}
+}
+
+function delProj(id){if(confirm('Delete this project?'))fbDelete('projects',id);}
+
+function togProjPin(id){
+  var p=PROJECTS.find(function(p){return p.id===id;});if(!p)return;
+  p.pinned=!p.pinned;fbSave('projects',id,p);
+}
+
+function addProjStep(projId){
+  var inp=document.getElementById('psai-'+projId);if(!inp)return;
+  var title=inp.value.trim();if(!title)return;
+  var p=PROJECTS.find(function(p){return p.id===projId;});if(!p)return;
+  if(!p.steps)p.steps=[];
+  p.steps.push({id:projId+'_ps'+Date.now(),title:title,done:false});
+  fbSave('projects',projId,p);
+  inp.value='';OPEN_PROJ[projId]=true;
+}
+
+function togProjStep(projId,stepId){
+  var p=PROJECTS.find(function(p){return p.id===projId;});if(!p||!p.steps)return;
+  var s=p.steps.find(function(s){return s.id===stepId;});if(s)s.done=!s.done;
+  fbSave('projects',projId,p);
+}
+
+function delProjStep(projId,stepId){
+  var p=PROJECTS.find(function(p){return p.id===projId;});if(!p||!p.steps)return;
+  p.steps=p.steps.filter(function(s){return s.id!==stepId;});
+  fbSave('projects',projId,p);
+}
+
+function sendStepToTask(projId,stepId){
+  var p=PROJECTS.find(function(p){return p.id===projId;});if(!p||!p.steps)return;
+  var s=p.steps.find(function(s){return s.id===stepId;});if(!s)return;
+  var tid=Date.now().toString();
+  fbSave('tasks',tid,{id:tid,title:p.title+': '+s.title,cat:p.cat||'mis',urgency:'important-not-urgent',etime:'',due:'',notes:'📁 From project: '+p.title,done:false,repeat:'',subs:[],created:new Date().toISOString()});
+  alert('✅ Sent to Tasks!');
+}
+
+function sendAllToTasks(projId){
+  var p=PROJECTS.find(function(p){return p.id===projId;});if(!p||!p.steps)return;
+  var inc=p.steps.filter(function(s){return!s.done;});
+  inc.forEach(function(s){
+    var tid=Date.now().toString()+Math.random().toString(36).slice(2,6);
+    fbSave('tasks',tid,{id:tid,title:p.title+': '+s.title,cat:p.cat||'mis',urgency:'important-not-urgent',etime:'',due:'',notes:'📁 Project: '+p.title,done:false,repeat:'',subs:[],created:new Date().toISOString()});
+  });
+  alert('✅ Sent '+inc.length+' steps to Tasks!');
+}
+
+// TEMPLATES
+function renderTmplBar(){
+  var el=document.getElementById('tmplBar');if(!el)return;
+  el.innerHTML=TMPLS.map(function(t){return'<button class="tmpl-chip" onclick="loadTemplate(\''+t.id+'\')">'+t.emoji+' '+t.name+'</button>';}).join('');
+}
+
+function renderTmplList(){
+  var el=document.getElementById('tmplSettingsList');if(!el)return;
+  el.innerHTML=TMPLS.map(function(t){
+    return'<div class="set-row"><div><div class="set-lbl">'+t.emoji+' '+t.name+'</div><div class="set-sub">'+t.steps.length+' steps</div></div><button class="sb" style="padding:6px 14px;width:auto;flex-shrink:0;font-size:12px" onclick="loadTemplate(\''+t.id+'\')">Load →</button></div>';
+  }).join('');
+}
+
+function loadTemplate(tid){
+  var tmpl=TMPLS.find(function(t){return t.id===tid;});if(!tmpl)return;
+  var id=Date.now().toString();
+  var steps=tmpl.steps.map(function(title,i){return{id:id+'_ps'+i,title:title,done:false};});
+  var proj={id:id,title:tmpl.name,cat:'mis',notes:'',pinned:false,steps:steps,created:new Date().toISOString()};
+  fbSave('projects',id,proj);
+  OPEN_PROJ[id]=true;
+  goTabDirect('projects',document.querySelector('[data-tab="projects"]'));
+}
+
+// ═══════════════════════════════════════════════
+// GOALS
+// ═══════════════════════════════════════════════
+function goalHTML(g){
+  var steps=g.steps||[];
+  var sDone=steps.filter(function(s){return s.done;}).length;
+  var gc=GCATMAP[g.gcat]||GCATMAP.misc;
+  var pct=g.target?Math.min(100,Math.round((g.current||0)/g.target*100)):(steps.length?Math.round(sDone/steps.length*100):0);
+  var open=OPEN_GOAL[g.id];
+  var stepsHTML=steps.map(function(s){
+    var sid=s.id.replace(/'/g,"\\'");
+    return'<div class="sub-item'+(s.done?' done':'')+'">'+
+      '<div class="rchk" onclick="togGoalStep(\''+g.id+'\',\''+sid+'\')">'+  (s.done?'✓':'')+'</div>'+
+      '<div class="rlb">'+s.title+'</div>'+
+      '<button onclick="delGoalStep(\''+g.id+'\',\''+sid+'\')" class="sub-del">✕</button>'+
+    '</div>';
+  }).join('');
+  return'<div class="proj-card" style="border-left:3px solid '+gc.c+'">'+
+    '<div class="proj-hd">'+
+      '<div style="flex:1">'+
+        '<div class="proj-title">'+g.title+'</div>'+
+        '<span class="ttag" style="background:'+gc.bg+';color:'+gc.c+'">'+gc.n+'</span>'+
+        (g.target?'<span class="ttime" style="margin-left:5px">'+(g.current||0)+' / '+g.target+(g.unit?' '+g.unit:'')+'</span>':'')+
+      '</div>'+
+      '<div style="display:flex;gap:2px;flex-shrink:0">'+
+        '<button class="pin-btn'+(g.pinned?' on':'')+'" onclick="togGoalPin(\''+g.id+'\')">📌</button>'+
+        '<button class="tact" onclick="editGoal(\''+g.id+'\')">✏️</button>'+
+        '<button class="tact" onclick="delGoalConf(\''+g.id+'\')">🗑️</button>'+
+      '</div>'+
+    '</div>'+
+    '<div style="margin:6px 0 10px"><div class="pt" style="margin-bottom:3px"><span style="font-size:11px;color:var(--textl)">Progress</span><span style="font-size:11px;font-weight:700;color:'+gc.c+'">'+pct+'%</span></div><div class="pb"><div class="pf" style="width:'+pct+'%;background:'+gc.c+'"></div></div></div>'+
+    (g.target?'<div class="goal-upd"><input type="number" class="fi" id="gcur-'+g.id+'" value="'+(g.current||0)+'" style="width:90px;padding:7px 10px"><button onclick="updGoalProgress(\''+g.id+'\')" style="flex:1;padding:8px;border-radius:9px;border:none;background:var(--sage-light);color:#5a7a56;font-family:\'Quicksand\',sans-serif;font-size:13px;font-weight:700;cursor:pointer">Update Progress</button></div>':'')+
+    '<div class="sub-panel" id="gsp-'+g.id+'" style="display:'+(open?'block':'none')+'">'+
+      stepsHTML+
+      '<div class="sub-add" style="margin-top:8px">'+
+        '<input class="sub-inp" id="gsai-'+g.id+'" placeholder="Add micro-step..." onkeydown="if(event.key===\'Enter\')addGoalStep(\''+g.id+'\')">'+
+        '<button class="sub-add-btn" onclick="addGoalStep(\''+g.id+'\')" style="background:'+gc.c+'">+</button>'+
+      '</div>'+
+    '</div>'+
+    '<button class="proj-exp" onclick="togGoalPanel(\''+g.id+'\')">'+
+      (steps.length?'▾ '+steps.length+' micro-step'+(steps.length!==1?'s':''):'➕ Add micro-steps')+
+    '</button>'+
+  '</div>';
+}
+
+function renderGoals(){
+  var el=document.getElementById('goalList');if(!el)return;
+  el.innerHTML=GOALS.length?GOALS.map(goalHTML).join(''):'<div class="empty"><div class="emj">🎯</div><p>No goals yet.</p></div>';
+}
+
+function togGoalPanel(id){
+  OPEN_GOAL[id]=!OPEN_GOAL[id];renderGoals();
+}
+
+function openNewGoal(){
+  SBV={};
+  document.querySelectorAll('[data-g]').forEach(function(b){b.classList.remove('on');});
+  document.getElementById('gmTit').textContent='New Goal 🎯';
+  document.getElementById('gmId').value='';
+  document.getElementById('gmN').value='';
+  document.getElementById('gmTarget').value='';
+  document.getElementById('gmUnit').value='';
+  document.getElementById('gmNotes').value='';
+  document.getElementById('gmDel').style.display='none';
+  document.getElementById('goalModal').classList.add('show');
+}
+
+function editGoal(id){
+  var g=GOALS.find(function(g){return g.id===id;});if(!g)return;
+  SBV={};
+  document.querySelectorAll('[data-g]').forEach(function(b){b.classList.remove('on');});
+  document.getElementById('gmTit').textContent='Edit Goal ✏️';
+  document.getElementById('gmId').value=id;
+  document.getElementById('gmN').value=g.title;
+  document.getElementById('gmTarget').value=g.target||'';
+  document.getElementById('gmUnit').value=g.unit||'';
+  document.getElementById('gmNotes').value=g.notes||'';
+  document.getElementById('gmDel').style.display='block';
+  setTimeout(function(){
+    document.querySelectorAll('[data-g="gcat"]').forEach(function(b){if(b.dataset.v===g.gcat){b.classList.add('on');SBV.gcat=g.gcat;}});
+  },30);
+  document.getElementById('goalModal').classList.add('show');
+}
+
+function saveGoal(){
+  var title=document.getElementById('gmN').value.trim();
+  if(!title){alert('Please enter a goal name!');return;}
+  var id=document.getElementById('gmId').value||Date.now().toString();
+  var existing=GOALS.find(function(g){return g.id===id;});
+  var tgt=parseFloat(document.getElementById('gmTarget').value)||0;
+  var goal={id:id,title:title,gcat:SBV.gcat||(existing&&existing.gcat)||'misc',
+    target:tgt||0,unit:document.getElementById('gmUnit').value.trim(),
+    current:existing?existing.current||0:0,
+    notes:document.getElementById('gmNotes').value.trim(),
+    pinned:existing?existing.pinned:false,
+    steps:existing?existing.steps||[]:[],
+    created:existing?existing.created:new Date().toISOString()};
+  fbSave('goals',id,goal);
+  closeM('goalModal');
+}
+
+function delGoalEdit(){
+  var id=document.getElementById('gmId').value;
+  if(id&&confirm('Delete this goal?')){fbDelete('goals',id);closeM('goalModal');}
+}
+
+function delGoalConf(id){if(confirm('Delete this goal?'))fbDelete('goals',id);}
+
+function togGoalPin(id){
+  var g=GOALS.find(function(g){return g.id===id;});if(!g)return;
+  g.pinned=!g.pinned;fbSave('goals',id,g);
+}
+
+function addGoalStep(goalId){
+  var inp=document.getElementById('gsai-'+goalId);if(!inp)return;
+  var title=inp.value.trim();if(!title)return;
+  var g=GOALS.find(function(g){return g.id===goalId;});if(!g)return;
+  if(!g.steps)g.steps=[];
+  g.steps.push({id:goalId+'_gs'+Date.now(),title:title,done:false});
+  fbSave('goals',goalId,g);
+  inp.value='';OPEN_GOAL[goalId]=true;
+}
+
+function togGoalStep(goalId,stepId){
+  var g=GOALS.find(function(g){return g.id===goalId;});if(!g||!g.steps)return;
+  var s=g.steps.find(function(s){return s.id===stepId;});if(s)s.done=!s.done;
+  fbSave('goals',goalId,g);
+}
+
+function delGoalStep(goalId,stepId){
+  var g=GOALS.find(function(g){return g.id===goalId;});if(!g||!g.steps)return;
+  g.steps=g.steps.filter(function(s){return s.id!==stepId;});
+  fbSave('goals',goalId,g);
+}
+
+function updGoalProgress(id){
+  var g=GOALS.find(function(g){return g.id===id;});if(!g)return;
+  var val=parseFloat(document.getElementById('gcur-'+id).value)||0;
+  g.current=val;fbSave('goals',id,g);
+}
+
+// ═══════════════════════════════════════════════
+// PINNED DASHBOARD
+// ═══════════════════════════════════════════════
+function renderPinned(){
+  var pinned=[];
+  GOALS.filter(function(g){return g.pinned;}).forEach(function(g){
+    var gc=GCATMAP[g.gcat]||GCATMAP.misc;
+    var pct=g.target?Math.min(100,Math.round((g.current||0)/g.target*100)):0;
+    pinned.push({title:g.title,pct:pct,color:gc.c,sub:g.target?(g.current||0)+'/'+g.target+(g.unit?' '+g.unit:''):'🎯 Goal',type:'goal'});
+  });
+  PROJECTS.filter(function(p){return p.pinned;}).forEach(function(p){
+    var steps=p.steps||[];var done=steps.filter(function(s){return s.done;}).length;
+    var pct=steps.length?Math.round(done/steps.length*100):0;
+    pinned.push({title:p.title,pct:pct,color:'var(--blue)',sub:done+'/'+steps.length+' steps',type:'project'});
+  });
+  var sec=document.getElementById('pinnedSection');
+  var list=document.getElementById('pinnedList');
+  if(!sec||!list)return;
+  if(!pinned.length){sec.style.display='none';return;}
+  sec.style.display='block';
+  list.innerHTML=pinned.map(function(p){
+    return'<div class="card" style="padding:12px;border-left:3px solid '+p.color+'">'+
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">'+
+        '<div style="font-size:14px;font-weight:700;color:var(--text)">'+p.title+'</div>'+
+        '<div style="font-size:11px;font-weight:700;color:'+p.color+'">'+p.pct+'%</div>'+
+      '</div>'+
+      '<div class="pb"><div class="pf" style="width:'+p.pct+'%;background:'+p.color+'"></div></div>'+
+      '<div style="font-size:11px;color:var(--textl);margin-top:4px">'+p.sub+'</div>'+
+    '</div>';
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════
 // SUBTASKS
 // ═══════════════════════════════════════════════
 function togSP(taskId){
@@ -1548,6 +2016,7 @@ function renderSettings(){
   if(!S.pin){tpl.innerHTML='<div style="font-size:12px;color:var(--textl);padding:8px 0">Set a PIN first to enable per-tab protection.</div>';}
   else{tpl.innerHTML=TOGGLEABLE_TABS.map(function(t){return'<div class="set-row"><div class="set-lbl">'+t.label+'</div><button class="tog'+(S.protTabs[t.id]?' on':'')+'" onclick="togTabProt(\''+t.id+'\',this)"></button></div>';}).join('');}
   renderCatList();
+  renderTmplList();
   renderHiddenRoutines();
   document.getElementById('sCal').value=S.gCal;document.getElementById('sPro').value=S.gPro;
   document.getElementById('sFib').value=S.gFib;document.getElementById('sCrb').value=S.gCrb;
@@ -1636,6 +2105,7 @@ function startApp(){
   updM();
   renderTaskCatBtns();
   renderCatFilters();
+  renderTmplBar();
 }
 
 // Wait for Firebase then start
