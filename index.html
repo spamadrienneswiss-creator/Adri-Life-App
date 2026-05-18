@@ -211,6 +211,28 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
 .color-swatch{width:34px;height:34px;border-radius:50%;border:3px solid transparent;cursor:pointer;transition:transform .15s;box-shadow:var(--sh2)}
 .color-swatch.on{border-color:var(--text);transform:scale(1.15)}
 .notes-big{min-height:260px;resize:vertical;font-size:14px;line-height:1.6}
+
+/* SUBTASKS */
+.tc-wrap{margin-bottom:8px}
+.tc-wrap>.tc{margin-bottom:0}
+.tc-wrap>.tc.sub-open{border-bottom-left-radius:0;border-bottom-right-radius:0}
+.sub-panel{background:#faf7f4;padding:8px 12px;border:1px solid #ede8e3;border-top:none;border-radius:0 0 var(--r2) var(--r2)}
+.sub-item{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid #f0ebe6}
+.sub-item:last-child{border-bottom:none}
+.sub-item .rlb{flex:1;font-size:13px;color:var(--text)}
+.sub-item.done .rlb{text-decoration:line-through;color:var(--textl)}
+.sub-item .rchk{width:20px;height:20px;border-radius:50%;border:2px solid #ddd;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:10px;cursor:pointer;transition:all .2s}
+.sub-item.done .rchk{background:var(--sage);border-color:var(--sage);color:white}
+.sub-del{background:none;border:none;color:var(--textl);cursor:pointer;font-size:13px;padding:2px 4px;flex-shrink:0}
+.sub-add{display:flex;gap:6px;margin-top:8px}
+.sub-inp{flex:1;padding:8px 10px;border:1.5px solid #ede8e3;border-radius:9px;font-family:'Quicksand',sans-serif;font-size:13px;color:var(--text);background:white;outline:none}
+.sub-inp:focus{border-color:var(--rose)}
+.sub-add-btn{width:34px;height:34px;border-radius:9px;border:none;background:var(--rose);color:white;font-size:20px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.sub-bar{margin-top:5px}
+.rep-badge{font-size:10px;margin-left:4px;opacity:.65;vertical-align:middle}
+/* ROUTINE HIDE */
+.rhi{background:none;border:none;color:#ccc;cursor:pointer;font-size:12px;padding:2px 4px;margin-left:auto;flex-shrink:0;opacity:0;transition:opacity .2s}
+.ri:hover .rhi{opacity:1}
 </style>
 </head>
 <body>
@@ -402,6 +424,14 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     </div>
   </div>
   <div class="fg"><label class="fl">Due Date (optional)</label><input class="fi" type="date" id="tDue"></div>
+  <div class="fg"><label class="fl">Repeat</label>
+    <div class="bg bg4">
+      <button class="sb" data-g="rep" data-v="" onclick="pSB(this)">🚫 None</button>
+      <button class="sb" data-g="rep" data-v="daily" onclick="pSB(this)">📅 Daily</button>
+      <button class="sb" data-g="rep" data-v="weekly" onclick="pSB(this)">📆 Weekly</button>
+      <button class="sb" data-g="rep" data-v="monthly" onclick="pSB(this)">🗓️ Monthly</button>
+    </div>
+  </div>
   <div class="fg"><label class="fl" style="display:flex;justify-content:space-between;align-items:center">Notes <button type="button" onclick="expandNotes()" style="background:none;border:none;font-size:11px;color:var(--lav);font-weight:700;cursor:pointer;font-family:'Quicksand',sans-serif">⛶ Full Screen</button></label><textarea class="fi fi-big" id="tNotes" placeholder="Details, links, context..."></textarea></div>
   <button class="ok-btn" onclick="saveTask()">Save Task ✨</button>
   <button class="del-btn" id="delTBtn" onclick="delFromEdit()" style="display:none">🗑️ Delete Task</button>
@@ -535,6 +565,11 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     <button class="add-btn" onclick="openAddCat()">➕ Add Category</button>
   </div>
   <div class="card">
+    <div class="set-sec-t">🔄 Routines</div>
+    <div style="font-size:12px;color:var(--textl);margin-bottom:10px">Items you've hidden from routines. Tap Restore to bring them back.</div>
+    <div id="hiddenRoutines"><div style="font-size:12px;color:var(--textl)">No hidden routine items.</div></div>
+  </div>
+  <div class="card">
     <div class="set-sec-t">🎯 Goals & Macros</div>
     <div class="set-row"><div class="set-lbl">🔥 Calories</div><input class="fi" type="number" id="sCal" style="width:90px;padding:7px 10px"></div>
     <div class="set-row"><div class="set-lbl">💪 Protein (g)</div><input class="fi" type="number" id="sPro" style="width:90px;padding:7px 10px"></div>
@@ -653,6 +688,7 @@ var FDB = JSON.parse(localStorage.getItem('aFDB')||'null')||[
 var FL = JSON.parse(localStorage.getItem('aFL')||'{}'); // food log stays local (daily, personal)
 var WL = JSON.parse(localStorage.getItem('aWL')||'{}'); // water stays local
 var RS = JSON.parse(localStorage.getItem('aRS')||'{}'); // routine state stays local (daily)
+var RH = JSON.parse(localStorage.getItem('aRH')||'{}'); // routine hidden items (permanent)
 
 var RTNS = JSON.parse(localStorage.getItem('aRtns')||'null')||{
   am:['Pray 🙏','Warm water + meds','Bible Reading 📖','Text','Movement / Walk','Eat breakfast','Brush teeth','Get ready','Look over schedule','Other vitamins'],
@@ -676,7 +712,7 @@ var S = {
   protTabs:JSON.parse(localStorage.getItem('aProtTabs')||'{"money":true}'),
 };
 
-var SBV={}, CF='all', DELTED=null, UNDO_T=null;
+var SBV={}, CF='all', DELTED=null, UNDO_T=null, OPEN_PANELS={};
 var firebaseLoaded = false;
 
 // ═══════════════════════════════════════════════
@@ -798,9 +834,16 @@ function renderRL(elId,key){
   var el=document.getElementById(elId);if(!el)return;
   var tt=el.querySelector('.rt');var th=tt?tt.outerHTML:'';
   var items=RTNS[key]||[];
+  var rh=RH[key]||{};
   el.innerHTML=th+items.map(function(item,i){
+    if(rh[item])return'';
     var done=RS[key]&&RS[key][i];
-    return '<div class="ri '+(done?'done':'')+'" onclick="togR(\''+key+'\','+i+',this)"><div class="rchk">'+(done?'✓':'')+'</div><div class="rlb">'+item+'</div></div>';
+    var eItem=item.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+    return'<div class="ri '+(done?'done':'')+'" onclick="togR(\''+key+'\','+i+',this)">'+
+      '<div class="rchk">'+(done?'✓':'')+'</div>'+
+      '<div class="rlb">'+item+'</div>'+
+      '<button class="rhi" onclick="hideRI(event,\''+key+'\',\''+eItem+'\')" title="Hide this item">✕</button>'+
+    '</div>';
   }).join('');
 }
 
@@ -856,33 +899,62 @@ function renderT(f){
   else arr=TASKS.filter(function(t){return !t.done&&t.cat===f;});
 
   list.innerHTML=arr.length?arr.map(tHTML).join(''):'<div class="empty"><div class="emj">✨</div><p>'+(f==='done'?'Nothing done yet.':'No tasks here.')+'</p></div>';
+  restorePanels(list);
   renderTdTasks();
   updStats();
 }
 
 function tHTML(t){
   var etm={'<10min':'⚡<10m','<1hr':'🕐<1hr','half-day':'📅Half','full-day':'🗓️Full'};
-  return '<div class="tc '+(t.done?'done':'')+'" data-u="'+t.urgency+'">'+
-    '<div class="tchk" onclick="togT(\''+t.id+'\')">'+(t.done?'✓':'')+'</div>'+
-    '<div class="tb" onclick="editT(\''+t.id+'\')">'+
-      '<div class="tt">'+t.title+'</div>'+
-      '<div class="tm">'+catTag(t.cat)+
-        (t.etime?'<span class="ttime">'+etm[t.etime]+'</span>':'')+
-        (t.due?'<span class="tnote">📅 '+t.due+'</span>':'')+
-        (t.notes?'<span class="tnote">'+t.notes.substring(0,40)+(t.notes.length>40?'...':'')+'</span>':'')+
+  var repIco={'daily':'🔁','weekly':'📆','monthly':'🗓️'};
+  var subs=t.subs||[];
+  var subDone=subs.filter(function(s){return s.done;}).length;
+  var subPct=subs.length?Math.round(subDone/subs.length*100):0;
+  var subBtnIco=subs.length?'▾':'➕';
+  var subsHTML=subs.map(function(s){
+    var sid=s.id.replace(/'/g,"\\'");
+    return'<div class="sub-item'+(s.done?' done':'')+'">'+
+      '<div class="rchk" onclick="togSub(\''+t.id+'\',\''+sid+'\')">'+  (s.done?'✓':'')+'</div>'+
+      '<div class="rlb">'+s.title+'</div>'+
+      '<button class="sub-del" onclick="delSub(\''+t.id+'\',\''+sid+'\')">✕</button>'+
+    '</div>';
+  }).join('');
+  return'<div class="tc-wrap">'+
+    '<div class="tc '+(t.done?'done':'')+'" data-u="'+t.urgency+'" id="tc-'+t.id+'">'+
+      '<div class="tchk" onclick="togT(\''+t.id+'\')">'+(t.done?'✓':'')+'</div>'+
+      '<div class="tb" onclick="editT(\''+t.id+'\')">'+
+        '<div class="tt">'+t.title+(t.repeat?'<span class="rep-badge">'+repIco[t.repeat]+'</span>':'')+'</div>'+
+        '<div class="tm">'+catTag(t.cat)+
+          (t.etime?'<span class="ttime">'+etm[t.etime]+'</span>':'')+
+          (t.due?'<span class="tnote">📅 '+t.due+'</span>':'')+
+        '</div>'+
+        (subs.length?'<div class="sub-bar"><div class="pt" style="margin-bottom:2px"><span style="font-size:10px;color:var(--textl)">'+subDone+'/'+subs.length+' subtasks</span><span style="font-size:10px;color:var(--textl)">'+subPct+'%</span></div><div class="pb" style="height:5px"><div class="pf pf-pro" style="width:'+subPct+'%"></div></div></div>':'')+
+      '</div>'+
+      '<div class="tacts">'+
+        '<button class="tact" onclick="togSP(\''+t.id+'\')" title="Subtasks">'+subBtnIco+'</button>'+
+        (t.notes?'<button class="tact" onclick="openNotes(\''+t.id+'\')">📝</button>':'')+
+        '<button class="tact" onclick="delTask(\''+t.id+'\')">🗑️</button>'+
       '</div>'+
     '</div>'+
-    '<div class="tacts">'+
-      (t.notes?'<button class="tact" onclick="openNotes(\''+t.id+'\')">📝</button>':'')+
-      '<button class="tact" onclick="delTask(\''+t.id+'\')">🗑️</button></div>'+
+    '<div class="sub-panel" id="sp-'+t.id+'" style="display:none">'+
+      subsHTML+
+      '<div class="sub-add">'+
+        '<input class="sub-inp" id="sai-'+t.id+'" placeholder="Add sub-task..." onkeydown="if(event.key===\'Enter\')addSub(\''+t.id+'\')">'+
+        '<button class="sub-add-btn" onclick="addSub(\''+t.id+'\')">+</button>'+
+      '</div>'+
+    '</div>'+
   '</div>';
 }
 
 function renderTdTasks(){
   var u=TASKS.filter(function(t){return !t.done&&t.urgency==='urgent-important';});
   var s=TASKS.filter(function(t){return !t.done&&t.urgency==='important-not-urgent';});
-  document.getElementById('todayUr').innerHTML=u.length?u.map(tHTML).join(''):'<div class="empty"><div class="emj">🎉</div><p>No urgent tasks!</p></div>';
-  document.getElementById('todaySo').innerHTML=s.length?s.map(tHTML).join(''):'<div class="empty"><div class="emj">📝</div><p>Nothing scheduled yet.</p></div>';
+  var urEl=document.getElementById('todayUr');
+  urEl.innerHTML=u.length?u.map(tHTML).join(''):'<div class="empty"><div class="emj">🎉</div><p>No urgent tasks!</p></div>';
+  restorePanels(urEl);
+  var soEl=document.getElementById('todaySo');
+  soEl.innerHTML=s.length?s.map(tHTML).join(''):'<div class="empty"><div class="emj">📝</div><p>Nothing scheduled yet.</p></div>';
+  restorePanels(soEl);
 }
 
 function togT(id){
@@ -890,6 +962,7 @@ function togT(id){
   if(!t)return;
   t.done=!t.done;
   fbSave('tasks',id,t);
+  if(t.done&&t.repeat)setTimeout(function(){createRepeat(t);},600);
 }
 
 function editT(id){
@@ -907,6 +980,7 @@ function editT(id){
     document.querySelectorAll('[data-g="cat"]').forEach(function(b){if(b.dataset.v===t.cat){b.classList.add('on');SBV.cat=t.cat;}});
     document.querySelectorAll('[data-g="urg"]').forEach(function(b){if(b.dataset.v===t.urgency){b.classList.add('on');SBV.urg=t.urgency;}});
     document.querySelectorAll('[data-g="etm"]').forEach(function(b){if(b.dataset.v===t.etime){b.classList.add('on');SBV.etm=t.etime;}});
+    document.querySelectorAll('[data-g="rep"]').forEach(function(b){if(b.dataset.v===(t.repeat||'')){b.classList.add('on');SBV.rep=t.repeat||'';}});
   },50);
   openM('taskModal');
 }
@@ -955,6 +1029,8 @@ function saveTask(){
     due:document.getElementById('tDue').value,
     notes:document.getElementById('tNotes').value.trim(),
     done:existing?existing.done:false,
+    repeat:SBV.rep!==undefined?SBV.rep:(existing?existing.repeat||'':''),
+    subs:existing?existing.subs||[]:[],
     created:existing?existing.created:new Date().toISOString()
   };
   fbSave('tasks',id,t);
@@ -1196,6 +1272,104 @@ document.querySelectorAll('.ov').forEach(function(o){
 });
 
 // ═══════════════════════════════════════════════
+// SUBTASKS
+// ═══════════════════════════════════════════════
+function togSP(taskId){
+  var panel=document.getElementById('sp-'+taskId);
+  var tc=document.getElementById('tc-'+taskId);
+  if(!panel)return;
+  var open=panel.style.display!=='none';
+  panel.style.display=open?'none':'block';
+  if(tc)tc.classList.toggle('sub-open',!open);
+  OPEN_PANELS[taskId]=!open;
+}
+
+function restorePanels(container){
+  Object.keys(OPEN_PANELS).forEach(function(id){
+    if(!OPEN_PANELS[id])return;
+    var panel=container?container.querySelector('#sp-'+id):document.getElementById('sp-'+id);
+    var tc=container?container.querySelector('#tc-'+id):document.getElementById('tc-'+id);
+    if(panel){panel.style.display='block';if(tc)tc.classList.add('sub-open');}
+  });
+}
+
+function togSub(taskId,subId){
+  var t=TASKS.find(function(t){return t.id===taskId;});if(!t||!t.subs)return;
+  var s=t.subs.find(function(s){return s.id===subId;});if(s)s.done=!s.done;
+  fbSave('tasks',taskId,t);
+}
+
+function addSub(taskId){
+  var inp=document.getElementById('sai-'+taskId);if(!inp)return;
+  var title=inp.value.trim();if(!title)return;
+  var t=TASKS.find(function(t){return t.id===taskId;});if(!t)return;
+  if(!t.subs)t.subs=[];
+  t.subs.push({id:taskId+'_s'+Date.now(),title:title,done:false});
+  fbSave('tasks',taskId,t);
+  inp.value='';
+  OPEN_PANELS[taskId]=true;
+}
+
+function delSub(taskId,subId){
+  var t=TASKS.find(function(t){return t.id===taskId;});if(!t||!t.subs)return;
+  t.subs=t.subs.filter(function(s){return s.id!==subId;});
+  fbSave('tasks',taskId,t);
+}
+
+// ═══════════════════════════════════════════════
+// REPEATING TASKS
+// ═══════════════════════════════════════════════
+function createRepeat(t){
+  var newId=Date.now().toString();
+  var nextDue='';
+  if(t.due){
+    var d=new Date(t.due+'T12:00:00');
+    if(t.repeat==='daily')d.setDate(d.getDate()+1);
+    else if(t.repeat==='weekly')d.setDate(d.getDate()+7);
+    else if(t.repeat==='monthly')d.setMonth(d.getMonth()+1);
+    nextDue=d.toISOString().split('T')[0];
+  }
+  var next={id:newId,title:t.title,cat:t.cat,urgency:t.urgency,etime:t.etime,due:nextDue,
+    notes:t.notes,done:false,repeat:t.repeat,
+    subs:(t.subs||[]).map(function(s){return{id:newId+'_s'+Date.now()+Math.random(),title:s.title,done:false};}),
+    created:new Date().toISOString()};
+  fbSave('tasks',newId,next);
+}
+
+// ═══════════════════════════════════════════════
+// ROUTINE HIDE/RESTORE
+// ═══════════════════════════════════════════════
+function hideRI(event,key,item){
+  event.stopPropagation();
+  if(!RH[key])RH[key]={};
+  RH[key][item]=true;
+  localStorage.setItem('aRH',JSON.stringify(RH));
+  renderAllR();
+}
+
+function restoreRI(key,item){
+  if(RH[key])delete RH[key][item];
+  localStorage.setItem('aRH',JSON.stringify(RH));
+  renderAllR();
+  renderSettings();
+}
+
+function renderHiddenRoutines(){
+  var el=document.getElementById('hiddenRoutines');if(!el)return;
+  var rNames={am:'AM Routine',pm:'PM Routine',da:'Daily Habits',we:'Weekly Reset',cl:'Cleaning'};
+  var rows='';
+  Object.keys(RH).forEach(function(key){
+    Object.keys(RH[key]||{}).forEach(function(item){
+      if(!RH[key][item])return;
+      var eKey=key.replace(/'/g,"\\'");
+      var eItem=item.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+      rows+='<div class="set-row"><div class="set-lbl" style="font-size:12px"><span style="color:var(--textl)">'+rNames[key]+':</span> '+item+'</div><button class="sb" style="padding:5px 12px;width:auto;flex-shrink:0;font-size:11px" onclick="restoreRI(\''+eKey+'\',\''+eItem+'\')">Restore</button></div>';
+    });
+  });
+  el.innerHTML=rows||'<div style="font-size:12px;color:var(--textl);padding:4px 0">No hidden routine items.</div>';
+}
+
+// ═══════════════════════════════════════════════
 // CATEGORIES
 // ═══════════════════════════════════════════════
 function renderTaskCatBtns(){
@@ -1374,6 +1548,7 @@ function renderSettings(){
   if(!S.pin){tpl.innerHTML='<div style="font-size:12px;color:var(--textl);padding:8px 0">Set a PIN first to enable per-tab protection.</div>';}
   else{tpl.innerHTML=TOGGLEABLE_TABS.map(function(t){return'<div class="set-row"><div class="set-lbl">'+t.label+'</div><button class="tog'+(S.protTabs[t.id]?' on':'')+'" onclick="togTabProt(\''+t.id+'\',this)"></button></div>';}).join('');}
   renderCatList();
+  renderHiddenRoutines();
   document.getElementById('sCal').value=S.gCal;document.getElementById('sPro').value=S.gPro;
   document.getElementById('sFib').value=S.gFib;document.getElementById('sCrb').value=S.gCrb;
   document.getElementById('sFat').value=S.gFat;document.getElementById('sWat').value=S.gWat;
