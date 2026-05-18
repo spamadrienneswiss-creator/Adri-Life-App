@@ -294,6 +294,31 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
 .list-hdr-lbl{font-size:11px;font-weight:700;color:var(--textl);text-transform:uppercase;letter-spacing:1px}
 /* EXPORT BADGE */
 .tab-btn.has-badge::after{content:'●';color:var(--rose);font-size:9px;vertical-align:super;margin-left:1px}
+/* Meals tab */
+.meal-grid{display:grid;gap:8px;margin-bottom:12px}
+.meal-day{background:#fff;border-radius:12px;padding:12px;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.meal-day-hdr{font-weight:700;font-size:13px;color:var(--textd);margin-bottom:8px;display:flex;justify-content:space-between;align-items:center}
+.meal-slot{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid #f5f0eb;cursor:pointer}
+.meal-slot:last-child{border-bottom:none}
+.meal-slot-lbl{font-size:11px;color:var(--textl);width:62px;flex-shrink:0}
+.meal-slot-val{font-size:13px;color:var(--textd);flex:1}
+.meal-slot-val.empty{color:#ccc;font-style:italic}
+.meal-macro-bar{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+.meal-macro-pip{font-size:10px;padding:2px 7px;border-radius:20px;background:var(--cream)}
+.recipe-card{background:#fff;border-radius:12px;padding:13px;box-shadow:0 1px 4px rgba(0,0,0,.06);margin-bottom:8px;cursor:pointer}
+.recipe-card-name{font-weight:700;font-size:14px;color:var(--textd)}
+.recipe-card-macros{display:flex;gap:6px;margin-top:5px;flex-wrap:wrap}
+.recipe-macro-tag{font-size:10px;padding:2px 7px;border-radius:20px;background:var(--cream);color:var(--textl)}
+.recipe-ing-row{display:flex;align-items:center;gap:6px;padding:4px 0;border-bottom:1px solid #f5f0eb}
+.recipe-ing-row:last-child{border-bottom:none}
+.grocery-item{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #f5f0eb}
+.grocery-item:last-child{border-bottom:none}
+.grocery-item.done .grocery-name{text-decoration:line-through;color:var(--textl)}
+.grocery-cat-hdr{font-size:11px;font-weight:700;color:var(--textl);text-transform:uppercase;letter-spacing:.5px;padding:8px 0 2px}
+.price-row{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid #f5f0eb;font-size:13px}
+.price-row:last-child{border-bottom:none}
+.price-item-name{font-weight:600;flex:1;color:var(--textd)}
+.price-amt{color:var(--rose);font-weight:700}
 /* ROUTINE EDIT */
 .rtn-item-row{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid #f0ebe6}
 .rtn-item-row:last-child{border-bottom:none}
@@ -347,6 +372,7 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
   <button class="tab-btn" data-tab="money" onclick="goTab('money',this)">💰 Money</button>
   <button class="tab-btn" data-tab="recap" onclick="goTab('recap',this)">📊 Recap</button>
   <button class="tab-btn" data-tab="export" onclick="goTab('export',this)">📤 Export</button>
+  <button class="tab-btn" data-tab="meals" onclick="goTab('meals',this)">🍽️ Meals</button>
   <button class="tab-btn" data-tab="settings" onclick="goTab('settings',this)">⚙️ Settings</button>
 </div>
 
@@ -534,6 +560,65 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
   <div class="sh">💸 Recent Expenses</div>
   <div class="card"><div id="expList"><div class="empty"><div class="emj">💸</div><p>No expenses yet.</p></div></div></div>
   <button class="exp-btn" onclick="goTabDirect('export',document.querySelector('[data-tab=\'export\']'))" style="margin-top:8px">📤 Go to Export →</button>
+</div>
+
+<div class="view" id="v-meals">
+  <div class="pill-nav" style="margin-bottom:12px">
+    <button class="pn-btn on" onclick="showMealSec('plan',this)">📅 Plan</button>
+    <button class="pn-btn" onclick="showMealSec('recipes',this)">📖 Recipes</button>
+    <button class="pn-btn" onclick="showMealSec('grocery',this)">🛒 Grocery</button>
+    <button class="pn-btn" onclick="showMealSec('prices',this)">💰 Prices</button>
+  </div>
+
+  <!-- PLAN section -->
+  <div id="ms-plan">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+      <button class="btn sec" style="padding:5px 10px;font-size:12px" onclick="shiftMealWeek(-1)">◀</button>
+      <span id="mealWeekLbl" style="font-weight:700;font-size:13px;color:var(--textd)"></span>
+      <button class="btn sec" style="padding:5px 10px;font-size:12px" onclick="shiftMealWeek(1)">▶</button>
+    </div>
+    <div id="mealPlanGrid" class="meal-grid"></div>
+    <button class="btn" style="width:100%;margin-top:6px" onclick="genGroceryFromPlan()">🛒 Generate Grocery List from This Week</button>
+  </div>
+
+  <!-- RECIPES section -->
+  <div id="ms-recipes" style="display:none">
+    <div style="display:flex;gap:8px;margin-bottom:10px">
+      <input id="recipeSearch" type="text" placeholder="Search recipes…" oninput="renderRecipes()" style="flex:1;padding:8px 11px;border-radius:10px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px">
+      <button class="btn" onclick="openRecipeModal()">+ New</button>
+    </div>
+    <div id="recipeList"></div>
+  </div>
+
+  <!-- GROCERY section -->
+  <div id="ms-grocery" style="display:none">
+    <div style="display:flex;gap:8px;margin-bottom:10px;align-items:center">
+      <span style="font-weight:700;font-size:14px;color:var(--textd);flex:1">🛒 Grocery List</span>
+      <button class="btn sec" style="font-size:12px;padding:5px 10px" onclick="clearCheckedGrocery()">Clear checked</button>
+      <button class="btn sec" style="font-size:12px;padding:5px 10px" onclick="expGrocery()">Export</button>
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:10px">
+      <input id="groceryAddName" type="text" placeholder="Item name" style="flex:2;padding:8px 11px;border-radius:10px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px">
+      <input id="groceryAddQty" type="text" placeholder="Qty" style="flex:1;padding:8px 11px;border-radius:10px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px;max-width:70px">
+      <button class="btn" onclick="addGroceryManual()">Add</button>
+    </div>
+    <div id="groceryEstTotal" style="font-size:13px;color:var(--textl);margin-bottom:8px"></div>
+    <div id="groceryListEl"></div>
+  </div>
+
+  <!-- PRICES section -->
+  <div id="ms-prices" style="display:none">
+    <div style="display:flex;gap:8px;margin-bottom:10px;align-items:center">
+      <span style="font-weight:700;font-size:14px;color:var(--textd);flex:1">💰 Price Log</span>
+    </div>
+    <div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap">
+      <input id="priceItem" type="text" placeholder="Item" style="flex:2;min-width:100px;padding:8px 11px;border-radius:10px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px">
+      <input id="priceAmt" type="number" placeholder="$" step="0.01" style="width:70px;padding:8px 11px;border-radius:10px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px">
+      <input id="priceStore" type="text" placeholder="Store" style="flex:1;min-width:80px;padding:8px 11px;border-radius:10px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px">
+      <button class="btn" onclick="logPrice()">Log</button>
+    </div>
+    <div id="priceLogEl"></div>
+  </div>
 </div>
 
 <!-- EXPORT -->
@@ -977,6 +1062,12 @@ window.dispatchEvent(new Event('firebaseReady'));
 // ═══════════════════════════════════════════════
 // CORE DATA (local fallback while Firebase loads)
 // ═══════════════════════════════════════════════
+var RECIPES = JSON.parse(localStorage.getItem('aRecipes')||'[]');
+var MEAL_PLAN = JSON.parse(localStorage.getItem('aMealPlan')||'{}');
+var GROCERY_LIST = JSON.parse(localStorage.getItem('aGroceryList')||'[]');
+var PRICE_LOG = JSON.parse(localStorage.getItem('aPriceLog')||'[]');
+var MEAL_WEEK_OFFSET = 0; // weeks from current
+var MEAL_EDIT_INGS = []; // temp for recipe modal
 var TASKS = [];
 var EXPENSES = [];
 var WIGS = [];
@@ -3294,6 +3385,402 @@ function cpHealthExp(){
 // ═══════════════════════════════════════════════
 // START
 // ═══════════════════════════════════════════════
+// ═══════════════════════════════════════════════
+// MEALS TAB
+// ═══════════════════════════════════════════════
+
+var MEAL_SLOTS = ['breakfast','lunch','dinner','snack'];
+var MEAL_SLOT_ICONS = {breakfast:'🌅',lunch:'☀️',dinner:'🌙',snack:'🍎'};
+var GROCERY_CATS = ['Produce','Dairy','Meat & Fish','Bakery','Pantry','Frozen','Beverages','Other'];
+
+function showMealSec(sec,btn){
+  ['plan','recipes','grocery','prices'].forEach(function(s){
+    var el=document.getElementById('ms-'+s);
+    if(el)el.style.display=(s===sec)?'':'none';
+  });
+  document.querySelectorAll('#v-meals .pn-btn').forEach(function(b){b.classList.remove('on');});
+  if(btn)btn.classList.add('on');
+  if(sec==='plan')renderMealPlan();
+  if(sec==='recipes')renderRecipes();
+  if(sec==='grocery')renderGrocery();
+  if(sec==='prices')renderPriceLog();
+}
+
+// ── Week helpers ──────────────────────────────
+function getMealWeekDates(offset){
+  var now=new Date();
+  var day=now.getDay();
+  var mon=new Date(now);
+  mon.setDate(now.getDate()-((day+6)%7)+(offset*7));
+  var dates=[];
+  for(var i=0;i<7;i++){
+    var d=new Date(mon);
+    d.setDate(mon.getDate()+i);
+    dates.push(d.toISOString().slice(0,10));
+  }
+  return dates;
+}
+function mealWeekKey(offset){
+  var dates=getMealWeekDates(offset);
+  return dates[0];
+}
+function shiftMealWeek(dir){
+  MEAL_WEEK_OFFSET+=dir;
+  renderMealPlan();
+}
+function fmtWeekLbl(dates){
+  var a=new Date(dates[0]+'T12:00:00');
+  var b=new Date(dates[6]+'T12:00:00');
+  var mo=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return mo[a.getMonth()]+' '+a.getDate()+' – '+mo[b.getMonth()]+' '+b.getDate()+', '+b.getFullYear();
+}
+var DOW=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+
+// ── Plan rendering ────────────────────────────
+function renderMealPlan(){
+  var dates=getMealWeekDates(MEAL_WEEK_OFFSET);
+  var lbl=document.getElementById('mealWeekLbl');
+  if(lbl)lbl.textContent=fmtWeekLbl(dates);
+  var grid=document.getElementById('mealPlanGrid');
+  if(!grid)return;
+  var html='';
+  dates.forEach(function(date,i){
+    var dayData=MEAL_PLAN[date]||{};
+    var macros=calcDayMacros(date);
+    html+='<div class="meal-day">';
+    html+='<div class="meal-day-hdr"><span>'+DOW[i]+' <span style="font-weight:400;color:var(--textl)">'+date.slice(5)+'</span></span>';
+    if(macros.cal>0)html+='<span style="font-size:11px;color:var(--textl)">'+macros.cal+' cal</span>';
+    html+='</div>';
+    MEAL_SLOTS.forEach(function(slot){
+      var val=dayData[slot]||'';
+      html+='<div class="meal-slot" onclick="openSlotPicker(\''+date+'\',\''+slot+'\')">';
+      html+='<span class="meal-slot-lbl">'+MEAL_SLOT_ICONS[slot]+' '+slot.charAt(0).toUpperCase()+slot.slice(1)+'</span>';
+      html+='<span class="meal-slot-val'+(val?'':' empty')+'">'+(val||'tap to add')+'</span>';
+      html+='</div>';
+    });
+    if(macros.cal>0){
+      html+='<div class="meal-macro-bar">';
+      html+='<span class="meal-macro-pip">🔥 '+macros.cal+' cal</span>';
+      html+='<span class="meal-macro-pip">💪 '+macros.pro+'g pro</span>';
+      html+='<span class="meal-macro-pip">🌾 '+macros.carb+'g carb</span>';
+      html+='<span class="meal-macro-pip">🫙 '+macros.fat+'g fat</span>';
+      html+='</div>';
+    }
+    html+='</div>';
+  });
+  grid.innerHTML=html;
+}
+
+function calcDayMacros(date){
+  var dayData=MEAL_PLAN[date]||{};
+  var totals={cal:0,pro:0,carb:0,fat:0};
+  MEAL_SLOTS.forEach(function(slot){
+    var val=dayData[slot]||'';
+    if(!val)return;
+    var rec=RECIPES.find(function(r){return r.name===val;});
+    if(rec&&rec.macros){
+      totals.cal+=rec.macros.cal||0;
+      totals.pro+=rec.macros.pro||0;
+      totals.carb+=rec.macros.carb||0;
+      totals.fat+=rec.macros.fat||0;
+    }
+  });
+  return totals;
+}
+
+function openSlotPicker(date,slot){
+  var current=(MEAL_PLAN[date]||{})[slot]||'';
+  var names=RECIPES.map(function(r){return r.name;});
+  var opts=names.length?'\n\nYour recipes:\n'+names.join(', '):'';
+  var val=prompt('Meal for '+slot+' on '+date+':\n(Enter recipe name or any text, leave blank to clear)'+opts, current);
+  if(val===null)return;
+  if(!MEAL_PLAN[date])MEAL_PLAN[date]={};
+  if(val.trim()===''){
+    delete MEAL_PLAN[date][slot];
+  } else {
+    MEAL_PLAN[date][slot]=val.trim();
+  }
+  localStorage.setItem('aMealPlan',JSON.stringify(MEAL_PLAN));
+  renderMealPlan();
+}
+
+// ── Recipe rendering ──────────────────────────
+function renderRecipes(){
+  var q=(document.getElementById('recipeSearch')||{}).value||'';
+  var el=document.getElementById('recipeList');
+  if(!el)return;
+  var list=RECIPES.filter(function(r){return !q||r.name.toLowerCase().includes(q.toLowerCase());});
+  if(!list.length){el.innerHTML='<p style="color:var(--textl);text-align:center;padding:20px">No recipes yet. Add one!</p>';return;}
+  el.innerHTML=list.map(function(r){
+    var m=r.macros||{};
+    var tags=(r.tags||[]).map(function(t){return '<span class="recipe-macro-tag">'+t+'</span>';}).join('');
+    return '<div class="recipe-card" onclick="openRecipeModal(\''+r.id+'\')">'
+      +'<div style="display:flex;align-items:center;justify-content:space-between">'
+      +'<span class="recipe-card-name">'+r.name+'</span>'
+      +'<button class="btn sec" style="font-size:11px;padding:3px 8px" onclick="event.stopPropagation();delRecipe(\''+r.id+'\')">✕</button>'
+      +'</div>'
+      +'<div class="recipe-card-macros">'
+      +(m.cal?'<span class="recipe-macro-tag">🔥 '+m.cal+' cal</span>':'')
+      +(m.pro?'<span class="recipe-macro-tag">💪 '+m.pro+'g pro</span>':'')
+      +(m.carb?'<span class="recipe-macro-tag">🌾 '+m.carb+'g carb</span>':'')
+      +(m.fat?'<span class="recipe-macro-tag">🫙 '+m.fat+'g fat</span>':'')
+      +tags
+      +'</div>'
+      +(r.ingredients&&r.ingredients.length?'<div style="font-size:11px;color:var(--textl);margin-top:4px">'+r.ingredients.length+' ingredient'+(r.ingredients.length>1?'s':'')+'</div>':'')
+      +'</div>';
+  }).join('');
+}
+
+function openRecipeModal(id){
+  var rec=id?RECIPES.find(function(r){return r.id===id;}):null;
+  MEAL_EDIT_INGS=rec?(rec.ingredients||[]).map(function(i){return Object.assign({},i);}):[];
+  document.getElementById('recModalTitle').textContent=rec?'Edit Recipe':'New Recipe';
+  document.getElementById('recName').value=rec?rec.name:'';
+  document.getElementById('recServings').value=rec?rec.servings||1:1;
+  document.getElementById('recCal').value=rec&&rec.macros?rec.macros.cal||'':'';
+  document.getElementById('recPro').value=rec&&rec.macros?rec.macros.pro||'':'';
+  document.getElementById('recCarb').value=rec&&rec.macros?rec.macros.carb||'':'';
+  document.getElementById('recFat').value=rec&&rec.macros?rec.macros.fat||'':'';
+  document.getElementById('recTags').value=rec&&rec.tags?rec.tags.join(', '):'';
+  document.getElementById('recNotes').value=rec?rec.notes||'':'';
+  document.getElementById('recId').value=rec?rec.id:'';
+  renderRecipeIngList();
+  showOv('recipeModal');
+}
+
+function renderRecipeIngList(){
+  var el=document.getElementById('recIngList');
+  if(!el)return;
+  if(!MEAL_EDIT_INGS.length){el.innerHTML='<p style="color:var(--textl);font-size:12px;text-align:center;padding:8px">No ingredients added</p>';return;}
+  el.innerHTML=MEAL_EDIT_INGS.map(function(ing,i){
+    return '<div class="recipe-ing-row">'
+      +'<span style="flex:1;font-size:13px">'+ing.qty+' '+ing.unit+' '+ing.name+'</span>'
+      +'<button class="btn sec" style="font-size:11px;padding:2px 7px" onclick="delRecipeIng('+i+')">✕</button>'
+      +'</div>';
+  }).join('');
+}
+
+function addRecipeIng(){
+  var name=document.getElementById('recIngName').value.trim();
+  var qty=document.getElementById('recIngQty').value.trim();
+  var unit=document.getElementById('recIngUnit').value.trim();
+  if(!name)return;
+  MEAL_EDIT_INGS.push({name:name,qty:qty||'1',unit:unit||''});
+  document.getElementById('recIngName').value='';
+  document.getElementById('recIngQty').value='';
+  document.getElementById('recIngUnit').value='';
+  renderRecipeIngList();
+}
+
+function delRecipeIng(i){
+  MEAL_EDIT_INGS.splice(i,1);
+  renderRecipeIngList();
+}
+
+function saveRecipe(){
+  var name=document.getElementById('recName').value.trim();
+  if(!name)return alert('Recipe name required');
+  var id=document.getElementById('recId').value||'rec-'+Date.now();
+  var rec={
+    id:id,
+    name:name,
+    servings:parseInt(document.getElementById('recServings').value)||1,
+    macros:{
+      cal:parseInt(document.getElementById('recCal').value)||0,
+      pro:parseInt(document.getElementById('recPro').value)||0,
+      carb:parseInt(document.getElementById('recCarb').value)||0,
+      fat:parseInt(document.getElementById('recFat').value)||0,
+    },
+    tags:(document.getElementById('recTags').value||'').split(',').map(function(t){return t.trim();}).filter(Boolean),
+    ingredients:MEAL_EDIT_INGS,
+    notes:document.getElementById('recNotes').value.trim()
+  };
+  var idx=RECIPES.findIndex(function(r){return r.id===id;});
+  if(idx>=0)RECIPES[idx]=rec;
+  else RECIPES.push(rec);
+  localStorage.setItem('aRecipes',JSON.stringify(RECIPES));
+  closeOv('recipeModal');
+  renderRecipes();
+}
+
+function delRecipe(id){
+  if(!confirm('Delete this recipe?'))return;
+  RECIPES=RECIPES.filter(function(r){return r.id!==id;});
+  localStorage.setItem('aRecipes',JSON.stringify(RECIPES));
+  renderRecipes();
+}
+
+// ── Grocery list ──────────────────────────────
+function genGroceryFromPlan(){
+  var dates=getMealWeekDates(MEAL_WEEK_OFFSET);
+  var ingMap={};
+  dates.forEach(function(date){
+    var dayData=MEAL_PLAN[date]||{};
+    MEAL_SLOTS.forEach(function(slot){
+      var val=dayData[slot]||'';
+      if(!val)return;
+      var rec=RECIPES.find(function(r){return r.name===val;});
+      if(!rec||!rec.ingredients)return;
+      rec.ingredients.forEach(function(ing){
+        var key=ing.name.toLowerCase();
+        if(!ingMap[key])ingMap[key]={name:ing.name,qty:ing.qty,unit:ing.unit,category:'Other',checked:false};
+      });
+    });
+  });
+  var newItems=Object.values(ingMap);
+  if(!newItems.length){alert('No recipe ingredients found for this week. Make sure your recipes have ingredients added.');return;}
+  // Merge with existing (don't duplicate)
+  newItems.forEach(function(item){
+    var exists=GROCERY_LIST.some(function(g){return g.name.toLowerCase()===item.name.toLowerCase();});
+    if(!exists)GROCERY_LIST.push(item);
+  });
+  localStorage.setItem('aGroceryList',JSON.stringify(GROCERY_LIST));
+  // Switch to grocery tab
+  var btn=document.querySelector('#v-meals .pn-btn:nth-child(3)');
+  showMealSec('grocery',btn);
+  renderGrocery();
+}
+
+function renderGrocery(){
+  var el=document.getElementById('groceryListEl');
+  if(!el)return;
+  if(!GROCERY_LIST.length){el.innerHTML='<p style="color:var(--textl);text-align:center;padding:20px">List is empty. Generate from plan or add items manually.</p>';updateGroceryTotal();return;}
+  // Group by category
+  var cats={};
+  GROCERY_LIST.forEach(function(item,i){
+    var cat=item.category||'Other';
+    if(!cats[cat])cats[cat]=[];
+    cats[cat].push({item:item,idx:i});
+  });
+  var html='';
+  Object.keys(cats).sort().forEach(function(cat){
+    html+='<div class="grocery-cat-hdr">'+cat+'</div>';
+    cats[cat].forEach(function(entry){
+      var item=entry.item;
+      var i=entry.idx;
+      var price=getBestPrice(item.name);
+      html+='<div class="grocery-item'+(item.checked?' done':'')+'">'
+        +'<input type="checkbox" '+(item.checked?'checked':'')+' onchange="toggleGrocery('+i+')" style="width:18px;height:18px;cursor:pointer">'
+        +'<span class="grocery-name" style="flex:1;font-size:13px">'+item.name+'<span style="color:var(--textl);font-size:11px"> '+item.qty+' '+item.unit+'</span></span>'
+        +(price?'<span style="font-size:12px;color:var(--rose);font-weight:700">$'+price.toFixed(2)+'</span>':'')
+        +'<button class="btn sec" style="font-size:11px;padding:2px 7px" onclick="delGroceryItem('+i+')">✕</button>'
+        +'</div>';
+    });
+  });
+  el.innerHTML=html;
+  updateGroceryTotal();
+}
+
+function toggleGrocery(i){
+  if(!GROCERY_LIST[i])return;
+  GROCERY_LIST[i].checked=!GROCERY_LIST[i].checked;
+  localStorage.setItem('aGroceryList',JSON.stringify(GROCERY_LIST));
+  renderGrocery();
+}
+
+function delGroceryItem(i){
+  GROCERY_LIST.splice(i,1);
+  localStorage.setItem('aGroceryList',JSON.stringify(GROCERY_LIST));
+  renderGrocery();
+}
+
+function clearCheckedGrocery(){
+  GROCERY_LIST=GROCERY_LIST.filter(function(g){return !g.checked;});
+  localStorage.setItem('aGroceryList',JSON.stringify(GROCERY_LIST));
+  renderGrocery();
+}
+
+function addGroceryManual(){
+  var name=(document.getElementById('groceryAddName')||{}).value||'';
+  var qty=(document.getElementById('groceryAddQty')||{}).value||'1';
+  name=name.trim();
+  if(!name)return;
+  GROCERY_LIST.push({name:name,qty:qty,unit:'',category:'Other',checked:false});
+  localStorage.setItem('aGroceryList',JSON.stringify(GROCERY_LIST));
+  document.getElementById('groceryAddName').value='';
+  document.getElementById('groceryAddQty').value='';
+  renderGrocery();
+}
+
+function updateGroceryTotal(){
+  var el=document.getElementById('groceryEstTotal');
+  if(!el)return;
+  var total=0;
+  var hasAny=false;
+  GROCERY_LIST.forEach(function(item){
+    var p=getBestPrice(item.name);
+    if(p){total+=p;hasAny=true;}
+  });
+  el.textContent=hasAny?'Estimated total: $'+total.toFixed(2):'';
+}
+
+function getBestPrice(itemName){
+  var lower=itemName.toLowerCase();
+  var matches=PRICE_LOG.filter(function(p){return p.item.toLowerCase()===lower;});
+  if(!matches.length)return null;
+  matches.sort(function(a,b){return b.date.localeCompare(a.date);});
+  return parseFloat(matches[0].price)||null;
+}
+
+function expGrocery(){
+  var lines=['🛒 Grocery List\n'];
+  var cats={};
+  GROCERY_LIST.forEach(function(item){
+    var cat=item.category||'Other';
+    if(!cats[cat])cats[cat]=[];
+    cats[cat].push((item.checked?'[x] ':'[ ] ')+item.name+' '+item.qty+' '+item.unit);
+  });
+  Object.keys(cats).sort().forEach(function(cat){
+    lines.push('\n'+cat.toUpperCase());
+    cats[cat].forEach(function(l){lines.push(l);});
+  });
+  var ta=document.createElement('textarea');
+  ta.value=lines.join('\n');
+  document.body.appendChild(ta);
+  ta.select();
+  document.execCommand('copy');
+  document.body.removeChild(ta);
+  alert('Grocery list copied to clipboard!');
+}
+
+// ── Price log ─────────────────────────────────
+function logPrice(){
+  var item=(document.getElementById('priceItem')||{}).value||'';
+  var amt=(document.getElementById('priceAmt')||{}).value||'';
+  var store=(document.getElementById('priceStore')||{}).value||'';
+  item=item.trim();
+  if(!item||!amt)return alert('Item and price required');
+  PRICE_LOG.push({item:item,price:parseFloat(amt),store:store.trim(),date:new Date().toISOString().slice(0,10)});
+  localStorage.setItem('aPriceLog',JSON.stringify(PRICE_LOG));
+  document.getElementById('priceItem').value='';
+  document.getElementById('priceAmt').value='';
+  document.getElementById('priceStore').value='';
+  renderPriceLog();
+}
+
+function renderPriceLog(){
+  var el=document.getElementById('priceLogEl');
+  if(!el)return;
+  if(!PRICE_LOG.length){el.innerHTML='<p style="color:var(--textl);text-align:center;padding:20px">No prices logged yet.</p>';return;}
+  // Show most recent first
+  var sorted=PRICE_LOG.slice().sort(function(a,b){return b.date.localeCompare(a.date);});
+  el.innerHTML=sorted.map(function(p,i){
+    return '<div class="price-row">'
+      +'<span class="price-item-name">'+p.item+'</span>'
+      +'<span style="font-size:11px;color:var(--textl)">'+(p.store||'')+'</span>'
+      +'<span style="font-size:11px;color:var(--textl)">'+p.date+'</span>'
+      +'<span class="price-amt">$'+parseFloat(p.price).toFixed(2)+'</span>'
+      +'<button class="btn sec" style="font-size:11px;padding:2px 7px" onclick="delPriceEntry('+PRICE_LOG.indexOf(p)+')">✕</button>'
+      +'</div>';
+  }).join('');
+}
+
+function delPriceEntry(i){
+  PRICE_LOG.splice(i,1);
+  localStorage.setItem('aPriceLog',JSON.stringify(PRICE_LOG));
+  renderPriceLog();
+}
+
 function startApp(){
   document.getElementById('loadingScreen').classList.add('hidden');
   chkReset();
@@ -3317,6 +3804,7 @@ function startApp(){
   renderListQBar();
   renderLists();
   updMoneyBadge();
+  renderMealPlan();
 }
 
 // Wait for Firebase then start
@@ -3362,6 +3850,46 @@ setInterval(updDate, 60000);
   <button class="ok-btn" onclick="saveBill()">Save Bill 🏦</button>
   <button class="del-btn" id="billDelBtn" onclick="delBillEdit()" style="display:none">🗑️ Delete Bill</button>
   <button class="cn-btn" onclick="closeM('billModal')">Cancel</button>
+</div></div>
+
+<!-- RECIPE MODAL -->
+<div class="ov" id="recipeModal"><div class="mod" style="max-height:90vh;overflow-y:auto">
+  <div class="mh"></div>
+  <div class="mtit" id="recModalTitle">New Recipe</div>
+  <input type="hidden" id="recId">
+  <label style="font-size:12px;color:var(--textl)">Recipe Name *</label>
+  <input id="recName" type="text" placeholder="e.g. Chicken & Rice Bowl" style="width:100%;padding:9px 11px;border-radius:10px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px;margin-bottom:10px;box-sizing:border-box">
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
+    <div>
+      <label style="font-size:12px;color:var(--textl)">Servings</label>
+      <input id="recServings" type="number" value="1" min="1" style="width:100%;padding:8px 11px;border-radius:10px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px;box-sizing:border-box">
+    </div>
+    <div>
+      <label style="font-size:12px;color:var(--textl)">Tags (comma sep)</label>
+      <input id="recTags" type="text" placeholder="e.g. high protein, quick" style="width:100%;padding:8px 11px;border-radius:10px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px;box-sizing:border-box">
+    </div>
+  </div>
+  <div style="font-size:12px;font-weight:700;color:var(--textl);margin-bottom:6px">MACROS (per serving)</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:6px;margin-bottom:12px">
+    <div><label style="font-size:11px;color:var(--textl)">Cal</label><input id="recCal" type="number" placeholder="0" style="width:100%;padding:7px 8px;border-radius:8px;border:1.5px solid #e8e0d8;font-size:13px;box-sizing:border-box"></div>
+    <div><label style="font-size:11px;color:var(--textl)">Protein g</label><input id="recPro" type="number" placeholder="0" style="width:100%;padding:7px 8px;border-radius:8px;border:1.5px solid #e8e0d8;font-size:13px;box-sizing:border-box"></div>
+    <div><label style="font-size:11px;color:var(--textl)">Carbs g</label><input id="recCarb" type="number" placeholder="0" style="width:100%;padding:7px 8px;border-radius:8px;border:1.5px solid #e8e0d8;font-size:13px;box-sizing:border-box"></div>
+    <div><label style="font-size:11px;color:var(--textl)">Fat g</label><input id="recFat" type="number" placeholder="0" style="width:100%;padding:7px 8px;border-radius:8px;border:1.5px solid #e8e0d8;font-size:13px;box-sizing:border-box"></div>
+  </div>
+  <div style="font-size:12px;font-weight:700;color:var(--textl);margin-bottom:6px">INGREDIENTS</div>
+  <div id="recIngList" style="margin-bottom:8px"></div>
+  <div style="display:flex;gap:6px;margin-bottom:12px">
+    <input id="recIngName" type="text" placeholder="Ingredient" style="flex:2;padding:7px 9px;border-radius:8px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:12px">
+    <input id="recIngQty" type="text" placeholder="Qty" style="width:50px;padding:7px 9px;border-radius:8px;border:1.5px solid #e8e0d8;font-size:12px">
+    <input id="recIngUnit" type="text" placeholder="Unit" style="width:60px;padding:7px 9px;border-radius:8px;border:1.5px solid #e8e0d8;font-size:12px">
+    <button class="btn" onclick="addRecipeIng()" style="padding:7px 10px;font-size:12px">Add</button>
+  </div>
+  <label style="font-size:12px;color:var(--textl)">Notes</label>
+  <textarea id="recNotes" placeholder="Instructions, tips…" rows="2" style="width:100%;padding:8px 11px;border-radius:10px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px;resize:vertical;box-sizing:border-box;margin-bottom:12px"></textarea>
+  <div style="display:flex;gap:8px">
+    <button class="btn" style="flex:1" onclick="saveRecipe()">Save Recipe</button>
+    <button class="btn sec" style="flex:1" onclick="closeOv('recipeModal')">Cancel</button>
+  </div>
 </div></div>
 
 <!-- ROUTINE EDIT MODAL -->
