@@ -273,6 +273,17 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
 /* ROUTINE HIDE */
 .rhi{background:none;border:none;color:#ccc;cursor:pointer;font-size:12px;padding:2px 4px;margin-left:auto;flex-shrink:0;opacity:0;transition:opacity .2s}
 .ri:hover .rhi{opacity:1}
+/* FAB COLLAPSIBLE */
+.fab-m.open{transform:rotate(45deg)}
+.fab-sub{transition:opacity .15s,transform .15s}
+/* MONEY */
+.bill-row{display:flex;justify-content:space-between;align-items:center;padding:11px 0;border-bottom:1px solid #f5f0eb}
+.bill-row:last-child{border-bottom:none}
+.bill-chk{width:28px;height:28px;border-radius:50%;border:2px solid #ddd;background:white;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;transition:all .2s;flex-shrink:0}
+.bill-chk.on{background:var(--sage);border-color:var(--sage);color:white}
+.inc-row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid #f5f0eb;font-size:13px}
+.inc-row:last-child{border-bottom:none}
+.inc-amt{font-weight:700;color:var(--sage)}
 </style>
 </head>
 <body>
@@ -482,17 +493,28 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
 
 <!-- MONEY -->
 <div class="view" id="v-money">
-  <button class="exp-btn" onclick="expD('expenses')">📤 Export Expenses</button>
-  <div class="mny-g">
-    <div class="mny-c"><div class="mny-l">Business</div><div class="mny-n" id="mBiz">$0</div></div>
-    <div class="mny-c"><div class="mny-l">Personal</div><div class="mny-n" id="mPer">$0</div></div>
-    <div class="mny-c"><div class="mny-l">WWOW Income</div><div class="mny-n" id="mInc">$0</div></div>
-    <div class="mny-c"><div class="mny-l">Total Expenses</div><div class="mny-n" id="mTot">$0</div></div>
+  <div style="display:flex;gap:8px;margin-bottom:12px">
+    <button class="ok-btn" style="flex:1;padding:10px;font-size:13px" onclick="openM('expModal')">💸 Add Expense</button>
+    <button class="ok-btn" style="flex:1;padding:10px;font-size:13px;background:linear-gradient(135deg,var(--sage),var(--teal))" onclick="openM('incModal')">💰 Add Income</button>
   </div>
-  <div class="gc"><div class="gct">💳 Debt</div><div class="gcs">Citi Diamond $224/mo • BankAmericard $250/mo</div></div>
-  <div class="gc"><div class="gct">✈️ Europe — Aug 2026</div><div class="gcs">Amsterdam → Paris → London</div></div>
+  <div class="mny-g">
+    <div class="mny-c"><div class="mny-l">Month Income</div><div class="mny-n" id="mThisInc">$0</div></div>
+    <div class="mny-c"><div class="mny-l">Month Expenses</div><div class="mny-n" id="mThisExp">$0</div></div>
+    <div class="mny-c"><div class="mny-l">Net</div><div class="mny-n" id="mNet" style="font-size:20px">$0</div></div>
+    <div class="mny-c"><div class="mny-l">WWOW Income</div><div class="mny-n" id="mInc">$0</div></div>
+  </div>
+  <div class="sh sect-toggle" onclick="togSect('monthlyBreak','monthlyArrow')">📊 Spending by Category <span id="monthlyArrow">▸</span></div>
+  <div id="monthlyBreak" style="display:none">
+    <div class="card" id="monthlyCard"><div style="text-align:center;padding:12px;font-size:13px;color:var(--textl)">Loading...</div></div>
+  </div>
+  <div class="sh">🏦 Bills</div>
+  <div class="card"><div id="billsList"><div class="empty"><div class="emj">🏦</div><p>No bills added.</p></div></div></div>
+  <button class="add-btn" onclick="openAddBill()" style="margin-bottom:14px">➕ Add Bill</button>
+  <div class="sh">💚 Income Log</div>
+  <div class="card"><div id="incList"><div class="empty"><div class="emj">💰</div><p>No income logged yet.</p></div></div></div>
   <div class="sh">💸 Recent Expenses</div>
   <div class="card"><div id="expList"><div class="empty"><div class="emj">💸</div><p>No expenses yet.</p></div></div></div>
+  <button class="exp-btn" onclick="expD('expenses')" style="margin-top:8px">📤 Export Expenses</button>
 </div>
 
 <!-- RECAP -->
@@ -515,10 +537,10 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
 
 <div id="undoToast"><span id="undoMsg">Task deleted</span><button onclick="undoDel()">UNDO</button></div>
 
-<div class="fab-wrap">
-  <div class="fab-r"><span class="fab-lb">Log $</span><button class="fab-mi f2" onclick="openM('expModal')">💸</button></div>
-  <div class="fab-r"><span class="fab-lb">Food/Water</span><button class="fab-mi f3" onclick="openM('fwModal')">🍽️</button></div>
-  <button class="fab-m" onclick="openM('taskModal')">+</button>
+<div class="fab-wrap" id="fabWrap">
+  <div class="fab-r fab-sub" style="display:none"><span class="fab-lb">Log $</span><button class="fab-mi f2" onclick="openM('expModal')">💸</button></div>
+  <div class="fab-r fab-sub" style="display:none"><span class="fab-lb">Food/Water</span><button class="fab-mi f3" onclick="openM('fwModal')">🍽️</button></div>
+  <button class="fab-m" id="fabMain" onclick="togFAB()">+</button>
 </div>
 
 <!-- TASK MODAL -->
@@ -757,6 +779,7 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     <div class="set-sec-t">📋 Project Templates</div>
     <div style="font-size:12px;color:var(--textl);margin-bottom:10px">Tap any template from the Projects tab to load it instantly as a new project.</div>
     <div id="tmplSettingsList"></div>
+    <button class="add-btn" onclick="openAddTmpl()">➕ Create Template</button>
   </div>
   <div class="card">
     <div class="set-sec-t">🔄 Routines</div>
@@ -913,6 +936,12 @@ var RTNS = JSON.parse(localStorage.getItem('aRtns')||'null')||{
   cl:['Trash Monday night 🗑️','Tidy clutter','Papers/mail','Dust','Water plants 🌱','Laundry','Kitchen counters+stovetop+fridge','Floors sweep+mop','Bathroom toilet+mirrors+shower']
 };
 
+var INCOME = JSON.parse(localStorage.getItem('aIncome')||'[]');
+var BILLS = JSON.parse(localStorage.getItem('aBills')||'null')||[
+  {id:'b1',name:'Citi Diamond',amt:224,day:15},
+  {id:'b2',name:'BankAmericard',amt:250,day:1},
+];
+var BILL_PAY = JSON.parse(localStorage.getItem('aBillPay')||'{}');
 var MOOD = JSON.parse(localStorage.getItem('aMood')||'{}');
 var SYM_LOG = JSON.parse(localStorage.getItem('aSymLog')||'{}');
 var SYM_TYPES = JSON.parse(localStorage.getItem('aSymTypes')||'null')||[
@@ -954,6 +983,23 @@ var S = {
 
 var SBV={}, CF='all', DELTED=null, UNDO_T=null, OPEN_PANELS={};
 var firebaseLoaded = false;
+
+// ═══════════════════════════════════════════════
+// FAB
+// ═══════════════════════════════════════════════
+var FAB_OPEN=false;
+function togFAB(){
+  FAB_OPEN=!FAB_OPEN;
+  document.querySelectorAll('.fab-sub').forEach(function(el){el.style.display=FAB_OPEN?'flex':'none';});
+  var fm=document.getElementById('fabMain');
+  if(fm)fm.classList.toggle('open',FAB_OPEN);
+}
+function closeFAB(){
+  FAB_OPEN=false;
+  document.querySelectorAll('.fab-sub').forEach(function(el){el.style.display='none';});
+  var fm=document.getElementById('fabMain');
+  if(fm)fm.classList.remove('open');
+}
 
 // ═══════════════════════════════════════════════
 // FIREBASE SYNC
@@ -1445,17 +1491,26 @@ function saveExp(){
   closeM('expModal');
 }
 
+function getMonStr(){var n=new Date();return n.getFullYear()+'-'+(String(n.getMonth()+1).padStart(2,'0'));}
+
 function renderE(){
   var el=document.getElementById('expList');
-  var biz=EXPENSES.filter(function(e){return e.ty==='business';}).reduce(function(s,e){return s+e.amt;},0);
-  var per=EXPENSES.filter(function(e){return e.ty==='personal';}).reduce(function(s,e){return s+e.amt;},0);
-  document.getElementById('mBiz').textContent='$'+biz.toFixed(0);
-  document.getElementById('mPer').textContent='$'+per.toFixed(0);
-  document.getElementById('mTot').textContent='$'+(biz+per).toFixed(0);
-  if(!EXPENSES.length){el.innerHTML='<div class="empty"><div class="emj">💸</div><p>No expenses yet.</p></div>';return;}
-  el.innerHTML=EXPENSES.slice(0,20).map(function(e){
+  var mon=getMonStr();
+  var thisMonExp=EXPENSES.filter(function(e){return(e.created||'').startsWith(mon);});
+  var thisMonExpAmt=thisMonExp.reduce(function(s,e){return s+e.amt;},0);
+  var thisMonIncAmt=INCOME.filter(function(i){return(i.created||'').startsWith(mon);}).reduce(function(s,i){return s+i.amt;},0);
+  var wigInc=WIGS.reduce(function(s,w){return s+(parseFloat(w.price)||0);},0);
+  var net=thisMonIncAmt-thisMonExpAmt;
+  var e1=document.getElementById('mThisInc');if(e1)e1.textContent='$'+thisMonIncAmt.toFixed(0);
+  var e2=document.getElementById('mThisExp');if(e2)e2.textContent='$'+thisMonExpAmt.toFixed(0);
+  var e3=document.getElementById('mNet');if(e3){e3.textContent=(net>=0?'+':'-')+'$'+Math.abs(net).toFixed(0);e3.style.color=net>=0?'var(--sage)':'var(--ured)';}
+  var e4=document.getElementById('mInc');if(e4)e4.textContent='$'+wigInc.toFixed(0);
+  if(!EXPENSES.length){if(el)el.innerHTML='<div class="empty"><div class="emj">💸</div><p>No expenses yet.</p></div>';renderIncome();renderBills();return;}
+  if(el)el.innerHTML=EXPENSES.slice(0,20).map(function(e){
     return'<div class="er"><div class="er-l"><div class="er-d">'+e.desc+'</div><div class="er-m">'+(e.ty==='business'?'💼':'🏠')+' '+e.cat+' • '+e.date+'</div></div><div class="er-a '+(e.ty==='business'?'biz':'')+'">$'+e.amt.toFixed(2)+'</div></div>';
   }).join('');
+  renderIncome();
+  renderBills();
 }
 
 // ═══════════════════════════════════════════════
@@ -1500,6 +1555,7 @@ function cpExp(){var t=document.getElementById('expTxt');t.select();document.exe
 // MODAL HELPERS
 // ═══════════════════════════════════════════════
 function openM(id){
+  closeFAB();
   SBV={};
   document.querySelectorAll('[data-g]').forEach(function(b){b.classList.remove('on');});
   ['tTit','tDue','tNotes','eAmt','eDesc','wCli','wCha','wPri','wNot','nfN','nfS','nfC','nfP','nfF','nfR','nfA'].forEach(function(f){var el=document.getElementById(f);if(el)el.value='';});
@@ -1696,7 +1752,13 @@ function renderTmplBar(){
 function renderTmplList(){
   var el=document.getElementById('tmplSettingsList');if(!el)return;
   el.innerHTML=TMPLS.map(function(t){
-    return'<div class="set-row"><div><div class="set-lbl">'+t.emoji+' '+t.name+'</div><div class="set-sub">'+t.steps.length+' steps</div></div><button class="sb" style="padding:6px 14px;width:auto;flex-shrink:0;font-size:12px" onclick="loadTemplate(\''+t.id+'\')">Load →</button></div>';
+    return'<div class="set-row">'+
+      '<div><div class="set-lbl">'+t.emoji+' '+t.name+'</div><div class="set-sub">'+t.steps.length+' steps</div></div>'+
+      '<div style="display:flex;gap:5px;flex-shrink:0">'+
+        '<button class="sb" style="padding:5px 10px;width:auto;font-size:12px" onclick="editTmpl(\''+t.id+'\')">✏️</button>'+
+        '<button class="sb" style="padding:5px 12px;width:auto;font-size:12px" onclick="loadTemplate(\''+t.id+'\')">Load →</button>'+
+      '</div>'+
+    '</div>';
   }).join('');
 }
 
@@ -2242,6 +2304,192 @@ function saveNotesM(){
 }
 
 // ═══════════════════════════════════════════════
+// MONEY — INCOME
+// ═══════════════════════════════════════════════
+function saveIncome(){
+  var amt=parseFloat(document.getElementById('incAmt').value);
+  var desc=document.getElementById('incDesc').value.trim();
+  if(!amt||!desc){alert('Please fill in amount and description!');return;}
+  var id=Date.now().toString();
+  INCOME.unshift({id:id,amt:amt,desc:desc,cat:SBV.incat||'other',date:new Date().toLocaleDateString(),created:new Date().toISOString()});
+  localStorage.setItem('aIncome',JSON.stringify(INCOME));
+  closeM('incModal');renderE();
+}
+
+function delIncome(id){
+  INCOME=INCOME.filter(function(i){return i.id!==id;});
+  localStorage.setItem('aIncome',JSON.stringify(INCOME));
+  renderE();
+}
+
+function renderIncome(){
+  var el=document.getElementById('incList');if(!el)return;
+  if(!INCOME.length){el.innerHTML='<div class="empty"><div class="emj">💰</div><p>No income logged yet.</p></div>';return;}
+  var catIco={wig:'🪄',loreal:'📋',service:'🛠️',other:'✨'};
+  el.innerHTML=INCOME.slice(0,20).map(function(i){
+    return'<div class="inc-row">'+
+      '<div><div style="font-weight:600;color:var(--text)">'+(catIco[i.cat]||'💰')+' '+i.desc+'</div>'+
+        '<div style="font-size:11px;color:var(--textl)">'+i.cat+' • '+i.date+'</div></div>'+
+      '<div style="display:flex;align-items:center;gap:8px">'+
+        '<span class="inc-amt">+$'+i.amt.toFixed(2)+'</span>'+
+        '<button onclick="delIncome(\''+i.id+'\')" style="background:none;border:none;color:var(--textl);cursor:pointer;font-size:13px">✕</button>'+
+      '</div>'+
+    '</div>';
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════
+// MONEY — BILLS
+// ═══════════════════════════════════════════════
+function renderBills(){
+  var el=document.getElementById('billsList');if(!el)return;
+  if(!BILLS.length){el.innerHTML='<div class="empty"><div class="emj">🏦</div><p>No bills added.</p></div>';return;}
+  var mon=getMonStr();
+  var paid=BILL_PAY[mon]||{};
+  el.innerHTML=BILLS.map(function(b){
+    var isPaid=!!paid[b.id];
+    return'<div class="bill-row">'+
+      '<div>'+
+        '<div style="font-size:14px;font-weight:600;color:var(--text)'+(isPaid?';text-decoration:line-through;color:var(--textl)':'')+'">'+ b.name+'</div>'+
+        '<div style="font-size:11px;color:var(--textl)">$'+b.amt+'/mo • due day '+b.day+'</div>'+
+      '</div>'+
+      '<div style="display:flex;align-items:center;gap:8px">'+
+        '<div class="bill-chk'+(isPaid?' on':'')+'" onclick="togBillPay(\''+b.id+'\')">'+  (isPaid?'✓':'')+'</div>'+
+        '<button onclick="editBill(\''+b.id+'\')" style="background:none;border:none;font-size:14px;cursor:pointer;color:var(--textl);padding:4px">✏️</button>'+
+      '</div>'+
+    '</div>';
+  }).join('');
+}
+
+function togBillPay(id){
+  var mon=getMonStr();
+  if(!BILL_PAY[mon])BILL_PAY[mon]={};
+  BILL_PAY[mon][id]=!BILL_PAY[mon][id];
+  localStorage.setItem('aBillPay',JSON.stringify(BILL_PAY));
+  renderBills();
+}
+
+function openAddBill(){
+  document.getElementById('billModalTit').textContent='Add Bill 🏦';
+  document.getElementById('billEditId').value='';
+  document.getElementById('billName').value='';
+  document.getElementById('billAmt').value='';
+  document.getElementById('billDay').value='';
+  document.getElementById('billDelBtn').style.display='none';
+  document.getElementById('billModal').classList.add('show');
+}
+
+function editBill(id){
+  var b=BILLS.find(function(b){return b.id===id;});if(!b)return;
+  document.getElementById('billModalTit').textContent='Edit Bill ✏️';
+  document.getElementById('billEditId').value=id;
+  document.getElementById('billName').value=b.name;
+  document.getElementById('billAmt').value=b.amt;
+  document.getElementById('billDay').value=b.day;
+  document.getElementById('billDelBtn').style.display='block';
+  document.getElementById('billModal').classList.add('show');
+}
+
+function saveBill(){
+  var name=document.getElementById('billName').value.trim();
+  var amt=parseFloat(document.getElementById('billAmt').value);
+  var day=parseInt(document.getElementById('billDay').value)||1;
+  if(!name||!amt){alert('Please fill in name and amount!');return;}
+  var id=document.getElementById('billEditId').value;
+  if(id){
+    var b=BILLS.find(function(b){return b.id===id;});
+    if(b){b.name=name;b.amt=amt;b.day=day;}
+  }else{
+    BILLS.push({id:Date.now().toString(),name:name,amt:amt,day:day});
+  }
+  localStorage.setItem('aBills',JSON.stringify(BILLS));
+  closeM('billModal');renderBills();
+}
+
+function delBillEdit(){
+  var id=document.getElementById('billEditId').value;
+  if(!id||!confirm('Delete this bill?'))return;
+  BILLS=BILLS.filter(function(b){return b.id!==id;});
+  localStorage.setItem('aBills',JSON.stringify(BILLS));
+  closeM('billModal');renderBills();
+}
+
+// ═══════════════════════════════════════════════
+// MONEY — MONTHLY BREAKDOWN
+// ═══════════════════════════════════════════════
+function renderMonthly(){
+  var el=document.getElementById('monthlyCard');if(!el)return;
+  var mon=getMonStr();
+  var thisMonExp=EXPENSES.filter(function(e){return(e.created||'').startsWith(mon);});
+  if(!thisMonExp.length){el.innerHTML='<div style="text-align:center;padding:12px;font-size:13px;color:var(--textl)">No expenses this month yet.</div>';return;}
+  var cats={};
+  thisMonExp.forEach(function(e){cats[e.cat]=(cats[e.cat]||0)+e.amt;});
+  var total=thisMonExp.reduce(function(s,e){return s+e.amt;},0);
+  var catLabels={'wig-supplies':'🪄 Wigs','shipping':'📦 Shipping','groceries':'🛒 Grocery','dining':'🍽️ Dining','gas':'⛽ Gas','other':'📋 Other'};
+  var rows=Object.keys(cats).sort(function(a,b){return cats[b]-cats[a];}).map(function(cat){
+    var pct=Math.round(cats[cat]/total*100);
+    return'<div style="margin-bottom:10px">'+
+      '<div class="pt" style="margin-bottom:3px"><span class="pn" style="font-size:12px">'+(catLabels[cat]||cat)+'</span><span class="pm2">$'+cats[cat].toFixed(0)+' ('+pct+'%)</span></div>'+
+      '<div class="pb"><div class="pf" style="width:'+pct+'%;background:var(--peach)"></div></div>'+
+    '</div>';
+  });
+  el.innerHTML='<div style="font-size:11px;font-weight:700;color:var(--textl);text-transform:uppercase;letter-spacing:.8px;margin-bottom:12px">This Month — Total: $'+total.toFixed(0)+'</div>'+rows.join('');
+}
+
+// ═══════════════════════════════════════════════
+// TEMPLATES
+// ═══════════════════════════════════════════════
+function openAddTmpl(){
+  document.getElementById('tmplModalTit').textContent='New Template ✨';
+  document.getElementById('tmplEditId').value='';
+  document.getElementById('tmplEmoji').value='';
+  document.getElementById('tmplName').value='';
+  document.getElementById('tmplSteps').value='';
+  document.getElementById('tmplDelBtn').style.display='none';
+  document.getElementById('tmplModal').classList.add('show');
+}
+
+function editTmpl(id){
+  var t=TMPLS.find(function(t){return t.id===id;});if(!t)return;
+  document.getElementById('tmplModalTit').textContent='Edit Template ✏️';
+  document.getElementById('tmplEditId').value=id;
+  document.getElementById('tmplEmoji').value=t.emoji||'✨';
+  document.getElementById('tmplName').value=t.name;
+  document.getElementById('tmplSteps').value=(t.steps||[]).join('\n');
+  document.getElementById('tmplDelBtn').style.display='block';
+  document.getElementById('tmplModal').classList.add('show');
+}
+
+function saveTmpl(){
+  var emoji=document.getElementById('tmplEmoji').value.trim()||'✨';
+  var name=document.getElementById('tmplName').value.trim();
+  if(!name){alert('Please enter a template name!');return;}
+  var steps=document.getElementById('tmplSteps').value.split('\n').map(function(s){return s.trim();}).filter(Boolean);
+  var id=document.getElementById('tmplEditId').value;
+  if(id){
+    var t=TMPLS.find(function(t){return t.id===id;});
+    if(t){t.emoji=emoji;t.name=name;t.steps=steps;}
+  }else{
+    TMPLS.push({id:'tmpl'+Date.now(),emoji:emoji,name:name,steps:steps});
+  }
+  localStorage.setItem('aTmpls',JSON.stringify(TMPLS));
+  renderTmplList();renderTmplBar();
+  closeM('tmplModal');
+}
+
+function delTmpl(){
+  var id=document.getElementById('tmplEditId').value;
+  if(!id)return;
+  var builtIn=['trip','pack','clean','meal','event'];
+  if(builtIn.indexOf(id)>-1){alert('Cannot delete built-in templates.');return;}
+  if(!confirm('Delete this template?'))return;
+  TMPLS=TMPLS.filter(function(t){return t.id!==id;});
+  localStorage.setItem('aTmpls',JSON.stringify(TMPLS));
+  renderTmplList();renderTmplBar();
+  closeM('tmplModal');
+}
+
+// ═══════════════════════════════════════════════
 // HEALTH — WATER UNIT
 // ═══════════════════════════════════════════════
 function renderWatBtns(){
@@ -2275,6 +2523,7 @@ function togSect(secId,arrowId){
   sec.style.display=hidden?'block':'none';
   if(arrow)arrow.textContent=hidden?'▾':'▸';
   if(hidden&&secId==='weeklyNut')renderWeeklyNut();
+  if(hidden&&secId==='monthlyBreak')renderMonthly();
 }
 
 // ═══════════════════════════════════════════════
@@ -2601,6 +2850,8 @@ function startApp(){
   renderExLog();
   renderCombos();
   renderPT();
+  renderIncome();
+  renderBills();
 }
 
 // Wait for Firebase then start
@@ -2619,5 +2870,46 @@ setTimeout(function(){
 
 setInterval(updDate, 60000);
 </script>
+<!-- INCOME MODAL -->
+<div class="ov" id="incModal"><div class="mod">
+  <div class="mh"></div><div class="mtit">Log Income 💰</div>
+  <div class="fg"><label class="fl">Amount ($)</label><input class="fi" type="number" id="incAmt" placeholder="0.00" step="0.01"></div>
+  <div class="fg"><label class="fl">Description</label><input class="fi" id="incDesc" placeholder="e.g. Ariel wig commission"></div>
+  <div class="fg"><label class="fl">Category</label>
+    <div class="bg bg4">
+      <button class="sb" data-g="incat" data-v="wig" onclick="pSB(this)">🪄 Wig</button>
+      <button class="sb" data-g="incat" data-v="loreal" onclick="pSB(this)">📋 L'Oréal</button>
+      <button class="sb" data-g="incat" data-v="service" onclick="pSB(this)">🛠️ Service</button>
+      <button class="sb" data-g="incat" data-v="other" onclick="pSB(this)">✨ Other</button>
+    </div>
+  </div>
+  <button class="ok-btn" style="background:linear-gradient(135deg,var(--sage),var(--teal))" onclick="saveIncome()">Log Income 💰</button>
+  <button class="cn-btn" onclick="closeM('incModal')">Cancel</button>
+</div></div>
+
+<!-- BILL MODAL -->
+<div class="ov" id="billModal"><div class="mod">
+  <div class="mh"></div><div class="mtit" id="billModalTit">Add Bill 🏦</div>
+  <input type="hidden" id="billEditId">
+  <div class="fg"><label class="fl">Bill Name</label><input class="fi" id="billName" placeholder="e.g. Netflix, Rent"></div>
+  <div class="fg"><label class="fl">Amount ($)</label><input class="fi" type="number" id="billAmt" placeholder="0.00" step="0.01"></div>
+  <div class="fg"><label class="fl">Due Day of Month</label><input class="fi" type="number" id="billDay" placeholder="1-31" min="1" max="31"></div>
+  <button class="ok-btn" onclick="saveBill()">Save Bill 🏦</button>
+  <button class="del-btn" id="billDelBtn" onclick="delBillEdit()" style="display:none">🗑️ Delete Bill</button>
+  <button class="cn-btn" onclick="closeM('billModal')">Cancel</button>
+</div></div>
+
+<!-- TEMPLATE MODAL -->
+<div class="ov" id="tmplModal"><div class="mod">
+  <div class="mh"></div><div class="mtit" id="tmplModalTit">New Template ✨</div>
+  <input type="hidden" id="tmplEditId">
+  <div class="fg"><label class="fl">Emoji</label><input class="fi" id="tmplEmoji" placeholder="✨" maxlength="4" style="width:80px"></div>
+  <div class="fg"><label class="fl">Template Name</label><input class="fi" id="tmplName" placeholder="e.g. Content Plan"></div>
+  <div class="fg"><label class="fl">Steps — one per line</label><textarea class="fi fi-big" id="tmplSteps" placeholder="Research topic&#10;Write outline&#10;Draft content&#10;Review &amp; publish"></textarea></div>
+  <button class="ok-btn" onclick="saveTmpl()">Save Template ✨</button>
+  <button class="del-btn" id="tmplDelBtn" onclick="delTmpl()" style="display:none">🗑️ Delete Template</button>
+  <button class="cn-btn" onclick="closeM('tmplModal')">Cancel</button>
+</div></div>
+
 </body>
 </html>
