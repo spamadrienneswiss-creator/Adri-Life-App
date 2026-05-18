@@ -276,6 +276,27 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
 /* FAB COLLAPSIBLE */
 .fab-m.open{transform:rotate(45deg)}
 .fab-sub{transition:opacity .15s,transform .15s}
+/* LISTS */
+.list-card{background:white;border-radius:var(--r);padding:14px;margin-bottom:12px;box-shadow:var(--sh);border-left:4px solid var(--rose)}
+.list-hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.list-title{font-size:15px;font-weight:700;color:var(--text)}
+.list-prog{font-size:11px;font-weight:700;padding:2px 8px;border-radius:10px}
+.list-item{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid #f0ebe6}
+.list-item:last-child{border-bottom:none}
+.list-item.done .rlb{text-decoration:line-through;color:var(--textl)}
+.list-add{display:flex;gap:6px;margin-top:10px}
+/* SETTINGS COLLAPSIBLE */
+.set-sec-t{cursor:pointer;display:flex;justify-content:space-between;align-items:center;user-select:none}
+.set-sec-t .sst-arr{font-size:12px;color:var(--textl);transition:transform .2s;flex-shrink:0}
+.set-sec-t.open .sst-arr{transform:rotate(90deg)}
+/* LIST SECTION HEADERS */
+.list-hdr-item{padding:10px 0 4px;margin-top:8px;border-bottom:2px solid #ede8e3;display:flex;align-items:center;justify-content:space-between}
+.list-hdr-lbl{font-size:11px;font-weight:700;color:var(--textl);text-transform:uppercase;letter-spacing:1px}
+/* EXPORT BADGE */
+.tab-btn.has-badge::after{content:'●';color:var(--rose);font-size:9px;vertical-align:super;margin-left:1px}
+/* ROUTINE EDIT */
+.rtn-item-row{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid #f0ebe6}
+.rtn-item-row:last-child{border-bottom:none}
 /* MONEY */
 .bill-row{display:flex;justify-content:space-between;align-items:center;padding:11px 0;border-bottom:1px solid #f5f0eb}
 .bill-row:last-child{border-bottom:none}
@@ -320,10 +341,12 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
   <button class="tab-btn" data-tab="projects" onclick="goTab('projects',this)">📁 Projects</button>
   <button class="tab-btn" data-tab="goals" onclick="goTab('goals',this)">🎯 Goals</button>
   <button class="tab-btn" data-tab="routines" onclick="goTab('routines',this)">🔄 Routines</button>
+  <button class="tab-btn" data-tab="lists" onclick="goTab('lists',this)">📝 Lists</button>
   <button class="tab-btn" data-tab="food" onclick="goTab('food',this)">💚 Health</button>
   <button class="tab-btn" data-tab="wigs" onclick="goTab('wigs',this)">🪄 Wigs</button>
   <button class="tab-btn" data-tab="money" onclick="goTab('money',this)">💰 Money</button>
   <button class="tab-btn" data-tab="recap" onclick="goTab('recap',this)">📊 Recap</button>
+  <button class="tab-btn" data-tab="export" onclick="goTab('export',this)">📤 Export</button>
   <button class="tab-btn" data-tab="settings" onclick="goTab('settings',this)">⚙️ Settings</button>
 </div>
 
@@ -378,7 +401,6 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
 
 <!-- TASKS -->
 <div class="view" id="v-tasks">
-  <button class="exp-btn" onclick="expD('tasks')">📤 Export Tasks</button>
   <div class="ul">
     <div class="uli r"><div class="uln">🔴 Do Now</div><div class="uls">Urgent+Important</div></div>
     <div class="uli y"><div class="uln">🟡 Schedule</div><div class="uls">Important, not urgent</div></div>
@@ -397,11 +419,20 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
 
 <!-- ROUTINES -->
 <div class="view" id="v-routines">
-  <div class="sh">🌅 AM Routine</div><div class="rc"><div class="rt">Morning</div><div id="amL"></div></div>
-  <div class="sh">🌙 PM Routine</div><div class="rc pm"><div class="rt">Wind Down</div><div id="pmL"></div></div>
-  <div class="sh">📅 Daily</div><div class="rc day"><div class="rt">Every Day</div><div id="daL"></div></div>
-  <div class="sh">📆 Weekly</div><div class="rc" style="border-left-color:var(--blue)"><div class="rt">Weekly Reset</div><div id="weL"></div></div>
-  <div class="sh">🧹 Cleaning</div><div class="rc" style="border-left-color:var(--teal)"><div class="rt">Home</div><div id="clL"></div></div>
+  <div id="rtnGroupsView"></div>
+  <button class="add-btn" onclick="openNewRtn()" style="margin-top:4px">➕ New Routine Group</button>
+</div>
+
+<!-- LISTS -->
+<div class="view" id="v-lists">
+  <button class="ok-btn" style="margin-bottom:10px" onclick="openNewList()">📝 New List</button>
+  <div class="sh">Quick Start</div>
+  <div class="tmpl-row" id="listQBar"></div>
+  <div class="fbar" style="margin-top:4px;margin-bottom:14px">
+    <button class="fchip on" onclick="setLF('active',this)">Active</button>
+    <button class="fchip" onclick="setLF('archived',this)">📦 Archived</button>
+  </div>
+  <div id="allLists"><div class="empty"><div class="emj">📝</div><p>No lists yet. Create one or pick a Quick Start above.</p></div></div>
 </div>
 
 <!-- FOOD -->
@@ -461,32 +492,20 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
         <div style="font-size:13px;font-weight:600;color:var(--text)">Period Log</div>
         <div style="font-size:11px;color:var(--textl)" id="ptAvg">Log at least 2 cycles to see average</div>
       </div>
-      <button onclick="logPeriod()" style="background:var(--rose-light);border:none;border-radius:9px;padding:6px 12px;font-family:'Quicksand',sans-serif;font-size:12px;font-weight:700;color:var(--rose);cursor:pointer">+ Log Today</button>
+      <button onclick="logPeriodToday()" style="background:var(--rose-light);border:none;border-radius:9px;padding:6px 12px;font-family:'Quicksand',sans-serif;font-size:12px;font-weight:700;color:var(--rose);cursor:pointer">+ Log Today</button>
     </div>
-    <div style="margin-bottom:6px"><input type="date" id="ptDateIn" class="fi" style="padding:7px 10px;font-size:13px"> <button onclick="logPeriodDate()" style="margin-top:6px;padding:7px 14px;border-radius:9px;border:none;background:var(--rose-light);color:var(--rose);font-family:'Quicksand',sans-serif;font-size:12px;font-weight:700;cursor:pointer">Log This Date</button></div>
+    <div style="margin-bottom:6px">
+      <input type="date" id="ptDateIn" class="fi" style="padding:7px 10px;font-size:13px;margin-bottom:6px">
+      <input class="fi" id="ptNoteIn" placeholder="Note (optional)..." style="padding:7px 10px;font-size:13px;margin-bottom:6px">
+      <button onclick="logPeriodDate()" style="padding:7px 14px;border-radius:9px;border:none;background:var(--rose-light);color:var(--rose);font-family:'Quicksand',sans-serif;font-size:12px;font-weight:700;cursor:pointer">Log This Date</button>
+    </div>
     <div id="ptList"></div>
   </div>
-  <div class="sh">📤 Export</div>
-  <div class="card">
-    <div style="display:flex;gap:8px;margin-bottom:10px">
-      <div style="flex:1"><label style="font-size:11px;font-weight:700;color:var(--textl);text-transform:uppercase;letter-spacing:.8px;display:block;margin-bottom:4px">From</label><input type="date" id="expFrom" class="fi" style="padding:7px 10px;font-size:13px"></div>
-      <div style="flex:1"><label style="font-size:11px;font-weight:700;color:var(--textl);text-transform:uppercase;letter-spacing:.8px;display:block;margin-bottom:4px">To</label><input type="date" id="expTo" class="fi" style="padding:7px 10px;font-size:13px"></div>
-    </div>
-    <div class="bg bg4" style="margin-bottom:10px">
-      <button class="sb on" data-g="expType" data-v="food" onclick="pSB(this)">🍽️ Food</button>
-      <button class="sb" data-g="expType" data-v="exercise" onclick="pSB(this)">💪 Exercise</button>
-      <button class="sb" data-g="expType" data-v="mood" onclick="pSB(this)">😊 Mood</button>
-      <button class="sb" data-g="expType" data-v="symptoms" onclick="pSB(this)">🩺 Symptoms</button>
-    </div>
-    <button class="ok-btn" onclick="expHealth()">📋 Generate Export</button>
-    <textarea id="healthExpTxt" style="width:100%;height:140px;border:2px solid #ede8e3;border-radius:11px;padding:11px;font-family:monospace;font-size:12px;resize:none;outline:none;margin-top:10px;display:none" readonly></textarea>
-    <button id="healthExpCopy" onclick="cpHealthExp()" style="display:none;width:100%;padding:11px;border-radius:11px;border:none;background:var(--blue-light);color:var(--blue);font-family:'Quicksand',sans-serif;font-size:14px;font-weight:700;cursor:pointer;margin-top:6px">📋 Copy to Clipboard</button>
-  </div>
+  <div style="margin-bottom:14px;text-align:center"><a href="#" onclick="goTabDirect('export',document.querySelector('[data-tab=\'export\']'));return false;" style="font-size:13px;color:var(--blue);font-weight:700;text-decoration:none">📤 Go to Export tab →</a></div>
 </div>
 
 <!-- WIGS -->
 <div class="view" id="v-wigs">
-  <button class="exp-btn" onclick="expD('wigs')">📤 Export Wigs</button>
   <div class="sh">🪄 Active Orders</div>
   <div id="wigList"><div class="empty"><div class="emj">🪄</div><p>No wig orders yet.</p></div></div>
 </div>
@@ -514,7 +533,56 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
   <div class="card"><div id="incList"><div class="empty"><div class="emj">💰</div><p>No income logged yet.</p></div></div></div>
   <div class="sh">💸 Recent Expenses</div>
   <div class="card"><div id="expList"><div class="empty"><div class="emj">💸</div><p>No expenses yet.</p></div></div></div>
-  <button class="exp-btn" onclick="expD('expenses')" style="margin-top:8px">📤 Export Expenses</button>
+  <button class="exp-btn" onclick="goTabDirect('export',document.querySelector('[data-tab=\'export\']'))" style="margin-top:8px">📤 Go to Export →</button>
+</div>
+
+<!-- EXPORT -->
+<div class="view" id="v-export">
+  <div class="card">
+    <div class="ct">📤 Export Everything</div>
+    <p style="font-size:12px;color:var(--textl);margin-bottom:12px">Generate a full export of all your data at once, or pick a section below.</p>
+    <button class="ok-btn" onclick="expAll()">📋 Export All Data</button>
+    <textarea id="expAllTxt" style="width:100%;height:160px;border:2px solid #ede8e3;border-radius:11px;padding:11px;font-family:monospace;font-size:12px;resize:none;outline:none;margin-top:10px;display:none" readonly></textarea>
+    <button id="expAllCopy" onclick="cpExpAll()" style="display:none;width:100%;padding:11px;border-radius:11px;border:none;background:var(--blue-light);color:var(--blue);font-family:'Quicksand',sans-serif;font-size:14px;font-weight:700;cursor:pointer;margin-top:6px">📋 Copy to Clipboard</button>
+  </div>
+  <div class="sh sect-toggle" onclick="togSect('expTasks','expTasksArrow')">📋 Tasks <span id="expTasksArrow">▸</span></div>
+  <div id="expTasks" style="display:none">
+    <div class="card">
+      <button class="ok-btn" onclick="expD('tasks')">📋 Export Tasks</button>
+      <textarea id="expTxt" style="width:100%;height:160px;border:2px solid #ede8e3;border-radius:11px;padding:11px;font-family:monospace;font-size:12px;resize:none;outline:none;margin-top:10px;display:none" readonly></textarea>
+      <button id="expCopyBtn" onclick="cpExp()" style="display:none;width:100%;padding:11px;border-radius:11px;border:none;background:var(--blue-light);color:var(--blue);font-family:'Quicksand',sans-serif;font-size:14px;font-weight:700;cursor:pointer;margin-top:6px">📋 Copy</button>
+    </div>
+  </div>
+  <div class="sh sect-toggle" onclick="togSect('expWigs','expWigsArrow')">🪄 Wigs <span id="expWigsArrow">▸</span></div>
+  <div id="expWigs" style="display:none">
+    <div class="card">
+      <button class="ok-btn" style="background:linear-gradient(135deg,var(--rose),var(--peach))" onclick="expD('wigs')">🪄 Export Wigs</button>
+    </div>
+  </div>
+  <div class="sh sect-toggle" onclick="togSect('expMoney','expMoneyArrow')">💰 Money <span id="expMoneyArrow">▸</span></div>
+  <div id="expMoney" style="display:none">
+    <div class="card">
+      <button class="ok-btn" style="background:linear-gradient(135deg,var(--sage),var(--teal))" onclick="expD('expenses')">💸 Export Expenses</button>
+    </div>
+  </div>
+  <div class="sh sect-toggle" onclick="togSect('expHealth','expHealthArrow')">💚 Health <span id="expHealthArrow">▸</span></div>
+  <div id="expHealth" style="display:none">
+    <div class="card">
+      <div style="display:flex;gap:8px;margin-bottom:10px">
+        <div style="flex:1"><label style="font-size:11px;font-weight:700;color:var(--textl);text-transform:uppercase;letter-spacing:.8px;display:block;margin-bottom:4px">From</label><input type="date" id="expFrom" class="fi" style="padding:7px 10px;font-size:13px"></div>
+        <div style="flex:1"><label style="font-size:11px;font-weight:700;color:var(--textl);text-transform:uppercase;letter-spacing:.8px;display:block;margin-bottom:4px">To</label><input type="date" id="expTo" class="fi" style="padding:7px 10px;font-size:13px"></div>
+      </div>
+      <div class="bg bg4" style="margin-bottom:10px">
+        <button class="sb on" data-g="expType" data-v="food" onclick="pSB(this)">🍽️ Food</button>
+        <button class="sb" data-g="expType" data-v="exercise" onclick="pSB(this)">💪 Exercise</button>
+        <button class="sb" data-g="expType" data-v="mood" onclick="pSB(this)">😊 Mood</button>
+        <button class="sb" data-g="expType" data-v="symptoms" onclick="pSB(this)">🩺 Symptoms</button>
+      </div>
+      <button class="ok-btn" onclick="expHealth()">📋 Generate Health Export</button>
+      <textarea id="healthExpTxt" style="width:100%;height:140px;border:2px solid #ede8e3;border-radius:11px;padding:11px;font-family:monospace;font-size:12px;resize:none;outline:none;margin-top:10px;display:none" readonly></textarea>
+      <button id="healthExpCopy" onclick="cpHealthExp()" style="display:none;width:100%;padding:11px;border-radius:11px;border:none;background:var(--blue-light);color:var(--blue);font-family:'Quicksand',sans-serif;font-size:14px;font-weight:700;cursor:pointer;margin-top:6px">📋 Copy to Clipboard</button>
+    </div>
+  </div>
 </div>
 
 <!-- RECAP -->
@@ -748,61 +816,75 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
 <!-- SETTINGS VIEW -->
 <div class="view" id="v-settings">
   <div class="card">
-    <div class="set-sec-t">🎨 Appearance</div>
-    <div class="set-row"><div><div class="set-lbl">Your Name</div><div class="set-sub">Used in greeting</div></div><input class="fi" id="sName" style="width:120px;padding:7px 10px" placeholder="Adri"></div>
-    <div class="set-row"><div class="set-lbl">Greeting Quote</div></div>
-    <textarea class="fi" id="sQuote" style="min-height:60px;margin-bottom:8px" placeholder="The plans of the diligent..."></textarea>
-    <div class="set-row" style="border:none;padding-bottom:0"><div class="set-lbl">Banner Color</div></div>
-    <div class="color-row" id="bannerColors"></div>
-    <button class="ok-btn" style="margin-top:14px" onclick="saveAppearance()">Save Appearance ✨</button>
-  </div>
-  <div class="card">
-    <div class="set-sec-t">🔐 PIN & Security</div>
-    <div class="set-row"><div><div class="set-lbl">App PIN</div><div class="set-sub" id="pinSetStatus">Not set</div></div><button class="sb" style="padding:7px 16px;width:auto;flex-shrink:0" onclick="openSetPin()">Set PIN</button></div>
-    <div id="tabProtList"><div style="font-size:12px;color:var(--textl);padding:8px 0">Set a PIN first to enable per-tab protection.</div></div>
-  </div>
-  <div class="card">
-    <div class="set-sec-t">🏷️ Task Categories</div>
-    <div id="catList"></div>
-    <button class="add-btn" onclick="openAddCat()">➕ Add Category</button>
-  </div>
-  <div class="card">
-    <div class="set-sec-t">🩺 Symptom Tracking</div>
-    <div style="font-size:12px;color:var(--textl);margin-bottom:10px">Customize which symptoms you track daily.</div>
-    <div id="symSettingsList"></div>
-    <div style="display:flex;gap:8px;margin-top:8px">
-      <input class="fi" id="newSymName" placeholder="New symptom name..." style="flex:1;padding:8px 10px">
-      <button onclick="addSymType()" style="padding:8px 14px;border-radius:9px;border:none;background:var(--sage);color:white;font-family:'Quicksand',sans-serif;font-size:13px;font-weight:700;cursor:pointer">Add</button>
+    <div class="set-sec-t" onclick="togSetSec('sc-appear',this)">🎨 Appearance <span class="sst-arr">▶</span></div>
+    <div id="sc-appear" style="display:none">
+      <div class="set-row"><div><div class="set-lbl">Your Name</div><div class="set-sub">Used in greeting</div></div><input class="fi" id="sName" style="width:120px;padding:7px 10px" placeholder="Adri"></div>
+      <div class="set-row"><div class="set-lbl">Greeting Quote</div></div>
+      <textarea class="fi" id="sQuote" style="min-height:60px;margin-bottom:8px" placeholder="The plans of the diligent..."></textarea>
+      <div class="set-row" style="border:none;padding-bottom:0"><div class="set-lbl">Banner Color</div></div>
+      <div class="color-row" id="bannerColors"></div>
+      <button class="ok-btn" style="margin-top:14px" onclick="saveAppearance()">Save Appearance ✨</button>
     </div>
   </div>
   <div class="card">
-    <div class="set-sec-t">📋 Project Templates</div>
-    <div style="font-size:12px;color:var(--textl);margin-bottom:10px">Tap any template from the Projects tab to load it instantly as a new project.</div>
-    <div id="tmplSettingsList"></div>
-    <button class="add-btn" onclick="openAddTmpl()">➕ Create Template</button>
+    <div class="set-sec-t" onclick="togSetSec('sc-pin',this)">🔐 PIN & Security <span class="sst-arr">▶</span></div>
+    <div id="sc-pin" style="display:none">
+      <div class="set-row"><div><div class="set-lbl">App PIN</div><div class="set-sub" id="pinSetStatus">Not set</div></div><button class="sb" style="padding:7px 16px;width:auto;flex-shrink:0" onclick="openSetPin()">Set PIN</button></div>
+      <div id="tabProtList"><div style="font-size:12px;color:var(--textl);padding:8px 0">Set a PIN first to enable per-tab protection.</div></div>
+    </div>
   </div>
   <div class="card">
-    <div class="set-sec-t">🔄 Routines</div>
-    <div style="font-size:12px;color:var(--textl);margin-bottom:10px">Items you've hidden from routines. Tap Restore to bring them back.</div>
-    <div id="hiddenRoutines"><div style="font-size:12px;color:var(--textl)">No hidden routine items.</div></div>
+    <div class="set-sec-t" onclick="togSetSec('sc-cats',this)">🏷️ Task Categories <span class="sst-arr">▶</span></div>
+    <div id="sc-cats" style="display:none">
+      <div id="catList"></div>
+      <button class="add-btn" onclick="openAddCat()">➕ Add Category</button>
+    </div>
   </div>
   <div class="card">
-    <div class="set-sec-t">🎯 Goals & Macros</div>
-    <div class="set-row"><div class="set-lbl">🔥 Calories</div><input class="fi" type="number" id="sCal" style="width:90px;padding:7px 10px"></div>
-    <div class="set-row"><div class="set-lbl">💪 Protein (g)</div><input class="fi" type="number" id="sPro" style="width:90px;padding:7px 10px"></div>
-    <div class="set-row"><div class="set-lbl">🌿 Fiber (g)</div><input class="fi" type="number" id="sFib" style="width:90px;padding:7px 10px"></div>
-    <div class="set-row"><div class="set-lbl">🍞 Carbs (g)</div><input class="fi" type="number" id="sCrb" style="width:90px;padding:7px 10px"></div>
-    <div class="set-row"><div class="set-lbl">🥑 Fat (g)</div><input class="fi" type="number" id="sFat" style="width:90px;padding:7px 10px"></div>
-    <div class="set-row">
-      <div><div class="set-lbl">💧 Water Unit</div><div class="set-sub">Glasses or ounces</div></div>
-      <div class="bg" style="width:auto;gap:6px">
-        <button class="sb" id="wUnitGl" onclick="setWUnit('glasses')" style="padding:6px 12px;width:auto">Glasses</button>
-        <button class="sb" id="wUnitOz" onclick="setWUnit('oz')" style="padding:6px 12px;width:auto">Ounces</button>
+    <div class="set-sec-t" onclick="togSetSec('sc-sym',this)">🩺 Symptom Tracking <span class="sst-arr">▶</span></div>
+    <div id="sc-sym" style="display:none">
+      <div style="font-size:12px;color:var(--textl);margin-bottom:10px">Customize which symptoms you track daily.</div>
+      <div id="symSettingsList"></div>
+      <div style="display:flex;gap:8px;margin-top:8px">
+        <input class="fi" id="newSymName" placeholder="New symptom name..." style="flex:1;padding:8px 10px">
+        <button onclick="addSymType()" style="padding:8px 14px;border-radius:9px;border:none;background:var(--sage);color:white;font-family:'Quicksand',sans-serif;font-size:13px;font-weight:700;cursor:pointer">Add</button>
       </div>
     </div>
-    <div class="set-row"><div class="set-lbl" id="sWatLbl">💧 Water Goal (glasses/day)</div><input class="fi" type="number" id="sWat" style="width:90px;padding:7px 10px"></div>
-    <div class="set-row"><div class="set-lbl">💪 Exercise Goal (workouts/week)</div><input class="fi" type="number" id="sEx" style="width:90px;padding:7px 10px"></div>
-    <button class="ok-btn" style="margin-top:14px" onclick="saveGoals()">Save Goals ✨</button>
+  </div>
+  <div class="card">
+    <div class="set-sec-t" onclick="togSetSec('sc-tmpls',this)">📋 Project Templates <span class="sst-arr">▶</span></div>
+    <div id="sc-tmpls" style="display:none">
+      <div style="font-size:12px;color:var(--textl);margin-bottom:10px">Tap any template from the Projects tab to load it instantly as a new project.</div>
+      <div id="tmplSettingsList"></div>
+      <button class="add-btn" onclick="openAddTmpl()">➕ Create Template</button>
+    </div>
+  </div>
+  <div class="card">
+    <div class="set-sec-t" onclick="togSetSec('sc-rtns',this)">🔄 Routines <span class="sst-arr">▶</span></div>
+    <div id="sc-rtns" style="display:none">
+      <div style="font-size:12px;color:var(--textl);margin-bottom:10px">Items you've hidden from routines. Tap Restore to bring them back.</div>
+      <div id="hiddenRoutines"><div style="font-size:12px;color:var(--textl)">No hidden routine items.</div></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="set-sec-t" onclick="togSetSec('sc-goals',this)">🎯 Goals & Macros <span class="sst-arr">▶</span></div>
+    <div id="sc-goals" style="display:none">
+      <div class="set-row"><div class="set-lbl">🔥 Calories</div><input class="fi" type="number" id="sCal" style="width:90px;padding:7px 10px"></div>
+      <div class="set-row"><div class="set-lbl">💪 Protein (g)</div><input class="fi" type="number" id="sPro" style="width:90px;padding:7px 10px"></div>
+      <div class="set-row"><div class="set-lbl">🌿 Fiber (g)</div><input class="fi" type="number" id="sFib" style="width:90px;padding:7px 10px"></div>
+      <div class="set-row"><div class="set-lbl">🍞 Carbs (g)</div><input class="fi" type="number" id="sCrb" style="width:90px;padding:7px 10px"></div>
+      <div class="set-row"><div class="set-lbl">🥑 Fat (g)</div><input class="fi" type="number" id="sFat" style="width:90px;padding:7px 10px"></div>
+      <div class="set-row">
+        <div><div class="set-lbl">💧 Water Unit</div><div class="set-sub">Glasses or ounces</div></div>
+        <div class="bg" style="width:auto;gap:6px">
+          <button class="sb" id="wUnitGl" onclick="setWUnit('glasses')" style="padding:6px 12px;width:auto">Glasses</button>
+          <button class="sb" id="wUnitOz" onclick="setWUnit('oz')" style="padding:6px 12px;width:auto">Ounces</button>
+        </div>
+      </div>
+      <div class="set-row"><div class="set-lbl" id="sWatLbl">💧 Water Goal (glasses/day)</div><input class="fi" type="number" id="sWat" style="width:90px;padding:7px 10px"></div>
+      <div class="set-row"><div class="set-lbl">💪 Exercise Goal (workouts/week)</div><input class="fi" type="number" id="sEx" style="width:90px;padding:7px 10px"></div>
+      <button class="ok-btn" style="margin-top:14px" onclick="saveGoals()">Save Goals ✨</button>
+    </div>
   </div>
 </div>
 
@@ -936,6 +1018,7 @@ var RTNS = JSON.parse(localStorage.getItem('aRtns')||'null')||{
   cl:['Trash Monday night 🗑️','Tidy clutter','Papers/mail','Dust','Water plants 🌱','Laundry','Kitchen counters+stovetop+fridge','Floors sweep+mop','Bathroom toilet+mirrors+shower']
 };
 
+var LISTS = JSON.parse(localStorage.getItem('aLists')||'[]');
 var INCOME = JSON.parse(localStorage.getItem('aIncome')||'[]');
 var BILLS = JSON.parse(localStorage.getItem('aBills')||'null')||[
   {id:'b1',name:'Citi Diamond',amt:224,day:15},
@@ -1127,11 +1210,51 @@ function goTabDirect(tab,btn){
 // ═══════════════════════════════════════════════
 // ROUTINES (stay local - daily/personal)
 // ═══════════════════════════════════════════════
+var RTN_GROUPS = JSON.parse(localStorage.getItem('aRTG')||'null')||[
+  {id:'am',name:'AM Routine',icon:'🌅',color:'var(--sage)'},
+  {id:'pm',name:'PM Routine',icon:'🌙',color:'var(--lav)'},
+  {id:'da',name:'Daily Habits',icon:'📅',color:'var(--peach)'},
+  {id:'we',name:'Weekly Reset',icon:'📆',color:'var(--blue)'},
+  {id:'cl',name:'Cleaning',icon:'🧹',color:'var(--teal)'},
+];
+var RTN_EDIT_ITEMS=[]; // temp storage during edit
+
 function renderAllR(){
+  // Today tab AM/PM
   renderRL('todayAM','am');renderRL('todayPM','pm');
-  renderRL('amL','am');renderRL('pmL','pm');
-  renderRL('daL','da');renderRL('weL','we');renderRL('clL','cl');
+  // Routines tab — render all groups
+  renderRtnGroups();
   updRS();
+}
+
+function renderRtnGroups(){
+  var el=document.getElementById('rtnGroupsView');if(!el)return;
+  el.innerHTML=RTN_GROUPS.map(function(g){
+    var items=RTNS[g.id]||[];
+    var rh=RH[g.id]||{};
+    var done=0;
+    if(RS[g.id])done=Object.values(RS[g.id]).filter(Boolean).length;
+    var visible=items.filter(function(item){return!rh[item];});
+    var itemsHTML=visible.map(function(item,vi){
+      // find original index
+      var oi=items.indexOf(item);
+      var isDone=RS[g.id]&&RS[g.id][oi];
+      var eItem=item.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+      return'<div class="ri '+(isDone?'done':'')+'" onclick="togR(\''+g.id+'\','+oi+',this)">'+
+        '<div class="rchk">'+(isDone?'✓':'')+'</div>'+
+        '<div class="rlb">'+item+'</div>'+
+        '<button class="rhi" onclick="hideRI(event,\''+g.id+'\',\''+eItem+'\')" title="Hide">✕</button>'+
+      '</div>';
+    }).join('');
+    var gKey=g.id.replace(/'/g,"\\'");
+    return'<div class="rc" style="border-left-color:'+g.color+'">'+
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">'+
+        '<div class="rt">'+g.icon+' '+g.name+'</div>'+
+        '<button onclick="editRtn(\''+gKey+'\')" style="background:none;border:none;font-size:14px;cursor:pointer;color:var(--textl);padding:4px">✏️</button>'+
+      '</div>'+
+      itemsHTML+
+    '</div>';
+  }).join('');
 }
 
 function renderRL(elId,key){
@@ -1149,6 +1272,85 @@ function renderRL(elId,key){
       '<button class="rhi" onclick="hideRI(event,\''+key+'\',\''+eItem+'\')" title="Hide this item">✕</button>'+
     '</div>';
   }).join('');
+}
+
+function editRtn(key){
+  var g=RTN_GROUPS.find(function(g){return g.id===key;});if(!g)return;
+  RTN_EDIT_ITEMS=(RTNS[key]||[]).slice();
+  document.getElementById('rtnModalTit').textContent='Edit: '+g.name;
+  document.getElementById('rtnEditKey').value=key;
+  document.getElementById('rtnName').value=g.name;
+  document.getElementById('rtnIcon').value=g.icon;
+  document.getElementById('rtnDelBtn').style.display='block';
+  renderRtnItemList();
+  document.getElementById('rtnModal').classList.add('show');
+}
+
+function openNewRtn(){
+  RTN_EDIT_ITEMS=[];
+  var newKey='rtn'+Date.now().toString().slice(-6);
+  document.getElementById('rtnModalTit').textContent='New Routine Group ✨';
+  document.getElementById('rtnEditKey').value=newKey;
+  document.getElementById('rtnName').value='';
+  document.getElementById('rtnIcon').value='';
+  document.getElementById('rtnDelBtn').style.display='none';
+  renderRtnItemList();
+  document.getElementById('rtnModal').classList.add('show');
+}
+
+function renderRtnItemList(){
+  var el=document.getElementById('rtnItemList');if(!el)return;
+  if(!RTN_EDIT_ITEMS.length){el.innerHTML='<div style="font-size:12px;color:var(--textl);padding:6px 0">No items yet. Add some below.</div>';return;}
+  el.innerHTML=RTN_EDIT_ITEMS.map(function(item,i){
+    return'<div class="rtn-item-row">'+
+      '<div class="rlb" style="flex:1">'+item+'</div>'+
+      '<button onclick="delRtnItemM('+i+')" style="background:none;border:none;color:var(--textl);cursor:pointer;font-size:13px;padding:2px 6px">✕</button>'+
+    '</div>';
+  }).join('');
+}
+
+function addRtnItemM(){
+  var inp=document.getElementById('rtnNewItem');if(!inp)return;
+  var val=inp.value.trim();if(!val)return;
+  RTN_EDIT_ITEMS.push(val);
+  inp.value='';
+  renderRtnItemList();
+}
+
+function delRtnItemM(idx){
+  RTN_EDIT_ITEMS.splice(idx,1);
+  renderRtnItemList();
+}
+
+function saveRtn(){
+  var key=document.getElementById('rtnEditKey').value;
+  var name=document.getElementById('rtnName').value.trim();
+  if(!name){alert('Please enter a routine name!');return;}
+  var icon=document.getElementById('rtnIcon').value.trim()||'📋';
+  // Update or add group
+  var g=RTN_GROUPS.find(function(g){return g.id===key;});
+  if(g){g.name=name;g.icon=icon;}
+  else{
+    var cols=['var(--sage)','var(--lav)','var(--peach)','var(--blue)','var(--teal)','var(--rose)'];
+    RTN_GROUPS.push({id:key,name:name,icon:icon,color:cols[RTN_GROUPS.length%cols.length]});
+  }
+  RTNS[key]=RTN_EDIT_ITEMS.slice();
+  localStorage.setItem('aRTG',JSON.stringify(RTN_GROUPS));
+  localStorage.setItem('aRtns',JSON.stringify(RTNS));
+  closeM('rtnModal');
+  renderAllR();
+}
+
+function delRtnGroup(){
+  var key=document.getElementById('rtnEditKey').value;
+  var builtIn=['am','pm','da','we','cl'];
+  if(builtIn.indexOf(key)>-1){alert('Cannot delete built-in routine groups.');return;}
+  if(!confirm('Delete this routine group?'))return;
+  RTN_GROUPS=RTN_GROUPS.filter(function(g){return g.id!==key;});
+  delete RTNS[key];
+  localStorage.setItem('aRTG',JSON.stringify(RTN_GROUPS));
+  localStorage.setItem('aRtns',JSON.stringify(RTNS));
+  closeM('rtnModal');renderAllR();
 }
 
 function togR(key,idx,el){
@@ -1486,7 +1688,7 @@ function saveExp(){
   var e={id:id,amt:parseFloat(amt),desc:desc,ty:SBV.ety||'personal',cat:SBV.ecat||'other',date:new Date().toLocaleDateString(),created:new Date().toISOString()};
   fbSave('expenses',id,e);
   var taskId=id+'_e';
-  var task={id:taskId,title:'Transfer $'+amt+' '+desc+' to spreadsheet',cat:'fin',urgency:'not-urgent',etime:'<10min',due:'',notes:(SBV.ety==='business'?'💼 Biz':'🏠 Personal'),done:false,created:new Date().toISOString()};
+  var task={id:taskId,title:'Transfer $'+amt+' '+desc+' to spreadsheet',cat:'fin',urgency:'important-not-urgent',etime:'<10min',due:'',notes:(SBV.ety==='business'?'💼 Biz':'🏠 Personal'),done:false,created:new Date().toISOString()};
   fbSave('tasks',taskId,task);
   closeM('expModal');
 }
@@ -1511,6 +1713,7 @@ function renderE(){
   }).join('');
   renderIncome();
   renderBills();
+  updMoneyBadge();
 }
 
 // ═══════════════════════════════════════════════
@@ -1538,6 +1741,7 @@ function expD(type){
     var b=EXPENSES.filter(function(e){return e.ty==='business';}).reduce(function(s,e){return s+e.amt;},0);
     var p=EXPENSES.filter(function(e){return e.ty==='personal';}).reduce(function(s,e){return s+e.amt;},0);
     txt+='\nBUSINESS: $'+b.toFixed(2)+'\nPERSONAL: $'+p.toFixed(2);
+    setTimeout(markExpExported,500);
   }
   if(type==='food'){
     var log=getTL();var t=getTot();
@@ -1549,7 +1753,49 @@ function expD(type){
   openM('expModal2');
 }
 
-function cpExp(){var t=document.getElementById('expTxt');t.select();document.execCommand('copy');alert('✅ Copied!');}
+function cpExp(){var t=document.getElementById('expTxt');if(t){t.select();document.execCommand('copy');alert('✅ Copied!');}}
+function updMoneyBadge(){
+  var lastExp=localStorage.getItem('aLastExpExport')||'';
+  var hasNew=EXPENSES.some(function(e){return(e.created||'')>lastExp;});
+  var btn=document.querySelector('[data-tab="money"]');
+  if(btn)btn.classList.toggle('has-badge',hasNew);
+}
+function markExpExported(){
+  localStorage.setItem('aLastExpExport',new Date().toISOString());
+  updMoneyBadge();
+}
+
+function expAll(){
+  var date=new Date().toLocaleDateString();
+  var parts=[];
+  // Tasks
+  var atxt='TASKS — '+date+'\n'+'='.repeat(40)+'\n';
+  var act=TASKS.filter(function(t){return !t.done;});
+  atxt+='ACTIVE ('+act.length+'):\n';
+  act.forEach(function(t){var c=catMap[t.cat]||catMap.mis;atxt+='• ['+t.urgency+'] '+t.title+' — '+c.n+(t.notes?'\n  '+t.notes:'')+'\n';});
+  parts.push(atxt);
+  // Expenses
+  var etxt='EXPENSES — '+date+'\nDATE\tDESCRIPTION\tTYPE\tAMOUNT\n';
+  EXPENSES.forEach(function(e){etxt+=e.date+'\t'+e.desc+'\t'+e.ty+'\t$'+e.amt.toFixed(2)+'\n';});
+  parts.push(etxt);
+  // Income
+  var itxt='INCOME — '+date+'\nDATE\tDESCRIPTION\tCATEGORY\tAMOUNT\n';
+  INCOME.forEach(function(i){itxt+=i.date+'\t'+i.desc+'\t'+i.cat+'\t$'+i.amt.toFixed(2)+'\n';});
+  parts.push(itxt);
+  // Today food
+  var log=getTL();var t=getTot();
+  var ftxt='FOOD LOG TODAY — '+date+'\nFOOD\tSERVING\tCAL\tPROT\n';
+  log.forEach(function(f){ftxt+=f.name+'\t'+(f.sv||'1srv')+'\t'+f.cal+'\t'+f.pro+'g\n';});
+  ftxt+='TOTALS: Cal:'+Math.round(t.cal)+' Protein:'+Math.round(t.pro)+'g';
+  parts.push(ftxt);
+  var full=parts.join('\n\n'+'═'.repeat(40)+'\n\n');
+  var el=document.getElementById('expAllTxt');
+  var btn=document.getElementById('expAllCopy');
+  if(el){el.value=full;el.style.display='block';}
+  if(btn)btn.style.display='block';
+  markExpExported();
+}
+function cpExpAll(){var t=document.getElementById('expAllTxt');if(t){t.select();document.execCommand('copy');alert('✅ All data copied!');}}
 
 // ═══════════════════════════════════════════════
 // MODAL HELPERS
@@ -2206,7 +2452,7 @@ var SEL_BANNER='';
 
 var TOGGLEABLE_TABS=[
   {id:'tasks',label:'📋 Tasks'},{id:'routines',label:'🔄 Routines'},
-  {id:'food',label:'🍽️ Food'},{id:'wigs',label:'🪄 Wigs'},
+  {id:'lists',label:'📝 Lists'},{id:'food',label:'💚 Health'},{id:'wigs',label:'🪄 Wigs'},
   {id:'money',label:'💰 Money'},{id:'recap',label:'📊 Recap'},
 ];
 
@@ -2301,6 +2547,200 @@ function saveNotesM(){
     if(t){t.notes=notes;fbSave('tasks',NOTES_TASK_ID,t);}
   }
   document.getElementById('notesModal').classList.remove('show');
+}
+
+// ═══════════════════════════════════════════════
+// LISTS
+// ═══════════════════════════════════════════════
+var LIST_COLORS={rose:'var(--rose)',sage:'var(--sage)',blue:'var(--blue)',lav:'var(--lav)',peach:'var(--peach)',teal:'var(--teal)'};
+var LIST_FILTER='active';
+var LIST_AUTO_COLS=['rose','sage','blue','lav','peach','teal'];
+var LIST_Q=[
+  {name:'Grocery Run',emoji:'🛒',items:[]},
+  {name:'Packing List',emoji:'🧳',items:['Passport / ID','Phone charger','Toiletries','Medications','Headphones','Snacks','Travel pillow']},
+  {name:'To-Buy',emoji:'🛍️',items:[]},
+  {name:'Reading List',emoji:'📚',items:[]},
+  {name:'Watching',emoji:'🎬',items:[]},
+  {name:'Home Needs',emoji:'🏠',items:[]},
+];
+
+function renderListQBar(){
+  var el=document.getElementById('listQBar');if(!el)return;
+  el.innerHTML=LIST_Q.map(function(q){
+    var esc=q.name.replace(/'/g,"\\'");
+    return'<button class="tmpl-chip" onclick="quickList(\''+esc+'\',\''+q.emoji+'\')">'+q.emoji+' '+q.name+'</button>';
+  }).join('');
+}
+
+function quickList(name,emoji){
+  var q=LIST_Q.find(function(q){return q.name===name;});
+  var items=(q&&q.items||[]).map(function(t,i){return{id:'li'+Date.now()+i,text:t,done:false};});
+  var col=LIST_AUTO_COLS[LISTS.length%LIST_AUTO_COLS.length];
+  LISTS.unshift({id:Date.now().toString(),name:name,emoji:emoji,col:col,items:items,created:new Date().toISOString(),archived:false});
+  localStorage.setItem('aLists',JSON.stringify(LISTS));
+  LIST_FILTER='active';
+  document.querySelectorAll('#v-lists .fchip').forEach(function(b){b.classList.toggle('on',b.textContent==='Active');});
+  renderLists();
+}
+
+function setLF(f,btn){
+  LIST_FILTER=f;
+  document.querySelectorAll('#v-lists .fchip').forEach(function(b){b.classList.remove('on');});
+  if(btn)btn.classList.add('on');
+  renderLists();
+}
+
+function listHTML(lst){
+  var col=LIST_COLORS[lst.col]||'var(--rose)';
+  var items=lst.items||[];
+  var done=items.filter(function(i){return i.done;}).length;
+  var pct=items.length?Math.round(done/items.length*100):0;
+  var lid=lst.id.replace(/'/g,"\\'");
+  var itemsHTML=items.map(function(item){
+    var iid=item.id.replace(/'/g,"\\'");
+    if(item.type==='header'){
+      return'<div class="list-hdr-item">'+
+        '<span class="list-hdr-lbl">'+item.text+'</span>'+
+        '<button class="sub-del" onclick="delLI(\''+lid+'\',\''+iid+'\')">✕</button>'+
+      '</div>';
+    }
+    return'<div class="list-item'+(item.done?' done':'')+'">'+
+      '<div class="rchk" onclick="togLI(\''+lid+'\',\''+iid+'\')" style="'+(item.done?'background:'+col+';border-color:'+col+';color:white':'')+'">'+  (item.done?'✓':'')+'</div>'+
+      '<div class="rlb">'+item.text+'</div>'+
+      '<button class="sub-del" onclick="delLI(\''+lid+'\',\''+iid+'\')">✕</button>'+
+    '</div>';
+  }).join('');
+  return'<div class="list-card" style="border-left-color:'+col+'">'+
+    '<div class="list-hd">'+
+      '<div style="display:flex;align-items:center;gap:8px">'+
+        '<span style="font-size:20px">'+lst.emoji+'</span>'+
+        '<div><div class="list-title">'+lst.name+'</div>'+
+          (items.length?'<div style="font-size:11px;color:var(--textl)">'+done+'/'+items.length+' done</div>':'')+'</div>'+
+      '</div>'+
+      '<div style="display:flex;gap:2px;align-items:center">'+
+        (items.length?'<span class="list-prog" style="background:'+col+'22;color:'+col+'">'+pct+'%</span>':'')+
+        '<button class="tact" onclick="editList(\''+lid+'\')">✏️</button>'+
+        (done>0?'<button class="tact" onclick="clearListDone(\''+lid+'\')" title="Clear checked">🧹</button>':'')+
+        '<button class="tact" onclick="togListArchive(\''+lid+'\')" title="'+(lst.archived?'Unarchive':'Archive')+'">'+(lst.archived?'📤':'📦')+'</button>'+
+        '<button class="tact" onclick="delListConf(\''+lid+'\')">🗑️</button>'+
+      '</div>'+
+    '</div>'+
+    (items.length?'<div style="margin:2px 0 8px"><div class="pb"><div class="pf" style="width:'+pct+'%;background:'+col+'"></div></div></div>':'')+
+    itemsHTML+
+    '<div class="list-add">'+
+      '<input class="sub-inp" id="lai-'+lst.id+'" placeholder="Add item..." onkeydown="if(event.key===\'Enter\')addLI(\''+lid+'\')">'+
+      '<button class="sub-add-btn" onclick="addLI(\''+lid+'\')" style="background:'+col+'">+</button>'+
+      '<button onclick="addLISection(\''+lid+'\')" title="Add section header" style="width:34px;height:34px;border-radius:9px;border:2px solid #ede8e3;background:white;cursor:pointer;font-size:14px;flex-shrink:0">🏷️</button>'+
+    '</div>'+
+  '</div>';
+}
+
+function renderLists(){
+  var el=document.getElementById('allLists');if(!el)return;
+  var arr=LISTS.filter(function(l){return LIST_FILTER==='archived'?l.archived:!l.archived;});
+  el.innerHTML=arr.length?arr.map(listHTML).join(''):'<div class="empty"><div class="emj">'+(LIST_FILTER==='archived'?'📦':'📝')+'</div><p>'+(LIST_FILTER==='archived'?'No archived lists.':'No lists yet. Create one or pick a Quick Start above.')+'</p></div>';
+}
+
+function openNewList(){
+  SBV={};
+  document.querySelectorAll('[data-g]').forEach(function(b){b.classList.remove('on');});
+  document.getElementById('listModalTit').textContent='New List 📝';
+  document.getElementById('listEditId').value='';
+  document.getElementById('listEmoji').value='';
+  document.getElementById('listName').value='';
+  document.getElementById('listDelBtn').style.display='none';
+  document.getElementById('listModal').classList.add('show');
+}
+
+function editList(id){
+  var lst=LISTS.find(function(l){return l.id===id;});if(!lst)return;
+  SBV={};
+  document.querySelectorAll('[data-g]').forEach(function(b){b.classList.remove('on');});
+  document.getElementById('listModalTit').textContent='Edit List ✏️';
+  document.getElementById('listEditId').value=id;
+  document.getElementById('listEmoji').value=lst.emoji||'📝';
+  document.getElementById('listName').value=lst.name;
+  document.getElementById('listDelBtn').style.display='block';
+  setTimeout(function(){
+    document.querySelectorAll('[data-g="lcol"]').forEach(function(b){if(b.dataset.v===lst.col){b.classList.add('on');SBV.lcol=lst.col;}});
+  },30);
+  document.getElementById('listModal').classList.add('show');
+}
+
+function saveList(){
+  var emoji=document.getElementById('listEmoji').value.trim()||'📝';
+  var name=document.getElementById('listName').value.trim();
+  if(!name){alert('Please enter a list name!');return;}
+  var id=document.getElementById('listEditId').value;
+  var col=SBV.lcol||LIST_AUTO_COLS[LISTS.filter(function(l){return!l.archived;}).length%LIST_AUTO_COLS.length];
+  if(id){
+    var lst=LISTS.find(function(l){return l.id===id;});
+    if(lst){lst.emoji=emoji;lst.name=name;lst.col=col;}
+  }else{
+    LISTS.unshift({id:Date.now().toString(),name:name,emoji:emoji,col:col,items:[],created:new Date().toISOString(),archived:false});
+  }
+  localStorage.setItem('aLists',JSON.stringify(LISTS));
+  renderLists();closeM('listModal');
+}
+
+function delListEdit(){
+  var id=document.getElementById('listEditId').value;
+  if(id&&confirm('Delete this list and all its items?')){
+    LISTS=LISTS.filter(function(l){return l.id!==id;});
+    localStorage.setItem('aLists',JSON.stringify(LISTS));
+    renderLists();closeM('listModal');
+  }
+}
+
+function delListConf(id){
+  if(confirm('Delete this list?')){
+    LISTS=LISTS.filter(function(l){return l.id!==id;});
+    localStorage.setItem('aLists',JSON.stringify(LISTS));renderLists();
+  }
+}
+
+function togListArchive(id){
+  var lst=LISTS.find(function(l){return l.id===id;});if(!lst)return;
+  lst.archived=!lst.archived;
+  localStorage.setItem('aLists',JSON.stringify(LISTS));renderLists();
+}
+
+function addLI(listId){
+  var inp=document.getElementById('lai-'+listId);if(!inp)return;
+  var text=inp.value.trim();if(!text)return;
+  var lst=LISTS.find(function(l){return l.id===listId;});if(!lst)return;
+  if(!lst.items)lst.items=[];
+  lst.items.push({id:'li'+Date.now()+Math.random().toString(36).slice(2,5),text:text,done:false});
+  localStorage.setItem('aLists',JSON.stringify(LISTS));
+  inp.value='';renderLists();
+  setTimeout(function(){var ni=document.getElementById('lai-'+listId);if(ni)ni.focus();},50);
+}
+
+function togLI(listId,itemId){
+  var lst=LISTS.find(function(l){return l.id===listId;});if(!lst||!lst.items)return;
+  var item=lst.items.find(function(i){return i.id===itemId;});if(item)item.done=!item.done;
+  localStorage.setItem('aLists',JSON.stringify(LISTS));renderLists();
+}
+
+function delLI(listId,itemId){
+  var lst=LISTS.find(function(l){return l.id===listId;});if(!lst||!lst.items)return;
+  lst.items=lst.items.filter(function(i){return i.id!==itemId;});
+  localStorage.setItem('aLists',JSON.stringify(LISTS));renderLists();
+}
+
+function clearListDone(listId){
+  var lst=LISTS.find(function(l){return l.id===listId;});if(!lst||!lst.items)return;
+  lst.items=lst.items.filter(function(i){return!i.done;});
+  localStorage.setItem('aLists',JSON.stringify(LISTS));renderLists();
+}
+
+function addLISection(listId){
+  var name=prompt('Section name (e.g. "Carry-On", "Nick\'s Stuff"):');
+  if(!name||!name.trim())return;
+  var lst=LISTS.find(function(l){return l.id===listId;});if(!lst)return;
+  if(!lst.items)lst.items=[];
+  lst.items.push({id:'li'+Date.now()+Math.random().toString(36).slice(2,5),text:name.trim(),type:'header',done:false});
+  localStorage.setItem('aLists',JSON.stringify(LISTS));renderLists();
 }
 
 // ═══════════════════════════════════════════════
@@ -2515,6 +2955,13 @@ function setWUnit(u){
 // ═══════════════════════════════════════════════
 // HEALTH — COLLAPSIBLE SECTIONS
 // ═══════════════════════════════════════════════
+function togSetSec(contentId,titleEl){
+  var sec=document.getElementById(contentId);if(!sec)return;
+  var open=sec.style.display!=='none';
+  sec.style.display=open?'none':'block';
+  if(titleEl)titleEl.classList.toggle('open',!open);
+}
+
 function togSect(secId,arrowId){
   var sec=document.getElementById(secId);
   var arrow=document.getElementById(arrowId);
@@ -2694,6 +3141,9 @@ function logCombo(id){
 // ═══════════════════════════════════════════════
 // HEALTH — PERIOD TRACKER
 // ═══════════════════════════════════════════════
+function ptDate(p){return typeof p==='string'?p:p.date;}
+function ptNote(p){return typeof p==='string'?'':p.note||'';}
+
 function renderPT(){
   var el=document.getElementById('ptList');if(!el)return;
   var avgEl=document.getElementById('ptAvg');
@@ -2701,17 +3151,19 @@ function renderPT(){
     el.innerHTML='<div style="font-size:12px;color:var(--textl);padding:8px 0">No dates logged yet.</div>';
     return;
   }
-  var sorted=PT.slice().sort(function(a,b){return b>a?1:-1;});
-  el.innerHTML=sorted.map(function(date,i){
+  var sorted=PT.slice().sort(function(a,b){return ptDate(b)>ptDate(a)?1:-1;});
+  el.innerHTML=sorted.map(function(item,i){
+    var date=ptDate(item);var note=ptNote(item);
     var gap='';
     if(i<sorted.length-1){
       var d1=new Date(date+'T12:00:00');
-      var d2=new Date(sorted[i+1]+'T12:00:00');
+      var d2=new Date(ptDate(sorted[i+1])+'T12:00:00');
       gap=Math.round((d1-d2)/(1000*60*60*24))+' days';
     }
     var esc=date.replace(/'/g,"\\'");
     return'<div class="pt-row">'+
       '<div><div class="pt-date">'+date+'</div>'+
+        (note?'<div class="pt-gap" style="color:var(--textl);font-style:italic">📝 '+note+'</div>':'')+
         (gap?'<div class="pt-gap">→ '+gap+' cycle</div>':'')+'</div>'+
       '<button onclick="delPeriod(\''+esc+'\')" style="background:none;border:none;color:var(--textl);cursor:pointer;font-size:13px">✕</button>'+
     '</div>';
@@ -2719,8 +3171,8 @@ function renderPT(){
   if(sorted.length>=2&&avgEl){
     var gaps=[];
     for(var j=0;j<sorted.length-1;j++){
-      var d1=new Date(sorted[j]+'T12:00:00');
-      var d2=new Date(sorted[j+1]+'T12:00:00');
+      var d1=new Date(ptDate(sorted[j])+'T12:00:00');
+      var d2=new Date(ptDate(sorted[j+1])+'T12:00:00');
       gaps.push(Math.round((d1-d2)/(1000*60*60*24)));
     }
     var avg=Math.round(gaps.reduce(function(a,b){return a+b;},0)/gaps.length);
@@ -2728,23 +3180,33 @@ function renderPT(){
   }
 }
 
-function logPeriod(){
+function logPeriodToday(){
   var today=new Date().toISOString().split('T')[0];
-  if(PT.indexOf(today)<0){PT.push(today);localStorage.setItem('aPT',JSON.stringify(PT));renderPT();}
-  else{alert('Today is already logged!');}
+  var dates=PT.map(ptDate);
+  if(dates.indexOf(today)<0){
+    PT.push({date:today,note:''});
+    localStorage.setItem('aPT',JSON.stringify(PT));renderPT();
+  }else{alert('Today is already logged!');}
 }
+
+function logPeriod(){logPeriodToday();}
 
 function logPeriodDate(){
   var date=document.getElementById('ptDateIn').value;
   if(!date){alert('Please select a date!');return;}
-  if(PT.indexOf(date)<0){PT.push(date);localStorage.setItem('aPT',JSON.stringify(PT));renderPT();}
-  else{alert('That date is already logged!');}
+  var note=(document.getElementById('ptNoteIn')||{}).value||'';
+  var dates=PT.map(ptDate);
+  if(dates.indexOf(date)<0){
+    PT.push({date:date,note:note.trim()});
+    localStorage.setItem('aPT',JSON.stringify(PT));
+    var noteEl=document.getElementById('ptNoteIn');if(noteEl)noteEl.value='';
+    renderPT();
+  }else{alert('That date is already logged!');}
 }
 
 function delPeriod(date){
-  PT=PT.filter(function(d){return d!==date;});
-  localStorage.setItem('aPT',JSON.stringify(PT));
-  renderPT();
+  PT=PT.filter(function(p){return ptDate(p)!==date;});
+  localStorage.setItem('aPT',JSON.stringify(PT));renderPT();
 }
 
 // ═══════════════════════════════════════════════
@@ -2852,6 +3314,9 @@ function startApp(){
   renderPT();
   renderIncome();
   renderBills();
+  renderListQBar();
+  renderLists();
+  updMoneyBadge();
 }
 
 // Wait for Firebase then start
@@ -2897,6 +3362,46 @@ setInterval(updDate, 60000);
   <button class="ok-btn" onclick="saveBill()">Save Bill 🏦</button>
   <button class="del-btn" id="billDelBtn" onclick="delBillEdit()" style="display:none">🗑️ Delete Bill</button>
   <button class="cn-btn" onclick="closeM('billModal')">Cancel</button>
+</div></div>
+
+<!-- ROUTINE EDIT MODAL -->
+<div class="ov" id="rtnModal"><div class="mod">
+  <div class="mh"></div><div class="mtit" id="rtnModalTit">Edit Routine ✨</div>
+  <input type="hidden" id="rtnEditKey">
+  <div style="display:flex;gap:8px">
+    <div class="fg" style="flex-shrink:0"><label class="fl">Icon</label><input class="fi" id="rtnIcon" placeholder="🌅" maxlength="4" style="width:64px;text-align:center"></div>
+    <div class="fg" style="flex:1"><label class="fl">Routine Name</label><input class="fi" id="rtnName" placeholder="e.g. Work Day"></div>
+  </div>
+  <div class="sh" style="margin-top:4px;margin-bottom:8px">Items</div>
+  <div id="rtnItemList"></div>
+  <div style="display:flex;gap:6px;margin-top:10px">
+    <input class="sub-inp" id="rtnNewItem" placeholder="Add item..." onkeydown="if(event.key==='Enter')addRtnItemM()">
+    <button class="sub-add-btn" onclick="addRtnItemM()" style="background:var(--sage)">+</button>
+  </div>
+  <button class="ok-btn" style="margin-top:14px" onclick="saveRtn()">Save Routine ✨</button>
+  <button class="del-btn" id="rtnDelBtn" onclick="delRtnGroup()" style="display:none">🗑️ Delete Routine Group</button>
+  <button class="cn-btn" onclick="closeM('rtnModal')">Cancel</button>
+</div></div>
+
+<!-- LIST MODAL -->
+<div class="ov" id="listModal"><div class="mod">
+  <div class="mh"></div><div class="mtit" id="listModalTit">New List 📝</div>
+  <input type="hidden" id="listEditId">
+  <div style="display:flex;gap:8px">
+    <div class="fg" style="flex-shrink:0"><label class="fl">Emoji</label><input class="fi" id="listEmoji" placeholder="📝" maxlength="4" style="width:64px;text-align:center"></div>
+    <div class="fg" style="flex:1"><label class="fl">List Name</label><input class="fi" id="listName" placeholder="e.g. Grocery Run"></div>
+  </div>
+  <div class="fg"><label class="fl">Color</label>
+    <div class="bg bg4">
+      <button class="sb" data-g="lcol" data-v="rose" onclick="pSB(this)">🌸 Rose</button>
+      <button class="sb" data-g="lcol" data-v="sage" onclick="pSB(this)">🌿 Sage</button>
+      <button class="sb" data-g="lcol" data-v="blue" onclick="pSB(this)">💙 Blue</button>
+      <button class="sb" data-g="lcol" data-v="lav" onclick="pSB(this)">💜 Lav</button>
+    </div>
+  </div>
+  <button class="ok-btn" onclick="saveList()">Save List 📝</button>
+  <button class="del-btn" id="listDelBtn" onclick="delListEdit()" style="display:none">🗑️ Delete List</button>
+  <button class="cn-btn" onclick="closeM('listModal')">Cancel</button>
 </div></div>
 
 <!-- TEMPLATE MODAL -->
