@@ -294,6 +294,137 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
 .list-hdr-lbl{font-size:11px;font-weight:700;color:var(--textl);text-transform:uppercase;letter-spacing:1px}
 /* EXPORT BADGE */
 .tab-btn.has-badge::after{content:'●';color:var(--rose);font-size:9px;vertical-align:super;margin-left:1px}
+/* Faves tab */
+.fave-grid{columns:2;column-gap:10px;margin-top:2px}
+.fave-card{break-inside:avoid;display:inline-block;width:100%;background:#fff;border-radius:14px;overflow:hidden;margin-bottom:10px;box-shadow:0 1px 5px rgba(0,0,0,.07);cursor:pointer;transition:transform .15s}
+.fave-card:active{transform:scale(.97)}
+.fave-card-img{width:100%;height:90px;object-fit:cover;display:block}
+.fave-card-img-placeholder{width:100%;height:60px;display:flex;align-items:center;justify-content:center;font-size:26px}
+.fave-card-body{padding:9px 10px 10px}
+.fave-card-name{font-size:13px;font-weight:700;color:var(--textd);margin-bottom:2px;line-height:1.3}
+.fave-card-cat{font-size:10px;color:var(--textl);background:#f2ede8;border-radius:6px;padding:1px 6px;display:inline-block}
+.fave-card-del{position:absolute;top:6px;right:6px;background:rgba(0,0,0,.45);color:#fff;border:none;border-radius:50%;width:22px;height:22px;font-size:12px;cursor:pointer;display:none;align-items:center;justify-content:center;line-height:1}
+.fave-card-wrap{position:relative}
+.fave-card-wrap:hover .fave-card-del,.fave-card-wrap.show-del .fave-card-del{display:flex}
+.fave-cat-chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.fave-cat-chip{padding:4px 12px;border-radius:20px;border:1.5px solid #e8e0d8;background:#fff;font-size:12px;font-weight:600;color:var(--textl);cursor:pointer;font-family:'Quicksand',sans-serif}
+.fave-cat-chip.on{background:var(--rose);border-color:var(--rose);color:#fff}
+.fave-accent-row{display:flex;gap:8px;margin-bottom:10px}
+.fave-accent-dot{width:26px;height:26px;border-radius:50%;cursor:pointer;border:2.5px solid transparent;flex-shrink:0}
+.fave-accent-dot.on{border-color:var(--textd)}
+/* Hex color pickers */
+.color-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
+.color-pick-item{display:flex;flex-direction:column;align-items:center;gap:4px}
+.color-pick-item label{font-size:11px;color:var(--textl);text-align:center}
+.color-pick-item input[type=color]{width:44px;height:44px;border:none;border-radius:10px;cursor:pointer;padding:2px;background:none}
+/* Banner image */
+.banner-img-preview{width:100%;height:60px;object-fit:cover;border-radius:10px;margin:8px 0;display:none}
+/* Board tab */
+.board-item{background:#fff;border-radius:14px;padding:14px;margin-bottom:10px;box-shadow:0 1px 4px rgba(0,0,0,.07)}
+.board-item-img{width:100%;max-height:180px;object-fit:cover;border-radius:10px;margin-bottom:8px}
+.board-item-text{font-size:14px;color:var(--textd);line-height:1.5}
+.board-item-quote{font-size:15px;font-style:italic;color:var(--rose);text-align:center;padding:8px 0;line-height:1.5}
+.board-item-label{font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--textl);margin-bottom:6px}
+.board-grid{columns:2;column-gap:10px}
+.board-grid .board-item{break-inside:avoid;display:inline-block;width:100%}
+.mem-entry{background:#fff;border-radius:14px;overflow:hidden;margin-bottom:12px;box-shadow:0 1px 5px rgba(0,0,0,.07)}
+.mem-entry-img{width:100%;max-height:200px;object-fit:cover;display:block}
+.mem-entry-body{padding:12px}
+.mem-entry-date{font-size:11px;color:var(--textl);margin-bottom:4px}
+.mem-entry-title{font-size:15px;font-weight:700;color:var(--textd);margin-bottom:5px}
+.mem-entry-note{font-size:13px;color:var(--textl);line-height:1.5}
+/* Flashcards */
+.fc-deck-card{background:#fff;border-radius:14px;padding:13px 15px;margin-bottom:9px;box-shadow:0 1px 4px rgba(0,0,0,.07);display:flex;align-items:center;gap:12px;cursor:pointer}
+.fc-deck-dot{width:14px;height:14px;border-radius:50%;flex-shrink:0}
+.fc-deck-info{flex:1}
+.fc-deck-name{font-size:14px;font-weight:700;color:var(--textd)}
+.fc-deck-count{font-size:11px;color:var(--textl);margin-top:2px}
+.fc-study-wrap{background:#fff;border-radius:18px;padding:20px;box-shadow:0 2px 12px rgba(0,0,0,.1);min-height:200px;display:flex;flex-direction:column;align-items:center;justify-content:center;margin-bottom:16px;cursor:pointer;position:relative}
+.fc-card-front{font-size:17px;font-weight:700;color:var(--textd);text-align:center;line-height:1.5}
+.fc-card-back{font-size:15px;color:var(--textl);text-align:center;line-height:1.5;margin-top:12px;padding-top:12px;border-top:1px solid #f0ebe6;width:100%}
+.fc-hint{font-size:11px;color:var(--textl);margin-top:14px}
+.fc-btns{display:flex;gap:10px;width:100%}
+.fc-prog-bar{height:4px;border-radius:2px;background:#f0ebe6;margin-bottom:14px;overflow:hidden}
+.fc-prog-fill{height:100%;border-radius:2px;background:var(--sage);transition:width .3s}
+/* Research */
+.res-card{background:#fff;border-radius:12px;padding:12px 14px;margin-bottom:8px;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.res-title{font-size:14px;font-weight:700;color:var(--textd);margin-bottom:3px}
+.res-url{font-size:11px;color:var(--blue);margin-bottom:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer}
+.res-notes{font-size:12px;color:var(--textl);line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.res-notes.expanded{display:block}
+.res-status-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:6px;text-transform:uppercase;letter-spacing:.4px}
+.res-status-want{background:#fde8d0;color:#8a5a30}
+.res-status-doing{background:var(--blue-light);color:#4a7a9b}
+.res-status-done{background:var(--sage-light);color:#5a7a56}
+/* Workout Plans */
+.wplan-card{background:#fff;border-radius:14px;padding:13px 15px;margin-bottom:9px;box-shadow:0 1px 4px rgba(0,0,0,.07)}
+.wplan-hd{display:flex;align-items:center;gap:10px;cursor:pointer}
+.wplan-name{font-size:14px;font-weight:700;color:var(--textd);flex:1}
+.wplan-cnt{font-size:11px;color:var(--textl)}
+.wplan-exercises{padding-top:10px;margin-top:10px;border-top:1px solid #f5f0eb;display:none}
+.wplan-ex-row{display:flex;gap:8px;align-items:center;padding:5px 0;border-bottom:1px solid #faf7f4}
+.wplan-ex-row:last-child{border-bottom:none}
+.wplan-ex-name{font-size:13px;color:var(--textd);flex:1}
+.wplan-ex-detail{font-size:11px;color:var(--textl);flex-shrink:0}
+.wplan-active{border:2px solid var(--sage);border-radius:14px;padding:13px;margin-bottom:14px}
+.wplan-active-ex{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #f5f0eb}
+.wplan-active-ex:last-child{border-bottom:none}
+.wplan-active-chk{width:24px;height:24px;border-radius:7px;border:2px solid var(--sage);background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;transition:all .15s}
+.wplan-active-chk.done{background:var(--sage);border-color:var(--sage);color:#fff}
+/* Pill nav */
+.pill-nav{display:flex;gap:7px;overflow-x:auto;scrollbar-width:none;padding-bottom:4px}
+.pill-nav::-webkit-scrollbar{display:none}
+.pn-btn{flex-shrink:0;padding:7px 15px;border-radius:20px;border:1.5px solid #e8e0d8;background:#fff;font-family:'Quicksand',sans-serif;font-size:12px;font-weight:700;color:var(--textl);cursor:pointer;white-space:nowrap;transition:all .2s}
+.pn-btn.on{background:var(--rose);border-color:var(--rose);color:#fff}
+/* Kingdom Events */
+.kevents-strip{display:flex;gap:10px;overflow-x:auto;scrollbar-width:none;padding-bottom:4px;margin-bottom:14px}
+.kevents-strip::-webkit-scrollbar{display:none}
+.kevent-card{flex-shrink:0;background:#fff;border-radius:12px;padding:12px 14px;box-shadow:0 1px 4px rgba(0,0,0,.07);min-width:110px;text-align:center;border-top:3px solid var(--rose)}
+.kevent-days{font-size:22px;font-weight:700;color:var(--rose)}
+.kevent-name{font-size:11px;color:var(--textl);margin-top:2px;line-height:1.3}
+.kevent-label{font-size:10px;font-weight:700;color:var(--textl);text-transform:uppercase;letter-spacing:.5px}
+/* Habits */
+.habit-row{background:#fff;border-radius:12px;padding:11px 13px;margin-bottom:8px;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.habit-top{display:flex;align-items:center;gap:10px;margin-bottom:7px}
+.habit-chk{width:26px;height:26px;border-radius:8px;border:2px solid var(--sage);background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;transition:all .15s}
+.habit-chk.done{background:var(--sage);border-color:var(--sage)}
+.habit-name{font-size:14px;font-weight:600;color:var(--textd);flex:1}
+.habit-streak{font-size:12px;font-weight:700;color:var(--rose);background:var(--rose-light);border-radius:8px;padding:2px 8px;flex-shrink:0}
+.habit-dots{display:flex;gap:3px;flex-wrap:wrap}
+.habit-dot{width:11px;height:11px;border-radius:3px;background:#f0ebe5;flex-shrink:0}
+.habit-dot.filled{background:var(--sage)}
+.habit-dot.today{outline:2px solid var(--rose);outline-offset:1px}
+/* Study Notes */
+.snote-card{background:#fff;border-radius:12px;padding:12px 14px;margin-bottom:8px;box-shadow:0 1px 4px rgba(0,0,0,.06);cursor:pointer}
+.snote-head{display:flex;align-items:flex-start;gap:8px;margin-bottom:4px}
+.snote-cat-badge{font-size:10px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;padding:2px 8px;border-radius:6px;flex-shrink:0}
+.snote-title{font-size:14px;font-weight:700;color:var(--textd);flex:1}
+.snote-date{font-size:11px;color:var(--textl);margin-bottom:6px}
+.snote-body{font-size:13px;color:var(--textl);line-height:1.5;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.snote-body.expanded{display:block;-webkit-line-clamp:unset}
+/* Spirit tab */
+.prayer-item{background:#fff;border-radius:12px;padding:12px;margin-bottom:8px;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.prayer-item.answered{opacity:.65;background:#f5fbf5}
+.prayer-text{font-size:14px;color:var(--textd);margin-bottom:6px}
+.prayer-meta{font-size:11px;color:var(--textl);display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.bible-book-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:6px;margin-bottom:12px}
+.bible-book-card{background:#fff;border-radius:10px;padding:10px 12px;box-shadow:0 1px 3px rgba(0,0,0,.06);cursor:pointer}
+.bible-book-name{font-size:13px;font-weight:700;color:var(--textd);margin-bottom:4px}
+.bible-book-prog{height:5px;border-radius:3px;background:#ede8e1;overflow:hidden;margin-bottom:3px}
+.bible-book-fill{height:100%;border-radius:3px;background:var(--sage);transition:width .3s}
+.bible-book-pct{font-size:10px;color:var(--textl)}
+.ministry-row{background:#fff;border-radius:12px;padding:11px 14px;margin-bottom:7px;box-shadow:0 1px 4px rgba(0,0,0,.06);display:flex;align-items:center;gap:10px}
+.ministry-row-date{font-size:11px;color:var(--textl);width:72px;flex-shrink:0}
+.ministry-row-hrs{font-size:18px;font-weight:700;color:var(--rose);width:46px;flex-shrink:0}
+.ministry-row-detail{flex:1;font-size:12px;color:var(--textl)}
+.grat-entry{background:#fff;border-radius:12px;padding:12px;margin-bottom:8px;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.grat-date{font-size:11px;color:var(--textl);margin-bottom:5px}
+.grat-item{font-size:13px;color:var(--textd);padding:2px 0}
+.grat-item::before{content:'🌸 ';font-size:11px}
+.spirit-stat-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.spirit-stat{flex:1;min-width:70px;background:#fff;border-radius:10px;padding:10px;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.spirit-stat-num{font-size:20px;font-weight:700;color:var(--rose)}
+.spirit-stat-lbl{font-size:10px;color:var(--textl);margin-top:2px}
 /* Meals tab */
 .meal-grid{display:grid;gap:8px;margin-bottom:12px}
 .meal-day{background:#fff;border-radius:12px;padding:12px;box-shadow:0 1px 4px rgba(0,0,0,.06)}
@@ -373,6 +504,10 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
   <button class="tab-btn" data-tab="recap" onclick="goTab('recap',this)">📊 Recap</button>
   <button class="tab-btn" data-tab="export" onclick="goTab('export',this)">📤 Export</button>
   <button class="tab-btn" data-tab="meals" onclick="goTab('meals',this)">🍽️ Meals</button>
+  <button class="tab-btn" data-tab="spirit" onclick="goTab('spirit',this)">✨ Spirit</button>
+  <button class="tab-btn" data-tab="board" onclick="goTab('board',this)">🌈 Board</button>
+  <button class="tab-btn" data-tab="faves" onclick="goTab('faves',this)">⭐ Faves</button>
+  <button class="tab-btn" data-tab="learn" onclick="goTab('learn',this)">📚 Learn</button>
   <button class="tab-btn" data-tab="settings" onclick="goTab('settings',this)">⚙️ Settings</button>
 </div>
 
@@ -383,6 +518,13 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
   <div class="gbanner" id="gBanner" style="background:linear-gradient(135deg,rgba(201,160,160,.15),rgba(169,159,201,.15))">
     <h2 id="gTxt">Good morning, Adri! 🌸</h2>
     <p id="gQuote">The plans of the diligent lead to success. — Prov 21:5</p>
+  </div>
+  <div id="keventsWrap" style="display:none">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+      <span style="font-size:12px;font-weight:700;color:var(--textl);letter-spacing:.5px;text-transform:uppercase">⏳ Kingdom Events</span>
+      <button class="btn sec" style="font-size:11px;padding:3px 10px" onclick="openKEventAdd()">+ Add</button>
+    </div>
+    <div class="kevents-strip" id="keventsStrip"></div>
   </div>
   <div class="quick-add">
     <button class="qa" onclick="openM('taskModal')" style="background:linear-gradient(135deg,#f2dede,#fdf6ee)"><div class="qa-ic">➕</div><div class="qa-lb">Task</div></button>
@@ -496,6 +638,22 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
       <div class="pb" style="margin-top:4px"><div class="pf pf-pro" id="exWeekB" style="width:0%"></div></div>
     </div>
   </div>
+  <div class="sh" style="display:flex;align-items:center;justify-content:space-between">
+    <span>🏋️ Workout Plans</span>
+    <button onclick="openAddWplan()" style="background:var(--sage-light);border:none;border-radius:9px;padding:5px 11px;font-family:'Quicksand',sans-serif;font-size:12px;font-weight:700;color:#5a7a56;cursor:pointer">+ Plan</button>
+  </div>
+  <!-- Active workout session -->
+  <div id="wplanActiveWrap" style="display:none">
+    <div class="wplan-active">
+      <div style="display:flex;align-items:center;margin-bottom:10px">
+        <span id="wplanActiveName" style="font-size:15px;font-weight:700;color:var(--textd);flex:1"></span>
+        <button class="btn sec" style="font-size:12px;padding:3px 10px" onclick="cancelActiveWplan()">✕ Cancel</button>
+      </div>
+      <div id="wplanActiveExList"></div>
+      <button class="btn" style="width:100%;margin-top:10px;background:var(--sage)" onclick="completeWplan()">✅ Complete Workout</button>
+    </div>
+  </div>
+  <div id="wplanList"></div>
   <div class="sh">😊 Mood</div>
   <div class="card">
     <div style="font-size:12px;color:var(--textl);margin-bottom:8px">How are you feeling today?</div>
@@ -562,6 +720,305 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
   <button class="exp-btn" onclick="goTabDirect('export',document.querySelector('[data-tab=\'export\']'))" style="margin-top:8px">📤 Go to Export →</button>
 </div>
 
+<div class="view" id="v-learn">
+  <div class="pill-nav" style="margin-bottom:12px">
+    <button class="pn-btn on" onclick="showLearnSec('flashcards',this)">🃏 Flashcards</button>
+    <button class="pn-btn" onclick="showLearnSec('research',this)">🔬 Research</button>
+  </div>
+
+  <!-- FLASHCARDS section -->
+  <div id="ls-flashcards">
+    <!-- Study mode (hidden until studying) -->
+    <div id="fcStudyMode" style="display:none">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+        <button class="btn sec" style="font-size:12px;padding:4px 12px" onclick="exitFcStudy()">← Back</button>
+        <span id="fcStudyDeckName" style="font-size:14px;font-weight:700;color:var(--textd);flex:1"></span>
+        <span id="fcStudyProgress" style="font-size:12px;color:var(--textl)"></span>
+      </div>
+      <div class="fc-prog-bar"><div class="fc-prog-fill" id="fcProgFill" style="width:0%"></div></div>
+      <div class="fc-study-wrap" id="fcCardWrap" onclick="flipFcCard()">
+        <div class="fc-card-front" id="fcCardFront"></div>
+        <div class="fc-card-back" id="fcCardBack" style="display:none"></div>
+        <div class="fc-hint" id="fcHint">Tap to reveal answer</div>
+      </div>
+      <div class="fc-btns" id="fcAnswerBtns" style="display:none">
+        <button class="btn sec" style="flex:1;padding:12px" onclick="fcAnswer(false)">↩ Again</button>
+        <button class="btn" style="flex:1;padding:12px;background:var(--sage)" onclick="fcAnswer(true)">✓ Got it</button>
+      </div>
+      <div id="fcDoneMsg" style="display:none;text-align:center;padding:20px">
+        <div style="font-size:32px;margin-bottom:8px">🎉</div>
+        <div style="font-size:16px;font-weight:700;color:var(--textd);margin-bottom:6px">Session complete!</div>
+        <div id="fcDoneStats" style="font-size:13px;color:var(--textl);margin-bottom:14px"></div>
+        <button class="btn" style="margin-right:8px" onclick="startFcStudy(fcStudyDeckId)">Study Again</button>
+        <button class="btn sec" onclick="exitFcStudy()">Done</button>
+      </div>
+    </div>
+
+    <!-- Deck list / card management (visible when not studying) -->
+    <div id="fcDeckView">
+      <div style="display:flex;align-items:center;margin-bottom:10px">
+        <span style="font-weight:700;font-size:14px;color:var(--textd);flex:1">🃏 Flashcard Decks</span>
+        <button class="btn" style="font-size:12px;padding:5px 13px" onclick="openAddDeck()">+ Deck</button>
+      </div>
+      <div id="fcDeckList"></div>
+
+      <!-- Card manager (shown when deck is selected) -->
+      <div id="fcCardManager" style="display:none">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+          <button class="btn sec" style="font-size:12px;padding:4px 12px" onclick="showFcDecks()">← Decks</button>
+          <span id="fcManagerDeckName" style="font-size:14px;font-weight:700;color:var(--textd);flex:1"></span>
+          <button class="btn" style="font-size:12px;padding:5px 12px;background:var(--sage)" onclick="startFcStudy(fcActiveDeckId)">▶ Study</button>
+        </div>
+        <div class="card" style="margin-bottom:10px">
+          <textarea id="fcCardFrontInput" placeholder="Front (question / term)" rows="2" style="width:100%;padding:8px 11px;border-radius:9px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px;resize:vertical;box-sizing:border-box;margin-bottom:8px"></textarea>
+          <textarea id="fcCardBackInput" placeholder="Back (answer / definition)" rows="2" style="width:100%;padding:8px 11px;border-radius:9px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px;resize:vertical;box-sizing:border-box;margin-bottom:10px"></textarea>
+          <button class="btn" style="width:100%" onclick="addFcCard()">Add Card</button>
+        </div>
+        <div id="fcCardList"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RESEARCH section -->
+  <div id="ls-research" style="display:none">
+    <div style="font-weight:700;font-size:14px;color:var(--textd);margin-bottom:10px">🔬 Research & Learning</div>
+    <div class="card" style="margin-bottom:12px">
+      <input id="resTitle" type="text" placeholder="Topic or title" style="width:100%;padding:9px 12px;border-radius:10px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px;box-sizing:border-box;margin-bottom:7px">
+      <input id="resUrl" type="url" placeholder="URL (optional)" style="width:100%;padding:9px 12px;border-radius:10px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px;box-sizing:border-box;margin-bottom:7px">
+      <textarea id="resNotes" placeholder="Notes (optional)" rows="2" style="width:100%;padding:8px 11px;border-radius:10px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px;resize:vertical;box-sizing:border-box;margin-bottom:7px"></textarea>
+      <div style="display:flex;gap:8px;margin-bottom:10px;align-items:center">
+        <label style="font-size:12px;color:var(--textl)">Status:</label>
+        <select id="resStatus" style="flex:1;padding:7px 10px;border-radius:9px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px">
+          <option value="want">Want to learn</option>
+          <option value="doing">Currently learning</option>
+          <option value="done">Learned ✓</option>
+        </select>
+      </div>
+      <button class="btn" style="width:100%" onclick="addResearch()">Save Topic</button>
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:10px">
+      <input id="resSearch" type="text" placeholder="Search…" style="flex:1;padding:8px 12px;border-radius:10px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px" oninput="renderResearch()">
+      <select id="resFilter" onchange="renderResearch()" style="padding:8px 10px;border-radius:9px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:12px">
+        <option value="">All</option>
+        <option value="want">Want</option>
+        <option value="doing">Learning</option>
+        <option value="done">Done</option>
+      </select>
+    </div>
+    <div id="researchList"></div>
+  </div>
+</div>
+<div class="view" id="v-faves">
+  <!-- Add form -->
+  <div class="card" style="margin-bottom:12px" id="faveAddForm">
+    <div style="font-size:13px;font-weight:700;color:var(--textd);margin-bottom:10px">⭐ Add a Favorite</div>
+    <input id="faveName" type="text" placeholder="Name (e.g. JW.org)" style="width:100%;padding:9px 12px;border-radius:10px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px;box-sizing:border-box;margin-bottom:7px">
+    <input id="faveUrl" type="url" placeholder="URL (https://…)" style="width:100%;padding:9px 12px;border-radius:10px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px;box-sizing:border-box;margin-bottom:7px">
+    <input id="faveCat" type="text" placeholder="Category (optional)" style="width:100%;padding:9px 12px;border-radius:10px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px;box-sizing:border-box;margin-bottom:7px" list="faveCatSuggestions">
+    <datalist id="faveCatSuggestions"></datalist>
+    <div style="font-size:11px;color:var(--textl);margin-bottom:5px">Image (pick one):</div>
+    <div style="display:flex;gap:8px;margin-bottom:7px;flex-wrap:wrap;align-items:center">
+      <input id="faveImgUrl" type="url" placeholder="Image URL (optional)" style="flex:1;min-width:120px;padding:8px 11px;border-radius:10px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:12px">
+      <span style="font-size:11px;color:var(--textl)">or</span>
+      <input type="file" id="faveImgFile" accept="image/*" style="font-size:11px;flex:1;min-width:100px" onchange="previewFaveImg(this)">
+    </div>
+    <img id="faveImgPreview" style="display:none;width:100%;max-height:100px;object-fit:cover;border-radius:9px;margin-bottom:8px" alt="">
+    <div style="font-size:11px;color:var(--textl);margin-bottom:6px">Accent color:</div>
+    <div class="fave-accent-row" id="faveAccentRow"></div>
+    <button class="btn" style="width:100%" onclick="addFave()">Save Favorite ⭐</button>
+  </div>
+
+  <!-- Filter chips -->
+  <div class="fave-cat-chips" id="faveCatChips"></div>
+
+  <!-- Grid -->
+  <div id="favesGrid" class="fave-grid"></div>
+</div>
+<div class="view" id="v-board">
+  <div class="pill-nav" style="margin-bottom:12px">
+    <button class="pn-btn on" onclick="showBoardSec('vision',this)">🌟 Vision Board</button>
+    <button class="pn-btn" onclick="showBoardSec('memories',this)">📸 Memories</button>
+  </div>
+
+  <!-- VISION BOARD -->
+  <div id="bs-vision">
+    <div style="font-weight:700;font-size:14px;color:var(--textd);margin-bottom:10px">🌟 Vision Board</div>
+    <div class="card" style="margin-bottom:12px">
+      <div style="font-size:12px;font-weight:600;color:var(--textd);margin-bottom:8px">Add to board</div>
+      <select id="vbType" onchange="toggleVbInputs()" style="width:100%;padding:8px 10px;border-radius:9px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px;margin-bottom:8px">
+        <option value="quote">✏️ Affirmation / Quote</option>
+        <option value="goal">🎯 Goal</option>
+        <option value="image">🖼️ Image (URL)</option>
+      </select>
+      <textarea id="vbText" placeholder="Write your affirmation, goal, or paste an image URL…" rows="2" style="width:100%;padding:8px 11px;border-radius:9px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px;resize:vertical;box-sizing:border-box;margin-bottom:8px"></textarea>
+      <input id="vbCaption" type="text" placeholder="Caption (optional, for images)" style="display:none;width:100%;padding:8px 11px;border-radius:9px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px;box-sizing:border-box;margin-bottom:8px">
+      <button class="btn" style="width:100%" onclick="addVbItem()">Add to Board</button>
+    </div>
+    <div id="visionBoard" class="board-grid"></div>
+  </div>
+
+  <!-- MEMORIES -->
+  <div id="bs-memories" style="display:none">
+    <div style="font-weight:700;font-size:14px;color:var(--textd);margin-bottom:10px">📸 Memories</div>
+    <div class="card" style="margin-bottom:12px">
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;align-items:flex-end">
+        <div style="display:flex;flex-direction:column;gap:3px">
+          <label style="font-size:11px;color:var(--textl)">Date</label>
+          <input id="memDate" type="date" style="padding:8px 10px;border-radius:9px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px">
+        </div>
+        <div style="flex:1;min-width:130px;display:flex;flex-direction:column;gap:3px">
+          <label style="font-size:11px;color:var(--textl)">Title</label>
+          <input id="memTitle" type="text" placeholder="What was this moment?" style="width:100%;padding:8px 10px;border-radius:9px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px;box-sizing:border-box">
+        </div>
+      </div>
+      <textarea id="memNote" placeholder="Tell the story…" rows="2" style="width:100%;padding:8px 11px;border-radius:9px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px;resize:vertical;box-sizing:border-box;margin-bottom:8px"></textarea>
+      <div style="margin-bottom:8px">
+        <label style="font-size:11px;color:var(--textl);display:block;margin-bottom:4px">Photo (optional — choose from your device)</label>
+        <input type="file" id="memPhotoInput" accept="image/*" style="font-size:12px" onchange="previewMemPhoto(this)">
+        <img id="memPhotoPreview" style="display:none;width:100%;max-height:120px;object-fit:cover;border-radius:9px;margin-top:6px" alt="">
+      </div>
+      <button class="btn" style="width:100%" onclick="addMemory()">Save Memory</button>
+    </div>
+    <div id="memoriesList"></div>
+  </div>
+</div>
+
+<div class="view" id="v-spirit">
+  <div class="pill-nav" style="margin-bottom:12px">
+    <button class="pn-btn on" onclick="showSpiritSec('prayer',this)">🙏 Prayer</button>
+    <button class="pn-btn" onclick="showSpiritSec('bible',this)">📖 Bible</button>
+    <button class="pn-btn" onclick="showSpiritSec('ministry',this)">⏱️ Ministry</button>
+    <button class="pn-btn" onclick="showSpiritSec('gratitude',this)">🌸 Gratitude</button>
+    <button class="pn-btn" onclick="showSpiritSec('habits',this)">🔥 Habits</button>
+    <button class="pn-btn" onclick="showSpiritSec('notes',this)">📓 Notes</button>
+  </div>
+
+  <!-- PRAYER section -->
+  <div id="ss-prayer">
+    <div style="display:flex;gap:8px;margin-bottom:10px;align-items:center">
+      <span style="font-weight:700;font-size:14px;color:var(--textd);flex:1">🙏 Prayer List</span>
+      <label style="font-size:12px;color:var(--textl);display:flex;align-items:center;gap:4px;cursor:pointer">
+        <input type="checkbox" id="showAnswered" onchange="renderPrayers()"> Show answered
+      </label>
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:10px">
+      <input id="prayerInput" type="text" placeholder="Add a prayer request…" style="flex:1;padding:9px 12px;border-radius:10px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px" onkeydown="if(event.key==='Enter')addPrayer()">
+      <button class="btn" onclick="addPrayer()">Add</button>
+    </div>
+    <div id="prayerList"></div>
+  </div>
+
+  <!-- BIBLE section -->
+  <div id="ss-bible" style="display:none">
+    <div class="spirit-stat-row" id="bibleStats"></div>
+    <div style="display:flex;gap:8px;margin-bottom:10px;align-items:center">
+      <span style="font-weight:700;font-size:14px;color:var(--textd);flex:1">📖 Bible Reading</span>
+      <select id="bibleFilter" onchange="renderBibleBooks()" style="padding:6px 10px;border-radius:8px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:12px">
+        <option value="all">All books</option>
+        <option value="ot">Old Testament</option>
+        <option value="nt">New Testament</option>
+        <option value="unread">Unread</option>
+        <option value="started">In progress</option>
+        <option value="done">Completed</option>
+      </select>
+    </div>
+    <div id="bibleBookGrid" class="bible-book-grid"></div>
+  </div>
+
+  <!-- MINISTRY section -->
+  <div id="ss-ministry" style="display:none">
+    <div class="spirit-stat-row" id="ministryStats"></div>
+    <div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap;align-items:flex-end">
+      <div style="display:flex;flex-direction:column;gap:3px">
+        <label style="font-size:11px;color:var(--textl)">Date</label>
+        <input id="minDate" type="date" style="padding:8px 10px;border-radius:9px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px">
+      </div>
+      <div style="display:flex;flex-direction:column;gap:3px">
+        <label style="font-size:11px;color:var(--textl)">Hours</label>
+        <input id="minHrs" type="number" placeholder="0" min="0" step="0.5" style="width:70px;padding:8px 10px;border-radius:9px;border:1.5px solid #e8e0d8;font-size:13px">
+      </div>
+      <div style="display:flex;flex-direction:column;gap:3px">
+        <label style="font-size:11px;color:var(--textl)">Bible studies</label>
+        <input id="minStudies" type="number" placeholder="0" min="0" style="width:70px;padding:8px 10px;border-radius:9px;border:1.5px solid #e8e0d8;font-size:13px">
+      </div>
+      <div style="display:flex;flex-direction:column;gap:3px;flex:1;min-width:100px">
+        <label style="font-size:11px;color:var(--textl)">Notes</label>
+        <input id="minNotes" type="text" placeholder="e.g. return visits, placements…" style="width:100%;padding:8px 10px;border-radius:9px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px;box-sizing:border-box">
+      </div>
+      <button class="btn" onclick="logMinistry()" style="align-self:flex-end">Log</button>
+    </div>
+    <div id="ministryLog"></div>
+  </div>
+
+  <!-- GRATITUDE section -->
+  <div id="ss-gratitude" style="display:none">
+    <div style="font-weight:700;font-size:14px;color:var(--textd);margin-bottom:10px">🌸 Gratitude Journal</div>
+    <div class="card" style="margin-bottom:12px">
+      <div style="font-size:13px;font-weight:600;color:var(--textd);margin-bottom:8px">Today I'm grateful for…</div>
+      <input id="grat1" type="text" placeholder="1." style="width:100%;padding:8px 11px;border-radius:9px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px;box-sizing:border-box;margin-bottom:6px">
+      <input id="grat2" type="text" placeholder="2." style="width:100%;padding:8px 11px;border-radius:9px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px;box-sizing:border-box;margin-bottom:6px">
+      <input id="grat3" type="text" placeholder="3." style="width:100%;padding:8px 11px;border-radius:9px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px;box-sizing:border-box;margin-bottom:10px">
+      <textarea id="gratExtra" placeholder="More thoughts… (optional)" rows="2" style="width:100%;padding:8px 11px;border-radius:9px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px;resize:vertical;box-sizing:border-box;margin-bottom:10px"></textarea>
+      <button class="btn" style="width:100%" onclick="saveGratitude()">Save Entry</button>
+    </div>
+    <div id="gratitudeLog"></div>
+  </div>
+
+  <!-- HABITS section -->
+  <div id="ss-habits" style="display:none">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+      <span style="font-weight:700;font-size:14px;color:var(--textd)">🔥 Spiritual Habits</span>
+      <button class="btn sec" style="font-size:12px;padding:4px 12px" onclick="openAddHabit()">+ Habit</button>
+    </div>
+    <div style="font-size:11px;color:var(--textl);margin-bottom:12px">Check off each habit daily. Tap the checkbox for today.</div>
+    <div id="habitList"></div>
+    <div style="font-size:10px;color:var(--textl);text-align:center;margin-top:8px">■ = done &nbsp;□ = missed &nbsp;Today is outlined</div>
+  </div>
+
+  <!-- STUDY NOTES section -->
+  <div id="ss-notes" style="display:none">
+    <div style="font-weight:700;font-size:14px;color:var(--textd);margin-bottom:10px">📓 Study Notes</div>
+    <div class="card" style="margin-bottom:12px">
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;align-items:flex-end">
+        <div style="display:flex;flex-direction:column;gap:3px">
+          <label style="font-size:11px;color:var(--textl)">Date</label>
+          <input id="snDate" type="date" style="padding:8px 10px;border-radius:9px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px">
+        </div>
+        <div style="flex:1;min-width:110px;display:flex;flex-direction:column;gap:3px">
+          <label style="font-size:11px;color:var(--textl)">Category</label>
+          <select id="snCat" style="width:100%;padding:8px 10px;border-radius:9px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px">
+            <option value="Meeting Notes">Meeting Notes</option>
+            <option value="Personal Study">Personal Study</option>
+            <option value="Bible Study">Bible Study</option>
+            <option value="Field Service Prep">Field Service Prep</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+      </div>
+      <input id="snTitle" type="text" placeholder="Title" style="width:100%;padding:8px 11px;border-radius:9px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px;box-sizing:border-box;margin-bottom:8px">
+      <textarea id="snBody" placeholder="Your notes…" rows="4" style="width:100%;padding:8px 11px;border-radius:9px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px;resize:vertical;box-sizing:border-box;margin-bottom:10px"></textarea>
+      <div style="display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap">
+        <button class="btn sec" style="font-size:11px;padding:4px 10px" onclick="snQuick('Watchtower Study: ')">Watchtower</button>
+        <button class="btn sec" style="font-size:11px;padding:4px 10px" onclick="snQuick('Congregation Bible Study: ')">Bible Study</button>
+        <button class="btn sec" style="font-size:11px;padding:4px 10px" onclick="snQuick('Service Meeting: ')">Service Mtg</button>
+        <button class="btn sec" style="font-size:11px;padding:4px 10px" onclick="snQuick('Personal study of ')">Personal</button>
+      </div>
+      <button class="btn" style="width:100%" onclick="saveStudyNote()">Save Note</button>
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:10px">
+      <input id="snSearch" type="text" placeholder="Search notes…" style="flex:1;padding:8px 12px;border-radius:10px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px" oninput="renderStudyNotes()">
+      <select id="snFilter" onchange="renderStudyNotes()" style="padding:8px 10px;border-radius:9px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:12px">
+        <option value="">All</option>
+        <option value="Meeting Notes">Meeting</option>
+        <option value="Personal Study">Personal</option>
+        <option value="Bible Study">Bible Study</option>
+        <option value="Field Service Prep">Field Svc</option>
+        <option value="Other">Other</option>
+      </select>
+    </div>
+    <div id="studyNotesList"></div>
+  </div>
+</div>
 <div class="view" id="v-meals">
   <div class="pill-nav" style="margin-bottom:12px">
     <button class="pn-btn on" onclick="showMealSec('plan',this)">📅 Plan</button>
@@ -623,6 +1080,13 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
 
 <!-- EXPORT -->
 <div class="view" id="v-export">
+  <div class="card">
+    <div class="ct">💾 Backup & Restore</div>
+    <p style="font-size:12px;color:var(--textl);margin-bottom:12px">Download a full JSON backup of all your data, or restore from a previous backup.</p>
+    <button class="ok-btn" style="background:linear-gradient(135deg,var(--sage),var(--teal));margin-bottom:8px" onclick="downloadBackup()">⬇️ Download Backup (.json)</button>
+    <div style="font-size:12px;color:var(--textl);margin-bottom:6px">Restore from backup:</div>
+    <input type="file" accept=".json" onchange="restoreBackup(this)" style="font-size:12px;margin-bottom:10px">
+  </div>
   <div class="card">
     <div class="ct">📤 Export Everything</div>
     <p style="font-size:12px;color:var(--textl);margin-bottom:12px">Generate a full export of all your data at once, or pick a section below.</p>
@@ -908,7 +1372,14 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
       <textarea class="fi" id="sQuote" style="min-height:60px;margin-bottom:8px" placeholder="The plans of the diligent..."></textarea>
       <div class="set-row" style="border:none;padding-bottom:0"><div class="set-lbl">Banner Color</div></div>
       <div class="color-row" id="bannerColors"></div>
-      <button class="ok-btn" style="margin-top:14px" onclick="saveAppearance()">Save Appearance ✨</button>
+      <div class="set-row" style="border:none;padding-bottom:0;margin-top:10px"><div class="set-lbl">Banner Image</div><div class="set-sub">Replaces gradient when set</div></div>
+      <input type="file" id="bannerImgInput" accept="image/*" style="font-size:12px;margin:4px 0 2px" onchange="previewBannerImg(this)">
+      <img id="bannerImgPreview" class="banner-img-preview" alt="">
+      <button class="btn sec" id="bannerImgClear" style="font-size:12px;padding:4px 12px;display:none;margin-bottom:8px" onclick="clearBannerImg()">✕ Remove image</button>
+      <div class="set-row" style="border:none;padding-bottom:0;margin-top:10px"><div class="set-lbl">Theme Colors</div><div class="set-sub">Customize each accent color</div></div>
+      <div class="color-grid" id="colorPickerGrid"></div>
+      <button class="btn sec" style="font-size:12px;padding:5px 14px;margin-bottom:10px" onclick="resetColors()">Reset to defaults</button>
+      <button class="ok-btn" style="margin-top:4px" onclick="saveAppearance()">Save Appearance ✨</button>
     </div>
   </div>
   <div class="card">
@@ -1062,6 +1533,39 @@ window.dispatchEvent(new Event('firebaseReady'));
 // ═══════════════════════════════════════════════
 // CORE DATA (local fallback while Firebase loads)
 // ═══════════════════════════════════════════════
+var FC_DECKS = JSON.parse(localStorage.getItem('aFcDecks')||'[]');
+var FC_CARDS = JSON.parse(localStorage.getItem('aFcCards')||'[]');
+var RESEARCH = JSON.parse(localStorage.getItem('aResearch')||'[]');
+var WORKOUT_PLANS = JSON.parse(localStorage.getItem('aWplans')||'[]');
+var WORKOUT_LOG2 = JSON.parse(localStorage.getItem('aWlog2')||'[]');
+var fcActiveDeckId = '';
+var fcStudyDeckId = '';
+var _fcStudyQueue = [];
+var _fcStudyIdx = 0;
+var _fcFlipped = false;
+var _fcGot = 0;
+var _fcAgain = 0;
+var _fcDeckColor = '#c9a0a0';
+var FC_COLORS = ['#c9a0a0','#a99fc9','#8faa8b','#d4a574','#7fb5b0','#8aafc9'];
+var _activeWplanId = '';
+var _activeWplanChecked = {};
+var HABITS = JSON.parse(localStorage.getItem('aHabits')||'[]');
+var HABIT_LOG = JSON.parse(localStorage.getItem('aHabitLog')||'{}');
+var STUDY_NOTES = JSON.parse(localStorage.getItem('aStudyNotes')||'[]');
+var K_EVENTS = JSON.parse(localStorage.getItem('aKEvents')||'[]');
+var FAVES = JSON.parse(localStorage.getItem('aFaves')||'[]');
+var _favePendingImg = '';
+var _faveAccent = '#c9a0a0';
+var _faveCatFilter = 'all';
+var FAVE_ACCENTS = ['#c9a0a0','#a99fc9','#8faa8b','#d4a574','#7fb5b0','#8aafc9'];
+var VB_ITEMS = JSON.parse(localStorage.getItem('aVbItems')||'[]');
+var MEMORIES = JSON.parse(localStorage.getItem('aMemories')||'[]');
+var CUSTOM_COLORS = JSON.parse(localStorage.getItem('aCustomColors')||'{}');
+var BANNER_IMG = localStorage.getItem('aBannerImg')||'';
+var PRAYERS = JSON.parse(localStorage.getItem('aPrayers')||'[]');
+var BIBLE_LOG = JSON.parse(localStorage.getItem('aBibleLog')||'{}');
+var MINISTRY_LOG = JSON.parse(localStorage.getItem('aMinistryLog')||'[]');
+var GRAT_LOG = JSON.parse(localStorage.getItem('aGratLog')||'[]');
 var RECIPES = JSON.parse(localStorage.getItem('aRecipes')||'[]');
 var MEAL_PLAN = JSON.parse(localStorage.getItem('aMealPlan')||'{}');
 var GROCERY_LIST = JSON.parse(localStorage.getItem('aGroceryList')||'[]');
@@ -2569,6 +3073,7 @@ function renderSettings(){
   document.getElementById('wUnitOz').classList.toggle('on',S.wUnit==='oz');
   document.getElementById('sWatLbl').textContent='💧 Water Goal ('+(S.wUnit==='oz'?'oz/day':'glasses/day')+')';
   renderSymSettings();
+  renderColorPickers();
 }
 
 function selBanner(id){
@@ -2587,7 +3092,17 @@ function saveAppearance(){
   S.quote=document.getElementById('sQuote').value.trim()||S.quote;
   if(SEL_BANNER){var p=BANNER_PRESETS.find(function(p){return p.id===SEL_BANNER;});if(p)S.banner=p.grad;}
   localStorage.setItem('aSName',S.name);localStorage.setItem('aSQuote',S.quote);localStorage.setItem('aSBanner',S.banner);
-  document.getElementById('mainHdr').style.background='linear-gradient('+S.banner+')';
+  localStorage.setItem('aCustomColors',JSON.stringify(CUSTOM_COLORS));
+  var bannerFileInput=document.getElementById('bannerImgInput');
+  if(bannerFileInput&&bannerFileInput.files&&bannerFileInput.files[0]){
+    var prevEl=document.getElementById('bannerImgPreview');
+    if(prevEl&&prevEl.src&&prevEl.src.indexOf('data:')===0){
+      BANNER_IMG=prevEl.src;
+      localStorage.setItem('aBannerImg',BANNER_IMG);
+    }
+  }
+  applyBannerImg();
+  if(!BANNER_IMG)document.getElementById('mainHdr').style.background='linear-gradient('+S.banner+')';
   document.getElementById('gQuote').textContent=S.quote;
   updGreet();
   alert('✅ Appearance saved!');
@@ -3386,6 +3901,1301 @@ function cpHealthExp(){
 // START
 // ═══════════════════════════════════════════════
 // ═══════════════════════════════════════════════
+// LEARN TAB
+// ═══════════════════════════════════════════════
+
+function showLearnSec(sec,btn){
+  ['flashcards','research'].forEach(function(s){
+    var el=document.getElementById('ls-'+s);
+    if(el)el.style.display=(s===sec)?'':'none';
+  });
+  document.querySelectorAll('#v-learn .pn-btn').forEach(function(b){b.classList.remove('on');});
+  if(btn)btn.classList.add('on');
+  if(sec==='flashcards')renderFcDecks();
+  if(sec==='research')renderResearch();
+}
+
+// ── Flashcard Decks ───────────────────────────
+function openAddDeck(){
+  var row=document.getElementById('deckColorRow');
+  if(row){
+    _fcDeckColor=FC_COLORS[0];
+    row.innerHTML=FC_COLORS.map(function(c){
+      return '<div style="width:28px;height:28px;border-radius:50%;background:'+c+';cursor:pointer;border:2.5px solid '+(c===_fcDeckColor?'#3d3530':'transparent')+'" onclick="selDeckColor(\''+c+'\',this)"></div>';
+    }).join('');
+  }
+  showOv('ovAddDeck');
+}
+
+function selDeckColor(c,el){
+  _fcDeckColor=c;
+  document.querySelectorAll('#deckColorRow div').forEach(function(d){d.style.borderColor='transparent';});
+  if(el)el.style.borderColor='#3d3530';
+}
+
+function confirmAddDeck(){
+  var name=((document.getElementById('deckNameInput')||{}).value||'').trim();
+  if(!name)return alert('Enter a deck name');
+  FC_DECKS.push({id:'fd-'+Date.now(),name:name,color:_fcDeckColor});
+  localStorage.setItem('aFcDecks',JSON.stringify(FC_DECKS));
+  closeOv('ovAddDeck');
+  if(document.getElementById('deckNameInput'))document.getElementById('deckNameInput').value='';
+  renderFcDecks();
+}
+
+function renderFcDecks(){
+  var el=document.getElementById('fcDeckList');
+  if(!el)return;
+  document.getElementById('fcCardManager').style.display='none';
+  document.getElementById('fcDeckList').style.display='';
+  if(!FC_DECKS.length){el.innerHTML='<p style="color:var(--textl);text-align:center;padding:20px">No decks yet. Tap "+ Deck" to create your first deck!</p>';return;}
+  el.innerHTML=FC_DECKS.map(function(d){
+    var count=FC_CARDS.filter(function(c){return c.deckId===d.id;}).length;
+    var mastered=FC_CARDS.filter(function(c){return c.deckId===d.id&&c.bucket===2;}).length;
+    return '<div class="fc-deck-card" onclick="openFcDeck(\''+d.id+'\')">'
+      +'<div class="fc-deck-dot" style="background:'+d.color+'"></div>'
+      +'<div class="fc-deck-info">'
+      +'<div class="fc-deck-name">'+d.name+'</div>'
+      +'<div class="fc-deck-count">'+count+' cards'+( mastered?' · '+mastered+' mastered':'')+'</div>'
+      +'</div>'
+      +(count?'<button class="btn" style="font-size:12px;padding:5px 12px;background:var(--sage)" onclick="event.stopPropagation();startFcStudy(\''+d.id+'\')">▶ Study</button>':'')
+      +'<button class="btn sec" style="font-size:12px;padding:5px 10px;margin-left:4px" onclick="event.stopPropagation();delFcDeck(\''+d.id+'\')">✕</button>'
+      +'</div>';
+  }).join('');
+}
+
+function delFcDeck(id){
+  if(!confirm('Delete this deck and all its cards?'))return;
+  FC_DECKS=FC_DECKS.filter(function(d){return d.id!==id;});
+  FC_CARDS=FC_CARDS.filter(function(c){return c.deckId!==id;});
+  localStorage.setItem('aFcDecks',JSON.stringify(FC_DECKS));
+  localStorage.setItem('aFcCards',JSON.stringify(FC_CARDS));
+  renderFcDecks();
+}
+
+function openFcDeck(id){
+  fcActiveDeckId=id;
+  var deck=FC_DECKS.find(function(d){return d.id===id;});
+  if(!deck)return;
+  document.getElementById('fcDeckList').style.display='none';
+  var mgr=document.getElementById('fcCardManager');
+  mgr.style.display='';
+  document.getElementById('fcManagerDeckName').textContent=deck.name;
+  renderFcCardList();
+}
+
+function showFcDecks(){
+  document.getElementById('fcCardManager').style.display='none';
+  document.getElementById('fcDeckList').style.display='';
+  renderFcDecks();
+}
+
+function addFcCard(){
+  var front=((document.getElementById('fcCardFrontInput')||{}).value||'').trim();
+  var back=((document.getElementById('fcCardBackInput')||{}).value||'').trim();
+  if(!front||!back)return alert('Enter both front and back');
+  FC_CARDS.push({id:'fc-'+Date.now(),deckId:fcActiveDeckId,front:front,back:back,bucket:0});
+  localStorage.setItem('aFcCards',JSON.stringify(FC_CARDS));
+  if(document.getElementById('fcCardFrontInput'))document.getElementById('fcCardFrontInput').value='';
+  if(document.getElementById('fcCardBackInput'))document.getElementById('fcCardBackInput').value='';
+  renderFcCardList();
+}
+
+function renderFcCardList(){
+  var el=document.getElementById('fcCardList');
+  if(!el)return;
+  var cards=FC_CARDS.filter(function(c){return c.deckId===fcActiveDeckId;});
+  if(!cards.length){el.innerHTML='<p style="color:var(--textl);text-align:center;padding:16px">No cards yet. Add some above!</p>';return;}
+  el.innerHTML=cards.map(function(c){
+    var bucketLabel=['New','Learning','Mastered'][c.bucket]||'New';
+    var bucketColor=['var(--textl)','var(--peach)','var(--sage)'][c.bucket]||'var(--textl)';
+    return '<div class="prayer-item" style="margin-bottom:7px">'
+      +'<div style="font-size:13px;font-weight:700;color:var(--textd);margin-bottom:4px">'+c.front+'</div>'
+      +'<div style="font-size:12px;color:var(--textl);margin-bottom:6px">'+c.back+'</div>'
+      +'<div style="display:flex;align-items:center">'
+      +'<span style="font-size:10px;font-weight:700;color:'+bucketColor+';background:'+bucketColor+'22;padding:1px 7px;border-radius:5px">'+bucketLabel+'</span>'
+      +'<button class="btn sec" style="font-size:11px;padding:2px 7px;margin-left:auto" onclick="delFcCard(\''+c.id+'\')">✕</button>'
+      +'</div>'
+      +'</div>';
+  }).join('');
+}
+
+function delFcCard(id){
+  FC_CARDS=FC_CARDS.filter(function(c){return c.id!==id;});
+  localStorage.setItem('aFcCards',JSON.stringify(FC_CARDS));
+  renderFcCardList();
+}
+
+// ── Flashcard Study Mode ───────────────────────
+function startFcStudy(deckId){
+  var cards=FC_CARDS.filter(function(c){return c.deckId===deckId;});
+  if(!cards.length)return alert('Add some cards to this deck first!');
+  fcStudyDeckId=deckId;
+  var deck=FC_DECKS.find(function(d){return d.id===deckId;});
+  // shuffle: not-mastered first, then mastered
+  var q=cards.filter(function(c){return c.bucket<2;}).concat(cards.filter(function(c){return c.bucket===2;}));
+  // simple shuffle
+  for(var i=q.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var tmp=q[i];q[i]=q[j];q[j]=tmp;}
+  _fcStudyQueue=q;
+  _fcStudyIdx=0;
+  _fcGot=0;_fcAgain=0;
+  _fcFlipped=false;
+  document.getElementById('fcDeckView').style.display='none';
+  var sm=document.getElementById('fcStudyMode');
+  sm.style.display='';
+  document.getElementById('fcStudyDeckName').textContent=deck?deck.name:'';
+  document.getElementById('fcDoneMsg').style.display='none';
+  document.getElementById('fcCardWrap').style.display='';
+  document.getElementById('fcAnswerBtns').style.display='none';
+  showFcCard();
+}
+
+function showFcCard(){
+  if(_fcStudyIdx>=_fcStudyQueue.length){
+    // done
+    document.getElementById('fcCardWrap').style.display='none';
+    document.getElementById('fcAnswerBtns').style.display='none';
+    document.getElementById('fcDoneMsg').style.display='';
+    document.getElementById('fcDoneStats').textContent='Got it: '+_fcGot+' · Again: '+_fcAgain;
+    document.getElementById('fcStudyProgress').textContent='Done!';
+    document.getElementById('fcProgFill').style.width='100%';
+    return;
+  }
+  var card=_fcStudyQueue[_fcStudyIdx];
+  _fcFlipped=false;
+  document.getElementById('fcCardFront').textContent=card.front;
+  document.getElementById('fcCardBack').textContent=card.back;
+  document.getElementById('fcCardBack').style.display='none';
+  document.getElementById('fcHint').style.display='';
+  document.getElementById('fcAnswerBtns').style.display='none';
+  var total=_fcStudyQueue.length;
+  document.getElementById('fcStudyProgress').textContent=(_fcStudyIdx+1)+'/'+total;
+  document.getElementById('fcProgFill').style.width=((_fcStudyIdx/total)*100)+'%';
+}
+
+function flipFcCard(){
+  if(_fcFlipped)return;
+  _fcFlipped=true;
+  document.getElementById('fcCardBack').style.display='';
+  document.getElementById('fcHint').style.display='none';
+  document.getElementById('fcAnswerBtns').style.display='flex';
+}
+
+function fcAnswer(got){
+  var card=_fcStudyQueue[_fcStudyIdx];
+  if(got){
+    _fcGot++;
+    // promote bucket
+    var orig=FC_CARDS.find(function(c){return c.id===card.id;});
+    if(orig&&orig.bucket<2)orig.bucket++;
+  } else {
+    _fcAgain++;
+    var orig=FC_CARDS.find(function(c){return c.id===card.id;});
+    if(orig&&orig.bucket>0)orig.bucket--;
+  }
+  localStorage.setItem('aFcCards',JSON.stringify(FC_CARDS));
+  _fcStudyIdx++;
+  _fcFlipped=false;
+  showFcCard();
+}
+
+function exitFcStudy(){
+  document.getElementById('fcStudyMode').style.display='none';
+  document.getElementById('fcDeckView').style.display='';
+  fcStudyDeckId='';
+  renderFcDecks();
+}
+
+// ── Research ──────────────────────────────────
+function addResearch(){
+  var title=((document.getElementById('resTitle')||{}).value||'').trim();
+  if(!title)return alert('Enter a topic title');
+  var url=((document.getElementById('resUrl')||{}).value||'').trim();
+  var notes=((document.getElementById('resNotes')||{}).value||'').trim();
+  var status=((document.getElementById('resStatus')||{}).value||'want');
+  RESEARCH.unshift({id:'rs-'+Date.now(),title:title,url:url,notes:notes,status:status,date:new Date().toISOString().slice(0,10),expanded:false});
+  localStorage.setItem('aResearch',JSON.stringify(RESEARCH));
+  ['resTitle','resUrl','resNotes'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});
+  renderResearch();
+}
+
+function renderResearch(){
+  var el=document.getElementById('researchList');
+  if(!el)return;
+  var q=((document.getElementById('resSearch')||{}).value||'').toLowerCase().trim();
+  var f=((document.getElementById('resFilter')||{}).value||'');
+  var list=RESEARCH.filter(function(r){
+    if(f&&r.status!==f)return false;
+    if(q&&(r.title+' '+r.notes+' '+r.url).toLowerCase().indexOf(q)<0)return false;
+    return true;
+  });
+  if(!list.length){el.innerHTML='<p style="color:var(--textl);text-align:center;padding:20px">'+(RESEARCH.length?'Nothing matches.':'No topics yet. Add your first research topic above!')+'</p>';return;}
+  var statusLabels={want:'Want to learn',doing:'Currently learning',done:'Learned ✓'};
+  var statusClass={want:'res-status-want',doing:'res-status-doing',done:'res-status-done'};
+  el.innerHTML=list.map(function(r){
+    var safeId=r.id.replace(/[^a-z0-9-]/g,'');
+    return '<div class="res-card">'
+      +'<div style="display:flex;align-items:flex-start;gap:8px;margin-bottom:4px">'
+      +'<span class="res-title" style="flex:1">'+r.title+'</span>'
+      +'<span class="res-status-badge '+statusClass[r.status]+'">'+statusLabels[r.status]+'</span>'
+      +'</div>'
+      +(r.url?'<div class="res-url" onclick="window.open(\''+r.url+'\',\'_blank\')">🔗 '+r.url+'</div>':'')
+      +(r.notes?'<div class="res-notes'+(r.expanded?' expanded':'')+'" id="rn-'+safeId+'" onclick="toggleRes(\''+r.id+'\')">'+r.notes+'</div>':'')
+      +'<div style="display:flex;gap:6px;margin-top:8px;align-items:center">'
+      +'<span style="font-size:10px;color:var(--textl)">'+r.date+'</span>'
+      +'<select onchange="updResStatus(\''+r.id+'\',this.value)" style="font-size:11px;border:1px solid #e8e0d8;border-radius:6px;padding:2px 6px;font-family:\'Quicksand\',sans-serif;margin-left:auto">'
+      +'<option value="want"'+(r.status==='want'?' selected':'')+'>Want</option>'
+      +'<option value="doing"'+(r.status==='doing'?' selected':'')+'>Learning</option>'
+      +'<option value="done"'+(r.status==='done'?' selected':'')+'>Done</option>'
+      +'</select>'
+      +'<button class="btn sec" style="font-size:11px;padding:2px 7px" onclick="delResearch(\''+r.id+'\')">✕</button>'
+      +'</div>'
+      +'</div>';
+  }).join('');
+}
+
+function toggleRes(id){
+  var r=RESEARCH.find(function(x){return x.id===id;});
+  if(r)r.expanded=!r.expanded;
+  renderResearch();
+}
+
+function updResStatus(id,status){
+  var r=RESEARCH.find(function(x){return x.id===id;});
+  if(r){r.status=status;localStorage.setItem('aResearch',JSON.stringify(RESEARCH));renderResearch();}
+}
+
+function delResearch(id){
+  RESEARCH=RESEARCH.filter(function(r){return r.id!==id;});
+  localStorage.setItem('aResearch',JSON.stringify(RESEARCH));
+  renderResearch();
+}
+
+// ═══════════════════════════════════════════════
+// WORKOUT PLANS
+// ═══════════════════════════════════════════════
+
+function openAddWplan(){
+  var inputs=document.getElementById('wplanExInputs');
+  if(inputs)inputs.innerHTML='';
+  addWplanExInput();addWplanExInput();addWplanExInput();
+  showOv('ovAddWplan');
+}
+
+function addWplanExInput(){
+  var el=document.getElementById('wplanExInputs');
+  if(!el)return;
+  var div=document.createElement('div');
+  div.style.cssText='display:flex;gap:6px;margin-bottom:7px;align-items:center';
+  div.innerHTML='<input type="text" placeholder="Exercise name" style="flex:2;padding:8px 10px;border-radius:9px;border:1.5px solid #e8e0d8;font-family:\'Quicksand\',sans-serif;font-size:13px">'
+    +'<input type="text" placeholder="Sets×Reps" style="flex:1;min-width:70px;padding:8px 10px;border-radius:9px;border:1.5px solid #e8e0d8;font-size:13px">'
+    +'<button onclick="this.parentNode.remove()" style="background:none;border:none;font-size:16px;cursor:pointer;color:var(--textl);padding:2px 4px">✕</button>';
+  el.appendChild(div);
+}
+
+function confirmAddWplan(){
+  var name=((document.getElementById('wplanNameInput')||{}).value||'').trim();
+  if(!name)return alert('Enter a plan name');
+  var rows=document.querySelectorAll('#wplanExInputs > div');
+  var exercises=[];
+  rows.forEach(function(row){
+    var inputs=row.querySelectorAll('input');
+    var ename=(inputs[0]&&inputs[0].value||'').trim();
+    var detail=(inputs[1]&&inputs[1].value||'').trim();
+    if(ename)exercises.push({id:'we-'+Date.now()+Math.random(),name:ename,detail:detail});
+  });
+  if(!exercises.length)return alert('Add at least one exercise');
+  WORKOUT_PLANS.push({id:'wp-'+Date.now(),name:name,exercises:exercises});
+  localStorage.setItem('aWplans',JSON.stringify(WORKOUT_PLANS));
+  closeOv('ovAddWplan');
+  if(document.getElementById('wplanNameInput'))document.getElementById('wplanNameInput').value='';
+  renderWplanList();
+}
+
+function renderWplanList(){
+  var el=document.getElementById('wplanList');
+  if(!el)return;
+  if(!WORKOUT_PLANS.length){el.innerHTML='<p style="color:var(--textl);text-align:center;padding:16px;font-size:13px">No workout plans yet. Tap "+ Plan" to create one.</p>';return;}
+  el.innerHTML=WORKOUT_PLANS.map(function(p){
+    var recentLogs=WORKOUT_LOG2.filter(function(l){return l.planId===p.id;});
+    var lastDone=recentLogs.length?recentLogs[recentLogs.length-1].date:'';
+    return '<div class="wplan-card" id="wpc-'+p.id+'">'
+      +'<div class="wplan-hd" onclick="toggleWplan(\''+p.id+'\')">'
+      +'<span class="wplan-name">'+p.name+'</span>'
+      +'<span class="wplan-cnt">'+p.exercises.length+' exercises'+(lastDone?' · last: '+lastDone:'')+'</span>'
+      +'<span style="font-size:12px;color:var(--textl);margin-left:6px">▾</span>'
+      +'</div>'
+      +'<div class="wplan-exercises" id="wpex-'+p.id+'">'
+      +p.exercises.map(function(ex){
+        return '<div class="wplan-ex-row"><span class="wplan-ex-name">'+ex.name+'</span><span class="wplan-ex-detail">'+ex.detail+'</span></div>';
+      }).join('')
+      +'<div style="display:flex;gap:8px;margin-top:10px">'
+      +'<button class="btn" style="flex:1;background:var(--sage)" onclick="loadWplan(\''+p.id+'\')">▶ Start Workout</button>'
+      +'<button class="btn sec" style="font-size:12px;padding:6px 12px" onclick="delWplan(\''+p.id+'\')">🗑️</button>'
+      +'</div>'
+      +'</div>'
+      +'</div>';
+  }).join('');
+}
+
+function toggleWplan(id){
+  var ex=document.getElementById('wpex-'+id);
+  if(ex)ex.style.display=ex.style.display==='none'||!ex.style.display?'':'none';
+  // default is display:none from CSS — toggle to block
+  if(ex&&ex.style.display==='')ex.style.display='block';
+  else if(ex)ex.style.display='';
+}
+
+function delWplan(id){
+  if(!confirm('Delete this workout plan?'))return;
+  WORKOUT_PLANS=WORKOUT_PLANS.filter(function(p){return p.id!==id;});
+  localStorage.setItem('aWplans',JSON.stringify(WORKOUT_PLANS));
+  renderWplanList();
+}
+
+function loadWplan(id){
+  var plan=WORKOUT_PLANS.find(function(p){return p.id===id;});
+  if(!plan)return;
+  _activeWplanId=id;
+  _activeWplanChecked={};
+  document.getElementById('wplanActiveName').textContent='💪 '+plan.name;
+  var list=document.getElementById('wplanActiveExList');
+  if(list){
+    list.innerHTML=plan.exercises.map(function(ex){
+      return '<div class="wplan-active-ex">'
+        +'<div class="wplan-active-chk" id="wac-'+ex.id+'" onclick="toggleWplanEx(\''+ex.id+'\')"></div>'
+        +'<div style="flex:1"><div style="font-size:13px;font-weight:600;color:var(--textd)">'+ex.name+'</div>'
+        +(ex.detail?'<div style="font-size:11px;color:var(--textl)">'+ex.detail+'</div>':'')
+        +'</div>'
+        +'</div>';
+    }).join('');
+  }
+  document.getElementById('wplanActiveWrap').style.display='';
+  document.getElementById('wplanActiveWrap').scrollIntoView({behavior:'smooth'});
+}
+
+function toggleWplanEx(exId){
+  _activeWplanChecked[exId]=!_activeWplanChecked[exId];
+  var chk=document.getElementById('wac-'+exId);
+  if(chk){chk.classList.toggle('done',!!_activeWplanChecked[exId]);chk.textContent=_activeWplanChecked[exId]?'✓':'';}
+}
+
+function completeWplan(){
+  var plan=WORKOUT_PLANS.find(function(p){return p.id===_activeWplanId;});
+  var total=plan?plan.exercises.length:0;
+  var done=Object.values(_activeWplanChecked).filter(Boolean).length;
+  WORKOUT_LOG2.push({id:'wl-'+Date.now(),planId:_activeWplanId,planName:plan?plan.name:'',date:new Date().toISOString().slice(0,10),done:done,total:total});
+  localStorage.setItem('aWlog2',JSON.stringify(WORKOUT_LOG2));
+  cancelActiveWplan();
+  // also log in exercise log
+  var today=new Date().toISOString().slice(0,10);
+  if(!EX_LOG[today])EX_LOG[today]=[];
+  EX_LOG[today].push({name:(plan?plan.name:'Workout'),duration:0,cal:0,note:'Plan: '+done+'/'+total+' exercises done'});
+  localStorage.setItem('aExLog',JSON.stringify(EX_LOG));
+  renderExLog();
+  alert('✅ Workout logged! '+done+'/'+total+' exercises completed.');
+}
+
+function cancelActiveWplan(){
+  _activeWplanId='';
+  _activeWplanChecked={};
+  document.getElementById('wplanActiveWrap').style.display='none';
+}
+
+// ═══════════════════════════════════════════════
+// KINGDOM EVENTS
+// ═══════════════════════════════════════════════
+
+function openKEventAdd(){
+  var el=document.getElementById('kEventDate');
+  if(el)el.value=new Date().toISOString().slice(0,10);
+  showOv('ovKEvent');
+}
+
+function prefillKEvent(name,emoji){
+  var n=document.getElementById('kEventName');
+  var e=document.getElementById('kEventEmoji');
+  if(n)n.value=name;
+  if(e)e.value=emoji;
+}
+
+function saveKEvent(){
+  var name=((document.getElementById('kEventName')||{}).value||'').trim();
+  var date=(document.getElementById('kEventDate')||{}).value||'';
+  var emoji=((document.getElementById('kEventEmoji')||{}).value||'⏳').trim()||'⏳';
+  if(!name||!date)return alert('Enter a name and date');
+  K_EVENTS.push({id:'ke-'+Date.now(),name:name,date:date,emoji:emoji});
+  K_EVENTS.sort(function(a,b){return a.date<b.date?-1:1;});
+  localStorage.setItem('aKEvents',JSON.stringify(K_EVENTS));
+  closeOv('ovKEvent');
+  if(document.getElementById('kEventName'))document.getElementById('kEventName').value='';
+  if(document.getElementById('kEventEmoji'))document.getElementById('kEventEmoji').value='';
+  renderKEvents();
+}
+
+function delKEvent(id){
+  K_EVENTS=K_EVENTS.filter(function(e){return e.id!==id;});
+  localStorage.setItem('aKEvents',JSON.stringify(K_EVENTS));
+  renderKEvents();
+}
+
+function renderKEvents(){
+  var wrap=document.getElementById('keventsWrap');
+  var strip=document.getElementById('keventsStrip');
+  if(!wrap||!strip)return;
+  if(!K_EVENTS.length){wrap.style.display='none';return;}
+  wrap.style.display='';
+  var today=new Date();today.setHours(0,0,0,0);
+  strip.innerHTML=K_EVENTS.map(function(ev){
+    var d=new Date(ev.date+'T00:00:00');
+    var diff=Math.round((d-today)/(1000*60*60*24));
+    var label='',color='var(--rose)';
+    if(diff===0){label='Today!';color='var(--sage)';}
+    else if(diff>0){label='days away';}
+    else{label='days ago';color='var(--textl)';}
+    return '<div class="kevent-card" style="border-top-color:'+color+'" onclick="if(confirm(\'Remove \\\''+ev.name.replace(/'/g,"\\'")+'\\\'?\'))delKEvent(\''+ev.id+'\')">'
+      +'<div style="font-size:22px">'+ev.emoji+'</div>'
+      +'<div class="kevent-days" style="color:'+color+'">'+Math.abs(diff)+'</div>'
+      +(diff!==0?'<div class="kevent-label">'+label+'</div>':'<div class="kevent-label" style="color:var(--sage)">TODAY!</div>')
+      +'<div class="kevent-name">'+ev.name+'</div>'
+      +'</div>';
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════
+// SPIRITUAL HABITS
+// ═══════════════════════════════════════════════
+
+function todayStr(){return new Date().toISOString().slice(0,10);}
+
+function habitStreak(id){
+  var log=HABIT_LOG[id]||[];
+  if(!log.length)return 0;
+  var logSet=new Set(log);
+  var streak=0;
+  var d=new Date();
+  // start from today; if today not done start from yesterday
+  if(!logSet.has(todayStr())){
+    d.setDate(d.getDate()-1);
+  }
+  while(true){
+    var ds=d.toISOString().slice(0,10);
+    if(!logSet.has(ds))break;
+    streak++;
+    d.setDate(d.getDate()-1);
+    if(streak>365)break;
+  }
+  return streak;
+}
+
+function habitDone(id,dateStr){
+  dateStr=dateStr||todayStr();
+  var log=HABIT_LOG[id]||[];
+  return log.indexOf(dateStr)>=0;
+}
+
+function toggleHabit(id){
+  var today=todayStr();
+  var log=HABIT_LOG[id]||[];
+  var idx=log.indexOf(today);
+  if(idx>=0)log.splice(idx,1);
+  else log.push(today);
+  HABIT_LOG[id]=log;
+  localStorage.setItem('aHabitLog',JSON.stringify(HABIT_LOG));
+  renderHabits();
+}
+
+function openAddHabit(){showOv('ovAddHabit');}
+
+function prefillHabit(name,emoji){
+  var n=document.getElementById('habitNameInput');
+  var e=document.getElementById('habitEmojiInput');
+  if(n)n.value=name;
+  if(e)e.value=emoji;
+}
+
+function confirmAddHabit(){
+  var name=((document.getElementById('habitNameInput')||{}).value||'').trim();
+  var emoji=((document.getElementById('habitEmojiInput')||{}).value||'').trim()||'✅';
+  if(!name)return alert('Enter a habit name');
+  HABITS.push({id:'h-'+Date.now(),name:name,emoji:emoji,active:true});
+  localStorage.setItem('aHabits',JSON.stringify(HABITS));
+  closeOv('ovAddHabit');
+  if(document.getElementById('habitNameInput'))document.getElementById('habitNameInput').value='';
+  if(document.getElementById('habitEmojiInput'))document.getElementById('habitEmojiInput').value='';
+  renderHabits();
+}
+
+function renderHabits(){
+  var el=document.getElementById('habitList');
+  if(!el)return;
+  if(!HABITS.length){
+    el.innerHTML='<p style="color:var(--textl);text-align:center;padding:20px">No habits yet. Tap "+ Habit" to add your first spiritual habit.</p>';
+    return;
+  }
+  var today=todayStr();
+  // Build last 28 days
+  var days=[];
+  var d=new Date();
+  for(var i=27;i>=0;i--){
+    var tmp=new Date(d);
+    tmp.setDate(tmp.getDate()-i);
+    days.push(tmp.toISOString().slice(0,10));
+  }
+  el.innerHTML=HABITS.map(function(h){
+    var done=habitDone(h.id,today);
+    var streak=habitStreak(h.id);
+    var log=HABIT_LOG[h.id]||[];
+    var logSet=new Set(log);
+    var dots=days.map(function(ds){
+      var cls='habit-dot'+(logSet.has(ds)?' filled':'')+(ds===today?' today':'');
+      return '<div class="'+cls+'" title="'+ds+'"></div>';
+    }).join('');
+    return '<div class="habit-row">'
+      +'<div class="habit-top">'
+      +'<div class="habit-chk'+(done?' done':'')+'" onclick="toggleHabit(\''+h.id+'\')">'+(done?'✓':'')+'</div>'
+      +'<span style="font-size:18px;flex-shrink:0">'+h.emoji+'</span>'
+      +'<span class="habit-name">'+h.name+'</span>'
+      +(streak>0?'<span class="habit-streak">🔥'+streak+'</span>':'')
+      +'<button class="btn sec" style="font-size:11px;padding:2px 7px;flex-shrink:0" onclick="delHabit(\''+h.id+'\')">✕</button>'
+      +'</div>'
+      +'<div class="habit-dots">'+dots+'</div>'
+      +'</div>';
+  }).join('');
+}
+
+function delHabit(id){
+  if(!confirm('Remove this habit?'))return;
+  HABITS=HABITS.filter(function(h){return h.id!==id;});
+  delete HABIT_LOG[id];
+  localStorage.setItem('aHabits',JSON.stringify(HABITS));
+  localStorage.setItem('aHabitLog',JSON.stringify(HABIT_LOG));
+  renderHabits();
+}
+
+// ═══════════════════════════════════════════════
+// STUDY NOTES
+// ═══════════════════════════════════════════════
+
+var SNOTE_COLORS={
+  'Meeting Notes':'#c9a0a0','Personal Study':'#a99fc9',
+  'Bible Study':'#8faa8b','Field Service Prep':'#d4a574','Other':'#8aafc9'
+};
+
+function snQuick(prefix){
+  var el=document.getElementById('snTitle');
+  if(el)el.value=prefix;
+  el.focus();
+}
+
+function saveStudyNote(){
+  var date=(document.getElementById('snDate')||{}).value||todayStr();
+  var cat=((document.getElementById('snCat')||{}).value||'').trim()||'Other';
+  var title=((document.getElementById('snTitle')||{}).value||'').trim();
+  var body=((document.getElementById('snBody')||{}).value||'').trim();
+  if(!title&&!body)return alert('Add a title or notes');
+  STUDY_NOTES.unshift({id:'sn-'+Date.now(),date:date,cat:cat,title:title,body:body,expanded:false});
+  localStorage.setItem('aStudyNotes',JSON.stringify(STUDY_NOTES));
+  ['snTitle','snBody'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});
+  renderStudyNotes();
+}
+
+function renderStudyNotes(){
+  var el=document.getElementById('studyNotesList');
+  if(!el)return;
+  var q=((document.getElementById('snSearch')||{}).value||'').toLowerCase().trim();
+  var f=((document.getElementById('snFilter')||{}).value||'');
+  var list=STUDY_NOTES.filter(function(n){
+    if(f&&n.cat!==f)return false;
+    if(q&&(n.title+' '+n.body+' '+n.cat).toLowerCase().indexOf(q)<0)return false;
+    return true;
+  });
+  if(!list.length){el.innerHTML='<p style="color:var(--textl);text-align:center;padding:20px">'+(STUDY_NOTES.length?'No notes match your search.':'No notes yet. Start by adding your first study note above!')+'</p>';return;}
+  el.innerHTML=list.map(function(n){
+    var color=SNOTE_COLORS[n.cat]||'#8aafc9';
+    return '<div class="snote-card" onclick="toggleSnote(\''+n.id+'\')">'
+      +'<div class="snote-head">'
+      +'<span class="snote-cat-badge" style="background:'+color+'22;color:'+color+'">'+n.cat+'</span>'
+      +(n.title?'<span class="snote-title">'+n.title+'</span>':'')
+      +'<button class="btn sec" style="font-size:11px;padding:2px 7px;flex-shrink:0;margin-left:auto" onclick="event.stopPropagation();delStudyNote(\''+n.id+'\')">✕</button>'
+      +'</div>'
+      +'<div class="snote-date">'+n.date+'</div>'
+      +(n.body?'<div class="snote-body'+(n.expanded?' expanded':'')+'">'+n.body.replace(/\n/g,'<br>')+'</div>':'')
+      +'</div>';
+  }).join('');
+}
+
+function toggleSnote(id){
+  var n=STUDY_NOTES.find(function(x){return x.id===id;});
+  if(n)n.expanded=!n.expanded;
+  renderStudyNotes();
+}
+
+function delStudyNote(id){
+  STUDY_NOTES=STUDY_NOTES.filter(function(n){return n.id!==id;});
+  localStorage.setItem('aStudyNotes',JSON.stringify(STUDY_NOTES));
+  renderStudyNotes();
+}
+
+// ═══════════════════════════════════════════════
+// JSON BACKUP / RESTORE
+// ═══════════════════════════════════════════════
+
+function downloadBackup(){
+  var keys=['aTasks','aRout','aLists','aExps','aWigs','aBills','aIncome','aMoods','aFoodLog','aWater','aSymptoms','aExLog','aRecipes','aMealPlan','aGrocery','aPrayers','aBibleLog','aMinistryLog','aGratLog','aVbItems','aMemories','aFaves','aHabits','aHabitLog','aStudyNotes','aKEvents','aFcDecks','aFcCards','aResearch','aWplans','aWlog2','aCustomColors','aSName','aSQuote','aSBanner','aProtTabs'];
+  var data={};
+  keys.forEach(function(k){var v=localStorage.getItem(k);if(v)data[k]=v;});
+  var blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');
+  a.href=url;
+  a.download='adri-life-backup-'+todayStr()+'.json';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function restoreBackup(input){
+  if(!input.files||!input.files[0])return;
+  var reader=new FileReader();
+  reader.onload=function(e){
+    try{
+      var data=JSON.parse(e.target.result);
+      if(!confirm('This will REPLACE all your current data with the backup. Continue?'))return;
+      Object.keys(data).forEach(function(k){localStorage.setItem(k,data[k]);});
+      alert('✅ Backup restored! The app will now reload.');
+      location.reload();
+    }catch(err){alert('❌ Invalid backup file.');}
+  };
+  reader.readAsText(input.files[0]);
+}
+
+// ═══════════════════════════════════════════════
+// FAVES TAB
+// ═══════════════════════════════════════════════
+
+function initFaveAccents(){
+  var row=document.getElementById('faveAccentRow');
+  if(!row)return;
+  row.innerHTML=FAVE_ACCENTS.map(function(c){
+    return '<div class="fave-accent-dot'+(c===_faveAccent?' on':'')+'" style="background:'+c+'" onclick="selFaveAccent(\''+c+'\',this)"></div>';
+  }).join('');
+}
+
+function selFaveAccent(c,el){
+  _faveAccent=c;
+  document.querySelectorAll('.fave-accent-dot').forEach(function(d){d.classList.remove('on');});
+  if(el)el.classList.add('on');
+}
+
+function previewFaveImg(input){
+  if(!input.files||!input.files[0])return;
+  var reader=new FileReader();
+  reader.onload=function(e){
+    _favePendingImg=e.target.result;
+    var prev=document.getElementById('faveImgPreview');
+    if(prev){prev.src=e.target.result;prev.style.display='block';}
+  };
+  reader.readAsDataURL(input.files[0]);
+}
+
+function addFave(){
+  var name=((document.getElementById('faveName')||{}).value||'').trim();
+  var url=((document.getElementById('faveUrl')||{}).value||'').trim();
+  if(!name)return alert('Enter a name');
+  if(!url)return alert('Enter a URL');
+  if(url.indexOf('http')!==0)url='https://'+url;
+  var imgUrl=((document.getElementById('faveImgUrl')||{}).value||'').trim();
+  var img=_favePendingImg||imgUrl||'';
+  var cat=((document.getElementById('faveCat')||{}).value||'').trim();
+  FAVES.unshift({id:'fv-'+Date.now(),name:name,url:url,img:img,cat:cat,accent:_faveAccent});
+  localStorage.setItem('aFaves',JSON.stringify(FAVES));
+  _favePendingImg='';
+  ['faveName','faveUrl','faveImgUrl','faveCat'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});
+  var fp=document.getElementById('faveImgPreview');if(fp){fp.src='';fp.style.display='none';}
+  var ff=document.getElementById('faveImgFile');if(ff)ff.value='';
+  renderFaves();
+}
+
+function getFaveCats(){
+  var cats={};
+  FAVES.forEach(function(f){if(f.cat)cats[f.cat]=1;});
+  return Object.keys(cats).sort();
+}
+
+function renderFaveCatChips(){
+  var el=document.getElementById('faveCatChips');
+  if(!el)return;
+  var cats=getFaveCats();
+  if(!cats.length){el.innerHTML='';return;}
+  var chips=[{label:'All',val:'all'}].concat(cats.map(function(c){return{label:c,val:c};}));
+  el.innerHTML=chips.map(function(ch){
+    return '<button class="fave-cat-chip'+(_faveCatFilter===ch.val?' on':'')+'" onclick="setFaveCatFilter(\''+ch.val+'\')">'+ch.label+'</button>';
+  }).join('');
+  // update datalist
+  var dl=document.getElementById('faveCatSuggestions');
+  if(dl)dl.innerHTML=cats.map(function(c){return'<option value="'+c+'">';}).join('');
+}
+
+function setFaveCatFilter(val){
+  _faveCatFilter=val;
+  renderFaveCatChips();
+  renderFavesGrid();
+}
+
+function renderFavesGrid(){
+  var el=document.getElementById('favesGrid');
+  if(!el)return;
+  var list=_faveCatFilter==='all'?FAVES:FAVES.filter(function(f){return f.cat===_faveCatFilter;});
+  if(!list.length){
+    el.innerHTML='<p style="color:var(--textl);text-align:center;padding:20px">'+(FAVES.length?'No favorites in this category.':'No favorites yet. Add your first one above!')+'</p>';
+    return;
+  }
+  el.innerHTML=list.map(function(f){
+    var imgHtml='';
+    if(f.img){
+      imgHtml='<img class="fave-card-img" src="'+f.img+'" alt="" onerror="this.style.display=\'none\'">';
+    } else {
+      imgHtml='<div class="fave-card-img-placeholder" style="background:'+f.accent+'22">⭐</div>';
+    }
+    return '<div class="fave-card-wrap" ontouchstart="" onclick="openFave(\''+f.id+'\')" oncontextmenu="toggleFaveDel(event,\''+f.id+'\')">'
+      +'<div class="fave-card" style="border-top:3px solid '+f.accent+'">'
+      +imgHtml
+      +'<div class="fave-card-body">'
+      +'<div class="fave-card-name">'+f.name+'</div>'
+      +(f.cat?'<span class="fave-card-cat">'+f.cat+'</span>':'')
+      +'</div>'
+      +'</div>'
+      +'<button class="fave-card-del" onclick="delFaveById(event,\''+f.id+'\')">✕</button>'
+      +'</div>';
+  }).join('');
+}
+
+function renderFaves(){
+  renderFaveCatChips();
+  renderFavesGrid();
+}
+
+function openFave(id){
+  var f=FAVES.find(function(x){return x.id===id;});
+  if(f)window.open(f.url,'_blank');
+}
+
+function toggleFaveDel(e,id){
+  e.preventDefault();
+  var wrap=e.currentTarget;
+  wrap.classList.toggle('show-del');
+}
+
+function delFaveById(e,id){
+  e.stopPropagation();
+  FAVES=FAVES.filter(function(f){return f.id!==id;});
+  localStorage.setItem('aFaves',JSON.stringify(FAVES));
+  renderFaves();
+}
+
+// ═══════════════════════════════════════════════
+// BOARD TAB
+// ═══════════════════════════════════════════════
+
+function showBoardSec(sec,btn){
+  ['vision','memories'].forEach(function(s){
+    var el=document.getElementById('bs-'+s);
+    if(el)el.style.display=(s===sec)?'':'none';
+  });
+  document.querySelectorAll('#v-board .pn-btn').forEach(function(b){b.classList.remove('on');});
+  if(btn)btn.classList.add('on');
+  if(sec==='vision')renderVisionBoard();
+  if(sec==='memories')renderMemories();
+}
+
+// ── Vision Board ──────────────────────────────
+function toggleVbInputs(){
+  var t=(document.getElementById('vbType')||{}).value||'quote';
+  var capEl=document.getElementById('vbCaption');
+  if(capEl)capEl.style.display=(t==='image')?'':'none';
+}
+
+function addVbItem(){
+  var type=(document.getElementById('vbType')||{}).value||'quote';
+  var text=((document.getElementById('vbText')||{}).value||'').trim();
+  var caption=((document.getElementById('vbCaption')||{}).value||'').trim();
+  if(!text)return alert('Enter some text or a URL');
+  VB_ITEMS.unshift({id:'vb-'+Date.now(),type:type,text:text,caption:caption});
+  localStorage.setItem('aVbItems',JSON.stringify(VB_ITEMS));
+  if(document.getElementById('vbText'))document.getElementById('vbText').value='';
+  if(document.getElementById('vbCaption'))document.getElementById('vbCaption').value='';
+  renderVisionBoard();
+}
+
+function renderVisionBoard(){
+  var el=document.getElementById('visionBoard');
+  if(!el)return;
+  if(!VB_ITEMS.length){el.innerHTML='<p style="color:var(--textl);text-align:center;padding:20px">Your vision board is empty. Add affirmations, goals, or images!</p>';return;}
+  el.innerHTML=VB_ITEMS.map(function(item){
+    var inner='';
+    if(item.type==='image'){
+      inner='<img class="board-item-img" src="'+item.text+'" alt="'+(item.caption||'')+'" onerror="this.style.display=\'none\'">'
+        +(item.caption?'<div class="board-item-text" style="font-size:12px;color:var(--textl)">'+item.caption+'</div>':'');
+    } else if(item.type==='quote'){
+      inner='<div class="board-item-label">Affirmation</div><div class="board-item-quote">'+item.text+'</div>';
+    } else {
+      inner='<div class="board-item-label">Goal</div><div class="board-item-text" style="font-weight:600">🎯 '+item.text+'</div>';
+    }
+    return '<div class="board-item">'
+      +inner
+      +'<div style="display:flex;justify-content:flex-end;margin-top:8px">'
+      +'<button class="btn sec" style="font-size:11px;padding:2px 8px" onclick="delVbItem(\''+item.id+'\')">✕</button>'
+      +'</div>'
+      +'</div>';
+  }).join('');
+}
+
+function delVbItem(id){
+  VB_ITEMS=VB_ITEMS.filter(function(v){return v.id!==id;});
+  localStorage.setItem('aVbItems',JSON.stringify(VB_ITEMS));
+  renderVisionBoard();
+}
+
+// ── Memories ──────────────────────────────────
+var _pendingMemPhoto='';
+
+function previewMemPhoto(input){
+  if(!input.files||!input.files[0])return;
+  var reader=new FileReader();
+  reader.onload=function(e){
+    _pendingMemPhoto=e.target.result;
+    var prev=document.getElementById('memPhotoPreview');
+    if(prev){prev.src=e.target.result;prev.style.display='block';}
+  };
+  reader.readAsDataURL(input.files[0]);
+}
+
+function addMemory(){
+  var date=(document.getElementById('memDate')||{}).value||new Date().toISOString().slice(0,10);
+  var title=((document.getElementById('memTitle')||{}).value||'').trim();
+  var note=((document.getElementById('memNote')||{}).value||'').trim();
+  if(!title&&!note)return alert('Add a title or note');
+  MEMORIES.unshift({id:'mem-'+Date.now(),date:date,title:title,note:note,photo:_pendingMemPhoto});
+  localStorage.setItem('aMemories',JSON.stringify(MEMORIES));
+  _pendingMemPhoto='';
+  ['memTitle','memNote'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});
+  var pi=document.getElementById('memPhotoInput');if(pi)pi.value='';
+  var pp=document.getElementById('memPhotoPreview');if(pp){pp.src='';pp.style.display='none';}
+  renderMemories();
+}
+
+function renderMemories(){
+  var el=document.getElementById('memoriesList');
+  if(!el)return;
+  if(!MEMORIES.length){el.innerHTML='<p style="color:var(--textl);text-align:center;padding:20px">No memories yet. Capture a special moment!</p>';return;}
+  el.innerHTML=MEMORIES.map(function(m){
+    return '<div class="mem-entry">'
+      +(m.photo?'<img class="mem-entry-img" src="'+m.photo+'" alt="">':'')
+      +'<div class="mem-entry-body">'
+      +'<div class="mem-entry-date">'+m.date+'</div>'
+      +(m.title?'<div class="mem-entry-title">'+m.title+'</div>':'')
+      +(m.note?'<div class="mem-entry-note">'+m.note+'</div>':'')
+      +'<div style="display:flex;justify-content:flex-end;margin-top:8px">'
+      +'<button class="btn sec" style="font-size:11px;padding:2px 8px" onclick="delMemory(\''+m.id+'\')">✕</button>'
+      +'</div>'
+      +'</div>'
+      +'</div>';
+  }).join('');
+}
+
+function delMemory(id){
+  MEMORIES=MEMORIES.filter(function(m){return m.id!==id;});
+  localStorage.setItem('aMemories',JSON.stringify(MEMORIES));
+  renderMemories();
+}
+
+// ═══════════════════════════════════════════════
+// HEX COLOR CUSTOMIZATION
+// ═══════════════════════════════════════════════
+
+var DEFAULT_COLORS={
+  '--rose':'#c9a0a0',
+  '--lav':'#a99fc9',
+  '--sage':'#8faa8b',
+  '--peach':'#d4a574',
+  '--teal':'#7fb5b0',
+  '--blue':'#8aafc9'
+};
+var COLOR_LABELS={
+  '--rose':'Rose',
+  '--lav':'Lavender',
+  '--sage':'Sage',
+  '--peach':'Peach',
+  '--teal':'Teal',
+  '--blue':'Blue'
+};
+
+function applyCustomColors(){
+  Object.keys(DEFAULT_COLORS).forEach(function(v){
+    var val=CUSTOM_COLORS[v]||DEFAULT_COLORS[v];
+    document.documentElement.style.setProperty(v,val);
+  });
+}
+
+function renderColorPickers(){
+  var el=document.getElementById('colorPickerGrid');
+  if(!el)return;
+  el.innerHTML=Object.keys(DEFAULT_COLORS).map(function(v){
+    var val=CUSTOM_COLORS[v]||DEFAULT_COLORS[v];
+    return '<div class="color-pick-item">'
+      +'<input type="color" value="'+val+'" data-var="'+v+'" onchange="liveUpdateColor(this)">'
+      +'<label>'+COLOR_LABELS[v]+'</label>'
+      +'</div>';
+  }).join('');
+  renderBannerImgPreview();
+}
+
+function liveUpdateColor(input){
+  var v=input.dataset.var;
+  var val=input.value;
+  document.documentElement.style.setProperty(v,val);
+  CUSTOM_COLORS[v]=val;
+}
+
+function resetColors(){
+  CUSTOM_COLORS={};
+  localStorage.removeItem('aCustomColors');
+  applyCustomColors();
+  renderColorPickers();
+}
+
+// ── Banner Image ──────────────────────────────
+function previewBannerImg(input){
+  if(!input.files||!input.files[0])return;
+  var reader=new FileReader();
+  reader.onload=function(e){
+    var prev=document.getElementById('bannerImgPreview');
+    if(prev){prev.src=e.target.result;prev.style.display='block';}
+    var clearBtn=document.getElementById('bannerImgClear');
+    if(clearBtn)clearBtn.style.display='';
+  };
+  reader.readAsDataURL(input.files[0]);
+}
+
+function renderBannerImgPreview(){
+  var prev=document.getElementById('bannerImgPreview');
+  var clearBtn=document.getElementById('bannerImgClear');
+  if(BANNER_IMG){
+    if(prev){prev.src=BANNER_IMG;prev.style.display='block';}
+    if(clearBtn)clearBtn.style.display='';
+  } else {
+    if(prev){prev.src='';prev.style.display='none';}
+    if(clearBtn)clearBtn.style.display='none';
+  }
+}
+
+function clearBannerImg(){
+  BANNER_IMG='';
+  localStorage.removeItem('aBannerImg');
+  applyBannerImg();
+  renderBannerImgPreview();
+}
+
+function applyBannerImg(){
+  var hdr=document.getElementById('mainHdr');
+  if(!hdr)return;
+  if(BANNER_IMG){
+    hdr.style.background='';
+    hdr.style.backgroundImage='url('+BANNER_IMG+')';
+    hdr.style.backgroundSize='cover';
+    hdr.style.backgroundPosition='center';
+  } else {
+    hdr.style.backgroundImage='';
+    hdr.style.background='linear-gradient('+S.banner+')';
+  }
+}
+
+// ═══════════════════════════════════════════════
+// SPIRIT TAB
+// ═══════════════════════════════════════════════
+
+var BIBLE_BOOKS = [
+  // Old Testament (39)
+  {name:'Genesis',chaps:50,t:'ot'},{name:'Exodus',chaps:40,t:'ot'},{name:'Leviticus',chaps:27,t:'ot'},
+  {name:'Numbers',chaps:36,t:'ot'},{name:'Deuteronomy',chaps:34,t:'ot'},{name:'Joshua',chaps:24,t:'ot'},
+  {name:'Judges',chaps:21,t:'ot'},{name:'Ruth',chaps:4,t:'ot'},{name:'1 Samuel',chaps:31,t:'ot'},
+  {name:'2 Samuel',chaps:24,t:'ot'},{name:'1 Kings',chaps:22,t:'ot'},{name:'2 Kings',chaps:25,t:'ot'},
+  {name:'1 Chronicles',chaps:29,t:'ot'},{name:'2 Chronicles',chaps:36,t:'ot'},{name:'Ezra',chaps:10,t:'ot'},
+  {name:'Nehemiah',chaps:13,t:'ot'},{name:'Esther',chaps:10,t:'ot'},{name:'Job',chaps:42,t:'ot'},
+  {name:'Psalms',chaps:150,t:'ot'},{name:'Proverbs',chaps:31,t:'ot'},{name:'Ecclesiastes',chaps:12,t:'ot'},
+  {name:'Song of Solomon',chaps:8,t:'ot'},{name:'Isaiah',chaps:66,t:'ot'},{name:'Jeremiah',chaps:52,t:'ot'},
+  {name:'Lamentations',chaps:5,t:'ot'},{name:'Ezekiel',chaps:48,t:'ot'},{name:'Daniel',chaps:12,t:'ot'},
+  {name:'Hosea',chaps:14,t:'ot'},{name:'Joel',chaps:3,t:'ot'},{name:'Amos',chaps:9,t:'ot'},
+  {name:'Obadiah',chaps:1,t:'ot'},{name:'Jonah',chaps:4,t:'ot'},{name:'Micah',chaps:7,t:'ot'},
+  {name:'Nahum',chaps:3,t:'ot'},{name:'Habakkuk',chaps:3,t:'ot'},{name:'Zephaniah',chaps:3,t:'ot'},
+  {name:'Haggai',chaps:2,t:'ot'},{name:'Zechariah',chaps:14,t:'ot'},{name:'Malachi',chaps:4,t:'ot'},
+  // New Testament (27)
+  {name:'Matthew',chaps:28,t:'nt'},{name:'Mark',chaps:16,t:'nt'},{name:'Luke',chaps:24,t:'nt'},
+  {name:'John',chaps:21,t:'nt'},{name:'Acts',chaps:28,t:'nt'},{name:'Romans',chaps:16,t:'nt'},
+  {name:'1 Corinthians',chaps:16,t:'nt'},{name:'2 Corinthians',chaps:13,t:'nt'},{name:'Galatians',chaps:6,t:'nt'},
+  {name:'Ephesians',chaps:6,t:'nt'},{name:'Philippians',chaps:4,t:'nt'},{name:'Colossians',chaps:4,t:'nt'},
+  {name:'1 Thessalonians',chaps:5,t:'nt'},{name:'2 Thessalonians',chaps:3,t:'nt'},{name:'1 Timothy',chaps:6,t:'nt'},
+  {name:'2 Timothy',chaps:4,t:'nt'},{name:'Titus',chaps:3,t:'nt'},{name:'Philemon',chaps:1,t:'nt'},
+  {name:'Hebrews',chaps:13,t:'nt'},{name:'James',chaps:5,t:'nt'},{name:'1 Peter',chaps:5,t:'nt'},
+  {name:'2 Peter',chaps:3,t:'nt'},{name:'1 John',chaps:5,t:'nt'},{name:'2 John',chaps:1,t:'nt'},
+  {name:'3 John',chaps:1,t:'nt'},{name:'Jude',chaps:1,t:'nt'},{name:'Revelation',chaps:22,t:'nt'}
+];
+
+function showSpiritSec(sec,btn){
+  ['prayer','bible','ministry','gratitude','habits','notes'].forEach(function(s){
+    var el=document.getElementById('ss-'+s);
+    if(el)el.style.display=(s===sec)?'':'none';
+  });
+  document.querySelectorAll('#v-spirit .pn-btn').forEach(function(b){b.classList.remove('on');});
+  if(btn)btn.classList.add('on');
+  if(sec==='prayer')renderPrayers();
+  if(sec==='bible'){renderBibleStats();renderBibleBooks();}
+  if(sec==='ministry'){renderMinistryStats();renderMinistryLog();}
+  if(sec==='gratitude')renderGratitudeLog();
+  if(sec==='habits')renderHabits();
+  if(sec==='notes'){renderStudyNotes();var snd=document.getElementById('snDate');if(snd&&!snd.value)snd.value=todayStr();}
+}
+
+// ── Prayer ────────────────────────────────────
+function addPrayer(){
+  var el=document.getElementById('prayerInput');
+  var text=(el&&el.value||'').trim();
+  if(!text)return;
+  PRAYERS.unshift({id:'p-'+Date.now(),text:text,date:new Date().toISOString().slice(0,10),answered:false,answeredDate:'',note:''});
+  localStorage.setItem('aPrayers',JSON.stringify(PRAYERS));
+  el.value='';
+  renderPrayers();
+}
+
+function renderPrayers(){
+  var el=document.getElementById('prayerList');
+  if(!el)return;
+  var showAns=(document.getElementById('showAnswered')||{}).checked||false;
+  var list=showAns?PRAYERS:PRAYERS.filter(function(p){return !p.answered;});
+  if(!list.length){el.innerHTML='<p style="color:var(--textl);text-align:center;padding:20px">'+(showAns?'No prayers yet.':'No active prayers. 🙏')+'</p>';return;}
+  el.innerHTML=list.map(function(p){
+    return '<div class="prayer-item'+(p.answered?' answered':'')+'">'
+      +'<div class="prayer-text">'+p.text+'</div>'
+      +'<div class="prayer-meta">'
+      +'<span>'+p.date+'</span>'
+      +(p.answered?'<span style="color:var(--sage);font-weight:700">✓ Answered '+(p.answeredDate||'')+'</span>':'')
+      +(p.note?'<span>'+p.note+'</span>':'')
+      +'</div>'
+      +'<div style="display:flex;gap:6px;margin-top:8px">'
+      +(!p.answered?'<button class="btn" style="font-size:11px;padding:4px 10px" onclick="markAnswered(\''+p.id+'\')">✓ Answered</button>':'')
+      +'<button class="btn sec" style="font-size:11px;padding:4px 10px" onclick="addPrayerNote(\''+p.id+'\')">📝 Note</button>'
+      +'<button class="btn sec" style="font-size:11px;padding:4px 10px;margin-left:auto" onclick="delPrayer(\''+p.id+'\')">✕</button>'
+      +'</div>'
+      +'</div>';
+  }).join('');
+}
+
+function markAnswered(id){
+  var p=PRAYERS.find(function(x){return x.id===id;});
+  if(!p)return;
+  p.answered=true;
+  p.answeredDate=new Date().toISOString().slice(0,10);
+  localStorage.setItem('aPrayers',JSON.stringify(PRAYERS));
+  renderPrayers();
+}
+
+function addPrayerNote(id){
+  var p=PRAYERS.find(function(x){return x.id===id;});
+  if(!p)return;
+  var note=prompt('Add a note to this prayer:',p.note||'');
+  if(note===null)return;
+  p.note=note.trim();
+  localStorage.setItem('aPrayers',JSON.stringify(PRAYERS));
+  renderPrayers();
+}
+
+function delPrayer(id){
+  PRAYERS=PRAYERS.filter(function(p){return p.id!==id;});
+  localStorage.setItem('aPrayers',JSON.stringify(PRAYERS));
+  renderPrayers();
+}
+
+// ── Bible reading ─────────────────────────────
+function renderBibleStats(){
+  var el=document.getElementById('bibleStats');
+  if(!el)return;
+  var totalChaps=BIBLE_BOOKS.reduce(function(s,b){return s+b.chaps;},0);
+  var readChaps=0;
+  BIBLE_BOOKS.forEach(function(b){
+    var log=BIBLE_LOG[b.name]||[];
+    readChaps+=log.length;
+  });
+  var booksFinished=BIBLE_BOOKS.filter(function(b){return (BIBLE_LOG[b.name]||[]).length===b.chaps;}).length;
+  var pct=totalChaps?Math.round(readChaps/totalChaps*100):0;
+  el.innerHTML='<div class="spirit-stat"><div class="spirit-stat-num">'+pct+'%</div><div class="spirit-stat-lbl">Complete</div></div>'
+    +'<div class="spirit-stat"><div class="spirit-stat-num">'+readChaps+'</div><div class="spirit-stat-lbl">Chapters read</div></div>'
+    +'<div class="spirit-stat"><div class="spirit-stat-num">'+booksFinished+'</div><div class="spirit-stat-lbl">Books done</div></div>'
+    +'<div class="spirit-stat"><div class="spirit-stat-num">'+(totalChaps-readChaps)+'</div><div class="spirit-stat-lbl">Remaining</div></div>';
+}
+
+function renderBibleBooks(){
+  var el=document.getElementById('bibleBookGrid');
+  if(!el)return;
+  var filter=(document.getElementById('bibleFilter')||{}).value||'all';
+  var books=BIBLE_BOOKS.filter(function(b){
+    var log=BIBLE_LOG[b.name]||[];
+    var pct=log.length/b.chaps;
+    if(filter==='ot')return b.t==='ot';
+    if(filter==='nt')return b.t==='nt';
+    if(filter==='unread')return log.length===0;
+    if(filter==='started')return log.length>0&&log.length<b.chaps;
+    if(filter==='done')return log.length===b.chaps;
+    return true;
+  });
+  el.innerHTML=books.map(function(b){
+    var log=BIBLE_LOG[b.name]||[];
+    var pct=Math.round(log.length/b.chaps*100);
+    var safeName=b.name.replace(/'/g,"\\'").replace(/"/g,'&quot;');
+    return '<div class="bible-book-card" onclick="openBibleBook(\''+safeName+'\')">'
+      +'<div class="bible-book-name">'+b.name+'</div>'
+      +'<div class="bible-book-prog"><div class="bible-book-fill" style="width:'+pct+'%"></div></div>'
+      +'<div class="bible-book-pct">'+log.length+'/'+b.chaps+' chapters</div>'
+      +'</div>';
+  }).join('');
+}
+
+function openBibleBook(bookName){
+  var book=BIBLE_BOOKS.find(function(b){return b.name===bookName;});
+  if(!book)return;
+  var log=BIBLE_LOG[bookName]||[];
+  var chaps=[];
+  for(var i=1;i<=book.chaps;i++)chaps.push(i);
+  var input=prompt(
+    book.name+' ('+book.chaps+' chapters)\n'+
+    'Currently read: '+(log.length?log.join(', '):'none')+'\n\n'+
+    'Enter chapter numbers to toggle (e.g. "1-5" or "1,3,7" or "all" or "none"):'
+  );
+  if(input===null)return;
+  input=input.trim().toLowerCase();
+  var newLog=log.slice();
+  if(input==='all'){
+    newLog=chaps.slice();
+  } else if(input==='none'){
+    newLog=[];
+  } else {
+    var toToggle=[];
+    input.split(',').forEach(function(part){
+      part=part.trim();
+      if(part.indexOf('-')>0){
+        var range=part.split('-');
+        var from=parseInt(range[0]);
+        var to=parseInt(range[1]);
+        if(!isNaN(from)&&!isNaN(to)){
+          for(var i=from;i<=to;i++)if(i>=1&&i<=book.chaps)toToggle.push(i);
+        }
+      } else {
+        var n=parseInt(part);
+        if(!isNaN(n)&&n>=1&&n<=book.chaps)toToggle.push(n);
+      }
+    });
+    toToggle.forEach(function(c){
+      var idx=newLog.indexOf(c);
+      if(idx>=0)newLog.splice(idx,1);
+      else newLog.push(c);
+    });
+    newLog.sort(function(a,b){return a-b;});
+  }
+  BIBLE_LOG[bookName]=newLog;
+  localStorage.setItem('aBibleLog',JSON.stringify(BIBLE_LOG));
+  renderBibleStats();
+  renderBibleBooks();
+}
+
+// ── Ministry ──────────────────────────────────
+function logMinistry(){
+  var date=(document.getElementById('minDate')||{}).value||new Date().toISOString().slice(0,10);
+  var hrs=parseFloat((document.getElementById('minHrs')||{}).value||0)||0;
+  var studies=parseInt((document.getElementById('minStudies')||{}).value||0)||0;
+  var notes=((document.getElementById('minNotes')||{}).value||'').trim();
+  if(!hrs&&!notes)return alert('Enter hours or notes');
+  MINISTRY_LOG.unshift({id:'m-'+Date.now(),date:date,hours:hrs,studies:studies,notes:notes});
+  localStorage.setItem('aMinistryLog',JSON.stringify(MINISTRY_LOG));
+  if(document.getElementById('minHrs'))document.getElementById('minHrs').value='';
+  if(document.getElementById('minStudies'))document.getElementById('minStudies').value='';
+  if(document.getElementById('minNotes'))document.getElementById('minNotes').value='';
+  renderMinistryStats();
+  renderMinistryLog();
+}
+
+function renderMinistryStats(){
+  var el=document.getElementById('ministryStats');
+  if(!el)return;
+  var now=new Date();
+  var ym=now.getFullYear()+'-'+(now.getMonth()+1<10?'0':'')+(now.getMonth()+1);
+  var monthEntries=MINISTRY_LOG.filter(function(m){return m.date.slice(0,7)===ym;});
+  var monthHrs=monthEntries.reduce(function(s,m){return s+(m.hours||0);},0);
+  var monthStudies=monthEntries.reduce(function(s,m){return s+(m.studies||0);},0);
+  var totalHrs=MINISTRY_LOG.reduce(function(s,m){return s+(m.hours||0);},0);
+  el.innerHTML='<div class="spirit-stat"><div class="spirit-stat-num">'+monthHrs+'</div><div class="spirit-stat-lbl">Hrs this month</div></div>'
+    +'<div class="spirit-stat"><div class="spirit-stat-num">'+monthStudies+'</div><div class="spirit-stat-lbl">Studies this month</div></div>'
+    +'<div class="spirit-stat"><div class="spirit-stat-num">'+Math.round(totalHrs)+'</div><div class="spirit-stat-lbl">Total hours</div></div>';
+}
+
+function renderMinistryLog(){
+  var el=document.getElementById('ministryLog');
+  if(!el)return;
+  if(!MINISTRY_LOG.length){el.innerHTML='<p style="color:var(--textl);text-align:center;padding:20px">No entries yet. Log your ministry time above.</p>';return;}
+  el.innerHTML=MINISTRY_LOG.map(function(m){
+    return '<div class="ministry-row">'
+      +'<span class="ministry-row-date">'+m.date+'</span>'
+      +'<span class="ministry-row-hrs">'+m.hours+'h</span>'
+      +'<span class="ministry-row-detail">'
+      +(m.studies?m.studies+' stud. ':'')
+      +(m.notes||'')
+      +'</span>'
+      +'<button class="btn sec" style="font-size:11px;padding:2px 7px" onclick="delMinistry(\''+m.id+'\')">✕</button>'
+      +'</div>';
+  }).join('');
+}
+
+function delMinistry(id){
+  MINISTRY_LOG=MINISTRY_LOG.filter(function(m){return m.id!==id;});
+  localStorage.setItem('aMinistryLog',JSON.stringify(MINISTRY_LOG));
+  renderMinistryStats();
+  renderMinistryLog();
+}
+
+// ── Gratitude ─────────────────────────────────
+function saveGratitude(){
+  var items=[
+    (document.getElementById('grat1')||{}).value||'',
+    (document.getElementById('grat2')||{}).value||'',
+    (document.getElementById('grat3')||{}).value||''
+  ].map(function(s){return s.trim();}).filter(Boolean);
+  var extra=((document.getElementById('gratExtra')||{}).value||'').trim();
+  if(!items.length&&!extra)return alert('Add at least one item');
+  GRAT_LOG.unshift({id:'g-'+Date.now(),date:new Date().toISOString().slice(0,10),items:items,extra:extra});
+  localStorage.setItem('aGratLog',JSON.stringify(GRAT_LOG));
+  ['grat1','grat2','grat3','gratExtra'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});
+  renderGratitudeLog();
+}
+
+function renderGratitudeLog(){
+  var el=document.getElementById('gratitudeLog');
+  if(!el)return;
+  if(!GRAT_LOG.length){el.innerHTML='<p style="color:var(--textl);text-align:center;padding:20px">No entries yet. What are you grateful for today?</p>';return;}
+  el.innerHTML=GRAT_LOG.map(function(g){
+    return '<div class="grat-entry">'
+      +'<div class="grat-date">'+g.date+'</div>'
+      +g.items.map(function(i){return '<div class="grat-item">'+i+'</div>';}).join('')
+      +(g.extra?'<div style="font-size:12px;color:var(--textl);margin-top:6px;font-style:italic">'+g.extra+'</div>':'')
+      +'<button class="btn sec" style="font-size:11px;padding:2px 7px;margin-top:8px" onclick="delGrat(\''+g.id+'\')">✕</button>'
+      +'</div>';
+  }).join('');
+}
+
+function delGrat(id){
+  GRAT_LOG=GRAT_LOG.filter(function(g){return g.id!==id;});
+  localStorage.setItem('aGratLog',JSON.stringify(GRAT_LOG));
+  renderGratitudeLog();
+}
+
+// ═══════════════════════════════════════════════
 // MEALS TAB
 // ═══════════════════════════════════════════════
 
@@ -3805,6 +5615,19 @@ function startApp(){
   renderLists();
   updMoneyBadge();
   renderMealPlan();
+  var minDateEl=document.getElementById('minDate');
+  if(minDateEl)minDateEl.value=new Date().toISOString().slice(0,10);
+  applyCustomColors();
+  applyBannerImg();
+  var memDateEl=document.getElementById('memDate');
+  if(memDateEl)memDateEl.value=new Date().toISOString().slice(0,10);
+  initFaveAccents();
+  renderFaves();
+  renderKEvents();
+  renderWplanList();
+  renderFcDecks();
+  var snDateEl=document.getElementById('snDate');
+  if(snDateEl)snDateEl.value=todayStr();
 }
 
 // Wait for Firebase then start
@@ -3944,5 +5767,60 @@ setInterval(updDate, 60000);
   <button class="cn-btn" onclick="closeM('tmplModal')">Cancel</button>
 </div></div>
 
+<!-- KINGDOM EVENTS MODAL -->
+<div class="ov" id="ovKEvent" onclick="closeOv('ovKEvent')">
+  <div class="mod" onclick="event.stopPropagation()">
+    <div class="mh"><span class="mt">⏳ Add Kingdom Event</span><button class="mc" onclick="closeOv('ovKEvent')">✕</button></div>
+    <input id="kEventName" type="text" class="fi" placeholder="Event name (e.g. Circuit Assembly)" style="margin-bottom:8px">
+    <input id="kEventDate" type="date" class="fi" style="margin-bottom:8px">
+    <input id="kEventEmoji" type="text" class="fi" placeholder="Emoji (optional, e.g. 🏛️)" maxlength="4" style="margin-bottom:12px">
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
+      <button class="btn sec" style="font-size:12px" onclick="prefillKEvent('Circuit Assembly','🏛️')">🏛️ Circuit Assembly</button>
+      <button class="btn sec" style="font-size:12px" onclick="prefillKEvent('District Convention','🌿')">🌿 Convention</button>
+      <button class="btn sec" style="font-size:12px" onclick="prefillKEvent('Memorial','🍷')">🍷 Memorial</button>
+      <button class="btn sec" style="font-size:12px" onclick="prefillKEvent('Pioneer School','📚')">📚 Pioneer School</button>
+    </div>
+    <button class="ok-btn" onclick="saveKEvent()">Save Event</button>
+  </div>
+</div>
+<!-- ADD DECK MODAL -->
+<div class="ov" id="ovAddDeck" onclick="closeOv('ovAddDeck')">
+  <div class="mod" onclick="event.stopPropagation()">
+    <div class="mh"><span class="mt">🃏 New Deck</span><button class="mc" onclick="closeOv('ovAddDeck')">✕</button></div>
+    <input id="deckNameInput" type="text" class="fi" placeholder="Deck name (e.g. Bible Truths)" style="margin-bottom:10px">
+    <div style="font-size:11px;color:var(--textl);margin-bottom:8px">Color:</div>
+    <div style="display:flex;gap:8px;margin-bottom:14px" id="deckColorRow"></div>
+    <button class="ok-btn" onclick="confirmAddDeck()">Create Deck</button>
+  </div>
+</div>
+<!-- ADD WORKOUT PLAN MODAL -->
+<div class="ov" id="ovAddWplan" onclick="closeOv('ovAddWplan')">
+  <div class="mod" onclick="event.stopPropagation()" style="max-height:88vh;overflow-y:auto">
+    <div class="mh"><span class="mt">🏋️ New Workout Plan</span><button class="mc" onclick="closeOv('ovAddWplan')">✕</button></div>
+    <input id="wplanNameInput" type="text" class="fi" placeholder="Plan name (e.g. Upper Body)" style="margin-bottom:12px">
+    <div style="font-size:12px;font-weight:700;color:var(--textd);margin-bottom:8px">Exercises:</div>
+    <div id="wplanExInputs"></div>
+    <button class="btn sec" style="width:100%;margin-bottom:14px" onclick="addWplanExInput()">+ Add Exercise</button>
+    <button class="ok-btn" onclick="confirmAddWplan()">Save Plan</button>
+  </div>
+</div>
+<!-- HABIT ADD MODAL -->
+<div class="ov" id="ovAddHabit" onclick="closeOv('ovAddHabit')">
+  <div class="mod" onclick="event.stopPropagation()">
+    <div class="mh"><span class="mt">🔥 Add Habit</span><button class="mc" onclick="closeOv('ovAddHabit')">✕</button></div>
+    <input id="habitNameInput" type="text" class="fi" placeholder="Habit name (e.g. Morning prayer)" style="margin-bottom:8px">
+    <input id="habitEmojiInput" type="text" class="fi" placeholder="Emoji (optional)" maxlength="4" style="margin-bottom:12px">
+    <div style="font-size:11px;color:var(--textl);margin-bottom:8px">Quick picks:</div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px">
+      <button class="btn sec" style="font-size:12px" onclick="prefillHabit('Morning Prayer','🙏')">🙏 Morning Prayer</button>
+      <button class="btn sec" style="font-size:12px" onclick="prefillHabit('Bible Reading','📖')">📖 Bible Reading</button>
+      <button class="btn sec" style="font-size:12px" onclick="prefillHabit('Attend Meeting','🏛️')">🏛️ Attend Meeting</button>
+      <button class="btn sec" style="font-size:12px" onclick="prefillHabit('Field Service','🚪')">🚪 Field Service</button>
+      <button class="btn sec" style="font-size:12px" onclick="prefillHabit('Personal Study','📚')">📚 Personal Study</button>
+      <button class="btn sec" style="font-size:12px" onclick="prefillHabit('Family Worship','👨‍👩‍👧')">👨‍👩‍👧 Family Worship</button>
+    </div>
+    <button class="ok-btn" onclick="confirmAddHabit()">Add Habit</button>
+  </div>
+</div>
 </body>
 </html>
