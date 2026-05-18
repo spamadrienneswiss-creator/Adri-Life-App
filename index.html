@@ -227,6 +227,30 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
 .tmpl-chip:active{background:var(--blue-light);border-color:var(--blue);color:var(--blue)}
 .pin-btn{background:none;border:none;font-size:16px;cursor:pointer;padding:3px;opacity:.5;transition:opacity .2s}
 .pin-btn.on{opacity:1}
+/* HEALTH TAB */
+.mood-row{display:flex;gap:8px;justify-content:space-between;margin:8px 0}
+.mood-btn{flex:1;padding:10px 4px;border-radius:12px;border:2px solid #ede8e3;background:white;font-size:22px;cursor:pointer;text-align:center;transition:all .15s}
+.mood-btn.on{border-color:var(--rose);background:var(--rose-light);transform:scale(1.08)}
+.sym-row{margin-bottom:10px}
+.sym-lbl{font-size:12px;font-weight:700;color:var(--text);margin-bottom:5px;display:flex;justify-content:space-between;align-items:center}
+.sym-dots{display:flex;gap:6px}
+.sym-d{width:32px;height:32px;border-radius:50%;border:2px solid #ede8e3;background:white;font-family:'Quicksand',sans-serif;font-size:12px;font-weight:700;color:var(--textl);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0}
+.sym-d.on{color:white;border-color:transparent}
+.ex-item{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid #f0ebe6}
+.ex-item:last-child{border-bottom:none}
+.ex-name{font-size:13px;font-weight:600;color:var(--text);flex:1}
+.ex-dur{font-size:11px;color:var(--textl);background:#f5f0eb;padding:2px 7px;border-radius:8px;font-weight:600}
+.pt-row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid #f5f0eb;font-size:13px}
+.pt-row:last-child{border-bottom:none}
+.pt-date{font-weight:600;color:var(--text)}
+.pt-gap{font-size:11px;color:var(--textl);margin-top:1px}
+.combo-row{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;margin-bottom:10px}
+.combo-row::-webkit-scrollbar{display:none}
+.combo-chip{flex-shrink:0;padding:9px 14px;border-radius:12px;border:2px solid #ede8e3;background:white;font-family:'Quicksand',sans-serif;font-size:12px;font-weight:700;color:var(--textl);cursor:pointer;white-space:nowrap;transition:all .15s}
+.combo-chip:active{background:var(--sage-light);border-color:var(--sage);color:#5a7a56}
+.hist-row{display:flex;gap:4px;margin-top:8px}
+.hist-dot{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;background:#f5f0eb;flex-shrink:0;font-size:14px}
+.sect-toggle{cursor:pointer;user-select:none}
 
 /* SUBTASKS */
 .tc-wrap{margin-bottom:8px}
@@ -285,7 +309,7 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
   <button class="tab-btn" data-tab="projects" onclick="goTab('projects',this)">📁 Projects</button>
   <button class="tab-btn" data-tab="goals" onclick="goTab('goals',this)">🎯 Goals</button>
   <button class="tab-btn" data-tab="routines" onclick="goTab('routines',this)">🔄 Routines</button>
-  <button class="tab-btn" data-tab="food" onclick="goTab('food',this)">🍽️ Food</button>
+  <button class="tab-btn" data-tab="food" onclick="goTab('food',this)">💚 Health</button>
   <button class="tab-btn" data-tab="wigs" onclick="goTab('wigs',this)">🪄 Wigs</button>
   <button class="tab-btn" data-tab="money" onclick="goTab('money',this)">💰 Money</button>
   <button class="tab-btn" data-tab="recap" onclick="goTab('recap',this)">📊 Recap</button>
@@ -380,12 +404,73 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     <div class="pr"><div class="pt"><span class="pn">🥑 Fat</span><span class="pm2" id="fAD">0g/65g</span></div><div class="pb"><div class="pf pf-fat" id="fAB" style="width:0%"></div></div></div>
     <div class="pr"><div class="pt"><span class="pn">💧 Water</span><span class="pm2" id="fWD">0/8</span></div><div class="pb"><div class="pf pf-wat" id="fWB" style="width:0%"></div></div></div>
   </div>
+  <div class="sh sect-toggle" onclick="togSect('weeklyNut','weeklyArrow')">📊 Weekly Nutrition <span id="weeklyArrow">▸</span></div>
+  <div id="weeklyNut" style="display:none">
+    <div class="card" id="weeklyCard"><div style="text-align:center;padding:12px;font-size:13px;color:var(--textl)">Loading weekly data...</div></div>
+  </div>
+  <div class="sh">🥗 Meal Combos</div>
+  <div class="combo-row" id="combosRow"></div>
   <div class="sh">🔍 Add Food</div>
   <div class="fsw"><span class="fsic">🔍</span><input class="fsi" id="foodSrch" placeholder="Type to search your foods..." oninput="srchFood(this.value)"></div>
   <div class="fsugs" id="foodSugs"></div>
-  <button class="exp-btn" onclick="expD('food')">📤 Export Food Log</button>
   <div class="sh">📋 Today's Log</div>
   <div id="foodLog"><div class="empty"><div class="emj">🍽️</div><p>No food logged yet.</p></div></div>
+  <div class="sh">💪 Exercise</div>
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+      <div style="font-size:13px;font-weight:600;color:var(--text)">Today's Workouts</div>
+      <button onclick="openAddEx()" style="background:var(--sage-light);border:none;border-radius:9px;padding:6px 12px;font-family:'Quicksand',sans-serif;font-size:12px;font-weight:700;color:#5a7a56;cursor:pointer">+ Log</button>
+    </div>
+    <div id="exLog"></div>
+    <div style="margin-top:10px;padding-top:10px;border-top:1px solid #f0ebe6">
+      <div style="font-size:11px;font-weight:700;color:var(--textl);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px">This Week</div>
+      <div class="pt"><span style="font-size:12px;font-weight:600;color:var(--text)">💪 Workouts</span><span id="exWeekD" style="font-size:12px;color:var(--textl)">0/3</span></div>
+      <div class="pb" style="margin-top:4px"><div class="pf pf-pro" id="exWeekB" style="width:0%"></div></div>
+    </div>
+  </div>
+  <div class="sh">😊 Mood</div>
+  <div class="card">
+    <div style="font-size:12px;color:var(--textl);margin-bottom:8px">How are you feeling today?</div>
+    <div class="mood-row" id="moodBtns">
+      <button class="mood-btn" data-m="1" onclick="logMood(1)">😔</button>
+      <button class="mood-btn" data-m="2" onclick="logMood(2)">😕</button>
+      <button class="mood-btn" data-m="3" onclick="logMood(3)">😐</button>
+      <button class="mood-btn" data-m="4" onclick="logMood(4)">🙂</button>
+      <button class="mood-btn" data-m="5" onclick="logMood(5)">😊</button>
+    </div>
+    <div style="font-size:11px;color:var(--textl);margin-top:6px;margin-bottom:4px">Last 7 days</div>
+    <div class="hist-row" id="moodHist"></div>
+  </div>
+  <div class="sh">🩺 Symptoms</div>
+  <div class="card" id="symCard"><div style="font-size:13px;color:var(--textl)">Loading...</div></div>
+  <div class="sh">🩸 Period Tracker</div>
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+      <div>
+        <div style="font-size:13px;font-weight:600;color:var(--text)">Period Log</div>
+        <div style="font-size:11px;color:var(--textl)" id="ptAvg">Log at least 2 cycles to see average</div>
+      </div>
+      <button onclick="logPeriod()" style="background:var(--rose-light);border:none;border-radius:9px;padding:6px 12px;font-family:'Quicksand',sans-serif;font-size:12px;font-weight:700;color:var(--rose);cursor:pointer">+ Log Today</button>
+    </div>
+    <div style="margin-bottom:6px"><input type="date" id="ptDateIn" class="fi" style="padding:7px 10px;font-size:13px"> <button onclick="logPeriodDate()" style="margin-top:6px;padding:7px 14px;border-radius:9px;border:none;background:var(--rose-light);color:var(--rose);font-family:'Quicksand',sans-serif;font-size:12px;font-weight:700;cursor:pointer">Log This Date</button></div>
+    <div id="ptList"></div>
+  </div>
+  <div class="sh">📤 Export</div>
+  <div class="card">
+    <div style="display:flex;gap:8px;margin-bottom:10px">
+      <div style="flex:1"><label style="font-size:11px;font-weight:700;color:var(--textl);text-transform:uppercase;letter-spacing:.8px;display:block;margin-bottom:4px">From</label><input type="date" id="expFrom" class="fi" style="padding:7px 10px;font-size:13px"></div>
+      <div style="flex:1"><label style="font-size:11px;font-weight:700;color:var(--textl);text-transform:uppercase;letter-spacing:.8px;display:block;margin-bottom:4px">To</label><input type="date" id="expTo" class="fi" style="padding:7px 10px;font-size:13px"></div>
+    </div>
+    <div class="bg bg4" style="margin-bottom:10px">
+      <button class="sb on" data-g="expType" data-v="food" onclick="pSB(this)">🍽️ Food</button>
+      <button class="sb" data-g="expType" data-v="exercise" onclick="pSB(this)">💪 Exercise</button>
+      <button class="sb" data-g="expType" data-v="mood" onclick="pSB(this)">😊 Mood</button>
+      <button class="sb" data-g="expType" data-v="symptoms" onclick="pSB(this)">🩺 Symptoms</button>
+    </div>
+    <button class="ok-btn" onclick="expHealth()">📋 Generate Export</button>
+    <textarea id="healthExpTxt" style="width:100%;height:140px;border:2px solid #ede8e3;border-radius:11px;padding:11px;font-family:monospace;font-size:12px;resize:none;outline:none;margin-top:10px;display:none" readonly></textarea>
+    <button id="healthExpCopy" onclick="cpHealthExp()" style="display:none;width:100%;padding:11px;border-radius:11px;border:none;background:var(--blue-light);color:var(--blue);font-family:'Quicksand',sans-serif;font-size:14px;font-weight:700;cursor:pointer;margin-top:6px">📋 Copy to Clipboard</button>
+  </div>
 </div>
 
 <!-- WIGS -->
@@ -508,12 +593,8 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     <button class="sb" data-g="fwt" data-v="food" onclick="pSB(this);togFW('food')">🍽️ Food</button>
   </div></div>
   <div id="watSec">
-    <div class="fg"><label class="fl">How many glasses?</label>
-      <div class="bg bg3">
-        <button class="sb" data-g="wamt" data-v="1" onclick="pSB(this)">1</button>
-        <button class="sb" data-g="wamt" data-v="2" onclick="pSB(this)">2</button>
-        <button class="sb" data-g="wamt" data-v="3" onclick="pSB(this)">3</button>
-      </div>
+    <div class="fg"><label class="fl" id="watAmtLbl">How many glasses?</label>
+      <div id="watAmtBtns" class="bg bg3"></div>
     </div>
     <button class="ok-btn" onclick="logWat()">Log Water 💧</button>
   </div>
@@ -580,6 +661,26 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
   <button class="cn-btn" onclick="closeM('expModal2')">Close</button>
 </div></div>
 
+<!-- ADD EXERCISE MODAL -->
+<div class="ov" id="exModal"><div class="mod">
+  <div class="mh"></div><div class="mtit">Log Exercise 💪</div>
+  <div class="fg"><label class="fl">Exercise</label>
+    <select class="fi" id="exSel" style="appearance:auto"></select>
+  </div>
+  <div class="fg"><label class="fl">Duration</label>
+    <div style="display:flex;gap:8px">
+      <input class="fi" type="number" id="exDur" placeholder="30" style="width:90px">
+      <select class="fi" id="exDurUnit" style="flex:1;appearance:auto">
+        <option value="min">minutes</option>
+        <option value="sets">sets / reps</option>
+      </select>
+    </div>
+  </div>
+  <div class="fg"><label class="fl">Note (optional)</label><input class="fi" id="exNote" placeholder="e.g. 3 sets of 10, felt great"></div>
+  <button class="ok-btn" onclick="saveEx()">Log Exercise 💪</button>
+  <button class="cn-btn" onclick="closeM('exModal')">Cancel</button>
+</div></div>
+
 <!-- PROJECT MODAL -->
 <div class="ov" id="projModal"><div class="mod">
   <div class="mh"></div><div class="mtit" id="pmTit">New Project 📁</div>
@@ -644,6 +745,15 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     <button class="add-btn" onclick="openAddCat()">➕ Add Category</button>
   </div>
   <div class="card">
+    <div class="set-sec-t">🩺 Symptom Tracking</div>
+    <div style="font-size:12px;color:var(--textl);margin-bottom:10px">Customize which symptoms you track daily.</div>
+    <div id="symSettingsList"></div>
+    <div style="display:flex;gap:8px;margin-top:8px">
+      <input class="fi" id="newSymName" placeholder="New symptom name..." style="flex:1;padding:8px 10px">
+      <button onclick="addSymType()" style="padding:8px 14px;border-radius:9px;border:none;background:var(--sage);color:white;font-family:'Quicksand',sans-serif;font-size:13px;font-weight:700;cursor:pointer">Add</button>
+    </div>
+  </div>
+  <div class="card">
     <div class="set-sec-t">📋 Project Templates</div>
     <div style="font-size:12px;color:var(--textl);margin-bottom:10px">Tap any template from the Projects tab to load it instantly as a new project.</div>
     <div id="tmplSettingsList"></div>
@@ -660,7 +770,15 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     <div class="set-row"><div class="set-lbl">🌿 Fiber (g)</div><input class="fi" type="number" id="sFib" style="width:90px;padding:7px 10px"></div>
     <div class="set-row"><div class="set-lbl">🍞 Carbs (g)</div><input class="fi" type="number" id="sCrb" style="width:90px;padding:7px 10px"></div>
     <div class="set-row"><div class="set-lbl">🥑 Fat (g)</div><input class="fi" type="number" id="sFat" style="width:90px;padding:7px 10px"></div>
-    <div class="set-row"><div class="set-lbl">💧 Water (glasses/day)</div><input class="fi" type="number" id="sWat" style="width:90px;padding:7px 10px"></div>
+    <div class="set-row">
+      <div><div class="set-lbl">💧 Water Unit</div><div class="set-sub">Glasses or ounces</div></div>
+      <div class="bg" style="width:auto;gap:6px">
+        <button class="sb" id="wUnitGl" onclick="setWUnit('glasses')" style="padding:6px 12px;width:auto">Glasses</button>
+        <button class="sb" id="wUnitOz" onclick="setWUnit('oz')" style="padding:6px 12px;width:auto">Ounces</button>
+      </div>
+    </div>
+    <div class="set-row"><div class="set-lbl" id="sWatLbl">💧 Water Goal (glasses/day)</div><input class="fi" type="number" id="sWat" style="width:90px;padding:7px 10px"></div>
+    <div class="set-row"><div class="set-lbl">💪 Exercise Goal (workouts/week)</div><input class="fi" type="number" id="sEx" style="width:90px;padding:7px 10px"></div>
     <button class="ok-btn" style="margin-top:14px" onclick="saveGoals()">Save Goals ✨</button>
   </div>
 </div>
@@ -795,6 +913,29 @@ var RTNS = JSON.parse(localStorage.getItem('aRtns')||'null')||{
   cl:['Trash Monday night 🗑️','Tidy clutter','Papers/mail','Dust','Water plants 🌱','Laundry','Kitchen counters+stovetop+fridge','Floors sweep+mop','Bathroom toilet+mirrors+shower']
 };
 
+var MOOD = JSON.parse(localStorage.getItem('aMood')||'{}');
+var SYM_LOG = JSON.parse(localStorage.getItem('aSymLog')||'{}');
+var SYM_TYPES = JSON.parse(localStorage.getItem('aSymTypes')||'null')||[
+  {id:'energy',name:'Energy',icon:'⚡'},{id:'pain',name:'Pain',icon:'🔴'},
+  {id:'brainfog',name:'Brain Fog',icon:'🌫️'},{id:'headache',name:'Headache',icon:'😵'},
+  {id:'histamine',name:'Histamine',icon:'🌿'},
+];
+var EX_DB = JSON.parse(localStorage.getItem('aExDB')||'null')||[
+  {id:'ex1',name:'Walking',cat:'cardio'},{id:'ex2',name:'Running',cat:'cardio'},
+  {id:'ex3',name:'Cycling',cat:'cardio'},{id:'ex4',name:'Strength Training',cat:'strength'},
+  {id:'ex5',name:'Yoga',cat:'flexibility'},{id:'ex6',name:'Foam Rolling',cat:'recovery'},
+  {id:'ex7',name:'Swimming',cat:'cardio'},{id:'ex8',name:'Pilates',cat:'flexibility'},
+  {id:'ex9',name:'HIIT',cat:'cardio'},{id:'ex10',name:'Stretching',cat:'flexibility'},
+];
+var EX_LOG = JSON.parse(localStorage.getItem('aExLog')||'{}');
+var PT = JSON.parse(localStorage.getItem('aPT')||'[]');
+var MEAL_COMBOS = JSON.parse(localStorage.getItem('aMC')||'null')||[
+  {id:'mc1',name:'High Protein Morning',emoji:'🥚',foods:['f1','f7']},
+  {id:'mc2',name:'Quick Balanced Lunch',emoji:'🥗',foods:['f2','f8']},
+  {id:'mc3',name:'Filling Snack',emoji:'🥜',foods:['f6','f5']},
+  {id:'mc4',name:'Recovery Meal',emoji:'🍗',foods:['f2','f3','f10']},
+];
+
 var S = {
   gCal:parseInt(localStorage.getItem('aGCal'))||1900,
   gPro:parseInt(localStorage.getItem('aGPro'))||120,
@@ -807,6 +948,8 @@ var S = {
   banner:localStorage.getItem('aSBanner')||'135deg,#c9a0a0,#a99fc9,#8aafc9',
   pin:localStorage.getItem('aPIN')||'',
   protTabs:JSON.parse(localStorage.getItem('aProtTabs')||'{"money":true}'),
+  wUnit:localStorage.getItem('aWUnit')||'glasses',
+  gEx:parseInt(localStorage.getItem('aGEx'))||3,
 };
 
 var SBV={}, CF='all', DELTED=null, UNDO_T=null, OPEN_PANELS={};
@@ -1369,6 +1512,7 @@ function openM(id){
     togFW('water');
     document.querySelector('[data-g="fwt"][data-v="water"]').classList.add('on');
     SBV.fwt='water';
+    renderWatBtns();
   }
   document.getElementById(id).classList.add('show');
 }
@@ -2021,6 +2165,11 @@ function renderSettings(){
   document.getElementById('sCal').value=S.gCal;document.getElementById('sPro').value=S.gPro;
   document.getElementById('sFib').value=S.gFib;document.getElementById('sCrb').value=S.gCrb;
   document.getElementById('sFat').value=S.gFat;document.getElementById('sWat').value=S.gWat;
+  document.getElementById('sEx').value=S.gEx||3;
+  document.getElementById('wUnitGl').classList.toggle('on',S.wUnit!=='oz');
+  document.getElementById('wUnitOz').classList.toggle('on',S.wUnit==='oz');
+  document.getElementById('sWatLbl').textContent='💧 Water Goal ('+(S.wUnit==='oz'?'oz/day':'glasses/day')+')';
+  renderSymSettings();
 }
 
 function selBanner(id){
@@ -2052,10 +2201,12 @@ function saveGoals(){
   S.gCrb=parseInt(document.getElementById('sCrb').value)||150;
   S.gFat=parseInt(document.getElementById('sFat').value)||65;
   S.gWat=parseInt(document.getElementById('sWat').value)||8;
+  S.gEx=parseInt(document.getElementById('sEx').value)||3;
   localStorage.setItem('aGCal',S.gCal);localStorage.setItem('aGPro',S.gPro);
   localStorage.setItem('aGFib',S.gFib);localStorage.setItem('aGCrb',S.gCrb);
   localStorage.setItem('aGFat',S.gFat);localStorage.setItem('aGWat',S.gWat);
-  updM();alert('✅ Goals saved!');
+  localStorage.setItem('aGEx',S.gEx);
+  updM();updExWeek();alert('✅ Goals saved!');
 }
 
 // ═══════════════════════════════════════════════
@@ -2091,6 +2242,345 @@ function saveNotesM(){
 }
 
 // ═══════════════════════════════════════════════
+// HEALTH — WATER UNIT
+// ═══════════════════════════════════════════════
+function renderWatBtns(){
+  var el=document.getElementById('watAmtBtns');
+  var lbl=document.getElementById('watAmtLbl');
+  if(!el)return;
+  var isOz=S.wUnit==='oz';
+  if(lbl)lbl.textContent=isOz?'How many ounces?':'How many glasses?';
+  var amts=isOz?[8,12,16,20,24,32]:[1,2,3,4,5,6];
+  el.innerHTML=amts.map(function(a){
+    return'<button class="sb'+(SBV.wamt===a?' on':'')+'" data-g="wamt" data-v="'+a+'" onclick="pSB(this)">'+a+(isOz?' oz':' 🥤')+'</button>';
+  }).join('');
+}
+
+function setWUnit(u){
+  S.wUnit=u;
+  localStorage.setItem('aWUnit',u);
+  document.getElementById('wUnitGl').classList.toggle('on',u==='glasses');
+  document.getElementById('wUnitOz').classList.toggle('on',u==='oz');
+  document.getElementById('sWatLbl').textContent='💧 Water Goal ('+(u==='oz'?'oz/day':'glasses/day')+')';
+}
+
+// ═══════════════════════════════════════════════
+// HEALTH — COLLAPSIBLE SECTIONS
+// ═══════════════════════════════════════════════
+function togSect(secId,arrowId){
+  var sec=document.getElementById(secId);
+  var arrow=document.getElementById(arrowId);
+  if(!sec)return;
+  var hidden=sec.style.display==='none';
+  sec.style.display=hidden?'block':'none';
+  if(arrow)arrow.textContent=hidden?'▾':'▸';
+  if(hidden&&secId==='weeklyNut')renderWeeklyNut();
+}
+
+// ═══════════════════════════════════════════════
+// HEALTH — MOOD
+// ═══════════════════════════════════════════════
+function logMood(m){
+  var k=getTK();
+  MOOD[k]=m;
+  localStorage.setItem('aMood',JSON.stringify(MOOD));
+  renderMood();
+}
+
+function renderMood(){
+  var k=getTK();
+  var today=MOOD[k];
+  document.querySelectorAll('.mood-btn').forEach(function(b){
+    b.classList.toggle('on',parseInt(b.dataset.m)===today);
+  });
+  var hist=document.getElementById('moodHist');if(!hist)return;
+  var emojis=['','😔','😕','😐','🙂','😊'];
+  var days=[];
+  for(var i=6;i>=0;i--){
+    var d=new Date();d.setDate(d.getDate()-i);
+    days.push(MOOD[d.toDateString()]||0);
+  }
+  hist.innerHTML=days.map(function(m){
+    return'<div class="hist-dot">'+(m?emojis[m]:'·')+'</div>';
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════
+// HEALTH — SYMPTOMS
+// ═══════════════════════════════════════════════
+function renderSymCard(){
+  var el=document.getElementById('symCard');if(!el)return;
+  var k=getTK();
+  var today=SYM_LOG[k]||{};
+  el.innerHTML='<div style="font-size:12px;color:var(--textl);margin-bottom:10px">Rate each from 0–5 (0 = none)</div>'+
+    SYM_TYPES.map(function(s){
+      var val=today[s.id]||0;
+      var cols=['#f5f0eb','#d4e4d0','#d4e4d0','#fde8d0','#fde8d0','#f2dede'];
+      return'<div class="sym-row">'+
+        '<div class="sym-lbl"><span>'+s.icon+' '+s.name+'</span>'+
+          '<span style="font-size:12px;font-weight:700;color:var(--rose)">'+(val?val+'/5':'—')+'</span></div>'+
+        '<div class="sym-dots">'+
+          [0,1,2,3,4,5].map(function(n){
+            var sel=val===n;
+            return'<div class="sym-d'+(sel?' on':'')+'" style="'+(sel?'background:'+cols[n]+';border-color:'+cols[n]+';color:var(--text)':'')+'" onclick="logSym(\''+s.id+'\','+n+')">'+n+'</div>';
+          }).join('')+
+        '</div>'+
+      '</div>';
+    }).join('');
+}
+
+function logSym(symId,val){
+  var k=getTK();
+  if(!SYM_LOG[k])SYM_LOG[k]={};
+  SYM_LOG[k][symId]=val;
+  localStorage.setItem('aSymLog',JSON.stringify(SYM_LOG));
+  renderSymCard();
+}
+
+function renderSymSettings(){
+  var el=document.getElementById('symSettingsList');if(!el)return;
+  el.innerHTML=SYM_TYPES.map(function(s){
+    return'<div class="set-row"><div class="set-lbl">'+s.icon+' '+s.name+'</div>'+
+      '<button onclick="delSymType(\''+s.id+'\')" style="background:none;border:1.5px solid #ede8e3;border-radius:8px;padding:5px 10px;font-size:12px;color:var(--textl);cursor:pointer">✕ Remove</button></div>';
+  }).join('');
+}
+
+function addSymType(){
+  var name=document.getElementById('newSymName').value.trim();
+  if(!name){alert('Please enter a symptom name!');return;}
+  SYM_TYPES.push({id:'sym'+Date.now().toString().slice(-6),name:name,icon:'🔹'});
+  localStorage.setItem('aSymTypes',JSON.stringify(SYM_TYPES));
+  document.getElementById('newSymName').value='';
+  renderSymSettings();renderSymCard();
+}
+
+function delSymType(id){
+  SYM_TYPES=SYM_TYPES.filter(function(s){return s.id!==id;});
+  localStorage.setItem('aSymTypes',JSON.stringify(SYM_TYPES));
+  renderSymSettings();renderSymCard();
+}
+
+// ═══════════════════════════════════════════════
+// HEALTH — EXERCISE
+// ═══════════════════════════════════════════════
+function renderExLog(){
+  var el=document.getElementById('exLog');if(!el)return;
+  var k=getTK();
+  var log=EX_LOG[k]||[];
+  if(!log.length){
+    el.innerHTML='<div style="font-size:12px;color:var(--textl);padding:8px 0;text-align:center">No workouts logged today.</div>';
+    updExWeek();return;
+  }
+  el.innerHTML=log.map(function(e,i){
+    return'<div class="ex-item">'+
+      '<div class="ex-name">'+e.name+'</div>'+
+      '<span class="ex-dur">'+e.dur+' '+e.unit+'</span>'+
+      (e.note?'<span style="font-size:11px;color:var(--textl);margin-left:4px">'+e.note+'</span>':'')+
+      '<button onclick="delEx(\''+k+'\','+i+')" style="background:none;border:none;color:var(--textl);cursor:pointer;font-size:13px;margin-left:4px">✕</button>'+
+    '</div>';
+  }).join('');
+  updExWeek();
+}
+
+function openAddEx(){
+  var sel=document.getElementById('exSel');
+  if(sel)sel.innerHTML=EX_DB.map(function(e){return'<option value="'+e.id+'">'+e.name+'</option>';}).join('');
+  document.getElementById('exDur').value='';
+  document.getElementById('exNote').value='';
+  document.getElementById('exModal').classList.add('show');
+}
+
+function saveEx(){
+  var selEl=document.getElementById('exSel');
+  var exId=selEl?selEl.value:'';
+  var ex=EX_DB.find(function(e){return e.id===exId;})||{id:exId,name:exId};
+  var dur=document.getElementById('exDur').value||'30';
+  var unit=document.getElementById('exDurUnit').value||'min';
+  var note=document.getElementById('exNote').value.trim();
+  var k=getTK();
+  if(!EX_LOG[k])EX_LOG[k]=[];
+  EX_LOG[k].push({id:Date.now().toString(),name:ex.name,dur:dur,unit:unit,note:note});
+  localStorage.setItem('aExLog',JSON.stringify(EX_LOG));
+  closeM('exModal');renderExLog();
+}
+
+function delEx(day,idx){
+  if(!EX_LOG[day])return;
+  EX_LOG[day].splice(idx,1);
+  localStorage.setItem('aExLog',JSON.stringify(EX_LOG));
+  renderExLog();
+}
+
+function updExWeek(){
+  var count=0;
+  for(var i=0;i<7;i++){
+    var d=new Date();d.setDate(d.getDate()-i);
+    var k=d.toDateString();
+    if(EX_LOG[k]&&EX_LOG[k].length)count++;
+  }
+  var goal=S.gEx||3;
+  var pct=Math.min(100,Math.round(count/goal*100));
+  var dEl=document.getElementById('exWeekD');
+  var bEl=document.getElementById('exWeekB');
+  if(dEl)dEl.textContent=count+'/'+goal;
+  if(bEl)bEl.style.width=pct+'%';
+}
+
+// ═══════════════════════════════════════════════
+// HEALTH — MEAL COMBOS
+// ═══════════════════════════════════════════════
+function renderCombos(){
+  var el=document.getElementById('combosRow');if(!el)return;
+  el.innerHTML=MEAL_COMBOS.map(function(c){
+    return'<button class="combo-chip" onclick="logCombo(\''+c.id+'\')">'+c.emoji+' '+c.name+'</button>';
+  }).join('');
+}
+
+function logCombo(id){
+  var combo=MEAL_COMBOS.find(function(c){return c.id===id;});if(!combo)return;
+  combo.foods.forEach(function(fid){addFL(fid);});
+  alert('✅ Logged: '+combo.name);
+}
+
+// ═══════════════════════════════════════════════
+// HEALTH — PERIOD TRACKER
+// ═══════════════════════════════════════════════
+function renderPT(){
+  var el=document.getElementById('ptList');if(!el)return;
+  var avgEl=document.getElementById('ptAvg');
+  if(!PT.length){
+    el.innerHTML='<div style="font-size:12px;color:var(--textl);padding:8px 0">No dates logged yet.</div>';
+    return;
+  }
+  var sorted=PT.slice().sort(function(a,b){return b>a?1:-1;});
+  el.innerHTML=sorted.map(function(date,i){
+    var gap='';
+    if(i<sorted.length-1){
+      var d1=new Date(date+'T12:00:00');
+      var d2=new Date(sorted[i+1]+'T12:00:00');
+      gap=Math.round((d1-d2)/(1000*60*60*24))+' days';
+    }
+    var esc=date.replace(/'/g,"\\'");
+    return'<div class="pt-row">'+
+      '<div><div class="pt-date">'+date+'</div>'+
+        (gap?'<div class="pt-gap">→ '+gap+' cycle</div>':'')+'</div>'+
+      '<button onclick="delPeriod(\''+esc+'\')" style="background:none;border:none;color:var(--textl);cursor:pointer;font-size:13px">✕</button>'+
+    '</div>';
+  }).join('');
+  if(sorted.length>=2&&avgEl){
+    var gaps=[];
+    for(var j=0;j<sorted.length-1;j++){
+      var d1=new Date(sorted[j]+'T12:00:00');
+      var d2=new Date(sorted[j+1]+'T12:00:00');
+      gaps.push(Math.round((d1-d2)/(1000*60*60*24)));
+    }
+    var avg=Math.round(gaps.reduce(function(a,b){return a+b;},0)/gaps.length);
+    avgEl.textContent='Average cycle: ~'+avg+' days';
+  }
+}
+
+function logPeriod(){
+  var today=new Date().toISOString().split('T')[0];
+  if(PT.indexOf(today)<0){PT.push(today);localStorage.setItem('aPT',JSON.stringify(PT));renderPT();}
+  else{alert('Today is already logged!');}
+}
+
+function logPeriodDate(){
+  var date=document.getElementById('ptDateIn').value;
+  if(!date){alert('Please select a date!');return;}
+  if(PT.indexOf(date)<0){PT.push(date);localStorage.setItem('aPT',JSON.stringify(PT));renderPT();}
+  else{alert('That date is already logged!');}
+}
+
+function delPeriod(date){
+  PT=PT.filter(function(d){return d!==date;});
+  localStorage.setItem('aPT',JSON.stringify(PT));
+  renderPT();
+}
+
+// ═══════════════════════════════════════════════
+// HEALTH — WEEKLY NUTRITION
+// ═══════════════════════════════════════════════
+function renderWeeklyNut(){
+  var el=document.getElementById('weeklyCard');if(!el)return;
+  var days=[];
+  for(var i=6;i>=0;i--){
+    var d=new Date();d.setDate(d.getDate()-i);
+    var k=d.toDateString();
+    var log=FL[k]||[];
+    days.push(log.reduce(function(a,f){a.cal+=f.cal||0;a.pro+=f.pro||0;a.fib+=f.fib||0;a.crb+=f.crb||0;a.fat+=f.fat||0;return a;},{cal:0,pro:0,fib:0,crb:0,fat:0}));
+  }
+  var sum=days.reduce(function(a,d){return{cal:a.cal+d.cal,pro:a.pro+d.pro,fib:a.fib+d.fib,crb:a.crb+d.crb,fat:a.fat+d.fat};},{cal:0,pro:0,fib:0,crb:0,fat:0});
+  var n=days.length||1;
+  var avg={cal:Math.round(sum.cal/n),pro:Math.round(sum.pro/n),fib:Math.round(sum.fib/n),crb:Math.round(sum.crb/n),fat:Math.round(sum.fat/n)};
+  var pct=function(v,g){return Math.min(100,Math.round(v/g*100))+'%';};
+  el.innerHTML=
+    '<div style="font-size:11px;font-weight:700;color:var(--textl);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px">7-Day Average</div>'+
+    '<div class="pr"><div class="pt"><span class="pn">🔥 Calories</span><span class="pm2">'+avg.cal+'/'+S.gCal+'</span></div><div class="pb"><div class="pf pf-cal" style="width:'+pct(avg.cal,S.gCal)+'"></div></div></div>'+
+    '<div class="pr"><div class="pt"><span class="pn">💪 Protein</span><span class="pm2">'+avg.pro+'g/'+S.gPro+'g</span></div><div class="pb"><div class="pf pf-pro" style="width:'+pct(avg.pro,S.gPro)+'"></div></div></div>'+
+    '<div class="pr"><div class="pt"><span class="pn">🌿 Fiber</span><span class="pm2">'+avg.fib+'g/'+S.gFib+'g</span></div><div class="pb"><div class="pf pf-fib" style="width:'+pct(avg.fib,S.gFib)+'"></div></div></div>'+
+    '<div class="pr"><div class="pt"><span class="pn">🍞 Carbs</span><span class="pm2">'+avg.crb+'g/'+S.gCrb+'g</span></div><div class="pb"><div class="pf pf-crb" style="width:'+pct(avg.crb,S.gCrb)+'"></div></div></div>'+
+    '<div class="pr"><div class="pt"><span class="pn">🥑 Fat</span><span class="pm2">'+avg.fat+'g/'+S.gFat+'g</span></div><div class="pb"><div class="pf pf-fat" style="width:'+pct(avg.fat,S.gFat)+'"></div></div></div>';
+}
+
+// ═══════════════════════════════════════════════
+// HEALTH — EXPORT
+// ═══════════════════════════════════════════════
+function expHealth(){
+  var from=document.getElementById('expFrom').value;
+  var to=document.getElementById('expTo').value;
+  var type=SBV.expType||'food';
+  var txt='HEALTH EXPORT — '+type.toUpperCase()+'\n';
+  if(from)txt+='From: '+from+'\n';
+  if(to)txt+='To: '+to+'\n';
+  txt+='='.repeat(40)+'\n\n';
+  var inRange=function(k){
+    var d=new Date(k);
+    if(from&&d<new Date(from+'T00:00:00'))return false;
+    if(to&&d>new Date(to+'T23:59:59'))return false;
+    return true;
+  };
+  if(type==='food'){
+    txt+='DATE\tFOOD\tSERVING\tCAL\tPROT\tFIB\tCARBS\tFAT\n';
+    Object.keys(FL).sort().forEach(function(k){
+      if(!inRange(k))return;
+      (FL[k]||[]).forEach(function(f){
+        txt+=k+'\t'+f.name+'\t'+(f.sv||'1srv')+'\t'+f.cal+'\t'+f.pro+'g\t'+f.fib+'g\t'+f.crb+'g\t'+f.fat+'g\n';
+      });
+    });
+  }else if(type==='exercise'){
+    txt+='DATE\tEXERCISE\tDURATION\tNOTE\n';
+    Object.keys(EX_LOG).sort().forEach(function(k){
+      if(!inRange(k))return;
+      (EX_LOG[k]||[]).forEach(function(e){
+        txt+=k+'\t'+e.name+'\t'+e.dur+' '+e.unit+'\t'+(e.note||'')+'\n';
+      });
+    });
+  }else if(type==='mood'){
+    txt+='DATE\tMOOD (1-5)\n';
+    Object.keys(MOOD).sort().forEach(function(k){
+      if(!inRange(k))return;
+      txt+=k+'\t'+MOOD[k]+'\n';
+    });
+  }else if(type==='symptoms'){
+    txt+='DATE\t'+SYM_TYPES.map(function(s){return s.icon+' '+s.name;}).join('\t')+'\n';
+    Object.keys(SYM_LOG).sort().forEach(function(k){
+      if(!inRange(k))return;
+      var row=k;
+      SYM_TYPES.forEach(function(s){row+='\t'+(SYM_LOG[k][s.id]||0);});
+      txt+=row+'\n';
+    });
+  }
+  document.getElementById('healthExpTxt').value=txt;
+  document.getElementById('healthExpTxt').style.display='block';
+  document.getElementById('healthExpCopy').style.display='block';
+}
+
+function cpHealthExp(){
+  var t=document.getElementById('healthExpTxt');t.select();document.execCommand('copy');alert('✅ Copied!');
+}
+
+// ═══════════════════════════════════════════════
 // START
 // ═══════════════════════════════════════════════
 function startApp(){
@@ -2106,6 +2596,11 @@ function startApp(){
   renderTaskCatBtns();
   renderCatFilters();
   renderTmplBar();
+  renderMood();
+  renderSymCard();
+  renderExLog();
+  renderCombos();
+  renderPT();
 }
 
 // Wait for Firebase then start
