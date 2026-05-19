@@ -579,6 +579,17 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
 .meaningful-toggle{width:100%;padding:10px 12px;border-radius:10px;border:2px solid #e8e0d8;background:#fff;font-family:'Quicksand',sans-serif;font-size:13px;font-weight:700;color:var(--textl);cursor:pointer;text-align:left;transition:all .2s;margin-bottom:10px;display:block}
 .meaningful-toggle.on{background:var(--peach-light);border-color:var(--peach);color:#8a5a20}
 .millie-toast{position:absolute;top:-30px;left:50%;transform:translateX(-50%);background:white;border-radius:12px;padding:4px 10px;font-size:12px;font-weight:700;color:var(--rose);box-shadow:0 2px 8px rgba(0,0,0,.15);white-space:nowrap;pointer-events:none;animation:su .3s ease forwards}
+/* COLLAPSIBLE SECTION HEADERS */
+.sh-toggle{cursor:pointer;user-select:none;display:flex;align-items:center;justify-content:space-between;-webkit-tap-highlight-color:transparent}
+.sh-toggle:active{opacity:.7}
+.sh-arr{font-size:12px;color:var(--textl);transition:transform .2s;flex-shrink:0}
+.sh-arr.coll{transform:rotate(-90deg)}
+/* MEAL LOG */
+.meal-log-cat-hdr{font-size:11px;font-weight:700;color:var(--textl);text-transform:uppercase;letter-spacing:.5px;padding:10px 0 4px;border-bottom:1px solid #ede8e3;margin-bottom:6px;display:flex;align-items:center;justify-content:space-between}
+.meal-log-item{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid #f5f0eb}
+.meal-log-item:last-child{border-bottom:none}
+.meal-log-name{font-size:13px;color:var(--textd);flex:1;font-weight:600}
+.meal-log-day{font-size:10px;color:var(--textl);background:#f2ede8;border-radius:6px;padding:1px 7px}
 /* SECTION HUB PAGES */
 .hub-banner{border-radius:16px;padding:18px 16px 16px;margin-bottom:14px;display:flex;align-items:center;gap:16px;border:1px solid rgba(0,0,0,.05)}
 .hub-char{flex-shrink:0;filter:drop-shadow(0 3px 8px rgba(0,0,0,.15))}
@@ -675,7 +686,7 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
   <button class="tab-btn" data-tab="conservatory" onclick="goTab('conservatory',this)">🌿 Conservatory</button>
   <button class="tab-btn" data-tab="hearthside" onclick="goTab('hearthside',this)">🏡 Hearthside</button>
   <button class="tab-btn" data-tab="workshop" onclick="goTab('workshop',this)">🔨 Workshop</button>
-  <button class="tab-btn" data-tab="lighthouse" onclick="goTab('lighthouse',this)">🕊️ Lighthouse</button>
+  <button class="tab-btn" data-tab="lighthouse" onclick="goTab('lighthouse',this)">✨ Lighthouse</button>
   <button class="tab-btn" data-tab="estate" onclick="goTab('estate',this)">🏛️ The Estate</button>
   <button class="tab-btn" data-tab="emporium" onclick="goTab('emporium',this)">🏪 Emporium</button>
   <button class="tab-btn" data-tab="archives" onclick="goTab('archives',this)">📚 Archives</button>
@@ -840,14 +851,14 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     <div class="pr"><div class="pt"><span class="pn">🔥 Calories</span><span class="pm2" id="tcD">0/1900</span></div><div class="pb"><div class="pf pf-cal" id="tcB" style="width:0%"></div></div></div>
     <div class="pr"><div class="pt"><span class="pn">💪 Protein</span><span class="pm2" id="tpD">0g/120g</span></div><div class="pb"><div class="pf pf-pro" id="tpB" style="width:0%"></div></div></div>
   </div>
-  <div class="sh">🌅 Morning Routine</div>
-  <div class="rc" id="todayAM"><div class="rt">✨ AM Routine</div></div>
+  <div class="sh sh-toggle" onclick="togTodaySec('todayAM')">🌅 Morning Routine <span class="sh-arr" id="sh-arr-todayAM">▾</span></div>
+  <div id="todayAM-wrap"><div class="rc" id="todayAM"><div class="rt">✨ AM Routine</div></div></div>
   <div class="sh">🔴 Do Now</div>
   <div id="todayUr"><div class="empty"><div class="emj">🎉</div><p>No urgent tasks!</p></div></div>
-  <div class="sh">🟡 Do Soon</div>
-  <div id="todaySo"><div class="empty"><div class="emj">📝</div><p>Add tasks to see them here.</p></div></div>
-  <div class="sh">🌙 Evening Routine</div>
-  <div class="rc pm" id="todayPM"><div class="rt">🌙 PM Routine</div></div>
+  <div class="sh sh-toggle" onclick="togTodaySec('todaySo')">🟡 Do Soon <span class="sh-arr" id="sh-arr-todaySo">▾</span></div>
+  <div id="todaySo-wrap"><div id="todaySo"><div class="empty"><div class="emj">📝</div><p>Add tasks to see them here.</p></div></div></div>
+  <div class="sh sh-toggle" onclick="togTodaySec('todayPM')">🌙 Evening Routine <span class="sh-arr" id="sh-arr-todayPM">▾</span></div>
+  <div id="todayPM-wrap"><div class="rc pm" id="todayPM"><div class="rt">🌙 PM Routine</div></div></div>
   <div id="todayNonDaily"></div>
   <div id="pinnedSection" style="display:none">
     <div class="sh">📌 Pinned</div>
@@ -1502,15 +1513,56 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
 </div>
 <div class="view" id="v-meals">
   <div class="pill-nav" style="margin-bottom:12px">
-    <button class="pn-btn on" onclick="showMealSec('plan',this)">📅 Plan</button>
+    <button class="pn-btn on" onclick="showMealSec('meals',this)">🍽️ Meals</button>
+    <button class="pn-btn" onclick="showMealSec('plan',this)">📅 Week</button>
     <button class="pn-btn" onclick="showMealSec('recipes',this)">📖 Recipes</button>
     <button class="pn-btn" onclick="showMealSec('grocery',this)">🛒 Grocery</button>
     <button class="pn-btn" onclick="showMealSec('prices',this)">💰 Prices</button>
     <button class="pn-btn" onclick="showMealSec('inventory',this)">📦 Inventory</button>
   </div>
 
+  <!-- MEALS section (category-based log) -->
+  <div id="ms-meals">
+    <div class="card" style="margin-bottom:10px">
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end">
+        <div style="flex:2;min-width:130px">
+          <label style="font-size:11px;color:var(--textl);display:block;margin-bottom:3px">What did you eat/drink?</label>
+          <input id="mealLogName" type="text" placeholder="e.g. Oatmeal, Latte, Apple…" style="width:100%;padding:8px 11px;border-radius:10px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px;box-sizing:border-box">
+        </div>
+        <div style="flex:1;min-width:110px">
+          <label style="font-size:11px;color:var(--textl);display:block;margin-bottom:3px">Category</label>
+          <select id="mealLogCat" style="width:100%;padding:8px 10px;border-radius:10px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px;box-sizing:border-box">
+            <option value="main">🍳 Main Meal</option>
+            <option value="snack">🥨 Snack</option>
+            <option value="beverage">☕ Beverage</option>
+            <option value="treat">🍰 Treat</option>
+            <option value="supplement">💊 Supplement</option>
+          </select>
+        </div>
+        <div style="flex:1;min-width:100px">
+          <label style="font-size:11px;color:var(--textl);display:block;margin-bottom:3px">Day (optional)</label>
+          <select id="mealLogDay" style="width:100%;padding:8px 10px;border-radius:10px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px;box-sizing:border-box">
+            <option value="">No day</option>
+            <option>Monday</option><option>Tuesday</option><option>Wednesday</option>
+            <option>Thursday</option><option>Friday</option><option>Saturday</option><option>Sunday</option>
+          </select>
+        </div>
+      </div>
+      <button class="btn" style="width:100%;margin-top:8px" onclick="addMealLogItem()">+ Log Meal</button>
+    </div>
+    <div class="bd-filter-row" id="mealLogFilter" style="margin-bottom:10px">
+      <button class="bd-filter on" onclick="setMealLogFilter('',this)">All</button>
+      <button class="bd-filter" onclick="setMealLogFilter('main',this)">🍳 Mains</button>
+      <button class="bd-filter" onclick="setMealLogFilter('snack',this)">🥨 Snacks</button>
+      <button class="bd-filter" onclick="setMealLogFilter('beverage',this)">☕ Beverages</button>
+      <button class="bd-filter" onclick="setMealLogFilter('treat',this)">🍰 Treats</button>
+      <button class="bd-filter" onclick="setMealLogFilter('supplement',this)">💊 Supps</button>
+    </div>
+    <div id="mealLogList"></div>
+  </div>
+
   <!-- PLAN section -->
-  <div id="ms-plan">
+  <div id="ms-plan" style="display:none">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
       <button class="btn sec" style="padding:5px 10px;font-size:12px" onclick="shiftMealWeek(-1)">◀</button>
       <span id="mealWeekLbl" style="font-weight:700;font-size:13px;color:var(--textd)"></span>
@@ -1548,14 +1600,15 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
 
   <!-- PRICES section -->
   <div id="ms-prices" style="display:none">
-    <div style="display:flex;gap:8px;margin-bottom:10px;align-items:center">
-      <span style="font-weight:700;font-size:14px;color:var(--textd);flex:1">💰 Price Log</span>
-    </div>
-    <div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap">
-      <input id="priceItem" type="text" placeholder="Item" style="flex:2;min-width:100px;padding:8px 11px;border-radius:10px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px">
-      <input id="priceAmt" type="number" placeholder="$" step="0.01" style="width:70px;padding:8px 11px;border-radius:10px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px">
-      <input id="priceStore" type="text" placeholder="Store" style="flex:1;min-width:80px;padding:8px 11px;border-radius:10px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px">
-      <button class="btn" onclick="logPrice()">Log</button>
+    <div style="font-size:12px;color:var(--textl);margin-bottom:10px">Prices auto-link to inventory items with the same name.</div>
+    <div class="card" style="margin-bottom:10px">
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        <input id="priceItem" type="text" placeholder="Item name" style="flex:2;min-width:100px;padding:8px 11px;border-radius:10px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px" oninput="priceAutocomplete(this.value)">
+        <input id="priceAmt" type="number" placeholder="$0.00" step="0.01" style="width:80px;padding:8px 11px;border-radius:10px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px">
+        <input id="priceStore" type="text" placeholder="Store" style="flex:1;min-width:80px;padding:8px 11px;border-radius:10px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px">
+        <button class="btn" onclick="logPrice()">Log</button>
+      </div>
+      <div id="priceAutoSuggest" style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px"></div>
     </div>
     <div id="priceLogEl"></div>
   </div>
@@ -2880,7 +2933,7 @@ var MEAL_COMBOS = JSON.parse(localStorage.getItem('aMC')||'null')||[
 ];
 
 var DEFAULT_TAB_ORDER=['today','helm','conservatory','hearthside','workshop','lighthouse','estate','emporium','archives','world'];
-var TAB_LABELS={today:'☀️ Today',helm:'⚓ The Helm',conservatory:'🌿 Conservatory',hearthside:'🏡 Hearthside',workshop:'🔨 Workshop',lighthouse:'🕊️ Lighthouse',estate:'🏛️ The Estate',emporium:'🏪 Emporium',archives:'📚 Archives',world:'🌊 World',stories:'📖 Stories',mixtape:'🎵 Mixtape'};
+var TAB_LABELS={today:'☀️ Today',helm:'⚓ The Helm',conservatory:'🌿 Conservatory',hearthside:'🏡 Hearthside',workshop:'🔨 Workshop',lighthouse:'✨ Lighthouse',estate:'🏛️ The Estate',emporium:'🏪 Emporium',archives:'📚 Archives',world:'🌊 World',stories:'📖 Stories',mixtape:'🎵 Mixtape'};
 var TAB_ORDER=(function(){var o=JSON.parse(localStorage.getItem('aTabOrder')||'null');if(!o)return DEFAULT_TAB_ORDER.slice();var full=DEFAULT_TAB_ORDER.slice();o=o.filter(function(t){return full.indexOf(t)>-1;});full.forEach(function(t){if(o.indexOf(t)<0)o.push(t);});return o;})();
 var SECTION_VIEWS={today:['today'],helm:['tasks','projects','lists'],conservatory:['goals','routines','learn','focus'],hearthside:['food','meals','recap'],workshop:['board','faves','stories','mixtape'],lighthouse:['spirit'],estate:['money'],emporium:['wigs'],archives:['guide','export','settings'],world:['world']};
 var SECTION_LABELS={today:'Today',helm:'The Helm',conservatory:'Conservatory',hearthside:'Hearthside',workshop:'Workshop',lighthouse:'Lighthouse',estate:'The Estate',emporium:'Emporium',archives:'Archives',world:'World'};
@@ -3206,8 +3259,50 @@ function rtnNextOccurrence(g,fromDate){
   return null;
 }
 
+// ── Collapsible Today Sections ──────────────────
+var _todaySecC=JSON.parse(localStorage.getItem('aTodaySecC')||'{}');
+
+function initTodaySecDefaults(){
+  var today=todayStr();
+  if(_todaySecC._autoDate!==today){
+    var h=new Date().getHours();
+    _todaySecC['todayPM']=(h<19); // PM collapsed before 7pm
+    _todaySecC['todayAM']=(h>=19); // AM collapsed after 7pm
+    _todaySecC['todaySo']=false;
+    _todaySecC._autoDate=today;
+    localStorage.setItem('aTodaySecC',JSON.stringify(_todaySecC));
+  }
+  ['todayAM','todayPM','todaySo'].forEach(applyTodaySecState);
+}
+
+function togTodaySec(id){
+  _todaySecC[id]=!_todaySecC[id];
+  localStorage.setItem('aTodaySecC',JSON.stringify(_todaySecC));
+  applyTodaySecState(id);
+}
+
+function applyTodaySecState(id){
+  var wrap=document.getElementById(id+'-wrap');
+  var arr=document.getElementById('sh-arr-'+id);
+  var collapsed=!!_todaySecC[id];
+  if(wrap)wrap.style.display=collapsed?'none':'';
+  if(arr)arr.classList.toggle('coll',collapsed);
+}
+
+// ── Collapsible Routine Groups ──────────────────
+var _rtnCollapsed={};
+
+function togRtnCollapse(gid){
+  _rtnCollapsed[gid]=!_rtnCollapsed[gid];
+  var body=document.getElementById('rc-body-'+gid);
+  var arr=document.getElementById('rc-arr-'+gid);
+  if(body)body.style.display=_rtnCollapsed[gid]?'none':'';
+  if(arr)arr.textContent=_rtnCollapsed[gid]?'▸':'▾';
+}
+
 function renderAllR(){
   renderRL('todayAM','am');renderRL('todayPM','pm');
+  initTodaySecDefaults();
   renderNonDailyToday();
   renderRtnGroups();
   renderLookahead();
@@ -3273,13 +3368,19 @@ function renderRtnGroups(){
         '<div id="'+doneId+'" class="rtn-done-section" style="display:none">'+done.map(function(item){return renderItem(item,true);}).join('')+'</div>'
       :'';
 
+    var isCollapsed=!!_rtnCollapsed[g.id];
     return'<div class="rc" style="border-left-color:'+g.color+';'+dimStyle+'">'+
-      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">'+
-        '<div><div class="rt" style="display:inline">'+g.icon+' '+g.name+'</div>'+freqBadge+duePill+'</div>'+
-        '<button onclick="editRtn(\''+gKey+'\')" style="background:none;border:none;font-size:14px;cursor:pointer;color:var(--textl);padding:4px">✏️</button>'+
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;cursor:pointer" onclick="togRtnCollapse(\''+gKey+'\')">'+
+        '<div style="display:flex;align-items:center;gap:4px"><div class="rt" style="display:inline">'+g.icon+' '+g.name+'</div>'+freqBadge+duePill+'</div>'+
+        '<div style="display:flex;align-items:center;gap:2px">'
+        +'<span id="rc-arr-'+g.id+'" style="font-size:12px;color:var(--textl);transition:transform .2s">'+(isCollapsed?'▸':'▾')+'</span>'
+        +'<button onclick="event.stopPropagation();editRtn(\''+gKey+'\')" style="background:none;border:none;font-size:14px;cursor:pointer;color:var(--textl);padding:4px">✏️</button>'
+        +'</div>'+
       '</div>'+
-      undone.map(function(item){return renderItem(item,false);}).join('')+
-      doneHTML+
+      '<div id="rc-body-'+g.id+'" style="'+(isCollapsed?'display:none':'')+'">'+
+        undone.map(function(item){return renderItem(item,false);}).join('')+
+        doneHTML
+      +'</div>'+
     '</div>';
   }).join('');
 }
@@ -8364,17 +8465,91 @@ var MEAL_SLOT_LABELS = {breakfast:'Breakfast',mains:'Main Meals',soup:'Soup',oth
 var GROCERY_CATS = ['Produce','Dairy','Meat & Fish','Bakery','Pantry','Frozen','Beverages','Other'];
 
 function showMealSec(sec,btn){
-  ['plan','recipes','grocery','prices','inventory'].forEach(function(s){
+  ['meals','plan','recipes','grocery','prices','inventory'].forEach(function(s){
     var el=document.getElementById('ms-'+s);
     if(el)el.style.display=(s===sec)?'':'none';
   });
   document.querySelectorAll('#v-meals .pn-btn').forEach(function(b){b.classList.remove('on');});
   if(btn)btn.classList.add('on');
+  if(sec==='meals')renderMealLog();
   if(sec==='plan')renderMealPlan();
   if(sec==='recipes')renderRecipes();
   if(sec==='grocery')renderGrocery();
   if(sec==='inventory')renderInventory();
   if(sec==='prices')renderPriceLog();
+}
+
+// ── Meal Log (category-based) ─────────────────
+var MEAL_LOG_ITEMS=JSON.parse(localStorage.getItem('aMealLogItems')||'[]');
+var _mealLogFilter='';
+var MEAL_CAT_LABELS={main:'🍳 Main Meals',snack:'🥨 Snacks',beverage:'☕ Beverages',treat:'🍰 Treats',supplement:'💊 Supplements'};
+var MEAL_CAT_COLORS={main:'#fde8d0',snack:'#d4e4d0',beverage:'#daeaf5',treat:'#f2dede',supplement:'#e8e4f5'};
+
+function setMealLogFilter(cat,btn){
+  _mealLogFilter=cat;
+  document.querySelectorAll('#mealLogFilter .bd-filter').forEach(function(b){b.classList.remove('on');});
+  if(btn)btn.classList.add('on');
+  renderMealLog();
+}
+
+function addMealLogItem(){
+  var name=(document.getElementById('mealLogName')||{}).value||'';
+  name=name.trim();if(!name)return;
+  var cat=(document.getElementById('mealLogCat')||{}).value||'main';
+  var day=(document.getElementById('mealLogDay')||{}).value||'';
+  MEAL_LOG_ITEMS.unshift({id:'ml-'+Date.now(),name:name,category:cat,day:day,date:todayStr()});
+  localStorage.setItem('aMealLogItems',JSON.stringify(MEAL_LOG_ITEMS));
+  document.getElementById('mealLogName').value='';
+  document.getElementById('mealLogDay').value='';
+  renderMealLog();
+}
+
+function renderMealLog(){
+  var el=document.getElementById('mealLogList');if(!el)return;
+  var list=_mealLogFilter?MEAL_LOG_ITEMS.filter(function(m){return m.category===_mealLogFilter;}):MEAL_LOG_ITEMS;
+  if(!list.length){el.innerHTML='<p style="color:var(--textl);text-align:center;padding:20px">No meals logged yet. Start tracking what you eat!</p>';return;}
+  // Group by category if showing all
+  if(!_mealLogFilter){
+    var bycat={};
+    list.forEach(function(m){
+      var c=m.category||'main';
+      if(!bycat[c])bycat[c]=[];
+      bycat[c].push(m);
+    });
+    var catOrder=['main','snack','beverage','treat','supplement'];
+    var html='';
+    catOrder.forEach(function(c){
+      if(!bycat[c]||!bycat[c].length)return;
+      html+='<div class="meal-log-cat-hdr" style="color:'+(c==='main'?'#8a5a20':c==='snack'?'#5a7a56':c==='beverage'?'#4a7a9b':c==='treat'?'#8a4a4a':'#6a5a9b')+'">'+MEAL_CAT_LABELS[c]+'<span style="font-size:10px;font-weight:600;color:var(--textl)">'+bycat[c].length+' item'+(bycat[c].length!==1?'s':'')+'</span></div>';
+      html+='<div class="card" style="padding:6px 12px;margin-bottom:8px;background:'+MEAL_CAT_COLORS[c]+'20">';
+      bycat[c].forEach(function(m){
+        html+='<div class="meal-log-item">'
+          +'<span class="meal-log-name">'+escHtml(m.name)+'</span>'
+          +(m.day?'<span class="meal-log-day">'+escHtml(m.day)+'</span>':'')
+          +'<span style="font-size:10px;color:var(--textl);flex-shrink:0">'+m.date+'</span>'
+          +'<button onclick="delMealLogItem(\''+m.id+'\')" style="background:none;border:none;font-size:12px;cursor:pointer;color:var(--textl);flex-shrink:0;padding:2px">✕</button>'
+          +'</div>';
+      });
+      html+='</div>';
+    });
+    el.innerHTML=html;
+  } else {
+    el.innerHTML='<div class="card" style="padding:6px 12px;background:'+MEAL_CAT_COLORS[_mealLogFilter]+'20">'+
+      list.map(function(m){
+        return '<div class="meal-log-item">'
+          +'<span class="meal-log-name">'+escHtml(m.name)+'</span>'
+          +(m.day?'<span class="meal-log-day">'+escHtml(m.day)+'</span>':'')
+          +'<span style="font-size:10px;color:var(--textl);flex-shrink:0">'+m.date+'</span>'
+          +'<button onclick="delMealLogItem(\''+m.id+'\')" style="background:none;border:none;font-size:12px;cursor:pointer;color:var(--textl);flex-shrink:0;padding:2px">✕</button>'
+          +'</div>';
+      }).join('')+'</div>';
+  }
+}
+
+function delMealLogItem(id){
+  MEAL_LOG_ITEMS=MEAL_LOG_ITEMS.filter(function(m){return m.id!==id;});
+  localStorage.setItem('aMealLogItems',JSON.stringify(MEAL_LOG_ITEMS));
+  renderMealLog();
 }
 
 // ── Week helpers ──────────────────────────────
@@ -8654,15 +8829,23 @@ function renderInventory(){
   var el=document.getElementById('inventoryListEl');
   if(!el)return;
   if(!INVENTORY.length){
-    el.innerHTML='<p style="color:var(--textl);text-align:center;padding:20px">Inventory is empty. Items checked off your grocery list appear here automatically.</p>';
+    el.innerHTML='<p style="color:var(--textl);text-align:center;padding:20px">Inventory is empty. Items checked off your grocery list appear here automatically, or add them manually.</p>';
     return;
   }
   el.innerHTML=INVENTORY.map(function(inv,i){
-    return'<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid #f5f0eb">'
-      +'<div style="flex:1"><div style="font-size:13px;font-weight:600">'+inv.name+'</div>'
-      +'<div style="font-size:11px;color:var(--textl)">'+inv.qty+' '+inv.unit+' • added '+inv.addedDate+'</div></div>'
-      +'<button onclick="useInventoryItem('+i+')" style="background:var(--sage-light);border:none;border-radius:8px;padding:4px 10px;font-size:12px;font-weight:700;color:#3a6a3a;cursor:pointer">Use</button>'
-      +'<button onclick="delInventoryItem('+i+')" style="background:none;border:none;font-size:13px;cursor:pointer;color:var(--textl);padding:2px 6px">🗑️</button>'
+    var priceHist=inv.priceHistory&&inv.priceHistory.length?inv.priceHistory:[];
+    var lastP=inv.lastPrice?'$'+parseFloat(inv.lastPrice).toFixed(2)+(inv.lastPriceStore?' @ '+inv.lastPriceStore:''):'';
+    return'<div style="padding:9px 0;border-bottom:1px solid #f5f0eb">'
+      +'<div style="display:flex;align-items:center;gap:8px">'
+      +'<div style="flex:1">'
+      +'<div style="font-size:13px;font-weight:600">'+escHtml(inv.name)+'</div>'
+      +'<div style="font-size:11px;color:var(--textl)">Qty: '+escHtml(inv.qty)+(inv.unit?' '+inv.unit:'')+(lastP?' · Last price: <strong>'+lastP+'</strong>':'')+'</div>'
+      +(priceHist.length>1?'<div style="font-size:10px;color:var(--textl);margin-top:1px">History: '+priceHist.slice(1,4).map(function(p){return'$'+parseFloat(p.price).toFixed(2)+(p.store?' @ '+p.store:'');}).join(' · ')+'</div>':'')
+      +'</div>'
+      +'<button onclick="priceToGrocery(\''+escHtml(inv.name)+'\','+(inv.lastPrice||0)+',\''+escHtml(inv.lastPriceStore||'')+'\');showMealSec(\'grocery\',document.querySelector(\'#v-meals .pn-btn:nth-child(4)\'))" style="background:var(--blue-light);border:none;border-radius:8px;padding:4px 9px;font-size:11px;font-weight:700;color:#4a7a9b;cursor:pointer;flex-shrink:0">→ 🛒</button>'
+      +'<button onclick="useInventoryItem('+i+')" style="background:var(--sage-light);border:none;border-radius:8px;padding:4px 9px;font-size:11px;font-weight:700;color:#3a6a3a;cursor:pointer;flex-shrink:0">Use</button>'
+      +'<button onclick="delInventoryItem('+i+')" style="background:none;border:none;font-size:13px;cursor:pointer;color:var(--textl);padding:2px 4px;flex-shrink:0">🗑️</button>'
+      +'</div>'
       +'</div>';
   }).join('');
 }
@@ -8837,35 +9020,78 @@ function expGrocery(){
 }
 
 // ── Price log ─────────────────────────────────
+function priceAutocomplete(val){
+  var sug=document.getElementById('priceAutoSuggest');if(!sug)return;
+  var v=(val||'').trim().toLowerCase();
+  if(!v){sug.innerHTML='';return;}
+  var matches=INVENTORY.filter(function(inv){return inv.name.toLowerCase().indexOf(v)>-1;}).slice(0,5);
+  sug.innerHTML=matches.map(function(inv){
+    return'<button onclick="document.getElementById(\'priceItem\').value=\''+escHtml(inv.name)+'\';document.getElementById(\'priceAutoSuggest\').innerHTML=\'\'" style="padding:3px 10px;border-radius:8px;border:1.5px solid var(--peach);background:var(--peach-light);font-family:\'Quicksand\',sans-serif;font-size:11px;font-weight:700;color:#8a5a20;cursor:pointer">📦 '+escHtml(inv.name)+'</button>';
+  }).join('');
+}
+
 function logPrice(){
   var item=(document.getElementById('priceItem')||{}).value||'';
   var amt=(document.getElementById('priceAmt')||{}).value||'';
   var store=(document.getElementById('priceStore')||{}).value||'';
   item=item.trim();
-  if(!item||!amt)return alert('Item and price required');
-  PRICE_LOG.push({item:item,price:parseFloat(amt),store:store.trim(),date:new Date().toISOString().slice(0,10)});
+  if(!item||!amt)return showToast('Item and price required');
+  var entry={id:'pr-'+Date.now(),item:item,price:parseFloat(amt),store:store.trim(),date:todayStr()};
+  PRICE_LOG.push(entry);
   localStorage.setItem('aPriceLog',JSON.stringify(PRICE_LOG));
+  // Link to inventory item with matching name
+  var inv=INVENTORY.find(function(i){return i.name.toLowerCase()===item.toLowerCase();});
+  if(inv){
+    if(!inv.priceHistory)inv.priceHistory=[];
+    inv.priceHistory.unshift({price:parseFloat(amt),store:store.trim(),date:todayStr()});
+    inv.lastPrice=parseFloat(amt);
+    inv.lastPriceStore=store.trim();
+    inv.lastPriceDate=todayStr();
+    localStorage.setItem('aInventory',JSON.stringify(INVENTORY));
+    showToast('Price saved + linked to inventory!');
+  } else {
+    showToast('Price logged!');
+  }
   document.getElementById('priceItem').value='';
   document.getElementById('priceAmt').value='';
   document.getElementById('priceStore').value='';
+  document.getElementById('priceAutoSuggest').innerHTML='';
   renderPriceLog();
+}
+
+function priceToGrocery(item,price,store){
+  GROCERY_LIST.push({id:'gr-'+Date.now(),name:item,qty:'1',unit:'',category:'Other',store:store||'',checked:false});
+  localStorage.setItem('aGroceryList',JSON.stringify(GROCERY_LIST));
+  showToast(item+' added to grocery list!');
 }
 
 function renderPriceLog(){
   var el=document.getElementById('priceLogEl');
   if(!el)return;
-  if(!PRICE_LOG.length){el.innerHTML='<p style="color:var(--textl);text-align:center;padding:20px">No prices logged yet.</p>';return;}
-  // Show most recent first
-  var sorted=PRICE_LOG.slice().sort(function(a,b){return b.date.localeCompare(a.date);});
-  el.innerHTML=sorted.map(function(p,i){
-    return '<div class="price-row">'
-      +'<span class="price-item-name">'+p.item+'</span>'
-      +'<span style="font-size:11px;color:var(--textl)">'+(p.store||'')+'</span>'
-      +'<span style="font-size:11px;color:var(--textl)">'+p.date+'</span>'
-      +'<span class="price-amt">$'+parseFloat(p.price).toFixed(2)+'</span>'
-      +'<button class="btn sec" style="font-size:11px;padding:2px 7px" onclick="delPriceEntry('+PRICE_LOG.indexOf(p)+')">✕</button>'
+  if(!PRICE_LOG.length){el.innerHTML='<p style="color:var(--textl);text-align:center;padding:20px">No prices logged yet. Type an item name above — existing inventory items will auto-suggest.</p>';return;}
+  // Group by item name, show latest price per item + history
+  var byItem={};
+  PRICE_LOG.forEach(function(p){
+    var k=p.item.toLowerCase();
+    if(!byItem[k])byItem[k]=[];
+    byItem[k].push(p);
+  });
+  var html='';
+  Object.keys(byItem).sort().forEach(function(k){
+    var entries=byItem[k].slice().sort(function(a,b){return b.date.localeCompare(a.date);});
+    var latest=entries[0];
+    var hasInv=!!INVENTORY.find(function(i){return i.name.toLowerCase()===k;});
+    html+='<div class="price-row" style="flex-direction:column;align-items:stretch;gap:4px">'
+      +'<div style="display:flex;align-items:center;gap:8px">'
+      +'<span class="price-item-name" style="flex:1">'+escHtml(latest.item)+(hasInv?'<span style="font-size:10px;background:var(--peach-light);color:#8a5a20;border-radius:5px;padding:1px 6px;margin-left:5px">📦 in inventory</span>':'')+'</span>'
+      +'<span class="price-amt">$'+parseFloat(latest.price).toFixed(2)+'</span>'
+      +'<button class="btn sec" style="font-size:11px;padding:3px 9px" onclick="priceToGrocery(\''+escHtml(latest.item)+'\','+latest.price+',\''+escHtml(latest.store||'')+'\')">→ 🛒</button>'
+      +'</div>'
+      +'<div style="font-size:10px;color:var(--textl)">Latest: '+(latest.store?latest.store+' · ':'')+latest.date+'</div>'
+      +(entries.length>1?'<div style="font-size:10px;color:var(--textl)">History: '+entries.slice(1).map(function(e){return'$'+parseFloat(e.price).toFixed(2)+(e.store?' @ '+e.store:'')+' ('+e.date+')';}).join(' · ')+'</div>':'')
       +'</div>';
-  }).join('');
+  });
+  el.innerHTML=html;
 }
 
 function delPriceEntry(i){
