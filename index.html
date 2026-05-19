@@ -557,6 +557,8 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
 .millie-sleep-entry{display:flex;justify-content:space-between;font-size:12px;color:var(--textl);padding:4px 0;border-bottom:1px solid rgba(0,0,0,.05)}
 .millie-sleep-entry:last-child{border-bottom:none}
 .millie-habit-tag{display:flex;justify-content:space-between;align-items:center;padding:5px 9px;background:var(--peach-light);border-radius:8px;margin-bottom:4px;font-size:12px;font-weight:700;color:#8a5a30}
+.ember-skill-row{padding:10px 12px;background:rgba(255,255,255,0.7);border-radius:10px;margin-bottom:8px}
+.ember-habit-chip{display:inline-flex;align-items:center;background:var(--peach-light);color:#8a5a30;border-radius:6px;padding:2px 6px;font-size:11px;font-weight:700;gap:2px}
 .tab-order-item{display:flex;align-items:center;gap:10px;padding:10px 12px;background:white;border-radius:10px;margin-bottom:6px;font-size:13px;font-weight:700;color:var(--textd);cursor:grab;border:1.5px solid #f0e8e0;user-select:none;transition:transform .15s,border-color .15s}
 .tab-order-item.drag-over{border-color:var(--rose);background:var(--rose-light);transform:scale(1.02)}
 .tab-order-handle{font-size:18px;color:var(--textl);cursor:grab;line-height:1}
@@ -626,6 +628,7 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
   <button class="tab-btn" data-tab="learn" onclick="goTab('learn',this)">📚 Learn</button>
   <button class="tab-btn" data-tab="guide" onclick="goTab('guide',this)">📖 Guide</button>
   <button class="tab-btn" data-tab="export" onclick="goTab('export',this)">📤 Export</button>
+  <button class="tab-btn" data-tab="world" onclick="goTab('world',this)">🌊 World</button>
   <button class="tab-btn" data-tab="settings" onclick="goTab('settings',this)">⚙️ Settings</button>
 </div>
 
@@ -1893,6 +1896,562 @@ if(MILLIE.asleep===undefined)MILLIE.asleep=false;
 if(!MILLIE.sleepLog)MILLIE.sleepLog=[];
 if(!MILLIE.habits)MILLIE.habits=[];
 if(!MILLIE.habitWeek)MILLIE.habitWeek='';
+var EMBER = (function(){
+  var d = JSON.parse(localStorage.getItem('aEmber')||'null') || {};
+  return {
+    skills: d.skills || [
+      {id:'sk1',name:'Discipline',level:1,xp:0,habits:[],color:'#c9a0a0'},
+      {id:'sk2',name:'Strength',level:1,xp:0,habits:[],color:'#d4a574'},
+      {id:'sk3',name:'Knowledge',level:1,xp:0,habits:[],color:'#8aafc9'},
+      {id:'sk4',name:'Spirit',level:1,xp:0,habits:[],color:'#a99fc9'}
+    ]
+  };
+})();
+function saveEmber(){ localStorage.setItem('aEmber', JSON.stringify(EMBER)); }
+
+// ═══════════════════════════════════════════════
+// FISHING 🎣
+// ═══════════════════════════════════════════════
+var FISH_LEVEL = JSON.parse(localStorage.getItem('aFishLevel')||'null') || {level:1,xp:0};
+var FISH_LOG = JSON.parse(localStorage.getItem('aFishLog')||'[]');
+function saveFishing(){localStorage.setItem('aFishLevel',JSON.stringify(FISH_LEVEL));localStorage.setItem('aFishLog',JSON.stringify(FISH_LOG));}
+
+var FISH_TYPES=[
+  {id:'sardine',name:'Sardine',emoji:'🐟',rarity:'common',speed:1.4,dirFreq:70,xp:5},
+  {id:'perch',name:'Perch',emoji:'🐠',rarity:'common',speed:1.8,dirFreq:65,xp:5},
+  {id:'crab',name:'Crab',emoji:'🦀',rarity:'uncommon',speed:2.6,dirFreq:45,xp:12},
+  {id:'squid',name:'Squid',emoji:'🦑',rarity:'uncommon',speed:3.0,dirFreq:36,xp:12},
+  {id:'eel',name:'Eel',emoji:'🐍',rarity:'rare',speed:3.8,dirFreq:22,xp:25},
+  {id:'jellyfish',name:'Jellyfish',emoji:'🪼',rarity:'rare',speed:4.0,dirFreq:18,xp:25},
+  {id:'octopus',name:'Octopus',emoji:'🐙',rarity:'legendary',speed:4.8,dirFreq:12,xp:60},
+  {id:'seadragon',name:'Sea Dragon',emoji:'🐉',rarity:'legendary',speed:5.5,dirFreq:9,xp:100}
+];
+
+var FG={state:'idle',catchY:100,catchVel:0,fishY:80,fishVel:1.5,fishDirTimer:0,progress:50,fish:null,holding:false,raf:null};
+// Bar geometry inside the fishing canvas
+var FBR={x:85,y:35,w:55,h:220};
+
+function fishCatchH(){return Math.min(40+Math.floor(FISH_LEVEL.level/3)*6,72);}
+
+function pickFish(){
+  var w={common:60,uncommon:30,rare:8,legendary:2};
+  if(FISH_LEVEL.level>=5)w={common:40,uncommon:35,rare:18,legendary:7};
+  if(FISH_LEVEL.level>=10)w={common:25,uncommon:35,rare:28,legendary:12};
+  var pool=[];
+  FISH_TYPES.forEach(function(f){for(var i=0;i<(w[f.rarity]||0);i++)pool.push(f);});
+  return pool[Math.floor(Math.random()*pool.length)];
+}
+
+var FISH_GATE=3; // activities needed to unlock fishing each day
+function openFishing(){
+  var done=todayActivityCount();
+  var locked=done<FISH_GATE;
+  FG.state=locked?'locked':'idle';
+  if(FG.raf){cancelAnimationFrame(FG.raf);FG.raf=null;}
+  showOv('fishingOv');
+  setTimeout(function(){
+    var c=document.getElementById('fishCanvas');
+    if(c){c.width=250;c.height=340;}
+    drawFishingCanvas();renderFishLog();
+    var lv=document.getElementById('fishLevelDisplay');
+    if(lv)lv.textContent='🎣 Fishing Level '+FISH_LEVEL.level;
+  },50);
+}
+
+function startFishing(){
+  FG.fish=pickFish();
+  FG.state='casting'; FG.castTimer=50;
+  FG.catchY=FBR.h/2; FG.catchVel=0;
+  FG.fishY=Math.random()*(FBR.h-22);
+  FG.fishVel=(Math.random()>0.5?1:-1)*FG.fish.speed;
+  FG.fishDirTimer=FG.fish.dirFreq;
+  FG.progress=50;
+  if(FG.raf)cancelAnimationFrame(FG.raf);
+  FG.raf=requestAnimationFrame(fishingLoop);
+}
+
+function fishingLoop(){
+  fishingTick();drawFishingCanvas();
+  if(FG.state==='reeling'||FG.state==='casting')FG.raf=requestAnimationFrame(fishingLoop);
+}
+
+function fishingTick(){
+  if(FG.state==='casting'){if(--FG.castTimer<=0)FG.state='reeling';return;}
+  if(FG.state!=='reeling')return;
+  // Catch zone physics
+  FG.catchVel+=(FG.holding?-0.38:0)+0.13;
+  FG.catchVel=Math.max(-4,Math.min(4,FG.catchVel));
+  FG.catchY+=FG.catchVel;
+  var ch=fishCatchH();
+  FG.catchY=Math.max(0,Math.min(FBR.h-ch,FG.catchY));
+  // Fish movement
+  if(--FG.fishDirTimer<=0){
+    FG.fishVel=(Math.random()>0.5?1:-1)*FG.fish.speed*(0.8+Math.random()*0.4);
+    FG.fishDirTimer=FG.fish.dirFreq+Math.floor(Math.random()*15-7);
+  }
+  FG.fishY+=FG.fishVel;
+  if(FG.fishY<0){FG.fishY=0;FG.fishVel=Math.abs(FG.fishVel);}
+  if(FG.fishY>FBR.h-22){FG.fishY=FBR.h-22;FG.fishVel=-Math.abs(FG.fishVel);}
+  // Progress
+  var inZone=(FG.fishY+11)>=FG.catchY&&(FG.fishY+11)<=(FG.catchY+ch);
+  FG.progress=Math.max(0,Math.min(100,FG.progress+(inZone?0.9:-1.1)));
+  if(FG.progress>=100)fishCaught();
+  if(FG.progress<=0)fishEscaped();
+}
+
+function drawFishingCanvas(){
+  var canvas=document.getElementById('fishCanvas');
+  if(!canvas)return;
+  var ctx=canvas.getContext('2d');
+  var W=canvas.width,H=canvas.height;
+  // Water bg
+  ctx.fillStyle='#071828';ctx.fillRect(0,0,W,H);
+  // Ripples
+  ctx.strokeStyle='rgba(100,180,255,0.06)';ctx.lineWidth=1;
+  for(var wy=15;wy<H;wy+=28){
+    ctx.beginPath();
+    for(var wx=0;wx<W;wx+=4){ctx[wx===0?'moveTo':'lineTo'](wx,wy+Math.sin((wx+wy*2)/18)*3);}
+    ctx.stroke();
+  }
+  // Fishing line
+  ctx.strokeStyle='rgba(255,255,255,0.35)';ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(W/2,0);ctx.lineTo(FBR.x+FBR.w/2,FBR.y);ctx.stroke();
+
+  if(FG.state==='locked'){
+    var done=todayActivityCount();
+    var need=FISH_GATE-done;
+    ctx.fillStyle='rgba(0,0,0,0.45)';ctx.fillRect(0,0,W,H);
+    ctx.font='32px serif';ctx.textAlign='center';ctx.fillText('🔒',W/2,H/2-28);
+    ctx.fillStyle='rgba(136,221,255,0.9)';ctx.font='bold 14px Quicksand,sans-serif';
+    ctx.fillText('Dock is quiet...',W/2,H/2+4);
+    ctx.fillStyle='rgba(255,255,255,0.55)';ctx.font='12px Quicksand,sans-serif';
+    ctx.fillText('Complete '+need+' more thing'+(need===1?'':'s')+' today',W/2,H/2+24);
+    ctx.fillText('to head out fishing',W/2,H/2+40);
+    return;
+  }
+  if(FG.state==='idle'){
+    ctx.fillStyle='rgba(136,221,255,0.85)';ctx.font='bold 13px Quicksand,sans-serif';
+    ctx.textAlign='center';ctx.fillText('Tap to cast your line',W/2,H/2);
+    ctx.font='11px Quicksand,sans-serif';ctx.fillStyle='rgba(255,255,255,0.4)';
+    ctx.fillText('Hold screen to reel up',W/2,H/2+18);return;
+  }
+  if(FG.state==='casting'){
+    ctx.fillStyle='rgba(136,221,255,0.85)';ctx.font='bold 14px Quicksand,sans-serif';
+    ctx.textAlign='center';ctx.fillText('Casting...',W/2,H/2);return;
+  }
+
+  // Bar bg
+  var bx=FBR.x,by=FBR.y,bw=FBR.w,bh=FBR.h;
+  ctx.fillStyle='rgba(0,20,50,0.85)';ctx.fillRect(bx,by,bw,bh);
+  ctx.strokeStyle='rgba(100,180,255,0.25)';ctx.lineWidth=1;ctx.strokeRect(bx,by,bw,bh);
+
+  // Catch zone
+  var ch=fishCatchH();
+  var cg=ctx.createLinearGradient(0,by+FG.catchY,0,by+FG.catchY+ch);
+  cg.addColorStop(0,'rgba(60,200,80,0.25)');cg.addColorStop(0.5,'rgba(60,220,80,0.55)');cg.addColorStop(1,'rgba(60,200,80,0.25)');
+  ctx.fillStyle=cg;ctx.fillRect(bx,by+FG.catchY,bw,ch);
+  ctx.strokeStyle='rgba(80,240,100,0.8)';ctx.lineWidth=2;ctx.strokeRect(bx,by+FG.catchY,bw,ch);
+
+  // Fish emoji
+  ctx.font='20px serif';ctx.textAlign='center';
+  ctx.fillText(FG.fish?FG.fish.emoji:'🐟',bx+bw/2,by+FG.fishY+20);
+
+  // Progress bar
+  var px2=bx+bw+8,ph=bh;
+  ctx.fillStyle='rgba(0,20,50,0.85)';ctx.fillRect(px2,by,12,ph);
+  var progH=ph*(FG.progress/100);
+  ctx.fillStyle=FG.progress>60?'#44dd66':FG.progress>30?'#ddaa22':'#dd4444';
+  ctx.fillRect(px2,by+ph-progH,12,progH);
+  ctx.strokeStyle='rgba(255,255,255,0.15)';ctx.lineWidth=1;ctx.strokeRect(px2,by,12,ph);
+
+  // Fish name
+  if(FG.fish){
+    ctx.textAlign='center';
+    ctx.fillStyle='rgba(255,255,255,0.9)';ctx.font='bold 13px Quicksand,sans-serif';
+    ctx.fillText(FG.fish.emoji+' '+FG.fish.name,W/2,20);
+    var rc={common:'#88cc88',uncommon:'#8899ee',rare:'#ee9944',legendary:'#eecc44'};
+    ctx.fillStyle=rc[FG.fish.rarity]||'#aaa';ctx.font='10px Quicksand,sans-serif';
+    ctx.fillText(FG.fish.rarity.toUpperCase(),W/2,31);
+  }
+
+  // Instruction
+  ctx.textAlign='center';ctx.fillStyle='rgba(255,255,255,0.4)';ctx.font='11px Quicksand,sans-serif';
+  ctx.fillText(FG.holding?'▲ Holding':'Hold to pull up',W/2,H-6);
+
+  // Overlay for caught/escaped
+  if(FG.state==='caught'||FG.state==='escaped'){
+    ctx.fillStyle='rgba(0,0,0,0.55)';ctx.fillRect(0,0,W,H);
+    if(FG.state==='caught'){
+      ctx.font='36px serif';ctx.textAlign='center';ctx.fillText(FG.fish?FG.fish.emoji:'🐟',W/2,H/2-18);
+      ctx.fillStyle='#ffe08a';ctx.font='bold 17px Quicksand,sans-serif';ctx.fillText('Caught!',W/2,H/2+12);
+      if(FG.fish){ctx.fillStyle='rgba(255,255,255,0.7)';ctx.font='13px Quicksand,sans-serif';ctx.fillText(FG.fish.name,W/2,H/2+30);}
+      ctx.fillStyle='rgba(255,255,255,0.4)';ctx.font='11px Quicksand,sans-serif';ctx.fillText('Tap to fish again',W/2,H/2+50);
+    } else {
+      ctx.fillStyle='#ee8888';ctx.font='bold 16px Quicksand,sans-serif';ctx.textAlign='center';ctx.fillText('It got away...',W/2,H/2);
+      ctx.fillStyle='rgba(255,255,255,0.5)';ctx.font='13px Quicksand,sans-serif';ctx.fillText('Tap to try again',W/2,H/2+22);
+    }
+  }
+}
+
+function fishCaught(){
+  FG.state='caught';
+  if(FG.raf){cancelAnimationFrame(FG.raf);FG.raf=null;}
+  drawFishingCanvas();
+  var fish=FG.fish;
+  if(fish){
+    FISH_LEVEL.xp=(FISH_LEVEL.xp||0)+fish.xp;
+    var needed=Math.floor(30*Math.pow(FISH_LEVEL.level,1.4));
+    while(FISH_LEVEL.xp>=needed){FISH_LEVEL.xp-=needed;FISH_LEVEL.level++;needed=Math.floor(30*Math.pow(FISH_LEVEL.level,1.4));showToast('🎣 Fishing Level '+FISH_LEVEL.level+'!');}
+    FISH_LOG=([{fish:fish.id,name:fish.name,emoji:fish.emoji,rarity:fish.rarity,date:todayStr()}].concat(FISH_LOG)).slice(0,50);
+    saveFishing();renderFishLog();
+    if(fish.rarity==='legendary')celebrate();
+    showToast(fish.emoji+' '+fish.name+' caught! +'+fish.xp+' XP');
+    var lv=document.getElementById('fishLevelDisplay');
+    if(lv)lv.textContent='🎣 Fishing Level '+FISH_LEVEL.level;
+  }
+}
+
+function fishEscaped(){
+  FG.state='escaped';
+  if(FG.raf){cancelAnimationFrame(FG.raf);FG.raf=null;}
+  drawFishingCanvas();
+}
+
+function fishingPointerDown(){
+  if(FG.state==='locked')return;
+  if(FG.state==='idle'){startFishing();return;}
+  if(FG.state==='caught'||FG.state==='escaped'){
+    FG.state='idle';drawFishingCanvas();return;
+  }
+  FG.holding=true;
+}
+function fishingPointerUp(){FG.holding=false;}
+
+function logRetroSleep(){
+  var dateEl=document.getElementById('retroSleepDate');
+  var bedEl=document.getElementById('retroSleepBed');
+  var wakeEl=document.getElementById('retroSleepWake');
+  var msgEl=document.getElementById('retroSleepMsg');
+  if(!dateEl||!bedEl||!wakeEl)return;
+  var d=dateEl.value||todayStr();
+  var bed=bedEl.value;var wake=wakeEl.value;
+  if(!bed||!wake){msgEl.textContent='Please enter both times.';msgEl.style.color='#cc5566';msgEl.style.display='';return;}
+  // Build ISO timestamps — bedtime may be previous evening
+  var wokeDT=new Date(d+'T'+wake+':00');
+  var sleptDT=new Date(d+'T'+bed+':00');
+  if(sleptDT>=wokeDT)sleptDT.setDate(sleptDT.getDate()-1); // bed was previous night
+  var dur=wokeDT-sleptDT;
+  var hrs=Math.floor(dur/3600000);var mins=Math.floor((dur%3600000)/60000);
+  if(hrs<0||hrs>20){msgEl.textContent='Times look off — check date/times.';msgEl.style.color='#cc5566';msgEl.style.display='';return;}
+  // Add to Millie's sleep log
+  MILLIE.sleepLog=(MILLIE.sleepLog||[]).concat([{slept:sleptDT.toISOString(),woke:wokeDT.toISOString(),durH:hrs,durM:mins}]).slice(-14);
+  // Boost Millie's energy based on sleep duration (as if she slept)
+  var energyGain=Math.min(hrs*14,95);
+  MILLIE.energy=Math.min(100,MILLIE.energy+energyGain);
+  MILLIE.hunger=Math.max(0,MILLIE.hunger-hrs*2);
+  saveMillie();renderMillieSleepLog();renderMillieWidget();
+  msgEl.textContent='Logged '+hrs+'h '+mins+'m — Millie\'s energy restored! ✓';
+  msgEl.style.color='var(--sage)';msgEl.style.display='';
+  // Reset fields
+  dateEl.value='';bedEl.value='';wakeEl.value='';
+}
+
+function todayActivityCount(){
+  var today=todayStr();
+  var count=0;
+  // Count routines completed today
+  RTN_GROUPS.forEach(function(g){
+    var state=rtnCompState(g,today);
+    count+=Object.values(state).filter(Boolean).length;
+  });
+  // Count tasks marked done that were created today or completed (best effort)
+  TASKS.forEach(function(t){
+    if(t.done&&t.created&&t.created.slice(0,10)===today)count++;
+  });
+  return count;
+}
+
+function renderFishLog(){
+  var el=document.getElementById('fishLog');
+  if(!el)return;
+  if(!FISH_LOG.length){el.innerHTML='<div style="font-size:12px;color:rgba(255,255,255,0.4);text-align:center;padding:6px">No fish caught yet</div>';return;}
+  var rc={common:'#88cc88',uncommon:'#8899ee',rare:'#ee9944',legendary:'#eecc44'};
+  el.innerHTML=FISH_LOG.slice(0,10).map(function(e){
+    return'<div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid rgba(255,255,255,.06);font-size:12px;color:rgba(255,255,255,.75)">'
+      +'<span>'+e.emoji+' '+e.name+'</span>'
+      +'<span style="color:'+(rc[e.rarity]||'#aaa')+';font-size:10px">'+e.rarity+'</span>'
+      +'<span style="color:rgba(255,255,255,.35);font-size:11px">'+e.date+'</span>'
+      +'</div>';
+  }).join('');
+}
+
+function emberDrawSVG(sz){
+  sz=sz||60; var h=Math.round(sz*2);
+  var hair='#b54020',hairD='#8a2e10',hairL='#d05028';
+  var skin='#e8b896',skinS='#d49a78';
+  var dress='#2e3535',dressL='#3d4848';
+  var apron='#e8e0cc',apronS='#d4ccb4';
+  var boot='#5a3820',bootL='#7a5030';
+  var eye='#3a5a2a',lip='#c07060';
+  return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 40" shape-rendering="crispEdges" width="'+sz+'" height="'+h+'">'
+    // hair bun top
+    +'<rect x="7" y="0" fill="'+hair+'" width="6" height="1"/>'
+    +'<rect x="6" y="1" fill="'+hair+'" width="8" height="2"/>'
+    +'<rect x="7" y="1" fill="'+hairL+'" width="3" height="1"/>'
+    // hair sides framing face
+    +'<rect x="4" y="3" fill="'+hair+'" width="2" height="5"/>'
+    +'<rect x="14" y="3" fill="'+hair+'" width="2" height="5"/>'
+    // head/face
+    +'<rect x="6" y="3" fill="'+skin+'" width="8" height="6"/>'
+    // eyes (green)
+    +'<rect x="7" y="5" fill="'+eye+'" width="2" height="2" rx=".5"/>'
+    +'<rect x="11" y="5" fill="'+eye+'" width="2" height="2" rx=".5"/>'
+    +'<rect x="7.2" y="5.2" fill="white" width=".8" height=".8"/>'
+    +'<rect x="11.2" y="5.2" fill="white" width=".8" height=".8"/>'
+    // nose + mouth
+    +'<rect x="9.5" y="7" fill="'+skinS+'" width="1" height="1"/>'
+    +'<rect x="8" y="8" fill="'+lip+'" width="4" height="0.8" rx=".4"/>'
+    // neck
+    +'<rect x="8" y="9" fill="'+skin+'" width="4" height="2"/>'
+    // left shoulder / right shoulder
+    +'<rect x="5" y="10" fill="'+dress+'" width="4" height="2"/>'
+    +'<rect x="11" y="10" fill="'+dress+'" width="4" height="2"/>'
+    // arms
+    +'<rect x="3" y="11" fill="'+dress+'" width="3" height="11"/>'
+    +'<rect x="14" y="11" fill="'+dress+'" width="3" height="11"/>'
+    // hands
+    +'<rect x="3" y="22" fill="'+skin+'" width="3" height="2"/>'
+    +'<rect x="14" y="22" fill="'+skin+'" width="3" height="2"/>'
+    // dress torso
+    +'<rect x="5" y="10" fill="'+dress+'" width="10" height="20"/>'
+    // apron (front, slightly narrower)
+    +'<rect x="6" y="13" fill="'+apron+'" width="8" height="16"/>'
+    +'<rect x="6" y="13" fill="'+apronS+'" width="1" height="16"/>'
+    // apron waist strings
+    +'<rect x="3" y="20" fill="'+apron+'" width="3" height="1"/>'
+    +'<rect x="14" y="20" fill="'+apron+'" width="3" height="1"/>'
+    // skirt flare
+    +'<rect x="4" y="29" fill="'+dress+'" width="12" height="5"/>'
+    +'<rect x="3" y="32" fill="'+dress+'" width="14" height="2"/>'
+    +'<rect x="5" y="30" fill="'+apron+'" width="10" height="3"/>'
+    // boots
+    +'<rect x="4" y="34" fill="'+boot+'" width="5" height="5"/>'
+    +'<rect x="11" y="34" fill="'+boot+'" width="5" height="5"/>'
+    +'<rect x="4" y="34" fill="'+bootL+'" width="2" height="2"/>'
+    +'<rect x="11" y="34" fill="'+bootL+'" width="2" height="2"/>'
+    +'<rect x="3" y="38" fill="'+boot+'" width="7" height="2"/>'
+    +'<rect x="10" y="38" fill="'+boot+'" width="7" height="2"/>'
+    +'</svg>';
+}
+
+function drawBrindleport(){
+  var canvas=document.getElementById('worldCanvas');
+  if(!canvas)return;
+  var ctx=canvas.getContext('2d');
+  var W=320,H=160;
+  canvas.width=W; canvas.height=H;
+  function px(x,y,w,h,c){ctx.fillStyle=c;ctx.fillRect(x,y,w,h);}
+
+  // Sky
+  px(0,0,W,H,'#1a2a3a');
+  // Stars
+  [[10,5],[25,12],[45,3],[60,18],[80,8],[100,15],[120,4],[140,20],[160,10],[180,6],[200,18],[220,3],[240,14],[260,8],[280,20],[300,5],[315,12],[35,25],[75,28],[155,25],[245,22]].forEach(function(s){px(s[0],s[1],1,1,'#fffde8');});
+  // Moon
+  px(290,8,10,10,'#fffde0'); px(294,8,6,10,'#1a2a3a');
+  // Distant water/bay (right)
+  px(190,75,130,85,'#0d1f35');
+  px(190,75,130,3,'#1a3a5a');
+  for(var wx=195;wx<320;wx+=14){px(wx,82,8,1,'#1e4a6a');}
+  // Shore/hills bg
+  px(150,65,50,20,'#1a3028'); px(170,60,30,25,'#162a22');
+  // Ground
+  px(0,105,W,55,'#3a3028');
+  for(var cy=107;cy<160;cy+=7){for(var cx=(cy%14<7?0:4);cx<W;cx+=14){px(cx,cy,12,5,'#4a3e30');px(cx+1,cy+1,10,3,'#504438');}}
+  // === INN ===
+  px(20,35,110,75,'#2d2010'); // body
+  px(20,95,110,15,'#3a3025'); // stone base
+  // Roof
+  px(15,25,120,12,'#1a1208');
+  px(20,17,110,10,'#241810');
+  px(26,10,98,9,'#1a1208');
+  // Chimney
+  px(55,4,14,22,'#2a1e0e'); px(53,2,18,5,'#1a1208');
+  px(59,0,5,5,'#5a5a5a'); px(61,0,3,3,'#888'); // smoke
+  // Sign hanging
+  px(80,44,36,18,'#4a3010'); px(81,45,34,16,'#3a2208');
+  // Windows
+  px(28,50,22,20,'#ffd060'); px(30,52,18,16,'#ffe080');
+  px(38,52,2,16,'#c8a040'); px(30,59,18,2,'#c8a040');
+  px(31,53,6,6,'#fff5b0');
+  px(80,50,22,20,'#ffd060'); px(82,52,18,16,'#ffe080');
+  px(90,52,2,16,'#c8a040'); px(82,59,18,2,'#c8a040');
+  px(83,53,6,6,'#fff5b0');
+  // Door
+  px(57,78,16,32,'#1a0e06'); px(58,79,14,30,'#241408');
+  px(61,83,5,12,'#3a2010'); px(61,97,5,10,'#3a2010');
+  px(67,93,3,3,'#ffd060'); px(68,94,2,2,'#c4a030');
+  // Lanterns
+  px(44,72,7,10,'#ffd060'); px(45,73,5,8,'#fff080');
+  px(79,72,7,10,'#ffd060'); px(80,73,5,8,'#fff080');
+  // Barrel
+  px(148,97,18,17,'#4a3010'); px(149,98,16,15,'#5a3c18');
+  px(148,100,18,2,'#6a4a20'); px(148,106,18,2,'#6a4a20');
+  // === DOCK ===
+  px(210,108,110,6,'#3a2808'); px(210,109,110,1,'#4a3410');
+  for(var dp=216;dp<320;dp+=22){px(dp,96,6,26,'#2a1e08');}
+  px(210,102,110,4,'#3a2810');
+  // Boat
+  px(230,93,60,14,'#3a2010'); px(232,90,56,5,'#4a2c14');
+  px(258,72,3,25,'#5a3820'); px(248,73,12,2,'#5a3820');
+  px(249,73,10,16,'#e8e0cc');
+  // Lamp post
+  px(170,72,4,38,'#2a2010'); px(168,70,8,6,'#3a3010');
+  px(165,62,14,10,'#ffd060'); px(167,64,10,6,'#fff080');
+  // === EMBER (simple figure near door) ===
+  var ex=104,ey=72;
+  // hair
+  px(ex+3,ey,5,1,'#b54020'); px(ex+2,ey+1,7,3,'#b54020'); px(ex+3,ey+1,3,1,'#d05028');
+  // face
+  px(ex+3,ey+3,6,5,'#e8b896');
+  // eyes
+  px(ex+4,ey+5,1,1,'#3a5a2a'); px(ex+7,ey+5,1,1,'#3a5a2a');
+  // mouth
+  px(ex+4,ey+7,3,1,'#c07060');
+  // neck
+  px(ex+4,ey+8,4,2,'#e8b896');
+  // dress body
+  px(ex+2,ey+9,8,12,'#2e3535');
+  // apron
+  px(ex+3,ey+10,6,10,'#e8e0cc');
+  // arms
+  px(ex+1,ey+10,2,8,'#2e3535'); px(ex+9,ey+10,2,8,'#2e3535');
+  // skirt
+  px(ex+1,ey+20,10,5,'#2e3535');
+  // boots
+  px(ex+2,ey+25,3,3,'#5a3820'); px(ex+7,ey+25,3,3,'#5a3820');
+}
+
+function emberXpNeeded(level){ return Math.floor(50*Math.pow(level,1.5)); }
+
+function emberAddXp(skillId, amount){
+  var skill=EMBER.skills.find(function(s){return s.id===skillId;});
+  if(!skill)return;
+  skill.xp=(skill.xp||0)+amount;
+  var needed=emberXpNeeded(skill.level);
+  if(skill.xp>=needed){
+    skill.xp-=needed;
+    skill.level++;
+    showToast('✨ '+skill.name+' reached Level '+skill.level+'!');
+    if(skill.level%5===0)celebrate();
+  }
+  saveEmber();
+}
+
+function emberHabitCheck(groupId){
+  EMBER.skills.forEach(function(skill){
+    if((skill.habits||[]).indexOf(groupId)>-1) emberAddXp(skill.id,10);
+  });
+}
+
+function renderEmberSkillBars(){
+  var el=document.getElementById('emberSkillBars');
+  if(!el)return;
+  el.innerHTML=EMBER.skills.map(function(s){
+    var pct=Math.min(100,Math.round(((s.xp||0)/emberXpNeeded(s.level))*100));
+    return'<div style="margin-bottom:8px">'
+      +'<div style="display:flex;justify-content:space-between;font-size:12px;font-weight:700;color:var(--textl);margin-bottom:3px">'
+      +'<span>'+(s.name||'Skill')+'</span><span>Lv '+s.level+' · '+pct+'%</span></div>'
+      +'<div style="height:8px;background:#f0ebe6;border-radius:4px;overflow:hidden">'
+      +'<div style="height:100%;border-radius:4px;background:'+(s.color||'var(--rose)')+';width:'+pct+'%;transition:width .6s ease"></div>'
+      +'</div></div>';
+  }).join('');
+}
+
+function openEmber(){
+  var emsEl=document.getElementById('emberModalSvg');
+  if(emsEl)emsEl.innerHTML=emberDrawSVG(50);
+  renderEmberModal();
+  showOv('emberOv');
+}
+
+function renderEmberModal(){
+  var el=document.getElementById('emberSkillList');
+  if(!el)return;
+  el.innerHTML=EMBER.skills.map(function(s,si){
+    var pct=Math.min(100,Math.round(((s.xp||0)/emberXpNeeded(s.level))*100));
+    var habitNames=(s.habits||[]).map(function(gid){
+      var g=RTN_GROUPS.find(function(x){return x.id===gid;});
+      return g?'<span class="ember-habit-chip">'+(g.icon||'📌')+' '+g.name+'<button onclick="emberUnassignHabit('+si+',\''+gid+'\')" style="background:none;border:none;cursor:pointer;color:var(--textl);font-size:13px;padding:0 2px">×</button></span>':'';
+    }).join('');
+    return'<div class="ember-skill-row">'
+      +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">'
+      +'<div style="width:12px;height:12px;border-radius:3px;background:'+(s.color||'#ccc')+'"></div>'
+      +'<span style="font-weight:700;font-size:13px;flex:1">'+s.name+'</span>'
+      +'<span style="font-size:11px;color:var(--textl)">Lv '+s.level+'</span>'
+      +'<button onclick="delEmberSkill('+si+')" style="background:none;border:none;cursor:pointer;color:var(--textl);font-size:14px">🗑</button>'
+      +'</div>'
+      +'<div style="height:6px;background:#f0ebe6;border-radius:3px;margin-bottom:6px;overflow:hidden">'
+      +'<div style="height:100%;background:'+(s.color||'var(--rose)')+';width:'+pct+'%;border-radius:3px;transition:width .5s"></div>'
+      +'</div>'
+      +'<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:6px">'+habitNames+'</div>'
+      +'<button onclick="openEmberHabitPicker('+si+')" style="font-size:11px;padding:3px 8px;border-radius:6px;border:none;background:var(--lav-light);color:var(--lav);font-weight:700;cursor:pointer">+ Link habit</button>'
+      +'</div>';
+  }).join('');
+}
+
+function openEmberHabitPicker(skillIdx){
+  var p=document.getElementById('emberPickerPanel');
+  if(!p)return;
+  if(p.dataset.si===String(skillIdx)&&p.style.display!=='none'){p.style.display='none';return;}
+  p.dataset.si=skillIdx;
+  var assigned=(EMBER.skills[skillIdx].habits||[]);
+  var groups=RTN_GROUPS.filter(function(g){return assigned.indexOf(g.id)===-1;});
+  p.innerHTML='<div style="font-size:11px;font-weight:700;color:var(--textl);padding:6px 8px 4px">Choose a routine:</div>'
+    +groups.map(function(g){
+      return'<button onclick="emberAssignHabit('+skillIdx+',\''+g.id+'\')" style="display:block;width:100%;text-align:left;padding:7px 10px;background:none;border:none;border-bottom:1px solid rgba(0,0,0,.05);font-family:\'Quicksand\',sans-serif;font-size:13px;cursor:pointer">'+(g.icon||'📌')+' '+g.name+'</button>';
+    }).join('');
+  p.style.display='';
+}
+
+function emberAssignHabit(skillIdx,gid){
+  if(!EMBER.skills[skillIdx].habits)EMBER.skills[skillIdx].habits=[];
+  if(EMBER.skills[skillIdx].habits.indexOf(gid)===-1)EMBER.skills[skillIdx].habits.push(gid);
+  saveEmber();
+  var p=document.getElementById('emberPickerPanel');
+  if(p)p.style.display='none';
+  renderEmberModal();
+}
+
+function emberUnassignHabit(skillIdx,gid){
+  EMBER.skills[skillIdx].habits=(EMBER.skills[skillIdx].habits||[]).filter(function(x){return x!==gid;});
+  saveEmber();renderEmberModal();
+}
+
+function addEmberSkill(){
+  var name=document.getElementById('newEmberSkillName');
+  if(!name||!name.value.trim())return;
+  var colors=['#c9a0a0','#d4a574','#8aafc9','#a99fc9','#8faa8b','#b0b890'];
+  var col=colors[EMBER.skills.length%colors.length];
+  EMBER.skills.push({id:'sk'+Date.now(),name:name.value.trim(),level:1,xp:0,habits:[],color:col});
+  name.value='';
+  saveEmber();renderEmberModal();renderEmberSkillBars();
+}
+
+function delEmberSkill(idx){
+  EMBER.skills.splice(idx,1);
+  saveEmber();renderEmberModal();renderEmberSkillBars();
+}
+
+function renderWorld(){
+  drawBrindleport();
+  var ewSvg=document.getElementById('emberWidgetSvg');
+  if(ewSvg)ewSvg.innerHTML=emberDrawSVG(50);
+  var mwSvg=document.getElementById('millieWorldSvg');
+  var mmode=millieMode(); var msvg=mmode==='sleeping'?'sleepy':mmode;
+  if(mwSvg)mwSvg.innerHTML=millieDrawSVG(msvg,52);
+  renderEmberSkillBars();
+}
+
 var BRAIN_DUMP = JSON.parse(localStorage.getItem('aBrainDump')||'[]');
 var INTENTIONS = JSON.parse(localStorage.getItem('aIntentions')||'{}');
 var MEDS = JSON.parse(localStorage.getItem('aMeds')||'[]');
@@ -2013,8 +2572,8 @@ var MEAL_COMBOS = JSON.parse(localStorage.getItem('aMC')||'null')||[
   {id:'mc4',name:'Recovery Meal',emoji:'🍗',foods:['f2','f3','f10']},
 ];
 
-var DEFAULT_TAB_ORDER=['today','tasks','projects','goals','routines','lists','food','wigs','money','recap','meals','spirit','board','faves','focus','learn','guide','export','settings'];
-var TAB_LABELS={today:'☀️ Today',tasks:'📋 Tasks',projects:'📁 Projects',goals:'🎯 Goals',routines:'🔄 Routines',lists:'📝 Lists',food:'💚 Health',wigs:'🪄 Wigs',money:'💰 Money',recap:'📊 Recap',meals:'🍽️ Meals',spirit:'✨ Spiritual',board:'🌈 Board',faves:'⭐ Faves',focus:'🧠 Focus',learn:'📚 Learn',guide:'📖 Guide',export:'📤 Export',settings:'⚙️ Settings'};
+var DEFAULT_TAB_ORDER=['today','tasks','projects','goals','routines','lists','food','wigs','money','recap','meals','spirit','board','faves','focus','learn','guide','export','world','settings'];
+var TAB_LABELS={today:'☀️ Today',tasks:'📋 Tasks',projects:'📁 Projects',goals:'🎯 Goals',routines:'🔄 Routines',lists:'📝 Lists',food:'💚 Health',wigs:'🪄 Wigs',money:'💰 Money',recap:'📊 Recap',meals:'🍽️ Meals',spirit:'✨ Spiritual',board:'🌈 Board',faves:'⭐ Faves',focus:'🧠 Focus',learn:'📚 Learn',guide:'📖 Guide',export:'📤 Export',world:'🌊 World',settings:'⚙️ Settings'};
 var TAB_ORDER=(function(){var o=JSON.parse(localStorage.getItem('aTabOrder')||'null');if(!o)return DEFAULT_TAB_ORDER.slice();var full=DEFAULT_TAB_ORDER.slice();o.forEach(function(t){if(full.indexOf(t)<0)o=o.filter(function(x){return x!==t;});});full.forEach(function(t){if(o.indexOf(t)<0)o.push(t);});return o;})();
 
 var S = {
@@ -2183,6 +2742,7 @@ function goTabDirect(tab,btn){
   if(v)v.classList.add('on');
   if(btn)btn.classList.add('on');
   if(tab==='settings')renderSettings();
+  if(tab==='world')renderWorld();
 }
 
 // ═══════════════════════════════════════════════
@@ -2563,6 +3123,7 @@ function togR(key,idx,el){
     MILLIE.happiness=Math.min(100,MILLIE.happiness+10);
     saveMillie();millieTaskTreat();
   }
+  if(newVal)emberHabitCheck(key);
 }
 
 function updRS(){
@@ -3956,6 +4517,8 @@ function openMillie(){
   if(wtInp)wtInp.value=MILLIE.waketime||'07:00';
   renderMillieSleepLog();
   renderMillieHabits();
+  var rsd=document.getElementById('retroSleepDate');
+  if(rsd&&!rsd.value)rsd.value=todayStr();
   showOv('millieOv');
 }
 
@@ -7856,6 +8419,50 @@ setInterval(updDate, 60000);
   <div id="moodSubContent"></div>
 </div>
 
+<!-- WORLD: BRINDLEPORT BAY -->
+<div class="view" id="v-world">
+  <div style="font-family:'Playfair Display',serif;font-size:20px;color:var(--rose);text-align:center;margin-bottom:8px">🌊 Brindleport Bay</div>
+  <canvas id="worldCanvas" style="width:100%;border-radius:14px;image-rendering:pixelated;image-rendering:crisp-edges;display:block;cursor:pointer" onclick="openEmber()"></canvas>
+  <div style="display:flex;gap:10px;margin-top:12px">
+    <div class="card" style="flex:1;text-align:center;cursor:pointer;padding:14px 8px" onclick="openEmber()">
+      <div id="emberWidgetSvg" style="margin:0 auto 4px;width:50px;height:100px"></div>
+      <div style="font-family:'Playfair Display',serif;font-size:15px;color:var(--rose)">Ember</div>
+      <div style="font-size:11px;color:var(--textl)">Innkeeper</div>
+    </div>
+    <div class="card" style="flex:1;text-align:center;cursor:pointer;padding:14px 8px" onclick="openMillie()">
+      <div id="millieWorldSvg" style="margin:0 auto 4px;width:52px;height:68px"></div>
+      <div style="font-family:'Playfair Display',serif;font-size:15px;color:var(--rose)">Millie</div>
+      <div style="font-size:11px;color:var(--textl)">Inn Cat</div>
+    </div>
+  </div>
+  <div class="card" style="margin-top:12px">
+    <div style="font-weight:700;font-size:13px;color:var(--textd);margin-bottom:10px">⚔️ Ember's Skills</div>
+    <div id="emberSkillBars"></div>
+    <button class="add-btn" onclick="openEmber()" style="margin-top:6px">⚙️ Manage Skills & Habits →</button>
+  </div>
+  <button onclick="openFishing()" style="width:100%;margin-top:10px;padding:12px;border-radius:12px;border:none;background:linear-gradient(135deg,#0a2a4e,#1a3a5e);color:#88ddff;font-family:'Quicksand',sans-serif;font-size:14px;font-weight:700;cursor:pointer;letter-spacing:.3px">🎣 Go Fishing at the Dock</button>
+</div>
+
+<!-- FISHING MODAL -->
+<div class="ov" id="fishingOv" onclick="closeOv('fishingOv')">
+  <div class="mod" onclick="event.stopPropagation()" style="max-width:300px;background:linear-gradient(160deg,#071828,#0e2a42);border:1px solid rgba(100,180,255,0.15);padding-bottom:14px">
+    <div class="mh" style="border-bottom-color:rgba(255,255,255,0.08)">
+      <span class="mt" style="color:#88ddff">🎣 Fishing</span>
+      <button class="mc" onclick="closeOv('fishingOv')" style="color:rgba(255,255,255,0.5)">✕</button>
+    </div>
+    <div id="fishLevelDisplay" style="text-align:center;font-size:12px;font-weight:700;color:#88ddff;margin-bottom:8px">🎣 Fishing Level 1</div>
+    <canvas id="fishCanvas" width="250" height="340"
+      style="width:100%;border-radius:10px;cursor:pointer;display:block;touch-action:none;user-select:none"
+      onpointerdown="fishingPointerDown()"
+      onpointerup="fishingPointerUp()"
+      onpointerleave="fishingPointerUp()"></canvas>
+    <div style="margin-top:10px;padding:8px 10px;background:rgba(255,255,255,0.04);border-radius:8px">
+      <div style="font-size:11px;font-weight:700;color:#88ddff;margin-bottom:6px;letter-spacing:.5px">RECENT CATCHES</div>
+      <div id="fishLog"></div>
+    </div>
+  </div>
+</div>
+
 <!-- MILLIE WIDGET -->
 <div id="millieWidget" class="millie-widget" onclick="openMillie()" style="display:none"></div>
 
@@ -7904,8 +8511,53 @@ setInterval(updDate, 60000);
     <div style="margin-top:10px;padding:8px 12px;background:rgba(255,255,255,0.5);border-radius:12px">
       <div style="font-weight:700;color:var(--textl);font-size:12px;margin-bottom:6px">😴 Sleep Log</div>
       <div id="millieSleepLog"></div>
+      <!-- Retroactive sleep entry -->
+      <details style="margin-top:8px">
+        <summary style="font-size:11px;color:var(--textl);cursor:pointer;user-select:none;font-weight:700">+ Log past sleep</summary>
+        <div style="padding:8px 0 2px;display:flex;flex-direction:column;gap:6px">
+          <div style="display:flex;gap:8px;align-items:center;font-size:12px;color:var(--textl)">
+            <label style="width:54px;flex-shrink:0">Date</label>
+            <input type="date" id="retroSleepDate" style="flex:1;padding:5px 8px;border-radius:7px;border:1px solid #ddd;font-size:12px">
+          </div>
+          <div style="display:flex;gap:8px;align-items:center;font-size:12px;color:var(--textl)">
+            <label style="width:54px;flex-shrink:0">Bedtime</label>
+            <input type="time" id="retroSleepBed" style="flex:1;padding:5px 8px;border-radius:7px;border:1px solid #ddd;font-size:12px">
+          </div>
+          <div style="display:flex;gap:8px;align-items:center;font-size:12px;color:var(--textl)">
+            <label style="width:54px;flex-shrink:0">Woke up</label>
+            <input type="time" id="retroSleepWake" style="flex:1;padding:5px 8px;border-radius:7px;border:1px solid #ddd;font-size:12px">
+          </div>
+          <button onclick="logRetroSleep()" style="padding:7px;border-radius:8px;border:none;background:var(--peach-light);color:#8a5a30;font-family:'Quicksand',sans-serif;font-size:12px;font-weight:700;cursor:pointer;width:100%">Log this sleep 💤</button>
+          <div id="retroSleepMsg" style="display:none;font-size:11px;text-align:center;color:var(--sage)"></div>
+        </div>
+      </details>
     </div>
     <div id="millieAgeRow" style="text-align:center;font-size:11px;color:var(--textl);margin:10px 0 2px"></div>
+  </div>
+</div>
+
+<!-- EMBER MODAL -->
+<div class="ov" id="emberOv" onclick="closeOv('emberOv')">
+  <div class="mod" onclick="event.stopPropagation()" style="max-width:360px;background:linear-gradient(135deg,#fff5f0,#f5ede4);max-height:90vh;overflow-y:auto">
+    <div class="mh"><span class="mt">✨ Ember</span><button class="mc" onclick="closeOv('emberOv')">✕</button></div>
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+      <div id="emberModalSvg" style="width:50px;height:100px;flex-shrink:0"></div>
+      <div>
+        <div style="font-family:'Playfair Display',serif;font-size:18px;color:var(--rose)">Ember</div>
+        <div style="font-size:12px;color:var(--textl)">Innkeeper of Brindleport Bay</div>
+        <div style="font-size:11px;color:var(--textl);margin-top:4px">Complete linked routines to level up her skills</div>
+      </div>
+    </div>
+    <div style="font-weight:700;font-size:13px;color:var(--textd);margin-bottom:8px">⚔️ Skills</div>
+    <div id="emberSkillList"></div>
+    <div id="emberPickerPanel" style="display:none;background:white;border-radius:10px;border:1px solid #eee;margin:8px 0;max-height:160px;overflow-y:auto"></div>
+    <div style="margin-top:12px;padding:10px;background:rgba(255,255,255,0.6);border-radius:10px">
+      <div style="font-weight:700;font-size:12px;color:var(--textl);margin-bottom:6px">+ Add Skill</div>
+      <div style="display:flex;gap:8px">
+        <input class="fi" id="newEmberSkillName" placeholder="e.g. Courage..." style="flex:1;padding:7px 10px;font-size:13px">
+        <button onclick="addEmberSkill()" style="padding:7px 14px;border-radius:9px;border:none;background:var(--rose);color:white;font-family:'Quicksand',sans-serif;font-size:13px;font-weight:700;cursor:pointer">Add</button>
+      </div>
+    </div>
   </div>
 </div>
 </body>
