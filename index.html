@@ -333,6 +333,33 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
 .mem-entry-date{font-size:11px;color:var(--textl);margin-bottom:4px}
 .mem-entry-title{font-size:15px;font-weight:700;color:var(--textd);margin-bottom:5px}
 .mem-entry-note{font-size:13px;color:var(--textl);line-height:1.5}
+/* ADHD / Focus */
+@keyframes confettiFall{0%{transform:translateY(-20px) rotate(0deg);opacity:1}100%{transform:translateY(110vh) rotate(720deg);opacity:0}}
+.confetti-piece{position:fixed;top:-12px;width:9px;height:9px;border-radius:2px;pointer-events:none;z-index:10000;animation:confettiFall 2.2s ease-in forwards}
+.energy-btn{background:none;border:2px solid transparent;border-radius:10px;font-size:20px;padding:4px 6px;cursor:pointer;transition:all .15s;line-height:1}
+.energy-btn.on{background:var(--rose-light);border-color:var(--rose)}
+.timer-ring{transform:rotate(-90deg);transform-origin:center}
+.timer-ring-track{fill:none;stroke:#f0ebe6;stroke-width:9}
+.timer-ring-fill{fill:none;stroke:var(--rose);stroke-width:9;stroke-linecap:round;transition:stroke-dashoffset 1s linear}
+.timer-display{font-size:44px;font-weight:700;color:var(--textd);font-family:'Quicksand',sans-serif;text-align:center;margin:8px 0 4px}
+.timer-mode{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:1px;text-align:center;margin-bottom:14px}
+.timer-btns{display:flex;gap:10px;justify-content:center;margin-bottom:14px}
+.timer-session-count{font-size:12px;color:var(--textl);text-align:center;margin-bottom:10px}
+.dump-item{background:#fff;border-radius:11px;padding:10px 12px;margin-bottom:7px;box-shadow:0 1px 3px rgba(0,0,0,.06);display:flex;align-items:flex-start;gap:10px}
+.dump-text{flex:1;font-size:13px;color:var(--textd);line-height:1.5}
+.dump-meta{font-size:10px;color:var(--textl);margin-top:2px}
+.whatnow-card{background:linear-gradient(135deg,var(--rose-light),var(--lav-light));border-radius:16px;padding:20px;text-align:center;margin-bottom:16px;min-height:100px;display:flex;align-items:center;justify-content:center}
+.whatnow-task{font-size:18px;font-weight:700;color:var(--textd);line-height:1.4}
+.intention-row{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid #f5f0eb}
+.intention-row:last-child{border-bottom:none}
+.intention-chk{width:20px;height:20px;border-radius:6px;border:2px solid var(--sage);background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;transition:all .15s}
+.intention-chk.done{background:var(--sage);border-color:var(--sage);color:#fff}
+.med-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #f5f0eb}
+.med-row:last-child{border-bottom:none}
+.med-name{font-size:13px;font-weight:600;color:var(--textd);flex:1}
+.med-chk-wrap{display:flex;gap:6px}
+.med-chk{padding:3px 10px;border-radius:8px;border:1.5px solid #e8e0d8;background:#fff;font-size:11px;font-weight:700;color:var(--textl);cursor:pointer;font-family:'Quicksand',sans-serif;transition:all .15s}
+.med-chk.on{background:var(--sage);border-color:var(--sage);color:#fff}
 /* Flashcards */
 .fc-deck-card{background:#fff;border-radius:14px;padding:13px 15px;margin-bottom:9px;box-shadow:0 1px 4px rgba(0,0,0,.07);display:flex;align-items:center;gap:12px;cursor:pointer}
 .fc-deck-dot{width:14px;height:14px;border-radius:50%;flex-shrink:0}
@@ -507,6 +534,7 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
   <button class="tab-btn" data-tab="spirit" onclick="goTab('spirit',this)">✨ Spirit</button>
   <button class="tab-btn" data-tab="board" onclick="goTab('board',this)">🌈 Board</button>
   <button class="tab-btn" data-tab="faves" onclick="goTab('faves',this)">⭐ Faves</button>
+  <button class="tab-btn" data-tab="focus" onclick="goTab('focus',this)">🧠 Focus</button>
   <button class="tab-btn" data-tab="learn" onclick="goTab('learn',this)">📚 Learn</button>
   <button class="tab-btn" data-tab="settings" onclick="goTab('settings',this)">⚙️ Settings</button>
 </div>
@@ -518,6 +546,28 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
   <div class="gbanner" id="gBanner" style="background:linear-gradient(135deg,rgba(201,160,160,.15),rgba(169,159,201,.15))">
     <h2 id="gTxt">Good morning, Adri! 🌸</h2>
     <p id="gQuote">The plans of the diligent lead to success. — Prov 21:5</p>
+  </div>
+  <!-- Energy log -->
+  <div style="background:#fff;border-radius:14px;padding:11px 14px;margin-bottom:10px;box-shadow:0 1px 4px rgba(0,0,0,.06);display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+    <span style="font-size:11px;font-weight:700;color:var(--textl);letter-spacing:.5px;text-transform:uppercase;flex-shrink:0">⚡ Energy</span>
+    <div style="display:flex;gap:4px" id="energyBtns">
+      <button class="energy-btn" data-e="1" onclick="logEnergy(1)">😴</button>
+      <button class="energy-btn" data-e="2" onclick="logEnergy(2)">😐</button>
+      <button class="energy-btn" data-e="3" onclick="logEnergy(3)">🙂</button>
+      <button class="energy-btn" data-e="4" onclick="logEnergy(4)">⚡</button>
+      <button class="energy-btn" data-e="5" onclick="logEnergy(5)">🔥</button>
+    </div>
+    <span id="energyTodayTxt" style="font-size:12px;color:var(--textl);margin-left:auto"></span>
+  </div>
+  <!-- Intentions widget -->
+  <div id="intentionsHomeWrap" style="display:none;margin-bottom:10px">
+    <div style="background:#fff;border-radius:14px;padding:12px 14px;box-shadow:0 1px 4px rgba(0,0,0,.06)">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+        <span style="font-size:11px;font-weight:700;color:var(--textl);letter-spacing:.5px;text-transform:uppercase">🎯 Today's Focus</span>
+        <button class="btn sec" style="font-size:11px;padding:2px 9px" onclick="goTab('focus',document.querySelector('[data-tab=\'focus\']'))">Edit</button>
+      </div>
+      <div id="intentionsHomeList"></div>
+    </div>
   </div>
   <div id="keventsWrap" style="display:none">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
@@ -654,6 +704,13 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     </div>
   </div>
   <div id="wplanList"></div>
+  <div class="sh" style="display:flex;align-items:center;justify-content:space-between">
+    <span>💊 Meds &amp; Supplements</span>
+    <button onclick="openAddMed()" style="background:var(--lav-light);border:none;border-radius:9px;padding:5px 11px;font-family:'Quicksand',sans-serif;font-size:12px;font-weight:700;color:#5a4a9b;cursor:pointer">+ Add</button>
+  </div>
+  <div class="card" id="medCard">
+    <div id="medList"><p style="color:var(--textl);font-size:13px;text-align:center;padding:8px">No meds added yet. Tap "+ Add" above.</p></div>
+  </div>
   <div class="sh">😊 Mood</div>
   <div class="card">
     <div style="font-size:12px;color:var(--textl);margin-bottom:8px">How are you feeling today?</div>
@@ -720,6 +777,83 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
   <button class="exp-btn" onclick="goTabDirect('export',document.querySelector('[data-tab=\'export\']'))" style="margin-top:8px">📤 Go to Export →</button>
 </div>
 
+<div class="view" id="v-focus">
+  <div class="pill-nav" style="margin-bottom:12px">
+    <button class="pn-btn on" onclick="showFocusSec('timer',this)">🍅 Timer</button>
+    <button class="pn-btn" onclick="showFocusSec('dump',this)">🧠 Dump</button>
+    <button class="pn-btn" onclick="showFocusSec('whatnow',this)">🎲 What Now?</button>
+    <button class="pn-btn" onclick="showFocusSec('intentions',this)">🎯 Intentions</button>
+  </div>
+  <!-- TIMER -->
+  <div id="fs-timer">
+    <div style="text-align:center;margin-bottom:10px">
+      <svg width="170" height="170" viewBox="0 0 170 170">
+        <circle class="timer-ring-track" cx="85" cy="85" r="72"/>
+        <circle class="timer-ring-fill timer-ring" id="timerRingFill" cx="85" cy="85" r="72" stroke-dasharray="452.4" stroke-dashoffset="0"/>
+      </svg>
+      <div id="timerDisplay" class="timer-display" style="margin-top:-130px;position:relative;z-index:2">25:00</div>
+      <div id="timerMode" class="timer-mode" style="position:relative;z-index:2;color:var(--rose)">Work</div>
+      <div style="height:90px"></div>
+    </div>
+    <div class="timer-session-count" id="timerSessions">🍅 0 sessions today</div>
+    <div class="timer-btns">
+      <button class="btn sec" style="padding:10px 20px" onclick="resetTimer()">↺ Reset</button>
+      <button class="btn" style="padding:10px 30px;font-size:16px" id="timerStartBtn" onclick="toggleTimer()">▶ Start</button>
+      <button class="btn sec" style="padding:10px 20px" onclick="skipTimerPhase()">⏭ Skip</button>
+    </div>
+    <div class="card" style="margin-top:10px">
+      <div style="font-size:12px;font-weight:700;color:var(--textd);margin-bottom:8px">Timer Settings</div>
+      <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap">
+        <div style="display:flex;flex-direction:column;gap:3px">
+          <label style="font-size:11px;color:var(--textl)">Work (min)</label>
+          <input id="timerWork" type="number" min="1" max="90" value="25" style="width:64px;padding:7px 10px;border-radius:9px;border:1.5px solid #e8e0d8;font-size:14px;font-weight:700" onchange="updateTimerSettings()">
+        </div>
+        <div style="display:flex;flex-direction:column;gap:3px">
+          <label style="font-size:11px;color:var(--textl)">Break (min)</label>
+          <input id="timerBreak" type="number" min="1" max="30" value="5" style="width:64px;padding:7px 10px;border-radius:9px;border:1.5px solid #e8e0d8;font-size:14px;font-weight:700" onchange="updateTimerSettings()">
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- BRAIN DUMP -->
+  <div id="fs-dump" style="display:none">
+    <div style="font-weight:700;font-size:14px;color:var(--textd);margin-bottom:10px">🧠 Brain Dump</div>
+    <div style="font-size:12px;color:var(--textl);margin-bottom:10px">Get it out of your head instantly — no organizing needed.</div>
+    <div style="display:flex;gap:8px;margin-bottom:12px">
+      <textarea id="dumpInput" placeholder="What's on your mind? Just type it…" rows="2" style="flex:1;padding:9px 12px;border-radius:10px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:14px;resize:none" onkeydown="if((event.metaKey||event.ctrlKey)&&event.key==='Enter')dumpIt()"></textarea>
+      <button class="btn" style="align-self:flex-end;padding:10px 16px" onclick="dumpIt()">Dump</button>
+    </div>
+    <div id="dumpList"></div>
+  </div>
+  <!-- WHAT NOW -->
+  <div id="fs-whatnow" style="display:none">
+    <div style="font-weight:700;font-size:14px;color:var(--textd);margin-bottom:6px">🎲 What should I do now?</div>
+    <div style="font-size:12px;color:var(--textl);margin-bottom:14px">Can't decide? Let the app pick for you.</div>
+    <div class="whatnow-card" id="whatnowCard">
+      <div class="whatnow-task" id="whatnowTask" style="color:var(--textl)">Tap below to get a task picked for you!</div>
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:16px" id="whatnowActions">
+      <button class="btn sec" style="flex:1;display:none" id="whatnowSkipBtn" onclick="pickWhatNow()">↩ Pick another</button>
+      <button class="btn" style="flex:1;background:var(--sage);display:none" id="whatnowDoneBtn" onclick="whatnowDone()">✓ Done!</button>
+    </div>
+    <button class="btn" style="width:100%;font-size:16px;padding:14px" onclick="pickWhatNow()">🎲 Pick for me!</button>
+    <div style="font-size:11px;color:var(--textl);text-align:center;margin-top:8px" id="whatnowStats"></div>
+  </div>
+  <!-- INTENTIONS -->
+  <div id="fs-intentions" style="display:none">
+    <div style="font-weight:700;font-size:14px;color:var(--textd);margin-bottom:6px">🎯 Today's Intentions</div>
+    <div style="font-size:12px;color:var(--textl);margin-bottom:12px">Choose 1–3 things to focus on today. Less is more.</div>
+    <div class="card" style="margin-bottom:12px">
+      <div style="display:flex;gap:8px;margin-bottom:8px">
+        <input id="intentionInput" type="text" placeholder="What's one important thing today?" style="flex:1;padding:9px 12px;border-radius:10px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px" onkeydown="if(event.key==='Enter')addIntention()">
+        <button class="btn" onclick="addIntention()">Add</button>
+      </div>
+      <div style="font-size:11px;color:var(--textl);margin-bottom:6px">Or pick from your tasks:</div>
+      <div id="intentionTaskPicks" style="display:flex;gap:6px;flex-wrap:wrap"></div>
+    </div>
+    <div id="intentionList"></div>
+  </div>
+</div>
 <div class="view" id="v-learn">
   <div class="pill-nav" style="margin-bottom:12px">
     <button class="pn-btn on" onclick="showLearnSec('flashcards',this)">🃏 Flashcards</button>
@@ -1533,6 +1667,13 @@ window.dispatchEvent(new Event('firebaseReady'));
 // ═══════════════════════════════════════════════
 // CORE DATA (local fallback while Firebase loads)
 // ═══════════════════════════════════════════════
+var BRAIN_DUMP = JSON.parse(localStorage.getItem('aBrainDump')||'[]');
+var INTENTIONS = JSON.parse(localStorage.getItem('aIntentions')||'{}');
+var MEDS = JSON.parse(localStorage.getItem('aMeds')||'[]');
+var MED_LOG = JSON.parse(localStorage.getItem('aMedLog')||'{}');
+var ENERGY_LOG = JSON.parse(localStorage.getItem('aEnergyLog')||'{}');
+var PMD = {workMin:25,breakMin:5,mode:'work',remaining:25*60,running:false,sessions:0,iv:null};
+var _whatnowTaskId = '';
 var FC_DECKS = JSON.parse(localStorage.getItem('aFcDecks')||'[]');
 var FC_CARDS = JSON.parse(localStorage.getItem('aFcCards')||'[]');
 var RESEARCH = JSON.parse(localStorage.getItem('aResearch')||'[]');
@@ -2030,10 +2171,12 @@ function tHTML(t){
           (t.due?'<span class="tnote">📅 '+t.due+'</span>':'')+
         '</div>'+
         (subs.length?'<div class="sub-bar"><div class="pt" style="margin-bottom:2px"><span style="font-size:10px;color:var(--textl)">'+subDone+'/'+subs.length+' subtasks</span><span style="font-size:10px;color:var(--textl)">'+subPct+'%</span></div><div class="pb" style="height:5px"><div class="pf pf-pro" style="width:'+subPct+'%"></div></div></div>':'')+
+        (!t.done&&t.resume?'<div style="font-size:11px;color:var(--peach);background:var(--peach-light);padding:3px 9px;border-radius:6px;margin-top:4px;display:inline-block">⏸️ '+t.resume+'</div>':'')+
       '</div>'+
       '<div class="tacts">'+
         '<button class="tact" onclick="togSP(\''+t.id+'\')" title="Subtasks">'+subBtnIco+'</button>'+
         (t.notes?'<button class="tact" onclick="openNotes(\''+t.id+'\')">📝</button>':'')+
+        (!t.done?'<button class="tact" onclick="setResumeNote(\''+t.id+'\')" title="Resume note">⏸️</button>':'')+
         '<button class="tact" onclick="delTask(\''+t.id+'\')">🗑️</button>'+
       '</div>'+
     '</div>'+
@@ -2063,7 +2206,7 @@ function togT(id){
   if(!t)return;
   t.done=!t.done;
   fbSave('tasks',id,t);
-  if(t.done&&t.repeat)setTimeout(function(){createRepeat(t);},600);
+  if(t.done){celebrate();if(t.repeat)setTimeout(function(){createRepeat(t);},600);}
 }
 
 function editT(id){
@@ -3901,6 +4044,344 @@ function cpHealthExp(){
 // START
 // ═══════════════════════════════════════════════
 // ═══════════════════════════════════════════════
+// CONFETTI
+// ═══════════════════════════════════════════════
+
+function celebrate(){
+  var colors=['#c9a0a0','#a99fc9','#8faa8b','#d4a574','#7fb5b0','#8aafc9','#f5d76e'];
+  for(var i=0;i<28;i++){
+    (function(i){
+      setTimeout(function(){
+        var el=document.createElement('div');
+        el.className='confetti-piece';
+        el.style.left=Math.random()*100+'vw';
+        el.style.background=colors[Math.floor(Math.random()*colors.length)];
+        el.style.width=(6+Math.random()*8)+'px';
+        el.style.height=(6+Math.random()*8)+'px';
+        el.style.borderRadius=Math.random()>.5?'50%':'2px';
+        el.style.animationDuration=(1.5+Math.random())+'s';
+        document.body.appendChild(el);
+        setTimeout(function(){el.remove();},2500);
+      },i*60);
+    })(i);
+  }
+}
+
+// ═══════════════════════════════════════════════
+// FOCUS TAB
+// ═══════════════════════════════════════════════
+
+function showFocusSec(sec,btn){
+  ['timer','dump','whatnow','intentions'].forEach(function(s){
+    var el=document.getElementById('fs-'+s);
+    if(el)el.style.display=(s===sec)?'':'none';
+  });
+  document.querySelectorAll('#v-focus .pn-btn').forEach(function(b){b.classList.remove('on');});
+  if(btn)btn.classList.add('on');
+  if(sec==='dump')renderDumpList();
+  if(sec==='whatnow')renderWhatNowStats();
+  if(sec==='intentions'){renderIntentionList();renderIntentionTaskPicks();}
+}
+
+// ── Pomodoro Timer ────────────────────────────
+var TIMER_CIRCUMFERENCE=452.4;
+
+function updateTimerSettings(){
+  var w=parseInt((document.getElementById('timerWork')||{}).value||25)||25;
+  var b=parseInt((document.getElementById('timerBreak')||{}).value||5)||5;
+  PMD.workMin=w;PMD.breakMin=b;
+  if(!PMD.running){PMD.remaining=(PMD.mode==='work'?w:b)*60;renderTimerDisplay();}
+}
+
+function toggleTimer(){
+  if(PMD.running){
+    PMD.running=false;clearInterval(PMD.iv);PMD.iv=null;
+    document.getElementById('timerStartBtn').textContent='▶ Start';
+  } else {
+    PMD.running=true;
+    document.getElementById('timerStartBtn').textContent='⏸ Pause';
+    PMD.iv=setInterval(function(){
+      PMD.remaining--;renderTimerDisplay();
+      if(PMD.remaining<=0){
+        clearInterval(PMD.iv);PMD.iv=null;PMD.running=false;
+        if(PMD.mode==='work'){PMD.sessions++;pingTimer('Work done! Take a break 🌿');PMD.mode='break';PMD.remaining=PMD.breakMin*60;}
+        else{pingTimer('Break over! Time to focus 🍅');PMD.mode='work';PMD.remaining=PMD.workMin*60;}
+        document.getElementById('timerStartBtn').textContent='▶ Start';
+        renderTimerDisplay();
+      }
+    },1000);
+  }
+}
+
+function resetTimer(){
+  clearInterval(PMD.iv);PMD.iv=null;PMD.running=false;
+  PMD.mode='work';PMD.remaining=PMD.workMin*60;
+  document.getElementById('timerStartBtn').textContent='▶ Start';
+  renderTimerDisplay();
+}
+
+function skipTimerPhase(){
+  clearInterval(PMD.iv);PMD.iv=null;PMD.running=false;
+  if(PMD.mode==='work'){PMD.sessions++;PMD.mode='break';PMD.remaining=PMD.breakMin*60;}
+  else{PMD.mode='work';PMD.remaining=PMD.workMin*60;}
+  document.getElementById('timerStartBtn').textContent='▶ Start';
+  renderTimerDisplay();
+}
+
+function renderTimerDisplay(){
+  var mins=Math.floor(PMD.remaining/60);
+  var secs=PMD.remaining%60;
+  var txt=(mins<10?'0':'')+mins+':'+(secs<10?'0':'')+secs;
+  var d=document.getElementById('timerDisplay');if(d)d.textContent=txt;
+  var m=document.getElementById('timerMode');
+  if(m){m.textContent=PMD.mode==='work'?'Work 🍅':'Break 🌿';m.style.color=PMD.mode==='work'?'var(--rose)':'var(--sage)';}
+  var ring=document.getElementById('timerRingFill');
+  if(ring){
+    var total=(PMD.mode==='work'?PMD.workMin:PMD.breakMin)*60;
+    var pct=total>0?PMD.remaining/total:1;
+    ring.style.strokeDashoffset=TIMER_CIRCUMFERENCE*(1-pct);
+    ring.style.stroke=PMD.mode==='work'?'var(--rose)':'var(--sage)';
+  }
+  var sc=document.getElementById('timerSessions');
+  if(sc)sc.textContent='🍅 '+PMD.sessions+' session'+(PMD.sessions!==1?'s':'')+' today';
+}
+
+function pingTimer(msg){
+  try{var ctx=new(window.AudioContext||window.webkitAudioContext)();var osc=ctx.createOscillator();var gain=ctx.createGain();osc.connect(gain);gain.connect(ctx.destination);osc.frequency.value=880;gain.gain.setValueAtTime(.3,ctx.currentTime);gain.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+.8);osc.start();osc.stop(ctx.currentTime+.8);}catch(e){}
+  alert(msg);
+}
+
+// ── Brain Dump ────────────────────────────────
+function dumpIt(){
+  var el=document.getElementById('dumpInput');
+  var text=(el&&el.value||'').trim();
+  if(!text)return;
+  BRAIN_DUMP.unshift({id:'bd-'+Date.now(),text:text,date:new Date().toISOString().slice(0,10)});
+  localStorage.setItem('aBrainDump',JSON.stringify(BRAIN_DUMP));
+  el.value='';
+  renderDumpList();
+}
+
+function renderDumpList(){
+  var el=document.getElementById('dumpList');
+  if(!el)return;
+  if(!BRAIN_DUMP.length){el.innerHTML='<p style="color:var(--textl);text-align:center;padding:20px">Empty head = clear focus. Type anything above!</p>';return;}
+  el.innerHTML=BRAIN_DUMP.map(function(d){
+    return '<div class="dump-item">'
+      +'<div style="flex:1"><div class="dump-text">'+d.text+'</div><div class="dump-meta">'+d.date+'</div></div>'
+      +'<button class="btn sec" style="font-size:11px;padding:3px 9px;flex-shrink:0" onclick="dumpToTask(\''+d.id+'\')">→ Task</button>'
+      +'<button onclick="delDump(\''+d.id+'\')" style="background:none;border:none;font-size:14px;cursor:pointer;color:var(--textl);padding:2px 4px;flex-shrink:0">✕</button>'
+      +'</div>';
+  }).join('');
+}
+
+function dumpToTask(id){
+  var d=BRAIN_DUMP.find(function(x){return x.id===id;});
+  if(!d)return;
+  var t={id:'t-'+Date.now(),title:d.text,done:false,urgency:'important-not-urgent',cat:'mis',due:'',notes:'',created:new Date().toISOString(),repeat:''};
+  TASKS.push(t);fbSave('tasks',t.id,t);
+  delDump(id);
+  alert('Added to tasks!');
+}
+
+function delDump(id){
+  BRAIN_DUMP=BRAIN_DUMP.filter(function(d){return d.id!==id;});
+  localStorage.setItem('aBrainDump',JSON.stringify(BRAIN_DUMP));
+  renderDumpList();
+}
+
+// ── What Now? ─────────────────────────────────
+function renderWhatNowStats(){
+  var total=TASKS.filter(function(t){return !t.done;}).length;
+  var el=document.getElementById('whatnowStats');
+  if(el)el.textContent=total+' active tasks to choose from';
+}
+
+function pickWhatNow(){
+  var active=TASKS.filter(function(t){return !t.done;});
+  if(!active.length){document.getElementById('whatnowTask').textContent='No active tasks! You\'re all caught up 🎉';_whatnowTaskId='';return;}
+  var pick=active[Math.floor(Math.random()*active.length)];
+  _whatnowTaskId=pick.id;
+  document.getElementById('whatnowTask').textContent=pick.title;
+  document.getElementById('whatnowCard').style.background='linear-gradient(135deg,var(--rose-light),var(--lav-light))';
+  var skip=document.getElementById('whatnowSkipBtn');if(skip)skip.style.display='';
+  var done=document.getElementById('whatnowDoneBtn');if(done)done.style.display='';
+  renderWhatNowStats();
+}
+
+function whatnowDone(){
+  if(!_whatnowTaskId)return;
+  togT(_whatnowTaskId);
+  _whatnowTaskId='';
+  document.getElementById('whatnowTask').textContent='Great work! Pick another? 🎉';
+  document.getElementById('whatnowCard').style.background='linear-gradient(135deg,var(--sage-light),#d5eceb)';
+  var skip=document.getElementById('whatnowSkipBtn');if(skip)skip.style.display='none';
+  var done=document.getElementById('whatnowDoneBtn');if(done)done.style.display='none';
+  renderWhatNowStats();
+}
+
+// ── Intentions ────────────────────────────────
+function todayIntentions(){
+  return INTENTIONS[todayStr()]||[];
+}
+
+function addIntention(){
+  var el=document.getElementById('intentionInput');
+  var text=(el&&el.value||'').trim();
+  if(!text)return;
+  var list=todayIntentions();
+  if(list.length>=3)return alert('Keep it to 3 max — focus!');
+  list.push({text:text,done:false});
+  INTENTIONS[todayStr()]=list;
+  localStorage.setItem('aIntentions',JSON.stringify(INTENTIONS));
+  el.value='';
+  renderIntentionList();renderIntentionsHome();
+}
+
+function addIntentionFromTask(title){
+  var list=todayIntentions();
+  if(list.length>=3)return alert('Keep it to 3 max — focus!');
+  list.push({text:title,done:false});
+  INTENTIONS[todayStr()]=list;
+  localStorage.setItem('aIntentions',JSON.stringify(INTENTIONS));
+  renderIntentionList();renderIntentionsHome();renderIntentionTaskPicks();
+}
+
+function togIntention(idx){
+  var list=todayIntentions();
+  if(list[idx])list[idx].done=!list[idx].done;
+  INTENTIONS[todayStr()]=list;
+  localStorage.setItem('aIntentions',JSON.stringify(INTENTIONS));
+  renderIntentionList();renderIntentionsHome();
+}
+
+function delIntention(idx){
+  var list=todayIntentions();list.splice(idx,1);
+  INTENTIONS[todayStr()]=list;
+  localStorage.setItem('aIntentions',JSON.stringify(INTENTIONS));
+  renderIntentionList();renderIntentionsHome();renderIntentionTaskPicks();
+}
+
+function renderIntentionList(){
+  var el=document.getElementById('intentionList');if(!el)return;
+  var list=todayIntentions();
+  if(!list.length){el.innerHTML='<p style="color:var(--textl);text-align:center;padding:14px;font-size:13px">No intentions set yet. What\'s the ONE thing that matters today?</p>';return;}
+  el.innerHTML='<div class="card">'+list.map(function(it,i){
+    return '<div class="intention-row">'
+      +'<div class="intention-chk'+(it.done?' done':'')+'" onclick="togIntention('+i+')">'+(it.done?'✓':'')+'</div>'
+      +'<span style="flex:1;font-size:14px;font-weight:600;color:var(--textd)'+(it.done?';text-decoration:line-through;color:var(--textl)':'')+'">'+(i+1)+'. '+it.text+'</span>'
+      +'<button onclick="delIntention('+i+')" style="background:none;border:none;font-size:13px;cursor:pointer;color:var(--textl);padding:2px 5px">✕</button>'
+      +'</div>';
+  }).join('')+'</div>';
+}
+
+function renderIntentionTaskPicks(){
+  var el=document.getElementById('intentionTaskPicks');if(!el)return;
+  var active=TASKS.filter(function(t){return !t.done;}).slice(0,8);
+  if(!active.length){el.innerHTML='<span style="font-size:12px;color:var(--textl)">No active tasks yet</span>';return;}
+  el.innerHTML=active.map(function(t){
+    return '<button class="btn sec" style="font-size:11px;padding:3px 10px" onclick="addIntentionFromTask(\''+t.title.replace(/'/g,"\\'")+'\')">'
+      +t.title.slice(0,30)+(t.title.length>30?'…':'')+'</button>';
+  }).join('');
+}
+
+function renderIntentionsHome(){
+  var wrap=document.getElementById('intentionsHomeWrap');
+  var list=document.getElementById('intentionsHomeList');
+  if(!wrap||!list)return;
+  var items=todayIntentions();
+  if(!items.length){wrap.style.display='none';return;}
+  wrap.style.display='';
+  list.innerHTML=items.map(function(it,i){
+    return '<div style="display:flex;align-items:center;gap:8px;padding:4px 0;'+(i<items.length-1?'border-bottom:1px solid #f5f0eb':'')+'">'
+      +'<span style="font-size:14px">'+(it.done?'✅':'⬜')+'</span>'
+      +'<span style="font-size:13px;font-weight:600;color:var(--textd)'+(it.done?';text-decoration:line-through;color:var(--textl)':'')+'">'+(i+1)+'. '+it.text+'</span>'
+      +'</div>';
+  }).join('');
+}
+
+// ── Energy ────────────────────────────────────
+function logEnergy(level){
+  ENERGY_LOG[todayStr()]=level;
+  localStorage.setItem('aEnergyLog',JSON.stringify(ENERGY_LOG));
+  renderEnergyWidget();
+}
+
+function renderEnergyWidget(){
+  var today=todayStr();
+  var level=ENERGY_LOG[today]||0;
+  var btns=document.querySelectorAll('#energyBtns .energy-btn');
+  btns.forEach(function(b){b.classList.toggle('on',parseInt(b.dataset.e)===level);});
+  var txt=document.getElementById('energyTodayTxt');
+  var labels=['','Low','Meh','Okay','High','🔥 Max'];
+  if(txt)txt.textContent=level?labels[level]:'';
+}
+
+// ── Resume Notes ──────────────────────────────
+function setResumeNote(id){
+  var t=TASKS.find(function(x){return x.id===id;});
+  if(!t)return;
+  var note=prompt('Where did you leave off?\n(Leave blank to clear)',t.resume||'');
+  if(note===null)return;
+  t.resume=note.trim();
+  fbSave('tasks',id,t);
+  renderAllR();
+}
+
+// ── Meds ──────────────────────────────────────
+function openAddMed(){
+  var am=document.getElementById('medAM');var pm=document.getElementById('medPM');
+  if(am)am.classList.remove('on');if(pm)pm.classList.remove('on');
+  if(document.getElementById('medNameInput'))document.getElementById('medNameInput').value='';
+  showOv('ovAddMed');
+}
+
+function confirmAddMed(){
+  var name=((document.getElementById('medNameInput')||{}).value||'').trim();
+  if(!name)return alert('Enter a name');
+  var am=!!(document.getElementById('medAM')&&document.getElementById('medAM').classList.contains('on'));
+  var pm=!!(document.getElementById('medPM')&&document.getElementById('medPM').classList.contains('on'));
+  if(!am&&!pm)am=true;
+  MEDS.push({id:'md-'+Date.now(),name:name,am:am,pm:pm});
+  localStorage.setItem('aMeds',JSON.stringify(MEDS));
+  closeOv('ovAddMed');
+  renderMeds();
+}
+
+function renderMeds(){
+  var el=document.getElementById('medList');if(!el)return;
+  if(!MEDS.length){el.innerHTML='<p style="color:var(--textl);font-size:13px;text-align:center;padding:8px">No meds added yet. Tap "+ Add" above.</p>';return;}
+  var today=todayStr();
+  if(!MED_LOG[today])MED_LOG[today]={};
+  el.innerHTML=MEDS.map(function(m){
+    var amDone=!!(MED_LOG[today]&&MED_LOG[today][m.id+'_am']);
+    var pmDone=!!(MED_LOG[today]&&MED_LOG[today][m.id+'_pm']);
+    return '<div class="med-row">'
+      +'<span class="med-name">'+m.name+'</span>'
+      +'<div class="med-chk-wrap">'
+      +(m.am?'<button class="med-chk'+(amDone?' on':'')+'" onclick="togMed(\''+m.id+'\',\'am\')">🌅 AM</button>':'')
+      +(m.pm?'<button class="med-chk'+(pmDone?' on':'')+'" onclick="togMed(\''+m.id+'\',\'pm\')">🌙 PM</button>':'')
+      +'</div>'
+      +'<button onclick="delMed(\''+m.id+'\')" style="background:none;border:none;font-size:13px;cursor:pointer;color:var(--textl);padding:2px 5px">✕</button>'
+      +'</div>';
+  }).join('');
+}
+
+function togMed(id,slot){
+  var today=todayStr();
+  if(!MED_LOG[today])MED_LOG[today]={};
+  MED_LOG[today][id+'_'+slot]=!MED_LOG[today][id+'_'+slot];
+  localStorage.setItem('aMedLog',JSON.stringify(MED_LOG));
+  renderMeds();
+}
+
+function delMed(id){
+  MEDS=MEDS.filter(function(m){return m.id!==id;});
+  localStorage.setItem('aMeds',JSON.stringify(MEDS));
+  renderMeds();
+}
+
+// ═══════════════════════════════════════════════
 // LEARN TAB
 // ═══════════════════════════════════════════════
 
@@ -4542,7 +5023,7 @@ function delStudyNote(id){
 // ═══════════════════════════════════════════════
 
 function downloadBackup(){
-  var keys=['aTasks','aRout','aLists','aExps','aWigs','aBills','aIncome','aMoods','aFoodLog','aWater','aSymptoms','aExLog','aRecipes','aMealPlan','aGrocery','aPrayers','aBibleLog','aMinistryLog','aGratLog','aVbItems','aMemories','aFaves','aHabits','aHabitLog','aStudyNotes','aKEvents','aFcDecks','aFcCards','aResearch','aWplans','aWlog2','aCustomColors','aSName','aSQuote','aSBanner','aProtTabs'];
+  var keys=['aTasks','aRout','aLists','aExps','aWigs','aBills','aIncome','aMoods','aFoodLog','aWater','aSymptoms','aExLog','aRecipes','aMealPlan','aGrocery','aPrayers','aBibleLog','aMinistryLog','aGratLog','aVbItems','aMemories','aFaves','aHabits','aHabitLog','aStudyNotes','aKEvents','aFcDecks','aFcCards','aResearch','aWplans','aWlog2','aBrainDump','aIntentions','aMeds','aMedLog','aEnergyLog','aCustomColors','aSName','aSQuote','aSBanner','aProtTabs'];
   var data={};
   keys.forEach(function(k){var v=localStorage.getItem(k);if(v)data[k]=v;});
   var blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
@@ -5628,6 +6109,11 @@ function startApp(){
   renderFcDecks();
   var snDateEl=document.getElementById('snDate');
   if(snDateEl)snDateEl.value=todayStr();
+  renderTimerDisplay();
+  renderDumpList();
+  renderEnergyWidget();
+  renderIntentionsHome();
+  renderMeds();
 }
 
 // Wait for Firebase then start
@@ -5781,6 +6267,19 @@ setInterval(updDate, 60000);
       <button class="btn sec" style="font-size:12px" onclick="prefillKEvent('Pioneer School','📚')">📚 Pioneer School</button>
     </div>
     <button class="ok-btn" onclick="saveKEvent()">Save Event</button>
+  </div>
+</div>
+<!-- ADD MED MODAL -->
+<div class="ov" id="ovAddMed" onclick="closeOv('ovAddMed')">
+  <div class="mod" onclick="event.stopPropagation()">
+    <div class="mh"><span class="mt">💊 Add Med / Supplement</span><button class="mc" onclick="closeOv('ovAddMed')">✕</button></div>
+    <input id="medNameInput" type="text" class="fi" placeholder="Name (e.g. Adderall, Vitamin D)" style="margin-bottom:10px">
+    <div style="font-size:12px;font-weight:700;color:var(--textd);margin-bottom:8px">When to take:</div>
+    <div style="display:flex;gap:8px;margin-bottom:14px">
+      <button class="sb" id="medAM" onclick="this.classList.toggle('on')">🌅 Morning</button>
+      <button class="sb" id="medPM" onclick="this.classList.toggle('on')">🌙 Evening</button>
+    </div>
+    <button class="ok-btn" onclick="confirmAddMed()">Add</button>
   </div>
 </div>
 <!-- ADD DECK MODAL -->
