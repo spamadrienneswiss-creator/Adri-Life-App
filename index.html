@@ -557,6 +557,9 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
 .millie-sleep-entry{display:flex;justify-content:space-between;font-size:12px;color:var(--textl);padding:4px 0;border-bottom:1px solid rgba(0,0,0,.05)}
 .millie-sleep-entry:last-child{border-bottom:none}
 .millie-habit-tag{display:flex;justify-content:space-between;align-items:center;padding:5px 9px;background:var(--peach-light);border-radius:8px;margin-bottom:4px;font-size:12px;font-weight:700;color:#8a5a30}
+.tab-order-item{display:flex;align-items:center;gap:10px;padding:10px 12px;background:white;border-radius:10px;margin-bottom:6px;font-size:13px;font-weight:700;color:var(--textd);cursor:grab;border:1.5px solid #f0e8e0;user-select:none;transition:transform .15s,border-color .15s}
+.tab-order-item.drag-over{border-color:var(--rose);background:var(--rose-light);transform:scale(1.02)}
+.tab-order-handle{font-size:18px;color:var(--textl);cursor:grab;line-height:1}
 .millie-widget.bouncing{animation:millieBounce .55s ease-in-out 3}
 .millie-widget.treat{animation:millieTreat .4s ease-in-out 3}
 .millie-mood-badge{position:absolute;top:-8px;right:-8px;font-size:16px;background:white;border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 4px rgba(0,0,0,.2);line-height:1}
@@ -604,7 +607,7 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
 </div>
 
 <!-- TABS -->
-<div class="tabs">
+<div class="tabs" id="tabBar">
   <button class="tab-btn on" data-tab="today" onclick="goTab('today',this)">☀️ Today</button>
   <button class="tab-btn" data-tab="tasks" onclick="goTab('tasks',this)">📋 Tasks</button>
   <button class="tab-btn" data-tab="projects" onclick="goTab('projects',this)">📁 Projects</button>
@@ -1724,6 +1727,14 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     </div>
   </div>
   <div class="card">
+    <div class="set-sec-t" onclick="togSetSec('sc-taborder',this)">🗂️ Tab Order <span class="sst-arr">▶</span></div>
+    <div id="sc-taborder" style="display:none">
+      <div style="font-size:12px;color:var(--textl);margin-bottom:10px">Drag tabs into the order you want them to appear.</div>
+      <div id="tabOrderList"></div>
+      <button onclick="resetTabOrder()" class="btn sec" style="font-size:12px;padding:5px 14px;margin-top:6px">↺ Reset to default</button>
+    </div>
+  </div>
+  <div class="card">
     <div class="set-sec-t" onclick="togSetSec('sc-pin',this)">🔐 PIN & Security <span class="sst-arr">▶</span></div>
     <div id="sc-pin" style="display:none">
       <div class="set-row"><div><div class="set-lbl">App PIN</div><div class="set-sub" id="pinSetStatus">Not set</div></div><button class="sb" style="padding:7px 16px;width:auto;flex-shrink:0" onclick="openSetPin()">Set PIN</button></div>
@@ -2001,6 +2012,10 @@ var MEAL_COMBOS = JSON.parse(localStorage.getItem('aMC')||'null')||[
   {id:'mc3',name:'Filling Snack',emoji:'🥜',foods:['f6','f5']},
   {id:'mc4',name:'Recovery Meal',emoji:'🍗',foods:['f2','f3','f10']},
 ];
+
+var DEFAULT_TAB_ORDER=['today','tasks','projects','goals','routines','lists','food','wigs','money','recap','meals','spirit','board','faves','focus','learn','guide','export','settings'];
+var TAB_LABELS={today:'☀️ Today',tasks:'📋 Tasks',projects:'📁 Projects',goals:'🎯 Goals',routines:'🔄 Routines',lists:'📝 Lists',food:'💚 Health',wigs:'🪄 Wigs',money:'💰 Money',recap:'📊 Recap',meals:'🍽️ Meals',spirit:'✨ Spiritual',board:'🌈 Board',faves:'⭐ Faves',focus:'🧠 Focus',learn:'📚 Learn',guide:'📖 Guide',export:'📤 Export',settings:'⚙️ Settings'};
+var TAB_ORDER=(function(){var o=JSON.parse(localStorage.getItem('aTabOrder')||'null');if(!o)return DEFAULT_TAB_ORDER.slice();var full=DEFAULT_TAB_ORDER.slice();o.forEach(function(t){if(full.indexOf(t)<0)o=o.filter(function(x){return x!==t;});});full.forEach(function(t){if(o.indexOf(t)<0)o.push(t);});return o;})();
 
 var S = {
   gCal:parseInt(localStorage.getItem('aGCal'))||1900,
@@ -4168,6 +4183,62 @@ var TOGGLEABLE_TABS=[
   {id:'money',label:'💰 Money'},{id:'recap',label:'📊 Recap'},
 ];
 
+var _tabDragFrom=null;
+function applyTabOrder(){
+  var bar=document.getElementById('tabBar');
+  if(!bar)return;
+  TAB_ORDER.forEach(function(tab){
+    var btn=bar.querySelector('[data-tab="'+tab+'"]');
+    if(btn)bar.appendChild(btn);
+  });
+}
+function renderTabOrderList(){
+  var el=document.getElementById('tabOrderList');
+  if(!el)return;
+  el.innerHTML=TAB_ORDER.map(function(tab){
+    return'<div class="tab-order-item" draggable="true" data-tab="'+tab+'"'
+      +' ondragstart="tabDragStart(event,\''+tab+'\')"'
+      +' ondragover="tabDragOver(event)"'
+      +' ondrop="tabDrop(event,\''+tab+'\')"'
+      +' ondragend="tabDragEnd()">'
+      +'<span class="tab-order-handle">⠿</span>'
+      +'<span style="flex:1">'+( TAB_LABELS[tab]||tab)+'</span>'
+      +'</div>';
+  }).join('');
+}
+function tabDragStart(e,tab){
+  _tabDragFrom=tab;
+  e.dataTransfer.effectAllowed='move';
+}
+function tabDragOver(e){
+  e.preventDefault();
+  e.dataTransfer.dropEffect='move';
+  document.querySelectorAll('.tab-order-item').forEach(function(el){el.classList.remove('drag-over');});
+  e.currentTarget.classList.add('drag-over');
+}
+function tabDrop(e,targetTab){
+  e.preventDefault();
+  document.querySelectorAll('.tab-order-item').forEach(function(el){el.classList.remove('drag-over');});
+  if(!_tabDragFrom||_tabDragFrom===targetTab)return;
+  var fi=TAB_ORDER.indexOf(_tabDragFrom),ti=TAB_ORDER.indexOf(targetTab);
+  if(fi<0||ti<0)return;
+  TAB_ORDER.splice(fi,1);
+  TAB_ORDER.splice(ti,0,_tabDragFrom);
+  localStorage.setItem('aTabOrder',JSON.stringify(TAB_ORDER));
+  applyTabOrder();
+  renderTabOrderList();
+}
+function tabDragEnd(){
+  _tabDragFrom=null;
+  document.querySelectorAll('.tab-order-item').forEach(function(el){el.classList.remove('drag-over');});
+}
+function resetTabOrder(){
+  TAB_ORDER=DEFAULT_TAB_ORDER.slice();
+  localStorage.setItem('aTabOrder',JSON.stringify(TAB_ORDER));
+  applyTabOrder();
+  renderTabOrderList();
+}
+
 function renderSettings(){
   var appTitleInp=document.getElementById('sAppTitle');if(appTitleInp)appTitleInp.value=S.appTitle||'';
   document.getElementById('sName').value=S.name;
@@ -4184,6 +4255,7 @@ function renderSettings(){
   renderTmplList();
   renderHiddenRoutines();
   renderThemesList();
+  renderTabOrderList();
   var millieBtn=document.getElementById('millieTogBtn');
   if(millieBtn)millieBtn.classList.toggle('on',!S.hideMillie);
   document.getElementById('sCal').value=S.gCal;document.getElementById('sPro').value=S.gPro;
@@ -7482,6 +7554,7 @@ function startApp(){
   renderMinistryHome();
   renderGuide();
   applyAppTitle();
+  applyTabOrder();
   tickMillie();
   renderMillieWidget();
 }
@@ -7837,4 +7910,3 @@ setInterval(updDate, 60000);
 </div>
 </body>
 </html>
-
