@@ -579,6 +579,20 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
 .meaningful-toggle{width:100%;padding:10px 12px;border-radius:10px;border:2px solid #e8e0d8;background:#fff;font-family:'Quicksand',sans-serif;font-size:13px;font-weight:700;color:var(--textl);cursor:pointer;text-align:left;transition:all .2s;margin-bottom:10px;display:block}
 .meaningful-toggle.on{background:var(--peach-light);border-color:var(--peach);color:#8a5a20}
 .millie-toast{position:absolute;top:-30px;left:50%;transform:translateX(-50%);background:white;border-radius:12px;padding:4px 10px;font-size:12px;font-weight:700;color:var(--rose);box-shadow:0 2px 8px rgba(0,0,0,.15);white-space:nowrap;pointer-events:none;animation:su .3s ease forwards}
+/* SECTION HUB PAGES */
+.hub-banner{border-radius:16px;padding:18px 16px 16px;margin-bottom:14px;display:flex;align-items:center;gap:16px;border:1px solid rgba(0,0,0,.05)}
+.hub-char{flex-shrink:0;filter:drop-shadow(0 3px 8px rgba(0,0,0,.15))}
+.hub-info h2{font-family:'Playfair Display',serif;font-size:20px;color:var(--text);margin-bottom:4px}
+.hub-info p{font-size:12px;color:var(--textl);font-style:italic;line-height:1.5}
+.hub-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.hub-card{background:#fff;border-radius:14px;padding:14px 12px;box-shadow:0 1px 5px rgba(0,0,0,.07);cursor:pointer;transition:transform .15s,box-shadow .15s;display:flex;flex-direction:column;align-items:flex-start;gap:5px;border:1.5px solid transparent}
+.hub-card:active{transform:scale(.96)}
+.hub-card.span2{grid-column:span 2}
+.hub-card-ic{font-size:24px;line-height:1}
+.hub-card-name{font-size:13px;font-weight:700;color:var(--text)}
+.hub-card-sub{font-size:11px;color:var(--textl);line-height:1.5}
+#sectionBreadcrumb{display:none;padding:2px 0 10px;align-items:center;gap:6px}
+.bc-btn{background:none;border:none;cursor:pointer;font-size:12px;font-weight:700;color:var(--rose);padding:0;font-family:'Quicksand',sans-serif}
 </style>
 </head>
 <body>
@@ -611,28 +625,118 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
 <!-- TABS -->
 <div class="tabs" id="tabBar">
   <button class="tab-btn on" data-tab="today" onclick="goTab('today',this)">☀️ Today</button>
-  <button class="tab-btn" data-tab="tasks" onclick="goTab('tasks',this)">📋 Tasks</button>
-  <button class="tab-btn" data-tab="projects" onclick="goTab('projects',this)">📁 Projects</button>
-  <button class="tab-btn" data-tab="goals" onclick="goTab('goals',this)">🎯 Goals</button>
-  <button class="tab-btn" data-tab="routines" onclick="goTab('routines',this)">🔄 Routines</button>
-  <button class="tab-btn" data-tab="lists" onclick="goTab('lists',this)">📝 Lists</button>
-  <button class="tab-btn" data-tab="food" onclick="goTab('food',this)">💚 Health</button>
-  <button class="tab-btn" data-tab="wigs" onclick="goTab('wigs',this)">🪄 Wigs</button>
-  <button class="tab-btn" data-tab="money" onclick="goTab('money',this)">💰 Money</button>
-  <button class="tab-btn" data-tab="recap" onclick="goTab('recap',this)">📊 Recap</button>
-  <button class="tab-btn" data-tab="meals" onclick="goTab('meals',this)">🍽️ Meals</button>
-  <button class="tab-btn" data-tab="spirit" onclick="goTab('spirit',this)">✨ Spiritual</button>
-  <button class="tab-btn" data-tab="board" onclick="goTab('board',this)">🌈 Board</button>
-  <button class="tab-btn" data-tab="faves" onclick="goTab('faves',this)">⭐ Faves</button>
-  <button class="tab-btn" data-tab="focus" onclick="goTab('focus',this)">🧠 Focus</button>
-  <button class="tab-btn" data-tab="learn" onclick="goTab('learn',this)">📚 Learn</button>
-  <button class="tab-btn" data-tab="guide" onclick="goTab('guide',this)">📖 Guide</button>
-  <button class="tab-btn" data-tab="export" onclick="goTab('export',this)">📤 Export</button>
+  <button class="tab-btn" data-tab="helm" onclick="goTab('helm',this)">⚓ The Helm</button>
+  <button class="tab-btn" data-tab="conservatory" onclick="goTab('conservatory',this)">🌿 Conservatory</button>
+  <button class="tab-btn" data-tab="hearthside" onclick="goTab('hearthside',this)">🏡 Hearthside</button>
+  <button class="tab-btn" data-tab="workshop" onclick="goTab('workshop',this)">🔨 Workshop</button>
+  <button class="tab-btn" data-tab="lighthouse" onclick="goTab('lighthouse',this)">🕊️ Lighthouse</button>
+  <button class="tab-btn" data-tab="estate" onclick="goTab('estate',this)">🏛️ The Estate</button>
+  <button class="tab-btn" data-tab="emporium" onclick="goTab('emporium',this)">🏪 Emporium</button>
+  <button class="tab-btn" data-tab="archives" onclick="goTab('archives',this)">📚 Archives</button>
   <button class="tab-btn" data-tab="world" onclick="goTab('world',this)">🌊 World</button>
-  <button class="tab-btn" data-tab="settings" onclick="goTab('settings',this)">⚙️ Settings</button>
 </div>
 
 <div class="pg">
+
+<div id="sectionBreadcrumb"></div>
+
+<!-- THE HELM -->
+<div class="view" id="v-helm">
+  <div class="hub-banner" style="background:linear-gradient(135deg,rgba(44,62,107,.1),rgba(212,168,32,.08))">
+    <div class="hub-char"><svg viewBox="0 0 36 48" width="54" height="72" style="shape-rendering:auto"><rect x="6" y="32" width="24" height="16" rx="5" fill="#1e3a6e"/><circle cx="18" cy="37" r="1.2" fill="#d4a820"/><circle cx="18" cy="41" r="1.2" fill="#d4a820"/><rect x="15" y="26" width="6" height="8" fill="#d4a87c"/><ellipse cx="18" cy="21" rx="9" ry="10" fill="#d4a87c"/><ellipse cx="18" cy="28" rx="6" ry="3.5" fill="#b88c60"/><circle cx="14.5" cy="20" r="1.4" fill="#1e3a6e"/><circle cx="21.5" cy="20" r="1.4" fill="#1e3a6e"/><path d="M14 25 Q18 27 22 25" stroke="#8a6040" stroke-width="1.3" fill="none" stroke-linecap="round"/><rect x="7" y="13" width="22" height="2.5" rx="1.2" fill="#111e40"/><rect x="10" y="4" width="16" height="10" rx="3" fill="#111e40"/><rect x="7" y="13" width="22" height="2" fill="#d4a820"/><ellipse cx="18" cy="9" rx="2.5" ry="2" fill="#d4a820"/></svg></div>
+    <div class="hub-info"><h2>The Helm</h2><p>Captain Reid keeps you on course — tasks, projects &amp; active lists, all in one command center.</p></div>
+  </div>
+  <div class="hub-grid">
+    <div class="hub-card" onclick="goTab('tasks',null)"><div class="hub-card-ic">📋</div><div class="hub-card-name">Tasks</div><div class="hub-card-sub" id="hub-tasks-sub">Loading…</div></div>
+    <div class="hub-card" onclick="goTab('projects',null)"><div class="hub-card-ic">📁</div><div class="hub-card-name">Projects</div><div class="hub-card-sub" id="hub-projects-sub">Loading…</div></div>
+    <div class="hub-card span2" onclick="goTab('lists',null)"><div class="hub-card-ic">📝</div><div class="hub-card-name">Lists</div><div class="hub-card-sub" id="hub-lists-sub">Active working lists</div></div>
+  </div>
+</div>
+
+<!-- THE CONSERVATORY -->
+<div class="view" id="v-conservatory">
+  <div class="hub-banner" style="background:linear-gradient(135deg,rgba(90,138,90,.12),rgba(212,170,96,.08))">
+    <div class="hub-char"><svg viewBox="0 0 36 48" width="54" height="72" style="shape-rendering:auto"><rect x="6" y="32" width="24" height="16" rx="5" fill="#5a8a5a"/><rect x="15" y="26" width="6" height="7" fill="#c8a07a"/><ellipse cx="18" cy="21" rx="9" ry="10" fill="#c8a07a"/><circle cx="18" cy="10" r="6" fill="#2a1a0a"/><ellipse cx="9.5" cy="20" rx="2.5" ry="5" fill="#2a1a0a"/><ellipse cx="26.5" cy="20" rx="2.5" ry="5" fill="#2a1a0a"/><circle cx="14.5" cy="21" r="1.4" fill="#2a1a0a"/><circle cx="21.5" cy="21" r="1.4" fill="#2a1a0a"/><circle cx="14.5" cy="21" r="3.2" fill="none" stroke="#2a1a0a" stroke-width="1.1"/><circle cx="21.5" cy="21" r="3.2" fill="none" stroke="#2a1a0a" stroke-width="1.1"/><line x1="17.7" y1="21" x2="18.3" y2="21" stroke="#2a1a0a" stroke-width="1.1"/><path d="M15.5 26 Q18 28 20.5 26" stroke="#8a6040" stroke-width="1.2" fill="none" stroke-linecap="round"/><circle cx="9" cy="22" r="1.3" fill="#d4aa60"/></svg></div>
+    <div class="hub-info"><h2>The Conservatory</h2><p>Tessa tends to your growth — goals, habits, learning &amp; ADHD tools in a calm, nurturing space.</p></div>
+  </div>
+  <div class="hub-grid">
+    <div class="hub-card" onclick="goTab('goals',null)"><div class="hub-card-ic">🎯</div><div class="hub-card-name">Goals</div><div class="hub-card-sub" id="hub-goals-sub">Loading…</div></div>
+    <div class="hub-card" onclick="goTab('routines',null)"><div class="hub-card-ic">🔄</div><div class="hub-card-name">Routines</div><div class="hub-card-sub" id="hub-routines-sub">Loading…</div></div>
+    <div class="hub-card" onclick="goTab('learn',null)"><div class="hub-card-ic">📚</div><div class="hub-card-name">Learning</div><div class="hub-card-sub">Research &amp; study</div></div>
+    <div class="hub-card" onclick="goTab('focus',null)"><div class="hub-card-ic">🧠</div><div class="hub-card-name">Focus Tools</div><div class="hub-card-sub">Intentions &amp; ADHD aids</div></div>
+  </div>
+</div>
+
+<!-- HEARTHSIDE -->
+<div class="view" id="v-hearthside">
+  <div class="hub-banner" style="background:linear-gradient(135deg,rgba(181,64,32,.1),rgba(212,160,100,.08))">
+    <div class="hub-char" id="hub-hearthside-char" style="width:54px;height:72px;flex-shrink:0"></div>
+    <div class="hub-info"><h2>Hearthside</h2><p>Ember keeps the hearth warm — wellness, meals, sleep &amp; movement all cared for here.</p></div>
+  </div>
+  <div class="hub-grid">
+    <div class="hub-card" onclick="goTab('food',null)"><div class="hub-card-ic">💚</div><div class="hub-card-name">Health</div><div class="hub-card-sub" id="hub-health-sub">Sleep, workouts &amp; wellness</div></div>
+    <div class="hub-card" onclick="goTab('meals',null)"><div class="hub-card-ic">🍽️</div><div class="hub-card-name">Meals</div><div class="hub-card-sub" id="hub-meals-sub">Loading…</div></div>
+    <div class="hub-card span2" onclick="goTab('recap',null)"><div class="hub-card-ic">📊</div><div class="hub-card-name">Recap</div><div class="hub-card-sub">Mood, symptoms &amp; reflections</div></div>
+  </div>
+</div>
+
+<!-- THE WORKSHOP -->
+<div class="view" id="v-workshop">
+  <div class="hub-banner" style="background:linear-gradient(135deg,rgba(138,74,191,.1),rgba(160,120,220,.08))">
+    <div class="hub-char"><svg viewBox="0 0 36 48" width="54" height="72" style="shape-rendering:auto"><rect x="6" y="32" width="24" height="16" rx="5" fill="#9a6abf"/><circle cx="10" cy="37" r="2.5" fill="#e0b8f0"/><circle cx="13.5" cy="40.5" r="1.8" fill="#a0d4f0"/><rect x="15" y="26" width="6" height="8" fill="#e8c4a0"/><ellipse cx="18" cy="21" rx="9" ry="10" fill="#e8c4a0"/><ellipse cx="9" cy="17" rx="4" ry="8" fill="#8a4abf"/><ellipse cx="27" cy="17" rx="4" ry="8" fill="#8a4abf"/><ellipse cx="18" cy="12" rx="10" ry="6" fill="#8a4abf"/><ellipse cx="18" cy="11" rx="6" ry="3" fill="#b07ae0"/><circle cx="14.5" cy="21" r="1.4" fill="#5a3a80"/><circle cx="21.5" cy="21" r="1.4" fill="#5a3a80"/><ellipse cx="11" cy="24" rx="2" ry="1" fill="#e89ab0" opacity="0.6"/><path d="M15 25.5 Q18 28 21 25.5" stroke="#c07080" stroke-width="1.2" fill="none" stroke-linecap="round"/></svg></div>
+    <div class="hub-info"><h2>The Workshop</h2><p>Clara's creative studio — vision board, inspiration, faves &amp; all your hobbies &amp; passions.</p></div>
+  </div>
+  <div class="hub-grid">
+    <div class="hub-card" onclick="goTab('board',null)"><div class="hub-card-ic">🌈</div><div class="hub-card-name">Vision Board</div><div class="hub-card-sub" id="hub-board-sub">Loading…</div></div>
+    <div class="hub-card" onclick="goTab('faves',null)"><div class="hub-card-ic">⭐</div><div class="hub-card-name">Faves</div><div class="hub-card-sub" id="hub-faves-sub">Loading…</div></div>
+  </div>
+</div>
+
+<!-- LIGHTHOUSE -->
+<div class="view" id="v-lighthouse">
+  <div class="hub-banner" style="background:linear-gradient(135deg,rgba(26,58,90,.1),rgba(200,220,255,.08))">
+    <div class="hub-char"><svg viewBox="0 0 36 48" width="54" height="72" style="shape-rendering:auto"><rect x="0" y="30" width="36" height="18" rx="4" fill="#1a3a5a"/><path d="M0 37 Q9 34 18 37 Q27 40 36 37" stroke="#1e4a70" stroke-width="1.5" fill="none"/><rect x="13" y="8" width="10" height="26" rx="2" fill="#f5f0e8"/><rect x="13" y="13" width="10" height="4" fill="#e07070"/><rect x="13" y="23" width="10" height="4" fill="#e07070"/><rect x="11" y="4" width="14" height="6" rx="2" fill="#4a3a28"/><circle cx="18" cy="7" r="4" fill="#fff9a0" opacity="0.9"/><circle cx="18" cy="7" r="2.5" fill="#fffce0"/><line x1="18" y1="3" x2="18" y2="0" stroke="#fff9a0" stroke-width="1.5" opacity="0.6"/><line x1="22" y1="5" x2="25" y2="2" stroke="#fff9a0" stroke-width="1.5" opacity="0.6"/><line x1="14" y1="5" x2="11" y2="2" stroke="#fff9a0" stroke-width="1.5" opacity="0.6"/><rect x="10" y="33" width="16" height="4" rx="2" fill="#c4b898"/></svg></div>
+    <div class="hub-info"><h2>Lighthouse</h2><p>A place of light and anchoring — Bible study, prayer, ministry &amp; your spiritual life.</p></div>
+  </div>
+  <div class="hub-grid">
+    <div class="hub-card span2" onclick="goTab('spirit',null)"><div class="hub-card-ic">✨</div><div class="hub-card-name">Spiritual</div><div class="hub-card-sub">Bible study, prayer &amp; ministry</div></div>
+  </div>
+</div>
+
+<!-- THE ESTATE -->
+<div class="view" id="v-estate">
+  <div class="hub-banner" style="background:linear-gradient(135deg,rgba(42,46,54,.1),rgba(212,168,32,.08))">
+    <div class="hub-char"><svg viewBox="0 0 36 48" width="54" height="72" style="shape-rendering:auto"><rect x="6" y="31" width="24" height="17" rx="5" fill="#2a2e36"/><polygon points="15,31 18,38 21,31" fill="#3a3e46"/><rect x="15.5" y="31" width="5" height="8" fill="#f0ede8"/><rect x="20" y="33" width="5" height="4" rx="1" fill="#d4a820"/><rect x="15" y="26" width="6" height="7" fill="#d4a87c"/><ellipse cx="18" cy="21" rx="9" ry="10" fill="#d4a87c"/><ellipse cx="18" cy="12" rx="10" ry="5" fill="#2a1a10"/><ellipse cx="9" cy="17" rx="2.5" ry="5" fill="#2a1a10"/><ellipse cx="27" cy="17" rx="2.5" ry="5" fill="#2a1a10"/><ellipse cx="18" cy="11" rx="5" ry="2" fill="#4a3020"/><circle cx="14.5" cy="21" r="1.4" fill="#2a1a10"/><circle cx="21.5" cy="21" r="1.4" fill="#2a1a10"/><path d="M15.5 26 Q18 27.5 20.5 26" stroke="#a07050" stroke-width="1.2" fill="none" stroke-linecap="round"/></svg></div>
+    <div class="hub-info"><h2>The Estate</h2><p>Elias manages the books — bills, budget, savings &amp; household, run like a business.</p></div>
+  </div>
+  <div class="hub-grid">
+    <div class="hub-card span2" onclick="goTab('money',null)"><div class="hub-card-ic">💰</div><div class="hub-card-name">Money</div><div class="hub-card-sub" id="hub-money-sub">Bills, budget &amp; expenses</div></div>
+  </div>
+</div>
+
+<!-- THE EMPORIUM -->
+<div class="view" id="v-emporium">
+  <div class="hub-banner" style="background:linear-gradient(135deg,rgba(60,42,80,.1),rgba(212,168,32,.08))">
+    <div class="hub-char"><svg viewBox="0 0 36 48" width="54" height="72" style="shape-rendering:auto"><rect x="6" y="31" width="24" height="17" rx="5" fill="#3c2a50"/><polygon points="15,31 18,38 21,31" fill="#4e3868"/><rect x="15.5" y="31" width="5" height="8" fill="#f0ede8"/><rect x="20" y="33" width="5" height="4" rx="1" fill="#d4a820"/><rect x="15" y="26" width="6" height="7" fill="#d4a87c"/><ellipse cx="18" cy="21" rx="9" ry="10" fill="#d4a87c"/><ellipse cx="18" cy="12" rx="10" ry="5" fill="#2a1a10"/><ellipse cx="9" cy="17" rx="2.5" ry="5" fill="#2a1a10"/><ellipse cx="27" cy="17" rx="2.5" ry="5" fill="#2a1a10"/><ellipse cx="18" cy="11" rx="5" ry="2" fill="#4a3020"/><circle cx="14.5" cy="21" r="1.4" fill="#2a1a10"/><circle cx="21.5" cy="21" r="1.4" fill="#2a1a10"/><path d="M15.5 26 Q18 27.5 20.5 26" stroke="#a07050" stroke-width="1.2" fill="none" stroke-linecap="round"/></svg></div>
+    <div class="hub-info"><h2>The Emporium</h2><p>Elias &amp; Co.'s business front — wigs, L'Oréal &amp; all your income streams in one shop.</p></div>
+  </div>
+  <div class="hub-grid">
+    <div class="hub-card span2" onclick="goTab('wigs',null)"><div class="hub-card-ic">🪄</div><div class="hub-card-name">Wigs</div><div class="hub-card-sub" id="hub-wigs-sub">Loading…</div></div>
+  </div>
+</div>
+
+<!-- THE ARCHIVES -->
+<div class="view" id="v-archives">
+  <div class="hub-banner" style="background:linear-gradient(135deg,rgba(138,88,40,.1),rgba(212,170,96,.08))">
+    <div class="hub-char"><svg viewBox="0 0 36 48" width="54" height="72" style="shape-rendering:auto"><rect x="6" y="32" width="24" height="16" rx="5" fill="#8a5a2a"/><rect x="12" y="32" width="12" height="14" rx="2" fill="#a07040"/><rect x="15" y="26" width="6" height="8" fill="#d4aa84"/><ellipse cx="18" cy="21" rx="9" ry="10" fill="#d4aa84"/><circle cx="10" cy="16" r="4.5" fill="#8a4818"/><circle cx="14" cy="12" r="5" fill="#8a4818"/><circle cx="20" cy="11" r="5" fill="#8a4818"/><circle cx="26" cy="15" r="4.5" fill="#8a4818"/><rect x="10" y="12" width="16" height="10" fill="#8a4818"/><circle cx="12" cy="13" r="2.5" fill="#b06028"/><circle cx="20" cy="12" r="2.5" fill="#b06028"/><circle cx="14.5" cy="21" r="1.4" fill="#4a2a10"/><circle cx="21.5" cy="21" r="1.4" fill="#4a2a10"/><rect x="11.5" y="19" width="5.5" height="3.5" rx="1" fill="none" stroke="#4a2a10" stroke-width="1"/><rect x="19" y="19" width="5.5" height="3.5" rx="1" fill="none" stroke="#4a2a10" stroke-width="1"/><line x1="17" y1="20.5" x2="19" y2="20.5" stroke="#4a2a10" stroke-width="1"/><path d="M15.5 25.5 Q18 27 20.5 25.5" stroke="#906040" stroke-width="1.2" fill="none" stroke-linecap="round"/></svg></div>
+    <div class="hub-info"><h2>The Archives</h2><p>Bran keeps everything in order — guides, app settings &amp; data export are shelved here.</p></div>
+  </div>
+  <div class="hub-grid">
+    <div class="hub-card" onclick="goTab('guide',null)"><div class="hub-card-ic">📖</div><div class="hub-card-name">Guide</div><div class="hub-card-sub">App help &amp; tips</div></div>
+    <div class="hub-card" onclick="goTab('export',null)"><div class="hub-card-ic">📤</div><div class="hub-card-name">Export</div><div class="hub-card-sub">Backup your data</div></div>
+    <div class="hub-card span2" onclick="goTab('settings',null)"><div class="hub-card-ic">⚙️</div><div class="hub-card-name">Settings</div><div class="hub-card-sub">Themes, PIN, preferences</div></div>
+  </div>
+</div>
 
 <!-- TODAY -->
 <div class="view on" id="v-today">
@@ -1730,9 +1834,9 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     </div>
   </div>
   <div class="card">
-    <div class="set-sec-t" onclick="togSetSec('sc-taborder',this)">🗂️ Tab Order <span class="sst-arr">▶</span></div>
+    <div class="set-sec-t" onclick="togSetSec('sc-taborder',this)">🗂️ Section Order <span class="sst-arr">▶</span></div>
     <div id="sc-taborder" style="display:none">
-      <div style="font-size:12px;color:var(--textl);margin-bottom:10px">Drag tabs into the order you want them to appear.</div>
+      <div style="font-size:12px;color:var(--textl);margin-bottom:10px">Drag sections into the order you want them to appear in the navigation bar.</div>
       <div id="tabOrderList"></div>
       <button onclick="resetTabOrder()" class="btn sec" style="font-size:12px;padding:5px 14px;margin-top:6px">↺ Reset to default</button>
     </div>
@@ -2572,9 +2676,12 @@ var MEAL_COMBOS = JSON.parse(localStorage.getItem('aMC')||'null')||[
   {id:'mc4',name:'Recovery Meal',emoji:'🍗',foods:['f2','f3','f10']},
 ];
 
-var DEFAULT_TAB_ORDER=['today','tasks','projects','goals','routines','lists','food','wigs','money','recap','meals','spirit','board','faves','focus','learn','guide','export','world','settings'];
-var TAB_LABELS={today:'☀️ Today',tasks:'📋 Tasks',projects:'📁 Projects',goals:'🎯 Goals',routines:'🔄 Routines',lists:'📝 Lists',food:'💚 Health',wigs:'🪄 Wigs',money:'💰 Money',recap:'📊 Recap',meals:'🍽️ Meals',spirit:'✨ Spiritual',board:'🌈 Board',faves:'⭐ Faves',focus:'🧠 Focus',learn:'📚 Learn',guide:'📖 Guide',export:'📤 Export',world:'🌊 World',settings:'⚙️ Settings'};
-var TAB_ORDER=(function(){var o=JSON.parse(localStorage.getItem('aTabOrder')||'null');if(!o)return DEFAULT_TAB_ORDER.slice();var full=DEFAULT_TAB_ORDER.slice();o.forEach(function(t){if(full.indexOf(t)<0)o=o.filter(function(x){return x!==t;});});full.forEach(function(t){if(o.indexOf(t)<0)o.push(t);});return o;})();
+var DEFAULT_TAB_ORDER=['today','helm','conservatory','hearthside','workshop','lighthouse','estate','emporium','archives','world'];
+var TAB_LABELS={today:'☀️ Today',helm:'⚓ The Helm',conservatory:'🌿 Conservatory',hearthside:'🏡 Hearthside',workshop:'🔨 Workshop',lighthouse:'🕊️ Lighthouse',estate:'🏛️ The Estate',emporium:'🏪 Emporium',archives:'📚 Archives',world:'🌊 World'};
+var TAB_ORDER=(function(){var o=JSON.parse(localStorage.getItem('aTabOrder')||'null');if(!o)return DEFAULT_TAB_ORDER.slice();var full=DEFAULT_TAB_ORDER.slice();o=o.filter(function(t){return full.indexOf(t)>-1;});full.forEach(function(t){if(o.indexOf(t)<0)o.push(t);});return o;})();
+var SECTION_VIEWS={today:['today'],helm:['tasks','projects','lists'],conservatory:['goals','routines','learn','focus'],hearthside:['food','meals','recap'],workshop:['board','faves'],lighthouse:['spirit'],estate:['money'],emporium:['wigs'],archives:['guide','export','settings'],world:['world']};
+var SECTION_LABELS={today:'Today',helm:'The Helm',conservatory:'Conservatory',hearthside:'Hearthside',workshop:'Workshop',lighthouse:'Lighthouse',estate:'The Estate',emporium:'Emporium',archives:'Archives',world:'World'};
+var VIEW_SECTION=(function(){var m={};Object.keys(SECTION_VIEWS).forEach(function(s){SECTION_VIEWS[s].forEach(function(v){m[v]=s;});});return m;})();
 
 var S = {
   gCal:parseInt(localStorage.getItem('aGCal'))||1900,
@@ -2587,7 +2694,7 @@ var S = {
   quote:localStorage.getItem('aSQuote')||'The plans of the diligent lead to success. — Prov 21:5',
   banner:localStorage.getItem('aSBanner')||'135deg,#c9a0a0,#a99fc9,#8aafc9',
   pin:localStorage.getItem('aPIN')||'',
-  protTabs:JSON.parse(localStorage.getItem('aProtTabs')||'{"money":true}'),
+  protTabs:JSON.parse(localStorage.getItem('aProtTabs')||'{"estate":true}'),
   wUnit:localStorage.getItem('aWUnit')||'glasses',
   gEx:parseInt(localStorage.getItem('aGEx'))||3,
   hideMillie:localStorage.getItem('aHideMillie')==='1',
@@ -2740,9 +2847,52 @@ function goTabDirect(tab,btn){
   document.querySelectorAll('.tab-btn').forEach(function(b){b.classList.remove('on');});
   var v=document.getElementById('v-'+tab);
   if(v)v.classList.add('on');
-  if(btn)btn.classList.add('on');
+  var section=VIEW_SECTION[tab]||tab;
+  var sBtn=document.querySelector('[data-tab="'+section+'"]');
+  if(sBtn)sBtn.classList.add('on');
+  else if(btn)btn.classList.add('on');
+  var bc=document.getElementById('sectionBreadcrumb');
+  if(bc){
+    var isSubView=(section!==tab&&SECTION_LABELS[section]);
+    if(isSubView){
+      bc.style.display='flex';
+      bc.innerHTML='<button class="bc-btn" onclick="goTab(\''+section+'\',document.querySelector(\'[data-tab=&quot;'+section+'&quot;]\'))">← '+SECTION_LABELS[section]+'</button><span style="font-size:12px;color:var(--textl)"> / '+TAB_LABELS[tab]+'</span>';
+    }else{bc.style.display='none';}
+  }
   if(tab==='settings')renderSettings();
   if(tab==='world')renderWorld();
+  if(SECTION_VIEWS[tab])renderHubPreviews(tab);
+}
+
+function renderHubPreviews(section){
+  var el,today=todayStr();
+  if(section==='helm'){
+    var open=TASKS.filter(function(t){return !t.done;}).length;
+    var due=TASKS.filter(function(t){return !t.done&&t.due&&t.due<=today;}).length;
+    el=document.getElementById('hub-tasks-sub');if(el)el.textContent=due+' due today · '+open+' open';
+    var active=(PROJECTS||[]).filter(function(p){return p.status==='active';}).length;
+    el=document.getElementById('hub-projects-sub');if(el)el.textContent=active+' active project'+(active!==1?'s':'');
+    el=document.getElementById('hub-lists-sub');if(el)el.textContent=(LISTS||[]).length+' list'+((LISTS||[]).length!==1?'s':'')+' saved';
+  }else if(section==='conservatory'){
+    var goals=(GOALS||[]).filter(function(g){return !g.done;}).length;
+    el=document.getElementById('hub-goals-sub');if(el)el.textContent=goals+' goal'+(goals!==1?'s':'')+' in progress';
+    var due2=RTN_GROUPS.filter(function(g){return rtnIsDueToday(g);}).length;
+    el=document.getElementById('hub-routines-sub');if(el)el.textContent=due2+' group'+(due2!==1?'s':'')+' due today';
+  }else if(section==='hearthside'){
+    var charEl=document.getElementById('hub-hearthside-char');
+    if(charEl&&!charEl.innerHTML.trim())charEl.innerHTML=emberDrawSVG(36);
+    el=document.getElementById('hub-health-sub');
+    var lastSl=MILLIE.sleepLog&&MILLIE.sleepLog.length?MILLIE.sleepLog[MILLIE.sleepLog.length-1]:null;
+    if(el)el.textContent=lastSl?'Last sleep: '+((new Date(lastSl.wake)-new Date(lastSl.bed))/3600000).toFixed(1)+'h':'Log sleep, workouts & wellness';
+    el=document.getElementById('hub-meals-sub');
+    var todayMeals=Object.values(MEAL_PLAN||{}).filter(function(v){return v&&v.date===today;}).length;
+    if(el)el.textContent='Meal planning & recipes';
+  }else if(section==='workshop'){
+    el=document.getElementById('hub-board-sub');if(el)el.textContent=(VB_ITEMS||[]).length+' item'+((VB_ITEMS||[]).length!==1?'s':'');
+    el=document.getElementById('hub-faves-sub');if(el)el.textContent=(FAVES||[]).length+' saved fave'+((FAVES||[]).length!==1?'s':'');
+  }else if(section==='emporium'){
+    el=document.getElementById('hub-wigs-sub');if(el)el.textContent=(WIGS||[]).length+' wig'+((WIGS||[]).length!==1?'s':'')+' in collection';
+  }
 }
 
 // ═══════════════════════════════════════════════
@@ -4741,9 +4891,10 @@ var BANNER_PRESETS=[
 var SEL_BANNER='';
 
 var TOGGLEABLE_TABS=[
-  {id:'tasks',label:'📋 Tasks'},{id:'routines',label:'🔄 Routines'},
-  {id:'lists',label:'📝 Lists'},{id:'food',label:'💚 Health'},{id:'wigs',label:'🪄 Wigs'},
-  {id:'money',label:'💰 Money'},{id:'recap',label:'📊 Recap'},
+  {id:'helm',label:'⚓ The Helm'},{id:'conservatory',label:'🌿 Conservatory'},
+  {id:'hearthside',label:'🏡 Hearthside'},{id:'workshop',label:'🔨 Workshop'},
+  {id:'lighthouse',label:'🕊️ Lighthouse'},{id:'estate',label:'🏛️ The Estate'},
+  {id:'emporium',label:'🏪 Emporium'},{id:'archives',label:'📚 Archives'},
 ];
 
 var _tabDragFrom=null;
