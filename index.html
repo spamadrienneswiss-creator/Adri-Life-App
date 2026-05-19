@@ -556,6 +556,7 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
 .millie-widget.sleeping{animation:millieBreath 4s ease-in-out infinite;opacity:0.75}
 .millie-sleep-entry{display:flex;justify-content:space-between;font-size:12px;color:var(--textl);padding:4px 0;border-bottom:1px solid rgba(0,0,0,.05)}
 .millie-sleep-entry:last-child{border-bottom:none}
+.millie-habit-tag{display:flex;justify-content:space-between;align-items:center;padding:5px 9px;background:var(--peach-light);border-radius:8px;margin-bottom:4px;font-size:12px;font-weight:700;color:#8a5a30}
 .millie-widget.bouncing{animation:millieBounce .55s ease-in-out 3}
 .millie-widget.treat{animation:millieTreat .4s ease-in-out 3}
 .millie-mood-badge{position:absolute;top:-8px;right:-8px;font-size:16px;background:white;border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 4px rgba(0,0,0,.2);line-height:1}
@@ -570,6 +571,8 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
 .millie-action{padding:12px 8px 10px;border-radius:12px;border:none;font-family:'Quicksand',sans-serif;font-size:12px;font-weight:700;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;transition:transform .15s}
 .millie-action:active{transform:scale(.93)}
 .millie-action-icon{font-size:24px;line-height:1}
+.meaningful-toggle{width:100%;padding:10px 12px;border-radius:10px;border:2px solid #e8e0d8;background:#fff;font-family:'Quicksand',sans-serif;font-size:13px;font-weight:700;color:var(--textl);cursor:pointer;text-align:left;transition:all .2s;margin-bottom:10px;display:block}
+.meaningful-toggle.on{background:var(--peach-light);border-color:var(--peach);color:#8a5a20}
 .millie-toast{position:absolute;top:-30px;left:50%;transform:translateX(-50%);background:white;border-radius:12px;padding:4px 10px;font-size:12px;font-weight:700;color:var(--rose);box-shadow:0 2px 8px rgba(0,0,0,.15);white-space:nowrap;pointer-events:none;animation:su .3s ease forwards}
 </style>
 </head>
@@ -869,28 +872,44 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
 
 <!-- MONEY -->
 <div class="view" id="v-money">
-  <div style="display:flex;gap:8px;margin-bottom:12px">
-    <button class="ok-btn" style="flex:1;padding:10px;font-size:13px" onclick="openM('expModal')">💸 Add Expense</button>
-    <button class="ok-btn" style="flex:1;padding:10px;font-size:13px;background:linear-gradient(135deg,var(--sage),var(--teal))" onclick="openM('incModal')">💰 Add Income</button>
+  <div class="pill-nav" style="margin-bottom:12px">
+    <button class="pn-btn on" onclick="showMoneySec('overview',this)">📊 Overview</button>
+    <button class="pn-btn" onclick="showMoneySec('bills',this)">🏦 Bills</button>
+    <button class="pn-btn" onclick="showMoneySec('expenses',this)">💸 Expenses</button>
+    <button class="pn-btn" onclick="showMoneySec('income',this)">💰 Income</button>
   </div>
-  <div class="mny-g">
-    <div class="mny-c"><div class="mny-l">Month Income</div><div class="mny-n" id="mThisInc">$0</div></div>
-    <div class="mny-c"><div class="mny-l">Month Expenses</div><div class="mny-n" id="mThisExp">$0</div></div>
-    <div class="mny-c"><div class="mny-l">Net</div><div class="mny-n" id="mNet" style="font-size:20px">$0</div></div>
-    <div class="mny-c"><div class="mny-l">WWOW Income</div><div class="mny-n" id="mInc">$0</div></div>
+  <!-- Overview -->
+  <div id="ms-overview" class="money-sec">
+    <div class="mny-g">
+      <div class="mny-c"><div class="mny-l">Month Income</div><div class="mny-n" id="mThisInc">$0</div></div>
+      <div class="mny-c"><div class="mny-l">Month Expenses</div><div class="mny-n" id="mThisExp">$0</div></div>
+      <div class="mny-c"><div class="mny-l">Net</div><div class="mny-n" id="mNet" style="font-size:20px">$0</div></div>
+      <div class="mny-c"><div class="mny-l">WWOW Income</div><div class="mny-n" id="mInc">$0</div></div>
+    </div>
+    <div class="sh sect-toggle" onclick="togSect('monthlyBreak','monthlyArrow')">📊 Spending by Category <span id="monthlyArrow">▸</span></div>
+    <div id="monthlyBreak" style="display:none">
+      <div class="card" id="monthlyCard"><div style="text-align:center;padding:12px;font-size:13px;color:var(--textl)">Loading...</div></div>
+    </div>
   </div>
-  <div class="sh sect-toggle" onclick="togSect('monthlyBreak','monthlyArrow')">📊 Spending by Category <span id="monthlyArrow">▸</span></div>
-  <div id="monthlyBreak" style="display:none">
-    <div class="card" id="monthlyCard"><div style="text-align:center;padding:12px;font-size:13px;color:var(--textl)">Loading...</div></div>
+  <!-- Bills -->
+  <div id="ms-bills" class="money-sec" style="display:none">
+    <div class="sh">🏦 Bills</div>
+    <div class="card"><div id="billsList"><div class="empty"><div class="emj">🏦</div><p>No bills added.</p></div></div></div>
+    <button class="add-btn" onclick="openAddBill()" style="margin-bottom:14px">➕ Add Bill</button>
   </div>
-  <div class="sh">🏦 Bills</div>
-  <div class="card"><div id="billsList"><div class="empty"><div class="emj">🏦</div><p>No bills added.</p></div></div></div>
-  <button class="add-btn" onclick="openAddBill()" style="margin-bottom:14px">➕ Add Bill</button>
-  <div class="sh">💚 Income Log</div>
-  <div class="card"><div id="incList"><div class="empty"><div class="emj">💰</div><p>No income logged yet.</p></div></div></div>
-  <div class="sh">💸 Recent Expenses</div>
-  <div class="card"><div id="expList"><div class="empty"><div class="emj">💸</div><p>No expenses yet.</p></div></div></div>
-  <button class="exp-btn" onclick="goTabDirect('export',document.querySelector('[data-tab=\'export\']'))" style="margin-top:8px">📤 Go to Export →</button>
+  <!-- Expenses -->
+  <div id="ms-expenses" class="money-sec" style="display:none">
+    <button class="ok-btn" style="width:100%;margin-bottom:12px" onclick="openM('expModal')">💸 Add Expense</button>
+    <div class="sh">💸 Recent Expenses</div>
+    <div class="card"><div id="expList"><div class="empty"><div class="emj">💸</div><p>No expenses yet.</p></div></div></div>
+    <button class="exp-btn" onclick="goTabDirect('export',document.querySelector('[data-tab=\'export\']'))" style="margin-top:8px">📤 Export →</button>
+  </div>
+  <!-- Income -->
+  <div id="ms-income" class="money-sec" style="display:none">
+    <button class="ok-btn" style="width:100%;margin-bottom:12px;background:linear-gradient(135deg,var(--sage),var(--teal))" onclick="openM('incModal')">💰 Add Income</button>
+    <div class="sh">💚 Income Log</div>
+    <div class="card"><div id="incList"><div class="empty"><div class="emj">💰</div><p>No income logged yet.</p></div></div></div>
+  </div>
 </div>
 
 <div class="view" id="v-focus">
@@ -1494,6 +1513,7 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     </div>
   </div>
   <div class="fg"><label class="fl" style="display:flex;justify-content:space-between;align-items:center">Notes <button type="button" onclick="expandNotes()" style="background:none;border:none;font-size:11px;color:var(--lav);font-weight:700;cursor:pointer;font-family:'Quicksand',sans-serif">⛶ Full Screen</button></label><textarea class="fi fi-big" id="tNotes" placeholder="Details, links, context..."></textarea></div>
+  <button type="button" id="tMeaningfulBtn" onclick="togMeaningful(this)" class="meaningful-toggle">⭐ Mark as meaningful goal</button>
   <button class="ok-btn" onclick="saveTask()">Save Task ✨</button>
   <button class="del-btn" id="delTBtn" onclick="delFromEdit()" style="display:none">🗑️ Delete Task</button>
   <button class="cn-btn" onclick="closeM('taskModal')">Cancel</button>
@@ -1860,6 +1880,8 @@ if(!MILLIE.bedtime)MILLIE.bedtime='22:00';
 if(!MILLIE.waketime)MILLIE.waketime='07:00';
 if(MILLIE.asleep===undefined)MILLIE.asleep=false;
 if(!MILLIE.sleepLog)MILLIE.sleepLog=[];
+if(!MILLIE.habits)MILLIE.habits=[];
+if(!MILLIE.habitWeek)MILLIE.habitWeek='';
 var BRAIN_DUMP = JSON.parse(localStorage.getItem('aBrainDump')||'[]');
 var INTENTIONS = JSON.parse(localStorage.getItem('aIntentions')||'{}');
 var MEDS = JSON.parse(localStorage.getItem('aMeds')||'[]');
@@ -2521,6 +2543,11 @@ function togR(key,idx,el){
   el.classList.toggle('done',newVal);
   el.querySelector('.rchk').textContent=newVal?'✓':'';
   updRS();
+  if(newVal&&(MILLIE.habits||[]).indexOf(key)>-1){
+    MILLIE.hunger=Math.min(100,MILLIE.hunger+12);
+    MILLIE.happiness=Math.min(100,MILLIE.happiness+10);
+    saveMillie();millieTaskTreat();
+  }
 }
 
 function updRS(){
@@ -2626,12 +2653,19 @@ function renderTdTasks(){
   restorePanels(soEl);
 }
 
+var _taskMeaningful=false;
+function togMeaningful(btn){
+  _taskMeaningful=!_taskMeaningful;
+  btn.classList.toggle('on',_taskMeaningful);
+  btn.textContent=_taskMeaningful?'⭐ Meaningful goal — will celebrate! 🎉':'⭐ Mark as meaningful goal';
+}
+
 function togT(id){
   var t=TASKS.find(function(t){return t.id===id;});
   if(!t)return;
   t.done=!t.done;
   fbSave('tasks',id,t);
-  if(t.done){celebrate();millieTaskTreat();if(t.repeat)setTimeout(function(){createRepeat(t);},600);}
+  if(t.done){if(t.meaningful)celebrate();millieTaskTreat();if(t.repeat)setTimeout(function(){createRepeat(t);},600);}
 }
 
 function editT(id){
@@ -2643,6 +2677,9 @@ function editT(id){
   document.getElementById('tDue').value=t.due||'';
   document.getElementById('tNotes').value=t.notes||'';
   document.getElementById('delTBtn').style.display='block';
+  _taskMeaningful=!!(t.meaningful);
+  var _mb=document.getElementById('tMeaningfulBtn');
+  if(_mb){_mb.classList.toggle('on',_taskMeaningful);_mb.textContent=_taskMeaningful?'⭐ Meaningful goal — will celebrate! 🎉':'⭐ Mark as meaningful goal';}
   SBV={};
   document.querySelectorAll('[data-g]').forEach(function(b){b.classList.remove('on');});
   setTimeout(function(){
@@ -2700,7 +2737,8 @@ function saveTask(){
     done:existing?existing.done:false,
     repeat:SBV.rep!==undefined?SBV.rep:(existing?existing.repeat||'':''),
     subs:existing?existing.subs||[]:[],
-    created:existing?existing.created:new Date().toISOString()
+    created:existing?existing.created:new Date().toISOString(),
+    meaningful:_taskMeaningful
   };
   fbSave('tasks',id,t);
   closeM('taskModal');
@@ -3002,6 +3040,9 @@ function openM(id){
     document.getElementById('tModTit').textContent='Add Task ✨';
     document.getElementById('editTId').value='';
     document.getElementById('delTBtn').style.display='none';
+    _taskMeaningful=false;
+    var _mb2=document.getElementById('tMeaningfulBtn');
+    if(_mb2){_mb2.classList.remove('on');_mb2.textContent='⭐ Mark as meaningful goal';}
   }
   if(id==='fwModal'){
     togFW('water');
@@ -3707,6 +3748,53 @@ function millieDrawSVG(mode,sz){
     +'</svg>';
 }
 
+function getWeekStr(){
+  var d=new Date(),day=d.getDay(),diff=d.getDate()-day+(day===0?-6:1);
+  var mon=new Date(d.getFullYear(),d.getMonth(),diff);
+  return mon.getFullYear()+'-'+('0'+(mon.getMonth()+1)).slice(-2)+'-'+('0'+mon.getDate()).slice(-2);
+}
+
+function renderMillieHabits(){
+  var el=document.getElementById('millieHabitsList');
+  if(!el)return;
+  var habits=MILLIE.habits||[];
+  if(!habits.length){el.innerHTML='<div style="font-size:12px;color:var(--textl);text-align:center;padding:4px">No habits assigned yet.<br><small>Assign up to 3 weekly habits.</small></div>';return;}
+  el.innerHTML=habits.map(function(gid){
+    var g=RTN_GROUPS.find(function(x){return x.id===gid;});
+    if(!g)return'';
+    return'<div class="millie-habit-tag"><span>'+(g.icon||'📌')+' '+g.name+'</span><button onclick="millieUnassignHabit(\''+gid+'\')" style="background:none;border:none;color:var(--textl);cursor:pointer;font-size:16px;line-height:1;padding:0 2px">×</button></div>';
+  }).join('');
+}
+
+function millieAssignHabit(gid){
+  if((MILLIE.habits||[]).indexOf(gid)>-1)return;
+  if((MILLIE.habits||[]).length>=3){showToast('Max 3 habits for Millie!');return;}
+  MILLIE.habits=(MILLIE.habits||[]).concat([gid]);
+  MILLIE.habitWeek=getWeekStr();
+  saveMillie();renderMillieHabits();
+  var p=document.getElementById('millieHabitPicker');
+  if(p)p.style.display='none';
+}
+
+function millieUnassignHabit(gid){
+  MILLIE.habits=(MILLIE.habits||[]).filter(function(x){return x!==gid;});
+  saveMillie();renderMillieHabits();
+}
+
+function togMillieHabitPicker(){
+  var p=document.getElementById('millieHabitPicker');
+  if(!p)return;
+  var showing=p.style.display!=='none'&&p.style.display!=='';
+  if(showing){p.style.display='none';return;}
+  var assigned=MILLIE.habits||[];
+  var groups=RTN_GROUPS.filter(function(g){return assigned.indexOf(g.id)===-1;});
+  if(!groups.length){p.innerHTML='<div style="padding:8px 10px;font-size:12px;color:var(--textl)">All routines assigned!</div>';p.style.display='';return;}
+  p.innerHTML=groups.map(function(g){
+    return'<button onclick="millieAssignHabit(\''+g.id+'\')" style="display:block;width:100%;text-align:left;padding:8px 10px;background:none;border:none;border-bottom:1px solid rgba(0,0,0,.05);font-family:\'Quicksand\',sans-serif;font-size:13px;cursor:pointer;color:var(--textd)">'+(g.icon||'📌')+' '+g.name+'</button>';
+  }).join('');
+  p.style.display='';
+}
+
 function millieShouldSleep(){
   if(MILLIE.asleep)return true;
   var now=new Date();
@@ -3852,6 +3940,7 @@ function openMillie(){
   var wtInp=document.getElementById('millieWaketime');
   if(wtInp)wtInp.value=MILLIE.waketime||'07:00';
   renderMillieSleepLog();
+  renderMillieHabits();
   showOv('millieOv');
 }
 
@@ -5058,6 +5147,15 @@ function celebrate(){
 // ═══════════════════════════════════════════════
 // FOCUS TAB
 // ═══════════════════════════════════════════════
+
+function showMoneySec(sec,btn){
+  ['overview','bills','expenses','income'].forEach(function(s){
+    var el=document.getElementById('ms-'+s);
+    if(el)el.style.display=(s===sec)?'':'none';
+  });
+  document.querySelectorAll('#v-money .pn-btn').forEach(function(b){b.classList.remove('on');});
+  if(btn)btn.classList.add('on');
+}
 
 function showFocusSec(sec,btn){
   ['timer','dump','whatnow','intentions'].forEach(function(s){
@@ -7710,6 +7808,16 @@ setInterval(updDate, 60000);
       <div style="font-size:13px;color:#7a6a8a;margin-bottom:8px">Millie is sleeping 💤<br><small style="color:var(--textl)">She'll be up at <span id="millieWakeAtText"></span></small></div>
       <button class="millie-action" style="width:100%;background:#fff9d6;color:#8a7a20;justify-content:center;gap:8px" onclick="millieGoodmorning()"><span class="millie-action-icon" style="font-size:20px">☀️</span>Good morning!</button>
     </div>
+    <!-- Weekly habits -->
+    <div style="margin-top:12px;padding:10px 12px;background:rgba(255,255,255,0.65);border-radius:12px">
+      <div style="font-weight:700;color:var(--textl);font-size:12px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center">
+        <span>📌 Weekly Habits</span>
+        <button onclick="togMillieHabitPicker()" style="background:var(--rose-light);color:var(--rose);border:none;border-radius:6px;padding:3px 8px;font-size:11px;font-weight:700;cursor:pointer">+ Assign</button>
+      </div>
+      <div style="font-size:11px;color:var(--textl);margin-bottom:6px">Completing these routines feeds Millie 🍣</div>
+      <div id="millieHabitsList"></div>
+      <div id="millieHabitPicker" style="display:none;background:white;border-radius:8px;border:1px solid #eee;margin-top:6px;max-height:140px;overflow-y:auto"></div>
+    </div>
     <!-- Sleep schedule -->
     <div style="margin-top:12px;padding:10px 12px;background:rgba(255,255,255,0.65);border-radius:12px;font-size:12px">
       <div style="font-weight:700;color:var(--textl);margin-bottom:8px">🌙 Sleep Schedule</div>
@@ -7729,3 +7837,4 @@ setInterval(updDate, 60000);
 </div>
 </body>
 </html>
+
