@@ -480,7 +480,11 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
 /* Meals tab */
 .meal-grid{display:grid;gap:8px;margin-bottom:12px}
 .meal-day{background:#fff;border-radius:12px;padding:12px;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.meal-day.overloaded{border:2px solid #f0c040}
+.meal-day.today{border-left:3px solid var(--rose)}
 .meal-day-hdr{font-weight:700;font-size:13px;color:var(--textd);margin-bottom:8px;display:flex;justify-content:space-between;align-items:center}
+.meal-day.overloaded .meal-day-hdr{background:#fffbe6}
+.meal-day.today .meal-day-hdr{background:var(--rose-light)}
 .meal-slot{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid #f5f0eb;cursor:pointer}
 .meal-slot:last-child{border-bottom:none}
 .meal-slot-lbl{font-size:11px;color:var(--textl);width:62px;flex-shrink:0}
@@ -527,6 +531,16 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
 .bill-row:last-child{border-bottom:none}
 .bill-chk{width:28px;height:28px;border-radius:50%;border:2px solid #ddd;background:white;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;transition:all .2s;flex-shrink:0}
 .bill-chk.on{background:var(--sage);border-color:var(--sage);color:white}
+.bill-status-btns{display:flex;gap:4px;flex-shrink:0}
+.bsb{padding:4px 8px;border-radius:8px;border:1.5px solid #ddd;background:white;font-family:'Quicksand',sans-serif;font-size:11px;font-weight:700;cursor:pointer;color:var(--textl);transition:all .15s;white-space:nowrap}
+.bsb.acc.on{background:var(--blue-light);border-color:var(--blue);color:#3a5a8a}
+.bsb.paid.on{background:var(--peach-light);border-color:var(--peach);color:#7a4a20}
+.bsb.post.on{background:var(--sage-light);border-color:var(--sage);color:#3a6a3a}
+.exp-pending{opacity:.6}
+.exp-pending .er-d::after{content:' ⏳';font-size:11px}
+.exp-pending .er-a{color:var(--textl)!important}
+.exp-pend-btn{background:none;border:1.5px solid #ddd;border-radius:8px;padding:2px 7px;font-size:11px;font-weight:700;color:var(--textl);cursor:pointer;flex-shrink:0;transition:all .15s}
+.exp-pend-btn.on{background:var(--peach-light);border-color:var(--peach);color:#7a4a20}
 .inc-row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid #f5f0eb;font-size:13px}
 .inc-row:last-child{border-bottom:none}
 .inc-amt{font-weight:700;color:var(--sage)}
@@ -574,7 +588,7 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
 <!-- HEADER -->
 <div class="hdr" id="mainHdr" style="background:linear-gradient(135deg,#c9a0a0,#a99fc9,#8aafc9)">
   <div class="hdr-top">
-    <div class="app-title">✨ Adri's Life</div>
+    <div class="app-title" id="appTitleEl" ondblclick="editAppTitle()" title="Double-tap to rename">✨ Adri's Life</div>
     <div class="hdr-r">
       <div class="ddate" id="dDate"></div>
       <div class="dstatus" id="dStatus">Loading...</div>
@@ -1289,6 +1303,7 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     <button class="pn-btn" onclick="showMealSec('recipes',this)">📖 Recipes</button>
     <button class="pn-btn" onclick="showMealSec('grocery',this)">🛒 Grocery</button>
     <button class="pn-btn" onclick="showMealSec('prices',this)">💰 Prices</button>
+    <button class="pn-btn" onclick="showMealSec('inventory',this)">📦 Inventory</button>
   </div>
 
   <!-- PLAN section -->
@@ -1318,9 +1333,10 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
       <button class="btn sec" style="font-size:12px;padding:5px 10px" onclick="clearCheckedGrocery()">Clear checked</button>
       <button class="btn sec" style="font-size:12px;padding:5px 10px" onclick="expGrocery()">Export</button>
     </div>
-    <div style="display:flex;gap:8px;margin-bottom:10px">
-      <input id="groceryAddName" type="text" placeholder="Item name" style="flex:2;padding:8px 11px;border-radius:10px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px">
-      <input id="groceryAddQty" type="text" placeholder="Qty" style="flex:1;padding:8px 11px;border-radius:10px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px;max-width:70px">
+    <div style="display:flex;gap:6px;margin-bottom:6px;flex-wrap:wrap">
+      <input id="groceryAddName" type="text" placeholder="Item name" style="flex:2;min-width:100px;padding:8px 11px;border-radius:10px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px">
+      <input id="groceryAddQty" type="text" placeholder="Qty" style="width:55px;padding:8px 11px;border-radius:10px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px">
+      <input id="groceryAddStore" type="text" placeholder="Store" style="flex:1;min-width:80px;padding:8px 11px;border-radius:10px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px">
       <button class="btn" onclick="addGroceryManual()">Add</button>
     </div>
     <div id="groceryEstTotal" style="font-size:13px;color:var(--textl);margin-bottom:8px"></div>
@@ -1340,6 +1356,21 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     </div>
     <div id="priceLogEl"></div>
   </div>
+
+  <!-- INVENTORY section -->
+  <div id="ms-inventory" style="display:none">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+      <span style="font-weight:700;font-size:14px;color:var(--text)">📦 Pantry Inventory</span>
+      <button class="btn sec" style="font-size:12px;padding:5px 10px" onclick="clearInventory()">Clear all</button>
+    </div>
+    <div style="display:flex;gap:6px;margin-bottom:10px">
+      <input id="invAddName" type="text" placeholder="Item name" style="flex:2;padding:8px 11px;border-radius:10px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px">
+      <input id="invAddQty" type="text" placeholder="Qty" style="flex:1;padding:8px 11px;border-radius:10px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px;max-width:70px">
+      <button class="btn" onclick="addInventoryManual()">Add</button>
+    </div>
+    <div id="inventoryListEl"></div>
+  </div>
+
 </div>
 
 <!-- GUIDE VIEW -->
@@ -1486,6 +1517,10 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
       <button class="sb" data-g="ecat" data-v="other" onclick="pSB(this)">📋 Other</button>
     </div>
   </div>
+  <div style="display:flex;align-items:center;gap:10px;margin-top:8px;padding:10px 0;border-top:1px solid #f0ebe6">
+    <button class="exp-pend-btn" id="expPendingBtn" onclick="this.classList.toggle('on')">⏳ Pending charge</button>
+    <span style="font-size:11px;color:var(--textl)">Excludes from totals until cleared</span>
+  </div>
   <button class="ok-btn" onclick="saveExp()">Log It 💸</button>
   <button class="cn-btn" onclick="closeM('expModal')">Cancel</button>
 </div></div>
@@ -1506,6 +1541,12 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
   <div id="foodSec" style="display:none">
     <div class="fsw"><span class="fsic">🔍</span><input class="fsi" id="fwSrch" placeholder="Search foods..." oninput="srchFW(this.value)"></div>
     <div class="fsugs" id="fwSugs"></div>
+    <div style="margin-bottom:8px">
+      <button class="btn sec" style="width:100%;font-size:12px;padding:6px" onclick="showInvPicker()">📦 Use from inventory</button>
+      <div id="invPickerSection" style="display:none;margin-top:6px">
+        <div id="invPickerList" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:4px"></div>
+      </div>
+    </div>
     <button class="ok-btn" onclick="openM('nfModal')">➕ Add New Food to Database</button>
   </div>
   <button class="cn-btn" onclick="closeM('fwModal')">Cancel</button>
@@ -1633,6 +1674,7 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
   <div class="card">
     <div class="set-sec-t" onclick="togSetSec('sc-appear',this)">🎨 Appearance <span class="sst-arr">▶</span></div>
     <div id="sc-appear" style="display:none">
+      <div class="set-row"><div><div class="set-lbl">App Title</div><div class="set-sub">Shown in header (or double-tap header)</div></div><input class="fi" id="sAppTitle" style="width:140px;padding:7px 10px" placeholder="✨ Adri's Life"></div>
       <div class="set-row"><div><div class="set-lbl">Your Name</div><div class="set-sub">Used in greeting</div></div><input class="fi" id="sName" style="width:120px;padding:7px 10px" placeholder="Adri"></div>
       <div class="set-row"><div class="set-lbl">Greeting Quote</div></div>
       <textarea class="fi" id="sQuote" style="min-height:60px;margin-bottom:8px" placeholder="The plans of the diligent..."></textarea>
@@ -1854,6 +1896,8 @@ var GRAT_LOG = JSON.parse(localStorage.getItem('aGratLog')||'[]');
 var RECIPES = JSON.parse(localStorage.getItem('aRecipes')||'[]');
 var MEAL_PLAN = JSON.parse(localStorage.getItem('aMealPlan')||'{}');
 var GROCERY_LIST = JSON.parse(localStorage.getItem('aGroceryList')||'[]');
+var INVENTORY = JSON.parse(localStorage.getItem('aInventory')||'[]');
+// Each inventory item: {id, name, qty, unit, addedDate}
 var PRICE_LOG = JSON.parse(localStorage.getItem('aPriceLog')||'[]');
 var MEAL_WEEK_OFFSET = 0; // weeks from current
 var MEAL_EDIT_INGS = []; // temp for recipe modal
@@ -1944,6 +1988,7 @@ var S = {
   wUnit:localStorage.getItem('aWUnit')||'glasses',
   gEx:parseInt(localStorage.getItem('aGEx'))||3,
   hideMillie:localStorage.getItem('aHideMillie')==='1',
+  appTitle:localStorage.getItem('aSAppTitle')||'✨ Adri\'s Life',
 };
 
 var SBV={}, CF='all', DELTED=null, UNDO_T=null, OPEN_PANELS={};
@@ -2796,7 +2841,10 @@ function saveExp(){
   var desc=document.getElementById('eDesc').value.trim();
   if(!amt||!desc){alert('Please fill in amount and description!');return;}
   var id=Date.now().toString();
-  var e={id:id,amt:parseFloat(amt),desc:desc,ty:SBV.ety||'personal',cat:SBV.ecat||'other',date:new Date().toLocaleDateString(),created:new Date().toISOString()};
+  var pendBtn=document.getElementById('expPendingBtn');
+  var isPending=pendBtn&&pendBtn.classList.contains('on');
+  var e={id:id,amt:parseFloat(amt),desc:desc,ty:SBV.ety||'personal',cat:SBV.ecat||'other',date:new Date().toLocaleDateString(),created:new Date().toISOString(),pending:isPending||false};
+  if(pendBtn)pendBtn.classList.remove('on');
   fbSave('expenses',id,e);
   var taskId=id+'_e';
   var task={id:taskId,title:'Transfer $'+amt+' '+desc+' to spreadsheet',cat:'fin',urgency:'important-not-urgent',etime:'<10min',due:'',notes:(SBV.ety==='business'?'💼 Biz':'🏠 Personal'),done:false,created:new Date().toISOString()};
@@ -2810,17 +2858,29 @@ function renderE(){
   var el=document.getElementById('expList');
   var mon=getMonStr();
   var thisMonExp=EXPENSES.filter(function(e){return(e.created||'').startsWith(mon);});
-  var thisMonExpAmt=thisMonExp.reduce(function(s,e){return s+e.amt;},0);
+  var confirmedExp=thisMonExp.filter(function(e){return!e.pending;});
+  var pendingExp=thisMonExp.filter(function(e){return e.pending;});
+  var thisMonExpAmt=confirmedExp.reduce(function(s,e){return s+e.amt;},0);
+  var pendingAmt=pendingExp.reduce(function(s,e){return s+e.amt;},0);
   var thisMonIncAmt=INCOME.filter(function(i){return(i.created||'').startsWith(mon);}).reduce(function(s,i){return s+i.amt;},0);
   var wigInc=WIGS.reduce(function(s,w){return s+(parseFloat(w.price)||0);},0);
   var net=thisMonIncAmt-thisMonExpAmt;
   var e1=document.getElementById('mThisInc');if(e1)e1.textContent='$'+thisMonIncAmt.toFixed(0);
-  var e2=document.getElementById('mThisExp');if(e2)e2.textContent='$'+thisMonExpAmt.toFixed(0);
+  var e2=document.getElementById('mThisExp');if(e2)e2.textContent='$'+thisMonExpAmt.toFixed(0)+(pendingAmt?'+⏳$'+pendingAmt.toFixed(0):'');
   var e3=document.getElementById('mNet');if(e3){e3.textContent=(net>=0?'+':'-')+'$'+Math.abs(net).toFixed(0);e3.style.color=net>=0?'var(--sage)':'var(--ured)';}
   var e4=document.getElementById('mInc');if(e4)e4.textContent='$'+wigInc.toFixed(0);
   if(!EXPENSES.length){if(el)el.innerHTML='<div class="empty"><div class="emj">💸</div><p>No expenses yet.</p></div>';renderIncome();renderBills();return;}
   if(el)el.innerHTML=EXPENSES.slice(0,40).map(function(e){
-    return'<div class="er"><div class="er-l"><div class="er-d">'+e.desc+'</div><div class="er-m">'+(e.ty==='business'?'💼':'🏠')+' '+e.cat+' • '+e.date+'</div></div><div class="er-a '+(e.ty==='business'?'biz':'')+'">$'+e.amt.toFixed(2)+'</div><button onclick="delExpense(\''+e.id+'\')" style="background:none;border:none;font-size:13px;cursor:pointer;color:var(--textl);padding:4px 6px;flex-shrink:0">🗑️</button></div>';
+    var isPending=!!e.pending;
+    return'<div class="er'+(isPending?' exp-pending':'')+'">'+
+      '<div class="er-l">'+
+        '<div class="er-d">'+e.desc+'</div>'+
+        '<div class="er-m">'+(e.ty==='business'?'💼':'🏠')+' '+e.cat+' • '+e.date+'</div>'+
+      '</div>'+
+      '<button class="exp-pend-btn'+(isPending?' on':'')+'" onclick="toggleExpPending(\''+e.id+'\')" title="'+(isPending?'Mark confirmed':'Mark pending')+'">'+(isPending?'⏳':'✓')+'</button>'+
+      '<div class="er-a '+(e.ty==='business'?'biz':'')+'">$'+e.amt.toFixed(2)+'</div>'+
+      '<button onclick="delExpense(\''+e.id+'\')" style="background:none;border:none;font-size:13px;cursor:pointer;color:var(--textl);padding:4px 6px;flex-shrink:0">🗑️</button>'+
+    '</div>';
   }).join('');
   renderIncome();
   renderBills();
@@ -2832,6 +2892,14 @@ function delExpense(id){
   EXPENSES=EXPENSES.filter(function(e){return e.id!==id;});
   try{if(window.db&&window.fsDoc&&window.fsDeleteDoc)window.fsDeleteDoc(window.fsDoc(window.db,'expenses',id));}catch(err){}
   renderExpenses();
+}
+
+function toggleExpPending(id){
+  var e=EXPENSES.find(function(x){return x.id===id;});
+  if(!e)return;
+  e.pending=!e.pending;
+  fbSave('expenses',id,e);
+  renderE();
 }
 
 // ═══════════════════════════════════════════════
@@ -3890,6 +3958,7 @@ var TOGGLEABLE_TABS=[
 ];
 
 function renderSettings(){
+  var appTitleInp=document.getElementById('sAppTitle');if(appTitleInp)appTitleInp.value=S.appTitle||'';
   document.getElementById('sName').value=S.name;
   document.getElementById('sQuote').value=S.quote;
   var bc=document.getElementById('bannerColors');
@@ -3928,7 +3997,38 @@ function togTabProt(tabId,btn){
   localStorage.setItem('aProtTabs',JSON.stringify(S.protTabs));
 }
 
+function applyAppTitle(){
+  var t=S.appTitle||'✨ Adri\'s Life';
+  var el=document.getElementById('appTitleEl');
+  if(el)el.textContent=t;
+}
+
+function editAppTitle(){
+  var el=document.getElementById('appTitleEl');
+  if(!el)return;
+  var cur=S.appTitle||'✨ Adri\'s Life';
+  var inp=document.createElement('input');
+  inp.value=cur;
+  inp.style.cssText='font-family:\'Playfair Display\',serif;font-size:19px;background:rgba(255,255,255,.2);border:none;border-bottom:2px solid white;color:var(--title-color,white);outline:none;width:160px;padding:2px 4px';
+  el.replaceWith(inp);
+  inp.focus();inp.select();
+  var done=function(){
+    S.appTitle=inp.value.trim()||'✨ Adri\'s Life';
+    localStorage.setItem('aSAppTitle',S.appTitle);
+    var newEl=document.createElement('div');
+    newEl.id='appTitleEl';newEl.className='app-title';
+    newEl.setAttribute('ondblclick','editAppTitle()');
+    newEl.setAttribute('title','Double-tap to rename');
+    newEl.textContent=S.appTitle;
+    inp.replaceWith(newEl);
+  };
+  inp.addEventListener('blur',done);
+  inp.addEventListener('keydown',function(e){if(e.key==='Enter')inp.blur();if(e.key==='Escape'){inp.value=cur;inp.blur();}});
+}
+
 function saveAppearance(){
+  var titleInp=document.getElementById('sAppTitle');
+  if(titleInp&&titleInp.value.trim()){S.appTitle=titleInp.value.trim();localStorage.setItem('aSAppTitle',S.appTitle);applyAppTitle();}
   S.name=document.getElementById('sName').value.trim()||'Adri';
   S.quote=document.getElementById('sQuote').value.trim()||S.quote;
   if(SEL_BANNER){var p=BANNER_PRESETS.find(function(p){return p.id===SEL_BANNER;});if(p)S.banner=p.grad;}
@@ -4234,27 +4334,36 @@ function renderBills(){
   var mon=getMonStr();
   var paid=BILL_PAY[mon]||{};
   el.innerHTML=BILLS.map(function(b){
-    var isPaid=!!paid[b.id];
+    var status=paid[b.id]||''; // ''|'accounted'|'paid'|'posted'
+    var isPosted=status==='posted';
+    var nameStyle='font-size:14px;font-weight:600;color:var(--text)'+(isPosted?';text-decoration:line-through;color:var(--textl)':'');
     return'<div class="bill-row">'+
-      '<div>'+
-        '<div style="font-size:14px;font-weight:600;color:var(--text)'+(isPaid?';text-decoration:line-through;color:var(--textl)':'')+'">'+ b.name+'</div>'+
+      '<div style="flex:1;min-width:0">'+
+        '<div style="'+nameStyle+'">'+b.name+'</div>'+
         '<div style="font-size:11px;color:var(--textl)">$'+b.amt+'/mo • due day '+b.day+'</div>'+
       '</div>'+
-      '<div style="display:flex;align-items:center;gap:8px">'+
-        '<div class="bill-chk'+(isPaid?' on':'')+'" onclick="togBillPay(\''+b.id+'\')">'+  (isPaid?'✓':'')+'</div>'+
+      '<div style="display:flex;align-items:center;gap:5px">'+
+        '<div class="bill-status-btns">'+
+          '<button class="bsb acc'+(status==='accounted'||status==='paid'||status==='posted'?' on':'')+'" onclick="setBillStatus(\''+b.id+'\',\'accounted\')" title="Money set aside">📌 Set aside</button>'+
+          '<button class="bsb paid'+(status==='paid'||status==='posted'?' on':'')+'" onclick="setBillStatus(\''+b.id+'\',\'paid\')" title="Payment sent">💸 Paid</button>'+
+          '<button class="bsb post'+(status==='posted'?' on':'')+'" onclick="setBillStatus(\''+b.id+'\',\'posted\')" title="Shows on account">✅ Posted</button>'+
+        '</div>'+
         '<button onclick="editBill(\''+b.id+'\')" style="background:none;border:none;font-size:14px;cursor:pointer;color:var(--textl);padding:4px">✏️</button>'+
       '</div>'+
     '</div>';
   }).join('');
 }
 
-function togBillPay(id){
+function setBillStatus(id,status){
   var mon=getMonStr();
   if(!BILL_PAY[mon])BILL_PAY[mon]={};
-  BILL_PAY[mon][id]=!BILL_PAY[mon][id];
+  // Toggle off if already at this status
+  BILL_PAY[mon][id]=BILL_PAY[mon][id]===status?'':status;
   localStorage.setItem('aBillPay',JSON.stringify(BILL_PAY));
   renderBills();
 }
+
+function togBillPay(id){setBillStatus(id,'posted');}// backward compat
 
 function openAddBill(){
   document.getElementById('billModalTit').textContent='Add Bill 🏦';
@@ -6592,12 +6701,13 @@ function delGrat(id){
 // MEALS TAB
 // ═══════════════════════════════════════════════
 
-var MEAL_SLOTS = ['breakfast','lunch','dinner','snack'];
-var MEAL_SLOT_ICONS = {breakfast:'🌅',lunch:'☀️',dinner:'🌙',snack:'🍎'};
+var MEAL_SLOTS = ['breakfast','mains','soup','other'];
+var MEAL_SLOT_ICONS = {breakfast:'🌅',mains:'🍽️',soup:'🍲',other:'🥗'};
+var MEAL_SLOT_LABELS = {breakfast:'Breakfast',mains:'Main Meals',soup:'Soup',other:'Other'};
 var GROCERY_CATS = ['Produce','Dairy','Meat & Fish','Bakery','Pantry','Frozen','Beverages','Other'];
 
 function showMealSec(sec,btn){
-  ['plan','recipes','grocery','prices'].forEach(function(s){
+  ['plan','recipes','grocery','prices','inventory'].forEach(function(s){
     var el=document.getElementById('ms-'+s);
     if(el)el.style.display=(s===sec)?'':'none';
   });
@@ -6606,6 +6716,7 @@ function showMealSec(sec,btn){
   if(sec==='plan')renderMealPlan();
   if(sec==='recipes')renderRecipes();
   if(sec==='grocery')renderGrocery();
+  if(sec==='inventory')renderInventory();
   if(sec==='prices')renderPriceLog();
 }
 
@@ -6647,31 +6758,56 @@ function renderMealPlan(){
   var grid=document.getElementById('mealPlanGrid');
   if(!grid)return;
   var html='';
+  var today=todayStr();
   dates.forEach(function(date,i){
     var dayData=MEAL_PLAN[date]||{};
     var macros=calcDayMacros(date);
-    html+='<div class="meal-day">';
-    html+='<div class="meal-day-hdr"><span>'+DOW[i]+' <span style="font-weight:400;color:var(--textl)">'+date.slice(5)+'</span></span>';
+    var filledSlots=MEAL_SLOTS.filter(function(s){return dayData[s];}).length;
+    var isOverloaded=filledSlots>3;
+    var isToday=date===today;
+    var isCollapsed=!isToday&&!MEAL_DAY_OPEN[date];
+    html+='<div class="meal-day'+(isOverloaded?' overloaded':'')+(isToday?' today':'')+'">';
+    html+='<div class="meal-day-hdr" onclick="togMealDay(\''+date+'\')" style="cursor:pointer">';
+    html+='<span>'+DOW[i]+' <span style="font-weight:400;color:var(--textl)">'+date.slice(5)+'</span>'+(isToday?' <span style="font-size:10px;background:var(--rose);color:white;padding:1px 6px;border-radius:8px">Today</span>':'')+'</span>';
+    html+='<span style="display:flex;align-items:center;gap:6px">';
+    if(isOverloaded)html+='<span title="Busy day!" style="font-size:13px">⚠️</span>';
     if(macros.cal>0)html+='<span style="font-size:11px;color:var(--textl)">'+macros.cal+' cal</span>';
-    html+='</div>';
-    MEAL_SLOTS.forEach(function(slot){
-      var val=dayData[slot]||'';
-      html+='<div class="meal-slot" onclick="openSlotPicker(\''+date+'\',\''+slot+'\')">';
-      html+='<span class="meal-slot-lbl">'+MEAL_SLOT_ICONS[slot]+' '+slot.charAt(0).toUpperCase()+slot.slice(1)+'</span>';
-      html+='<span class="meal-slot-val'+(val?'':' empty')+'">'+(val||'tap to add')+'</span>';
-      html+='</div>';
-    });
-    if(macros.cal>0){
-      html+='<div class="meal-macro-bar">';
-      html+='<span class="meal-macro-pip">🔥 '+macros.cal+' cal</span>';
-      html+='<span class="meal-macro-pip">💪 '+macros.pro+'g pro</span>';
-      html+='<span class="meal-macro-pip">🌾 '+macros.carb+'g carb</span>';
-      html+='<span class="meal-macro-pip">🫙 '+macros.fat+'g fat</span>';
-      html+='</div>';
+    html+='<span style="font-size:12px;color:var(--textl)">'+(isCollapsed?'▶':'▼')+'</span>';
+    html+='</span></div>';
+    if(!isCollapsed){
+      MEAL_SLOTS.forEach(function(slot){
+        var val=dayData[slot]||'';
+        var rec=val?RECIPES.find(function(r){return r.name===val;}):null;
+        var hasPrepTime=rec&&rec.prepTime;
+        html+='<div class="meal-slot" onclick="openSlotPicker(\''+date+'\',\''+slot+'\')">';
+        html+='<span class="meal-slot-lbl">'+MEAL_SLOT_ICONS[slot]+' '+(MEAL_SLOT_LABELS[slot]||slot)+'</span>';
+        html+='<span style="display:flex;align-items:center;gap:4px;flex:1;min-width:0">';
+        html+='<span class="meal-slot-val'+(val?'':' empty')+'" style="flex:1">'+(val||'tap to add')+'</span>';
+        if(hasPrepTime)html+='<button onclick="event.stopPropagation();addPrepTask(\''+val+'\','+rec.prepTime+')" style="background:none;border:1px solid var(--sage);border-radius:6px;padding:1px 5px;font-size:10px;color:var(--sage);cursor:pointer;flex-shrink:0">⏱ '+rec.prepTime+'m</button>';
+        html+='</span>';
+        html+='</div>';
+      });
+      if(macros.cal>0){
+        html+='<div class="meal-macro-bar">';
+        html+='<span class="meal-macro-pip">🔥 '+macros.cal+' cal</span>';
+        html+='<span class="meal-macro-pip">💪 '+macros.pro+'g pro</span>';
+        html+='<span class="meal-macro-pip">🌾 '+macros.carb+'g carb</span>';
+        html+='<span class="meal-macro-pip">🫙 '+macros.fat+'g fat</span>';
+        html+='</div>';
+      }
+      if(isOverloaded){
+        html+='<div style="font-size:11px;color:#c08000;background:#fff8e0;border-radius:8px;padding:5px 8px;margin-top:4px">⚠️ Busy day — consider moving one meal to another day</div>';
+      }
     }
     html+='</div>';
   });
   grid.innerHTML=html;
+}
+
+var MEAL_DAY_OPEN = {};
+function togMealDay(date){
+  MEAL_DAY_OPEN[date]=!MEAL_DAY_OPEN[date];
+  renderMealPlan();
 }
 
 function calcDayMacros(date){
@@ -6695,7 +6831,8 @@ function openSlotPicker(date,slot){
   var current=(MEAL_PLAN[date]||{})[slot]||'';
   var names=RECIPES.map(function(r){return r.name;});
   var opts=names.length?'\n\nYour recipes:\n'+names.join(', '):'';
-  var val=prompt('Meal for '+slot+' on '+date+':\n(Enter recipe name or any text, leave blank to clear)'+opts, current);
+  var slotLabel=MEAL_SLOT_LABELS[slot]||slot;
+  var val=prompt('Meal for '+slotLabel+' on '+date+':\n(Enter recipe name or any text, leave blank to clear)'+opts, current);
   if(val===null)return;
   if(!MEAL_PLAN[date])MEAL_PLAN[date]={};
   if(val.trim()===''){
@@ -6708,6 +6845,18 @@ function openSlotPicker(date,slot){
 }
 
 // ── Recipe rendering ──────────────────────────
+function addPrepTask(mealName,prepMin){
+  var t={id:'t'+Date.now(),text:'Prep: '+mealName+' (~'+prepMin+' min)',done:false,cat:'home',priority:'important-not-urgent',due:'',notes:'',repeat:false,subtasks:[]};
+  TASKS.push(t);
+  fbSave('tasks',t.id,t);
+  renderTasks();
+  var flash=document.createElement('div');
+  flash.style.cssText='position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:var(--sage);color:white;padding:8px 16px;border-radius:12px;font-size:13px;font-weight:700;z-index:9999;pointer-events:none';
+  flash.textContent='⏱ Prep task added!';
+  document.body.appendChild(flash);
+  setTimeout(function(){flash.remove();},1800);
+}
+
 function renderRecipes(){
   var q=(document.getElementById('recipeSearch')||{}).value||'';
   var el=document.getElementById('recipeList');
@@ -6835,7 +6984,7 @@ function genGroceryFromPlan(){
   // Merge with existing (don't duplicate)
   newItems.forEach(function(item){
     var exists=GROCERY_LIST.some(function(g){return g.name.toLowerCase()===item.name.toLowerCase();});
-    if(!exists)GROCERY_LIST.push(item);
+    if(!exists)GROCERY_LIST.push(Object.assign({store:''},item));
   });
   localStorage.setItem('aGroceryList',JSON.stringify(GROCERY_LIST));
   // Switch to grocery tab
@@ -6844,21 +6993,92 @@ function genGroceryFromPlan(){
   renderGrocery();
 }
 
+function renderInventory(){
+  var el=document.getElementById('inventoryListEl');
+  if(!el)return;
+  if(!INVENTORY.length){
+    el.innerHTML='<p style="color:var(--textl);text-align:center;padding:20px">Inventory is empty. Items checked off your grocery list appear here automatically.</p>';
+    return;
+  }
+  el.innerHTML=INVENTORY.map(function(inv,i){
+    return'<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid #f5f0eb">'
+      +'<div style="flex:1"><div style="font-size:13px;font-weight:600">'+inv.name+'</div>'
+      +'<div style="font-size:11px;color:var(--textl)">'+inv.qty+' '+inv.unit+' • added '+inv.addedDate+'</div></div>'
+      +'<button onclick="useInventoryItem('+i+')" style="background:var(--sage-light);border:none;border-radius:8px;padding:4px 10px;font-size:12px;font-weight:700;color:#3a6a3a;cursor:pointer">Use</button>'
+      +'<button onclick="delInventoryItem('+i+')" style="background:none;border:none;font-size:13px;cursor:pointer;color:var(--textl);padding:2px 6px">🗑️</button>'
+      +'</div>';
+  }).join('');
+}
+
+function addInventoryManual(){
+  var name=((document.getElementById('invAddName')||{}).value||'').trim();
+  var qty=((document.getElementById('invAddQty')||{}).value||'1').trim();
+  if(!name)return;
+  INVENTORY.push({id:Date.now().toString(),name:name,qty:qty,unit:'',addedDate:todayStr()});
+  localStorage.setItem('aInventory',JSON.stringify(INVENTORY));
+  document.getElementById('invAddName').value='';
+  document.getElementById('invAddQty').value='';
+  renderInventory();
+}
+
+function useInventoryItem(i){
+  INVENTORY.splice(i,1);
+  localStorage.setItem('aInventory',JSON.stringify(INVENTORY));
+  renderInventory();
+}
+
+function delInventoryItem(i){
+  if(!confirm('Remove from inventory?'))return;
+  INVENTORY.splice(i,1);
+  localStorage.setItem('aInventory',JSON.stringify(INVENTORY));
+  renderInventory();
+}
+
+function clearInventory(){
+  if(!INVENTORY.length||!confirm('Clear all inventory?'))return;
+  INVENTORY=[];
+  localStorage.setItem('aInventory',JSON.stringify(INVENTORY));
+  renderInventory();
+}
+
+function showInvPicker(){
+  var sec=document.getElementById('invPickerSection');
+  var list=document.getElementById('invPickerList');
+  if(!sec||!list)return;
+  if(!INVENTORY.length){sec.style.display='none';return;}
+  sec.style.display='block';
+  list.innerHTML=INVENTORY.map(function(inv,i){
+    return'<button onclick="pickInventoryFood('+i+')" style="padding:4px 10px;border-radius:8px;border:1.5px solid var(--sage);background:var(--sage-light);font-family:\'Quicksand\',sans-serif;font-size:12px;font-weight:600;color:#3a6a3a;cursor:pointer">'+inv.name+'</button>';
+  }).join('');
+}
+
+function pickInventoryFood(i){
+  var inv=INVENTORY[i];if(!inv)return;
+  var nameEl=document.getElementById('fwSrch');
+  if(nameEl){nameEl.value=inv.name;srchFW(inv.name);}
+  // Use up inventory item
+  INVENTORY.splice(i,1);
+  localStorage.setItem('aInventory',JSON.stringify(INVENTORY));
+  showInvPicker();
+}
+
 function renderGrocery(){
   var el=document.getElementById('groceryListEl');
   if(!el)return;
   if(!GROCERY_LIST.length){el.innerHTML='<p style="color:var(--textl);text-align:center;padding:20px">List is empty. Generate from plan or add items manually.</p>';updateGroceryTotal();return;}
-  // Group by category
-  var cats={};
+  // Group by store
+  var stores={};
   GROCERY_LIST.forEach(function(item,i){
-    var cat=item.category||'Other';
-    if(!cats[cat])cats[cat]=[];
-    cats[cat].push({item:item,idx:i});
+    var store=item.store||item.category||'No store';
+    if(!stores[store])stores[store]=[];
+    stores[store].push({item:item,idx:i});
   });
   var html='';
-  Object.keys(cats).sort().forEach(function(cat){
-    html+='<div class="grocery-cat-hdr">'+cat+'</div>';
-    cats[cat].forEach(function(entry){
+  Object.keys(stores).sort().forEach(function(store){
+    var storeItems=stores[store];
+    var doneCount=storeItems.filter(function(e){return e.item.checked;}).length;
+    html+='<div class="grocery-cat-hdr">'+store+(doneCount?' <span style="font-size:10px;color:var(--sage)">'+doneCount+'/'+storeItems.length+' ✓</span>':'')+'</div>';
+    storeItems.forEach(function(entry){
       var item=entry.item;
       var i=entry.idx;
       var price=getBestPrice(item.name);
@@ -6876,7 +7096,18 @@ function renderGrocery(){
 
 function toggleGrocery(i){
   if(!GROCERY_LIST[i])return;
-  GROCERY_LIST[i].checked=!GROCERY_LIST[i].checked;
+  var item=GROCERY_LIST[i];
+  item.checked=!item.checked;
+  if(item.checked){
+    // Move to inventory
+    var exists=INVENTORY.find(function(inv){return inv.name.toLowerCase()===item.name.toLowerCase();});
+    if(exists){
+      exists.qty=item.qty||exists.qty;
+    } else {
+      INVENTORY.push({id:Date.now().toString(),name:item.name,qty:item.qty||'1',unit:item.unit||'',addedDate:todayStr()});
+    }
+    localStorage.setItem('aInventory',JSON.stringify(INVENTORY));
+  }
   localStorage.setItem('aGroceryList',JSON.stringify(GROCERY_LIST));
   renderGrocery();
 }
@@ -6896,12 +7127,14 @@ function clearCheckedGrocery(){
 function addGroceryManual(){
   var name=(document.getElementById('groceryAddName')||{}).value||'';
   var qty=(document.getElementById('groceryAddQty')||{}).value||'1';
+  var store=((document.getElementById('groceryAddStore')||{}).value||'').trim();
   name=name.trim();
   if(!name)return;
-  GROCERY_LIST.push({name:name,qty:qty,unit:'',category:'Other',checked:false});
+  GROCERY_LIST.push({name:name,qty:qty,unit:'',category:'Other',store:store||'',checked:false});
   localStorage.setItem('aGroceryList',JSON.stringify(GROCERY_LIST));
   document.getElementById('groceryAddName').value='';
   document.getElementById('groceryAddQty').value='';
+  var storeEl=document.getElementById('groceryAddStore');if(storeEl)storeEl.value='';
   renderGrocery();
 }
 
@@ -7028,6 +7261,7 @@ function startApp(){
   renderMeds();
   renderMinistryHome();
   renderGuide();
+  applyAppTitle();
   tickMillie();
   renderMillieWidget();
 }
