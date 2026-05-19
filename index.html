@@ -593,6 +593,52 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
 .hub-card-sub{font-size:11px;color:var(--textl);line-height:1.5}
 #sectionBreadcrumb{display:none;padding:2px 0 10px;align-items:center;gap:6px}
 .bc-btn{background:none;border:none;cursor:pointer;font-size:12px;font-weight:700;color:var(--rose);padding:0;font-family:'Quicksand',sans-serif}
+/* BRAIN DUMP ENHANCED */
+.bd-filter-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.bd-filter{padding:4px 10px;border-radius:20px;border:1.5px solid #e8e0d8;background:#fff;font-size:11px;font-weight:700;color:var(--textl);cursor:pointer;font-family:'Quicksand',sans-serif;white-space:nowrap}
+.bd-filter.on{background:var(--rose);border-color:var(--rose);color:#fff}
+.bd-item{background:#fff;border-radius:11px;padding:10px 12px;margin-bottom:7px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.bd-row{display:flex;align-items:flex-start;gap:8px}
+.bd-cb{width:18px;height:18px;border-radius:5px;border:1.5px solid #d0c8c0;cursor:pointer;flex-shrink:0;margin-top:2px;appearance:none;-webkit-appearance:none;background:#fff;transition:all .15s}
+.bd-cb:checked{background:var(--rose);border-color:var(--rose)}
+.bd-cb:checked::after{content:'✓';color:#fff;font-size:11px;display:block;text-align:center;line-height:16px;font-weight:700}
+.bd-text{flex:1;font-size:13px;color:var(--textd);line-height:1.5;cursor:pointer}
+.bd-pri{display:inline-block;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0}
+.bd-pri.none{background:#f0ebe6;color:#999}
+.bd-pri.critical{background:#fde8e8;color:#c05050}
+.bd-pri.high{background:#fde8d0;color:#8a5a20}
+.bd-pri.medium{background:#daeaf5;color:#4a7a9b}
+.bd-pri.low{background:#d4e4d0;color:#5a7a56}
+.bd-pri.ignore{background:#f0f0f0;color:#bbb}
+.bd-expand{background:#f0ebe6;border-radius:8px;padding:10px 12px;margin-top:8px}
+.bd-bulk-bar{display:none;position:sticky;bottom:76px;background:var(--rose);color:#fff;border-radius:12px;padding:10px 14px;margin-bottom:8px;z-index:50;align-items:center;gap:8px;flex-wrap:wrap;box-shadow:0 4px 16px rgba(201,160,160,.4)}
+.bd-bulk-bar.show{display:flex}
+.bd-bulk-sel{background:rgba(255,255,255,.25);border:none;color:#fff;border-radius:8px;padding:6px 12px;font-family:'Quicksand',sans-serif;font-size:12px;font-weight:700;cursor:pointer}
+/* STORIES */
+.story-card{background:#fff;border-radius:14px;padding:14px;margin-bottom:10px;box-shadow:0 1px 5px rgba(0,0,0,.07);cursor:pointer;transition:transform .15s;border-left:4px solid var(--rose)}
+.story-card:active{transform:scale(.97)}
+.story-card-title{font-family:'Playfair Display',serif;font-size:16px;color:var(--text);margin-bottom:3px}
+.story-card-meta{font-size:11px;color:var(--textl)}
+.story-char-card{background:#fff;border-radius:12px;padding:12px;margin-bottom:8px;box-shadow:0 1px 4px rgba(0,0,0,.07);display:flex;align-items:flex-start;gap:10px}
+.story-char-dot{width:32px;height:32px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;color:#fff}
+.scene-card{background:rgba(255,255,255,.7);border-radius:10px;padding:10px 12px;margin-bottom:6px;border-left:3px solid #e8e0d8}
+.scene-ep-header{font-size:12px;font-weight:700;color:var(--textl);text-transform:uppercase;letter-spacing:.5px;padding:8px 0 4px;margin-top:8px;display:flex;align-items:center;justify-content:space-between}
+.scene-season-header{font-family:'Playfair Display',serif;font-size:14px;color:var(--text);padding:12px 0 4px;border-bottom:1px solid #ede8e3;margin-bottom:6px}
+/* MIXTAPE */
+.mix-card{background:#fff;border-radius:12px;padding:12px 14px;margin-bottom:8px;box-shadow:0 1px 4px rgba(0,0,0,.07);display:flex;gap:12px;align-items:flex-start}
+.mix-note{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--rose),var(--lav));display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.mix-title{font-size:13px;font-weight:700;color:var(--textd)}
+.mix-artist{font-size:11px;color:var(--textl);margin-bottom:2px}
+.mix-era{display:inline-block;font-size:10px;font-weight:700;background:var(--lav-light);color:var(--lav);border-radius:6px;padding:1px 7px;margin-bottom:4px}
+.mix-memory{font-size:12px;color:var(--textl);line-height:1.5;font-style:italic}
+/* YEARLY REFLECTION */
+.yr-month-card{background:#fff;border-radius:14px;padding:12px 14px;margin-bottom:8px;box-shadow:0 1px 4px rgba(0,0,0,.06);cursor:pointer}
+.yr-month-hdr{display:flex;align-items:center;justify-content:space-between}
+.yr-month-name{font-size:14px;font-weight:700;color:var(--textd)}
+.yr-month-tag{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.yr-tag{font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px}
+.yr-bar{height:6px;border-radius:3px;background:#f0ebe6;margin-top:8px;overflow:hidden}
+.yr-bar-fill{height:100%;border-radius:3px;background:var(--rose);transition:width .6s ease}
 </style>
 </head>
 <body>
@@ -689,6 +735,8 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
   <div class="hub-grid">
     <div class="hub-card" onclick="goTab('board',null)"><div class="hub-card-ic">🌈</div><div class="hub-card-name">Vision Board</div><div class="hub-card-sub" id="hub-board-sub">Loading…</div></div>
     <div class="hub-card" onclick="goTab('faves',null)"><div class="hub-card-ic">⭐</div><div class="hub-card-name">Faves</div><div class="hub-card-sub" id="hub-faves-sub">Loading…</div></div>
+    <div class="hub-card" onclick="goTab('stories',null)"><div class="hub-card-ic">📖</div><div class="hub-card-name">Stories</div><div class="hub-card-sub" id="hub-stories-sub">Your creative worlds</div></div>
+    <div class="hub-card span2" onclick="goTab('mixtape',null)"><div class="hub-card-ic">🎵</div><div class="hub-card-name">Mixtape</div><div class="hub-card-sub">Songs &amp; musical memories</div></div>
   </div>
 </div>
 
@@ -1062,11 +1110,34 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
   </div>
   <!-- BRAIN DUMP -->
   <div id="fs-dump" style="display:none">
-    <div style="font-weight:700;font-size:14px;color:var(--textd);margin-bottom:10px">🧠 Brain Dump</div>
-    <div style="font-size:12px;color:var(--textl);margin-bottom:10px">Get it out of your head instantly — no organizing needed.</div>
-    <div style="display:flex;gap:8px;margin-bottom:12px">
-      <textarea id="dumpInput" placeholder="What's on your mind? Just type it…" rows="2" style="flex:1;padding:9px 12px;border-radius:10px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:14px;resize:none" onkeydown="if((event.metaKey||event.ctrlKey)&&event.key==='Enter')dumpIt()"></textarea>
-      <button class="btn" style="align-self:flex-end;padding:10px 16px" onclick="dumpIt()">Dump</button>
+    <div style="font-size:12px;color:var(--textl);margin-bottom:10px">Get it out of your head — no organizing needed yet.</div>
+    <div style="display:flex;gap:8px;margin-bottom:10px">
+      <textarea id="dumpInput" placeholder="What's on your mind? Press Enter to add…" rows="2" style="flex:1;padding:9px 12px;border-radius:10px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:14px;resize:none" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();dumpIt();}"></textarea>
+      <button class="btn" style="align-self:flex-end;padding:10px 16px" onclick="dumpIt()">+ Add</button>
+    </div>
+    <div class="bd-filter-row" id="bdFilters">
+      <button class="bd-filter on" onclick="setBdFilter('all',this)">All</button>
+      <button class="bd-filter" onclick="setBdFilter('none',this)">🔘 Unsorted</button>
+      <button class="bd-filter" onclick="setBdFilter('critical',this)">🔥 Critical</button>
+      <button class="bd-filter" onclick="setBdFilter('high',this)">⬆️ High</button>
+      <button class="bd-filter" onclick="setBdFilter('medium',this)">➡️ Medium</button>
+      <button class="bd-filter" onclick="setBdFilter('low',this)">⬇️ Low</button>
+      <button class="bd-filter" onclick="setBdFilter('ignore',this)">🗑️ Ignore</button>
+    </div>
+    <div class="bd-bulk-bar" id="bdBulkBar">
+      <span id="bdBulkCount" style="font-size:12px;font-weight:700;flex:1">0 selected</span>
+      <select id="bdBulkPri" style="padding:5px 8px;border-radius:7px;border:none;font-family:'Quicksand',sans-serif;font-size:12px;font-weight:700" onchange="bdBulkAssign(this.value);this.value=''">
+        <option value="">Assign priority…</option>
+        <option value="critical">🔥 Critical</option>
+        <option value="high">⬆️ High</option>
+        <option value="medium">➡️ Medium</option>
+        <option value="low">⬇️ Low</option>
+        <option value="ignore">🗑️ Ignore</option>
+        <option value="none">🔘 Unsorted</option>
+      </select>
+      <button class="bd-bulk-sel" onclick="bdBulkToTasks()">→ Tasks</button>
+      <button class="bd-bulk-sel" style="background:rgba(255,255,255,.15)" onclick="bdBulkDelete()">🗑️ Delete</button>
+      <button class="bd-bulk-sel" style="background:rgba(255,255,255,.1)" onclick="bdClearSel()">✕</button>
     </div>
     <div id="dumpList"></div>
   </div>
@@ -1570,20 +1641,144 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
 
 <!-- RECAP -->
 <div class="view" id="v-recap">
-  <div class="recap-c"><div class="recap-t">📊 Today</div>
-    <div class="sr"><span>Tasks Done</span><span class="sv" id="sDone">0</span></div>
-    <div class="sr"><span>Tasks Left</span><span class="sv" id="sLeft">0</span></div>
-    <div class="sr"><span>Routine Items</span><span class="sv" id="sRout">0/0</span></div>
-    <div class="sr"><span>Water</span><span class="sv" id="sWat">0/8</span></div>
+  <div class="pill-nav" style="margin-bottom:12px">
+    <button class="pn-btn on" onclick="showRecapSec('stats',this)">📊 Stats</button>
+    <button class="pn-btn" onclick="showRecapSec('yearly',this)">📅 Year</button>
   </div>
-  <div class="recap-c"><div class="recap-t">💡 When Overwhelmed</div>
-    <div style="font-size:13px;color:var(--textl);line-height:2">🙏 Pray first<br>📝 Brain dump on paper<br>🎧 Headphones + LoFi<br>⏱️ Timer — 10 minutes<br>🐱 One task at a time<br>💧 Drink water<br>🌸 Done is better than perfect</div>
+  <div id="rs-stats">
+    <div class="recap-c"><div class="recap-t">📊 Today</div>
+      <div class="sr"><span>Tasks Done</span><span class="sv" id="sDone">0</span></div>
+      <div class="sr"><span>Tasks Left</span><span class="sv" id="sLeft">0</span></div>
+      <div class="sr"><span>Routine Items</span><span class="sv" id="sRout">0/0</span></div>
+      <div class="sr"><span>Water</span><span class="sv" id="sWat">0/8</span></div>
+    </div>
+    <div class="recap-c"><div class="recap-t">💡 When Overwhelmed</div>
+      <div style="font-size:13px;color:var(--textl);line-height:2">🙏 Pray first<br>📝 Brain dump on paper<br>🎧 Headphones + LoFi<br>⏱️ Timer — 10 minutes<br>🐱 One task at a time<br>💧 Drink water<br>🌸 Done is better than perfect</div>
+    </div>
+    <div class="recap-c"><div class="recap-t">⚡ Quick Dopamine</div>
+      <div style="font-size:13px;color:var(--textl);line-height:2">☕ Tea or coffee<br>🛏️ Make the bed<br>🕺 Dance to one song<br>🧹 Organize one thing<br>🌬️ 5 deep breaths<br>📝 Make a list</div>
+    </div>
   </div>
-  <div class="recap-c"><div class="recap-t">⚡ Quick Dopamine</div>
-    <div style="font-size:13px;color:var(--textl);line-height:2">☕ Tea or coffee<br>🛏️ Make the bed<br>🕺 Dance to one song<br>🧹 Organize one thing<br>🌬️ 5 deep breaths<br>📝 Make a list</div>
+  <!-- YEARLY REFLECTION -->
+  <div id="rs-yearly" style="display:none">
+    <div style="font-family:'Playfair Display',serif;font-size:18px;color:var(--text);margin-bottom:4px">📅 Year in Review</div>
+    <div style="font-size:12px;color:var(--textl);margin-bottom:14px">A look back at what you've built this year.</div>
+    <div id="yearlyStats"></div>
   </div>
 </div>
 
+<!-- STORIES -->
+<div class="view" id="v-stories">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+    <div style="font-family:'Playfair Display',serif;font-size:18px;color:var(--text)">📖 Stories</div>
+    <button class="btn" style="font-size:12px;padding:6px 14px" onclick="showOv('storyNewOv')">+ New Story</button>
+  </div>
+  <div id="storiesList"></div>
+</div>
+
+<!-- MIXTAPE -->
+<div class="view" id="v-mixtape">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+    <div style="font-family:'Playfair Display',serif;font-size:18px;color:var(--text)">🎵 Mixtape</div>
+    <button class="btn" style="font-size:12px;padding:6px 14px" onclick="showOv('mixtapeAddOv')">+ Add Song</button>
+  </div>
+  <div style="font-size:12px;color:var(--textl);margin-bottom:12px">Songs &amp; musical memories — your life's soundtrack.</div>
+  <div class="bd-filter-row" id="mixtapeEraFilter">
+    <button class="bd-filter on" onclick="setMixFilter('',this)">All</button>
+  </div>
+  <div id="mixtapeList"></div>
+</div>
+
+</div>
+
+<!-- STORY DETAIL OVERLAY -->
+<div class="ov" id="storyDetailOv" onclick="closeOv('storyDetailOv')">
+  <div class="mod" onclick="event.stopPropagation()" style="max-width:480px;max-height:92vh;overflow-y:auto">
+    <div class="mh"><span class="mt" id="storyDetailTitle">Story</span><button class="mc" onclick="closeOv('storyDetailOv')">✕</button></div>
+    <div class="pill-nav" style="margin-bottom:12px">
+      <button class="pn-btn on" onclick="showStorySec('overview',this)">📝 Overview</button>
+      <button class="pn-btn" onclick="showStorySec('characters',this)">👥 Characters</button>
+      <button class="pn-btn" onclick="showStorySec('storyboard',this)">🎬 Storyboard</button>
+    </div>
+    <div id="ss-overview">
+      <div id="storyOverviewContent"></div>
+    </div>
+    <div id="ss-characters" style="display:none">
+      <button class="add-btn" style="margin-bottom:10px" onclick="showOv('storyCharNewOv')">+ Add Character</button>
+      <div id="storyCharsList"></div>
+    </div>
+    <div id="ss-storyboard" style="display:none">
+      <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap">
+        <button class="btn sec" style="font-size:12px;padding:5px 14px" onclick="addStorySeason()">+ Season</button>
+        <button class="btn sec" style="font-size:12px;padding:5px 14px" onclick="addStoryEpisode()">+ Episode</button>
+        <button class="add-btn" style="flex:1" onclick="showOv('storySceneOv')">+ Scene</button>
+      </div>
+      <div id="storyboardContent"></div>
+    </div>
+  </div>
+</div>
+
+<!-- NEW STORY OVERLAY -->
+<div class="ov" id="storyNewOv" onclick="closeOv('storyNewOv')">
+  <div class="mod" onclick="event.stopPropagation()" style="max-width:380px">
+    <div class="mh"><span class="mt">📖 New Story</span><button class="mc" onclick="closeOv('storyNewOv')">✕</button></div>
+    <input id="sNewTitle" type="text" placeholder="Story title…" style="width:100%;padding:9px 12px;border-radius:10px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:14px;margin-bottom:8px;box-sizing:border-box">
+    <select id="sNewGenre" style="width:100%;padding:9px 12px;border-radius:10px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px;margin-bottom:8px;box-sizing:border-box">
+      <option value="">Genre (optional)</option>
+      <option>Fantasy</option><option>Romance</option><option>Mystery</option><option>Sci-Fi</option><option>Historical</option><option>Contemporary</option><option>Thriller</option><option>Other</option>
+    </select>
+    <textarea id="sNewSynopsis" placeholder="Short synopsis (optional)" rows="3" style="width:100%;padding:9px 12px;border-radius:10px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px;resize:none;margin-bottom:10px;box-sizing:border-box"></textarea>
+    <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">
+      <span style="font-size:12px;color:var(--textl);align-self:center">Color:</span>
+      <input type="color" id="sNewColor" value="#c9a0a0" style="width:44px;height:32px;border:none;border-radius:8px;cursor:pointer;padding:2px;background:none">
+    </div>
+    <button class="btn" style="width:100%" onclick="saveNewStory()">Create Story</button>
+  </div>
+</div>
+
+<!-- NEW CHARACTER OVERLAY -->
+<div class="ov" id="storyCharNewOv" onclick="closeOv('storyCharNewOv')">
+  <div class="mod" onclick="event.stopPropagation()" style="max-width:380px">
+    <div class="mh"><span class="mt">👤 New Character</span><button class="mc" onclick="closeOv('storyCharNewOv')">✕</button></div>
+    <input id="scNewName" type="text" placeholder="Character name" style="width:100%;padding:9px 12px;border-radius:10px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:14px;margin-bottom:8px;box-sizing:border-box">
+    <input id="scNewRole" type="text" placeholder="Role (e.g. Protagonist, Mentor…)" style="width:100%;padding:9px 12px;border-radius:10px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px;margin-bottom:8px;box-sizing:border-box">
+    <textarea id="scNewDesc" placeholder="Description, traits, notes…" rows="3" style="width:100%;padding:9px 12px;border-radius:10px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px;resize:none;margin-bottom:8px;box-sizing:border-box"></textarea>
+    <div style="display:flex;gap:8px;margin-bottom:12px;align-items:center">
+      <span style="font-size:12px;color:var(--textl)">Color:</span>
+      <input type="color" id="scNewColor" value="#8aafc9" style="width:44px;height:32px;border:none;border-radius:8px;cursor:pointer;padding:2px;background:none">
+    </div>
+    <button class="btn" style="width:100%" onclick="saveNewStoryChar()">Add Character</button>
+  </div>
+</div>
+
+<!-- NEW SCENE OVERLAY -->
+<div class="ov" id="storySceneOv" onclick="closeOv('storySceneOv')">
+  <div class="mod" onclick="event.stopPropagation()" style="max-width:380px">
+    <div class="mh"><span class="mt">🎬 Add Scene</span><button class="mc" onclick="closeOv('storySceneOv')">✕</button></div>
+    <div style="display:flex;gap:8px;margin-bottom:8px">
+      <div style="flex:1"><label style="font-size:11px;color:var(--textl)">Season</label><input id="sceneNewSeason" type="number" min="1" value="1" style="width:100%;padding:8px 10px;border-radius:9px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px;box-sizing:border-box"></div>
+      <div style="flex:1"><label style="font-size:11px;color:var(--textl)">Episode</label><input id="sceneNewEp" type="number" min="1" value="1" style="width:100%;padding:8px 10px;border-radius:9px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px;box-sizing:border-box"></div>
+    </div>
+    <input id="sceneNewTitle" type="text" placeholder="Scene title…" style="width:100%;padding:9px 12px;border-radius:10px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:14px;margin-bottom:8px;box-sizing:border-box">
+    <textarea id="sceneNewText" placeholder="What happens in this scene?" rows="4" style="width:100%;padding:9px 12px;border-radius:10px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px;resize:none;margin-bottom:10px;box-sizing:border-box"></textarea>
+    <button class="btn" style="width:100%" onclick="saveNewScene()">Add Scene</button>
+  </div>
+</div>
+
+<!-- MIXTAPE ADD OVERLAY -->
+<div class="ov" id="mixtapeAddOv" onclick="closeOv('mixtapeAddOv')">
+  <div class="mod" onclick="event.stopPropagation()" style="max-width:380px">
+    <div class="mh"><span class="mt">🎵 Add to Mixtape</span><button class="mc" onclick="closeOv('mixtapeAddOv')">✕</button></div>
+    <input id="mxTitle" type="text" placeholder="Song title" style="width:100%;padding:9px 12px;border-radius:10px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:14px;margin-bottom:8px;box-sizing:border-box">
+    <input id="mxArtist" type="text" placeholder="Artist (optional)" style="width:100%;padding:9px 12px;border-radius:10px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px;margin-bottom:8px;box-sizing:border-box">
+    <input id="mxEra" type="text" placeholder="Era / Chapter (e.g. High school, 2022)" style="width:100%;padding:9px 12px;border-radius:10px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px;margin-bottom:8px;box-sizing:border-box">
+    <textarea id="mxNote" placeholder="Memory or feeling this song brings…" rows="3" style="width:100%;padding:9px 12px;border-radius:10px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px;resize:none;margin-bottom:10px;box-sizing:border-box"></textarea>
+    <select id="mxMood" style="width:100%;padding:9px 12px;border-radius:10px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px;margin-bottom:10px;box-sizing:border-box">
+      <option value="">Mood (optional)</option>
+      <option>🥰 Nostalgic</option><option>💪 Energizing</option><option>😢 Emotional</option><option>✨ Magical</option><option>🎉 Joyful</option><option>😌 Peaceful</option><option>🔥 Intense</option>
+    </select>
+    <button class="btn" style="width:100%" onclick="saveMixSong()">Add to Mixtape</button>
+  </div>
 </div>
 
 <div id="undoToast"><span id="undoMsg">Task deleted</span><button onclick="undoDel()">UNDO</button></div>
@@ -2557,6 +2752,8 @@ function renderWorld(){
 }
 
 var BRAIN_DUMP = JSON.parse(localStorage.getItem('aBrainDump')||'[]');
+BRAIN_DUMP = BRAIN_DUMP.map(function(d){if(!d.priority)d.priority='none';if(!d.notes)d.notes='';if(!d.due)d.due='';return d;});
+BRAIN_DUMP = BRAIN_DUMP.map(function(d){if(!d.priority)d.priority='none';if(!d.notes)d.notes='';if(!d.due)d.due='';return d;});
 var INTENTIONS = JSON.parse(localStorage.getItem('aIntentions')||'{}');
 var MEDS = JSON.parse(localStorage.getItem('aMeds')||'[]');
 var MED_LOG = JSON.parse(localStorage.getItem('aMedLog')||'{}');
@@ -2584,6 +2781,12 @@ var HABIT_LOG = JSON.parse(localStorage.getItem('aHabitLog')||'{}');
 var STUDY_NOTES = JSON.parse(localStorage.getItem('aStudyNotes')||'[]');
 var K_EVENTS = JSON.parse(localStorage.getItem('aKEvents')||'[]');
 var FAVES = JSON.parse(localStorage.getItem('aFaves')||'[]');
+var STORIES = JSON.parse(localStorage.getItem('aStories')||'[]');
+var STORY_CHARS = JSON.parse(localStorage.getItem('aSChars')||'[]');
+var STORY_SCENES = JSON.parse(localStorage.getItem('aSScenes')||'[]');
+var MIXTAPE = JSON.parse(localStorage.getItem('aMixtape')||'[]');
+var MOODS = JSON.parse(localStorage.getItem('aMoods')||'[]');
+var _activeStoryId = null;
 var _favePendingImg = '';
 var _faveAccent = '#c9a0a0';
 var _faveCatFilter = 'all';
@@ -2677,9 +2880,9 @@ var MEAL_COMBOS = JSON.parse(localStorage.getItem('aMC')||'null')||[
 ];
 
 var DEFAULT_TAB_ORDER=['today','helm','conservatory','hearthside','workshop','lighthouse','estate','emporium','archives','world'];
-var TAB_LABELS={today:'☀️ Today',helm:'⚓ The Helm',conservatory:'🌿 Conservatory',hearthside:'🏡 Hearthside',workshop:'🔨 Workshop',lighthouse:'🕊️ Lighthouse',estate:'🏛️ The Estate',emporium:'🏪 Emporium',archives:'📚 Archives',world:'🌊 World'};
+var TAB_LABELS={today:'☀️ Today',helm:'⚓ The Helm',conservatory:'🌿 Conservatory',hearthside:'🏡 Hearthside',workshop:'🔨 Workshop',lighthouse:'🕊️ Lighthouse',estate:'🏛️ The Estate',emporium:'🏪 Emporium',archives:'📚 Archives',world:'🌊 World',stories:'📖 Stories',mixtape:'🎵 Mixtape'};
 var TAB_ORDER=(function(){var o=JSON.parse(localStorage.getItem('aTabOrder')||'null');if(!o)return DEFAULT_TAB_ORDER.slice();var full=DEFAULT_TAB_ORDER.slice();o=o.filter(function(t){return full.indexOf(t)>-1;});full.forEach(function(t){if(o.indexOf(t)<0)o.push(t);});return o;})();
-var SECTION_VIEWS={today:['today'],helm:['tasks','projects','lists'],conservatory:['goals','routines','learn','focus'],hearthside:['food','meals','recap'],workshop:['board','faves'],lighthouse:['spirit'],estate:['money'],emporium:['wigs'],archives:['guide','export','settings'],world:['world']};
+var SECTION_VIEWS={today:['today'],helm:['tasks','projects','lists'],conservatory:['goals','routines','learn','focus'],hearthside:['food','meals','recap'],workshop:['board','faves','stories','mixtape'],lighthouse:['spirit'],estate:['money'],emporium:['wigs'],archives:['guide','export','settings'],world:['world']};
 var SECTION_LABELS={today:'Today',helm:'The Helm',conservatory:'Conservatory',hearthside:'Hearthside',workshop:'Workshop',lighthouse:'Lighthouse',estate:'The Estate',emporium:'Emporium',archives:'Archives',world:'World'};
 var VIEW_SECTION=(function(){var m={};Object.keys(SECTION_VIEWS).forEach(function(s){SECTION_VIEWS[s].forEach(function(v){m[v]=s;});});return m;})();
 
@@ -2861,6 +3064,8 @@ function goTabDirect(tab,btn){
   }
   if(tab==='settings')renderSettings();
   if(tab==='world')renderWorld();
+  if(tab==='stories')renderStoriesList();
+  if(tab==='mixtape')renderMixtape();
   if(SECTION_VIEWS[tab])renderHubPreviews(tab);
 }
 
@@ -2890,8 +3095,39 @@ function renderHubPreviews(section){
   }else if(section==='workshop'){
     el=document.getElementById('hub-board-sub');if(el)el.textContent=(VB_ITEMS||[]).length+' item'+((VB_ITEMS||[]).length!==1?'s':'');
     el=document.getElementById('hub-faves-sub');if(el)el.textContent=(FAVES||[]).length+' saved fave'+((FAVES||[]).length!==1?'s':'');
+  }else if(section==='lighthouse'){
+    var thisMonth2=new Date().toISOString().slice(0,7);
+    var bibleCount=(JSON.parse(localStorage.getItem('aBibleLog')||'[]')).filter(function(e){return e.date&&e.date.slice(0,7)===thisMonth2;}).length;
+    var prayerCount=(JSON.parse(localStorage.getItem('aPrayers')||'[]')).filter(function(e){return e.date&&e.date.slice(0,7)===thisMonth2;}).length;
+    var ministryCount=(JSON.parse(localStorage.getItem('aMinistryLog')||'[]')).filter(function(e){return e.date&&e.date.slice(0,7)===thisMonth2;}).length;
+    var lhTotal=bibleCount+prayerCount+ministryCount;
+    var lhLevels=['🌫️ The lighthouse is dim this month','🕯️ A small flame is lit','💛 The light is growing','✨ Shining steady and bright','🌟 A beacon of light!'];
+    var lhIdx=Math.min(Math.floor(lhTotal/3),lhLevels.length-1);
+    var lighthouseStatus=document.getElementById('lighthouse-status');
+    if(!lighthouseStatus){
+      var lb=document.querySelector('#v-lighthouse .hub-info');
+      if(lb){var sd=document.createElement('div');sd.id='lighthouse-status';sd.style.cssText='font-size:11px;font-weight:700;margin-top:6px;color:var(--textl)';lb.appendChild(sd);}
+      lighthouseStatus=document.getElementById('lighthouse-status');
+    }
+    if(lighthouseStatus)lighthouseStatus.textContent=lhLevels[lhIdx]+' ('+lhTotal+' entries this month)';
+    var lhSvg=document.querySelector('#v-lighthouse .hub-char svg');
+    if(lhSvg){
+      var lightCircles=lhSvg.querySelectorAll('circle[fill="#fff9a0"], circle[fill="#fffce0"]');
+      var intensity=0.3+(lhIdx/(lhLevels.length-1))*0.7;
+      lightCircles.forEach(function(c){c.setAttribute('opacity',intensity.toFixed(2));});
+      var rays=lhSvg.querySelectorAll('line');
+      rays.forEach(function(r){r.setAttribute('opacity',(intensity*0.8).toFixed(2));});
+    }
   }else if(section==='emporium'){
-    el=document.getElementById('hub-wigs-sub');if(el)el.textContent=(WIGS||[]).length+' wig'+((WIGS||[]).length!==1?'s':'')+' in collection';
+    var wigsCount=(WIGS||[]).length;
+    el=document.getElementById('hub-wigs-sub');
+    if(el){
+      var expCount=(JSON.parse(localStorage.getItem('aIncome')||'[]')).length;
+      var customers=Math.min(Math.floor(wigsCount/2)+Math.floor(expCount/3),20);
+      var custLevels=['👻 No customers yet','🚪 First visitors…','👀 Word is spreading','🛍️ Regular customers!','🎉 The Emporium is bustling!'];
+      var custIdx=Math.min(Math.floor(customers/5),custLevels.length-1);
+      el.textContent=wigsCount+' wig'+(wigsCount!==1?'s':'')+' · '+custLevels[custIdx];
+    }
   }
 }
 
@@ -6024,42 +6260,457 @@ function pingTimer(msg){
 }
 
 // ── Brain Dump ────────────────────────────────
+var _bdFilter='all', _bdSel={};
+
 function dumpIt(){
   var el=document.getElementById('dumpInput');
   var text=(el&&el.value||'').trim();
   if(!text)return;
-  BRAIN_DUMP.unshift({id:'bd-'+Date.now(),text:text,date:new Date().toISOString().slice(0,10)});
+  BRAIN_DUMP.unshift({id:'bd-'+Date.now(),text:text,date:todayStr(),priority:'none',notes:'',due:''});
   localStorage.setItem('aBrainDump',JSON.stringify(BRAIN_DUMP));
   el.value='';
   renderDumpList();
 }
 
+function setBdFilter(f,btn){
+  _bdFilter=f;
+  document.querySelectorAll('.bd-filter').forEach(function(b){b.classList.remove('on');});
+  if(btn)btn.classList.add('on');
+  renderDumpList();
+}
+
+var PRI_LABELS={'none':'🔘 Sort','critical':'🔥 Critical','high':'⬆️ High','medium':'➡️ Medium','low':'⬇️ Low','ignore':'🗑️ Ignore'};
+
 function renderDumpList(){
   var el=document.getElementById('dumpList');
   if(!el)return;
-  if(!BRAIN_DUMP.length){el.innerHTML='<p style="color:var(--textl);text-align:center;padding:20px">Empty head = clear focus. Type anything above!</p>';return;}
-  el.innerHTML=BRAIN_DUMP.map(function(d){
-    return '<div class="dump-item">'
-      +'<div style="flex:1"><div class="dump-text">'+d.text+'</div><div class="dump-meta">'+d.date+'</div></div>'
-      +'<button class="btn sec" style="font-size:11px;padding:3px 9px;flex-shrink:0" onclick="dumpToTask(\''+d.id+'\')">→ Task</button>'
+  var list=_bdFilter==='all'?BRAIN_DUMP:BRAIN_DUMP.filter(function(d){return d.priority===_bdFilter;});
+  if(!list.length){
+    el.innerHTML='<p style="color:var(--textl);text-align:center;padding:20px">'+(BRAIN_DUMP.length?'Nothing here in this category.':'Empty head = clear focus. Type anything above!')+'</p>';
+    updBdBulkBar();return;
+  }
+  el.innerHTML=list.map(function(d){
+    var exp=d._expanded?
+      '<div class="bd-expand">'
+      +'<div style="display:flex;gap:8px;margin-bottom:6px;flex-wrap:wrap">'
+      +'<select onchange="bdSetPri(\''+d.id+'\',this.value)" style="padding:5px 9px;border-radius:8px;border:1.5px solid #e8e0d8;font-family:\'Quicksand\',sans-serif;font-size:12px;flex:1">'
+      +['none','critical','high','medium','low','ignore'].map(function(p){return'<option value="'+p+'"'+(d.priority===p?' selected':'')+'>'+PRI_LABELS[p]+'</option>';}).join('')
+      +'</select>'
+      +'<input type="date" value="'+d.due+'" onchange="bdSetDue(\''+d.id+'\',this.value)" style="padding:5px 9px;border-radius:8px;border:1.5px solid #e8e0d8;font-family:\'Quicksand\',sans-serif;font-size:12px;flex:1">'
+      +'</div>'
+      +'<textarea placeholder="Notes…" rows="2" style="width:100%;padding:8px 10px;border-radius:8px;border:1.5px solid #e8e0d8;font-family:\'Quicksand\',sans-serif;font-size:12px;resize:none;margin-bottom:6px" onchange="bdSetNotes(\''+d.id+'\',this.value)">'+escHtml(d.notes||'')+'</textarea>'
+      +'<button class="btn" style="font-size:11px;padding:5px 14px" onclick="dumpToTask(\''+d.id+'\')">→ Add to Tasks</button>'
+      +'</div>'
+      :'';
+    return '<div class="bd-item" id="bdi-'+d.id+'">'
+      +'<div class="bd-row">'
+      +'<input type="checkbox" class="bd-cb" '+((_bdSel[d.id])?'checked':'')+' onchange="bdTogSel(\''+d.id+'\',this.checked)">'
+      +'<span class="bd-text" onclick="bdTogExp(\''+d.id+'\')">'+escHtml(d.text)+'</span>'
+      +'<span class="bd-pri '+d.priority+'" onclick="bdCyclePri(\''+d.id+'\')">'+PRI_LABELS[d.priority]+'</span>'
+      +'<button onclick="bdTogExp(\''+d.id+'\')" style="background:none;border:none;font-size:12px;cursor:pointer;color:var(--textl);padding:2px 4px;flex-shrink:0">'+(d._expanded?'▲':'▼')+'</button>'
       +'<button onclick="delDump(\''+d.id+'\')" style="background:none;border:none;font-size:14px;cursor:pointer;color:var(--textl);padding:2px 4px;flex-shrink:0">✕</button>'
+      +'</div>'
+      +(d.due?'<div style="font-size:10px;color:var(--peach);margin-top:3px;padding-left:26px">📅 '+d.due+'</div>':'')
+      +exp
       +'</div>';
   }).join('');
+  updBdBulkBar();
+}
+
+function bdTogExp(id){
+  var d=BRAIN_DUMP.find(function(x){return x.id===id;});
+  if(d){d._expanded=!d._expanded;renderDumpList();}
+}
+
+function bdTogSel(id,checked){
+  if(checked)_bdSel[id]=true;else delete _bdSel[id];
+  updBdBulkBar();
+}
+
+function updBdBulkBar(){
+  var count=Object.keys(_bdSel).length;
+  var bar=document.getElementById('bdBulkBar');
+  var cnt=document.getElementById('bdBulkCount');
+  if(bar){bar.classList.toggle('show',count>0);}
+  if(cnt)cnt.textContent=count+' selected';
+}
+
+function bdClearSel(){_bdSel={};renderDumpList();}
+
+function bdCyclePri(id){
+  var order=['none','critical','high','medium','low','ignore'];
+  var d=BRAIN_DUMP.find(function(x){return x.id===id;});
+  if(!d)return;
+  var i=order.indexOf(d.priority);
+  d.priority=order[(i+1)%order.length];
+  localStorage.setItem('aBrainDump',JSON.stringify(BRAIN_DUMP));
+  renderDumpList();
+}
+
+function bdSetPri(id,val){
+  var d=BRAIN_DUMP.find(function(x){return x.id===id;});
+  if(d){d.priority=val;localStorage.setItem('aBrainDump',JSON.stringify(BRAIN_DUMP));renderDumpList();}
+}
+
+function bdSetDue(id,val){
+  var d=BRAIN_DUMP.find(function(x){return x.id===id;});
+  if(d){d.due=val;localStorage.setItem('aBrainDump',JSON.stringify(BRAIN_DUMP));}
+}
+
+function bdSetNotes(id,val){
+  var d=BRAIN_DUMP.find(function(x){return x.id===id;});
+  if(d){d.notes=val;localStorage.setItem('aBrainDump',JSON.stringify(BRAIN_DUMP));}
+}
+
+function bdBulkAssign(pri){
+  if(!pri)return;
+  Object.keys(_bdSel).forEach(function(id){
+    var d=BRAIN_DUMP.find(function(x){return x.id===id;});
+    if(d)d.priority=pri;
+  });
+  localStorage.setItem('aBrainDump',JSON.stringify(BRAIN_DUMP));
+  _bdSel={};renderDumpList();
+  showToast('Priority assigned!');
+}
+
+function bdBulkToTasks(){
+  var ids=Object.keys(_bdSel);
+  if(!ids.length)return;
+  ids.forEach(function(id){
+    var d=BRAIN_DUMP.find(function(x){return x.id===id;});
+    if(!d)return;
+    var urgMap={'critical':'urgent-important','high':'urgent-important','medium':'important-not-urgent','low':'not-urgent-not-important','none':'important-not-urgent','ignore':'not-urgent-not-important'};
+    var t={id:'t-'+Date.now()+'-'+Math.random().toString(36).slice(2),title:d.text,done:false,urgency:urgMap[d.priority]||'important-not-urgent',cat:'mis',due:d.due||'',notes:d.notes||'',created:new Date().toISOString(),repeat:''};
+    TASKS.push(t);fbSave('tasks',t.id,t);
+  });
+  BRAIN_DUMP=BRAIN_DUMP.filter(function(d){return !_bdSel[d.id];});
+  localStorage.setItem('aBrainDump',JSON.stringify(BRAIN_DUMP));
+  _bdSel={};renderDumpList();
+  showToast(ids.length+' added to tasks!');
+}
+
+function bdBulkDelete(){
+  var ids=Object.keys(_bdSel);
+  if(!ids.length)return;
+  if(!confirm('Delete '+ids.length+' items?'))return;
+  BRAIN_DUMP=BRAIN_DUMP.filter(function(d){return !_bdSel[d.id];});
+  localStorage.setItem('aBrainDump',JSON.stringify(BRAIN_DUMP));
+  _bdSel={};renderDumpList();
+  showToast('Deleted!');
 }
 
 function dumpToTask(id){
   var d=BRAIN_DUMP.find(function(x){return x.id===id;});
   if(!d)return;
-  var t={id:'t-'+Date.now(),title:d.text,done:false,urgency:'important-not-urgent',cat:'mis',due:'',notes:'',created:new Date().toISOString(),repeat:''};
+  var urgMap={'critical':'urgent-important','high':'urgent-important','medium':'important-not-urgent','low':'not-urgent-not-important','none':'important-not-urgent','ignore':'not-urgent-not-important'};
+  var t={id:'t-'+Date.now(),title:d.text,done:false,urgency:urgMap[d.priority]||'important-not-urgent',cat:'mis',due:d.due||'',notes:d.notes||'',created:new Date().toISOString(),repeat:''};
   TASKS.push(t);fbSave('tasks',t.id,t);
   delDump(id);
-  alert('Added to tasks!');
+  showToast('Added to tasks!');
 }
 
 function delDump(id){
   BRAIN_DUMP=BRAIN_DUMP.filter(function(d){return d.id!==id;});
+  delete _bdSel[id];
   localStorage.setItem('aBrainDump',JSON.stringify(BRAIN_DUMP));
   renderDumpList();
+}
+
+// ── Utilities ─────────────────────────────────
+function escHtml(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+// ── Stories ────────────────────────────────────
+var _storySeasonMax=1, _storyEpMax=1;
+
+function renderStoriesList(){
+  var el=document.getElementById('storiesList');
+  if(!el)return;
+  if(!STORIES.length){el.innerHTML='<p style="color:var(--textl);text-align:center;padding:20px">No stories yet. Create your first world!</p>';return;}
+  el.innerHTML=STORIES.map(function(s){
+    var chars=STORY_CHARS.filter(function(c){return c.storyId===s.id;}).length;
+    var scenes=STORY_SCENES.filter(function(sc){return sc.storyId===s.id;}).length;
+    return '<div class="story-card" style="border-left-color:'+(s.color||'var(--rose)')+'" onclick="openStory(\''+s.id+'\')">'
+      +'<div class="story-card-title">'+escHtml(s.title)+'</div>'
+      +'<div class="story-card-meta">'+(s.genre?s.genre+' · ':'')+(chars+' character'+(chars!==1?'s':''))+' · '+(scenes+' scene'+(scenes!==1?'s':''))+'</div>'
+      +(s.synopsis?'<div style="font-size:12px;color:var(--textl);margin-top:5px;line-height:1.4">'+escHtml(s.synopsis)+'</div>':'')
+      +'</div>';
+  }).join('');
+}
+
+function openStory(id){
+  _activeStoryId=id;
+  var s=STORIES.find(function(x){return x.id===id;});
+  if(!s)return;
+  document.getElementById('storyDetailTitle').textContent=s.title;
+  showStorySec('overview',document.querySelector('#storyDetailOv .pn-btn'));
+  showOv('storyDetailOv');
+}
+
+function showStorySec(sec,btn){
+  ['overview','characters','storyboard'].forEach(function(s){
+    var el=document.getElementById('ss-'+s);
+    if(el)el.style.display=(s===sec?'':'none');
+  });
+  document.querySelectorAll('#storyDetailOv .pn-btn').forEach(function(b){b.classList.remove('on');});
+  if(btn)btn.classList.add('on');
+  if(sec==='overview')renderStoryOverview();
+  if(sec==='characters')renderStoryChars();
+  if(sec==='storyboard')renderStoryboard();
+}
+
+function renderStoryOverview(){
+  var el=document.getElementById('storyOverviewContent');
+  if(!el)return;
+  var s=STORIES.find(function(x){return x.id===_activeStoryId;});
+  if(!s){el.innerHTML='';return;}
+  el.innerHTML='<div style="margin-bottom:10px">'
+    +'<div style="font-size:11px;color:var(--textl);margin-bottom:4px;font-weight:700;text-transform:uppercase;letter-spacing:.5px">Genre</div>'
+    +'<div style="font-size:13px;color:var(--textd)">'+(s.genre||'Not set')+'</div>'
+    +'</div>'
+    +(s.synopsis?'<div style="margin-bottom:10px"><div style="font-size:11px;color:var(--textl);margin-bottom:4px;font-weight:700;text-transform:uppercase;letter-spacing:.5px">Synopsis</div><div style="font-size:13px;color:var(--textd);line-height:1.6">'+escHtml(s.synopsis)+'</div></div>':'')
+    +'<div style="display:flex;gap:8px;margin-top:12px">'
+    +'<button class="btn sec" style="flex:1;font-size:12px" onclick="delStory(\''+s.id+'\')">🗑️ Delete</button>'
+    +'</div>';
+}
+
+function renderStoryChars(){
+  var el=document.getElementById('storyCharsList');
+  if(!el)return;
+  var chars=STORY_CHARS.filter(function(c){return c.storyId===_activeStoryId;});
+  if(!chars.length){el.innerHTML='<p style="color:var(--textl);text-align:center;padding:14px">No characters yet.</p>';return;}
+  el.innerHTML=chars.map(function(c){
+    return '<div class="story-char-card">'
+      +'<div class="story-char-dot" style="background:'+(c.color||'#c9a0a0')+'">'+c.name.charAt(0).toUpperCase()+'</div>'
+      +'<div style="flex:1">'
+      +'<div style="font-weight:700;font-size:13px;color:var(--textd)">'+escHtml(c.name)+'</div>'
+      +(c.role?'<div style="font-size:11px;color:var(--rose);font-weight:700;margin-bottom:3px">'+escHtml(c.role)+'</div>':'')
+      +(c.desc?'<div style="font-size:12px;color:var(--textl);line-height:1.5">'+escHtml(c.desc)+'</div>':'')
+      +'</div>'
+      +'<button onclick="delStoryChar(\''+c.id+'\')" style="background:none;border:none;font-size:14px;cursor:pointer;color:var(--textl);flex-shrink:0">✕</button>'
+      +'</div>';
+  }).join('');
+}
+
+function renderStoryboard(){
+  var el=document.getElementById('storyboardContent');
+  if(!el)return;
+  var scenes=STORY_SCENES.filter(function(sc){return sc.storyId===_activeStoryId;});
+  if(!scenes.length){el.innerHTML='<p style="color:var(--textl);text-align:center;padding:14px">No scenes yet. Add your first scene!</p>';return;}
+  var bySeason={};
+  scenes.forEach(function(sc){
+    var sk='S'+(sc.season||1);
+    if(!bySeason[sk])bySeason[sk]={season:sc.season||1,eps:{}};
+    var ek='E'+(sc.episode||1);
+    if(!bySeason[sk].eps[ek])bySeason[sk].eps[ek]={ep:sc.episode||1,scenes:[]};
+    bySeason[sk].eps[ek].scenes.push(sc);
+  });
+  var html='';
+  Object.keys(bySeason).sort().forEach(function(sk){
+    var sd=bySeason[sk];
+    html+='<div class="scene-season-header">Season '+sd.season+'</div>';
+    Object.keys(sd.eps).sort().forEach(function(ek){
+      var ed=sd.eps[ek];
+      html+='<div class="scene-ep-header">Episode '+ed.ep+'<button onclick="delStoryEpisode('+sd.season+','+ed.ep+')" style="background:none;border:none;font-size:12px;cursor:pointer;color:var(--textl)">✕</button></div>';
+      html+=ed.scenes.sort(function(a,b){return(a.order||0)-(b.order||0);}).map(function(sc){
+        return '<div class="scene-card">'
+          +'<div style="font-size:12px;font-weight:700;color:var(--textd);margin-bottom:3px">'+escHtml(sc.title||'Untitled scene')+'</div>'
+          +(sc.text?'<div style="font-size:12px;color:var(--textl);line-height:1.5">'+escHtml(sc.text)+'</div>':'')
+          +'<button onclick="delScene(\''+sc.id+'\')" style="background:none;border:none;font-size:11px;cursor:pointer;color:var(--textl);margin-top:4px">✕ Remove</button>'
+          +'</div>';
+      }).join('');
+    });
+  });
+  el.innerHTML=html;
+}
+
+function saveNewStory(){
+  var title=(document.getElementById('sNewTitle').value||'').trim();
+  if(!title)return;
+  var s={id:'st-'+Date.now(),title:title,genre:document.getElementById('sNewGenre').value,synopsis:(document.getElementById('sNewSynopsis').value||'').trim(),color:document.getElementById('sNewColor').value,created:todayStr()};
+  STORIES.unshift(s);
+  localStorage.setItem('aStories',JSON.stringify(STORIES));
+  closeOv('storyNewOv');
+  renderStoriesList();
+  showToast('Story created!');
+  document.getElementById('sNewTitle').value='';
+  document.getElementById('sNewGenre').value='';
+  document.getElementById('sNewSynopsis').value='';
+}
+
+function saveNewStoryChar(){
+  var name=(document.getElementById('scNewName').value||'').trim();
+  if(!name||!_activeStoryId)return;
+  var c={id:'sc-'+Date.now(),storyId:_activeStoryId,name:name,role:(document.getElementById('scNewRole').value||'').trim(),desc:(document.getElementById('scNewDesc').value||'').trim(),color:document.getElementById('scNewColor').value,order:STORY_CHARS.filter(function(x){return x.storyId===_activeStoryId;}).length};
+  STORY_CHARS.push(c);
+  localStorage.setItem('aSChars',JSON.stringify(STORY_CHARS));
+  closeOv('storyCharNewOv');
+  renderStoryChars();
+  showToast('Character added!');
+  document.getElementById('scNewName').value='';
+  document.getElementById('scNewRole').value='';
+  document.getElementById('scNewDesc').value='';
+}
+
+function saveNewScene(){
+  var title=(document.getElementById('sceneNewTitle').value||'').trim();
+  if(!_activeStoryId)return;
+  var season=parseInt(document.getElementById('sceneNewSeason').value)||1;
+  var ep=parseInt(document.getElementById('sceneNewEp').value)||1;
+  var sc={id:'ss-'+Date.now(),storyId:_activeStoryId,season:season,episode:ep,order:Date.now(),title:title,text:(document.getElementById('sceneNewText').value||'').trim()};
+  STORY_SCENES.push(sc);
+  localStorage.setItem('aSScenes',JSON.stringify(STORY_SCENES));
+  closeOv('storySceneOv');
+  renderStoryboard();
+  showToast('Scene added!');
+  document.getElementById('sceneNewTitle').value='';
+  document.getElementById('sceneNewText').value='';
+}
+
+function addStorySeason(){
+  var n=prompt('Season number?');
+  if(!n)return;
+  document.getElementById('sceneNewSeason').value=parseInt(n)||1;
+  showOv('storySceneOv');
+}
+
+function addStoryEpisode(){
+  var n=prompt('Episode number?');
+  if(!n)return;
+  document.getElementById('sceneNewEp').value=parseInt(n)||1;
+  showOv('storySceneOv');
+}
+
+function delStory(id){
+  if(!confirm('Delete this story and all its characters/scenes?'))return;
+  STORIES=STORIES.filter(function(s){return s.id!==id;});
+  STORY_CHARS=STORY_CHARS.filter(function(c){return c.storyId!==id;});
+  STORY_SCENES=STORY_SCENES.filter(function(s){return s.storyId!==id;});
+  localStorage.setItem('aStories',JSON.stringify(STORIES));
+  localStorage.setItem('aSChars',JSON.stringify(STORY_CHARS));
+  localStorage.setItem('aSScenes',JSON.stringify(STORY_SCENES));
+  closeOv('storyDetailOv');
+  renderStoriesList();
+}
+
+function delStoryChar(id){
+  STORY_CHARS=STORY_CHARS.filter(function(c){return c.id!==id;});
+  localStorage.setItem('aSChars',JSON.stringify(STORY_CHARS));
+  renderStoryChars();
+}
+
+function delScene(id){
+  STORY_SCENES=STORY_SCENES.filter(function(s){return s.id!==id;});
+  localStorage.setItem('aSScenes',JSON.stringify(STORY_SCENES));
+  renderStoryboard();
+}
+
+function delStoryEpisode(season,ep){
+  if(!confirm('Remove all scenes in S'+season+'E'+ep+'?'))return;
+  STORY_SCENES=STORY_SCENES.filter(function(s){return!(s.storyId===_activeStoryId&&s.season===season&&s.episode===ep);});
+  localStorage.setItem('aSScenes',JSON.stringify(STORY_SCENES));
+  renderStoryboard();
+}
+
+// ── Mixtape ────────────────────────────────────
+var _mixFilter='';
+
+function setMixFilter(era,btn){
+  _mixFilter=era;
+  document.querySelectorAll('#mixtapeEraFilter .bd-filter').forEach(function(b){b.classList.remove('on');});
+  if(btn)btn.classList.add('on');
+  renderMixtape();
+}
+
+function renderMixtape(){
+  var el=document.getElementById('mixtapeList');
+  if(!el)return;
+  var list=_mixFilter?MIXTAPE.filter(function(m){return m.era===_mixFilter;}):MIXTAPE;
+  if(!list.length){el.innerHTML='<p style="color:var(--textl);text-align:center;padding:20px">'+(MIXTAPE.length?'Nothing in this era.':'No songs yet. Start your soundtrack!')+'</p>';return;}
+  el.innerHTML=list.map(function(m){
+    return '<div class="mix-card">'
+      +'<div class="mix-note">🎵</div>'
+      +'<div style="flex:1">'
+      +(m.era?'<div class="mix-era">'+escHtml(m.era)+'</div>':'')
+      +'<div class="mix-title">'+escHtml(m.title)+'</div>'
+      +(m.artist?'<div class="mix-artist">'+escHtml(m.artist)+'</div>':'')
+      +(m.mood?'<div style="font-size:11px;color:var(--textl);margin-bottom:3px">'+m.mood+'</div>':'')
+      +(m.note?'<div class="mix-memory">"'+escHtml(m.note)+'"</div>':'')
+      +'</div>'
+      +'<button onclick="delMixSong(\''+m.id+'\')" style="background:none;border:none;font-size:14px;cursor:pointer;color:var(--textl);flex-shrink:0">✕</button>'
+      +'</div>';
+  }).join('');
+  var eras=[];
+  MIXTAPE.forEach(function(m){if(m.era&&eras.indexOf(m.era)===-1)eras.push(m.era);});
+  var fbar=document.getElementById('mixtapeEraFilter');
+  if(fbar){
+    var btns='<button class="bd-filter'+(_mixFilter===''?' on':'')+'" onclick="setMixFilter(\'\',this)">All</button>';
+    eras.forEach(function(e){btns+='<button class="bd-filter'+(_mixFilter===e?' on':'')+'" onclick="setMixFilter(\''+escHtml(e)+'\',this)">'+escHtml(e)+'</button>';});
+    fbar.innerHTML=btns;
+  }
+}
+
+function saveMixSong(){
+  var title=(document.getElementById('mxTitle').value||'').trim();
+  if(!title)return;
+  var m={id:'mx-'+Date.now(),title:title,artist:(document.getElementById('mxArtist').value||'').trim(),era:(document.getElementById('mxEra').value||'').trim(),note:(document.getElementById('mxNote').value||'').trim(),mood:document.getElementById('mxMood').value,added:todayStr()};
+  MIXTAPE.unshift(m);
+  localStorage.setItem('aMixtape',JSON.stringify(MIXTAPE));
+  closeOv('mixtapeAddOv');
+  renderMixtape();
+  showToast('Added to your mixtape!');
+  ['mxTitle','mxArtist','mxEra','mxNote'].forEach(function(id){var e=document.getElementById(id);if(e)e.value='';});
+  document.getElementById('mxMood').value='';
+}
+
+function delMixSong(id){
+  MIXTAPE=MIXTAPE.filter(function(m){return m.id!==id;});
+  localStorage.setItem('aMixtape',JSON.stringify(MIXTAPE));
+  renderMixtape();
+}
+
+// ── Yearly Reflection ────────────────────────────
+function renderYearlyReflection(){
+  var el=document.getElementById('yearlyStats');
+  if(!el)return;
+  var year=new Date().getFullYear();
+  var months=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  var html='<div style="font-size:13px;font-weight:700;color:var(--textd);margin-bottom:10px">'+year+'</div>';
+  var now=new Date();
+  for(var m=0;m<=now.getMonth();m++){
+    var mStr=year+'-'+(m<9?'0':'')+(m+1);
+    var tasksComp=TASKS.filter(function(t){return t.done&&t.created&&t.created.slice(0,7)===mStr;}).length;
+    var goalsComp=(GOALS||[]).filter(function(g){return g.done&&g.doneDate&&g.doneDate.slice(0,7)===mStr;}).length;
+    var monthMoods=(MOODS||[]).filter(function(mo){return mo.date&&mo.date.slice(0,7)===mStr;});
+    var moodAvg=monthMoods.length?Math.round(monthMoods.reduce(function(a,b){return a+(b.score||b.mood||3);},0)/monthMoods.length*10)/10:null;
+    var sleepEntries=(MILLIE.sleepLog||[]).filter(function(s){return s.bed&&s.bed.slice(0,7)===mStr;});
+    var sleepAvg=sleepEntries.length?Math.round(sleepEntries.reduce(function(a,s){return a+(new Date(s.wake)-new Date(s.bed))/3600000;},0)/sleepEntries.length*10)/10:null;
+    var isCurrent=(m===now.getMonth());
+    html+='<div class="yr-month-card">'
+      +'<div class="yr-month-hdr">'
+      +'<span class="yr-month-name">'+months[m]+(isCurrent?' ✨':'')+'</span>'
+      +(tasksComp?'<span style="font-size:11px;font-weight:700;color:var(--sage)">'+tasksComp+' done</span>':'')
+      +'</div>'
+      +'<div class="yr-month-tag">'
+      +(tasksComp?'<span class="yr-tag" style="background:#d4e4d0;color:#4a7a4a">✅ '+tasksComp+' tasks</span>':'')
+      +(goalsComp?'<span class="yr-tag" style="background:var(--peach-light);color:#8a5a20">🎯 '+goalsComp+' goal'+(goalsComp!==1?'s':'')+'</span>':'')
+      +(moodAvg?'<span class="yr-tag" style="background:var(--lav-light);color:var(--lav)">😊 mood '+moodAvg+'</span>':'')
+      +(sleepAvg?'<span class="yr-tag" style="background:var(--blue-light);color:var(--blue)">💤 '+sleepAvg+'h sleep</span>':'')
+      +((!tasksComp&&!goalsComp&&!moodAvg&&!sleepAvg)?'<span style="font-size:12px;color:var(--textl)">No data yet</span>':'')
+      +'</div>'
+      +'</div>';
+  }
+  el.innerHTML=html;
+}
+
+// ── Recap Sections ────────────────────────────────
+function showRecapSec(sec,btn){
+  ['stats','yearly'].forEach(function(s){
+    var el=document.getElementById('rs-'+s);
+    if(el)el.style.display=(s===sec?'':'none');
+  });
+  document.querySelectorAll('#v-recap .pn-btn').forEach(function(b){b.classList.remove('on');});
+  if(btn)btn.classList.add('on');
+  if(sec==='yearly')renderYearlyReflection();
 }
 
 // ── What Now? ─────────────────────────────────
@@ -7030,7 +7681,7 @@ function delStudyNote(id){
 // ═══════════════════════════════════════════════
 
 function downloadBackup(){
-  var keys=['aTasks','aRout','aLists','aExps','aWigs','aBills','aIncome','aMoods','aFoodLog','aWater','aSymptoms','aExLog','aRecipes','aMealPlan','aGrocery','aPrayers','aBibleLog','aMinistryLog','aGratLog','aVbItems','aMemories','aFaves','aHabits','aHabitLog','aStudyNotes','aKEvents','aFcDecks','aFcCards','aResearch','aWplans','aWlog2','aBrainDump','aIntentions','aMeds','aMedLog','aEnergyLog','aCustomColors','aSName','aSQuote','aSBanner','aProtTabs'];
+  var keys=['aTasks','aRout','aLists','aExps','aWigs','aBills','aIncome','aMoods','aFoodLog','aWater','aSymptoms','aExLog','aRecipes','aMealPlan','aGrocery','aPrayers','aBibleLog','aMinistryLog','aGratLog','aVbItems','aMemories','aFaves','aHabits','aHabitLog','aStudyNotes','aKEvents','aFcDecks','aFcCards','aResearch','aWplans','aWlog2','aBrainDump','aIntentions','aMeds','aMedLog','aEnergyLog','aCustomColors','aSName','aSQuote','aSBanner','aProtTabs','aStories','aSChars','aSScenes','aMixtape'];
   var data={};
   keys.forEach(function(k){var v=localStorage.getItem(k);if(v)data[k]=v;});
   var blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
