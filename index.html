@@ -553,6 +553,9 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
 .millie-widget{position:fixed;bottom:76px;right:12px;width:60px;height:72px;cursor:pointer;z-index:150;filter:drop-shadow(0 3px 6px rgba(0,0,0,.22));animation:millieFloat 3.5s ease-in-out infinite}
 .millie-widget.hungry{animation:millieShake .6s ease-in-out infinite}
 .millie-widget.sleepy{animation:millieBreath 2.5s ease-in-out infinite}
+.millie-widget.sleeping{animation:millieBreath 4s ease-in-out infinite;opacity:0.75}
+.millie-sleep-entry{display:flex;justify-content:space-between;font-size:12px;color:var(--textl);padding:4px 0;border-bottom:1px solid rgba(0,0,0,.05)}
+.millie-sleep-entry:last-child{border-bottom:none}
 .millie-widget.bouncing{animation:millieBounce .55s ease-in-out 3}
 .millie-widget.treat{animation:millieTreat .4s ease-in-out 3}
 .millie-mood-badge{position:absolute;top:-8px;right:-8px;font-size:16px;background:white;border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 4px rgba(0,0,0,.2);line-height:1}
@@ -1853,6 +1856,10 @@ window.dispatchEvent(new Event('firebaseReady'));
 // ═══════════════════════════════════════════════
 var SAVED_THEMES = JSON.parse(localStorage.getItem('aSavedThemes')||'[]');
 var MILLIE = JSON.parse(localStorage.getItem('aMillie')||'null') || {hunger:80,happiness:80,energy:80,born:todayStr(),lastTick:Date.now()};
+if(!MILLIE.bedtime)MILLIE.bedtime='22:00';
+if(!MILLIE.waketime)MILLIE.waketime='07:00';
+if(MILLIE.asleep===undefined)MILLIE.asleep=false;
+if(!MILLIE.sleepLog)MILLIE.sleepLog=[];
 var BRAIN_DUMP = JSON.parse(localStorage.getItem('aBrainDump')||'[]');
 var INTENTIONS = JSON.parse(localStorage.getItem('aIntentions')||'{}');
 var MEDS = JSON.parse(localStorage.getItem('aMeds')||'[]');
@@ -3630,55 +3637,126 @@ function setPinKey(k){
 // MILLIE THE CAT 🐱
 // ═══════════════════════════════════════════════
 function millieDrawEyes(mode){
-  if(mode==='sleepy')return'<path d="M2.5 6 Q3.5 5 4.5 6" stroke="#1a1a1a" stroke-width="1.2" fill="none"/><path d="M11.5 6 Q12.5 5 13.5 6" stroke="#1a1a1a" stroke-width="1.2" fill="none"/>';
-  if(mode==='happy')return'<path d="M2.5 7 Q3.5 5 4.5 7" stroke="#1a1a1a" stroke-width="1.5" fill="none"/><path d="M11.5 7 Q12.5 5 13.5 7" stroke="#1a1a1a" stroke-width="1.5" fill="none"/>';
-  return'<rect x="2.5" y="5" fill="#1a1a1a" width="2" height="2.5" rx=".4"/><rect x="11.5" y="5" fill="#1a1a1a" width="2" height="2.5" rx=".4"/><rect x="2.7" y="5.2" fill="white" width=".9" height=".9"/><rect x="11.7" y="5.2" fill="white" width=".9" height=".9"/>';
+  // sleepy: heavy drooping eyelids (curve downward)
+  if(mode==='sleepy')
+    return'<path d="M4 8.5 Q6 10.5 8 8.5" stroke="#1a1a1a" stroke-width="1.8" fill="none" stroke-linecap="round"/>'
+         +'<path d="M12 8.5 Q14 10.5 16 8.5" stroke="#1a1a1a" stroke-width="1.8" fill="none" stroke-linecap="round"/>';
+  // happy: squinting upward arcs (^^ eyes)
+  if(mode==='happy')
+    return'<path d="M4 9.5 Q6 7 8 9.5" stroke="#1a1a1a" stroke-width="2.2" fill="none" stroke-linecap="round"/>'
+         +'<path d="M12 9.5 Q14 7 16 9.5" stroke="#1a1a1a" stroke-width="2.2" fill="none" stroke-linecap="round"/>';
+  // normal/sad/hungry: big round eyes with shine
+  return'<rect x="3.5" y="6.5" fill="#1a1a1a" width="4.5" height="5" rx="2.2"/>'
+       +'<rect x="4" y="7" fill="white" width="1.8" height="1.8" rx="0.6"/>'
+       +'<rect x="7" y="10" fill="white" width="0.8" height="0.8" rx="0.4"/>'
+       +'<rect x="12" y="6.5" fill="#1a1a1a" width="4.5" height="5" rx="2.2"/>'
+       +'<rect x="12.5" y="7" fill="white" width="1.8" height="1.8" rx="0.6"/>'
+       +'<rect x="15.5" y="10" fill="white" width="0.8" height="0.8" rx="0.4"/>';
 }
 function millieDrawSVG(mode,sz){
-  sz=sz||60;var h=Math.round(sz*1.25);
-  var b='#f4834f',belly='#ffb899',ear='#ffb899',stripe='#e06020';
-  return'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 20" shape-rendering="crispEdges" width="'+sz+'" height="'+h+'">'
-    // ears
-    +'<rect x="1" y="0" fill="'+b+'" width="2" height="1"/>'
+  sz=sz||60;var h=Math.round(sz*1.3);
+  var b='#f4834f',belly='#ffe0cc',ear='#ffb8b8',stripe='#d96020';
+  return'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 26" shape-rendering="auto" width="'+sz+'" height="'+h+'">'
+    // left ear (pointy triangle)
+    +'<rect x="1" y="0" fill="'+b+'" width="1" height="1"/>'
     +'<rect x="0" y="1" fill="'+b+'" width="4" height="2"/>'
-    +'<rect x="2" y="1" fill="'+ear+'" width="1" height="2"/>'
-    +'<rect x="13" y="0" fill="'+b+'" width="2" height="1"/>'
-    +'<rect x="12" y="1" fill="'+b+'" width="4" height="2"/>'
-    +'<rect x="13" y="1" fill="'+ear+'" width="1" height="2"/>'
-    // head
-    +'<rect x="0" y="3" fill="'+b+'" width="16" height="9"/>'
-    // forehead stripe
-    +'<rect x="7" y="3" fill="'+stripe+'" width="2" height="2"/>'
-    // cheeks
-    +'<rect x="0" y="6" fill="#ff9963" width="2" height="3"/>'
-    +'<rect x="14" y="6" fill="#ff9963" width="2" height="3"/>'
+    +'<rect x="1" y="0" fill="'+ear+'" width="1" height="3"/>'
+    // right ear
+    +'<rect x="18" y="0" fill="'+b+'" width="1" height="1"/>'
+    +'<rect x="16" y="1" fill="'+b+'" width="4" height="2"/>'
+    +'<rect x="18" y="0" fill="'+ear+'" width="1" height="3"/>'
+    // big round head
+    +'<rect x="1" y="3" fill="'+b+'" width="18" height="13" rx="3"/>'
+    // M forehead stripes
+    +'<rect x="8.5" y="3.5" fill="'+stripe+'" width="2" height="2"/>'
+    +'<rect x="5.5" y="4.5" fill="'+stripe+'" width="2" height="1"/>'
+    +'<rect x="11.5" y="4.5" fill="'+stripe+'" width="2" height="1"/>'
+    // pink blush cheeks (ellipses)
+    +'<ellipse cx="3" cy="11.5" rx="2.2" ry="1.6" fill="#ffb0c8" opacity="0.85"/>'
+    +'<ellipse cx="17" cy="11.5" rx="2.2" ry="1.6" fill="#ffb0c8" opacity="0.85"/>'
     // eyes
     +millieDrawEyes(mode)
-    // nose
-    +'<rect x="6.5" y="8.5" fill="#ff7b8a" width="3" height="1.2" rx=".6"/>'
+    // cute small nose
+    +'<rect x="8.5" y="12.5" fill="#ff8899" width="3" height="1.8" rx="0.9"/>'
+    // whiskers
+    +'<line x1="0" y1="11.5" x2="6" y2="12.5" stroke="#d4b896" stroke-width="0.6"/>'
+    +'<line x1="0" y1="13" x2="6" y2="13.2" stroke="#d4b896" stroke-width="0.6"/>'
+    +'<line x1="14" y1="12.5" x2="20" y2="11.5" stroke="#d4b896" stroke-width="0.6"/>'
+    +'<line x1="14" y1="13.2" x2="20" y2="13" stroke="#d4b896" stroke-width="0.6"/>'
     // mouth
     +(mode==='sad'||mode==='hungry'
-      ?'<rect x="5" y="10" fill="#cc5566" width="1" height="1"/><rect x="10" y="10" fill="#cc5566" width="1" height="1"/>'
-      :'<rect x="6" y="10" fill="#cc5566" width="4" height=".8" rx=".4"/>')
-    // body
-    +'<rect x="1" y="12" fill="'+b+'" width="14" height="7"/>'
+      ?'<path d="M8.5 15 Q10 13.8 11.5 15" stroke="#cc5566" stroke-width="1.1" fill="none" stroke-linecap="round"/>'
+      :'<path d="M8.5 14.5 Q10 16.2 11.5 14.5" stroke="#cc5566" stroke-width="1.1" fill="none" stroke-linecap="round"/>')
+    // body (shorter — big head is the star)
+    +'<rect x="2" y="16" fill="'+b+'" width="16" height="7" rx="1.5"/>'
     // body stripe
-    +'<rect x="7" y="12" fill="'+stripe+'" width="2" height="3"/>'
-    // belly
-    +'<rect x="4" y="13" fill="'+belly+'" width="8" height="5"/>'
-    // tail
-    +'<rect x="14" y="14" fill="'+stripe+'" width="2" height="2"/>'
-    +'<rect x="14" y="16" fill="'+b+'" width="2" height="3"/>'
-    +'<rect x="13" y="19" fill="'+b+'" width="2" height="1"/>'
-    // paws
-    +'<rect x="1" y="19" fill="'+b+'" width="4" height="1"/>'
-    +'<rect x="11" y="19" fill="'+b+'" width="4" height="1"/>'
-    // zzz overlay when sleepy
-    +(mode==='sleepy'?'<text x="10" y="5" font-size="4" fill="#ccc" font-family="sans-serif" font-weight="bold">z</text><text x="12" y="2.5" font-size="3" fill="#ccc" font-family="sans-serif">z</text>':'')
+    +'<rect x="9" y="16" fill="'+stripe+'" width="2" height="3"/>'
+    // cream belly
+    +'<rect x="5" y="17" fill="'+belly+'" width="10" height="5" rx="2.5"/>'
+    // tail (curls to right)
+    +'<rect x="16" y="17" fill="'+b+'" width="3" height="2"/>'
+    +'<rect x="18" y="19" fill="'+b+'" width="2" height="2"/>'
+    +'<rect x="17" y="21" fill="'+stripe+'" width="2" height="1"/>'
+    // front paws (rounded, with cream toes)
+    +'<rect x="2" y="23" fill="'+b+'" width="5" height="2.5" rx="1.2"/>'
+    +'<rect x="13" y="23" fill="'+b+'" width="5" height="2.5" rx="1.2"/>'
+    +'<rect x="2.8" y="24" fill="'+belly+'" width="3.2" height="1.2" rx="0.6"/>'
+    +'<rect x="13.8" y="24" fill="'+belly+'" width="3.2" height="1.2" rx="0.6"/>'
+    // zzz when sleepy
+    +(mode==='sleepy'?'<text x="13" y="6" font-size="4" fill="#b0b0dd" font-family="sans-serif" font-weight="bold">z</text><text x="15.5" y="3" font-size="3" fill="#b0b0dd" font-family="sans-serif">z</text>':'')
     +'</svg>';
 }
 
+function millieShouldSleep(){
+  if(MILLIE.asleep)return true;
+  var now=new Date();
+  var nowMins=now.getHours()*60+now.getMinutes();
+  var bt=(MILLIE.bedtime||'22:00').split(':');
+  var wt=(MILLIE.waketime||'07:00').split(':');
+  var btMins=parseInt(bt[0])*60+parseInt(bt[1]||0);
+  var wtMins=parseInt(wt[0])*60+parseInt(wt[1]||0);
+  if(btMins>wtMins)return nowMins>=btMins||nowMins<wtMins;
+  return nowMins>=btMins&&nowMins<wtMins;
+}
+
+function millieGoodnight(){
+  MILLIE.asleep=true;
+  if(!MILLIE.lastSleepStart)MILLIE.lastSleepStart=new Date().toISOString();
+  saveMillie();openMillie();renderMillieWidget();
+}
+
+function millieGoodmorning(){
+  var sleptISO=MILLIE.lastSleepStart;
+  if(!sleptISO){
+    var est=new Date();
+    var bt=(MILLIE.bedtime||'22:00').split(':');
+    est.setHours(parseInt(bt[0]),parseInt(bt[1]||0),0,0);
+    if(est>new Date())est.setDate(est.getDate()-1);
+    sleptISO=est.toISOString();
+  }
+  MILLIE.asleep=false;
+  var woke=new Date().toISOString();
+  var dur=new Date(woke)-new Date(sleptISO);
+  var hrs=Math.floor(dur/3600000);
+  var mins=Math.floor((dur%3600000)/60000);
+  if(hrs>=0&&hrs<=24)MILLIE.sleepLog=(MILLIE.sleepLog||[]).concat([{slept:sleptISO,woke:woke,durH:hrs,durM:mins}]).slice(-14);
+  MILLIE.lastSleepStart=null;
+  MILLIE.happiness=Math.min(100,MILLIE.happiness+10);
+  saveMillie();openMillie();renderMillieWidget();
+}
+
+function millieSaveSleepSched(){
+  var bt=document.getElementById('millieBedtime');
+  var wt=document.getElementById('millieWaketime');
+  if(bt)MILLIE.bedtime=bt.value||'22:00';
+  if(wt)MILLIE.waketime=wt.value||'07:00';
+  saveMillie();
+  var msg=document.getElementById('millieSleepSaved');
+  if(msg){msg.style.display='';setTimeout(function(){msg.style.display='none';},1500);}
+}
+
 function millieMode(){
+  if(millieShouldSleep())return'sleeping';
   if(MILLIE.energy<25)return'sleepy';
   if(MILLIE.hunger<25)return'hungry';
   if(MILLIE.happiness<25)return'sad';
@@ -3687,7 +3765,7 @@ function millieMode(){
 }
 
 function millieMoodText(mode){
-  var map={sleepy:'Millie is exhausted... 😴',hungry:'Millie is hungry! 😿',sad:'Millie feels lonely... 💔',happy:'Millie is so happy! 😻',normal:'Millie is doing okay 🐱'};
+  var map={sleeping:'Millie is sleeping... 💤',sleepy:'Millie is exhausted... 😴',hungry:'Millie is hungry! 😿',sad:'Millie feels lonely... 💔',happy:'Millie is so happy! 😻',normal:'Millie is doing okay 🐱'};
   return map[mode]||'';
 }
 
@@ -3702,9 +3780,15 @@ function saveMillie(){
 function tickMillie(){
   var now=Date.now();
   var hrs=(now-(MILLIE.lastTick||now))/3600000;
-  MILLIE.hunger=Math.max(0,MILLIE.hunger-hrs*8);
-  MILLIE.happiness=Math.max(0,MILLIE.happiness-hrs*5);
-  MILLIE.energy=Math.max(0,MILLIE.energy-hrs*6);
+  if(millieShouldSleep()){
+    MILLIE.energy=Math.min(100,MILLIE.energy+hrs*14);
+    MILLIE.hunger=Math.max(0,MILLIE.hunger-hrs*2);
+    // happiness stable during sleep
+  } else {
+    MILLIE.hunger=Math.max(0,MILLIE.hunger-hrs*8);
+    MILLIE.happiness=Math.max(0,MILLIE.happiness-hrs*5);
+    MILLIE.energy=Math.max(0,MILLIE.energy-hrs*6);
+  }
   MILLIE.lastTick=now;
   saveMillie();
 }
@@ -3715,24 +3799,59 @@ function renderMillieWidget(){
   if(S.hideMillie){w.style.display='none';return;}
   w.style.display='';
   var mode=millieMode();
-  var cls='millie-widget '+mode;
+  var cls='millie-widget '+(mode==='sleeping'?'sleeping':mode);
   if(w.classList.contains('bouncing'))cls+=' bouncing';
   if(w.classList.contains('treat'))cls+=' treat';
   w.className=cls;
-  w.innerHTML=millieDrawSVG(mode,52)+'<div class="millie-mood-badge">'+(mode==='sleepy'?'😴':mode==='hungry'?'😿':mode==='sad'?'💔':mode==='happy'?'😻':'😺')+'</div>';
+  var badge=mode==='sleeping'?'💤':mode==='sleepy'?'😴':mode==='hungry'?'😿':mode==='sad'?'💔':mode==='happy'?'😻':'😺';
+  var svgMode=mode==='sleeping'?'sleepy':mode;
+  w.innerHTML=millieDrawSVG(svgMode,52)+'<div class="millie-mood-badge">'+badge+'</div>';
+}
+
+function renderMillieSleepLog(){
+  var el=document.getElementById('millieSleepLog');
+  if(!el)return;
+  var log=(MILLIE.sleepLog||[]).slice(-5).reverse();
+  if(!log.length){el.innerHTML='<div style="font-size:12px;color:var(--textl);text-align:center;padding:4px">No sleep logged yet</div>';return;}
+  el.innerHTML=log.map(function(e){
+    var d=new Date(e.slept);
+    var ds=d.toLocaleDateString(undefined,{month:'short',day:'numeric'});
+    return'<div class="millie-sleep-entry"><span>'+ds+'</span><span>'+e.durH+'h '+e.durM+'m 💤</span></div>';
+  }).join('');
 }
 
 function openMillie(){
   tickMillie();
   var mode=millieMode();
+  var sleeping=mode==='sleeping';
+  var svgMode=sleeping?'sleepy':mode;
   var age=millieAge();
   var bigSvg=document.getElementById('millieBigSvg');
-  if(bigSvg)bigSvg.innerHTML=millieDrawSVG(mode,100);
+  if(bigSvg)bigSvg.innerHTML=millieDrawSVG(svgMode,100);
   var moodTxt=document.getElementById('millieMoodTxt');
   if(moodTxt)moodTxt.textContent=millieMoodText(mode);
   var ageRow=document.getElementById('millieAgeRow');
   if(ageRow)ageRow.textContent='Age: '+age+(age===1?' day':' days')+' old 🎂';
   renderMillieStatBars();
+  // Show/hide sleep vs awake sections
+  var sleepSec=document.getElementById('millieSleepSection');
+  var awakeSec=document.getElementById('millieAwakeSection');
+  if(sleepSec)sleepSec.style.display=sleeping?'':'none';
+  if(awakeSec)awakeSec.style.display=sleeping?'none':'';
+  // Disable feed + play when sleeping
+  var feedBtn=document.getElementById('millieFeedBtn');
+  if(feedBtn){feedBtn.disabled=sleeping;feedBtn.style.opacity=sleeping?'0.4':'1';}
+  var playBtn=document.getElementById('milliePlayBtn');
+  if(playBtn){playBtn.disabled=sleeping;playBtn.style.opacity=sleeping?'0.4':'1';}
+  // Wake time display
+  var wakeAtEl=document.getElementById('millieWakeAtText');
+  if(wakeAtEl)wakeAtEl.textContent=MILLIE.waketime||'07:00';
+  // Schedule inputs
+  var btInp=document.getElementById('millieBedtime');
+  if(btInp)btInp.value=MILLIE.bedtime||'22:00';
+  var wtInp=document.getElementById('millieWaketime');
+  if(wtInp)wtInp.value=MILLIE.waketime||'07:00';
+  renderMillieSleepLog();
   showOv('millieOv');
 }
 
@@ -3755,19 +3874,22 @@ function renderMillieStatBars(){
 }
 
 function feedMillie(){
+  if(millieShouldSleep()){showToast('Millie is sleeping 💤 — let her rest!');return;}
   MILLIE.hunger=Math.min(100,MILLIE.hunger+30);
   MILLIE.energy=Math.max(0,MILLIE.energy-3);
   saveMillie();openMillie();renderMillieWidget();
 }
 
 function petMillie(){
-  MILLIE.happiness=Math.min(100,MILLIE.happiness+25);
+  MILLIE.happiness=Math.min(100,MILLIE.happiness+20);
+  MILLIE.hunger=Math.min(100,MILLIE.hunger+5);
   saveMillie();openMillie();renderMillieWidget();
 }
 
 function playMillie(){
-  if(MILLIE.energy<20){alert('Millie is too tired to play! Let her rest first 😴');return;}
-  MILLIE.happiness=Math.min(100,MILLIE.happiness+20);
+  if(millieShouldSleep()){showToast('Millie is sleeping 💤 — let her rest!');return;}
+  if(MILLIE.energy<20){showToast('Millie is too tired to play 😴');return;}
+  MILLIE.happiness=Math.min(100,MILLIE.happiness+22);
   MILLIE.energy=Math.max(0,MILLIE.energy-25);
   MILLIE.hunger=Math.max(0,MILLIE.hunger-15);
   saveMillie();openMillie();renderMillieWidget();
@@ -7568,19 +7690,41 @@ setInterval(updDate, 60000);
 
 <!-- MILLIE MODAL -->
 <div class="ov" id="millieOv" onclick="closeOv('millieOv')">
-  <div class="mod" onclick="event.stopPropagation()" style="max-width:340px;background:linear-gradient(135deg,#fff9f5,#fff0e8)">
+  <div class="mod" onclick="event.stopPropagation()" style="max-width:340px;background:linear-gradient(135deg,#fff9f5,#fff0e8);max-height:90vh;overflow-y:auto">
     <div class="mh"><span class="mt">🐱 Millie</span><button class="mc" onclick="closeOv('millieOv')">✕</button></div>
-    <div id="millieBigSvg" class="millie-panel-cat" style="width:110px;height:138px"></div>
+    <div id="millieBigSvg" class="millie-panel-cat" style="width:110px;height:143px"></div>
     <div class="millie-name">Millie</div>
     <div id="millieMoodTxt" class="millie-mood-txt"></div>
     <div id="millieStatsBars"></div>
-    <div class="millie-actions">
-      <button class="millie-action" style="background:#fde8d0;color:#8a5a30" onclick="feedMillie()"><span class="millie-action-icon">🍣</span>Feed</button>
-      <button class="millie-action" style="background:#f2dede;color:#8a4a4a" onclick="petMillie()"><span class="millie-action-icon">💕</span>Pet</button>
-      <button class="millie-action" style="background:#daeaf5;color:#4a7a9b" onclick="playMillie()"><span class="millie-action-icon">🎾</span>Play</button>
-      <button class="millie-action" style="background:#e8e4f5;color:#6a5a9b" onclick="napMillie()"><span class="millie-action-icon">😴</span>Rest</button>
+    <!-- Awake actions -->
+    <div id="millieAwakeSection">
+      <div class="millie-actions">
+        <button id="millieFeedBtn" class="millie-action" style="background:#fde8d0;color:#8a5a30" onclick="feedMillie()"><span class="millie-action-icon">🍣</span>Feed</button>
+        <button class="millie-action" style="background:#f2dede;color:#8a4a4a" onclick="petMillie()"><span class="millie-action-icon">💕</span>Pet</button>
+        <button id="milliePlayBtn" class="millie-action" style="background:#daeaf5;color:#4a7a9b" onclick="playMillie()"><span class="millie-action-icon">🎾</span>Play</button>
+        <button class="millie-action" style="background:#e8f5ee;color:#3a7a5a" onclick="millieGoodnight()"><span class="millie-action-icon">🌙</span>Goodnight</button>
+      </div>
     </div>
-    <div id="millieAgeRow" style="text-align:center;font-size:11px;color:var(--textl);margin-top:10px"></div>
+    <!-- Sleeping section -->
+    <div id="millieSleepSection" style="display:none;text-align:center;padding:8px 0">
+      <div style="font-size:13px;color:#7a6a8a;margin-bottom:8px">Millie is sleeping 💤<br><small style="color:var(--textl)">She'll be up at <span id="millieWakeAtText"></span></small></div>
+      <button class="millie-action" style="width:100%;background:#fff9d6;color:#8a7a20;justify-content:center;gap:8px" onclick="millieGoodmorning()"><span class="millie-action-icon" style="font-size:20px">☀️</span>Good morning!</button>
+    </div>
+    <!-- Sleep schedule -->
+    <div style="margin-top:12px;padding:10px 12px;background:rgba(255,255,255,0.65);border-radius:12px;font-size:12px">
+      <div style="font-weight:700;color:var(--textl);margin-bottom:8px">🌙 Sleep Schedule</div>
+      <div style="display:flex;gap:10px">
+        <label style="flex:1;color:var(--textl)">Bedtime<br><input type="time" id="millieBedtime" style="width:100%;padding:5px 6px;border-radius:8px;border:1px solid #ddd;font-size:13px;margin-top:3px" onchange="millieSaveSleepSched()"></label>
+        <label style="flex:1;color:var(--textl)">Wake up<br><input type="time" id="millieWaketime" style="width:100%;padding:5px 6px;border-radius:8px;border:1px solid #ddd;font-size:13px;margin-top:3px" onchange="millieSaveSleepSched()"></label>
+      </div>
+      <div id="millieSleepSaved" style="display:none;color:var(--sage);font-size:11px;text-align:center;margin-top:5px">✓ Saved!</div>
+    </div>
+    <!-- Sleep log -->
+    <div style="margin-top:10px;padding:8px 12px;background:rgba(255,255,255,0.5);border-radius:12px">
+      <div style="font-weight:700;color:var(--textl);font-size:12px;margin-bottom:6px">😴 Sleep Log</div>
+      <div id="millieSleepLog"></div>
+    </div>
+    <div id="millieAgeRow" style="text-align:center;font-size:11px;color:var(--textl);margin:10px 0 2px"></div>
   </div>
 </div>
 </body>
