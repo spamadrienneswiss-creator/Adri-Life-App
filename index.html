@@ -333,6 +333,17 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
 .mem-entry-date{font-size:11px;color:var(--textl);margin-bottom:4px}
 .mem-entry-title{font-size:15px;font-weight:700;color:var(--textd);margin-bottom:5px}
 .mem-entry-note{font-size:13px;color:var(--textl);line-height:1.5}
+/* Sub-pages */
+.subpage{display:none;position:fixed;inset:0;top:70px;background:#fdf6ee;z-index:200;overflow-y:auto;padding:14px 14px 80px}
+.subpage.active{display:block}
+.subpage-hdr{display:flex;align-items:center;gap:10px;margin-bottom:16px}
+.subpage-back{background:none;border:none;font-size:18px;cursor:pointer;color:var(--rose);padding:4px 8px;border-radius:8px;flex-shrink:0}
+.subpage-title{font-size:17px;font-weight:700;color:var(--textd);flex:1}
+.health-section-btn{display:block;width:100%;background:#fff;border:none;border-radius:14px;padding:14px 16px;margin-bottom:10px;text-align:left;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.07);display:flex;align-items:center;gap:12px;font-family:'Quicksand',sans-serif}
+.health-section-icon{font-size:26px;flex-shrink:0}
+.health-section-info{flex:1}
+.health-section-name{font-size:14px;font-weight:700;color:var(--textd)}
+.health-section-sub{font-size:11px;color:var(--textl);margin-top:2px}
 /* ADHD / Focus */
 @keyframes confettiFall{0%{transform:translateY(-20px) rotate(0deg);opacity:1}100%{transform:translateY(110vh) rotate(720deg);opacity:0}}
 .confetti-piece{position:fixed;top:-12px;width:9px;height:9px;border-radius:2px;pointer-events:none;z-index:10000;animation:confettiFall 2.2s ease-in forwards}
@@ -373,6 +384,13 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
 .fc-btns{display:flex;gap:10px;width:100%}
 .fc-prog-bar{height:4px;border-radius:2px;background:#f0ebe6;margin-bottom:14px;overflow:hidden}
 .fc-prog-fill{height:100%;border-radius:2px;background:var(--sage);transition:width .3s}
+.fc-swipe-wrap{position:relative;overflow:hidden;border-radius:18px;margin-bottom:12px;touch-action:pan-y;user-select:none}
+.fc-swipe-card{background:#fff;border-radius:18px;padding:24px 20px;min-height:200px;display:flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:0 2px 12px rgba(0,0,0,.1);transition:transform .15s,box-shadow .15s;cursor:grab}
+.fc-swipe-card.swiping{transition:none}
+.fc-swipe-label{position:absolute;top:16px;font-size:15px;font-weight:700;opacity:0;transition:opacity .15s;pointer-events:none;padding:4px 14px;border-radius:20px}
+.fc-swipe-label.got{right:12px;background:#d4e4d0;color:#3a6a3a}
+.fc-swipe-label.again{left:12px;background:#fde8d0;color:#8a4a30}
+.fc-card-img{max-width:100%;max-height:140px;object-fit:contain;border-radius:10px;margin-bottom:10px}
 /* Research */
 .res-card{background:#fff;border-radius:12px;padding:12px 14px;margin-bottom:8px;box-shadow:0 1px 4px rgba(0,0,0,.06)}
 .res-title{font-size:14px;font-weight:700;color:var(--textd);margin-bottom:3px}
@@ -529,13 +547,14 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
   <button class="tab-btn" data-tab="wigs" onclick="goTab('wigs',this)">🪄 Wigs</button>
   <button class="tab-btn" data-tab="money" onclick="goTab('money',this)">💰 Money</button>
   <button class="tab-btn" data-tab="recap" onclick="goTab('recap',this)">📊 Recap</button>
-  <button class="tab-btn" data-tab="export" onclick="goTab('export',this)">📤 Export</button>
   <button class="tab-btn" data-tab="meals" onclick="goTab('meals',this)">🍽️ Meals</button>
-  <button class="tab-btn" data-tab="spirit" onclick="goTab('spirit',this)">✨ Spirit</button>
+  <button class="tab-btn" data-tab="spirit" onclick="goTab('spirit',this)">✨ Spiritual</button>
   <button class="tab-btn" data-tab="board" onclick="goTab('board',this)">🌈 Board</button>
   <button class="tab-btn" data-tab="faves" onclick="goTab('faves',this)">⭐ Faves</button>
   <button class="tab-btn" data-tab="focus" onclick="goTab('focus',this)">🧠 Focus</button>
   <button class="tab-btn" data-tab="learn" onclick="goTab('learn',this)">📚 Learn</button>
+  <button class="tab-btn" data-tab="guide" onclick="goTab('guide',this)">📖 Guide</button>
+  <button class="tab-btn" data-tab="export" onclick="goTab('export',this)">📤 Export</button>
   <button class="tab-btn" data-tab="settings" onclick="goTab('settings',this)">⚙️ Settings</button>
 </div>
 
@@ -580,7 +599,14 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     <button class="qa" onclick="openM('taskModal')" style="background:linear-gradient(135deg,#f2dede,#fdf6ee)"><div class="qa-ic">➕</div><div class="qa-lb">Task</div></button>
     <button class="qa" onclick="openM('expModal')" style="background:linear-gradient(135deg,#d4e4d0,#fdf6ee)"><div class="qa-ic">💸</div><div class="qa-lb">Expense</div></button>
     <button class="qa" onclick="openM('fwModal')" style="background:linear-gradient(135deg,#daeaf5,#fdf6ee)"><div class="qa-ic">🍽️💧</div><div class="qa-lb">Food/Water</div></button>
-    <button class="qa" onclick="openM('wigModal')" style="background:linear-gradient(135deg,#e8e4f5,#fdf6ee)"><div class="qa-ic">🪄</div><div class="qa-lb">Wig</div></button>
+    <button class="qa" onclick="goTab('food',document.querySelector('[data-tab=\'food\']'));setTimeout(function(){document.getElementById('wplanList').scrollIntoView({behavior:'smooth'});},200)" style="background:linear-gradient(135deg,#d4e4d0,#fdf6ee)"><div class="qa-ic">💪</div><div class="qa-lb">Workout</div></button>
+  </div>
+  <div id="ministryHomeWrap" style="background:#fff;border-radius:14px;padding:11px 14px;margin-bottom:10px;box-shadow:0 1px 4px rgba(0,0,0,.06)">
+    <div style="display:flex;align-items:center;gap:10px">
+      <span style="font-size:11px;font-weight:700;color:var(--textl);letter-spacing:.5px;text-transform:uppercase;flex-shrink:0">⏱️ Ministry</span>
+      <span id="ministryHomeTxt" style="font-size:13px;color:var(--textd);font-weight:600;flex:1">—</span>
+      <button class="btn sec" style="font-size:11px;padding:3px 10px" onclick="goTab('spirit',document.querySelector('[data-tab=\'spirit\']'));setTimeout(function(){showSpiritSec('ministry',document.querySelector('#v-spirit .pn-btn:nth-child(3)'));},200)">Log</button>
+    </div>
   </div>
   <div class="card">
     <div class="ct">📊 Quick Stats</div>
@@ -655,6 +681,29 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
 
 <!-- FOOD -->
 <div class="view" id="v-food">
+  <!-- Health Dashboard -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+    <button class="health-section-btn" onclick="openSubpage('sp-nutrition')">
+      <span class="health-section-icon">🥗</span>
+      <div class="health-section-info"><div class="health-section-name">Nutrition</div><div class="health-section-sub" id="hd-food-sub">Log food & water</div></div>
+      <span style="color:var(--textl);font-size:14px">›</span>
+    </button>
+    <button class="health-section-btn" onclick="openSubpage('sp-macros')">
+      <span class="health-section-icon">📊</span>
+      <div class="health-section-info"><div class="health-section-name">Macros</div><div class="health-section-sub" id="hd-macro-sub">Today's goals</div></div>
+      <span style="color:var(--textl);font-size:14px">›</span>
+    </button>
+    <button class="health-section-btn" onclick="openSubpage('sp-workouts')">
+      <span class="health-section-icon">💪</span>
+      <div class="health-section-info"><div class="health-section-name">Workouts</div><div class="health-section-sub" id="hd-workout-sub">Plans & log</div></div>
+      <span style="color:var(--textl);font-size:14px">›</span>
+    </button>
+    <button class="health-section-btn" onclick="openSubpage('sp-mood')">
+      <span class="health-section-icon">😊</span>
+      <div class="health-section-info"><div class="health-section-name">Mood & Meds</div><div class="health-section-sub" id="hd-mood-sub">Wellness check-in</div></div>
+      <span style="color:var(--textl);font-size:14px">›</span>
+    </button>
+  </div>
   <div class="card">
     <div class="ct">🎯 Today's Macros</div>
     <div class="pr"><div class="pt"><span class="pn">🔥 Calories</span><span class="pm2" id="fCD">0/1900</span></div><div class="pb"><div class="pf pf-cal" id="fCB" style="width:0%"></div></div></div>
@@ -870,10 +919,24 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
         <span id="fcStudyProgress" style="font-size:12px;color:var(--textl)"></span>
       </div>
       <div class="fc-prog-bar"><div class="fc-prog-fill" id="fcProgFill" style="width:0%"></div></div>
-      <div class="fc-study-wrap" id="fcCardWrap" onclick="flipFcCard()">
-        <div class="fc-card-front" id="fcCardFront"></div>
-        <div class="fc-card-back" id="fcCardBack" style="display:none"></div>
-        <div class="fc-hint" id="fcHint">Tap to reveal answer</div>
+      <div style="display:flex;gap:8px;margin-bottom:10px;align-items:center">
+        <span style="font-size:12px;color:var(--textl)">Mode:</span>
+        <button class="pn-btn on" id="fcModeFlip" onclick="setFcMode('flip')">Tap to flip</button>
+        <button class="pn-btn" id="fcModeSwipe" onclick="setFcMode('swipe')">Swipe</button>
+        <button class="btn sec" id="fcShuffleBtn" style="font-size:11px;padding:4px 11px;margin-left:auto" onclick="toggleFcShuffle()">🔀 Shuffle</button>
+      </div>
+      <div class="fc-swipe-wrap" id="fcCardWrap">
+        <div class="fc-swipe-card" id="fcSwipeCard" onclick="flipFcCard()">
+          <div id="fcCardImgFront"></div>
+          <div class="fc-card-front" id="fcCardFront"></div>
+          <div id="fcCardBackWrap" style="display:none;width:100%;text-align:center">
+            <div id="fcCardImgBack"></div>
+            <div class="fc-card-back" id="fcCardBack" style="display:block;border-top:1px solid #f0ebe6;padding-top:12px;margin-top:12px"></div>
+          </div>
+          <div class="fc-hint" id="fcHint">Tap to reveal answer</div>
+        </div>
+        <div class="fc-swipe-label got" id="fcLabelGot">✓ Got it</div>
+        <div class="fc-swipe-label again" id="fcLabelAgain">↩ Again</div>
       </div>
       <div class="fc-btns" id="fcAnswerBtns" style="display:none">
         <button class="btn sec" style="flex:1;padding:12px" onclick="fcAnswer(false)">↩ Again</button>
@@ -904,8 +967,20 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
           <button class="btn" style="font-size:12px;padding:5px 12px;background:var(--sage)" onclick="startFcStudy(fcActiveDeckId)">▶ Study</button>
         </div>
         <div class="card" style="margin-bottom:10px">
-          <textarea id="fcCardFrontInput" placeholder="Front (question / term)" rows="2" style="width:100%;padding:8px 11px;border-radius:9px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px;resize:vertical;box-sizing:border-box;margin-bottom:8px"></textarea>
-          <textarea id="fcCardBackInput" placeholder="Back (answer / definition)" rows="2" style="width:100%;padding:8px 11px;border-radius:9px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px;resize:vertical;box-sizing:border-box;margin-bottom:10px"></textarea>
+          <div style="font-size:11px;font-weight:700;color:var(--textd);margin-bottom:4px">Front</div>
+          <textarea id="fcCardFrontInput" placeholder="Question / term" rows="2" style="width:100%;padding:8px 11px;border-radius:9px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px;resize:vertical;box-sizing:border-box;margin-bottom:4px"></textarea>
+          <div style="display:flex;gap:8px;align-items:center;margin-bottom:10px">
+            <span style="font-size:11px;color:var(--textl)">Front image (optional):</span>
+            <input type="file" id="fcFrontImg" accept="image/*" style="font-size:11px;flex:1" onchange="previewFcImg(this,'fcFrontPreview')">
+          </div>
+          <img id="fcFrontPreview" style="display:none;max-height:80px;border-radius:8px;margin-bottom:8px;max-width:100%;object-fit:contain" alt="">
+          <div style="font-size:11px;font-weight:700;color:var(--textd);margin-bottom:4px">Back</div>
+          <textarea id="fcCardBackInput" placeholder="Answer / definition" rows="2" style="width:100%;padding:8px 11px;border-radius:9px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px;resize:vertical;box-sizing:border-box;margin-bottom:4px"></textarea>
+          <div style="display:flex;gap:8px;align-items:center;margin-bottom:10px">
+            <span style="font-size:11px;color:var(--textl)">Back image (optional):</span>
+            <input type="file" id="fcBackImg" accept="image/*" style="font-size:11px;flex:1" onchange="previewFcImg(this,'fcBackPreview')">
+          </div>
+          <img id="fcBackPreview" style="display:none;max-height:80px;border-radius:8px;margin-bottom:10px;max-width:100%;object-fit:contain" alt="">
           <button class="btn" style="width:100%" onclick="addFcCard()">Add Card</button>
         </div>
         <div id="fcCardList"></div>
@@ -970,13 +1045,13 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
 </div>
 <div class="view" id="v-board">
   <div class="pill-nav" style="margin-bottom:12px">
-    <button class="pn-btn on" onclick="showBoardSec('vision',this)">🌟 Vision Board</button>
+    <button class="pn-btn on" onclick="showBoardSec('vision',this)">🌈 Mood Board</button>
     <button class="pn-btn" onclick="showBoardSec('memories',this)">📸 Memories</button>
   </div>
 
   <!-- VISION BOARD -->
   <div id="bs-vision">
-    <div style="font-weight:700;font-size:14px;color:var(--textd);margin-bottom:10px">🌟 Vision Board</div>
+    <div style="font-weight:700;font-size:14px;color:var(--textd);margin-bottom:10px">🌈 Mood Board</div>
     <div class="card" style="margin-bottom:12px">
       <div style="font-size:12px;font-weight:600;color:var(--textd);margin-bottom:8px">Add to board</div>
       <select id="vbType" onchange="toggleVbInputs()" style="width:100%;padding:8px 10px;border-radius:9px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px;margin-bottom:8px">
@@ -986,6 +1061,11 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
       </select>
       <textarea id="vbText" placeholder="Write your affirmation, goal, or paste an image URL…" rows="2" style="width:100%;padding:8px 11px;border-radius:9px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px;resize:vertical;box-sizing:border-box;margin-bottom:8px"></textarea>
       <input id="vbCaption" type="text" placeholder="Caption (optional, for images)" style="display:none;width:100%;padding:8px 11px;border-radius:9px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px;box-sizing:border-box;margin-bottom:8px">
+      <div id="vbImgUploadWrap" style="display:none;margin-bottom:8px">
+        <label style="font-size:11px;color:var(--textl);margin-bottom:4px;display:block">Upload image from device:</label>
+        <input type="file" id="vbImgFile" accept="image/*" style="font-size:12px" onchange="previewVbImg(this)">
+        <img id="vbImgPreview" style="display:none;width:100%;max-height:100px;object-fit:cover;border-radius:9px;margin-top:6px" alt="">
+      </div>
       <button class="btn" style="width:100%" onclick="addVbItem()">Add to Board</button>
     </div>
     <div id="visionBoard" class="board-grid"></div>
@@ -1212,6 +1292,13 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
   </div>
 </div>
 
+<!-- GUIDE VIEW -->
+<div class="view" id="v-guide">
+  <div style="font-family:'Playfair Display',serif;font-size:20px;color:var(--textd);margin-bottom:4px">📖 App Guide</div>
+  <p style="font-size:12px;color:var(--textl);margin-bottom:14px">Everything your app can do — tap a section to expand.</p>
+  <div id="guideContent"></div>
+</div>
+
 <!-- EXPORT -->
 <div class="view" id="v-export">
   <div class="card">
@@ -1288,11 +1375,6 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
 
 <div id="undoToast"><span id="undoMsg">Task deleted</span><button onclick="undoDel()">UNDO</button></div>
 
-<div class="fab-wrap" id="fabWrap">
-  <div class="fab-r fab-sub" style="display:none"><span class="fab-lb">Log $</span><button class="fab-mi f2" onclick="openM('expModal')">💸</button></div>
-  <div class="fab-r fab-sub" style="display:none"><span class="fab-lb">Food/Water</span><button class="fab-mi f3" onclick="openM('fwModal')">🍽️</button></div>
-  <button class="fab-m" id="fabMain" onclick="togFAB()">+</button>
-</div>
 
 <!-- TASK MODAL -->
 <div class="ov" id="taskModal"><div class="mod">
@@ -2446,12 +2528,19 @@ function renderE(){
   var e3=document.getElementById('mNet');if(e3){e3.textContent=(net>=0?'+':'-')+'$'+Math.abs(net).toFixed(0);e3.style.color=net>=0?'var(--sage)':'var(--ured)';}
   var e4=document.getElementById('mInc');if(e4)e4.textContent='$'+wigInc.toFixed(0);
   if(!EXPENSES.length){if(el)el.innerHTML='<div class="empty"><div class="emj">💸</div><p>No expenses yet.</p></div>';renderIncome();renderBills();return;}
-  if(el)el.innerHTML=EXPENSES.slice(0,20).map(function(e){
-    return'<div class="er"><div class="er-l"><div class="er-d">'+e.desc+'</div><div class="er-m">'+(e.ty==='business'?'💼':'🏠')+' '+e.cat+' • '+e.date+'</div></div><div class="er-a '+(e.ty==='business'?'biz':'')+'">$'+e.amt.toFixed(2)+'</div></div>';
+  if(el)el.innerHTML=EXPENSES.slice(0,40).map(function(e){
+    return'<div class="er"><div class="er-l"><div class="er-d">'+e.desc+'</div><div class="er-m">'+(e.ty==='business'?'💼':'🏠')+' '+e.cat+' • '+e.date+'</div></div><div class="er-a '+(e.ty==='business'?'biz':'')+'">$'+e.amt.toFixed(2)+'</div><button onclick="delExpense(\''+e.id+'\')" style="background:none;border:none;font-size:13px;cursor:pointer;color:var(--textl);padding:4px 6px;flex-shrink:0">🗑️</button></div>';
   }).join('');
   renderIncome();
   renderBills();
   updMoneyBadge();
+}
+
+function delExpense(id){
+  if(!confirm('Delete this expense?'))return;
+  EXPENSES=EXPENSES.filter(function(e){return e.id!==id;});
+  try{if(window.db&&window.fsDoc&&window.fsDeleteDoc)window.fsDeleteDoc(window.fsDoc(window.db,'expenses',id));}catch(err){}
+  renderExpenses();
 }
 
 // ═══════════════════════════════════════════════
@@ -2558,6 +2647,9 @@ function openM(id){
 }
 
 function closeM(id){document.getElementById(id).classList.remove('show');}
+
+function showOv(id){var el=document.getElementById(id);if(el)el.classList.add('show');}
+function closeOv(id){var el=document.getElementById(id);if(el)el.classList.remove('show');}
 
 function pSB(btn){
   var g=btn.dataset.g;
@@ -4044,6 +4136,65 @@ function cpHealthExp(){
 // START
 // ═══════════════════════════════════════════════
 // ═══════════════════════════════════════════════
+// SUB-PAGE NAVIGATION
+// ═══════════════════════════════════════════════
+
+function openSubpage(id){
+  document.querySelectorAll('.subpage').forEach(function(p){p.classList.remove('active');});
+  var el=document.getElementById(id);
+  if(el){el.classList.add('active');}
+  if(id==='sp-workouts'){renderWplanList2();syncExLog2();}
+  if(id==='sp-mood'){renderMoodSub();}
+  if(id==='sp-macros'){renderMacroSub();}
+  if(id==='sp-nutrition'){syncFoodLog2();}
+}
+
+function closeSubpage(id){
+  var el=document.getElementById(id);
+  if(el)el.classList.remove('active');
+}
+
+function syncFoodLog2(){
+  var src=document.getElementById('foodLog');
+  var dst=document.getElementById('foodLog2');
+  if(src&&dst)dst.innerHTML=src.innerHTML;
+}
+
+function syncExLog2(){
+  var src=document.getElementById('exLog');
+  var dst=document.getElementById('exLog2');
+  if(src&&dst)dst.innerHTML=src.innerHTML;
+  var src2=document.getElementById('wplanList');
+  var dst2=document.getElementById('wplanList2');
+  if(src2&&dst2)dst2.innerHTML=src2.innerHTML;
+}
+
+function renderMacroSub(){
+  var el=document.getElementById('macroSubContent');
+  if(!el)return;
+  var src=document.querySelector('#v-food .card');
+  if(src)el.innerHTML=src.outerHTML;
+}
+
+function renderMoodSub(){
+  var el=document.getElementById('moodSubContent');
+  if(!el)return;
+  var meds=document.getElementById('medCard');
+  var mood=document.querySelector('#v-food .mood-row');
+  var html='';
+  if(meds)html+='<div class="card" style="margin-bottom:12px"><div class="ct">💊 Meds Today</div>'+meds.innerHTML+'</div>';
+  if(mood)html+='<div class="card"><div class="ct">😊 Mood</div><div class="mood-row">'+mood.innerHTML+'</div></div>';
+  el.innerHTML=html||'<p style="color:var(--textl);text-align:center;padding:20px">Log your mood in the Health tab.</p>';
+}
+
+function renderWplanList2(){
+  var el=document.getElementById('wplanList2');
+  if(!el)return;
+  if(!WORKOUT_PLANS.length){el.innerHTML='<p style="color:var(--textl);font-size:13px;text-align:center;padding:14px">No workout plans yet.</p>';return;}
+  el.innerHTML=document.getElementById('wplanList').innerHTML;
+}
+
+// ═══════════════════════════════════════════════
 // CONFETTI
 // ═══════════════════════════════════════════════
 
@@ -4300,6 +4451,16 @@ function renderIntentionsHome(){
   }).join('');
 }
 
+function renderMinistryHome(){
+  var el=document.getElementById('ministryHomeTxt');
+  if(!el)return;
+  var mon=new Date().toISOString().slice(0,7);
+  var logs=(MINISTRY_LOG||[]).filter(function(l){return(l.date||'').startsWith(mon);});
+  var total=logs.reduce(function(s,l){return s+(parseFloat(l.hours)||0);},0);
+  var rv=logs.reduce(function(s,l){return s+(parseInt(l.rv)||0);},0);
+  el.textContent=total.toFixed(1)+' hrs this month'+(rv?' · '+rv+' RV':'');
+}
+
 // ── Energy ────────────────────────────────────
 function logEnergy(level){
   ENERGY_LOG[todayStr()]=level;
@@ -4379,6 +4540,54 @@ function delMed(id){
   MEDS=MEDS.filter(function(m){return m.id!==id;});
   localStorage.setItem('aMeds',JSON.stringify(MEDS));
   renderMeds();
+}
+
+// ═══════════════════════════════════════════════
+// GUIDE TAB
+// ═══════════════════════════════════════════════
+
+var GUIDE_SECTIONS=[
+  {title:'🏠 Home / Today',items:['⚡ Log your energy level each morning (😴→🔥)','🎯 Set 1–3 daily intentions — shown as a focus strip','⏳ Kingdom Events countdown (assembly, convention, etc.)','📊 Quick stats: water, tasks, macros','⏱️ Ministry hours this month']},
+  {title:'📋 Tasks',items:['Add tasks with urgency, category, due date, time estimate','⏸️ Resume note — jot where you left off on any task','Subtasks — expand a task to add sub-items','Tap checkbox → completes task (🎉 confetti!)','Filter by category or urgency','Move tasks to Today / mark as intentions']},
+  {title:'🔄 Routines',items:['Daily routines reset each day','View and edit all routines','Completed routines collapse into a Done section','(Coming soon) Monthly/yearly routines with assigned dates']},
+  {title:'📝 Lists',items:['Create multiple lists (shopping, packing, etc.)','Use templates for common list types','Check items off, reorder, delete']},
+  {title:'💚 Health',items:['Log food with macros (cal, protein, fiber, carbs, fat, water)','Meal combo presets for quick logging','💊 Meds & Supplements — AM/PM daily check-in','💪 Workout Plans — create templates, start a workout session','😊 Mood logging (1–5)','🩺 Symptoms log','Weekly nutrition summary']},
+  {title:'🍽️ Meals',items:['📅 Meal Plan — plan your week','📖 Recipes — create with ingredients + macros','🛒 Grocery List — add items manually or from recipes','💰 Price Log — track item prices by store']},
+  {title:'🪄 Wigs',items:['Log wig purchases and styling info','Track condition, price, and notes']},
+  {title:'💰 Money',items:['Log expenses (personal/business)','Delete expenses with the 🗑️ button','Log income and recurring bills','Monthly summary + budget overview']},
+  {title:'📊 Recap',items:['Today\'s stats: tasks done, water, macros','Weekly and monthly summaries','Affirmations and wellness check-ins']},
+  {title:'✨ Spiritual',items:['🙏 Prayer list — add, answer, archive prayers','📖 Bible Reading tracker — book-by-book progress','⏱️ Ministry log — hours, RVs, placements','🌸 Gratitude journal — daily entries','🔥 Habits — spiritual habit tracker with 28-day dot grid + streaks','📓 Study Notes — Meeting Notes, Personal Study, Bible Study, etc.']},
+  {title:'🌈 Board',items:['🌈 Mood Board — add affirmations, goals, or image URLs','📸 Memories — photo journal with date, title, and notes']},
+  {title:'⭐ Faves',items:['Save links with a name, image, and category','Filter by category, tap to open link','Long-press to reveal delete button']},
+  {title:'🧠 Focus',items:['🍅 Pomodoro Timer — 25/5 work/break cycles, customizable, audio ping','🧠 Brain Dump — capture thoughts instantly, convert to tasks','🎲 What Now? — app picks a random task for you (no more paralysis)','🎯 Daily Intentions — choose 1–3 focus items, shown on home screen']},
+  {title:'📚 Learn',items:['🃏 Flashcards — create decks, add cards, swipe to study (right=✓, left=↩)','Cards move through New → Learning → Mastered','🔬 Research — save topics with URL, notes, and status (Want/Learning/Done)']},
+  {title:'⚙️ Settings',items:['Change your name and greeting quote','Banner: color (hex/gradient) or upload an image','Theme Colors — customize all 6 accent colors live','💾 Backup & Restore — download/upload all your data as JSON','Tab visibility and PIN protection per tab']},
+];
+
+function renderGuide(){
+  var el=document.getElementById('guideContent');
+  if(!el)return;
+  el.innerHTML=GUIDE_SECTIONS.map(function(sec,i){
+    return '<div style="background:#fff;border-radius:14px;margin-bottom:8px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.06)">'
+      +'<div style="padding:13px 15px;display:flex;align-items:center;gap:10px;cursor:pointer" onclick="togGuide(\'gs-'+i+'\')">'
+      +'<span style="font-size:14px;font-weight:700;color:var(--textd);flex:1">'+sec.title+'</span>'
+      +'<span id="gs-arr-'+i+'" style="font-size:12px;color:var(--textl)">▾</span>'
+      +'</div>'
+      +'<div id="gs-'+i+'" style="display:none;padding:0 15px 13px">'
+      +sec.items.map(function(it){return '<div style="font-size:12px;color:var(--textl);padding:3px 0;border-bottom:1px solid #faf7f4">• '+it+'</div>';}).join('')
+      +'</div>'
+      +'</div>';
+  }).join('');
+}
+
+function togGuide(id){
+  var el=document.getElementById(id);
+  if(!el)return;
+  var open=el.style.display!=='none';
+  el.style.display=open?'none':'block';
+  var idx=id.replace('gs-','');
+  var arr=document.getElementById('gs-arr-'+idx);
+  if(arr)arr.textContent=open?'▾':'▴';
 }
 
 // ═══════════════════════════════════════════════
@@ -4474,11 +4683,16 @@ function showFcDecks(){
 function addFcCard(){
   var front=((document.getElementById('fcCardFrontInput')||{}).value||'').trim();
   var back=((document.getElementById('fcCardBackInput')||{}).value||'').trim();
-  if(!front||!back)return alert('Enter both front and back');
-  FC_CARDS.push({id:'fc-'+Date.now(),deckId:fcActiveDeckId,front:front,back:back,bucket:0});
+  if(!front&&!back)return alert('Enter front and/or back text');
+  var frontPrev=document.getElementById('fcFrontPreview');
+  var backPrev=document.getElementById('fcBackPreview');
+  var frontImg=(frontPrev&&frontPrev.src&&frontPrev.src.indexOf('data:')===0)?frontPrev.src:'';
+  var backImg=(backPrev&&backPrev.src&&backPrev.src.indexOf('data:')===0)?backPrev.src:'';
+  FC_CARDS.push({id:'fc-'+Date.now(),deckId:fcActiveDeckId,front:front,back:back,frontImg:frontImg,backImg:backImg,bucket:0});
   localStorage.setItem('aFcCards',JSON.stringify(FC_CARDS));
-  if(document.getElementById('fcCardFrontInput'))document.getElementById('fcCardFrontInput').value='';
-  if(document.getElementById('fcCardBackInput'))document.getElementById('fcCardBackInput').value='';
+  ['fcCardFrontInput','fcCardBackInput'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});
+  ['fcFrontPreview','fcBackPreview'].forEach(function(id){var el=document.getElementById(id);if(el){el.src='';el.style.display='none';}});
+  ['fcFrontImg','fcBackImg'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});
   renderFcCardList();
 }
 
@@ -4508,15 +4722,39 @@ function delFcCard(id){
 }
 
 // ── Flashcard Study Mode ───────────────────────
+var _fcShuffle=false;
+var _fcMode='flip';
+
+function setFcMode(mode){
+  _fcMode=mode;
+  document.getElementById('fcModeFlip').classList.toggle('on',mode==='flip');
+  document.getElementById('fcModeSwipe').classList.toggle('on',mode==='swipe');
+  if(mode==='swipe')initSwipe();
+}
+
+function toggleFcShuffle(){
+  _fcShuffle=!_fcShuffle;
+  var btn=document.getElementById('fcShuffleBtn');
+  if(btn){btn.style.background=_fcShuffle?'var(--rose-light)':'';btn.style.color=_fcShuffle?'var(--rose)':'';}
+}
+
+function previewFcImg(input,previewId){
+  if(!input.files||!input.files[0])return;
+  var reader=new FileReader();
+  reader.onload=function(e){
+    var p=document.getElementById(previewId);
+    if(p){p.src=e.target.result;p.style.display='block';}
+  };
+  reader.readAsDataURL(input.files[0]);
+}
+
 function startFcStudy(deckId){
   var cards=FC_CARDS.filter(function(c){return c.deckId===deckId;});
   if(!cards.length)return alert('Add some cards to this deck first!');
   fcStudyDeckId=deckId;
   var deck=FC_DECKS.find(function(d){return d.id===deckId;});
-  // shuffle: not-mastered first, then mastered
   var q=cards.filter(function(c){return c.bucket<2;}).concat(cards.filter(function(c){return c.bucket===2;}));
-  // simple shuffle
-  for(var i=q.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var tmp=q[i];q[i]=q[j];q[j]=tmp;}
+  if(_fcShuffle){for(var i=q.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var tmp=q[i];q[i]=q[j];q[j]=tmp;}}
   _fcStudyQueue=q;
   _fcStudyIdx=0;
   _fcGot=0;_fcAgain=0;
@@ -4544,22 +4782,35 @@ function showFcCard(){
   }
   var card=_fcStudyQueue[_fcStudyIdx];
   _fcFlipped=false;
-  document.getElementById('fcCardFront').textContent=card.front;
-  document.getElementById('fcCardBack').textContent=card.back;
-  document.getElementById('fcCardBack').style.display='none';
-  document.getElementById('fcHint').style.display='';
+  document.getElementById('fcCardFront').textContent=card.front||'';
+  document.getElementById('fcCardBack').textContent=card.back||'';
+  // images
+  var fi=document.getElementById('fcCardImgFront');
+  var bi=document.getElementById('fcCardImgBack');
+  if(fi){fi.innerHTML=card.frontImg?'<img class="fc-card-img" src="'+card.frontImg+'" alt="">':(card.frontEmoji?'<div style="font-size:40px;margin-bottom:8px">'+card.frontEmoji+'</div>':'');}
+  if(bi)bi.innerHTML=card.backImg?'<img class="fc-card-img" src="'+card.backImg+'" alt="">':'';
+  var backWrap=document.getElementById('fcCardBackWrap');
+  if(backWrap)backWrap.style.display='none';
+  var hint=document.getElementById('fcHint');if(hint)hint.style.display='';
   document.getElementById('fcAnswerBtns').style.display='none';
   var total=_fcStudyQueue.length;
   document.getElementById('fcStudyProgress').textContent=(_fcStudyIdx+1)+'/'+total;
   document.getElementById('fcProgFill').style.width=((_fcStudyIdx/total)*100)+'%';
+  // reset swipe position
+  var card2=document.getElementById('fcSwipeCard');
+  if(card2){card2.style.transform='';card2.style.boxShadow='';}
+  var lg=document.getElementById('fcLabelGot');var la=document.getElementById('fcLabelAgain');
+  if(lg)lg.style.opacity='0';if(la)la.style.opacity='0';
+  if(_fcMode==='swipe')initSwipe();
 }
 
 function flipFcCard(){
   if(_fcFlipped)return;
   _fcFlipped=true;
-  document.getElementById('fcCardBack').style.display='';
-  document.getElementById('fcHint').style.display='none';
-  document.getElementById('fcAnswerBtns').style.display='flex';
+  var backWrap=document.getElementById('fcCardBackWrap');
+  if(backWrap)backWrap.style.display='';
+  var hint=document.getElementById('fcHint');if(hint)hint.style.display='none';
+  if(_fcMode==='flip')document.getElementById('fcAnswerBtns').style.display='flex';
 }
 
 function fcAnswer(got){
@@ -4585,6 +4836,41 @@ function exitFcStudy(){
   document.getElementById('fcDeckView').style.display='';
   fcStudyDeckId='';
   renderFcDecks();
+}
+
+function initSwipe(){
+  var el=document.getElementById('fcSwipeCard');
+  if(!el)return;
+  el.onmousedown=null;el.ontouchstart=null;
+  var startX=0;var isDragging=false;
+  function start(x){startX=x;isDragging=true;el.classList.add('swiping');}
+  function move(x){
+    if(!isDragging)return;
+    var dx=x-startX;
+    el.style.transform='translateX('+dx+'px) rotate('+(dx*0.05)+'deg)';
+    var lg=document.getElementById('fcLabelGot');var la=document.getElementById('fcLabelAgain');
+    var pct=Math.min(Math.abs(dx)/80,1);
+    if(dx>0){if(lg)lg.style.opacity=pct;if(la)la.style.opacity='0';}
+    else{if(la)la.style.opacity=pct;if(lg)lg.style.opacity='0';}
+  }
+  function end(x){
+    if(!isDragging)return;
+    isDragging=false;el.classList.remove('swiping');
+    var dx=x-startX;
+    if(Math.abs(dx)<60){
+      el.style.transform='';
+      if(!_fcFlipped)flipFcCard();
+    } else {
+      el.style.transform='translateX('+(dx>0?'120%':'-120%')+') rotate('+(dx>0?20:-20)+'deg)';
+      setTimeout(function(){fcAnswer(dx>0);},300);
+    }
+  }
+  el.ontouchstart=function(e){start(e.touches[0].clientX);};
+  el.ontouchmove=function(e){e.preventDefault();move(e.touches[0].clientX);};
+  el.ontouchend=function(e){end(e.changedTouches[0].clientX);};
+  el.onmousedown=function(e){start(e.clientX);};
+  window.onmousemove=function(e){if(isDragging)move(e.clientX);};
+  window.onmouseup=function(e){if(isDragging)end(e.clientX);};
 }
 
 // ── Research ──────────────────────────────────
@@ -5193,15 +5479,32 @@ function showBoardSec(sec,btn){
 function toggleVbInputs(){
   var t=(document.getElementById('vbType')||{}).value||'quote';
   var capEl=document.getElementById('vbCaption');
+  var upEl=document.getElementById('vbImgUploadWrap');
   if(capEl)capEl.style.display=(t==='image')?'':'none';
+  if(upEl)upEl.style.display=(t==='image')?'':'none';
+}
+var _vbPendingImg='';
+function previewVbImg(input){
+  if(!input.files||!input.files[0])return;
+  var reader=new FileReader();
+  reader.onload=function(e){
+    _vbPendingImg=e.target.result;
+    var p=document.getElementById('vbImgPreview');
+    if(p){p.src=e.target.result;p.style.display='block';}
+  };
+  reader.readAsDataURL(input.files[0]);
 }
 
 function addVbItem(){
   var type=(document.getElementById('vbType')||{}).value||'quote';
   var text=((document.getElementById('vbText')||{}).value||'').trim();
   var caption=((document.getElementById('vbCaption')||{}).value||'').trim();
+  if(type==='image'&&_vbPendingImg){text=_vbPendingImg;}
   if(!text)return alert('Enter some text or a URL');
   VB_ITEMS.unshift({id:'vb-'+Date.now(),type:type,text:text,caption:caption});
+  _vbPendingImg='';
+  var fp=document.getElementById('vbImgPreview');if(fp){fp.src='';fp.style.display='none';}
+  var ff=document.getElementById('vbImgFile');if(ff)ff.value='';
   localStorage.setItem('aVbItems',JSON.stringify(VB_ITEMS));
   if(document.getElementById('vbText'))document.getElementById('vbText').value='';
   if(document.getElementById('vbCaption'))document.getElementById('vbCaption').value='';
@@ -6114,6 +6417,8 @@ function startApp(){
   renderEnergyWidget();
   renderIntentionsHome();
   renderMeds();
+  renderMinistryHome();
+  renderGuide();
 }
 
 // Wait for Firebase then start
@@ -6320,6 +6625,64 @@ setInterval(updDate, 60000);
     </div>
     <button class="ok-btn" onclick="confirmAddHabit()">Add Habit</button>
   </div>
+</div>
+
+<!-- HEALTH SUB-PAGES -->
+<div class="subpage" id="sp-nutrition">
+  <div class="subpage-hdr">
+    <button class="subpage-back" onclick="closeSubpage('sp-nutrition')">← Back</button>
+    <span class="subpage-title">🥗 Nutrition Log</span>
+  </div>
+  <div class="sh">🔍 Add Food</div>
+  <div class="fsw"><span class="fsic">🔍</span><input class="fsi" id="foodSrch2" placeholder="Type to search your foods..." oninput="srchFood(this.value)"></div>
+  <div class="fsugs" id="foodSugs2" style="display:none"></div>
+  <div class="sh">📋 Today's Food Log</div>
+  <div id="foodLog2"></div>
+</div>
+
+<div class="subpage" id="sp-macros">
+  <div class="subpage-hdr">
+    <button class="subpage-back" onclick="closeSubpage('sp-macros')">← Back</button>
+    <span class="subpage-title">📊 Macros Today</span>
+  </div>
+  <div id="macroSubContent"></div>
+</div>
+
+<div class="subpage" id="sp-workouts">
+  <div class="subpage-hdr">
+    <button class="subpage-back" onclick="closeSubpage('sp-workouts')">← Back</button>
+    <span class="subpage-title">💪 Workouts</span>
+  </div>
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+    <span style="font-size:13px;font-weight:600;color:var(--textd)">Today's Exercise</span>
+    <button onclick="openAddEx()" style="background:var(--sage-light);border:none;border-radius:9px;padding:6px 12px;font-family:'Quicksand',sans-serif;font-size:12px;font-weight:700;color:#5a7a56;cursor:pointer">+ Log</button>
+  </div>
+  <div id="exLog2"></div>
+  <div style="margin-top:14px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+      <span style="font-size:13px;font-weight:700;color:var(--textd)">Workout Plans</span>
+      <button onclick="openAddWplan()" style="background:var(--sage-light);border:none;border-radius:9px;padding:5px 11px;font-family:'Quicksand',sans-serif;font-size:12px;font-weight:700;color:#5a7a56;cursor:pointer">+ Plan</button>
+    </div>
+    <div id="wplanActiveWrap2" style="display:none">
+      <div class="wplan-active">
+        <div style="display:flex;align-items:center;margin-bottom:10px">
+          <span id="wplanActiveName2" style="font-size:15px;font-weight:700;color:var(--textd);flex:1"></span>
+          <button class="btn sec" style="font-size:12px;padding:3px 10px" onclick="cancelActiveWplan()">✕ Cancel</button>
+        </div>
+        <div id="wplanActiveExList2"></div>
+        <button class="btn" style="width:100%;margin-top:10px;background:var(--sage)" onclick="completeWplan()">✅ Complete Workout</button>
+      </div>
+    </div>
+    <div id="wplanList2"></div>
+  </div>
+</div>
+
+<div class="subpage" id="sp-mood">
+  <div class="subpage-hdr">
+    <button class="subpage-back" onclick="closeSubpage('sp-mood')">← Back</button>
+    <span class="subpage-title">😊 Mood & Wellness</span>
+  </div>
+  <div id="moodSubContent"></div>
 </div>
 </body>
 </html>
