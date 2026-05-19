@@ -505,6 +505,23 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
 /* ROUTINE EDIT */
 .rtn-item-row{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid #f0ebe6}
 .rtn-item-row:last-child{border-bottom:none}
+.rtn-done-toggle{background:none;border:1px solid #e0d8d0;border-radius:8px;padding:4px 10px;font-size:12px;color:var(--textl);cursor:pointer;margin-top:6px;width:100%;text-align:left}
+.rtn-done-section{padding-top:4px}
+.rtn-freq-badge{font-size:10px;font-weight:700;background:var(--sage-light);color:#5a7a56;border-radius:6px;padding:2px 7px;margin-left:6px}
+.rtn-freq-badge.weekly{background:var(--blue-light);color:#4a6a8a}
+.rtn-freq-badge.monthly{background:var(--lav-light);color:#6a5a9a}
+.rtn-freq-badge.yearly{background:var(--peach-light);color:#8a5a30}
+.rtn-next-date{font-size:11px;color:var(--textl);margin-top:2px}
+.lookahead-card{background:white;border-radius:var(--r);padding:14px;margin-bottom:14px;box-shadow:var(--sh2)}
+.lookahead-day{padding:8px 0;border-bottom:1px solid #f5f0eb;display:flex;align-items:flex-start;gap:10px}
+.lookahead-day:last-child{border-bottom:none}
+.lookahead-date{min-width:44px;font-size:11px;font-weight:700;color:var(--textl);padding-top:1px}
+.lookahead-items{display:flex;flex-wrap:wrap;gap:5px}
+.lookahead-chip{font-size:11px;background:var(--sage-light);color:#3a5a3a;border-radius:8px;padding:3px 8px;font-weight:600}
+.freq-day-btn{padding:4px 7px;border:1.5px solid #ddd;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;background:white;color:var(--textl);transition:all .15s}
+.freq-day-btn.on{background:var(--sage);border-color:var(--sage);color:white}
+.rtn-send-task{background:none;border:none;font-size:12px;color:var(--blue);cursor:pointer;padding:2px 4px;flex-shrink:0;opacity:.7}
+.rtn-send-task:active{opacity:1}
 /* MONEY */
 .bill-row{display:flex;justify-content:space-between;align-items:center;padding:11px 0;border-bottom:1px solid #f5f0eb}
 .bill-row:last-child{border-bottom:none}
@@ -653,6 +670,7 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
   <div id="todaySo"><div class="empty"><div class="emj">📝</div><p>Add tasks to see them here.</p></div></div>
   <div class="sh">🌙 Evening Routine</div>
   <div class="rc pm" id="todayPM"><div class="rt">🌙 PM Routine</div></div>
+  <div id="todayNonDaily"></div>
   <div id="pinnedSection" style="display:none">
     <div class="sh">📌 Pinned</div>
     <div id="pinnedList"></div>
@@ -694,6 +712,7 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
 
 <!-- ROUTINES -->
 <div class="view" id="v-routines">
+  <div id="rtnLookahead"></div>
   <div id="rtnGroupsView"></div>
   <button class="add-btn" onclick="openNewRtn()" style="margin-top:4px">➕ New Routine Group</button>
 </div>
@@ -1869,6 +1888,7 @@ var FDB = JSON.parse(localStorage.getItem('aFDB')||'null')||[
 var FL = JSON.parse(localStorage.getItem('aFL')||'{}'); // food log stays local (daily, personal)
 var WL = JSON.parse(localStorage.getItem('aWL')||'{}'); // water stays local
 var RS = JSON.parse(localStorage.getItem('aRS')||'{}'); // routine state stays local (daily)
+var RS2 = JSON.parse(localStorage.getItem('aRS2')||'{}'); // non-daily completion by date
 var RH = JSON.parse(localStorage.getItem('aRH')||'{}'); // routine hidden items (permanent)
 
 var RTNS = JSON.parse(localStorage.getItem('aRtns')||'null')||{
@@ -2022,7 +2042,14 @@ function fbDelete(col, id){
 // ═══════════════════════════════════════════════
 function chkReset(){
   var t=new Date().toDateString();
-  if(RS.date!==t){RS={date:t,am:{},pm:{},da:{},we:{},cl:{}};localStorage.setItem('aRS',JSON.stringify(RS));}
+  if(RS.date!==t){
+    var newRS={date:t};
+    RTN_GROUPS.forEach(function(g){if(rtnFreq(g)==='daily')newRS[g.id]={};});
+    // preserve built-in daily keys in case RTN_GROUPS not loaded yet
+    ['am','pm','da','we','cl'].forEach(function(k){if(!newRS[k])newRS[k]={};});
+    RS=newRS;
+    localStorage.setItem('aRS',JSON.stringify(RS));
+  }
   if(!FL[t]){FL[t]=[];localStorage.setItem('aFL',JSON.stringify(FL));}
   if(!WL[t]){WL[t]=0;localStorage.setItem('aWL',JSON.stringify(WL));}
 }
@@ -2081,42 +2108,165 @@ var RTN_GROUPS = JSON.parse(localStorage.getItem('aRTG')||'null')||[
 ];
 var RTN_EDIT_ITEMS=[]; // temp storage during edit
 
+// ── Routine Frequency Helpers ──────────────────
+function rtnFreq(g){return g&&g.freq?g.freq:'daily';}
+
+function rtnIsDueOn(g,date){
+  var freq=rtnFreq(g);
+  var dow=date.getDay(),dom=date.getDate(),mon=date.getMonth()+1;
+  if(freq==='daily')return true;
+  if(freq==='weekly')return(g.weekDays&&g.weekDays.length?g.weekDays:[1]).indexOf(dow)>-1;
+  if(freq==='monthly')return dom===(g.monthDay||1);
+  if(freq==='yearly')return mon===(g.yearMonth||1)&&dom===(g.yearDay||1);
+  return false;
+}
+
+function rtnIsDueToday(g){
+  var today=new Date();today.setHours(0,0,0,0);
+  return rtnIsDueOn(g,today);
+}
+
+function rtnCompState(g,dateStr){
+  var freq=rtnFreq(g);
+  if(freq==='daily')return RS[g.id]||{};
+  return(RS2[g.id]||{})[dateStr]||{};
+}
+
+function rtnSetComp(gId,dateStr,idx,val){
+  var g=RTN_GROUPS.find(function(x){return x.id===gId;});
+  var freq=g?rtnFreq(g):'daily';
+  if(freq==='daily'){
+    if(!RS[gId])RS[gId]={};RS[gId][idx]=val;
+    localStorage.setItem('aRS',JSON.stringify(RS));
+  } else {
+    if(!RS2[gId])RS2[gId]={};
+    if(!RS2[gId][dateStr])RS2[gId][dateStr]={};
+    RS2[gId][dateStr][idx]=val;
+    localStorage.setItem('aRS2',JSON.stringify(RS2));
+  }
+}
+
+function rtnFreqLabel(g){
+  var freq=rtnFreq(g);
+  if(freq==='daily')return'Daily';
+  if(freq==='weekly'){
+    var days=['Su','Mo','Tu','We','Th','Fr','Sa'];
+    var wd=g.weekDays&&g.weekDays.length?g.weekDays:[1];
+    return wd.map(function(d){return days[d];}).join(' ');
+  }
+  if(freq==='monthly')return'Day '+(g.monthDay||1)+' monthly';
+  if(freq==='yearly'){
+    var months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    return(months[(g.yearMonth||1)-1]||'Jan')+' '+(g.yearDay||1);
+  }
+  return freq;
+}
+
+function rtnNextOccurrence(g,fromDate){
+  var d=fromDate?new Date(fromDate):new Date();d.setHours(0,0,0,0);
+  for(var i=0;i<=365;i++){
+    var test=new Date(d.getTime()+i*86400000);
+    if(rtnIsDueOn(g,test))return test.toISOString().slice(0,10);
+  }
+  return null;
+}
+
 function renderAllR(){
-  // Today tab AM/PM
   renderRL('todayAM','am');renderRL('todayPM','pm');
-  // Routines tab — render all groups
+  renderNonDailyToday();
   renderRtnGroups();
+  renderLookahead();
   updRS();
+}
+
+function renderNonDailyToday(){
+  var el=document.getElementById('todayNonDaily');if(!el)return;
+  var today=todayStr();
+  var dueGroups=RTN_GROUPS.filter(function(g){return rtnFreq(g)!=='daily'&&rtnIsDueToday(g);});
+  if(!dueGroups.length){el.innerHTML='';return;}
+  el.innerHTML='<div class="sh" style="margin-top:12px;margin-bottom:8px">📅 Due Today</div>'+
+    dueGroups.map(function(g){
+      var items=RTNS[g.id]||[];var rh=RH[g.id]||{};
+      var cs=rtnCompState(g,today);
+      var visible=items.filter(function(item){return!rh[item];});
+      return'<div class="rc" style="border-left-color:'+g.color+'">'+
+        '<div class="rt" style="margin-bottom:8px">'+g.icon+' '+g.name+'</div>'+
+        visible.map(function(item,vi){
+          var oi=items.indexOf(item);var isDone=cs[oi];
+          var eItem=item.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+          return'<div class="ri '+(isDone?'done':'')+'" onclick="togR(\''+g.id+'\','+oi+',this)">'+
+            '<div class="rchk">'+(isDone?'✓':'')+'</div>'+
+            '<div class="rlb">'+item+'</div>'+
+            '<button class="rhi" onclick="hideRI(event,\''+g.id+'\',\''+eItem+'\')" title="Hide">✕</button>'+
+          '</div>';
+        }).join('')+
+      '</div>';
+    }).join('');
 }
 
 function renderRtnGroups(){
   var el=document.getElementById('rtnGroupsView');if(!el)return;
+  var today=todayStr();
   el.innerHTML=RTN_GROUPS.map(function(g){
     var items=RTNS[g.id]||[];
     var rh=RH[g.id]||{};
-    var done=0;
-    if(RS[g.id])done=Object.values(RS[g.id]).filter(Boolean).length;
+    var freq=rtnFreq(g);
+    var isDue=rtnIsDueToday(g);
+    var cs=rtnCompState(g,today);
     var visible=items.filter(function(item){return!rh[item];});
-    var itemsHTML=visible.map(function(item,vi){
-      // find original index
+    var undone=visible.filter(function(item){var oi=items.indexOf(item);return!cs[oi];});
+    var done=visible.filter(function(item){var oi=items.indexOf(item);return!!cs[oi];});
+    var gKey=g.id.replace(/'/g,"\\'");
+    var freqBadge=freq!=='daily'?'<span class="rtn-freq-badge '+freq+'">'+rtnFreqLabel(g)+'</span>':'';
+    var duePill=!isDue&&freq!=='daily'?'<span style="font-size:10px;background:#fff0e8;color:#8a5a30;border-radius:6px;padding:2px 7px;margin-left:4px">next: '+(rtnNextOccurrence(g,null)||'?')+'</span>':'';
+    var dimStyle=!isDue&&freq!=='daily'?'opacity:.55':'';
+
+    var renderItem=function(item,isDoneItem){
       var oi=items.indexOf(item);
-      var isDone=RS[g.id]&&RS[g.id][oi];
       var eItem=item.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
-      return'<div class="ri '+(isDone?'done':'')+'" onclick="togR(\''+g.id+'\','+oi+',this)">'+
-        '<div class="rchk">'+(isDone?'✓':'')+'</div>'+
+      return'<div class="ri '+(isDoneItem?'done':'')+'" onclick="togR(\''+g.id+'\','+oi+',this)">'+
+        '<div class="rchk">'+(isDoneItem?'✓':'')+'</div>'+
         '<div class="rlb">'+item+'</div>'+
+        '<button class="rtn-send-task" onclick="event.stopPropagation();sendRtnToTask(\''+eItem+'\')" title="Send to Tasks">→📋</button>'+
         '<button class="rhi" onclick="hideRI(event,\''+g.id+'\',\''+eItem+'\')" title="Hide">✕</button>'+
       '</div>';
-    }).join('');
-    var gKey=g.id.replace(/'/g,"\\'");
-    return'<div class="rc" style="border-left-color:'+g.color+'">'+
-      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">'+
-        '<div class="rt">'+g.icon+' '+g.name+'</div>'+
+    };
+
+    var doneId='rtnDone_'+g.id;
+    var doneHTML=done.length
+      ?'<button class="rtn-done-toggle" onclick="togRtnDone(\''+doneId+'\')" id="btn_'+doneId+'">✅ Done ('+done.length+')</button>'+
+        '<div id="'+doneId+'" class="rtn-done-section" style="display:none">'+done.map(function(item){return renderItem(item,true);}).join('')+'</div>'
+      :'';
+
+    return'<div class="rc" style="border-left-color:'+g.color+';'+dimStyle+'">'+
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">'+
+        '<div><div class="rt" style="display:inline">'+g.icon+' '+g.name+'</div>'+freqBadge+duePill+'</div>'+
         '<button onclick="editRtn(\''+gKey+'\')" style="background:none;border:none;font-size:14px;cursor:pointer;color:var(--textl);padding:4px">✏️</button>'+
       '</div>'+
-      itemsHTML+
+      undone.map(function(item){return renderItem(item,false);}).join('')+
+      doneHTML+
     '</div>';
   }).join('');
+}
+
+function sendRtnToTask(text){
+  var t={id:'t'+Date.now(),text:text,done:false,cat:'',priority:'',due:'',notes:'',repeat:false,subtasks:[]};
+  TASKS.push(t);
+  fbSave('tasks',t.id,t);
+  renderTasks();
+  var flash=document.createElement('div');
+  flash.style.cssText='position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:var(--sage);color:white;padding:8px 16px;border-radius:12px;font-size:13px;font-weight:700;z-index:9999;pointer-events:none';
+  flash.textContent='→ Added to Tasks!';
+  document.body.appendChild(flash);
+  setTimeout(function(){flash.remove();},1800);
+}
+
+function togRtnDone(id){
+  var el=document.getElementById(id);if(!el)return;
+  var btn=document.getElementById('btn_'+id);
+  var open=el.style.display!=='none';
+  el.style.display=open?'none':'block';
+  if(btn)btn.style.borderBottomLeftRadius=open?'8px':'0';
 }
 
 function renderRL(elId,key){
@@ -2124,16 +2274,56 @@ function renderRL(elId,key){
   var tt=el.querySelector('.rt');var th=tt?tt.outerHTML:'';
   var items=RTNS[key]||[];
   var rh=RH[key]||{};
-  el.innerHTML=th+items.map(function(item,i){
-    if(rh[item])return'';
-    var done=RS[key]&&RS[key][i];
-    var eItem=item.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
-    return'<div class="ri '+(done?'done':'')+'" onclick="togR(\''+key+'\','+i+',this)">'+
-      '<div class="rchk">'+(done?'✓':'')+'</div>'+
-      '<div class="rlb">'+item+'</div>'+
-      '<button class="rhi" onclick="hideRI(event,\''+key+'\',\''+eItem+'\')" title="Hide this item">✕</button>'+
+  var today=todayStr();var cs=rtnCompState({id:key,freq:'daily'},today);
+  var undone=[],done=[];
+  items.forEach(function(item,i){
+    if(rh[item])return;
+    if(cs[i])done.push({item:item,i:i});
+    else undone.push({item:item,i:i});
+  });
+  var mkRow=function(o,isDone){
+    var eItem=o.item.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+    return'<div class="ri '+(isDone?'done':'')+'" onclick="togR(\''+key+'\','+o.i+',this)">'+
+      '<div class="rchk">'+(isDone?'✓':'')+'</div>'+
+      '<div class="rlb">'+o.item+'</div>'+
+      '<button class="rhi" onclick="hideRI(event,\''+key+'\',\''+eItem+'\')" title="Hide">✕</button>'+
     '</div>';
-  }).join('');
+  };
+  var doneId='tlDone_'+elId;
+  var doneHTML=done.length
+    ?'<button class="rtn-done-toggle" onclick="togRtnDone(\''+doneId+'\')" id="btn_'+doneId+'">✅ Done ('+done.length+')</button>'+
+      '<div id="'+doneId+'" style="display:none">'+done.map(function(o){return mkRow(o,true);}).join('')+'</div>'
+    :'';
+  el.innerHTML=th+undone.map(function(o){return mkRow(o,false);}).join('')+doneHTML;
+}
+
+function renderLookahead(){
+  var el=document.getElementById('rtnLookahead');if(!el)return;
+  var nonDaily=RTN_GROUPS.filter(function(g){return rtnFreq(g)!=='daily';});
+  if(!nonDaily.length){el.innerHTML='';return;}
+  var today=new Date();today.setHours(0,0,0,0);
+  var days=[];
+  for(var d=0;d<14;d++){
+    var dt=new Date(today.getTime()+d*86400000);
+    var ds=dt.toISOString().slice(0,10);
+    var due=nonDaily.filter(function(g){return rtnIsDueOn(g,dt);});
+    if(due.length)days.push({ds:ds,dt:dt,groups:due});
+  }
+  if(!days.length){el.innerHTML='';return;}
+  var dayNames=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  var months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  el.innerHTML='<div class="lookahead-card">'+
+    '<div class="ct" style="margin-bottom:10px">📅 Next 14 Days</div>'+
+    days.map(function(day){
+      var lbl=d===0?'Today':dayNames[day.dt.getDay()]+' '+months[day.dt.getMonth()]+' '+day.dt.getDate();
+      return'<div class="lookahead-day">'+
+        '<div class="lookahead-date">'+lbl+'</div>'+
+        '<div class="lookahead-items">'+day.groups.map(function(g){
+          return'<span class="lookahead-chip">'+g.icon+' '+g.name+'</span>';
+        }).join('')+'</div>'+
+      '</div>';
+    }).join('')+
+  '</div>';
 }
 
 function editRtn(key){
@@ -2144,6 +2334,10 @@ function editRtn(key){
   document.getElementById('rtnName').value=g.name;
   document.getElementById('rtnIcon').value=g.icon;
   document.getElementById('rtnDelBtn').style.display='block';
+  // Set frequency button
+  var freq=rtnFreq(g);
+  document.querySelectorAll('[data-g="rtnFreq"]').forEach(function(b){b.classList.toggle('on',b.dataset.v===freq);});
+  updRtnFreqUI(g);
   renderRtnItemList();
   document.getElementById('rtnModal').classList.add('show');
 }
@@ -2156,8 +2350,44 @@ function openNewRtn(){
   document.getElementById('rtnName').value='';
   document.getElementById('rtnIcon').value='';
   document.getElementById('rtnDelBtn').style.display='none';
+  document.querySelectorAll('[data-g="rtnFreq"]').forEach(function(b){b.classList.toggle('on',b.dataset.v==='daily');});
+  updRtnFreqUI(null);
   renderRtnItemList();
   document.getElementById('rtnModal').classList.add('show');
+}
+
+function updRtnFreqUI(existingGroup){
+  var freq=document.querySelector('[data-g="rtnFreq"].on');
+  var fval=freq?freq.dataset.v:'daily';
+  var el=document.getElementById('rtnFreqDetail');
+  if(!el)return;
+  if(fval==='daily'){el.style.display='none';el.innerHTML='';return;}
+  el.style.display='block';
+  var dayNames=['Su','Mo','Tu','We','Th','Fr','Sa'];
+  if(fval==='weekly'){
+    var selDays=(existingGroup&&existingGroup.weekDays)||[1];
+    el.innerHTML='<div style="font-size:12px;color:var(--textl);margin-bottom:6px">Which day(s)?</div>'+
+      '<div style="display:flex;gap:5px;flex-wrap:wrap">'+
+      dayNames.map(function(d,i){return'<button class="freq-day-btn'+(selDays.indexOf(i)>-1?' on':'')+'" data-di="'+i+'" onclick="togFreqDay(this)">'+d+'</button>';}).join('')+
+      '</div>';
+  } else if(fval==='monthly'){
+    var md=(existingGroup&&existingGroup.monthDay)||1;
+    el.innerHTML='<div style="font-size:12px;color:var(--textl);margin-bottom:6px">Day of month:</div>'+
+      '<input class="fi" type="number" id="rtnMonthDay" min="1" max="31" value="'+md+'" style="width:80px;padding:7px 10px">';
+  } else if(fval==='yearly'){
+    var ym=(existingGroup&&existingGroup.yearMonth)||1;
+    var yd=(existingGroup&&existingGroup.yearDay)||1;
+    var monthNames=['January','February','March','April','May','June','July','August','September','October','November','December'];
+    el.innerHTML='<div style="font-size:12px;color:var(--textl);margin-bottom:6px">Month &amp; day:</div>'+
+      '<div style="display:flex;gap:8px">'+
+      '<select class="fi" id="rtnYearMonth" style="flex:1;padding:7px 8px">'+monthNames.map(function(m,i){return'<option value="'+(i+1)+'"'+(ym===i+1?' selected':'')+'>'+m+'</option>';}).join('')+'</select>'+
+      '<input class="fi" type="number" id="rtnYearDay" min="1" max="31" value="'+yd+'" style="width:70px;padding:7px 8px">'+
+      '</div>';
+  }
+}
+
+function togFreqDay(btn){
+  btn.classList.toggle('on');
 }
 
 function renderRtnItemList(){
@@ -2189,12 +2419,26 @@ function saveRtn(){
   var name=document.getElementById('rtnName').value.trim();
   if(!name){alert('Please enter a routine name!');return;}
   var icon=document.getElementById('rtnIcon').value.trim()||'📋';
-  // Update or add group
+  var freqBtn=document.querySelector('[data-g="rtnFreq"].on');
+  var freq=freqBtn?freqBtn.dataset.v:'daily';
+  var freqData={freq:freq};
+  if(freq==='weekly'){
+    var selDays=[];
+    document.querySelectorAll('.freq-day-btn.on').forEach(function(b){selDays.push(parseInt(b.dataset.di));});
+    freqData.weekDays=selDays.length?selDays:[1];
+  } else if(freq==='monthly'){
+    freqData.monthDay=parseInt(document.getElementById('rtnMonthDay').value)||1;
+  } else if(freq==='yearly'){
+    freqData.yearMonth=parseInt(document.getElementById('rtnYearMonth').value)||1;
+    freqData.yearDay=parseInt(document.getElementById('rtnYearDay').value)||1;
+  }
   var g=RTN_GROUPS.find(function(g){return g.id===key;});
-  if(g){g.name=name;g.icon=icon;}
+  if(g){g.name=name;g.icon=icon;Object.assign(g,freqData);}
   else{
     var cols=['var(--sage)','var(--lav)','var(--peach)','var(--blue)','var(--teal)','var(--rose)'];
-    RTN_GROUPS.push({id:key,name:name,icon:icon,color:cols[RTN_GROUPS.length%cols.length]});
+    var newG={id:key,name:name,icon:icon,color:cols[RTN_GROUPS.length%cols.length]};
+    Object.assign(newG,freqData);
+    RTN_GROUPS.push(newG);
   }
   RTNS[key]=RTN_EDIT_ITEMS.slice();
   localStorage.setItem('aRTG',JSON.stringify(RTN_GROUPS));
@@ -2216,11 +2460,14 @@ function delRtnGroup(){
 }
 
 function togR(key,idx,el){
-  if(!RS[key])RS[key]={};
-  RS[key][idx]=!RS[key][idx];
-  localStorage.setItem('aRS',JSON.stringify(RS));
-  el.classList.toggle('done');
-  el.querySelector('.rchk').textContent=RS[key][idx]?'✓':'';
+  var g=RTN_GROUPS.find(function(x){return x.id===key;});
+  var freq=g?rtnFreq(g):'daily';
+  var today=todayStr();
+  var cs=rtnCompState(g||{id:key,freq:'daily'},today);
+  var newVal=!cs[idx];
+  rtnSetComp(key,today,idx,newVal);
+  el.classList.toggle('done',newVal);
+  el.querySelector('.rchk').textContent=newVal?'✓':'';
   updRS();
 }
 
@@ -6878,6 +7125,16 @@ setInterval(updDate, 60000);
     <div class="fg" style="flex-shrink:0"><label class="fl">Icon</label><input class="fi" id="rtnIcon" placeholder="🌅" maxlength="4" style="width:64px;text-align:center"></div>
     <div class="fg" style="flex:1"><label class="fl">Routine Name</label><input class="fi" id="rtnName" placeholder="e.g. Work Day"></div>
   </div>
+  <div class="fg" style="margin-top:4px">
+    <label class="fl">Frequency</label>
+    <div class="bg bg4">
+      <button class="sb on" data-g="rtnFreq" data-v="daily" onclick="pSB(this);updRtnFreqUI()">Daily</button>
+      <button class="sb" data-g="rtnFreq" data-v="weekly" onclick="pSB(this);updRtnFreqUI()">Weekly</button>
+      <button class="sb" data-g="rtnFreq" data-v="monthly" onclick="pSB(this);updRtnFreqUI()">Monthly</button>
+      <button class="sb" data-g="rtnFreq" data-v="yearly" onclick="pSB(this);updRtnFreqUI()">Yearly</button>
+    </div>
+  </div>
+  <div id="rtnFreqDetail" style="display:none;margin-bottom:8px"></div>
   <div class="sh" style="margin-top:4px;margin-bottom:8px">Items</div>
   <div id="rtnItemList"></div>
   <div style="display:flex;gap:6px;margin-top:10px">
