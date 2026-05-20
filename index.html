@@ -736,10 +736,11 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     <div class="hub-info"><h2>The Helm</h2><p>Captain Reid keeps you on course — tasks, projects &amp; active lists, all in one command center.</p></div>
   </div>
   <div class="hub-grid">
+    <div id="helmMilestonePanel"></div>
     <div class="hub-card" onclick="goTab('tasks',null)"><div class="hub-card-ic">📋</div><div class="hub-card-name">Tasks</div><div class="hub-card-sub" id="hub-tasks-sub">Loading…</div></div>
     <div class="hub-card" onclick="goTab('projects',null)"><div class="hub-card-ic">📁</div><div class="hub-card-name">Projects</div><div class="hub-card-sub" id="hub-projects-sub">Loading…</div></div>
     <div class="hub-card span2" onclick="goTab('lists',null)"><div class="hub-card-ic">📝</div><div class="hub-card-name">Lists</div><div class="hub-card-sub" id="hub-lists-sub">Active working lists</div></div>
-    <div class="hub-card span2" onclick="openDeadlineDash()" style="background:linear-gradient(135deg,#e8f0f8,#d8e8f4);border-color:#b0c8e0"><div class="hub-card-ic">⚡</div><div class="hub-card-name">Deadline Dash</div><div class="hub-card-sub">Tap tasks before they expire — Reid's challenge</div></div>
+    <div class="hub-card span2" onclick="openCrateSprint()" style="background:linear-gradient(135deg,#e8f0f8,#d8e8f4);border-color:#b0c8e0"><div class="hub-card-ic">📦</div><div class="hub-card-name">Crate Sprint</div><div class="hub-card-sub">Race Reid's clock — how many crates can you load?</div></div>
   </div>
 </div>
 
@@ -750,6 +751,7 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     <div class="hub-info"><h2>The Conservatory</h2><p>Tessa tends to your growth — goals, habits, learning &amp; ADHD tools in a calm, nurturing space.</p></div>
   </div>
   <div class="hub-grid">
+    <div id="conservatoryMilestonePanel"></div>
     <div class="hub-card" onclick="goTab('goals',null)"><div class="hub-card-ic">🎯</div><div class="hub-card-name">Goals</div><div class="hub-card-sub" id="hub-goals-sub">Loading…</div></div>
     <div class="hub-card" onclick="goTab('routines',null)"><div class="hub-card-ic">🔄</div><div class="hub-card-name">Routines</div><div class="hub-card-sub" id="hub-routines-sub">Loading…</div></div>
     <div class="hub-card" onclick="goTab('learn',null)"><div class="hub-card-ic">📚</div><div class="hub-card-name">Learning</div><div class="hub-card-sub">Research &amp; study</div></div>
@@ -839,17 +841,13 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     <h2 id="gTxt">Good morning, Adri! 🌸</h2>
     <p id="gQuote">The plans of the diligent lead to success. — Prov 21:5</p>
   </div>
-  <!-- Energy log -->
-  <div style="background:#fff;border-radius:14px;padding:11px 14px;margin-bottom:10px;box-shadow:0 1px 4px rgba(0,0,0,.06);display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-    <span style="font-size:11px;font-weight:700;color:var(--textl);letter-spacing:.5px;text-transform:uppercase;flex-shrink:0">⚡ Energy</span>
-    <div style="display:flex;gap:4px" id="energyBtns">
-      <button class="energy-btn" data-e="1" onclick="logEnergy(1)">😴</button>
-      <button class="energy-btn" data-e="2" onclick="logEnergy(2)">😐</button>
-      <button class="energy-btn" data-e="3" onclick="logEnergy(3)">🙂</button>
-      <button class="energy-btn" data-e="4" onclick="logEnergy(4)">⚡</button>
-      <button class="energy-btn" data-e="5" onclick="logEnergy(5)">🔥</button>
+  <!-- Meds / Supplements (collapsible) -->
+  <div id="todayMedsWrap" style="background:#fff;border-radius:14px;padding:10px 14px;margin-bottom:10px;box-shadow:0 1px 4px rgba(0,0,0,.06)">
+    <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer" onclick="togTodayMeds()">
+      <span style="font-size:11px;font-weight:700;color:var(--textl);letter-spacing:.5px;text-transform:uppercase">💊 Meds &amp; Supplements</span>
+      <span id="todayMedsArr" style="font-size:12px;color:var(--textl)">▾</span>
     </div>
-    <span id="energyTodayTxt" style="font-size:12px;color:var(--textl);margin-left:auto"></span>
+    <div id="todayMedsBody" style="margin-top:8px"></div>
   </div>
   <!-- Intentions widget -->
   <div id="intentionsHomeWrap" style="display:none;margin-bottom:10px">
@@ -3165,6 +3163,7 @@ function goTabDirect(tab,btn){
 function renderHubPreviews(section){
   var el,today=todayStr();
   if(section==='helm'){
+    renderHelmMilestone();
     var open=TASKS.filter(function(t){return !t.done;}).length;
     var due=TASKS.filter(function(t){return !t.done&&t.due&&t.due<=today;}).length;
     el=document.getElementById('hub-tasks-sub');if(el)el.textContent=due+' due today · '+open+' open';
@@ -3172,6 +3171,7 @@ function renderHubPreviews(section){
     el=document.getElementById('hub-projects-sub');if(el)el.textContent=active+' active project'+(active!==1?'s':'');
     el=document.getElementById('hub-lists-sub');if(el)el.textContent=(LISTS||[]).length+' list'+((LISTS||[]).length!==1?'s':'')+' saved';
   }else if(section==='conservatory'){
+    renderConservatoryMilestone();
     var goals=(GOALS||[]).filter(function(g){return !g.done;}).length;
     el=document.getElementById('hub-goals-sub');if(el)el.textContent=goals+' goal'+(goals!==1?'s':'')+' in progress';
     var due2=RTN_GROUPS.filter(function(g){return rtnIsDueToday(g);}).length;
@@ -4093,6 +4093,8 @@ function saveTask(){
     created:existing?existing.created:new Date().toISOString(),
     meaningful:_taskMeaningful
   };
+  var isNew=!TASKS.find(function(x){return x.id===id;});
+  if(isNew){TASKS.push(t);bumpHelmTask();}else{var idx=TASKS.findIndex(function(x){return x.id===id;});if(idx>=0)TASKS[idx]=t;}
   fbSave('tasks',id,t);
   closeM('taskModal');
 }
@@ -4523,6 +4525,8 @@ function saveProj(){
     pinned:existing?existing.pinned:false,
     steps:existing?existing.steps||[]:[],
     created:existing?existing.created:new Date().toISOString()};
+  var isNewProj=!PROJECTS.find(function(x){return x.id===id;});
+  if(isNewProj){PROJECTS.push(proj);bumpHelmProj();}else{var pi=PROJECTS.findIndex(function(x){return x.id===id;});if(pi>=0)PROJECTS[pi]=proj;}
   fbSave('projects',id,proj);
   closeM('projModal');
 }
@@ -7272,6 +7276,39 @@ function confirmAddMed(){
   renderMeds();
 }
 
+var _todayMedsOpen = localStorage.getItem('aTodayMedsOpen')!=='0';
+function togTodayMeds(){
+  _todayMedsOpen=!_todayMedsOpen;
+  localStorage.setItem('aTodayMedsOpen',_todayMedsOpen?'1':'0');
+  var body=document.getElementById('todayMedsBody');
+  var arr=document.getElementById('todayMedsArr');
+  if(body)body.style.display=_todayMedsOpen?'':'none';
+  if(arr)arr.textContent=_todayMedsOpen?'▾':'▸';
+}
+function renderTodayMeds(){
+  var el=document.getElementById('todayMedsBody');if(!el)return;
+  var arr=document.getElementById('todayMedsArr');
+  if(arr)arr.textContent=_todayMedsOpen?'▾':'▸';
+  el.style.display=_todayMedsOpen?'':'none';
+  if(!MEDS.length){
+    el.innerHTML='<div style="font-size:12px;color:var(--textl);padding:4px 0">No meds added yet. <button onclick="goTab(\'food\',null)" style="background:none;border:none;color:var(--rose);font-size:12px;cursor:pointer;font-family:\'Quicksand\',sans-serif;font-weight:700">Add in Health →</button></div>';
+    return;
+  }
+  var today=todayStr();
+  if(!MED_LOG[today])MED_LOG[today]={};
+  var doneCount=0;
+  el.innerHTML=MEDS.map(function(m){
+    var amDone=!!(MED_LOG[today]&&MED_LOG[today][m.id+'_am']);
+    var pmDone=!!(MED_LOG[today]&&MED_LOG[today][m.id+'_pm']);
+    if(amDone||pmDone)doneCount++;
+    return'<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid #f5f0eb">'
+      +'<span style="font-size:13px;font-weight:600;color:var(--textd);flex:1">'+escHtml(m.name)+'</span>'
+      +(m.am?'<button onclick="togMed(\''+m.id+'\',\'am\');renderTodayMeds()" style="padding:5px 10px;border-radius:8px;border:2px solid '+(amDone?'var(--sage)':'#ddd')+';background:'+(amDone?'var(--sage)':'#fff')+';color:'+(amDone?'#fff':'var(--textl)')+';font-size:11px;font-weight:700;cursor:pointer;font-family:\'Quicksand\',sans-serif">🌅 AM</button>':'')
+      +(m.pm?'<button onclick="togMed(\''+m.id+'\',\'pm\');renderTodayMeds()" style="padding:5px 10px;border-radius:8px;border:2px solid '+(pmDone?'var(--lav)':'#ddd')+';background:'+(pmDone?'var(--lav)':'#fff')+';color:'+(pmDone?'#fff':'var(--textl)')+';font-size:11px;font-weight:700;cursor:pointer;font-family:\'Quicksand\',sans-serif">🌙 PM</button>':'')
+      +'</div>';
+  }).join('');
+}
+
 function renderMeds(){
   var el=document.getElementById('medList');if(!el)return;
   if(!MEDS.length){el.innerHTML='<p style="color:var(--textl);font-size:13px;text-align:center;padding:8px">No meds added yet. Tap "+ Add" above.</p>';return;}
@@ -9392,6 +9429,191 @@ function delPriceEntry(i){
 }
 
 // ═══════════════════════════════════════════════
+// MILESTONE & PROGRESSION SYSTEMS
+// ═══════════════════════════════════════════════
+
+// Track cumulative tasks/projects ever added (not just current open)
+var HELM_MILES = JSON.parse(localStorage.getItem('aHelmMiles')||'{"tasksEver":0,"projsEver":0}');
+function saveHelmMiles(){localStorage.setItem('aHelmMiles',JSON.stringify(HELM_MILES));}
+
+function bumpHelmTask(){
+  HELM_MILES.tasksEver=(HELM_MILES.tasksEver||0)+1;
+  saveHelmMiles();
+  renderHelmMilestone();
+}
+function bumpHelmProj(){
+  HELM_MILES.projsEver=(HELM_MILES.projsEver||0)+1;
+  saveHelmMiles();
+  renderHelmMilestone();
+}
+
+function helmMilestoneStatus(){
+  var t=Math.min(HELM_MILES.tasksEver||0,50);
+  var p=Math.min(HELM_MILES.projsEver||0,3);
+  var tPct=Math.round(t/50*100);
+  var pPct=Math.round(p/3*100);
+  var level=0;
+  if(t>=50&&p>=3)level=3;
+  else if(t>=25||p>=2)level=2;
+  else if(t>=10||p>=1)level=1;
+  var labels=['🚢 Empty dock — Reid is waiting…','⚓ The ship is being loaded!','📦 Cargo is stacking up!','🌊 The Helm is fully operational!'];
+  return{t:t,p:p,tPct:tPct,pPct:pPct,level:level,label:labels[level]};
+}
+
+function renderHelmMilestone(){
+  var el=document.getElementById('helmMilestonePanel');
+  if(!el)return;
+  var s=helmMilestoneStatus();
+  if(s.level===3){el.style.display='none';return;}
+  el.style.display='';
+  el.innerHTML='<div style="background:linear-gradient(135deg,#e8f0f8,#d8e8f4);border-radius:14px;padding:12px 14px;margin-bottom:10px;border:1.5px solid #b0c8e0">'
+    +'<div style="font-size:12px;font-weight:700;color:#3a5a80;margin-bottom:8px">'+s.label+'</div>'
+    +'<div style="font-size:11px;color:#5a7a9a;margin-bottom:4px">📋 Tasks added: '+s.t+'/50</div>'
+    +'<div style="height:5px;background:rgba(255,255,255,.6);border-radius:3px;margin-bottom:8px;overflow:hidden"><div style="width:'+s.tPct+'%;height:100%;background:#4a80c0;border-radius:3px;transition:width .5s"></div></div>'
+    +'<div style="font-size:11px;color:#5a7a9a;margin-bottom:4px">📁 Projects started: '+s.p+'/3</div>'
+    +'<div style="height:5px;background:rgba(255,255,255,.6);border-radius:3px;overflow:hidden"><div style="width:'+s.pPct+'%;height:100%;background:#d4a820;border-radius:3px;transition:width .5s"></div></div>'
+    +(s.level===0?'<div style="font-size:11px;color:#5a7a9a;margin-top:8px;font-style:italic">Add tasks &amp; start a project to load the ship 🚢</div>':'')
+    +'</div>';
+}
+
+// ── Conservatory Progression ───────────────────
+function conservatoryStatus(){
+  var goals=(GOALS||[]).filter(function(g){return !g.done;}).length;
+  var rtns=(RTN_GROUPS||[]).length;
+  var learn=(RESEARCH||[]).length+(FC_DECKS||[]).length;
+  var focus=(INTENTIONS&&Object.keys(INTENTIONS).length>0)||((HABITS||[]).length>0);
+  var pts=0;
+  if(goals>=4)pts++;if(goals>=2)pts+=0.5;
+  if(rtns>=5)pts++;if(rtns>=2)pts+=0.5;
+  if(learn>=10)pts++;if(learn>=4)pts+=0.5;
+  if(focus)pts+=0.5;
+  var pct=Math.min(100,Math.round(pts/4*100));
+  var level=pct>=100?4:pct>=75?3:pct>=40?2:pct>=15?1:0;
+  var states=[
+    {label:'🥀 Tessa is locked outside the Conservatory…',desc:'The door is sealed. She needs goals, routines, learning & focus tools to open it.'},
+    {label:'🌱 A crack of light — Tessa found a seedling',desc:'The lock is starting to loosen. Keep adding goals and routines.'},
+    {label:'🌿 Tessa is inside! The plants are waking up.',desc:'The Conservatory is alive but sparse. Add more learning topics and focus habits.'},
+    {label:'🌸 The Conservatory is blooming!',desc:'Tessa is thriving. Keep it growing with new goals and routines.'},
+    {label:'✨ The Conservatory is in full bloom!',desc:'Tessa is radiant. You\'ve unlocked everything.'}
+  ];
+  return{goals:goals,rtns:rtns,learn:learn,focus:focus,pct:pct,level:level,state:states[level],
+    needs:{goals:Math.max(0,4-goals),rtns:Math.max(0,5-rtns),learn:Math.max(0,10-learn),focus:!focus}};
+}
+
+function renderConservatoryMilestone(){
+  var el=document.getElementById('conservatoryMilestonePanel');if(!el)return;
+  var s=conservatoryStatus();
+  var st=s.state;
+  var n=s.needs;
+  var needsList=[];
+  if(n.goals>0)needsList.push(n.goals+' more goal'+(n.goals!==1?'s':''));
+  if(n.rtns>0)needsList.push(n.rtns+' more routine'+(n.rtns!==1?'s':''));
+  if(n.learn>0)needsList.push(n.learn+' more learning items');
+  if(n.focus)needsList.push('set a focus intention or habit');
+  el.innerHTML='<div style="background:linear-gradient(135deg,#edf5ea,#e0f0da);border-radius:14px;padding:12px 14px;margin-bottom:10px;border:1.5px solid #a8c8a0">'
+    +'<div style="font-size:13px;font-weight:700;color:#3a6a38;margin-bottom:4px">'+st.label+'</div>'
+    +'<div style="height:6px;background:rgba(255,255,255,.6);border-radius:3px;margin:8px 0;overflow:hidden"><div style="width:'+s.pct+'%;height:100%;background:linear-gradient(90deg,#70b060,#50d080);border-radius:3px;transition:width .6s"></div></div>'
+    +(needsList.length?'<div style="font-size:11px;color:#5a8050;font-style:italic">Next: '+needsList.slice(0,2).join(' · ')+'</div>':'<div style="font-size:11px;color:#5a8050">🌟 Fully blooming!</div>')
+    +'</div>';
+  // Also update the hub character mood to reflect level
+  var charEl=document.getElementById('hub-char-conservatory');
+  if(charEl){
+    var badge=charEl.querySelector('.char-mood-badge');
+    if(!badge){badge=document.createElement('div');badge.className='char-mood-badge';charEl.appendChild(badge);}
+    var moodMap=['😢','😔','🙂','🌸','✨'];
+    badge.textContent=moodMap[s.level]||'🙂';
+  }
+}
+
+// ── Crate Sprint (Reid, replaces Deadline Dash) ─
+var CRATE_SPRINT_SAMPLE=['Unsubscribe from 3 emails','Clear your desk','Reply to a text','Write tomorrow\'s top 3','Drink a full glass of water','Put away 5 things','Wipe down the counter','Do 10 squats','File one paper','Log an expense','Water one plant','Write a sentence of your story','Check your calendar','Delete 10 old photos','Stretch for 2 minutes'];
+var _crateInterval=null;
+
+function openCrateSprint(){showOv('crateSprintOv');startCrateSprint();}
+
+function startCrateSprint(){
+  if(_crateInterval){clearInterval(_crateInterval);_crateInterval=null;}
+  var quick=TASKS.filter(function(t){return !t.done&&t.etime==='<10min';});
+  var other=TASKS.filter(function(t){return !t.done&&t.etime!=='<10min';});
+  var queue=quick.concat(other);
+  if(queue.length<3)CRATE_SPRINT_SAMPLE.forEach(function(s,i){queue.push({id:'cs-'+i,title:s,_isSample:true});});
+  queue=queue.slice().sort(function(){return Math.random()-.5;}).slice(0,12);
+  var idx=0,done=0,skipped=0,timeLeft=600,shipLoad=0;
+  var el=document.getElementById('crateSprintBody');if(!el)return;
+
+  function renderBoard(){
+    if(idx>=queue.length){endCrateSprint(done,skipped);return;}
+    var task=queue[idx];
+    var m=Math.floor(timeLeft/60),s=timeLeft%60;
+    var crates=Math.min(done,10);
+    var crateRow='';
+    for(var i=0;i<10;i++)crateRow+='<span style="font-size:18px;opacity:'+(i<crates?1:0.2)+'">'+(i<crates?'📦':'📦')+'</span>';
+    el.innerHTML='<div style="padding:4px 0 8px">'
+      +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">'
+        +'<span style="font-size:11px;color:var(--textl)">'+done+' loaded · '+skipped+' skipped</span>'
+        +'<span style="font-size:18px;font-weight:700;font-family:monospace;color:'+(timeLeft<60?'#d07070':timeLeft<180?'#c4a020':'#3a5a80')+'" id="crateTimer">'+( (m<10?'0':'')+m+':'+(s<10?'0':'')+s)+'</span>'
+      +'</div>'
+      // Ship + crates visual
+      +'<div style="background:linear-gradient(180deg,#b8d8f0 60%,#7ab0d8);border-radius:12px;padding:10px 12px 6px;margin-bottom:10px;text-align:center">'
+        +'<div style="font-size:10px;font-weight:700;color:#3a5a80;margin-bottom:4px;letter-spacing:.5px">REID\'S SHIP 🚢</div>'
+        +'<div style="display:flex;justify-content:center;gap:2px;margin-bottom:4px">'+crateRow+'</div>'
+        +'<div style="font-size:10px;color:#5a7a9a">'+done+'/10 crates loaded</div>'
+      +'</div>'
+      // Current task card
+      +'<div style="font-size:11px;color:var(--textl);text-align:center;margin-bottom:6px">Task '+(idx+1)+' of '+queue.length+'</div>'
+      +'<div style="background:#fff;border-radius:14px;padding:18px 14px;margin-bottom:14px;box-shadow:0 3px 12px rgba(0,0,0,.09);min-height:70px;display:flex;align-items:center;justify-content:center;text-align:center">'
+        +'<div style="font-size:16px;font-weight:700;color:var(--textd);line-height:1.4">'+escHtml(task.title)+'</div>'
+      +'</div>'
+      +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">'
+        +'<button onclick="crateSkip()" style="padding:14px;border-radius:12px;border:2px solid #ddd;background:#fff;font-family:\'Quicksand\',sans-serif;font-size:13px;font-weight:700;cursor:pointer;color:var(--textl)">⏭ Skip</button>'
+        +'<button onclick="crateDone()" style="padding:14px;border-radius:12px;border:none;background:linear-gradient(135deg,#3a6aaa,#2a5090);font-family:\'Quicksand\',sans-serif;font-size:13px;font-weight:700;cursor:pointer;color:#fff;box-shadow:0 3px 8px rgba(50,100,180,.35)">📦 Loaded!</button>'
+      +'</div>'
+      +'</div>';
+  }
+
+  window.crateDone=function(){
+    var task=queue[idx];
+    if(task&&!task._isSample){
+      var t=TASKS.find(function(x){return x.id===task.id;});
+      if(t){t.done=true;t.doneDate=todayStr();fbSave('tasks',t.id,t);millieTaskTreat();}
+    }
+    done++;idx++;
+    var body=document.getElementById('crateSprintBody');
+    if(body){body.style.background='#e0f0ff';setTimeout(function(){if(body)body.style.background='';renderBoard();},200);}
+    else renderBoard();
+  };
+  window.crateSkip=function(){skipped++;idx++;renderBoard();};
+
+  renderBoard();
+  _crateInterval=setInterval(function(){
+    timeLeft--;
+    var tEl=document.getElementById('crateTimer');
+    if(tEl){var m=Math.floor(timeLeft/60),s=timeLeft%60;tEl.textContent=(m<10?'0':'')+m+':'+(s<10?'0':'')+s;tEl.style.color=timeLeft<60?'#d07070':timeLeft<180?'#c4a020':'#3a5a80';}
+    if(timeLeft<=0){clearInterval(_crateInterval);_crateInterval=null;endCrateSprint(done,skipped);}
+  },1000);
+}
+
+function endCrateSprint(done,skipped){
+  if(_crateInterval){clearInterval(_crateInterval);_crateInterval=null;}
+  updateSprintStreak(done);
+  var el=document.getElementById('crateSprintBody');if(!el)return;
+  var crates=Math.min(done,10);
+  var crateRow='';
+  for(var i=0;i<10;i++)crateRow+='<span style="font-size:22px;opacity:'+(i<crates?1:0.25)+'">📦</span>';
+  var grade=done>=8?'⚓ Full cargo! Reid is proud!':done>=5?'📦 Good haul, sailor!':done>=2?'🌊 A start — set sail again!':'🚢 The dock is empty.';
+  el.innerHTML='<div style="text-align:center;padding:16px 10px">'
+    +'<div style="background:linear-gradient(180deg,#b8d8f0 60%,#7ab0d8);border-radius:12px;padding:12px;margin-bottom:12px">'
+      +'<div style="display:flex;justify-content:center;gap:2px;flex-wrap:wrap">'+crateRow+'</div>'
+      +'<div style="font-size:12px;color:#3a5a80;margin-top:4px">'+done+' crates loaded 🚢</div>'
+    +'</div>'
+    +'<div style="font-size:17px;font-weight:700;color:var(--text);margin-bottom:4px">'+grade+'</div>'
+    +'<div style="font-size:12px;color:var(--textl);margin-bottom:4px">Skipped: '+skipped+'</div>'
+    +'<div style="font-size:13px;font-weight:700;color:var(--rose);margin:8px 0">🔥 '+SPRINT_STATS.streak+'-day streak</div>'
+    +'<button class="millie-game-btn" style="background:#3a6aaa;margin-top:10px" onclick="startCrateSprint()">Load again ⚓</button>'
+    +'</div>';
+}
+
+// ═══════════════════════════════════════════════
 // MINI-GAMES: BUDGET BLITZ + DEADLINE DASH + TASK SPRINT + MEMORY PALACE
 // ═══════════════════════════════════════════════
 
@@ -10201,6 +10423,9 @@ function startApp(){
   renderMillieWidget();
   renderSprintSign();
   initDailyQuests();
+  renderTodayMeds();
+  renderHelmMilestone();
+  renderConservatoryMilestone();
   ['helm','conservatory','hearthside','workshop','estate'].forEach(function(s){
     renderHubPreviews(s);
   });
@@ -10534,6 +10759,14 @@ setInterval(updDate, 60000);
   <div class="mod" onclick="event.stopPropagation()" style="max-width:340px;background:linear-gradient(135deg,#fdf0f8,#f5eafc);max-height:90vh;overflow-y:auto">
     <div class="mh"><span class="mt">🎨 Color Mix</span><button class="mc" onclick="closeOv('colorMixOv')">✕</button></div>
     <div id="colorMixBody" style="padding:0 4px 8px"></div>
+  </div>
+</div>
+
+<!-- CRATE SPRINT MODAL -->
+<div class="ov" id="crateSprintOv" onclick="closeOv('crateSprintOv')">
+  <div class="mod" onclick="event.stopPropagation()" style="max-width:360px;background:linear-gradient(135deg,#eef4fc,#e4eef8);max-height:90vh;overflow-y:auto">
+    <div class="mh" style="border-bottom-color:#c0d4ec"><span class="mt" style="color:#3a5a80">⚓ Crate Sprint</span><button class="mc" onclick="closeOv('crateSprintOv')">✕</button></div>
+    <div id="crateSprintBody" style="padding:0 4px 8px"></div>
   </div>
 </div>
 
