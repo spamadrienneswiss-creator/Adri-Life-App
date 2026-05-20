@@ -825,6 +825,10 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
         <button class="btn" style="font-size:12px;padding:8px" onclick="goTab('spirit',null);setTimeout(function(){showSpiritSec('gratitude',document.querySelector('#v-spirit .pn-btn:nth-child(4)'))},200)">🌸 Gratitude</button>
       </div>
     </div>
+    <div class="hub-card span2" style="cursor:default;padding:12px" id="spiritStreakCard">
+      <div style="font-size:11px;font-weight:700;color:var(--textd);margin-bottom:8px">🔥 Streaks</div>
+      <div id="spiritStreakBars" style="display:flex;gap:8px"></div>
+    </div>
     <div class="hub-card span2" onclick="goTab('spirit',null)"><div class="hub-card-ic">✨</div><div class="hub-card-name">Spiritual</div><div class="hub-card-sub">Bible study, prayer, ministry &amp; gratitude</div></div>
     <div class="hub-card span2" onclick="goTab('spirit',null);setTimeout(function(){showSpiritSec('notes',document.querySelector('#v-spirit .pn-btn:nth-child(7)'))},200)"><div class="hub-card-ic">📓</div><div class="hub-card-name">Meeting Notes</div><div class="hub-card-sub" id="hub-meet-notes-sub">Study notes &amp; meeting insights</div></div>
     <div class="hub-card" onclick="goTab('projects',null)"><div class="hub-card-ic">📁</div><div class="hub-card-name">Spirit Projects</div><div class="hub-card-sub" id="hub-spirit-proj-sub">Active spiritual goals</div></div>
@@ -906,6 +910,17 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     </div>
     <div id="todayMedsBody" style="margin-top:8px"></div>
   </div>
+  <!-- Sleep summary chip -->
+  <div id="todaySleepChip" style="display:none;background:#fff;border-radius:14px;padding:10px 14px;margin-bottom:10px;box-shadow:0 1px 4px rgba(0,0,0,.06);cursor:pointer" onclick="goTab('food',null)">
+    <div style="display:flex;align-items:center;gap:10px">
+      <span style="font-size:20px" id="todaySleepEmoji">😴</span>
+      <div style="flex:1">
+        <div style="font-size:12px;font-weight:700;color:var(--textd)" id="todaySleepTitle">Last night</div>
+        <div style="font-size:11px;color:var(--textl)" id="todaySleepSub">—</div>
+      </div>
+      <div id="todaySleepBars" style="display:flex;align-items:flex-end;gap:2px;height:28px"></div>
+    </div>
+  </div>
   <!-- Intentions widget -->
   <div id="intentionsHomeWrap" style="display:none;margin-bottom:10px">
     <div style="background:#fff;border-radius:14px;padding:12px 14px;box-shadow:0 1px 4px rgba(0,0,0,.06)">
@@ -932,7 +947,7 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
   <!-- Daily Quests -->
   <div id="dailyQuestWrap"></div>
   <!-- Spiritual Runner -->
-  <div id="spiritRunWrap" style="margin-bottom:10px;border-radius:14px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.18);cursor:pointer" onclick="goTab('lighthouse',document.querySelector('[data-tab=\'lighthouse\']'));setTimeout(function(){showSpiritSec('prayer',document.querySelector('#v-spirit .pn-btn'))},150)" title="Tap to open Spiritual hub">
+  <div id="spiritRunWrap" style="margin-bottom:10px;border-radius:14px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.18);cursor:pointer" onclick="goTab('lighthouse',document.querySelector('[data-tab=\'lighthouse\']'));setTimeout(function(){showSpiritSec('prayer',document.querySelector('#v-spirit .pn-btn'))},150)" title="Tap to open Lighthouse">
     <canvas id="spiritRunCanvas" style="width:100%;height:130px;display:block"></canvas>
   </div>
   <div id="ministryHomeWrap" style="background:#fff;border-radius:14px;padding:11px 14px;margin-bottom:10px;box-shadow:0 1px 4px rgba(0,0,0,.06)">
@@ -944,9 +959,31 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
   </div>
   <div class="card">
     <div class="ct">📊 Quick Stats</div>
-    <div class="pr"><div class="pt"><span class="pn">💧 Water</span><span class="pm2" id="twD">0/8</span></div><div class="pb"><div class="pf pf-wat" id="twB" style="width:0%"></div></div></div>
+    <div class="pr">
+      <div class="pt"><span class="pn">💧 Water</span><span class="pm2" id="twD">0/8</span></div>
+      <div class="pb"><div class="pf pf-wat" id="twB" style="width:0%"></div></div>
+      <div id="waterDropRow" style="display:flex;gap:4px;margin-top:6px;flex-wrap:wrap"></div>
+    </div>
     <div class="pr"><div class="pt"><span class="pn">🔥 Calories</span><span class="pm2" id="tcD">0/1900</span></div><div class="pb"><div class="pf pf-cal" id="tcB" style="width:0%"></div></div></div>
     <div class="pr"><div class="pt"><span class="pn">💪 Protein</span><span class="pm2" id="tpD">0g/120g</span></div><div class="pb"><div class="pf pf-pro" id="tpB" style="width:0%"></div></div></div>
+  </div>
+  <!-- This Week summary (collapsible) -->
+  <div class="card" style="padding:0">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:11px 14px;cursor:pointer" onclick="togTodaySec('thisWeekBody')">
+      <span style="font-size:12px;font-weight:700;color:var(--textl);letter-spacing:.5px;text-transform:uppercase">📅 This Week</span>
+      <span class="sh-arr" id="sh-arr-thisWeekBody">▸</span>
+    </div>
+    <div id="thisWeekBody-wrap" style="display:none"><div id="thisWeekBody" style="padding:0 14px 12px"></div></div>
+  </div>
+  <!-- Active Goals (collapsible) -->
+  <div id="todayGoalsWrap" style="display:none">
+    <div class="card" style="padding:0">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:11px 14px;cursor:pointer" onclick="togTodaySec('todayGoalsBody')">
+        <span style="font-size:12px;font-weight:700;color:var(--textl);letter-spacing:.5px;text-transform:uppercase">🎯 Active Goals</span>
+        <span class="sh-arr" id="sh-arr-todayGoalsBody">▸</span>
+      </div>
+      <div id="todayGoalsBody-wrap" style="display:none"><div id="todayGoalsBody" style="padding:0 14px 12px"></div></div>
+    </div>
   </div>
   <div class="sh sh-toggle" onclick="togTodaySec('todayAM')">🌅 Morning Routine <span class="sh-arr" id="sh-arr-todayAM">▾</span></div>
   <div id="todayAM-wrap"><div class="rc" id="todayAM"><div class="rt">✨ AM Routine</div></div></div>
@@ -974,8 +1011,40 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
 
 <!-- GOALS -->
 <div class="view" id="v-goals">
+  <div style="display:flex;gap:8px;margin-bottom:12px" id="goalHorizonStrip"></div>
   <button class="ok-btn" style="margin-bottom:14px;background:linear-gradient(135deg,var(--sage),var(--teal))" onclick="openNewGoal()">🎯 New Goal</button>
-  <div id="goalList"><div class="empty"><div class="emj">🎯</div><p>No goals yet. Add one to get started!</p></div></div>
+
+  <div id="goalSec-yearly" style="margin-bottom:16px">
+    <div style="font-family:'Playfair Display',serif;font-size:16px;color:var(--textd);margin-bottom:10px;display:flex;align-items:center;justify-content:space-between">
+      🗓️ Yearly Goals
+      <button onclick="openNewGoal('yearly')" style="font-size:11px;background:none;border:1.5px solid var(--bdr);border-radius:8px;padding:3px 10px;cursor:pointer;font-family:inherit;color:var(--textl)">+ Add</button>
+    </div>
+    <div id="goalList-yearly"></div>
+  </div>
+
+  <div id="goalSec-quarterly" style="margin-bottom:16px">
+    <div style="font-family:'Playfair Display',serif;font-size:16px;color:var(--textd);margin-bottom:10px;display:flex;align-items:center;justify-content:space-between">
+      📅 Quarterly Goals
+      <button onclick="openNewGoal('quarterly')" style="font-size:11px;background:none;border:1.5px solid var(--bdr);border-radius:8px;padding:3px 10px;cursor:pointer;font-family:inherit;color:var(--textl)">+ Add</button>
+    </div>
+    <div id="goalList-quarterly"></div>
+  </div>
+
+  <div id="goalSec-monthly" style="margin-bottom:16px">
+    <div style="font-family:'Playfair Display',serif;font-size:16px;color:var(--textd);margin-bottom:10px;display:flex;align-items:center;justify-content:space-between">
+      📆 Monthly Goals
+      <button onclick="openNewGoal('monthly')" style="font-size:11px;background:none;border:1.5px solid var(--bdr);border-radius:8px;padding:3px 10px;cursor:pointer;font-family:inherit;color:var(--textl)">+ Add</button>
+    </div>
+    <div id="goalList-monthly"></div>
+  </div>
+
+  <div id="goalSec-ongoing" style="margin-bottom:16px">
+    <div style="font-family:'Playfair Display',serif;font-size:16px;color:var(--textd);margin-bottom:10px;display:flex;align-items:center;justify-content:space-between">
+      ✨ Ongoing
+      <button onclick="openNewGoal('ongoing')" style="font-size:11px;background:none;border:1.5px solid var(--bdr);border-radius:8px;padding:3px 10px;cursor:pointer;font-family:inherit;color:var(--textl)">+ Add</button>
+    </div>
+    <div id="goalList-ongoing"></div>
+  </div>
 </div>
 
 <!-- TASKS -->
@@ -1048,6 +1117,18 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     <div class="pr"><div class="pt"><span class="pn">🍞 Carbs</span><span class="pm2" id="fRD">0g/150g</span></div><div class="pb"><div class="pf pf-crb" id="fRB" style="width:0%"></div></div></div>
     <div class="pr"><div class="pt"><span class="pn">🥑 Fat</span><span class="pm2" id="fAD">0g/65g</span></div><div class="pb"><div class="pf pf-fat" id="fAB" style="width:0%"></div></div></div>
     <div class="pr"><div class="pt"><span class="pn">💧 Water</span><span class="pm2" id="fWD">0/8</span></div><div class="pb"><div class="pf pf-wat" id="fWB" style="width:0%"></div></div></div>
+  </div>
+  <div class="card" style="margin-top:0;padding:12px 14px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+      <span style="font-size:13px;font-weight:700;color:var(--textd)">😴 Sleep — Last 7 Nights</span>
+      <span id="sleepAvgLabel" style="font-size:11px;color:var(--textl)">avg —</span>
+    </div>
+    <div id="sleepGraphBars" style="display:flex;align-items:flex-end;gap:3px;height:56px;margin-bottom:6px"></div>
+    <div style="display:flex;gap:10px;font-size:10px;color:var(--textl)">
+      <span style="color:var(--sage)">● ≥8h great</span>
+      <span style="color:#f0a020">● ≥6h ok</span>
+      <span style="color:#d94040">● &lt;6h short</span>
+    </div>
   </div>
   <div class="sh sect-toggle" onclick="togSect('weeklyNut','weeklyArrow')">📊 Weekly Nutrition <span id="weeklyArrow">▸</span></div>
   <div id="weeklyNut" style="display:none">
@@ -1542,6 +1623,7 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
 
   <!-- GRATITUDE section -->
   <div id="ss-gratitude" style="display:none">
+    <div id="gratCalendar" style="margin-bottom:12px"></div>
     <div style="font-weight:700;font-size:14px;color:var(--textd);margin-bottom:10px">🌸 Gratitude Journal</div>
     <div class="card" style="margin-bottom:12px">
       <div style="font-size:13px;font-weight:600;color:var(--textd);margin-bottom:8px">Today I'm grateful for…</div>
@@ -1711,6 +1793,15 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     <div style="display:flex;gap:8px;margin-bottom:10px">
       <input id="recipeSearch" type="text" placeholder="Search recipes…" oninput="renderRecipes()" style="flex:1;padding:8px 11px;border-radius:10px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px">
       <button class="btn" onclick="openRecipeModal()">+ New</button>
+    </div>
+    <div class="fbar" style="margin-bottom:10px;flex-wrap:wrap" id="recipeMealFilter">
+      <button class="fchip on" onclick="setRecipeFilter('',this)">All</button>
+      <button class="fchip" onclick="setRecipeFilter('breakfast',this)">🌅 Breakfast</button>
+      <button class="fchip" onclick="setRecipeFilter('lunch',this)">🥙 Lunch</button>
+      <button class="fchip" onclick="setRecipeFilter('dinner',this)">🍽️ Dinner</button>
+      <button class="fchip" onclick="setRecipeFilter('snack',this)">🥨 Snack</button>
+      <button class="fchip" onclick="setRecipeFilter('soup',this)">🍲 Soup</button>
+      <button class="fchip" onclick="setRecipeFilter('dessert',this)">🍰 Dessert</button>
     </div>
     <div id="recipeList"></div>
   </div>
@@ -2170,6 +2261,15 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
   <div class="mh"></div><div class="mtit" id="gmTit">New Goal 🎯</div>
   <input type="hidden" id="gmId">
   <div class="fg"><label class="fl">Goal Name</label><input class="fi" id="gmN" placeholder="e.g. 50 service hours this month"></div>
+  <div style="margin-bottom:10px">
+    <div class="fl" style="margin-bottom:6px">Time Horizon</div>
+    <div class="fbar" style="flex-wrap:wrap">
+      <button class="sb" data-g="ghorizon" data-v="yearly" onclick="pSB(this)">🗓️ Yearly</button>
+      <button class="sb" data-g="ghorizon" data-v="quarterly" onclick="pSB(this)">📅 Quarterly</button>
+      <button class="sb" data-g="ghorizon" data-v="monthly" onclick="pSB(this)">📆 Monthly</button>
+      <button class="sb on" data-g="ghorizon" data-v="ongoing" onclick="pSB(this)">✨ Ongoing</button>
+    </div>
+  </div>
   <div class="fg"><label class="fl">Category</label>
     <div class="bg bg3">
       <button class="sb" data-g="gcat" data-v="spiritual" onclick="pSB(this)">🌱 Spiritual</button>
@@ -2292,6 +2392,13 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
       <div class="set-row"><div class="set-lbl" id="sWatLbl">💧 Water Goal (glasses/day)</div><input class="fi" type="number" id="sWat" style="width:90px;padding:7px 10px"></div>
       <div class="set-row"><div class="set-lbl">💪 Exercise Goal (workouts/week)</div><input class="fi" type="number" id="sEx" style="width:90px;padding:7px 10px"></div>
       <button class="ok-btn" style="margin-top:14px" onclick="saveGoals()">Save Goals ✨</button>
+    </div>
+  </div>
+  <div class="card">
+    <div class="set-sec-t" onclick="togSetSec('sc-index',this)">📚 App Index <span class="sst-arr">▶</span></div>
+    <div id="sc-index" style="display:none">
+      <div style="font-size:12px;color:var(--textl);margin-bottom:12px">Tap any section to navigate there.</div>
+      <div id="appIndexBody"></div>
     </div>
   </div>
 </div>
@@ -2727,6 +2834,7 @@ function logRetroSleep(){
   MILLIE.energy=Math.min(100,MILLIE.energy+energyGain);
   MILLIE.hunger=Math.max(0,MILLIE.hunger-hrs*2);
   saveMillie();renderMillieSleepLog();renderMillieWidget();
+  renderSleepGraph();renderTodaySleepChip();
   checkQuestAutoComplete('sleep');
   msgEl.textContent='Logged '+hrs+'h '+mins+'m — Millie\'s energy restored! ✓';
   msgEl.style.color='var(--sage)';msgEl.style.display='';
@@ -3700,7 +3808,7 @@ function startTreatGame(){
         var dx=t.x-catX;
         if(t.y>H-38&&Math.abs(dx)<34){
           t.live=false;caught++;eatAnim=14;
-          MILLIE.hunger=Math.min(100,MILLIE.hunger+12);saveMillie();
+          MILLIE.hunger=Math.min(100,MILLIE.hunger+12);saveMillie();renderMillieStatBars();
         }else if(t.y>H+8){t.live=false;missed++;}
       });
       // Remove dead treats immediately so end-check works
@@ -3721,7 +3829,7 @@ function startTreatGame(){
       ctx.fillText('Caught '+caught+'/'+total,6,4);
       // End check
       if(launched>=total&&treats.length===0&&!done){done=true;clearInterval(_treatGame);_treatGame=null;
-        renderMillieWidget();
+        renderMillieWidget();renderMillieStatBars();
         if(label)label.textContent='Feeding time done! 🐟';
         if(scoreEl)scoreEl.textContent='Millie ate '+caught+' treat'+(caught!==1?'s':'')+'! +'+caught*12+' tummy';
         var btn=document.createElement('button');btn.className='millie-game-btn';btn.textContent='Feed again 🍣';btn.onclick=startTreatGame;wrap.appendChild(btn);
@@ -3832,7 +3940,9 @@ function initTodaySecDefaults(){
     _todaySecC._autoDate=today;
     localStorage.setItem('aTodaySecC',JSON.stringify(_todaySecC));
   }
-  ['todayAM','todayPM','todaySo'].forEach(applyTodaySecState);
+  if(_todaySecC['thisWeekBody']===undefined) _todaySecC['thisWeekBody']=true;
+  if(_todaySecC['todayGoalsBody']===undefined) _todaySecC['todayGoalsBody']=true;
+  ['todayAM','todayPM','todaySo','thisWeekBody','todayGoalsBody'].forEach(applyTodaySecState);
 }
 
 function togTodaySec(id){
@@ -4287,8 +4397,11 @@ function togT(id){
   var t=TASKS.find(function(t){return t.id===id;});
   if(!t)return;
   t.done=!t.done;
+  if(t.done) t.doneDate=todayStr(); else delete t.doneDate;
   fbSave('tasks',id,t);
   if(t.done){if(t.meaningful)celebrate();millieTaskTreat();if(t.repeat)setTimeout(function(){createRepeat(t);},600);checkQuestTaskCompletion(id);}
+  updHelmBadge();
+  renderThisWeek();
 }
 
 function editT(id){
@@ -4367,6 +4480,7 @@ function saveTask(){
   var isNew=!TASKS.find(function(x){return x.id===id;});
   if(isNew){TASKS.push(t);bumpHelmTask();}else{var idx=TASKS.findIndex(function(x){return x.id===id;});if(idx>=0)TASKS[idx]=t;}
   fbSave('tasks',id,t);
+  updHelmBadge();
   closeM('taskModal');
 }
 
@@ -4402,6 +4516,7 @@ function updM(){
   var t=getTot();var w=getW();
   var pct=function(v,g){return Math.min(100,Math.round(v/g*100))+'%';};
   document.getElementById('twD').textContent=w+'/'+S.gWat;document.getElementById('twB').style.width=pct(w,S.gWat);
+  renderWaterDrops();
   document.getElementById('tcD').textContent=Math.round(t.cal)+'/'+S.gCal;document.getElementById('tcB').style.width=pct(t.cal,S.gCal);
   document.getElementById('tpD').textContent=Math.round(t.pro)+'g/'+S.gPro+'g';document.getElementById('tpB').style.width=pct(t.pro,S.gPro);
   document.getElementById('fCD').textContent=Math.round(t.cal)+'/'+S.gCal;document.getElementById('fCB').style.width=pct(t.cal,S.gCal);
@@ -4900,11 +5015,14 @@ function goalHTML(g){
       '<button onclick="delGoalStep(\''+g.id+'\',\''+sid+'\')" class="sub-del">✕</button>'+
     '</div>';
   }).join('');
+  var horizonBadges={yearly:'🗓️',quarterly:'📅',monthly:'📆',ongoing:'✨'};
+  var hBadge=horizonBadges[g.horizon||'ongoing']||'✨';
   return'<div class="proj-card" style="border-left:3px solid '+gc.c+'">'+
     '<div class="proj-hd">'+
       '<div style="flex:1">'+
         '<div class="proj-title">'+g.title+'</div>'+
         '<span class="ttag" style="background:'+gc.bg+';color:'+gc.c+'">'+gc.n+'</span>'+
+        '<span class="ttag" style="background:#f5f0ff;color:#7c5cbf;margin-left:4px">'+hBadge+' '+(g.horizon||'ongoing')+'</span>'+
         (g.target?'<span class="ttime" style="margin-left:5px">'+(g.current||0)+' / '+g.target+(g.unit?' '+g.unit:'')+'</span>':'')+
       '</div>'+
       '<div style="display:flex;gap:2px;flex-shrink:0">'+
@@ -4929,17 +5047,48 @@ function goalHTML(g){
 }
 
 function renderGoals(){
-  var el=document.getElementById('goalList');if(!el)return;
-  el.innerHTML=GOALS.length?GOALS.map(goalHTML).join(''):'<div class="empty"><div class="emj">🎯</div><p>No goals yet.</p></div>';
+  var horizons=[
+    {key:'yearly',label:'🗓️ Yearly Goals',id:'goalList-yearly'},
+    {key:'quarterly',label:'📅 Quarterly Goals',id:'goalList-quarterly'},
+    {key:'monthly',label:'📆 Monthly Goals',id:'goalList-monthly'},
+    {key:'ongoing',label:'✨ Ongoing',id:'goalList-ongoing'},
+  ];
+  horizons.forEach(function(h){
+    var el=document.getElementById(h.id);
+    if(!el)return;
+    var goals=GOALS.filter(function(g){return !g.done&&(g.horizon||'ongoing')===h.key;});
+    el.innerHTML=goals.length?goals.map(goalHTML).join(''):'<div style="font-size:12px;color:var(--textl);padding:8px 0;text-align:center">No '+h.label.toLowerCase()+' yet</div>';
+  });
+  var strip=document.getElementById('goalHorizonStrip');
+  if(strip){
+    var active=GOALS.filter(function(g){return !g.done;});
+    strip.innerHTML=[
+      {key:'yearly',label:'Yearly',ico:'🗓️'},
+      {key:'quarterly',label:'Qtrly',ico:'📅'},
+      {key:'monthly',label:'Monthly',ico:'📆'},
+      {key:'ongoing',label:'Ongoing',ico:'✨'},
+    ].map(function(h){
+      var n=active.filter(function(g){return (g.horizon||'ongoing')===h.key;}).length;
+      return '<div style="flex:1;text-align:center;padding:8px 4px;background:white;border-radius:10px;cursor:pointer" onclick="document.getElementById(\'goalSec-'+h.key+'\').scrollIntoView({behavior:\'smooth\'})">'
+        +'<div style="font-size:18px">'+h.ico+'</div>'
+        +'<div style="font-size:15px;font-weight:700;color:var(--rose)">'+n+'</div>'
+        +'<div style="font-size:10px;color:var(--textl)">'+h.label+'</div>'
+        +'</div>';
+    }).join('');
+  }
+  renderTodayGoals();
 }
 
 function togGoalPanel(id){
   OPEN_GOAL[id]=!OPEN_GOAL[id];renderGoals();
 }
 
-function openNewGoal(){
+function openNewGoal(horizon){
   SBV={};
   document.querySelectorAll('[data-g]').forEach(function(b){b.classList.remove('on');});
+  var h=horizon||'ongoing';
+  SBV.ghorizon=h;
+  document.querySelectorAll('[data-g="ghorizon"]').forEach(function(b){b.classList.toggle('on',b.dataset.v===h);});
   document.getElementById('gmTit').textContent='New Goal 🎯';
   document.getElementById('gmId').value='';
   document.getElementById('gmN').value='';
@@ -4963,6 +5112,9 @@ function editGoal(id){
   document.getElementById('gmDel').style.display='block';
   setTimeout(function(){
     document.querySelectorAll('[data-g="gcat"]').forEach(function(b){if(b.dataset.v===g.gcat){b.classList.add('on');SBV.gcat=g.gcat;}});
+    var gh=g.horizon||'ongoing';
+    SBV.ghorizon=gh;
+    document.querySelectorAll('[data-g="ghorizon"]').forEach(function(b){b.classList.toggle('on',b.dataset.v===gh);});
   },30);
   document.getElementById('goalModal').classList.add('show');
 }
@@ -4974,6 +5126,7 @@ function saveGoal(){
   var existing=GOALS.find(function(g){return g.id===id;});
   var tgt=parseFloat(document.getElementById('gmTarget').value)||0;
   var goal={id:id,title:title,gcat:SBV.gcat||(existing&&existing.gcat)||'misc',
+    horizon:SBV.ghorizon||'ongoing',
     target:tgt||0,unit:document.getElementById('gmUnit').value.trim(),
     current:existing?existing.current||0:0,
     notes:document.getElementById('gmNotes').value.trim(),
@@ -5495,6 +5648,8 @@ function millieGoodmorning(){
   MILLIE.lastSleepStart=null;
   MILLIE.happiness=Math.min(100,MILLIE.happiness+10);
   saveMillie();openMillie();renderMillieWidget();
+  renderSleepGraph();
+  renderTodaySleepChip();
 }
 
 function millieSaveSleepSched(){
@@ -6301,6 +6456,7 @@ function setBillStatus(id,status){
   BILL_PAY[mon][id]=BILL_PAY[mon][id]===status?'':status;
   localStorage.setItem('aBillPay',JSON.stringify(BILL_PAY));
   renderBills();
+  updEstateBadge();
 }
 
 function togBillPay(id){setBillStatus(id,'posted');}// backward compat
@@ -6361,15 +6517,19 @@ function renderMonthly(){
   var cats={};
   thisMonExp.forEach(function(e){cats[e.cat]=(cats[e.cat]||0)+e.amt;});
   var total=thisMonExp.reduce(function(s,e){return s+e.amt;},0);
-  var catLabels={'wig-supplies':'🪄 Wigs','shipping':'📦 Shipping','groceries':'🛒 Grocery','dining':'🍽️ Dining','gas':'⛽ Gas','other':'📋 Other'};
-  var rows=Object.keys(cats).sort(function(a,b){return cats[b]-cats[a];}).map(function(cat){
+  var catLabels={'wig-supplies':'🪄 Wigs','shipping':'📦 Shipping','groceries':'🛒 Grocery','dining':'🍽️ Dining','gas':'⛽ Gas','other':'📋 Other','entertainment':'🎬 Entertain','utilities':'💡 Utilities','clothing':'👗 Clothing','health':'💊 Health','housing':'🏠 Housing','transport':'🚗 Transport','personal':'💅 Personal','business':'💼 Business'};
+  var sortedCats=Object.keys(cats).sort(function(a,b){return cats[b]-cats[a];});
+  var rows=sortedCats.map(function(cat,i){
     var pct=Math.round(cats[cat]/total*100);
-    return'<div style="margin-bottom:10px">'+
-      '<div class="pt" style="margin-bottom:3px"><span class="pn" style="font-size:12px">'+(catLabels[cat]||cat)+'</span><span class="pm2">$'+cats[cat].toFixed(0)+' ('+pct+'%)</span></div>'+
-      '<div class="pb"><div class="pf" style="width:'+pct+'%;background:var(--peach)"></div></div>'+
+    var color=EXP_CAT_COLORS[cat]||EXP_CAT_FALLBACKS[i%EXP_CAT_FALLBACKS.length];
+    return'<div style="margin-bottom:8px">'+
+      '<div class="pt" style="margin-bottom:3px"><span class="pn" style="font-size:12px"><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:'+color+';margin-right:5px;vertical-align:middle"></span>'+(catLabels[cat]||cat)+'</span><span class="pm2">$'+cats[cat].toFixed(0)+' ('+pct+'%)</span></div>'+
+      '<div class="pb"><div class="pf" style="width:'+pct+'%;background:'+color+'"></div></div>'+
     '</div>';
   });
-  el.innerHTML='<div style="font-size:11px;font-weight:700;color:var(--textl);text-transform:uppercase;letter-spacing:.8px;margin-bottom:12px">This Month — Total: $'+total.toFixed(0)+'</div>'+rows.join('');
+  el.innerHTML='<canvas id="expPieCanvas" width="160" height="160" style="display:block;margin:0 auto 12px"></canvas>'
+    +'<div style="font-size:11px;font-weight:700;color:var(--textl);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px">This Month — Total: $'+total.toFixed(0)+'</div>'+rows.join('');
+  setTimeout(renderExpPieChart, 0);
 }
 
 // ═══════════════════════════════════════════════
@@ -6499,26 +6659,46 @@ function renderMood(){
 
 // ═══════════════════════════════════════════════
 // HEALTH — SYMPTOMS
+var _symEditing = false;
+function togSymEdit(){ _symEditing=!_symEditing; var p=document.getElementById('symEditPanel'); if(p)p.style.display=_symEditing?'':'none'; }
 // ═══════════════════════════════════════════════
 function renderSymCard(){
   var el=document.getElementById('symCard');if(!el)return;
   var k=getTK();
   var today=SYM_LOG[k]||{};
-  el.innerHTML='<div style="font-size:12px;color:var(--textl);margin-bottom:10px">Rate each from 0–5 (0 = none)</div>'+
-    SYM_TYPES.map(function(s){
-      var val=today[s.id]||0;
-      var cols=['#f5f0eb','#d4e4d0','#d4e4d0','#fde8d0','#fde8d0','#f2dede'];
-      return'<div class="sym-row">'+
-        '<div class="sym-lbl"><span>'+s.icon+' '+s.name+'</span>'+
-          '<span style="font-size:12px;font-weight:700;color:var(--rose)">'+(val?val+'/5':'—')+'</span></div>'+
-        '<div class="sym-dots">'+
-          [0,1,2,3,4,5].map(function(n){
-            var sel=val===n;
-            return'<div class="sym-d'+(sel?' on':'')+'" style="'+(sel?'background:'+cols[n]+';border-color:'+cols[n]+';color:var(--text)':'')+'" onclick="logSym(\''+s.id+'\','+n+')">'+n+'</div>';
-          }).join('')+
-        '</div>'+
-      '</div>';
-    }).join('');
+  var rows=SYM_TYPES.map(function(s){
+    var val=today[s.id]||0;
+    var cols=['#f5f0eb','#d4e4d0','#d4e4d0','#fde8d0','#fde8d0','#f2dede'];
+    return'<div class="sym-row">'+
+      '<div class="sym-lbl"><span>'+s.icon+' '+s.name+'</span>'+
+        '<span style="font-size:12px;font-weight:700;color:var(--rose)">'+(val?val+'/5':'—')+'</span></div>'+
+      '<div class="sym-dots">'+
+        [0,1,2,3,4,5].map(function(n){
+          var sel=val===n;
+          return'<div class="sym-d'+(sel?' on':'')+'" style="'+(sel?'background:'+cols[n]+';border-color:'+cols[n]+';color:var(--text)':'')+'" onclick="logSym(\''+s.id+'\','+n+')">'+n+'</div>';
+        }).join('')+
+      '</div>'+
+    '</div>';
+  }).join('');
+  var editPanel='<div id="symEditPanel" style="display:'+(_symEditing?'':'none')+';margin-top:12px;border-top:1px solid var(--bdr);padding-top:10px">'
+    +'<div style="font-size:11px;font-weight:700;color:var(--textl);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px">Manage symptoms</div>'
+    +(SYM_TYPES.length?SYM_TYPES.map(function(s){
+      return'<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid var(--bdr)">'
+        +'<span style="font-size:13px">'+s.icon+' '+s.name+'</span>'
+        +'<button onclick="delSymType(\''+s.id+'\')" style="background:none;border:1.5px solid var(--bdr);border-radius:6px;padding:3px 8px;font-size:11px;color:var(--textl);cursor:pointer;font-family:inherit">✕ Remove</button>'
+        +'</div>';
+    }).join(''):'<div style="font-size:12px;color:var(--textl);padding:4px 0">No symptoms yet — add one below.</div>')
+    +'<div style="display:flex;gap:8px;margin-top:10px">'
+    +'<input class="fi" id="newSymName" placeholder="Symptom name..." style="flex:1;padding:7px 9px">'
+    +'<button onclick="addSymType()" style="padding:7px 12px;border-radius:9px;border:none;background:var(--sage);color:white;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer">Add</button>'
+    +'</div>'
+    +'</div>';
+  el.innerHTML='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">'
+    +'<span style="font-size:12px;color:var(--textl)">Rate each from 0–5 (0 = none)</span>'
+    +'<button onclick="togSymEdit()" style="background:none;border:1.5px solid var(--bdr);border-radius:8px;padding:4px 10px;font-size:11px;color:var(--textl);cursor:pointer;font-family:inherit">'+(_symEditing?'✓ Done':'✏️ Edit')+'</button>'
+    +'</div>'
+    +(rows||'<div style="font-size:12px;color:var(--textl);padding:8px 0">No symptoms tracked yet — tap ✏️ Edit to add some.</div>')
+    +editPanel;
 }
 
 function logSym(symId,val){
@@ -7555,6 +7735,7 @@ function renderEnergyWidget(){
   var txt=document.getElementById('energyTodayTxt');
   var labels=['','Low','Meh','Okay','High','🔥 Max'];
   if(txt)txt.textContent=level?labels[level]:'';
+  renderEnergyTrend();
 }
 
 // ── Resume Notes ──────────────────────────────
@@ -8867,6 +9048,9 @@ function addPrayer(){
   localStorage.setItem('aPrayers',JSON.stringify(PRAYERS));
   el.value='';
   spiritRunAdd('prayer');
+  checkSpiritMilestone('prayer');
+  renderSpiritStreaks();
+  renderThisWeek();
   renderPrayers();
 }
 
@@ -8930,10 +9114,14 @@ function renderBibleStats(){
   });
   var booksFinished=BIBLE_BOOKS.filter(function(b){return (BIBLE_LOG[b.name]||[]).length===b.chaps;}).length;
   var pct=totalChaps?Math.round(readChaps/totalChaps*100):0;
-  el.innerHTML='<div class="spirit-stat"><div class="spirit-stat-num">'+pct+'%</div><div class="spirit-stat-lbl">Complete</div></div>'
-    +'<div class="spirit-stat"><div class="spirit-stat-num">'+readChaps+'</div><div class="spirit-stat-lbl">Chapters read</div></div>'
-    +'<div class="spirit-stat"><div class="spirit-stat-num">'+booksFinished+'</div><div class="spirit-stat-lbl">Books done</div></div>'
-    +'<div class="spirit-stat"><div class="spirit-stat-num">'+(totalChaps-readChaps)+'</div><div class="spirit-stat-lbl">Remaining</div></div>';
+  el.innerHTML='<div style="display:flex;align-items:center;gap:14px;margin-bottom:10px">'
+    +'<canvas id="bibleArcCanvas" width="120" height="120"></canvas>'
+    +'<div style="flex:1">'
+    +'<div class="spirit-stat" style="display:block;margin-bottom:6px"><div class="spirit-stat-num">'+readChaps+'</div><div class="spirit-stat-lbl">Chapters read</div></div>'
+    +'<div class="spirit-stat" style="display:block;margin-bottom:6px"><div class="spirit-stat-num">'+booksFinished+'</div><div class="spirit-stat-lbl">Books finished</div></div>'
+    +'<div class="spirit-stat" style="display:block"><div class="spirit-stat-num">'+(totalChaps-readChaps)+'</div><div class="spirit-stat-lbl">Remaining</div></div>'
+    +'</div></div>';
+  setTimeout(renderBibleArc, 0);
 }
 
 function renderBibleBooks(){
@@ -9023,6 +9211,8 @@ function logMinistry(){
   if(document.getElementById('minStudies'))document.getElementById('minStudies').value='';
   if(document.getElementById('minNotes'))document.getElementById('minNotes').value='';
   spiritRunAdd('ministry');
+  checkSpiritMilestone('ministry');
+  renderSpiritStreaks();
   renderMinistryStats();
   renderMinistryLog();
 }
@@ -9078,10 +9268,14 @@ function saveGratitude(){
   localStorage.setItem('aGratLog',JSON.stringify(GRAT_LOG));
   ['grat1','grat2','grat3','gratExtra'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});
   spiritRunAdd('gratitude');
+  checkSpiritMilestone('gratitude');
+  renderSpiritStreaks();
+  renderThisWeek();
   renderGratitudeLog();
 }
 
 function renderGratitudeLog(){
+  renderGratCalendar();
   var el=document.getElementById('gratitudeLog');
   if(!el)return;
   if(!GRAT_LOG.length){el.innerHTML='<p style="color:var(--textl);text-align:center;padding:20px">No entries yet. What are you grateful for today?</p>';return;}
@@ -9337,19 +9531,79 @@ function addPrepTask(mealName,prepMin){
   setTimeout(function(){flash.remove();},1800);
 }
 
+var MEAL_TYPE_COLORS={breakfast:'#fff8e1',lunch:'#e8f5e8',dinner:'#fde8d0',snack:'#f0e8f5',soup:'#e8f0f5',dessert:'#fde8f0',side:'#f5f0e8'};
+var MEAL_TYPE_ICONS={breakfast:'🌅',lunch:'🥙',dinner:'🍽️',snack:'🥨',soup:'🍲',dessert:'🍰',side:'🥗'};
+var _recipeFilter='';
+
+function setRecipeFilter(val,btn){
+  _recipeFilter=val;
+  document.querySelectorAll('#recipeMealFilter .fchip').forEach(function(b){b.classList.remove('on');});
+  if(btn)btn.classList.add('on');
+  renderRecipes();
+}
+
+function setRecMealType(val,btn){
+  document.getElementById('recMealType').value=val;
+  document.querySelectorAll('#recMealTypeBar .fchip').forEach(function(b){b.classList.remove('on');});
+  if(btn)btn.classList.add('on');
+}
+
+function quickPlanRecipe(r){
+  var today=todayStr();
+  if(!MEAL_PLAN[today])MEAL_PLAN[today]={};
+  MEAL_PLAN[today]['mains']=r.name;
+  localStorage.setItem('aMealPlan',JSON.stringify(MEAL_PLAN));
+  showToast('Added "'+r.name+'" to today\'s mains 🍽️');
+}
+
+function showToast(msg){
+  var el=document.getElementById('appToast');
+  if(!el){
+    el=document.createElement('div');
+    el.id='appToast';
+    el.style.cssText='position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:var(--text,#333);color:white;padding:10px 20px;border-radius:20px;font-size:13px;font-weight:600;z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,.2);white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .3s';
+    document.body.appendChild(el);
+  }
+  el.textContent=msg;
+  el.style.opacity='1';
+  clearTimeout(el._t);
+  el._t=setTimeout(function(){el.style.opacity='0';},3000);
+}
+
 function renderRecipes(){
   var q=(document.getElementById('recipeSearch')||{}).value||'';
   var el=document.getElementById('recipeList');
   if(!el)return;
-  var list=RECIPES.filter(function(r){return !q||r.name.toLowerCase().includes(q.toLowerCase());});
+  var list=RECIPES.filter(function(r){
+    var matchQ=!q||r.name.toLowerCase().includes(q.toLowerCase());
+    var matchF=!_recipeFilter||(r.mealType||'')=== _recipeFilter;
+    return matchQ&&matchF;
+  });
   if(!list.length){el.innerHTML='<p style="color:var(--textl);text-align:center;padding:20px">No recipes yet. Add one!</p>';return;}
   el.innerHTML=list.map(function(r){
     var m=r.macros||{};
+    var mt=r.mealType||'';
+    var mtColor=MEAL_TYPE_COLORS[mt]||'white';
+    var mtIcon=MEAL_TYPE_ICONS[mt]||'';
+    var timeStr='';
+    if(r.prepTime||r.cookTime){
+      var total=(r.prepTime||0)+(r.cookTime||0);
+      timeStr='⏱️ '+total+' min';
+    }
     var tags=(r.tags||[]).map(function(t){return '<span class="recipe-macro-tag">'+t+'</span>';}).join('');
-    return '<div class="recipe-card" onclick="openRecipeModal(\''+r.id+'\')">'
+    var ingHtml=(r.ingredients&&r.ingredients.length)?r.ingredients.map(function(i){return '<span style="font-size:11px;color:var(--textl)">'+i.qty+' '+i.unit+' '+i.name+'</span>';}).join('<br>'):'';
+    return '<div class="recipe-card" style="background:'+mtColor+';position:relative">'
       +'<div style="display:flex;align-items:center;justify-content:space-between">'
       +'<span class="recipe-card-name">'+r.name+'</span>'
+      +'<div style="display:flex;gap:4px;flex-shrink:0">'
+      +'<button title="Add to today\'s meal plan" style="background:var(--sage-light);border:none;border-radius:8px;padding:3px 8px;font-size:13px;cursor:pointer" onclick="event.stopPropagation();quickPlanRecipe({id:\''+r.id+'\',name:\''+r.name.replace(/'/g,"\\'")+'\'})">📋</button>'
+      +'<button class="btn sec" style="font-size:11px;padding:3px 8px" onclick="event.stopPropagation();openRecipeModal(\''+r.id+'\')">✏️</button>'
       +'<button class="btn sec" style="font-size:11px;padding:3px 8px" onclick="event.stopPropagation();delRecipe(\''+r.id+'\')">✕</button>'
+      +'</div>'
+      +'</div>'
+      +'<div style="display:flex;gap:4px;flex-wrap:wrap;margin:4px 0">'
+      +(mt?'<span class="recipe-macro-tag" style="background:rgba(0,0,0,0.08)">'+mtIcon+' '+mt+'</span>':'')
+      +(timeStr?'<span class="recipe-macro-tag">'+timeStr+'</span>':'')
       +'</div>'
       +'<div class="recipe-card-macros">'
       +(m.cal?'<span class="recipe-macro-tag">🔥 '+m.cal+' cal</span>':'')
@@ -9358,7 +9612,7 @@ function renderRecipes(){
       +(m.fat?'<span class="recipe-macro-tag">🫙 '+m.fat+'g fat</span>':'')
       +tags
       +'</div>'
-      +(r.ingredients&&r.ingredients.length?'<div style="font-size:11px;color:var(--textl);margin-top:4px">'+r.ingredients.length+' ingredient'+(r.ingredients.length>1?'s':'')+'</div>':'')
+      +(ingHtml?'<details style="margin-top:6px"><summary style="font-size:11px;color:var(--textl);cursor:pointer;font-weight:700">'+r.ingredients.length+' ingredient'+(r.ingredients.length>1?'s':'')+'</summary><div style="margin-top:4px;line-height:1.8">'+ingHtml+'</div></details>':'')
       +'</div>';
   }).join('');
 }
@@ -9376,6 +9630,13 @@ function openRecipeModal(id){
   document.getElementById('recTags').value=rec&&rec.tags?rec.tags.join(', '):'';
   document.getElementById('recNotes').value=rec?rec.notes||'':'';
   document.getElementById('recId').value=rec?rec.id:'';
+  var mt=rec?rec.mealType||'':'';
+  document.getElementById('recMealType').value=mt;
+  document.querySelectorAll('#recMealTypeBar .fchip').forEach(function(b){b.classList.toggle('on',b.getAttribute('onclick').includes("'"+mt+"'"));});
+  var prepEl=document.getElementById('recPrepTime');
+  var cookEl=document.getElementById('recCookTime');
+  if(prepEl)prepEl.value=rec?rec.prepTime||'':'';
+  if(cookEl)cookEl.value=rec?rec.cookTime||'':'';
   renderRecipeIngList();
   showOv('recipeModal');
 }
@@ -9413,10 +9674,16 @@ function saveRecipe(){
   var name=document.getElementById('recName').value.trim();
   if(!name)return alert('Recipe name required');
   var id=document.getElementById('recId').value||'rec-'+Date.now();
+  var mtEl=document.getElementById('recMealType');
+  var prepEl=document.getElementById('recPrepTime');
+  var cookEl=document.getElementById('recCookTime');
   var rec={
     id:id,
     name:name,
     servings:parseInt(document.getElementById('recServings').value)||1,
+    mealType:mtEl?mtEl.value:'',
+    prepTime:prepEl?parseInt(prepEl.value)||0:0,
+    cookTime:cookEl?parseInt(cookEl.value)||0:0,
     macros:{
       cal:parseInt(document.getElementById('recCal').value)||0,
       pro:parseInt(document.getElementById('recPro').value)||0,
@@ -11265,29 +11532,44 @@ function renderSpiritRunner(){
   var now = Date.now();
   var t = now / 180;
 
-  // Sky
+  // Sky — warm sepia night
   var sky = ctx.createLinearGradient(0,0,0,groundY);
-  sky.addColorStop(0,'#081808'); sky.addColorStop(0.5,'#163a16'); sky.addColorStop(1,'#1e5a1e');
+  sky.addColorStop(0,'#0d0805'); sky.addColorStop(0.5,'#1e1408'); sky.addColorStop(1,'#3a2210');
   ctx.fillStyle = sky; ctx.fillRect(0,0,W,groundY);
 
-  // Background tree layer (slow parallax)
-  var scroll1 = (now * 0.008) % 32;
-  ctx.fillStyle = '#0a1e08';
-  for(var i=0; i<Math.ceil(W/32)+2; i++){
-    var tx = ((i*32 - scroll1 % 32 + W) % (W+32)) - 16;
-    var th = 26 + (i*17+3)%18;
-    ctx.fillRect(tx-3, groundY-th, 6, th);
-    ctx.beginPath(); ctx.moveTo(tx, groundY-th-18); ctx.lineTo(tx-10, groundY-th+2); ctx.lineTo(tx+10, groundY-th+2); ctx.closePath(); ctx.fill();
-    ctx.beginPath(); ctx.moveTo(tx, groundY-th-28); ctx.lineTo(tx-7, groundY-th-10); ctx.lineTo(tx+7, groundY-th-10); ctx.closePath(); ctx.fill();
+  // Subtle stars
+  ctx.fillStyle = 'rgba(255,240,200,0.45)';
+  for(var si=0; si<14; si++){
+    var sx=(si*79+13)%W; var sy=(si*43+7)%(groundY*0.65);
+    ctx.fillRect(sx,sy,1,1);
   }
-  // Foreground leaf layer (faster)
-  var scroll2 = (now * 0.022) % 24;
-  ctx.fillStyle = '#122810';
-  for(var j=0; j<Math.ceil(W/24)+2; j++){
-    var fx = ((j*24 - scroll2 % 24 + W) % (W+24)) - 12;
-    var fh = 14 + (j*11+5)%10;
-    ctx.fillRect(fx-2, groundY-fh, 4, fh);
-    ctx.beginPath(); ctx.moveTo(fx, groundY-fh-10); ctx.lineTo(fx-6, groundY-fh+1); ctx.lineTo(fx+6, groundY-fh+1); ctx.closePath(); ctx.fill();
+  // Moon
+  ctx.fillStyle = 'rgba(255,235,180,0.55)';
+  ctx.beginPath(); ctx.arc(W-22, 14, 7, 0, Math.PI*2); ctx.fill();
+  ctx.fillStyle = 'rgba(40,22,8,0.55)';
+  ctx.beginPath(); ctx.arc(W-19, 12, 6, 0, Math.PI*2); ctx.fill();
+
+  // Background town silhouettes (slow parallax)
+  var scroll1 = (now * 0.008) % 48;
+  for(var i=0; i<Math.ceil(W/48)+2; i++){
+    var tx = ((i*48 - scroll1 % 48 + W) % (W+48)) - 24;
+    var bh = 22 + (i*19+7)%24;
+    ctx.fillStyle = '#1a0e06';
+    ctx.fillRect(tx-8, groundY-bh, 16, bh);
+    ctx.beginPath(); ctx.moveTo(tx, groundY-bh-9); ctx.lineTo(tx-9, groundY-bh); ctx.lineTo(tx+9, groundY-bh); ctx.closePath(); ctx.fill();
+    if(bh > 26){
+      ctx.fillStyle = 'rgba(240,180,80,0.2)';
+      ctx.fillRect(tx-4, groundY-bh+5, 3, 4);
+      ctx.fillRect(tx+2, groundY-bh+5, 3, 4);
+    }
+  }
+  // Foreground fence/post layer (faster)
+  var scroll2 = (now * 0.025) % 32;
+  ctx.fillStyle = '#221508';
+  for(var j=0; j<Math.ceil(W/32)+2; j++){
+    var fx = ((j*32 - scroll2 % 32 + W) % (W+32)) - 16;
+    ctx.fillRect(fx-1, groundY-13, 2, 13);
+    ctx.fillRect(fx-7, groundY-10, 14, 2);
   }
 
   // Ground rendering
@@ -11314,8 +11596,8 @@ function renderSpiritRunner(){
       var gg = ctx.createLinearGradient(0,groundY,0,H);
       gg.addColorStop(0,'#7a4820'); gg.addColorStop(0.3,'#5a3010'); gg.addColorStop(1,'#301800');
       ctx.fillStyle = gg; ctx.fillRect(solidX, groundY, W-solidX, H-groundY);
-      ctx.fillStyle = '#3a8028'; ctx.fillRect(solidX, groundY, W-solidX, 6);
-      ctx.fillStyle = '#286018';
+      ctx.fillStyle = '#a08020'; ctx.fillRect(solidX, groundY, W-solidX, 5);
+      ctx.fillStyle = '#786018';
       for(var gx=solidX+1; gx<W; gx+=5){ ctx.fillRect(gx, groundY-2, 2, 4); ctx.fillRect(gx+2, groundY-4, 2, 6); }
     }
   } else {
@@ -11323,17 +11605,16 @@ function renderSpiritRunner(){
     var dg = ctx.createLinearGradient(0,groundY,0,H);
     dg.addColorStop(0,'#2a0505'); dg.addColorStop(1,'#000');
     ctx.fillStyle = dg; ctx.fillRect(0, groundY, W, H-groundY);
-    // Thin crumble patch ahead
     if(safe > 0){ ctx.fillStyle = '#6b3a18'; ctx.fillRect(runX, groundY, TILE*1.5, H-groundY); }
     var aheadX = runX + (safe>0 ? TILE*1.5 : 0);
     if(aheadX < W){
       ctx.fillStyle = '#5a3010'; ctx.fillRect(aheadX, groundY, W-aheadX, H-groundY);
-      ctx.fillStyle = '#3a8028'; ctx.fillRect(aheadX, groundY, W-aheadX, 6);
+      ctx.fillStyle = '#a08020'; ctx.fillRect(aheadX, groundY, W-aheadX, 5);
     }
   }
   ctx.restore();
 
-  // Runner (explorer) at fixed runX, on top of ground
+  // Runner (explorer) at fixed runX
   var ry = groundY;
   var legOff = Math.sin(t) * 4;
   var armOff = Math.sin(t + Math.PI) * 3;
@@ -11346,13 +11627,14 @@ function renderSpiritRunner(){
   // Legs
   ctx.fillStyle = '#5a3a18';
   ctx.fillRect(rx-4, ry-10+legOff*0.5, 3, 8); ctx.fillRect(rx+1, ry-10-legOff*0.5, 3, 8);
-  // Body/jacket
-  ctx.fillStyle = '#8b5a28';
+  // Body/jacket — warm rose-brown coat
+  ctx.fillStyle = '#8b4a38';
   ctx.fillRect(rx-4, ry-19, 8, 9);
-  // Backpack
-  ctx.fillStyle = '#3a6a3a'; ctx.fillRect(rx+3, ry-19, 4, 7);
+  // Satchel — warm leather brown
+  ctx.fillStyle = '#6a3a18'; ctx.fillRect(rx+3, ry-19, 4, 7);
+  ctx.fillStyle = '#4a2808'; ctx.fillRect(rx+4, ry-16, 2, 1);
   // Arms
-  ctx.fillStyle = '#8b5a28';
+  ctx.fillStyle = '#8b4a38';
   ctx.fillRect(rx-7, ry-18+armOff*0.5, 3, 5); ctx.fillRect(rx+4, ry-18-armOff*0.5, 3, 5);
   // Head
   ctx.fillStyle = '#c89850'; ctx.fillRect(rx-3, ry-27, 6, 7);
@@ -11366,21 +11648,20 @@ function renderSpiritRunner(){
   if(safe < 2){
     ctx.fillStyle = 'rgba(200,0,0,'+(0.15+0.1*Math.sin(now/180))+')';
     ctx.fillRect(0,0,W,H);
-    ctx.fillStyle = '#ff4040'; ctx.font = 'bold 13px sans-serif'; ctx.textAlign = 'center';
-    ctx.fillText('⚠ SPIRIT DANGER! Log something! ⚠', W/2, H/2);
+    ctx.fillStyle = '#ff4040'; ctx.font = 'bold 12px sans-serif'; ctx.textAlign = 'center';
+    ctx.fillText('⚠ Activity Low! Log something! ⚠', W/2, H/2);
     ctx.textAlign = 'left';
   }
 
-  // HUD: safety bar (top-left)
+  // HUD: safety bar
   ctx.fillStyle = 'rgba(0,0,0,0.55)'; ctx.fillRect(6, 6, 150, 26);
   var safeRatio = Math.min(1, safe/12);
-  var barColor = safe>6 ? '#3aaa3a' : safe>3 ? '#d4a020' : '#cc3030';
-  ctx.fillStyle = '#222'; ctx.fillRect(8, 15, 106, 8);
+  var barColor = safe>6 ? '#c89828' : safe>3 ? '#d4a020' : '#cc3030';
+  ctx.fillStyle = '#2a1a08'; ctx.fillRect(8, 15, 106, 8);
   ctx.fillStyle = barColor; ctx.fillRect(8, 15, Math.round(safeRatio*106), 8);
-  ctx.strokeStyle = 'rgba(255,255,255,0.25)'; ctx.lineWidth=1; ctx.strokeRect(8,15,106,8);
-  ctx.fillStyle = '#fff'; ctx.font = 'bold 9px sans-serif';
-  ctx.fillText('🌿 Spirit Run', 118, 22);
-  // Status label
+  ctx.strokeStyle = 'rgba(255,220,150,0.25)'; ctx.lineWidth=1; ctx.strokeRect(8,15,106,8);
+  ctx.fillStyle = '#ffe8b0'; ctx.font = 'bold 9px sans-serif';
+  ctx.fillText('🏃 Daily Road', 118, 22);
   ctx.fillStyle = barColor; ctx.font = '8px sans-serif';
   ctx.fillText(safe>6?'Safe ✓':safe>3?'Slipping…':'DANGER!', 10, 13);
   // Points
@@ -11396,6 +11677,7 @@ function updateLighthouseSpiritStatus(){
   var safe = SPIRIT_RUN.safe || 0;
   el.textContent = safe > 6 ? '✅ Spirit safe' : safe > 3 ? '⚠️ Slipping' : '🔴 Danger!';
   el.style.color = safe > 6 ? 'var(--sage)' : safe > 3 ? '#d4a020' : '#cc3030';
+  renderSpiritStreaks();
 }
 
 // ═══════════════════════════════════════════════
@@ -11526,6 +11808,96 @@ function lighthouseQuickPrayer(){
   showToast('Prayer added 🙏');
 }
 
+var APP_INDEX=[
+  {hub:'🏠 Today',items:[
+    {label:'Today Overview',action:"goTab('today',null)"},
+    {label:'Daily Intentions',action:"goTab('today',null)"},
+    {label:'Quick Stats (Water, Tasks)',action:"goTab('today',null)"},
+    {label:'This Week Summary',action:"goTab('today',null)"},
+    {label:'Active Goals Widget',action:"goTab('today',null)"},
+  ]},
+  {hub:'⛵ Helm',items:[
+    {label:'Tasks',action:"goTab('tasks',null)"},
+    {label:'Projects',action:"goTab('projects',null)"},
+    {label:'Lists',action:"goTab('lists',null)"},
+    {label:'Brain Dump',action:"goTab('tasks',null)"},
+    {label:'Focus Timer',action:"goTab('tasks',null)"},
+  ]},
+  {hub:'🌿 Conservatory',items:[
+    {label:'Goals (Yearly/Quarterly/Monthly)',action:"goTab('goals',null)"},
+    {label:'Routines & Habits',action:"goTab('routines',null)"},
+    {label:'Flashcards / Learning',action:"goTab('learn',null)"},
+    {label:'Focus Mode',action:"goTab('focus',null)"},
+  ]},
+  {hub:'🍳 Hearthside',items:[
+    {label:'Food & Macros',action:"goTab('food',null)"},
+    {label:'Sleep Tracker',action:"goTab('food',null)"},
+    {label:'Symptom Tracker',action:"goTab('food',null)"},
+    {label:'Mood Log',action:"goTab('recap',null)"},
+    {label:'Meals & Recipes',action:"goTab('meals',null)"},
+    {label:'Meal Plan',action:"goTab('meals',null)"},
+    {label:'Grocery List',action:"goTab('meals',null)"},
+    {label:'Pantry Inventory',action:"goTab('meals',null)"},
+    {label:'Recap',action:"goTab('recap',null)"},
+  ]},
+  {hub:'🎨 Workshop',items:[
+    {label:'Vision Board',action:"goTab('board',null)"},
+    {label:'Favorites',action:"goTab('faves',null)"},
+    {label:'Stories',action:"goTab('stories',null)"},
+    {label:'Mixtape',action:"goTab('mixtape',null)"},
+  ]},
+  {hub:'🏠 Estate',items:[
+    {label:'Bills & Budget',action:"goTab('estate',null)"},
+    {label:'Income',action:"goTab('money',null)"},
+    {label:'Monthly Expenses',action:"goTab('money',null)"},
+  ]},
+  {hub:'🕯️ Lighthouse',items:[
+    {label:'Prayer Log',action:"goTab('lighthouse',null)"},
+    {label:'Ministry Log',action:"goTab('lighthouse',null)"},
+    {label:'Gratitude Journal',action:"goTab('lighthouse',null)"},
+    {label:'Bible Reading',action:"goTab('lighthouse',null)"},
+    {label:'Scripture Notes',action:"goTab('lighthouse',null)"},
+    {label:'Flashcard Decks',action:"goTab('lighthouse',null)"},
+    {label:'Spiritual Streaks',action:"goTab('lighthouse',null)"},
+  ]},
+  {hub:'🧺 Emporium',items:[
+    {label:'Wig Inventory',action:"goTab('emporium',null)"},
+    {label:'Business Goal',action:"goTab('emporium',null)"},
+  ]},
+  {hub:'🌍 World',items:[
+    {label:'Brindleport World',action:"goTab('world',null)"},
+    {label:"Ember's Inn Rush Game",action:"openInnRush()"},
+    {label:'Reid Runner Game',action:"openReidRunner()"},
+    {label:'Daily Road (Activity)',action:"goTab('today',null)"},
+  ]},
+  {hub:'🐱 Millie',items:[
+    {label:'Millie the Cat',action:"openMillie()"},
+    {label:'Millie Feed Game',action:"openMillie()"},
+    {label:'Millie Play (Yarn)',action:"openMillie()"},
+  ]},
+  {hub:'📚 Archives',items:[
+    {label:'App Guide',action:"goTab('guide',null)"},
+    {label:'Data Export',action:"goTab('export',null)"},
+    {label:'Settings',action:"goTab('settings',null)"},
+  ]},
+];
+
+function renderAppIndex(){
+  var el=document.getElementById('appIndexBody');
+  if(!el)return;
+  el.innerHTML=APP_INDEX.map(function(section){
+    return '<div style="margin-bottom:12px">'
+      +'<div style="font-size:12px;font-weight:700;color:var(--textd);margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px">'+section.hub+'</div>'
+      +section.items.map(function(item){
+        return '<div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--bdr)">'
+          +'<span style="font-size:13px;color:var(--text)">'+item.label+'</span>'
+          +'<button onclick="'+item.action+'" style="background:var(--sage-light);color:#5a7a56;border:none;border-radius:8px;padding:4px 10px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit">→ Go</button>'
+          +'</div>';
+      }).join('')
+      +'</div>';
+  }).join('');
+}
+
 function startApp(){
   document.getElementById('loadingScreen').classList.add('hidden');
   chkReset();
@@ -11587,6 +11959,15 @@ function startApp(){
   updateLighthouseSpiritStatus();
   renderEmporiumGoal();
   renderCalInArchives();
+  renderSleepGraph();
+  renderTodaySleepChip();
+  updHelmBadge();
+  renderSpiritStreaks();
+  renderWaterDrops();
+  renderThisWeek();
+  renderTodayGoals();
+  updEstateBadge();
+  renderAppIndex();
 }
 
 // Wait for Firebase then start
@@ -11604,6 +11985,401 @@ setTimeout(function(){
 }, 5000);
 
 setInterval(updDate, 60000);
+
+// ══════════════════════════════════════════════
+// EXPENSE PIE / DONUT CHART
+// ══════════════════════════════════════════════
+var EXP_CAT_COLORS = {
+  'wig-supplies':'#9a5abf','shipping':'#4a8abf','groceries':'#5cb85c',
+  'dining':'#e07820','gas':'#d4a820','other':'#8a8a8a','entertainment':'#e05070',
+  'utilities':'#4aaabf','clothing':'#bf5a8a','health':'#5abf7a','housing':'#7a5abf',
+  'transport':'#5a7abf','personal':'#bf8a5a','business':'#5a9abf'
+};
+var EXP_CAT_FALLBACKS = ['#e07820','#5cb85c','#4a8abf','#9a5abf','#d4a820','#e05070','#4aaabf','#8a6a4a'];
+
+function renderExpPieChart(){
+  var cv = document.getElementById('expPieCanvas');
+  if(!cv) return;
+  var mon = getMonStr();
+  var thisMonExp = EXPENSES.filter(function(e){ return (e.created||'').startsWith(mon); });
+  var cats = {};
+  thisMonExp.forEach(function(e){ cats[e.cat] = (cats[e.cat]||0) + e.amt; });
+  var total = thisMonExp.reduce(function(s,e){ return s+e.amt; }, 0);
+  if(!total){ return; }
+  var ctx = cv.getContext('2d');
+  var W = cv.width, H = cv.height, cx = W/2, cy = H/2, OR = cx-8, IR = OR*0.52;
+  ctx.clearRect(0,0,W,H);
+  var keys = Object.keys(cats).sort(function(a,b){ return cats[b]-cats[a]; });
+  var angle = -Math.PI/2;
+  keys.forEach(function(cat, i){
+    var slice = (cats[cat]/total)*Math.PI*2;
+    ctx.beginPath();
+    ctx.moveTo(cx,cy);
+    ctx.arc(cx,cy,OR,angle,angle+slice);
+    ctx.closePath();
+    ctx.fillStyle = EXP_CAT_COLORS[cat] || EXP_CAT_FALLBACKS[i%EXP_CAT_FALLBACKS.length];
+    ctx.fill();
+    angle += slice;
+  });
+  ctx.beginPath(); ctx.arc(cx,cy,IR,0,Math.PI*2); ctx.fillStyle='#fff'; ctx.fill();
+  ctx.fillStyle='#3a2a1e'; ctx.font='bold 15px sans-serif'; ctx.textAlign='center';
+  ctx.fillText('$'+Math.round(total), cx, cy+2);
+  ctx.fillStyle='#8a7a6a'; ctx.font='10px sans-serif';
+  ctx.fillText('this month', cx, cy+14);
+}
+
+// ══════════════════════════════════════════════
+// BIBLE PROGRESS ARC
+// ══════════════════════════════════════════════
+function renderBibleArc(){
+  var cv = document.getElementById('bibleArcCanvas');
+  if(!cv) return;
+  var OT_TOTAL = 929, NT_TOTAL = 260;
+  var otRead = 0, ntRead = 0;
+  BIBLE_BOOKS.forEach(function(b){
+    var log = (BIBLE_LOG[b.name]||[]).length;
+    if(b.t==='ot') otRead += log; else ntRead += log;
+  });
+  var ctx = cv.getContext('2d');
+  var W = cv.width, H = cv.height, cx = W/2, cy = H/2;
+  ctx.clearRect(0,0,W,H);
+  var bg = '#ede8e2', otColor = '#8b5a2a', ntColor = '#4a8abf';
+  // OT outer ring
+  var otPct = OT_TOTAL ? otRead/OT_TOTAL : 0;
+  drawArcRing(ctx, cx, cy, cx-8, 14, 0, 1, bg);
+  drawArcRing(ctx, cx, cy, cx-8, 14, 0, otPct, otColor);
+  // NT inner ring
+  var ntPct = NT_TOTAL ? ntRead/NT_TOTAL : 0;
+  drawArcRing(ctx, cx, cy, cx-28, 14, 0, 1, bg);
+  drawArcRing(ctx, cx, cy, cx-28, 14, 0, ntPct, ntColor);
+  // Center text
+  var totalRead = otRead + ntRead, total = OT_TOTAL + NT_TOTAL;
+  var pct = Math.round(totalRead/total*100);
+  ctx.fillStyle='#3a2a1e'; ctx.font='bold 16px sans-serif'; ctx.textAlign='center';
+  ctx.fillText(pct+'%', cx, cy+3);
+  ctx.fillStyle='#8a7a6a'; ctx.font='10px sans-serif';
+  ctx.fillText('of Bible', cx, cy+15);
+  // Legend
+  ctx.fillStyle=otColor; ctx.fillRect(4,H-20,10,10);
+  ctx.fillStyle='#6a5040'; ctx.font='9px sans-serif'; ctx.textAlign='left';
+  ctx.fillText('OT '+Math.round(otPct*100)+'%', 17, H-12);
+  ctx.fillStyle=ntColor; ctx.fillRect(W/2, H-20,10,10);
+  ctx.fillStyle='#4a6a8a'; ctx.textAlign='left';
+  ctx.fillText('NT '+Math.round(ntPct*100)+'%', W/2+13, H-12);
+}
+
+function drawArcRing(ctx, cx, cy, r, w, startPct, endPct, color){
+  var startA = -Math.PI/2 + startPct*Math.PI*2;
+  var endA = -Math.PI/2 + endPct*Math.PI*2;
+  ctx.beginPath();
+  ctx.arc(cx, cy, r, startA, endA);
+  ctx.arc(cx, cy, r-w, endA, startA, true);
+  ctx.closePath();
+  ctx.fillStyle = color;
+  ctx.fill();
+}
+
+// ══════════════════════════════════════════════
+// ESTATE BADGE — unpaid bills past due day
+// ══════════════════════════════════════════════
+function updEstateBadge(){
+  var today = new Date();
+  var dayOfMonth = today.getDate();
+  var mon = getMonStr();
+  var paid = BILL_PAY[mon]||{};
+  var unpaid = (BILLS||[]).filter(function(b){
+    var status = paid[b.id]||'';
+    return status !== 'paid' && status !== 'posted' && parseInt(b.day||0) < dayOfMonth;
+  }).length;
+  var btn = document.querySelector('[data-tab="estate"]');
+  if(btn) btn.classList.toggle('has-badge', unpaid > 0);
+}
+
+// ══════════════════════════════════════════════
+// ENERGY TREND (7-day on Today)
+// ══════════════════════════════════════════════
+function renderEnergyTrend(){
+  var el = document.getElementById('energyTrendRow');
+  if(!el) return;
+  var days = [];
+  for(var i=6; i>=0; i--){ var d=new Date(); d.setDate(d.getDate()-i); days.push(d.toISOString().slice(0,10)); }
+  var energyColors = ['','#cc5050','#e07820','#d4a820','#5cb85c','#3a9a3a'];
+  var labels = ['','😴','😕','😐','😊','🔥'];
+  el.innerHTML = days.map(function(day){
+    var lv = ENERGY_LOG[day]||0;
+    var isToday = day === todayStr();
+    var dayLabel = ['Su','Mo','Tu','We','Th','Fr','Sa'][new Date(day+'T12:00:00').getDay()];
+    return '<div style="flex:1;text-align:center">'
+      +'<div style="font-size:'+(isToday?'18':'16')+'px;margin-bottom:2px">'+(lv?labels[lv]:'·')+'</div>'
+      +'<div style="font-size:9px;color:'+(isToday?'var(--rose)':'var(--textl)')+';font-weight:'+(isToday?'700':'400')+'">'+dayLabel+'</div>'
+      +'</div>';
+  }).join('');
+}
+
+// ══════════════════════════════════════════════
+// WATER QUICK-TAP
+// ══════════════════════════════════════════════
+function renderWaterDrops(){
+  var el = document.getElementById('waterDropRow');
+  if(!el) return;
+  var w = getW();
+  var goal = S.gWat || 8;
+  var show = Math.max(goal, w);
+  var html = '';
+  for(var i=0; i<show; i++){
+    var filled = i < w;
+    html += '<button onclick="quickAddWater()" title="Tap to add a glass" style="background:none;border:none;padding:0;cursor:pointer;font-size:20px;line-height:1;transition:transform .1s" onmousedown="this.style.transform=\'scale(.85)\'" onmouseup="this.style.transform=\'scale(1)\'" ontouchstart="this.style.transform=\'scale(.85)\'" ontouchend="this.style.transform=\'scale(1)\'">'+(filled?'💧':'🫙')+'</button>';
+  }
+  if(w < goal){
+    html += '<span style="font-size:11px;color:var(--textl);align-self:center;margin-left:2px">tap to add</span>';
+  } else {
+    html += '<span style="font-size:11px;color:var(--sage);align-self:center;margin-left:2px">Goal met! 🎉</span>';
+  }
+  el.innerHTML = html;
+}
+
+function quickAddWater(){
+  var k = getTK();
+  WL[k] = (WL[k]||0) + 1;
+  localStorage.setItem('aWL', JSON.stringify(WL));
+  updM();
+  renderWaterDrops();
+  var w = getW();
+  if(w === (S.gWat||8)) showToast('💧 Water goal reached!');
+}
+
+// ══════════════════════════════════════════════
+// THIS WEEK SUMMARY
+// ══════════════════════════════════════════════
+function renderThisWeek(){
+  var el = document.getElementById('thisWeekBody');
+  if(!el) return;
+  var today = todayStr();
+  var days = [];
+  for(var i=6; i>=0; i--){
+    var d = new Date(); d.setDate(d.getDate()-i);
+    days.push(d.toISOString().slice(0,10));
+  }
+  var daySet = new Set(days);
+  // Tasks done this week
+  var tasksDone = (TASKS||[]).filter(function(t){ return t.done && t.doneDate && daySet.has(t.doneDate); }).length;
+  // Prayers this week
+  var prayers = (PRAYERS||[]).filter(function(p){ return p.date && daySet.has(p.date.slice(0,10)); }).length;
+  // Ministry hours this week
+  var minHrs = (MINISTRY_LOG||[]).filter(function(m){ return m.date && daySet.has(m.date.slice(0,10)); }).reduce(function(s,m){ return s+(parseFloat(m.hours)||0); }, 0);
+  // Gratitude entries this week
+  var gratEntries = (GRAT_LOG||[]).filter(function(g){ return g.date && daySet.has(g.date.slice(0,10)); }).length;
+  // Sleep average
+  var sleepLog = MILLIE.sleepLog||[];
+  var sleepHrs = sleepLog.filter(function(e){ return (e.slept||'').slice(0,10) && daySet.has((e.slept||'').slice(0,10)); }).map(function(e){ return e.durH||0; });
+  var sleepAvg = sleepHrs.length ? (sleepHrs.reduce(function(a,b){return a+b;},0)/sleepHrs.length).toFixed(1) : null;
+  // Water average
+  var watDays = days.map(function(d){ return WL[new Date(d+'T12:00:00').toDateString()]||0; }).filter(function(v){ return v>0; });
+  var watAvg = watDays.length ? (watDays.reduce(function(a,b){return a+b;},0)/watDays.length).toFixed(1) : null;
+
+  function stat(emoji, label, value, goal){
+    var color = (goal && value >= goal) ? 'var(--sage)' : 'var(--textd)';
+    return '<div style="display:flex;align-items:center;justify-content:space-between;padding:5px 0;border-bottom:1px solid #f5f0eb">'
+      +'<span style="font-size:13px">'+emoji+' <span style="color:var(--textl);font-size:12px">'+label+'</span></span>'
+      +'<span style="font-size:14px;font-weight:700;color:'+color+'">'+value+'</span></div>';
+  }
+  el.innerHTML = stat('✅','Tasks done',tasksDone,'')
+    + stat('🙏','Prayers logged',prayers,'')
+    + stat('⏱️','Ministry hrs',minHrs>0?minHrs.toFixed(1)+'h':'—','')
+    + stat('🌸','Gratitude entries',gratEntries,'')
+    + stat('😴','Avg sleep',sleepAvg?sleepAvg+'h':'—','')
+    + stat('💧','Avg water / day',watAvg?watAvg+' glasses':'—','');
+}
+
+// ══════════════════════════════════════════════
+// ACTIVE GOALS WIDGET (Today)
+// ══════════════════════════════════════════════
+function renderTodayGoals(){
+  var wrap = document.getElementById('todayGoalsWrap');
+  var el = document.getElementById('todayGoalsBody');
+  if(!wrap || !el) return;
+  var active = (GOALS||[]).filter(function(g){ return !g.done; }).slice(0,4);
+  if(!active.length){ wrap.style.display='none'; return; }
+  wrap.style.display='';
+  el.innerHTML = active.map(function(g){
+    var steps = g.steps||[];
+    var sDone = steps.filter(function(s){ return s.done; }).length;
+    var pct = g.target ? Math.min(100,Math.round((g.current||0)/g.target*100)) : (steps.length ? Math.round(sDone/steps.length*100) : 0);
+    var barColor = pct>=80?'var(--sage)':pct>=40?'#f0a020':'var(--rose)';
+    return '<div style="margin-bottom:10px">'
+      +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px">'
+      +'<span style="font-size:13px;font-weight:600;color:var(--textd)">'+escHtml(g.title||'Goal')+'</span>'
+      +'<span style="font-size:11px;color:var(--textl)">'+pct+'%'+(g.target?' · '+(g.current||0)+'/'+g.target+(g.unit?' '+g.unit:''):'')+'</span></div>'
+      +'<div style="height:6px;background:#ede8e2;border-radius:3px"><div style="width:'+pct+'%;height:100%;border-radius:3px;background:'+barColor+';transition:width .5s"></div></div>'
+      +'</div>';
+  }).join('');
+}
+
+// ══════════════════════════════════════════════
+// GRATITUDE CALENDAR HEATMAP
+// ══════════════════════════════════════════════
+function renderGratCalendar(){
+  var el = document.getElementById('gratCalendar');
+  if(!el) return;
+  var now = new Date();
+  var year = now.getFullYear();
+  var month = now.getMonth();
+  var daysInMonth = new Date(year, month+1, 0).getDate();
+  var firstDay = new Date(year, month, 1).getDay();
+  var logged = new Set();
+  (GRAT_LOG||[]).forEach(function(g){
+    if(g.date && g.date.slice(0,7) === (year+'-'+(month+1<10?'0':'')+(month+1))){ logged.add(parseInt(g.date.slice(8,10))); }
+  });
+  var today = now.getDate();
+  var monthName = ['January','February','March','April','May','June','July','August','September','October','November','December'][month];
+  var html = '<div style="background:#fff8f0;border-radius:12px;padding:10px 12px">'
+    +'<div style="font-size:12px;font-weight:700;color:var(--textd);margin-bottom:8px">🌸 '+monthName+' Gratitude</div>'
+    +'<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-bottom:4px">';
+  ['S','M','T','W','T','F','S'].forEach(function(d){ html += '<div style="font-size:9px;color:var(--textl);text-align:center;font-weight:700">'+d+'</div>'; });
+  html += '</div><div style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px">';
+  for(var i=0; i<firstDay; i++) html += '<div></div>';
+  for(var day=1; day<=daysInMonth; day++){
+    var isLogged = logged.has(day);
+    var isToday = day === today;
+    var bg = isLogged ? 'var(--rose)' : (day<today?'#ede8e2':'#f8f5ef');
+    var color = isLogged ? '#fff' : (day<today?'var(--textl)':'var(--textl)');
+    var border = isToday ? '2px solid var(--rose)' : '2px solid transparent';
+    html += '<div style="aspect-ratio:1;display:flex;align-items:center;justify-content:center;border-radius:5px;background:'+bg+';color:'+color+';font-size:10px;font-weight:'+(isToday?'700':'400')+';border:'+border+'">'+day+'</div>';
+  }
+  html += '</div>';
+  var count = logged.size;
+  html += '<div style="font-size:11px;color:var(--textl);margin-top:6px;text-align:center">'+count+' / '+daysInMonth+' days this month</div></div>';
+  el.innerHTML = html;
+}
+
+// ══════════════════════════════════════════════
+// SLEEP GRAPH
+// ══════════════════════════════════════════════
+function renderSleepGraph(){
+  var bars = document.getElementById('sleepGraphBars');
+  var avgLbl = document.getElementById('sleepAvgLabel');
+  if(!bars) return;
+  var log = MILLIE.sleepLog || [];
+  var days = [];
+  for(var i=6; i>=0; i--){
+    var d = new Date(); d.setDate(d.getDate()-i);
+    days.push(d.toISOString().slice(0,10));
+  }
+  var dur = {};
+  log.forEach(function(e){
+    var date = (e.slept||e.woke||'').slice(0,10);
+    if(date) dur[date] = e.durH||0;
+  });
+  var totals = days.map(function(day){ return dur[day]||0; });
+  var logged = totals.filter(function(h){ return h>0; });
+  var avg = logged.length ? (logged.reduce(function(a,b){return a+b;},0)/logged.length).toFixed(1) : 0;
+  if(avgLbl) avgLbl.textContent = logged.length ? 'avg '+avg+'h' : 'no data';
+  var maxH = Math.max(10, Math.max.apply(null, totals));
+  bars.innerHTML = days.map(function(day,i){
+    var h = totals[i];
+    var pct = h ? Math.round((h/maxH)*100) : 0;
+    var color = h>=8?'var(--sage)':h>=6?'#f0a020':'#d94040';
+    var dayLbl = ['Su','Mo','Tu','We','Th','Fr','Sa'][new Date(day+'T12:00:00').getDay()];
+    var isToday = day===todayStr();
+    return '<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px">'
+      +'<div style="width:100%;flex:1;display:flex;align-items:flex-end">'
+      +'<div style="width:100%;height:'+(h?Math.max(pct,4):3)+'%;background:'+(h?color:'#ede8e2')+';border-radius:4px 4px 0 0" title="'+(h?h.toFixed(1)+'h':'none')+'"></div></div>'
+      +'<div style="font-size:9px;color:'+(isToday?'var(--rose)':'var(--textl)')+';font-weight:'+(isToday?'700':'400')+'">'+dayLbl+'</div></div>';
+  }).join('');
+}
+
+function renderTodaySleepChip(){
+  var chip = document.getElementById('todaySleepChip');
+  if(!chip) return;
+  var log = MILLIE.sleepLog || [];
+  if(!log.length){ chip.style.display='none'; return; }
+  chip.style.display='block';
+  var last = log[log.length-1];
+  var h = last.durH||0;
+  var emoji = h>=8?'🌟':h>=7?'😊':h>=6?'😐':'😴';
+  var msg = h>=8?'Great sleep! '+h.toFixed(1)+'h':h>=7?'Good sleep · '+h.toFixed(1)+'h':h>=6?'OK sleep · '+h.toFixed(1)+'h':'Short night · '+h.toFixed(1)+'h';
+  var el = document.getElementById('todaySleepEmoji');
+  if(el) el.textContent = emoji;
+  el = document.getElementById('todaySleepTitle');
+  if(el) el.textContent = 'Last night';
+  el = document.getElementById('todaySleepSub');
+  if(el) el.textContent = msg;
+  // Mini sparkline (last 7)
+  var recent = (log||[]).slice(-7);
+  var el2 = document.getElementById('todaySleepBars');
+  if(el2){
+    var maxH2 = Math.max(9, Math.max.apply(null, recent.map(function(e){return e.durH||0;})));
+    el2.innerHTML = recent.map(function(e){
+      var hh = e.durH||0;
+      var pct = Math.round((hh/maxH2)*100);
+      var c = hh>=8?'var(--sage)':hh>=6?'#f0a020':'#d94040';
+      return '<div style="width:5px;height:'+(hh?Math.max(pct,5):3)+'%;background:'+(hh?c:'#eee')+';border-radius:2px 2px 0 0"></div>';
+    }).join('');
+  }
+}
+
+// ══════════════════════════════════════════════
+// OVERDUE BADGE — Helm tab
+// ══════════════════════════════════════════════
+function updHelmBadge(){
+  var today = todayStr();
+  var overdue = (TASKS||[]).filter(function(t){ return !t.done && t.due && t.due < today; }).length;
+  var btn = document.querySelector('[data-tab="helm"]');
+  if(btn) btn.classList.toggle('has-badge', overdue > 0);
+}
+
+// ══════════════════════════════════════════════
+// SPIRITUAL STREAKS
+// ══════════════════════════════════════════════
+function calcSpiritStreak(type){
+  var days = new Set();
+  if(type==='prayer'){
+    PRAYERS.forEach(function(p){ if(p.date) days.add(p.date.slice(0,10)); });
+  } else if(type==='ministry'){
+    (MINISTRY_LOG||[]).forEach(function(m){ if(m.date) days.add(m.date.slice(0,10)); });
+  } else if(type==='gratitude'){
+    (GRAT_LOG||[]).forEach(function(g){ if(g.date) days.add(g.date.slice(0,10)); });
+  }
+  var streak = 0;
+  var d = new Date();
+  if(!days.has(d.toISOString().slice(0,10))) d.setDate(d.getDate()-1);
+  for(var i=0; i<365; i++){
+    if(!days.has(d.toISOString().slice(0,10))) break;
+    streak++;
+    d.setDate(d.getDate()-1);
+  }
+  return streak;
+}
+
+function checkSpiritMilestone(type){
+  var streak = calcSpiritStreak(type);
+  var milestones = [3,7,14,21,30,60,100,365];
+  if(milestones.indexOf(streak) >= 0){
+    var labels = {prayer:'🙏 Prayer',ministry:'⏱️ Ministry',gratitude:'🌸 Gratitude'};
+    showToast('🔥 '+streak+'-day '+labels[type]+' streak! Keep going!');
+    celebrate && celebrate();
+  }
+}
+
+function renderSpiritStreaks(){
+  var el = document.getElementById('spiritStreakBars');
+  if(!el) return;
+  var types = [
+    {key:'prayer',emoji:'🙏',label:'Prayer'},
+    {key:'ministry',emoji:'⏱️',label:'Ministry'},
+    {key:'gratitude',emoji:'🌸',label:'Gratitude'}
+  ];
+  el.innerHTML = types.map(function(t){
+    var s = calcSpiritStreak(t.key);
+    var color = s>=30?'#e07820':s>=7?'#f0a020':s>=3?'var(--sage)':'var(--textl)';
+    return '<div style="flex:1;text-align:center;background:#f8f5ef;border-radius:10px;padding:8px 4px">'
+      +'<div style="font-size:18px;margin-bottom:2px">'+t.emoji+'</div>'
+      +'<div style="font-size:16px;font-weight:700;color:'+color+'">'+(s>0?s:'—')+'</div>'
+      +'<div style="font-size:10px;color:var(--textl)">'+t.label+'</div>'
+      +(s>0?'<div style="font-size:9px;color:'+color+'">🔥 day</div>':'')
+      +'</div>';
+  }).join('');
+}
 
 // ══════════════════════════════════════════════
 // EMBER'S INN RUSH — Overcooked-style mini game
@@ -12056,15 +12832,37 @@ function startReidRunner(){
   <input type="hidden" id="recId">
   <label style="font-size:12px;color:var(--textl)">Recipe Name *</label>
   <input id="recName" type="text" placeholder="e.g. Chicken & Rice Bowl" style="width:100%;padding:9px 11px;border-radius:10px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px;margin-bottom:10px;box-sizing:border-box">
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
+  <div style="margin-bottom:10px">
+    <div style="font-size:12px;color:var(--textl);margin-bottom:6px">Meal Type</div>
+    <div class="fbar" style="flex-wrap:wrap" id="recMealTypeBar">
+      <button class="fchip" onclick="setRecMealType('',this)">Any</button>
+      <button class="fchip" onclick="setRecMealType('breakfast',this)">🌅 Breakfast</button>
+      <button class="fchip" onclick="setRecMealType('lunch',this)">🥙 Lunch</button>
+      <button class="fchip" onclick="setRecMealType('dinner',this)">🍽️ Dinner</button>
+      <button class="fchip" onclick="setRecMealType('snack',this)">🥨 Snack</button>
+      <button class="fchip" onclick="setRecMealType('soup',this)">🍲 Soup</button>
+      <button class="fchip" onclick="setRecMealType('dessert',this)">🍰 Dessert</button>
+      <button class="fchip" onclick="setRecMealType('side',this)">🥗 Side</button>
+    </div>
+    <input type="hidden" id="recMealType">
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px">
     <div>
       <label style="font-size:12px;color:var(--textl)">Servings</label>
       <input id="recServings" type="number" value="1" min="1" style="width:100%;padding:8px 11px;border-radius:10px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px;box-sizing:border-box">
     </div>
     <div>
-      <label style="font-size:12px;color:var(--textl)">Tags (comma sep)</label>
-      <input id="recTags" type="text" placeholder="e.g. high protein, quick" style="width:100%;padding:8px 11px;border-radius:10px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px;box-sizing:border-box">
+      <label style="font-size:12px;color:var(--textl)">Prep Time (min)</label>
+      <input id="recPrepTime" type="number" min="0" placeholder="0" style="width:100%;padding:8px 11px;border-radius:10px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px;box-sizing:border-box">
     </div>
+    <div>
+      <label style="font-size:12px;color:var(--textl)">Cook Time (min)</label>
+      <input id="recCookTime" type="number" min="0" placeholder="0" style="width:100%;padding:8px 11px;border-radius:10px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px;box-sizing:border-box">
+    </div>
+  </div>
+  <div style="margin-bottom:10px">
+    <label style="font-size:12px;color:var(--textl)">Tags (comma sep)</label>
+    <input id="recTags" type="text" placeholder="e.g. high protein, quick" style="width:100%;padding:8px 11px;border-radius:10px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px;box-sizing:border-box">
   </div>
   <div style="font-size:12px;font-weight:700;color:var(--textl);margin-bottom:6px">MACROS (per serving)</div>
   <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:6px;margin-bottom:12px">
