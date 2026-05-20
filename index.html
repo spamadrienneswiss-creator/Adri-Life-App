@@ -650,6 +650,38 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
 .yr-tag{font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px}
 .yr-bar{height:6px;border-radius:3px;background:#f0ebe6;margin-top:8px;overflow:hidden}
 .yr-bar-fill{height:100%;border-radius:3px;background:var(--rose);transition:width .6s ease}
+/* ── Daily Quests ── */
+.dq-card{background:#fff;border-radius:16px;padding:14px 14px 12px;margin-bottom:10px;box-shadow:0 1px 6px rgba(0,0,0,.07);border:1.5px solid #f0e8dc}
+.dq-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.dq-title{font-size:12px;font-weight:700;color:var(--textl);letter-spacing:.5px;text-transform:uppercase}
+.dq-progress{font-size:11px;color:var(--textl)}
+.dq-bar{height:4px;background:#f0e8dc;border-radius:2px;margin-bottom:10px;overflow:hidden}
+.dq-bar-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--sage),var(--teal));transition:width .5s ease}
+.dq-item{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:10px;margin-bottom:6px;background:#faf8f5;border:1px solid #ede8e0;cursor:pointer;transition:all .15s}
+.dq-item.done{background:#f0f8f0;border-color:#c0e0c0;opacity:.75}
+.dq-item:last-child{margin-bottom:0}
+.dq-icon{font-size:18px;flex-shrink:0;width:28px;text-align:center}
+.dq-label{font-size:13px;color:var(--textd);font-weight:600;flex:1;line-height:1.3}
+.dq-item.done .dq-label{text-decoration:line-through;color:var(--textl)}
+.dq-check{width:22px;height:22px;border-radius:50%;border:2px solid #ddd;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:13px;transition:all .2s}
+.dq-item.done .dq-check{background:var(--sage);border-color:var(--sage);color:#fff}
+.dq-chest{text-align:center;padding:10px 0 4px;animation:chestPop .5s ease}
+@keyframes chestPop{0%{transform:scale(0.5);opacity:0}70%{transform:scale(1.15)}100%{transform:scale(1);opacity:1}}
+/* ── Color Mix game ── */
+.colormix-swatch{width:100%;height:80px;border-radius:12px;margin-bottom:12px;border:2px solid rgba(0,0,0,.08);transition:background .1s}
+.colormix-slider-row{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.colormix-slider-label{font-size:12px;font-weight:700;width:14px;text-align:center}
+.colormix-slider{flex:1;-webkit-appearance:none;height:6px;border-radius:3px;outline:none;cursor:pointer}
+.colormix-val{font-size:11px;color:var(--textl);width:28px;text-align:right;font-family:monospace}
+/* ── Character mood badges ── */
+.char-wrap{position:relative;display:inline-block;flex-shrink:0}
+.char-mood-badge{position:absolute;bottom:-4px;right:-4px;font-size:13px;background:white;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 4px rgba(0,0,0,.22);line-height:1;pointer-events:none}
+/* ── Millie mini-games ── */
+.millie-game-wrap{background:rgba(255,255,255,0.8);border-radius:14px;padding:10px;margin:10px 0;text-align:center}
+.millie-game-canvas{border-radius:10px;background:#f8f2ee;cursor:crosshair;display:block;margin:0 auto;touch-action:none}
+.millie-game-label{font-size:12px;font-weight:700;color:var(--textl);margin-bottom:6px}
+.millie-game-score{font-size:13px;font-weight:700;color:var(--rose);margin-top:6px;min-height:18px}
+.millie-game-btn{padding:8px 20px;border-radius:10px;border:none;background:var(--sage);color:white;font-family:'Quicksand',sans-serif;font-size:12px;font-weight:700;cursor:pointer;margin-top:6px}
 </style>
 </head>
 <body>
@@ -700,20 +732,21 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
 <!-- THE HELM -->
 <div class="view" id="v-helm">
   <div class="hub-banner" style="background:linear-gradient(135deg,rgba(44,62,107,.1),rgba(212,168,32,.08))">
-    <div class="hub-char"><svg viewBox="0 0 36 48" width="54" height="72" style="shape-rendering:auto"><rect x="6" y="32" width="24" height="16" rx="5" fill="#1e3a6e"/><circle cx="18" cy="37" r="1.2" fill="#d4a820"/><circle cx="18" cy="41" r="1.2" fill="#d4a820"/><rect x="15" y="26" width="6" height="8" fill="#d4a87c"/><ellipse cx="18" cy="21" rx="9" ry="10" fill="#d4a87c"/><ellipse cx="18" cy="28" rx="6" ry="3.5" fill="#b88c60"/><circle cx="14.5" cy="20" r="1.4" fill="#1e3a6e"/><circle cx="21.5" cy="20" r="1.4" fill="#1e3a6e"/><path d="M14 25 Q18 27 22 25" stroke="#8a6040" stroke-width="1.3" fill="none" stroke-linecap="round"/><rect x="7" y="13" width="22" height="2.5" rx="1.2" fill="#111e40"/><rect x="10" y="4" width="16" height="10" rx="3" fill="#111e40"/><rect x="7" y="13" width="22" height="2" fill="#d4a820"/><ellipse cx="18" cy="9" rx="2.5" ry="2" fill="#d4a820"/></svg></div>
+    <div class="char-wrap" id="hub-char-helm"><svg viewBox="0 0 36 48" width="54" height="72" style="shape-rendering:auto"><rect x="6" y="32" width="24" height="16" rx="5" fill="#1e3a6e"/><circle cx="18" cy="37" r="1.2" fill="#d4a820"/><circle cx="18" cy="41" r="1.2" fill="#d4a820"/><rect x="15" y="26" width="6" height="8" fill="#d4a87c"/><ellipse cx="18" cy="21" rx="9" ry="10" fill="#d4a87c"/><ellipse cx="18" cy="28" rx="6" ry="3.5" fill="#b88c60"/><circle cx="14.5" cy="20" r="1.4" fill="#1e3a6e"/><circle cx="21.5" cy="20" r="1.4" fill="#1e3a6e"/><path d="M14 25 Q18 27 22 25" stroke="#8a6040" stroke-width="1.3" fill="none" stroke-linecap="round"/><rect x="7" y="13" width="22" height="2.5" rx="1.2" fill="#111e40"/><rect x="10" y="4" width="16" height="10" rx="3" fill="#111e40"/><rect x="7" y="13" width="22" height="2" fill="#d4a820"/><ellipse cx="18" cy="9" rx="2.5" ry="2" fill="#d4a820"/></svg></div>
     <div class="hub-info"><h2>The Helm</h2><p>Captain Reid keeps you on course — tasks, projects &amp; active lists, all in one command center.</p></div>
   </div>
   <div class="hub-grid">
     <div class="hub-card" onclick="goTab('tasks',null)"><div class="hub-card-ic">📋</div><div class="hub-card-name">Tasks</div><div class="hub-card-sub" id="hub-tasks-sub">Loading…</div></div>
     <div class="hub-card" onclick="goTab('projects',null)"><div class="hub-card-ic">📁</div><div class="hub-card-name">Projects</div><div class="hub-card-sub" id="hub-projects-sub">Loading…</div></div>
     <div class="hub-card span2" onclick="goTab('lists',null)"><div class="hub-card-ic">📝</div><div class="hub-card-name">Lists</div><div class="hub-card-sub" id="hub-lists-sub">Active working lists</div></div>
+    <div class="hub-card span2" onclick="openDeadlineDash()" style="background:linear-gradient(135deg,#e8f0f8,#d8e8f4);border-color:#b0c8e0"><div class="hub-card-ic">⚡</div><div class="hub-card-name">Deadline Dash</div><div class="hub-card-sub">Tap tasks before they expire — Reid's challenge</div></div>
   </div>
 </div>
 
 <!-- THE CONSERVATORY -->
 <div class="view" id="v-conservatory">
   <div class="hub-banner" style="background:linear-gradient(135deg,rgba(90,138,90,.12),rgba(212,170,96,.08))">
-    <div class="hub-char"><svg viewBox="0 0 36 48" width="54" height="72" style="shape-rendering:auto"><rect x="6" y="32" width="24" height="16" rx="5" fill="#5a8a5a"/><rect x="15" y="26" width="6" height="7" fill="#c8a07a"/><ellipse cx="18" cy="21" rx="9" ry="10" fill="#c8a07a"/><circle cx="18" cy="10" r="6" fill="#2a1a0a"/><ellipse cx="9.5" cy="20" rx="2.5" ry="5" fill="#2a1a0a"/><ellipse cx="26.5" cy="20" rx="2.5" ry="5" fill="#2a1a0a"/><circle cx="14.5" cy="21" r="1.4" fill="#2a1a0a"/><circle cx="21.5" cy="21" r="1.4" fill="#2a1a0a"/><circle cx="14.5" cy="21" r="3.2" fill="none" stroke="#2a1a0a" stroke-width="1.1"/><circle cx="21.5" cy="21" r="3.2" fill="none" stroke="#2a1a0a" stroke-width="1.1"/><line x1="17.7" y1="21" x2="18.3" y2="21" stroke="#2a1a0a" stroke-width="1.1"/><path d="M15.5 26 Q18 28 20.5 26" stroke="#8a6040" stroke-width="1.2" fill="none" stroke-linecap="round"/><circle cx="9" cy="22" r="1.3" fill="#d4aa60"/></svg></div>
+    <div class="char-wrap" id="hub-char-conservatory"><svg viewBox="0 0 36 48" width="54" height="72" style="shape-rendering:auto"><rect x="6" y="32" width="24" height="16" rx="5" fill="#5a8a5a"/><rect x="15" y="26" width="6" height="7" fill="#c8a07a"/><ellipse cx="18" cy="21" rx="9" ry="10" fill="#c8a07a"/><circle cx="18" cy="10" r="6" fill="#2a1a0a"/><ellipse cx="9.5" cy="20" rx="2.5" ry="5" fill="#2a1a0a"/><ellipse cx="26.5" cy="20" rx="2.5" ry="5" fill="#2a1a0a"/><circle cx="14.5" cy="21" r="1.4" fill="#2a1a0a"/><circle cx="21.5" cy="21" r="1.4" fill="#2a1a0a"/><circle cx="14.5" cy="21" r="3.2" fill="none" stroke="#2a1a0a" stroke-width="1.1"/><circle cx="21.5" cy="21" r="3.2" fill="none" stroke="#2a1a0a" stroke-width="1.1"/><line x1="17.7" y1="21" x2="18.3" y2="21" stroke="#2a1a0a" stroke-width="1.1"/><path d="M15.5 26 Q18 28 20.5 26" stroke="#8a6040" stroke-width="1.2" fill="none" stroke-linecap="round"/><circle cx="9" cy="22" r="1.3" fill="#d4aa60"/></svg></div>
     <div class="hub-info"><h2>The Conservatory</h2><p>Tessa tends to your growth — goals, habits, learning &amp; ADHD tools in a calm, nurturing space.</p></div>
   </div>
   <div class="hub-grid">
@@ -721,13 +754,14 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     <div class="hub-card" onclick="goTab('routines',null)"><div class="hub-card-ic">🔄</div><div class="hub-card-name">Routines</div><div class="hub-card-sub" id="hub-routines-sub">Loading…</div></div>
     <div class="hub-card" onclick="goTab('learn',null)"><div class="hub-card-ic">📚</div><div class="hub-card-name">Learning</div><div class="hub-card-sub">Research &amp; study</div></div>
     <div class="hub-card" onclick="goTab('focus',null)"><div class="hub-card-ic">🧠</div><div class="hub-card-name">Focus Tools</div><div class="hub-card-sub">Intentions &amp; ADHD aids</div></div>
+    <div class="hub-card span2" onclick="openMemoryPalace()" style="background:linear-gradient(135deg,#f0eaf8,#e6ddf0);border-color:#c4b0dc"><div class="hub-card-ic">🃏</div><div class="hub-card-name">Memory Palace</div><div class="hub-card-sub">Match your goals — Tessa's memory game</div></div>
   </div>
 </div>
 
 <!-- HEARTHSIDE -->
 <div class="view" id="v-hearthside">
   <div class="hub-banner" style="background:linear-gradient(135deg,rgba(181,64,32,.1),rgba(212,160,100,.08))">
-    <div class="hub-char" id="hub-hearthside-char" style="width:54px;height:72px;flex-shrink:0"></div>
+    <div class="char-wrap" id="hub-char-hearthside" style="width:54px;height:72px"></div>
     <div class="hub-info"><h2>Hearthside</h2><p>Ember keeps the hearth warm — wellness, meals, sleep &amp; movement all cared for here.</p></div>
   </div>
   <div class="hub-grid">
@@ -740,7 +774,7 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
 <!-- THE WORKSHOP -->
 <div class="view" id="v-workshop">
   <div class="hub-banner" style="background:linear-gradient(135deg,rgba(138,74,191,.1),rgba(160,120,220,.08))">
-    <div class="hub-char"><svg viewBox="0 0 36 48" width="54" height="72" style="shape-rendering:auto"><rect x="6" y="32" width="24" height="16" rx="5" fill="#9a6abf"/><circle cx="10" cy="37" r="2.5" fill="#e0b8f0"/><circle cx="13.5" cy="40.5" r="1.8" fill="#a0d4f0"/><rect x="15" y="26" width="6" height="8" fill="#e8c4a0"/><ellipse cx="18" cy="21" rx="9" ry="10" fill="#e8c4a0"/><ellipse cx="9" cy="17" rx="4" ry="8" fill="#8a4abf"/><ellipse cx="27" cy="17" rx="4" ry="8" fill="#8a4abf"/><ellipse cx="18" cy="12" rx="10" ry="6" fill="#8a4abf"/><ellipse cx="18" cy="11" rx="6" ry="3" fill="#b07ae0"/><circle cx="14.5" cy="21" r="1.4" fill="#5a3a80"/><circle cx="21.5" cy="21" r="1.4" fill="#5a3a80"/><ellipse cx="11" cy="24" rx="2" ry="1" fill="#e89ab0" opacity="0.6"/><path d="M15 25.5 Q18 28 21 25.5" stroke="#c07080" stroke-width="1.2" fill="none" stroke-linecap="round"/></svg></div>
+    <div class="char-wrap" id="hub-char-workshop"><svg viewBox="0 0 36 48" width="54" height="72" style="shape-rendering:auto"><rect x="6" y="32" width="24" height="16" rx="5" fill="#9a6abf"/><circle cx="10" cy="37" r="2.5" fill="#e0b8f0"/><circle cx="13.5" cy="40.5" r="1.8" fill="#a0d4f0"/><rect x="15" y="26" width="6" height="8" fill="#e8c4a0"/><ellipse cx="18" cy="21" rx="9" ry="10" fill="#e8c4a0"/><ellipse cx="9" cy="17" rx="4" ry="8" fill="#8a4abf"/><ellipse cx="27" cy="17" rx="4" ry="8" fill="#8a4abf"/><ellipse cx="18" cy="12" rx="10" ry="6" fill="#8a4abf"/><ellipse cx="18" cy="11" rx="6" ry="3" fill="#b07ae0"/><circle cx="14.5" cy="21" r="1.4" fill="#5a3a80"/><circle cx="21.5" cy="21" r="1.4" fill="#5a3a80"/><ellipse cx="11" cy="24" rx="2" ry="1" fill="#e89ab0" opacity="0.6"/><path d="M15 25.5 Q18 28 21 25.5" stroke="#c07080" stroke-width="1.2" fill="none" stroke-linecap="round"/></svg></div>
     <div class="hub-info"><h2>The Workshop</h2><p>Clara's creative studio — vision board, inspiration, faves &amp; all your hobbies &amp; passions.</p></div>
   </div>
   <div class="hub-grid">
@@ -748,6 +782,7 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     <div class="hub-card" onclick="goTab('faves',null)"><div class="hub-card-ic">⭐</div><div class="hub-card-name">Faves</div><div class="hub-card-sub" id="hub-faves-sub">Loading…</div></div>
     <div class="hub-card" onclick="goTab('stories',null)"><div class="hub-card-ic">📖</div><div class="hub-card-name">Stories</div><div class="hub-card-sub" id="hub-stories-sub">Your creative worlds</div></div>
     <div class="hub-card span2" onclick="goTab('mixtape',null)"><div class="hub-card-ic">🎵</div><div class="hub-card-name">Mixtape</div><div class="hub-card-sub">Songs &amp; musical memories</div></div>
+    <div class="hub-card span2" onclick="openColorMix()" style="background:linear-gradient(135deg,#fdf0f8,#f0e8fc);border-color:#d8b8e8"><div class="hub-card-ic">🎨</div><div class="hub-card-name">Color Mix</div><div class="hub-card-sub">Match the color — Clara's eye for detail</div></div>
   </div>
 </div>
 
@@ -765,11 +800,12 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
 <!-- THE ESTATE -->
 <div class="view" id="v-estate">
   <div class="hub-banner" style="background:linear-gradient(135deg,rgba(42,46,54,.1),rgba(212,168,32,.08))">
-    <div class="hub-char"><svg viewBox="0 0 36 48" width="54" height="72" style="shape-rendering:auto"><rect x="6" y="31" width="24" height="17" rx="5" fill="#2a2e36"/><polygon points="15,31 18,38 21,31" fill="#3a3e46"/><rect x="15.5" y="31" width="5" height="8" fill="#f0ede8"/><rect x="20" y="33" width="5" height="4" rx="1" fill="#d4a820"/><rect x="15" y="26" width="6" height="7" fill="#d4a87c"/><ellipse cx="18" cy="21" rx="9" ry="10" fill="#d4a87c"/><ellipse cx="18" cy="12" rx="10" ry="5" fill="#2a1a10"/><ellipse cx="9" cy="17" rx="2.5" ry="5" fill="#2a1a10"/><ellipse cx="27" cy="17" rx="2.5" ry="5" fill="#2a1a10"/><ellipse cx="18" cy="11" rx="5" ry="2" fill="#4a3020"/><circle cx="14.5" cy="21" r="1.4" fill="#2a1a10"/><circle cx="21.5" cy="21" r="1.4" fill="#2a1a10"/><path d="M15.5 26 Q18 27.5 20.5 26" stroke="#a07050" stroke-width="1.2" fill="none" stroke-linecap="round"/></svg></div>
+    <div class="char-wrap" id="hub-char-estate"><svg viewBox="0 0 36 48" width="54" height="72" style="shape-rendering:auto"><rect x="6" y="31" width="24" height="17" rx="5" fill="#2a2e36"/><polygon points="15,31 18,38 21,31" fill="#3a3e46"/><rect x="15.5" y="31" width="5" height="8" fill="#f0ede8"/><rect x="20" y="33" width="5" height="4" rx="1" fill="#d4a820"/><rect x="15" y="26" width="6" height="7" fill="#d4a87c"/><ellipse cx="18" cy="21" rx="9" ry="10" fill="#d4a87c"/><ellipse cx="18" cy="12" rx="10" ry="5" fill="#2a1a10"/><ellipse cx="9" cy="17" rx="2.5" ry="5" fill="#2a1a10"/><ellipse cx="27" cy="17" rx="2.5" ry="5" fill="#2a1a10"/><ellipse cx="18" cy="11" rx="5" ry="2" fill="#4a3020"/><circle cx="14.5" cy="21" r="1.4" fill="#2a1a10"/><circle cx="21.5" cy="21" r="1.4" fill="#2a1a10"/><path d="M15.5 26 Q18 27.5 20.5 26" stroke="#a07050" stroke-width="1.2" fill="none" stroke-linecap="round"/></svg></div>
     <div class="hub-info"><h2>The Estate</h2><p>Elias manages the books — bills, budget, savings &amp; household, run like a business.</p></div>
   </div>
   <div class="hub-grid">
     <div class="hub-card span2" onclick="goTab('money',null)"><div class="hub-card-ic">💰</div><div class="hub-card-name">Money</div><div class="hub-card-sub" id="hub-money-sub">Bills, budget &amp; expenses</div></div>
+    <div class="hub-card span2" onclick="openBudgetBlitz()" style="background:linear-gradient(135deg,#f8f4e8,#f4ecda);border-color:#d4c8a0"><div class="hub-card-ic">🧩</div><div class="hub-card-name">Budget Blitz</div><div class="hub-card-sub">Sort expenses by category — Elias's training game</div></div>
   </div>
 </div>
 
@@ -838,6 +874,8 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     <button class="qa" onclick="openM('fwModal')" style="background:linear-gradient(135deg,#daeaf5,#fdf6ee)"><div class="qa-ic">🍽️💧</div><div class="qa-lb">Food/Water</div></button>
     <button class="qa" onclick="goTab('food',document.querySelector('[data-tab=\'food\']'));setTimeout(function(){document.getElementById('wplanList').scrollIntoView({behavior:'smooth'});},200)" style="background:linear-gradient(135deg,#d4e4d0,#fdf6ee)"><div class="qa-ic">💪</div><div class="qa-lb">Workout</div></button>
   </div>
+  <!-- Daily Quests -->
+  <div id="dailyQuestWrap"></div>
   <div id="ministryHomeWrap" style="background:#fff;border-radius:14px;padding:11px 14px;margin-bottom:10px;box-shadow:0 1px 4px rgba(0,0,0,.06)">
     <div style="display:flex;align-items:center;gap:10px">
       <span style="font-size:11px;font-weight:700;color:var(--textl);letter-spacing:.5px;text-transform:uppercase;flex-shrink:0">⏱️ Ministry</span>
@@ -2502,6 +2540,7 @@ function logRetroSleep(){
   MILLIE.energy=Math.min(100,MILLIE.energy+energyGain);
   MILLIE.hunger=Math.max(0,MILLIE.hunger-hrs*2);
   saveMillie();renderMillieSleepLog();renderMillieWidget();
+  checkQuestAutoComplete('sleep');
   msgEl.textContent='Logged '+hrs+'h '+mins+'m — Millie\'s energy restored! ✓';
   msgEl.style.color='var(--sage)';msgEl.style.display='';
   // Reset fields
@@ -2802,6 +2841,7 @@ function renderWorld(){
   var mmode=millieMode(); var msvg=mmode==='sleeping'?'sleepy':mmode;
   if(mwSvg)mwSvg.innerHTML=millieDrawSVG(msvg,52);
   renderEmberSkillBars();
+  renderSprintSign();
 }
 
 var BRAIN_DUMP = JSON.parse(localStorage.getItem('aBrainDump')||'[]');
@@ -3137,8 +3177,8 @@ function renderHubPreviews(section){
     var due2=RTN_GROUPS.filter(function(g){return rtnIsDueToday(g);}).length;
     el=document.getElementById('hub-routines-sub');if(el)el.textContent=due2+' group'+(due2!==1?'s':'')+' due today';
   }else if(section==='hearthside'){
-    var charEl=document.getElementById('hub-hearthside-char');
-    if(charEl&&!charEl.innerHTML.trim())charEl.innerHTML=emberDrawSVG(36);
+    var charEl=document.getElementById('hub-char-hearthside');
+    if(charEl&&!charEl.querySelector('svg'))charEl.insertAdjacentHTML('afterbegin',emberDrawSVG(36));
     el=document.getElementById('hub-health-sub');
     var lastSl=MILLIE.sleepLog&&MILLIE.sleepLog.length?MILLIE.sleepLog[MILLIE.sleepLog.length-1]:null;
     if(el)el.textContent=lastSl?'Last sleep: '+((new Date(lastSl.wake)-new Date(lastSl.bed))/3600000).toFixed(1)+'h':'Log sleep, workouts & wellness';
@@ -3182,6 +3222,256 @@ function renderHubPreviews(section){
       el.textContent=wigsCount+' wig'+(wigsCount!==1?'s':'')+' · '+custLevels[custIdx];
     }
   }
+  updateCharMoods(section);
+}
+
+// ── Character condition (mood) system ──────────
+function calcSectionHealth(section){
+  var today=todayStr(),week=new Date(Date.now()-7*86400000).toISOString().slice(0,10);
+  if(section==='helm'){
+    var total=(TASKS||[]).length;if(!total)return 50;
+    var done=(TASKS||[]).filter(function(t){return t.done&&t.doneDate&&t.doneDate>=week;}).length;
+    var overdue=(TASKS||[]).filter(function(t){return !t.done&&t.due&&t.due<today;}).length;
+    return Math.max(0,Math.min(100,50+done*8-overdue*12));
+  }
+  if(section==='conservatory'){
+    var goals=(GOALS||[]).filter(function(g){return !g.done;}).length;
+    var rtnDue=RTN_GROUPS.filter(function(g){return rtnIsDueToday(g);}).length;
+    var rtnDone=RTN_GROUPS.filter(function(g){
+      if(!rtnIsDueToday(g))return false;
+      var items=g.items||[];if(!items.length)return false;
+      var cs=rtnCompState(g,todayStr());
+      return items.every(function(_,i){return!!cs[i];});
+    }).length;
+    var score=goals>0?40:20;
+    if(rtnDue>0)score+=Math.round((rtnDone/rtnDue)*60);else score+=50;
+    return Math.min(100,score);
+  }
+  if(section==='hearthside'){
+    var lastSleep=MILLIE.sleepLog&&MILLIE.sleepLog.length?MILLIE.sleepLog[MILLIE.sleepLog.length-1]:null;
+    var slScore=lastSleep&&lastSleep.date===today?80:lastSleep?50:20;
+    var mealCount=(MEAL_LOG_ITEMS||[]).filter(function(m){return m.date===today;}).length;
+    return Math.min(100,slScore+(mealCount*10));
+  }
+  if(section==='workshop'){
+    var items=(VB_ITEMS||[]).length+(FAVES||[]).length+(STORIES||[]).length+(MIXTAPE||[]).length;
+    return Math.min(100,items*5+20);
+  }
+  if(section==='estate'){
+    var bills=(JSON.parse(localStorage.getItem('aBills')||'[]'));
+    var overdueBills=bills.filter(function(b){return !b.paid&&b.due&&b.due<today;}).length;
+    var entries=(JSON.parse(localStorage.getItem('aExpenses')||'[]')).length;
+    return Math.max(0,Math.min(100,60+entries*3-overdueBills*20));
+  }
+  return 60;
+}
+
+function getSectionMood(score){
+  if(score>=75)return{emoji:'✨',label:'Thriving',color:'#6aaa6a'};
+  if(score>=45)return{emoji:'😊',label:'Well',color:'#7aaad4'};
+  if(score>=20)return{emoji:'😟',label:'Needs attention',color:'#d4aa50'};
+  return{emoji:'😢',label:'Neglected',color:'#d07070'};
+}
+
+function updateCharMoods(section){
+  var charId='hub-char-'+section;
+  var wrap=document.getElementById(charId);
+  if(!wrap)return;
+  var score=calcSectionHealth(section);
+  var mood=getSectionMood(score);
+  var badge=wrap.querySelector('.char-mood-badge');
+  if(!badge){badge=document.createElement('div');badge.className='char-mood-badge';wrap.appendChild(badge);}
+  badge.textContent=mood.emoji;
+  badge.title=mood.label+' ('+Math.round(score)+'%)';
+  badge.style.borderColor=mood.color;
+}
+
+// ── Yarn Catch mini-game (Millie: Play) ────────
+var _yarnGame=null;
+function startYarnGame(){
+  if(millieShouldSleep()){showToast('Millie is sleeping 💤 — let her rest!');return;}
+  if(MILLIE.energy<20){showToast('Millie is too tired to play 😴');return;}
+  var wrap=document.getElementById('millieGameWrap');
+  if(!wrap)return;
+  wrap.style.display='';
+  var canvas=document.getElementById('millieGameCanvas');
+  var label=document.getElementById('millieGameLabel');
+  var scoreEl=document.getElementById('millieGameScore');
+  if(!canvas)return;
+  var W=canvas.width=Math.min(270,wrap.clientWidth-20),H=canvas.height=160;
+  var ctx=canvas.getContext('2d');
+  var catches=0,needed=3,timeLeft=18;
+  var ball={x:W/2,y:30,vx:2.2,vy:2.8,r:10,caught:false,catchAnim:0};
+  var paw={x:-100,y:-100,visible:false,timer:0};
+  if(label)label.textContent='🧶 Catch the yarn ball! ('+catches+'/'+needed+')';
+  if(scoreEl)scoreEl.textContent='';
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    // sky gradient
+    var grad=ctx.createLinearGradient(0,0,0,H);
+    grad.addColorStop(0,'#fef6f0');grad.addColorStop(1,'#ffe8d8');
+    ctx.fillStyle=grad;ctx.fillRect(0,0,W,H);
+    // yarn ball
+    if(!ball.caught){
+      ctx.beginPath();ctx.arc(ball.x,ball.y,ball.r,0,Math.PI*2);
+      ctx.fillStyle='#d45080';ctx.fill();
+      ctx.strokeStyle='#a03060';ctx.lineWidth=1.5;ctx.stroke();
+      ctx.strokeStyle='#f080a8';ctx.lineWidth=0.8;
+      ctx.beginPath();ctx.arc(ball.x,ball.y,ball.r*0.6,0,Math.PI*2);ctx.stroke();
+      ctx.beginPath();ctx.moveTo(ball.x-ball.r*0.7,ball.y);ctx.lineTo(ball.x+ball.r*0.7,ball.y);ctx.stroke();
+    }else{
+      ball.catchAnim++;
+      ctx.globalAlpha=Math.max(0,1-ball.catchAnim/15);
+      ctx.font='22px serif';ctx.textAlign='center';ctx.textBaseline='middle';
+      ctx.fillText('✨',ball.x,ball.y-ball.catchAnim*1.5);
+      ctx.globalAlpha=1;
+      if(ball.catchAnim>15){ball.caught=false;ball.x=20+Math.random()*(W-40);ball.y=20;ball.vx=(Math.random()*2+1.5)*(Math.random()<0.5?1:-1);ball.vy=Math.random()*1.5+2;}
+    }
+    // paw
+    if(paw.visible){
+      ctx.globalAlpha=Math.max(0,1-paw.timer/12);
+      ctx.font='26px serif';ctx.textAlign='center';ctx.textBaseline='middle';
+      ctx.fillText('🐾',paw.x,paw.y);
+      ctx.globalAlpha=1;paw.timer++;
+      if(paw.timer>12)paw.visible=false;
+    }
+    // timer bar
+    ctx.fillStyle='#f0e0d8';ctx.fillRect(8,H-12,W-16,6);
+    ctx.fillStyle='#e07090';ctx.fillRect(8,H-12,Math.max(0,(timeLeft/18)*(W-16)),6);
+    ctx.fillStyle='rgba(0,0,0,.35)';ctx.font='10px sans-serif';ctx.textAlign='left';ctx.textBaseline='top';
+    ctx.fillText(catches+'/'+needed+' caught',8,2);
+  }
+  function tick(){
+    if(!ball.caught){
+      ball.x+=ball.vx;ball.y+=ball.vy;
+      if(ball.x-ball.r<0){ball.x=ball.r;ball.vx=Math.abs(ball.vx);}
+      if(ball.x+ball.r>W){ball.x=W-ball.r;ball.vx=-Math.abs(ball.vx);}
+      if(ball.y-ball.r<0){ball.y=ball.r;ball.vy=Math.abs(ball.vy);}
+      if(ball.y+ball.r>H-15){ball.y=H-ball.r-15;ball.vy=-Math.abs(ball.vy);}
+    }
+  }
+  var timerTick=0;
+  if(_yarnGame)clearInterval(_yarnGame);
+  _yarnGame=setInterval(function(){
+    tick();draw();
+    timerTick++;if(timerTick%60===0){timeLeft--;if(timeLeft<=0){endYarnGame(catches,needed,scoreEl,label,false);return;}}
+  },16);
+  function handleClick(e){
+    var rect=canvas.getBoundingClientRect();
+    var cx,cy;
+    if(e.touches){cx=e.touches[0].clientX-rect.left;cy=e.touches[0].clientY-rect.top;}
+    else{cx=e.clientX-rect.left;cy=e.clientY-rect.top;}
+    paw.x=cx;paw.y=cy;paw.visible=true;paw.timer=0;
+    var dx=cx-ball.x,dy=cy-ball.y;
+    if(!ball.caught&&Math.sqrt(dx*dx+dy*dy)<ball.r+22){
+      ball.caught=true;ball.catchAnim=0;catches++;
+      if(label)label.textContent='🧶 Catch the yarn ball! ('+catches+'/'+needed+')';
+      if(catches>=needed){endYarnGame(catches,needed,scoreEl,label,true);return;}
+      ball.vx*=1.15;ball.vy*=1.15;
+    }
+  }
+  canvas.onclick=handleClick;canvas.ontouchstart=function(e){e.preventDefault();handleClick(e);};
+}
+function endYarnGame(catches,needed,scoreEl,label,won){
+  if(_yarnGame){clearInterval(_yarnGame);_yarnGame=null;}
+  var canvas=document.getElementById('millieGameCanvas');
+  if(canvas){canvas.onclick=null;canvas.ontouchstart=null;}
+  if(won){
+    MILLIE.happiness=Math.min(100,MILLIE.happiness+30);
+    MILLIE.energy=Math.max(0,MILLIE.energy-20);
+    MILLIE.hunger=Math.max(0,MILLIE.hunger-10);
+    saveMillie();renderMillieWidget();
+    if(scoreEl)scoreEl.textContent='🎉 Millie had so much fun! +30 happiness!';
+    if(label)label.textContent='✅ Playtime complete!';
+  }else{
+    if(catches>0){MILLIE.happiness=Math.min(100,MILLIE.happiness+catches*8);saveMillie();renderMillieWidget();}
+    if(scoreEl)scoreEl.textContent=catches+'/'+needed+' caught — try again? '+'+'+catches*8+' happiness';
+    if(label)label.textContent='Time\'s up! 🕐';
+  }
+  var wrap=document.getElementById('millieGameWrap');
+  if(wrap){var btn=document.createElement('button');btn.className='millie-game-btn';btn.textContent='Play again 🧶';btn.onclick=startYarnGame;wrap.appendChild(btn);}
+}
+
+// ── Treat Toss mini-game (Millie: Feed) ────────
+var _treatGame=null;
+function startTreatGame(){
+  if(millieShouldSleep()){showToast('Millie is sleeping 💤 — let her rest!');return;}
+  var wrap=document.getElementById('millieGameWrap');
+  if(!wrap)return;
+  wrap.innerHTML='<div class="millie-game-label" id="millieGameLabel">🍣 Tap to toss a treat to Millie!</div><canvas id="millieGameCanvas" class="millie-game-canvas"></canvas><div class="millie-game-score" id="millieGameScore"></div>';
+  wrap.style.display='';
+  var canvas=document.getElementById('millieGameCanvas');
+  var label=document.getElementById('millieGameLabel');
+  var scoreEl=document.getElementById('millieGameScore');
+  if(!canvas)return;
+  var W=canvas.width=Math.min(270,wrap.clientWidth-20),H=canvas.height=160;
+  var ctx=canvas.getContext('2d');
+  var treats=[],caught=0,missed=0,total=7,launched=0,done=false;
+  var catX=W/2,catAnim=0,eatAnim=0;
+  function spawnTreat(){
+    if(launched>=total)return;
+    launched++;
+    treats.push({x:20+Math.random()*(W-40),y:-10,vy:2+Math.random()*1.5,caught:false,miss:false,alpha:1});
+  }
+  var spawnTimer=0;
+  if(_treatGame)clearInterval(_treatGame);
+  _treatGame=setInterval(function(){
+    if(done)return;
+    spawnTimer++;if(spawnTimer%55===0)spawnTreat();
+    treats.forEach(function(t){
+      if(t.caught||t.miss)return;
+      t.y+=t.vy;
+      var dx=t.x-catX;
+      if(t.y>H-35&&Math.abs(dx)<28){t.caught=true;caught++;eatAnim=12;catAnim=8;MILLIE.hunger=Math.min(100,MILLIE.hunger+14);saveMillie();}
+      else if(t.y>H+10){t.miss=true;missed++;}
+    });
+    treats=treats.filter(function(t){return t.y<H+30;});
+    ctx.clearRect(0,0,W,H);
+    var g=ctx.createLinearGradient(0,0,0,H);g.addColorStop(0,'#fef6f0');g.addColorStop(1,'#ffe8d8');
+    ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+    treats.forEach(function(t){
+      ctx.font='18px serif';ctx.textAlign='center';ctx.textBaseline='middle';
+      ctx.fillText('🍣',t.x,t.y);
+    });
+    // simple Millie face at bottom
+    if(catAnim>0)catAnim--;
+    ctx.font=(eatAnim>0?'28px':'22px')+' serif';ctx.textAlign='center';ctx.textBaseline='bottom';
+    ctx.fillText(eatAnim>0?'😻':'😺',catX,H-4);
+    if(eatAnim>0)eatAnim--;
+    ctx.fillStyle='rgba(0,0,0,.35)';ctx.font='10px sans-serif';ctx.textAlign='left';ctx.textBaseline='top';
+    ctx.fillText('Caught: '+caught+'/'+total,8,2);
+    if(launched>=total&&treats.length===0&&!done){done=true;endTreatGame(caught,scoreEl,label);}
+  },16);
+  function handleClick(e){
+    if(done)return;
+    var rect=canvas.getBoundingClientRect();
+    var cx;
+    if(e.touches)cx=e.touches[0].clientX-rect.left;
+    else cx=e.clientX-rect.left;
+    catX=Math.max(20,Math.min(W-20,cx));
+    if(label)label.textContent='🍣 Move to catch treats!';
+  }
+  canvas.onclick=handleClick;canvas.ontouchstart=function(e){e.preventDefault();handleClick(e);};
+  canvas.ontouchmove=function(e){e.preventDefault();handleClick(e);};
+  canvas.onmousemove=function(e){var r=canvas.getBoundingClientRect();catX=Math.max(20,Math.min(W-20,e.clientX-r.left));};
+}
+function endTreatGame(caught,scoreEl,label){
+  if(_treatGame){clearInterval(_treatGame);_treatGame=null;}
+  renderMillieWidget();
+  if(scoreEl)scoreEl.textContent='🍣 Millie ate '+caught+' treat'+(caught!==1?'s':'')+'! +'+caught*14+' tummy';
+  if(label)label.textContent='Feeding time done!';
+  var wrap=document.getElementById('millieGameWrap');
+  if(wrap){var btn=document.createElement('button');btn.className='millie-game-btn';btn.textContent='Feed again 🍣';btn.onclick=startTreatGame;wrap.appendChild(btn);}
+}
+
+function openMillieGame(type){
+  var wrap=document.getElementById('millieGameWrap');
+  if(!wrap)return;
+  if(_yarnGame){clearInterval(_yarnGame);_yarnGame=null;}
+  if(_treatGame){clearInterval(_treatGame);_treatGame=null;}
+  wrap.innerHTML='<div class="millie-game-label" id="millieGameLabel"></div><canvas id="millieGameCanvas" class="millie-game-canvas"></canvas><div class="millie-game-score" id="millieGameScore"></div>';
+  if(type==='yarn')startYarnGame();
+  else startTreatGame();
 }
 
 // ═══════════════════════════════════════════════
@@ -3728,7 +4018,7 @@ function togT(id){
   if(!t)return;
   t.done=!t.done;
   fbSave('tasks',id,t);
-  if(t.done){if(t.meaningful)celebrate();millieTaskTreat();if(t.repeat)setTimeout(function(){createRepeat(t);},600);}
+  if(t.done){if(t.meaningful)celebrate();millieTaskTreat();if(t.repeat)setTimeout(function(){createRepeat(t);},600);checkQuestTaskCompletion(id);}
 }
 
 function editT(id){
@@ -8501,6 +8791,7 @@ function addMealLogItem(){
   localStorage.setItem('aMealLogItems',JSON.stringify(MEAL_LOG_ITEMS));
   document.getElementById('mealLogName').value='';
   document.getElementById('mealLogDay').value='';
+  checkQuestAutoComplete('meal');
   renderMealLog();
 }
 
@@ -9100,6 +9391,766 @@ function delPriceEntry(i){
   renderPriceLog();
 }
 
+// ═══════════════════════════════════════════════
+// MINI-GAMES: BUDGET BLITZ + DEADLINE DASH + TASK SPRINT + MEMORY PALACE
+// ═══════════════════════════════════════════════
+
+var BUDGET_CATS=[
+  {key:'Housing',label:'🏠 Housing'},
+  {key:'Food',label:'🍕 Food'},
+  {key:'Transport',label:'🚗 Transport'},
+  {key:'Personal',label:'💄 Personal'},
+  {key:'Fun',label:'🎮 Fun'},
+  {key:'Health',label:'💊 Health'},
+  {key:'Business',label:'💼 Business'},
+  {key:'Other',label:'📦 Other'}
+];
+
+var BUDGET_SAMPLE=[
+  {desc:'Grocery run',cat:'Food',amt:87},{desc:'Netflix',cat:'Fun',amt:17},
+  {desc:'Gas station',cat:'Transport',amt:55},{desc:'Pharmacy',cat:'Health',amt:23},
+  {desc:'Rent',cat:'Housing',amt:1200},{desc:'Haircut',cat:'Personal',amt:45},
+  {desc:'Amazon order',cat:'Other',amt:38},{desc:'Gym membership',cat:'Health',amt:30},
+  {desc:'Uber Eats',cat:'Food',amt:28},{desc:'Office supplies',cat:'Business',amt:62},
+  {desc:'Electricity bill',cat:'Housing',amt:140},{desc:'Coffee shop',cat:'Food',amt:14},
+  {desc:'Car insurance',cat:'Transport',amt:180},{desc:'Nail salon',cat:'Personal',amt:65},
+  {desc:'Movie tickets',cat:'Fun',amt:32},{desc:'Vitamin supplements',cat:'Health',amt:41}
+];
+
+var _budgetGame=null;
+function openBudgetBlitz(){
+  showOv('budgetBlitzOv');
+  startBudgetBlitz();
+}
+function startBudgetBlitz(){
+  var pool=EXPENSES.filter(function(e){return e.cat&&e.desc;}).length>=5
+    ?EXPENSES.filter(function(e){return e.cat&&e.desc;}).slice(0,20)
+    :BUDGET_SAMPLE;
+  var deck=[];
+  for(var i=0;i<Math.min(12,pool.length);i++){var idx=Math.floor(Math.random()*pool.length);deck.push(pool[idx]);}
+  var qi=0,score=0,streak=0,total=deck.length,lastRight=false;
+  var cats=BUDGET_CATS;
+  var useExp=EXPENSES.filter(function(e){return e.cat&&e.desc;}).length>=5;
+  // Build distinct cats from pool
+  var seenCats=[];
+  pool.forEach(function(e){var c=e.cat||'Other';if(!seenCats.includes(c))seenCats.push(c);});
+  var displayCats=useExp
+    ?BUDGET_CATS.filter(function(c){return seenCats.includes(c.key);}).slice(0,6)
+    :BUDGET_CATS.slice(0,6);
+  if(displayCats.length<4)displayCats=BUDGET_CATS.slice(0,6);
+
+  function render(){
+    var el=document.getElementById('budgetBlitzBody');
+    if(!el)return;
+    if(qi>=total){
+      var grade=score>=total*8?'🏆 Elias is impressed!':score>=total*4?'👍 Not bad at all.':'📋 Keep tracking!';
+      el.innerHTML='<div style="text-align:center;padding:20px 10px">'
+        +'<div style="font-size:40px;margin-bottom:10px">'+grade.split(' ')[0]+'</div>'
+        +'<div style="font-size:16px;font-weight:700;color:var(--text);margin-bottom:6px">'+grade.slice(grade.indexOf(' ')+1)+'</div>'
+        +'<div style="font-size:13px;color:var(--textl);margin-bottom:4px">Score: <b>'+score+'</b> pts</div>'
+        +'<div style="font-size:12px;color:var(--textl);margin-bottom:16px">'+Math.round(score/total/10*100)+'% accuracy</div>'
+        +'<button class="millie-game-btn" style="background:var(--lav)" onclick="startBudgetBlitz()">Play again 💰</button>'
+        +'</div>';
+      return;
+    }
+    var item=deck[qi];
+    var correctCat=item.cat||'Other';
+    var correctKey=BUDGET_CATS.find(function(c){return c.key.toLowerCase()===correctCat.toLowerCase()});
+    correctKey=correctKey?correctKey.key:'Other';
+    var pct=Math.round((qi/total)*100);
+    el.innerHTML='<div style="padding:8px 0 4px">'
+      +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">'
+        +'<span style="font-size:11px;color:var(--textl)">'+qi+'/'+total+'</span>'
+        +'<span style="font-size:13px;font-weight:700;color:var(--text)">'+score+' pts</span>'
+        +'<span style="font-size:11px;color:var(--textl)">🔥 '+streak+'</span>'
+      +'</div>'
+      +'<div style="height:4px;background:#f0e8e0;border-radius:2px;margin-bottom:12px"><div style="width:'+pct+'%;height:100%;background:var(--lav);border-radius:2px;transition:width .3s"></div></div>'
+      +'<div style="background:#fff;border-radius:14px;padding:16px 14px;margin-bottom:14px;box-shadow:0 2px 8px rgba(0,0,0,.07);text-align:center">'
+        +'<div style="font-size:18px;font-weight:700;color:var(--textd);margin-bottom:4px">'+escHtml(item.desc)+'</div>'
+        +(item.amt?'<div style="font-size:14px;color:var(--textl)">$'+parseFloat(item.amt).toFixed(2)+'</div>':'')
+      +'</div>'
+      +'<div style="font-size:12px;color:var(--textl);font-weight:700;margin-bottom:8px;text-align:center">Which category?</div>'
+      +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">'
+      +displayCats.map(function(c){
+        return'<button onclick="budgetAnswer(\''+c.key+'\',\''+correctKey+'\')" style="padding:12px 8px;border-radius:12px;border:2px solid #ede8e0;background:#fff;font-family:\'Quicksand\',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .15s" id="bcat-'+c.key+'">'+c.label+'</button>';
+      }).join('')
+      +'</div>'
+      +'</div>';
+    window._budgetDeck=deck;window._budgetQi=qi;window._budgetScore=score;window._budgetStreak=streak;window._budgetTotal=total;window._budgetDisplayCats=displayCats;
+  }
+
+  window.budgetAnswer=function(chosen,correct){
+    var right=chosen===correct;
+    var pts=right?(10+(window._budgetStreak>=2?5:0)):0;
+    window._budgetScore=(window._budgetScore||0)+pts;
+    window._budgetStreak=right?(window._budgetStreak+1):0;
+    window._budgetQi=(window._budgetQi||0)+1;
+    // Flash feedback
+    var btn=document.getElementById('bcat-'+chosen);
+    if(btn){
+      btn.style.background=right?'#d4f0d4':'#f0d4d4';
+      btn.style.borderColor=right?'#60c060':'#c06060';
+      btn.textContent=right?'✓ Correct!':'✗ '+correct;
+    }
+    if(!right){var cb=document.getElementById('bcat-'+correct);if(cb){cb.style.background='#d4f0d4';cb.style.borderColor='#60c060';}}
+    setTimeout(function(){
+      var el2=document.getElementById('budgetBlitzBody');if(!el2)return;
+      var deck2=window._budgetDeck,qi2=window._budgetQi,score2=window._budgetScore,streak2=window._budgetStreak,total2=window._budgetTotal,dc=window._budgetDisplayCats;
+      if(qi2>=total2){
+        var grade=score2>=total2*8?'🏆 Elias is impressed!':score2>=total2*4?'👍 Not bad at all.':'📋 Keep tracking!';
+        el2.innerHTML='<div style="text-align:center;padding:20px 10px">'
+          +'<div style="font-size:40px;margin-bottom:10px">'+grade.split(' ')[0]+'</div>'
+          +'<div style="font-size:16px;font-weight:700;color:var(--text);margin-bottom:6px">'+grade.slice(grade.indexOf(' ')+1)+'</div>'
+          +'<div style="font-size:13px;color:var(--textl);margin-bottom:4px">Score: <b>'+score2+'</b> pts</div>'
+          +'<div style="font-size:12px;color:var(--textl);margin-bottom:16px">Streak peak: '+streak2+'🔥</div>'
+          +'<button class="millie-game-btn" style="background:var(--lav)" onclick="startBudgetBlitz()">Play again 💰</button>'
+          +'</div>';
+        return;
+      }
+      var item2=deck2[qi2];var ck2=BUDGET_CATS.find(function(c){return c.key.toLowerCase()===(item2.cat||'Other').toLowerCase()});ck2=ck2?ck2.key:'Other';
+      var pct2=Math.round((qi2/total2)*100);
+      el2.innerHTML='<div style="padding:8px 0 4px">'
+        +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">'
+          +'<span style="font-size:11px;color:var(--textl)">'+qi2+'/'+total2+'</span>'
+          +'<span style="font-size:13px;font-weight:700;color:var(--text)">'+score2+' pts</span>'
+          +'<span style="font-size:11px;color:var(--textl)">🔥 '+streak2+'</span>'
+        +'</div>'
+        +'<div style="height:4px;background:#f0e8e0;border-radius:2px;margin-bottom:12px"><div style="width:'+pct2+'%;height:100%;background:var(--lav);border-radius:2px;transition:width .3s"></div></div>'
+        +'<div style="background:#fff;border-radius:14px;padding:16px 14px;margin-bottom:14px;box-shadow:0 2px 8px rgba(0,0,0,.07);text-align:center">'
+          +'<div style="font-size:18px;font-weight:700;color:var(--textd);margin-bottom:4px">'+escHtml(item2.desc)+'</div>'
+          +(item2.amt?'<div style="font-size:14px;color:var(--textl)">$'+parseFloat(item2.amt).toFixed(2)+'</div>':'')
+        +'</div>'
+        +'<div style="font-size:12px;color:var(--textl);font-weight:700;margin-bottom:8px;text-align:center">Which category?</div>'
+        +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">'
+        +dc.map(function(c){return'<button onclick="budgetAnswer(\''+c.key+'\',\''+ck2+'\')" style="padding:12px 8px;border-radius:12px;border:2px solid #ede8e0;background:#fff;font-family:\'Quicksand\',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .15s" id="bcat-'+c.key+'">'+c.label+'</button>';}).join('')
+        +'</div>'
+        +'</div>';
+    },600);
+  };
+  render();
+}
+
+// ── Deadline Dash (Reid/Helm) ──────────────────
+var DEADLINE_SAMPLE=[
+  'Reply to that email','Pay the phone bill','Schedule doctor appointment',
+  'Call mom back','Submit the form','Renew car registration','Buy birthday gift',
+  'Return the package','Confirm the reservation','File those receipts',
+  'Water the plants','Check bank statement','Back up phone photos'
+];
+var _dashGame=null,_dashCards=[],_dashScore=0,_dashMissed=0,_dashInterval=null;
+
+function openDeadlineDash(){
+  showOv('deadlineDashOv');
+  startDeadlineDash();
+}
+
+function startDeadlineDash(){
+  if(_dashInterval){clearInterval(_dashInterval);_dashInterval=null;}
+  _dashCards=[];_dashScore=0;_dashMissed=0;
+  var el=document.getElementById('deadlineDashBody');
+  if(!el)return;
+  // Build task pool: real overdue/due-soon tasks first, then sample
+  var today=todayStr();
+  var urgentTasks=TASKS.filter(function(t){return !t.done&&t.title;}).slice(0,8).map(function(t){return t.title;});
+  var pool=urgentTasks.length>=5?urgentTasks:DEADLINE_SAMPLE;
+  var deck=pool.slice().sort(function(){return Math.random()-.5;}).slice(0,8);
+  var launched=0,maxLaunch=deck.length,done=false;
+  var launchInterval=2200,speedup=0.88;
+
+  function renderBoard(){
+    if(!el)return;
+    // header
+    var header='<div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0 10px">'
+      +'<span style="font-size:12px;font-weight:700;color:var(--textl)">⚡ Deadline Dash</span>'
+      +'<span style="font-size:13px;font-weight:700;color:var(--text)" id="ddScore">'+_dashScore+' pts</span>'
+      +'<span style="font-size:12px;color:#d07070" id="ddMissed">'+_dashMissed+' missed</span>'
+      +'</div>'
+      +'<div style="font-size:11px;color:var(--textl);text-align:center;margin-bottom:8px">Tap tasks before time runs out! ⏱️</div>'
+      +'<div id="ddBoard" style="display:flex;flex-direction:column;gap:8px;min-height:200px"></div>';
+    el.innerHTML=header;
+  }
+
+  renderBoard();
+  var scoreEl=function(){return document.getElementById('ddScore');};
+  var missedEl=function(){return document.getElementById('ddMissed');};
+  var board=function(){return document.getElementById('ddBoard');};
+
+  function spawnCard(taskTitle){
+    var id='dc-'+Date.now();
+    var duration=Math.max(3500,6000-launched*200);
+    var card={id:id,title:taskTitle,startTime:Date.now(),duration:duration,done:false,missed:false};
+    _dashCards.push(card);
+    var b=board();if(!b)return;
+    var div=document.createElement('div');
+    div.id=id;
+    div.style.cssText='background:#fff;border-radius:12px;padding:12px 14px;box-shadow:0 2px 8px rgba(0,0,0,.09);cursor:pointer;position:relative;overflow:hidden;border:2px solid #ede8e0;transition:transform .1s;';
+    div.innerHTML='<div style="font-size:13px;font-weight:700;color:var(--textd);margin-bottom:6px;padding-right:40px">'+escHtml(taskTitle)+'</div>'
+      +'<div style="height:5px;background:#f0e8e0;border-radius:3px;overflow:hidden"><div id="bar-'+id+'" style="height:100%;background:var(--rose);border-radius:3px;transition:width .08s linear;width:100%"></div></div>'
+      +'<div id="pts-'+id+'" style="position:absolute;top:10px;right:12px;font-size:11px;font-weight:700;color:var(--textl)"></div>';
+    div.onclick=function(){
+      var c=_dashCards.find(function(x){return x.id===id;});
+      if(!c||c.done||c.missed)return;
+      c.done=true;
+      var elapsed=(Date.now()-c.startTime)/c.duration;
+      var pts=Math.max(5,Math.round(30*(1-elapsed)));
+      _dashScore+=pts;
+      var sEl=scoreEl();if(sEl)sEl.textContent=_dashScore+' pts';
+      div.style.background='#e8f8e8';div.style.borderColor='#60c060';
+      var ptsEl=document.getElementById('pts-'+id);if(ptsEl)ptsEl.textContent='+'+pts+'✨';
+      setTimeout(function(){if(div.parentNode)div.parentNode.removeChild(div);},600);
+    };
+    b.appendChild(div);
+    // animate bar
+    function tick(){
+      var c=_dashCards.find(function(x){return x.id===id;});
+      if(!c||c.done)return;
+      var elapsed=(Date.now()-c.startTime)/c.duration;
+      if(elapsed>=1){
+        c.missed=true;_dashMissed++;
+        var mEl=missedEl();if(mEl)mEl.textContent=_dashMissed+' missed';
+        div.style.background='#fff0f0';div.style.borderColor='#e07070';
+        setTimeout(function(){if(div.parentNode)div.parentNode.removeChild(div);},400);
+        // check if all done
+        if(_dashMissed+countDone()>=maxLaunch&&!board().querySelector('[id^="dc-"]'))endDash();
+        return;
+      }
+      var bar=document.getElementById('bar-'+id);
+      if(bar)bar.style.width=((1-elapsed)*100)+'%';
+      var urgentColor=elapsed>0.6?'#d07070':elapsed>0.35?'#d4aa30':'var(--rose)';
+      if(bar)bar.style.background=urgentColor;
+      requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  }
+
+  function countDone(){return _dashCards.filter(function(c){return c.done;}).length;}
+
+  var launchTimer=0;
+  _dashInterval=setInterval(function(){
+    if(done)return;
+    if(launched<maxLaunch){
+      spawnCard(deck[launched]);
+      launched++;
+      launchInterval*=speedup;
+    }
+    // end check
+    var allLaunched=launched>=maxLaunch;
+    var allSettled=_dashCards.every(function(c){return c.done||c.missed;});
+    if(allLaunched&&allSettled){done=true;clearInterval(_dashInterval);_dashInterval=null;endDash();}
+  },launchInterval);
+
+  function endDash(){
+    var el2=document.getElementById('deadlineDashBody');if(!el2)return;
+    var doneCt=countDone();
+    var grade=doneCt>=maxLaunch*0.8?'⚓ Reid salutes you!':doneCt>=maxLaunch*0.5?'📋 Decent work, sailor.':'🌊 The tasks got away.';
+    el2.innerHTML='<div style="text-align:center;padding:20px 10px">'
+      +'<div style="font-size:40px;margin-bottom:10px">'+grade.split(' ')[0]+'</div>'
+      +'<div style="font-size:16px;font-weight:700;color:var(--text);margin-bottom:6px">'+grade.slice(grade.indexOf(' ')+1)+'</div>'
+      +'<div style="font-size:13px;color:var(--textl);margin-bottom:4px">Score: <b>'+_dashScore+'</b> pts</div>'
+      +'<div style="font-size:12px;color:var(--textl);margin-bottom:4px">✅ Cleared: '+doneCt+' · ❌ Missed: '+_dashMissed+'</div>'
+      +'<button class="millie-game-btn" style="background:var(--blue);margin-top:14px" onclick="startDeadlineDash()">Play again ⚡</button>'
+      +'</div>';
+  }
+}
+
+// ── Task Sprint ────────────────────────────────
+var SPRINT_STATS = JSON.parse(localStorage.getItem('aSprintStats')||'{"streak":0,"best":0,"lastDate":"","totalDone":0,"sessions":0}');
+
+function saveSprintStats(){localStorage.setItem('aSprintStats',JSON.stringify(SPRINT_STATS));}
+
+function updateSprintStreak(doneCount){
+  var today=todayStr();
+  if(doneCount<1){saveSprintStats();return;}
+  var last=SPRINT_STATS.lastDate;
+  var yesterday=new Date(Date.now()-86400000).toISOString().slice(0,10);
+  if(last===today){/* already played today, just update best */}
+  else if(last===yesterday){SPRINT_STATS.streak++;}
+  else{SPRINT_STATS.streak=1;}
+  SPRINT_STATS.lastDate=today;
+  SPRINT_STATS.best=Math.max(SPRINT_STATS.best||0,doneCount);
+  SPRINT_STATS.totalDone=(SPRINT_STATS.totalDone||0)+doneCount;
+  SPRINT_STATS.sessions=(SPRINT_STATS.sessions||0)+1;
+  saveSprintStats();
+  renderSprintSign();
+}
+
+function renderSprintSign(){
+  var el=document.getElementById('sprintSign');
+  if(!el)return;
+  var s=SPRINT_STATS;
+  var streak=s.streak||0;
+  var best=s.best||0;
+  var total=s.totalDone||0;
+  var flameColor=streak>=7?'#ff6820':streak>=3?'#ff9a20':'#ffcc60';
+  el.innerHTML=
+    '<div style="background:linear-gradient(135deg,#3a2010,#5a3818);border-radius:12px;padding:12px 14px;color:#f8e8c0;font-family:\'Playfair Display\',serif;position:relative;box-shadow:0 3px 10px rgba(0,0,0,.25);border:2px solid #8a5828">'
+    +'<div style="font-size:10px;font-weight:700;letter-spacing:1.5px;opacity:.7;margin-bottom:4px;text-align:center">⚡ TASK SPRINT</div>'
+    +'<div style="display:flex;justify-content:space-around;align-items:center;gap:8px">'
+      +'<div style="text-align:center">'
+        +'<div style="font-size:24px;font-weight:700;color:'+flameColor+'">'+streak+'</div>'
+        +'<div style="font-size:9px;opacity:.7">DAY STREAK</div>'
+      +'</div>'
+      +'<div style="width:1px;background:rgba(255,255,255,.2);height:36px"></div>'
+      +'<div style="text-align:center">'
+        +'<div style="font-size:22px;font-weight:700;color:#f0d090">'+best+'</div>'
+        +'<div style="font-size:9px;opacity:.7">BEST SESSION</div>'
+      +'</div>'
+      +'<div style="width:1px;background:rgba(255,255,255,.2);height:36px"></div>'
+      +'<div style="text-align:center">'
+        +'<div style="font-size:22px;font-weight:700;color:#b0e8b0">'+total+'</div>'
+        +'<div style="font-size:9px;opacity:.7">TOTAL DONE</div>'
+      +'</div>'
+    +'</div>'
+    +(streak>=3?'<div style="text-align:center;font-size:10px;margin-top:6px;opacity:.8">'+(streak>=14?'🏆 Legendary!':streak>=7?'🔥 On fire!':'⚡ Keep going!')+'</div>':'')
+    +'<button onclick="openTaskSprint()" style="width:100%;margin-top:10px;padding:9px;border-radius:8px;border:none;background:linear-gradient(135deg,#d4a820,#b88c20);color:#fff;font-family:\'Quicksand\',sans-serif;font-size:13px;font-weight:700;cursor:pointer">▶ Start Sprint</button>'
+    +'</div>';
+}
+
+var _sprintInterval=null,_sprintQueue=[],_sprintIdx=0,_sprintDone=0,_sprintSkipped=0,_sprintTimeLeft=0;
+
+function openTaskSprint(){
+  showOv('taskSprintOv');
+  startTaskSprint();
+}
+
+function startTaskSprint(){
+  if(_sprintInterval){clearInterval(_sprintInterval);_sprintInterval=null;}
+  _sprintDone=0;_sprintSkipped=0;_sprintIdx=0;
+  // Build queue: <10min tasks first, then all open tasks
+  var quick=TASKS.filter(function(t){return !t.done&&t.etime==='<10min';});
+  var other=TASKS.filter(function(t){return !t.done&&t.etime!=='<10min';});
+  _sprintQueue=quick.concat(other);
+  var SPRINT_SAMPLE=['Clear your email inbox','Wipe down the counter','Reply to one text','Write tomorrow\'s top 3 tasks','Drink a full glass of water','Put away 5 things','Do 10 squats','Write one sentence of your story','Water one plant','Check your calendar','Write a thank-you note','Organize one drawer','Delete 10 old photos','Stretch for 2 minutes','Log today\'s mood'];
+  if(_sprintQueue.length<3){
+    SPRINT_SAMPLE.forEach(function(s,i){_sprintQueue.push({id:'sample-'+i,title:s,_isSample:true});});
+  }
+  _sprintTimeLeft=600; // 10 minutes
+  renderSprintModal();
+  _sprintInterval=setInterval(function(){
+    _sprintTimeLeft--;
+    var tEl=document.getElementById('sprintTimer');
+    if(tEl){
+      var m=Math.floor(_sprintTimeLeft/60),s2=_sprintTimeLeft%60;
+      tEl.textContent=(m<10?'0':'')+m+':'+(s2<10?'0':'')+s2;
+      tEl.style.color=_sprintTimeLeft<60?'#d07070':_sprintTimeLeft<180?'#d4a020':'var(--text)';
+    }
+    var bar=document.getElementById('sprintTimerBar');
+    if(bar)bar.style.width=((_sprintTimeLeft/600)*100)+'%';
+    if(_sprintTimeLeft<=0){endTaskSprint();}
+  },1000);
+}
+
+function renderSprintModal(){
+  var el=document.getElementById('taskSprintBody');
+  if(!el)return;
+  if(_sprintIdx>=_sprintQueue.length){endTaskSprint();return;}
+  var task=_sprintQueue[_sprintIdx];
+  var remaining=_sprintQueue.length-_sprintIdx;
+  var m=Math.floor(_sprintTimeLeft/60),s2=_sprintTimeLeft%60;
+  el.innerHTML=
+    '<div style="padding:4px 0 10px">'
+    +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">'
+      +'<span style="font-size:11px;color:var(--textl)">'+_sprintDone+' done · '+_sprintSkipped+' skipped</span>'
+      +'<span style="font-size:16px;font-weight:700;color:var(--text);font-family:monospace" id="sprintTimer">'+( (m<10?'0':'')+m+':'+(s2<10?'0':'')+s2)+'</span>'
+    +'</div>'
+    +'<div style="height:5px;background:#f0e8e0;border-radius:3px;margin-bottom:14px;overflow:hidden"><div id="sprintTimerBar" style="height:100%;border-radius:3px;background:var(--sage);transition:width 1s linear;width:'+((_sprintTimeLeft/600)*100)+'%"></div></div>'
+    +'<div style="font-size:11px;color:var(--textl);text-align:center;margin-bottom:6px">Task '+((_sprintIdx+1))+' of '+_sprintQueue.length+'</div>'
+    +'<div style="background:#fff;border-radius:16px;padding:20px 16px;margin-bottom:16px;box-shadow:0 3px 12px rgba(0,0,0,.09);min-height:80px;display:flex;align-items:center;justify-content:center;text-align:center">'
+      +'<div style="font-size:17px;font-weight:700;color:var(--textd);line-height:1.4">'+escHtml(task.title)+'</div>'
+    +'</div>'
+    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">'
+      +'<button onclick="sprintSkip()" style="padding:16px 8px;border-radius:14px;border:2px solid #e0d8d0;background:#fff;font-family:\'Quicksand\',sans-serif;font-size:14px;font-weight:700;cursor:pointer;color:var(--textl)">⏭ Skip</button>'
+      +'<button onclick="sprintDone()" style="padding:16px 8px;border-radius:14px;border:none;background:linear-gradient(135deg,var(--sage),#6aaa6a);font-family:\'Quicksand\',sans-serif;font-size:14px;font-weight:700;cursor:pointer;color:#fff;box-shadow:0 3px 8px rgba(100,170,100,.4)">✅ Done!</button>'
+    +'</div>'
+    +(remaining>1?'<div style="font-size:11px;color:var(--textl);text-align:center;margin-top:10px">'+( remaining-1)+' more waiting…</div>':'')
+    +'</div>';
+}
+
+function sprintDone(){
+  var task=_sprintQueue[_sprintIdx];
+  if(task&&!task._isSample){
+    var t=TASKS.find(function(x){return x.id===task.id;});
+    if(t){t.done=true;t.doneDate=todayStr();fbSave('tasks',t.id,t);millieTaskTreat();}
+  }
+  _sprintDone++;
+  _sprintIdx++;
+  if(_sprintIdx>=_sprintQueue.length){endTaskSprint();return;}
+  // Flash green then next
+  var el=document.getElementById('taskSprintBody');
+  if(el){el.style.background='#e8f8e8';setTimeout(function(){if(el)el.style.background='';renderSprintModal();},250);}
+  else renderSprintModal();
+}
+
+function sprintSkip(){
+  _sprintSkipped++;
+  _sprintIdx++;
+  if(_sprintIdx>=_sprintQueue.length){endTaskSprint();return;}
+  renderSprintModal();
+}
+
+function endTaskSprint(){
+  if(_sprintInterval){clearInterval(_sprintInterval);_sprintInterval=null;}
+  updateSprintStreak(_sprintDone);
+  var el=document.getElementById('taskSprintBody');
+  if(!el)return;
+  var grade=_sprintDone>=8?'🔥 Unstoppable!':_sprintDone>=5?'⚡ Great sprint!':_sprintDone>=2?'✅ Good work!':'🌱 Every task counts!';
+  el.innerHTML='<div style="text-align:center;padding:20px 10px">'
+    +'<div style="font-size:42px;margin-bottom:8px">'+grade.split(' ')[0]+'</div>'
+    +'<div style="font-size:18px;font-weight:700;color:var(--textd);margin-bottom:4px">'+grade.slice(grade.indexOf(' ')+1)+'</div>'
+    +'<div style="font-size:26px;font-weight:700;color:var(--sage);margin:12px 0">'+_sprintDone+' tasks done</div>'
+    +'<div style="font-size:12px;color:var(--textl);margin-bottom:4px">Skipped: '+_sprintSkipped+'</div>'
+    +'<div style="font-size:13px;font-weight:700;color:var(--rose);margin:8px 0">🔥 '+SPRINT_STATS.streak+'-day streak</div>'
+    +'<button class="millie-game-btn" style="background:var(--sage);margin-top:10px" onclick="startTaskSprint()">Sprint again ⚡</button>'
+    +'</div>';
+  renderHubPreviews('helm');
+}
+
+// ── Memory Palace (Tessa / Conservatory) ───────
+var _memGame={cards:[],flipped:[],matched:[],moves:0,startTime:0,timer:null};
+
+function openMemoryPalace(){
+  showOv('memoryPalaceOv');
+  startMemoryPalace();
+}
+
+function startMemoryPalace(){
+  if(_memGame.timer){clearInterval(_memGame.timer);_memGame.timer=null;}
+  _memGame={cards:[],flipped:[],matched:[],moves:0,startTime:Date.now(),timer:null};
+  // Build pairs from goals, fall back to samples
+  var goalTerms=GOALS.filter(function(g){return !g.done&&g.title;}).map(function(g){return g.title.slice(0,24);});
+  var MEMORY_SAMPLE=['Learn something new','Build a good habit','Save more money','Drink more water','Read every day','Move your body','Rest without guilt','Create something','Connect with people','Show up for yourself','Be intentional','Celebrate wins'];
+  var terms=goalTerms.length>=4?goalTerms.slice(0,6):MEMORY_SAMPLE.slice(0,6);
+  var pairs=[];
+  terms.forEach(function(t,i){pairs.push({id:'a'+i,text:t,pairId:i});pairs.push({id:'b'+i,text:t,pairId:i});});
+  // Shuffle
+  for(var i=pairs.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var tmp=pairs[i];pairs[i]=pairs[j];pairs[j]=tmp;}
+  _memGame.cards=pairs;
+  renderMemoryPalace();
+  var elapsed=0;
+  _memGame.timer=setInterval(function(){
+    elapsed++;var tel=document.getElementById('memTimer');
+    if(tel){var m=Math.floor(elapsed/60),s=elapsed%60;tel.textContent=(m?m+'m ':'')+(s<10&&m?'0':'')+s+(m?'s':' sec');}
+  },1000);
+}
+
+function renderMemoryPalace(){
+  var el=document.getElementById('memoryPalaceBody');
+  if(!el)return;
+  var total=_memGame.cards.length,matched=_memGame.matched.length;
+  el.innerHTML='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;padding-top:2px">'
+    +'<span style="font-size:12px;color:var(--textl)">Moves: <b id="memMoves">'+_memGame.moves+'</b></span>'
+    +'<span style="font-size:12px;color:var(--textl)">Time: <b id="memTimer">0 sec</b></span>'
+    +'<span style="font-size:12px;color:var(--sage)">'+matched/2+'/'+total/2+' pairs</span>'
+    +'</div>'
+    +'<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:7px">'
+    +_memGame.cards.map(function(card,idx){
+      var isFlipped=_memGame.flipped.includes(idx);
+      var isMatched=_memGame.matched.includes(card.pairId);
+      return'<div onclick="memFlip('+idx+')" style="height:72px;border-radius:10px;cursor:'+(isMatched?'default':'pointer')+';transition:all .2s;background:'
+        +(isMatched?'linear-gradient(135deg,var(--sage),#6aaa6a)':isFlipped?'#fff':'linear-gradient(135deg,#e8d8f0,#d0c0e8)')
+        +';border:2px solid '+(isMatched?'#60c060':isFlipped?'var(--lav)':'#c0b0d8')
+        +';display:flex;align-items:center;justify-content:center;padding:6px;box-shadow:0 2px 6px rgba(0,0,0,.08)">'
+        +(isMatched?'<div style="font-size:18px;text-align:center">✨</div>'
+          :isFlipped?'<div style="font-size:10px;font-weight:700;color:var(--textd);text-align:center;line-height:1.3">'+escHtml(card.text)+'</div>'
+          :'<div style="font-size:22px">🟣</div>')
+        +'</div>';
+    }).join('')
+    +'</div>';
+}
+
+function memFlip(idx){
+  var card=_memGame.cards[idx];
+  if(!card)return;
+  if(_memGame.matched.includes(card.pairId))return;
+  if(_memGame.flipped.includes(idx))return;
+  if(_memGame.flipped.length>=2)return;
+  _memGame.flipped.push(idx);
+  renderMemoryPalace();
+  if(_memGame.flipped.length===2){
+    _memGame.moves++;
+    var i0=_memGame.flipped[0],i1=_memGame.flipped[1];
+    var c0=_memGame.cards[i0],c1=_memGame.cards[i1];
+    if(c0.pairId===c1.pairId){
+      _memGame.matched.push(c0.pairId);
+      _memGame.flipped=[];
+      renderMemoryPalace();
+      if(_memGame.matched.length===_memGame.cards.length/2){
+        setTimeout(function(){endMemoryPalace();},400);
+      }
+    }else{
+      setTimeout(function(){_memGame.flipped=[];renderMemoryPalace();},900);
+    }
+  }
+}
+
+function endMemoryPalace(){
+  if(_memGame.timer){clearInterval(_memGame.timer);_memGame.timer=null;}
+  var elapsed=Math.round((Date.now()-_memGame.startTime)/1000);
+  var m=Math.floor(elapsed/60),s=elapsed%60;
+  var timeStr=(m?m+'m ':'')+(s)+'s';
+  var grade=_memGame.moves<=_memGame.cards.length/2+2?'🌟 Tessa is amazed!':_memGame.moves<=_memGame.cards.length?'🌿 Well remembered!':'📚 Great practice!';
+  var el=document.getElementById('memoryPalaceBody');
+  if(!el)return;
+  el.innerHTML='<div style="text-align:center;padding:20px 10px">'
+    +'<div style="font-size:40px;margin-bottom:8px">'+grade.split(' ')[0]+'</div>'
+    +'<div style="font-size:16px;font-weight:700;color:var(--text);margin-bottom:6px">'+grade.slice(grade.indexOf(' ')+1)+'</div>'
+    +'<div style="font-size:13px;color:var(--textl);margin-bottom:4px">Time: '+timeStr+' · Moves: '+_memGame.moves+'</div>'
+    +'<div style="font-size:11px;color:var(--textl);margin-bottom:16px">Perfect would be '+_memGame.cards.length/2+' moves</div>'
+    +'<button class="millie-game-btn" style="background:var(--sage)" onclick="startMemoryPalace()">Play again 🃏</button>'
+    +'</div>';
+}
+
+// ── Daily Quests ───────────────────────────────
+var DAILY_QUESTS = JSON.parse(localStorage.getItem('aDailyQuests')||'null');
+var DQ_CHEST_MSGS = [
+  'Millie does a happy spin! 🐾','Reid is proud of you, sailor! ⚓','Tessa smiles from the Conservatory 🌿',
+  'Clara painted a star for you ⭐','Elias adds 10 coins to the vault 🪙','The Inn is glowing tonight ✨'
+];
+
+function saveDQ(){localStorage.setItem('aDailyQuests',JSON.stringify(DAILY_QUESTS));}
+
+function buildDailyQuests(){
+  var today=todayStr();
+  var quests=[];
+  // Slot 1: real open task (prefer overdue or <10min)
+  var open=TASKS.filter(function(t){return !t.done;});
+  var overdue=open.filter(function(t){return t.due&&t.due<=today;});
+  var quick=open.filter(function(t){return t.etime==='<10min';});
+  var pool=overdue.length?overdue:quick.length?quick:open;
+  if(pool.length){
+    var t=pool[Math.floor(Math.random()*Math.min(pool.length,5))];
+    quests.push({id:'dq1',type:'task',taskId:t.id,icon:'✅',label:t.title,done:false});
+  }else{
+    quests.push({id:'dq1',type:'manual',icon:'📋',label:'Add 3 tasks to The Helm',done:false});
+  }
+  // Slot 2: routine or movement
+  var rtnDue=RTN_GROUPS.filter(function(g){return rtnIsDueToday(g);});
+  if(rtnDue.length){
+    var rg=rtnDue[Math.floor(Math.random()*rtnDue.length)];
+    quests.push({id:'dq2',type:'routine',routineId:rg.id,icon:rg.icon||'🔄',label:'Complete '+rg.name,done:false});
+  }else{
+    var moves=[
+      {icon:'💧',label:'Drink 8 glasses of water'},{icon:'🚶',label:'Move your body for 10 minutes'},
+      {icon:'🌞',label:'Go outside today'},{icon:'🙏',label:'Write one thing you\'re grateful for'},
+      {icon:'📵',label:'Take a 20-minute screen break'}
+    ];
+    var mv=moves[Math.floor(Math.random()*moves.length)];
+    quests.push({id:'dq2',type:'manual',icon:mv.icon,label:mv.label,done:false});
+  }
+  // Slot 3: creative / wellness wildcard
+  var wildcards=[
+    {icon:'😴',label:'Log last night\'s sleep',type:'sleep'},
+    {icon:'🍽️',label:'Log a meal today',type:'meal'},
+    {icon:'📖',label:'Write one sentence in your story',type:'manual'},
+    {icon:'🎯',label:'Check in on one of your goals',type:'manual'},
+    {icon:'💕',label:'Pet Millie and check her stats',type:'manual'},
+    {icon:'🎵',label:'Add a song to your mixtape',type:'manual'},
+    {icon:'✨',label:'Do something kind for yourself',type:'manual'},
+    {icon:'📸',label:'Add a memory or photo note',type:'manual'},
+    {icon:'💸',label:'Log today\'s expenses',type:'manual'}
+  ];
+  var wc=wildcards[Math.floor(Math.random()*wildcards.length)];
+  quests.push({id:'dq3',type:wc.type,icon:wc.icon,label:wc.label,done:false});
+  return quests;
+}
+
+function initDailyQuests(){
+  var today=todayStr();
+  if(!DAILY_QUESTS||DAILY_QUESTS.date!==today){
+    DAILY_QUESTS={date:today,quests:buildDailyQuests(),chestOpened:false};
+    saveDQ();
+  }
+  renderDailyQuests();
+}
+
+function renderDailyQuests(){
+  var el=document.getElementById('dailyQuestWrap');
+  if(!el||!DAILY_QUESTS)return;
+  var quests=DAILY_QUESTS.quests;
+  var doneCount=quests.filter(function(q){return q.done;}).length;
+  var allDone=doneCount===quests.length;
+  var pct=Math.round((doneCount/quests.length)*100);
+  var html='<div class="dq-card">'
+    +'<div class="dq-header">'
+      +'<span class="dq-title">⚔️ Daily Quests</span>'
+      +'<span class="dq-progress">'+doneCount+'/'+quests.length+'</span>'
+    +'</div>'
+    +'<div class="dq-bar"><div class="dq-bar-fill" style="width:'+pct+'%"></div></div>';
+  if(allDone&&DAILY_QUESTS.chestOpened){
+    var msg=DQ_CHEST_MSGS[Math.floor(Math.random()*DQ_CHEST_MSGS.length)];
+    html+='<div class="dq-chest"><div style="font-size:32px">🎁</div><div style="font-size:13px;font-weight:700;color:var(--rose);margin-top:4px">All quests complete!</div><div style="font-size:12px;color:var(--textl);margin-top:2px">'+DAILY_QUESTS.rewardMsg+'</div></div>';
+  }else{
+    quests.forEach(function(q){
+      html+='<div class="dq-item'+(q.done?' done':'')+'" onclick="dqManualToggle(\''+q.id+'\')">'
+        +'<div class="dq-icon">'+q.icon+'</div>'
+        +'<div class="dq-label">'+escHtml(q.label)+'</div>'
+        +'<div class="dq-check">'+(q.done?'✓':'')+'</div>'
+        +'</div>';
+    });
+    if(allDone&&!DAILY_QUESTS.chestOpened){
+      html+='<button onclick="openDQChest()" style="width:100%;margin-top:8px;padding:12px;border-radius:12px;border:none;background:linear-gradient(135deg,#d4a820,#c08010);color:#fff;font-family:\'Quicksand\',sans-serif;font-size:14px;font-weight:700;cursor:pointer;animation:chestPop .5s ease">🎁 Open your reward chest!</button>';
+    }
+  }
+  html+='</div>';
+  el.innerHTML=html;
+}
+
+function dqManualToggle(qid){
+  if(!DAILY_QUESTS)return;
+  var q=DAILY_QUESTS.quests.find(function(x){return x.id===qid;});
+  if(!q||q.type==='task')return; // task quests auto-complete only
+  q.done=!q.done;
+  saveDQ();renderDailyQuests();
+}
+
+function checkQuestTaskCompletion(taskId){
+  if(!DAILY_QUESTS||DAILY_QUESTS.date!==todayStr())return;
+  var q=DAILY_QUESTS.quests.find(function(x){return x.type==='task'&&x.taskId===taskId;});
+  if(q&&!q.done){q.done=true;saveDQ();renderDailyQuests();}
+}
+
+function checkQuestAutoComplete(type){
+  if(!DAILY_QUESTS||DAILY_QUESTS.date!==todayStr())return;
+  var q=DAILY_QUESTS.quests.find(function(x){return x.type===type&&!x.done;});
+  if(q){q.done=true;saveDQ();renderDailyQuests();}
+}
+
+function openDQChest(){
+  DAILY_QUESTS.chestOpened=true;
+  DAILY_QUESTS.rewardMsg=DQ_CHEST_MSGS[Math.floor(Math.random()*DQ_CHEST_MSGS.length)];
+  saveDQ();
+  MILLIE.happiness=Math.min(100,MILLIE.happiness+20);
+  MILLIE.hunger=Math.min(100,MILLIE.hunger+10);
+  saveMillie();renderMillieWidget();
+  renderDailyQuests();
+  showToast('🎁 Quest chest opened! +20 happiness for Millie!');
+}
+
+// ── Color Mix (Clara / Workshop) ───────────────
+var _colorMix={target:{r:0,g:0,b:0},round:0,scores:[],totalRounds:5};
+var COLOR_MIX_PALETTES=[
+  {r:220,g:100,b:120},{r:80,g:160,b:200},{r:130,g:180,b:80},{r:200,g:140,b:60},
+  {r:150,g:80,b:190},{r:60,g:180,b:150},{r:230,g:180,b:80},{r:90,g:120,b:200},
+  {r:200,g:80,b:80},{r:80,g:200,b:160},{r:180,g:100,b:160},{r:100,g:160,b:100}
+];
+
+function openColorMix(){showOv('colorMixOv');startColorMix();}
+
+function startColorMix(){
+  _colorMix={target:{r:0,g:0,b:0},round:0,scores:[],totalRounds:5};
+  nextColorRound();
+}
+
+function nextColorRound(){
+  _colorMix.round++;
+  if(_colorMix.round>_colorMix.totalRounds){endColorMix();return;}
+  var palette=COLOR_MIX_PALETTES.slice().sort(function(){return Math.random()-.5;});
+  var t=palette[0];
+  // Add some randomness to each channel
+  _colorMix.target={
+    r:Math.max(20,Math.min(235,t.r+Math.round((Math.random()-.5)*60))),
+    g:Math.max(20,Math.min(235,t.g+Math.round((Math.random()-.5)*60))),
+    b:Math.max(20,Math.min(235,t.b+Math.round((Math.random()-.5)*60)))
+  };
+  renderColorMix(128,128,128);
+}
+
+function renderColorMix(r,g,b){
+  var el=document.getElementById('colorMixBody');
+  if(!el)return;
+  var t=_colorMix.target;
+  var tRgb='rgb('+t.r+','+t.g+','+t.b+')';
+  var mRgb='rgb('+r+','+g+','+b+')';
+  var dr=t.r-r,dg=t.g-g,db=t.b-b;
+  var dist=Math.sqrt(dr*dr+dg*dg+db*db);
+  var accuracy=Math.max(0,Math.round(100-dist/4.41));
+  var warmth=accuracy>=85?'🔥 So close!':accuracy>=65?'🎨 Getting there!':accuracy>=40?'🌈 Keep adjusting':'❓ Way off!';
+  el.innerHTML=
+    '<div style="padding:4px 0 8px">'
+    +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">'
+      +'<span style="font-size:11px;color:var(--textl)">Round '+_colorMix.round+'/'+_colorMix.totalRounds+'</span>'
+      +'<span style="font-size:12px;color:var(--textl)">Best: '+(Math.max(0,..._colorMix.scores)||'—')+'%</span>'
+    +'</div>'
+    +'<div style="font-size:11px;font-weight:700;color:var(--textl);margin-bottom:6px;text-align:center">🎯 TARGET COLOR</div>'
+    +'<div style="height:64px;border-radius:12px;background:'+tRgb+';border:2px solid rgba(0,0,0,.1);margin-bottom:10px"></div>'
+    +'<div style="font-size:11px;font-weight:700;color:var(--textl);margin-bottom:6px;text-align:center">🖌️ YOUR MIX <span style="font-weight:400;color:var(--textl);margin-left:8px">'+warmth+'</span></div>'
+    +'<div id="cmPreview" style="height:64px;border-radius:12px;background:'+mRgb+';border:2px solid rgba(0,0,0,.1);margin-bottom:14px;transition:background .05s"></div>'
+    +'<div class="colormix-slider-row"><span class="colormix-slider-label" style="color:#c04040">R</span><input type="range" class="colormix-slider" id="cmR" min="0" max="255" value="'+r+'" oninput="updateColorMix()" style="accent-color:#c04040"><span class="colormix-val" id="cmRv">'+r+'</span></div>'
+    +'<div class="colormix-slider-row"><span class="colormix-slider-label" style="color:#40a040">G</span><input type="range" class="colormix-slider" id="cmG" min="0" max="255" value="'+g+'" oninput="updateColorMix()" style="accent-color:#40a040"><span class="colormix-val" id="cmGv">'+g+'</span></div>'
+    +'<div class="colormix-slider-row"><span class="colormix-slider-label" style="color:#4060c0">B</span><input type="range" class="colormix-slider" id="cmB" min="0" max="255" value="'+b+'" oninput="updateColorMix()" style="accent-color:#4060c0"><span class="colormix-val" id="cmBv">'+b+'</span></div>'
+    +'<div style="display:flex;align-items:center;justify-content:space-between;margin-top:10px;gap:10px">'
+      +'<div style="font-size:18px;font-weight:700;color:var(--text)">'+(accuracy)+'<span style="font-size:12px;color:var(--textl)">% match</span></div>'
+      +'<button onclick="submitColorMix()" style="flex:1;padding:12px;border-radius:12px;border:none;background:linear-gradient(135deg,#9a6abf,#7a4a9f);color:#fff;font-family:\'Quicksand\',sans-serif;font-size:14px;font-weight:700;cursor:pointer">Lock it in ✓</button>'
+    +'</div>'
+    +'</div>';
+}
+
+function updateColorMix(){
+  var r=parseInt(document.getElementById('cmR').value);
+  var g=parseInt(document.getElementById('cmG').value);
+  var b=parseInt(document.getElementById('cmB').value);
+  var preview=document.getElementById('cmPreview');
+  if(preview)preview.style.background='rgb('+r+','+g+','+b+')';
+  var rv=document.getElementById('cmRv');if(rv)rv.textContent=r;
+  var gv=document.getElementById('cmGv');if(gv)gv.textContent=g;
+  var bv=document.getElementById('cmBv');if(bv)bv.textContent=b;
+  var t=_colorMix.target;
+  var dr=t.r-r,dg=t.g-g,db=t.b-b;
+  var dist=Math.sqrt(dr*dr+dg*dg+db*db);
+  var accuracy=Math.max(0,Math.round(100-dist/4.41));
+  var warmth=accuracy>=85?'🔥 So close!':accuracy>=65?'🎨 Getting there!':accuracy>=40?'🌈 Keep adjusting':'❓ Way off!';
+  var ws=document.querySelectorAll('#colorMixBody .colormix-slider-row');
+  var wEl=document.querySelector('#colorMixBody .colormix-slider-row+.colormix-slider-row+.colormix-slider-row+div span');
+  // Update accuracy display inline
+  var accEl=document.querySelector('#colorMixBody .colormix-slider-row');
+  var allDivs=document.querySelectorAll('#colorMixBody > div > div');
+  allDivs.forEach(function(d){if(d.querySelector('#cmPreview span')){d.textContent=warmth;}});
+  // Simple: update the accuracy number
+  var accNum=document.querySelector('#colorMixBody [style*="font-size:18px"]');
+  if(accNum)accNum.innerHTML=accuracy+'<span style="font-size:12px;color:var(--textl)">% match</span>';
+  var warmEl=document.querySelector('#colorMixBody .colormix-slider-row ~ .colormix-slider-row ~ .colormix-slider-row');
+}
+
+function submitColorMix(){
+  var r=parseInt(document.getElementById('cmR').value);
+  var g=parseInt(document.getElementById('cmG').value);
+  var b=parseInt(document.getElementById('cmB').value);
+  var t=_colorMix.target;
+  var dr=t.r-r,dg=t.g-g,db=t.b-b;
+  var dist=Math.sqrt(dr*dr+dg*dg+db*db);
+  var accuracy=Math.max(0,Math.round(100-dist/4.41));
+  _colorMix.scores.push(accuracy);
+  var el=document.getElementById('colorMixBody');if(!el)return;
+  var isLast=_colorMix.round>=_colorMix.totalRounds;
+  var tRgb='rgb('+t.r+','+t.g+','+t.b+')';
+  var mRgb='rgb('+r+','+g+','+b+')';
+  el.innerHTML='<div style="text-align:center;padding:10px 0">'
+    +'<div style="display:flex;gap:10px;justify-content:center;margin-bottom:12px">'
+      +'<div style="flex:1"><div style="font-size:11px;color:var(--textl);margin-bottom:4px">Target</div><div style="height:50px;border-radius:10px;background:'+tRgb+'"></div></div>'
+      +'<div style="flex:1"><div style="font-size:11px;color:var(--textl);margin-bottom:4px">Your mix</div><div style="height:50px;border-radius:10px;background:'+mRgb+'"></div></div>'
+    +'</div>'
+    +'<div style="font-size:28px;font-weight:700;color:'+(accuracy>=85?'var(--sage)':accuracy>=65?'var(--blue)':'var(--rose)')+'">'+accuracy+'%</div>'
+    +'<div style="font-size:13px;color:var(--textl);margin-bottom:14px">'+(accuracy>=85?'🌟 Incredible eye!':accuracy>=65?'🎨 Not bad!':accuracy>=40?'🌈 Keep practicing!':'🖌️ Clara will teach you!')+'</div>'
+    +(isLast?'<button onclick="endColorMix()" class="millie-game-btn" style="background:var(--lav)">See final score 🎨</button>':'<button onclick="nextColorRound()" class="millie-game-btn" style="background:var(--lav)">Next color →</button>')
+    +'</div>';
+}
+
+function endColorMix(){
+  var el=document.getElementById('colorMixBody');if(!el)return;
+  var scores=_colorMix.scores;
+  var avg=scores.length?Math.round(scores.reduce(function(a,b){return a+b;},0)/scores.length):0;
+  var grade=avg>=85?'🌟 Clara is amazed!':avg>=65?'🎨 Great eye for color!':avg>=40?'🖌️ Keep mixing!':'🌈 Come paint with Clara more!';
+  el.innerHTML='<div style="text-align:center;padding:20px 10px">'
+    +'<div style="font-size:40px;margin-bottom:8px">'+grade.split(' ')[0]+'</div>'
+    +'<div style="font-size:16px;font-weight:700;color:var(--text);margin-bottom:6px">'+grade.slice(grade.indexOf(' ')+1)+'</div>'
+    +'<div style="font-size:26px;font-weight:700;color:var(--lav);margin:10px 0">'+avg+'% avg</div>'
+    +'<div style="display:flex;justify-content:center;gap:6px;flex-wrap:wrap;margin-bottom:16px">'
+    +scores.map(function(s,i){return'<span style="background:'+(s>=85?'#d4f0d4':s>=65?'#d4e8f0':'#f4d4d4')+';border-radius:8px;padding:3px 8px;font-size:12px;font-weight:700">R'+( i+1)+': '+s+'%</span>';}).join('')
+    +'</div>'
+    +'<button class="millie-game-btn" style="background:var(--lav)" onclick="startColorMix()">Mix again 🎨</button>'
+    +'</div>';
+}
+
 function startApp(){
   document.getElementById('loadingScreen').classList.add('hidden');
   chkReset();
@@ -9148,6 +10199,11 @@ function startApp(){
   applyTabOrder();
   tickMillie();
   renderMillieWidget();
+  renderSprintSign();
+  initDailyQuests();
+  ['helm','conservatory','hearthside','workshop','estate'].forEach(function(s){
+    renderHubPreviews(s);
+  });
 }
 
 // Wait for Firebase then start
@@ -9468,7 +10524,49 @@ setInterval(updDate, 60000);
     <div id="emberSkillBars"></div>
     <button class="add-btn" onclick="openEmber()" style="margin-top:6px">⚙️ Manage Skills & Habits →</button>
   </div>
+  <!-- Task Sprint streak sign (updates via renderSprintSign) -->
+  <div id="sprintSign" style="margin-top:12px"></div>
   <button onclick="openFishing()" style="width:100%;margin-top:10px;padding:12px;border-radius:12px;border:none;background:linear-gradient(135deg,#0a2a4e,#1a3a5e);color:#88ddff;font-family:'Quicksand',sans-serif;font-size:14px;font-weight:700;cursor:pointer;letter-spacing:.3px">🎣 Go Fishing at the Dock</button>
+</div>
+
+<!-- COLOR MIX MODAL -->
+<div class="ov" id="colorMixOv" onclick="closeOv('colorMixOv')">
+  <div class="mod" onclick="event.stopPropagation()" style="max-width:340px;background:linear-gradient(135deg,#fdf0f8,#f5eafc);max-height:90vh;overflow-y:auto">
+    <div class="mh"><span class="mt">🎨 Color Mix</span><button class="mc" onclick="closeOv('colorMixOv')">✕</button></div>
+    <div id="colorMixBody" style="padding:0 4px 8px"></div>
+  </div>
+</div>
+
+<!-- TASK SPRINT MODAL -->
+<div class="ov" id="taskSprintOv" onclick="closeOv('taskSprintOv')">
+  <div class="mod" onclick="event.stopPropagation()" style="max-width:360px;background:linear-gradient(135deg,#f2f8f0,#e8f5e2);max-height:90vh;overflow-y:auto">
+    <div class="mh"><span class="mt">⚡ Task Sprint</span><button class="mc" onclick="closeOv('taskSprintOv')">✕</button></div>
+    <div id="taskSprintBody" style="padding:0 4px 8px"></div>
+  </div>
+</div>
+
+<!-- MEMORY PALACE MODAL -->
+<div class="ov" id="memoryPalaceOv" onclick="closeOv('memoryPalaceOv')">
+  <div class="mod" onclick="event.stopPropagation()" style="max-width:360px;background:linear-gradient(135deg,#f5f0fa,#ede6f5);max-height:90vh;overflow-y:auto">
+    <div class="mh"><span class="mt">🃏 Memory Palace</span><button class="mc" onclick="closeOv('memoryPalaceOv')">✕</button></div>
+    <div id="memoryPalaceBody" style="padding:0 4px 8px"></div>
+  </div>
+</div>
+
+<!-- BUDGET BLITZ MODAL -->
+<div class="ov" id="budgetBlitzOv" onclick="closeOv('budgetBlitzOv')">
+  <div class="mod" onclick="event.stopPropagation()" style="max-width:360px;background:linear-gradient(135deg,#f8f5ef,#fff9f0);max-height:90vh;overflow-y:auto">
+    <div class="mh"><span class="mt">💰 Budget Blitz</span><button class="mc" onclick="closeOv('budgetBlitzOv')">✕</button></div>
+    <div id="budgetBlitzBody" style="padding:0 2px 8px"></div>
+  </div>
+</div>
+
+<!-- DEADLINE DASH MODAL -->
+<div class="ov" id="deadlineDashOv" onclick="closeOv('deadlineDashOv')">
+  <div class="mod" onclick="event.stopPropagation()" style="max-width:360px;background:linear-gradient(135deg,#f0f4f8,#e8f0f8);max-height:90vh;overflow-y:auto">
+    <div class="mh"><span class="mt">⚡ Deadline Dash</span><button class="mc" onclick="closeOv('deadlineDashOv')">✕</button></div>
+    <div id="deadlineDashBody" style="padding:0 2px 8px"></div>
+  </div>
 </div>
 
 <!-- FISHING MODAL -->
@@ -9505,10 +10603,16 @@ setInterval(updDate, 60000);
     <!-- Awake actions -->
     <div id="millieAwakeSection">
       <div class="millie-actions">
-        <button id="millieFeedBtn" class="millie-action" style="background:#fde8d0;color:#8a5a30" onclick="feedMillie()"><span class="millie-action-icon">🍣</span>Feed</button>
+        <button id="millieFeedBtn" class="millie-action" style="background:#fde8d0;color:#8a5a30" onclick="openMillieGame('treat')"><span class="millie-action-icon">🍣</span>Feed Game</button>
         <button class="millie-action" style="background:#f2dede;color:#8a4a4a" onclick="petMillie()"><span class="millie-action-icon">💕</span>Pet</button>
-        <button id="milliePlayBtn" class="millie-action" style="background:#daeaf5;color:#4a7a9b" onclick="playMillie()"><span class="millie-action-icon">🎾</span>Play</button>
+        <button id="milliePlayBtn" class="millie-action" style="background:#daeaf5;color:#4a7a9b" onclick="openMillieGame('yarn')"><span class="millie-action-icon">🧶</span>Play Game</button>
         <button class="millie-action" style="background:#e8f5ee;color:#3a7a5a" onclick="millieGoodnight()"><span class="millie-action-icon">🌙</span>Goodnight</button>
+      </div>
+      <!-- Mini-game area -->
+      <div id="millieGameWrap" class="millie-game-wrap" style="display:none">
+        <div class="millie-game-label" id="millieGameLabel"></div>
+        <canvas id="millieGameCanvas" class="millie-game-canvas"></canvas>
+        <div class="millie-game-score" id="millieGameScore"></div>
       </div>
     </div>
     <!-- Sleeping section -->
@@ -9590,3 +10694,4 @@ setInterval(updDate, 60000);
 </div>
 </body>
 </html>
+
