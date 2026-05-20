@@ -3398,72 +3398,72 @@ function startTreatGame(){
   if(millieShouldSleep()){showToast('Millie is sleeping 💤 — let her rest!');return;}
   var wrap=document.getElementById('millieGameWrap');
   if(!wrap)return;
-  wrap.innerHTML='<div class="millie-game-label" id="millieGameLabel">🍣 Tap to toss a treat to Millie!</div><canvas id="millieGameCanvas" class="millie-game-canvas"></canvas><div class="millie-game-score" id="millieGameScore"></div>';
+  wrap.innerHTML='<div class="millie-game-label" id="millieGameLabel">🍣 Move Millie left &amp; right to catch treats!</div><canvas id="millieGameCanvas" class="millie-game-canvas" style="display:block;margin:0 auto"></canvas><div class="millie-game-score" id="millieGameScore"></div>';
   wrap.style.display='';
-  var canvas=document.getElementById('millieGameCanvas');
-  var label=document.getElementById('millieGameLabel');
-  var scoreEl=document.getElementById('millieGameScore');
-  if(!canvas)return;
-  var W=canvas.width=Math.min(270,wrap.clientWidth-20),H=canvas.height=160;
-  var ctx=canvas.getContext('2d');
-  var treats=[],caught=0,missed=0,total=7,launched=0,done=false;
-  var catX=W/2,catAnim=0,eatAnim=0;
-  function spawnTreat(){
-    if(launched>=total)return;
-    launched++;
-    treats.push({x:20+Math.random()*(W-40),y:-10,vy:2+Math.random()*1.5,caught:false,miss:false,alpha:1});
-  }
-  var spawnTimer=0;
-  if(_treatGame)clearInterval(_treatGame);
-  _treatGame=setInterval(function(){
-    if(done)return;
-    spawnTimer++;if(spawnTimer%55===0)spawnTreat();
-    treats.forEach(function(t){
-      if(t.caught||t.miss)return;
-      t.y+=t.vy;
-      var dx=t.x-catX;
-      if(t.y>H-35&&Math.abs(dx)<28){t.caught=true;caught++;eatAnim=12;catAnim=8;MILLIE.hunger=Math.min(100,MILLIE.hunger+14);saveMillie();}
-      else if(t.y>H+10){t.miss=true;missed++;}
-    });
-    treats=treats.filter(function(t){return t.y<H+30;});
-    ctx.clearRect(0,0,W,H);
-    var g=ctx.createLinearGradient(0,0,0,H);g.addColorStop(0,'#fef6f0');g.addColorStop(1,'#ffe8d8');
-    ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
-    treats.forEach(function(t){
-      ctx.font='18px serif';ctx.textAlign='center';ctx.textBaseline='middle';
-      ctx.fillText('🍣',t.x,t.y);
-    });
-    // simple Millie face at bottom
-    if(catAnim>0)catAnim--;
-    ctx.font=(eatAnim>0?'28px':'22px')+' serif';ctx.textAlign='center';ctx.textBaseline='bottom';
-    ctx.fillText(eatAnim>0?'😻':'😺',catX,H-4);
-    if(eatAnim>0)eatAnim--;
-    ctx.fillStyle='rgba(0,0,0,.35)';ctx.font='10px sans-serif';ctx.textAlign='left';ctx.textBaseline='top';
-    ctx.fillText('Caught: '+caught+'/'+total,8,2);
-    if(launched>=total&&treats.length===0&&!done){done=true;endTreatGame(caught,scoreEl,label);}
-  },16);
-  function handleClick(e){
-    if(done)return;
-    var rect=canvas.getBoundingClientRect();
-    var cx;
-    if(e.touches)cx=e.touches[0].clientX-rect.left;
-    else cx=e.clientX-rect.left;
-    catX=Math.max(20,Math.min(W-20,cx));
-    if(label)label.textContent='🍣 Move to catch treats!';
-  }
-  canvas.onclick=handleClick;canvas.ontouchstart=function(e){e.preventDefault();handleClick(e);};
-  canvas.ontouchmove=function(e){e.preventDefault();handleClick(e);};
-  canvas.onmousemove=function(e){var r=canvas.getBoundingClientRect();catX=Math.max(20,Math.min(W-20,e.clientX-r.left));};
+  // Delay one frame so modal has rendered and clientWidth is real
+  setTimeout(function(){
+    var canvas=document.getElementById('millieGameCanvas');
+    var label=document.getElementById('millieGameLabel');
+    var scoreEl=document.getElementById('millieGameScore');
+    if(!canvas)return;
+    var W=Math.max(220,Math.min(270,(wrap.clientWidth||260)-20));
+    var H=170;
+    canvas.width=W;canvas.height=H;
+    var ctx=canvas.getContext('2d');
+    var treats=[],caught=0,missed=0,total=8,launched=0,done=false;
+    var catX=W/2,eatAnim=0;
+    function spawnTreat(){
+      if(launched>=total)return;
+      launched++;
+      treats.push({x:20+Math.random()*(W-40),y:-14,vy:2.4+Math.random()*1.6,r:10,live:true});
+    }
+    // Spawn first treat immediately so game feels alive
+    spawnTreat();
+    var spawnTimer=0,SPAWN_INTERVAL=52;
+    if(_treatGame)clearInterval(_treatGame);
+    _treatGame=setInterval(function(){
+      if(done)return;
+      spawnTimer++;if(spawnTimer%SPAWN_INTERVAL===0)spawnTreat();
+      treats.forEach(function(t){
+        if(!t.live)return;
+        t.y+=t.vy;
+        var dx=t.x-catX;
+        if(t.y>H-38&&Math.abs(dx)<34){
+          t.live=false;caught++;eatAnim=14;
+          MILLIE.hunger=Math.min(100,MILLIE.hunger+12);saveMillie();
+        }else if(t.y>H+8){t.live=false;missed++;}
+      });
+      // Remove dead treats immediately so end-check works
+      treats=treats.filter(function(t){return t.live;});
+      // Draw
+      ctx.clearRect(0,0,W,H);
+      var bg=ctx.createLinearGradient(0,0,0,H);bg.addColorStop(0,'#fef6f0');bg.addColorStop(1,'#ffe8d8');
+      ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
+      treats.forEach(function(t){
+        ctx.save();ctx.font='20px serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('🍣',t.x,t.y);ctx.restore();
+      });
+      // Millie emoji at bottom tracks catX
+      ctx.save();ctx.font=(eatAnim>0?'30px':'24px')+' serif';ctx.textAlign='center';ctx.textBaseline='bottom';
+      ctx.fillText(eatAnim>0?'😻':'😺',catX,H-2);ctx.restore();
+      if(eatAnim>0)eatAnim--;
+      // Score label top-left
+      ctx.fillStyle='rgba(80,50,30,.55)';ctx.font='bold 10px sans-serif';ctx.textAlign='left';ctx.textBaseline='top';
+      ctx.fillText('Caught '+caught+'/'+total,6,4);
+      // End check
+      if(launched>=total&&treats.length===0&&!done){done=true;clearInterval(_treatGame);_treatGame=null;
+        renderMillieWidget();
+        if(label)label.textContent='Feeding time done! 🐟';
+        if(scoreEl)scoreEl.textContent='Millie ate '+caught+' treat'+(caught!==1?'s':'')+'! +'+caught*12+' tummy';
+        var btn=document.createElement('button');btn.className='millie-game-btn';btn.textContent='Feed again 🍣';btn.onclick=startTreatGame;wrap.appendChild(btn);
+      }
+    },16);
+    // Controls: mouse move + touch move to slide catX
+    canvas.onmousemove=function(e){var r=canvas.getBoundingClientRect();catX=Math.max(24,Math.min(W-24,e.clientX-r.left));};
+    canvas.onclick=function(e){var r=canvas.getBoundingClientRect();catX=Math.max(24,Math.min(W-24,e.clientX-r.left));};
+    canvas.ontouchmove=function(e){e.preventDefault();var r=canvas.getBoundingClientRect();catX=Math.max(24,Math.min(W-24,e.touches[0].clientX-r.left));};
+    canvas.ontouchstart=function(e){e.preventDefault();var r=canvas.getBoundingClientRect();catX=Math.max(24,Math.min(W-24,e.touches[0].clientX-r.left));};
+  },60);
 }
-function endTreatGame(caught,scoreEl,label){
-  if(_treatGame){clearInterval(_treatGame);_treatGame=null;}
-  renderMillieWidget();
-  if(scoreEl)scoreEl.textContent='🍣 Millie ate '+caught+' treat'+(caught!==1?'s':'')+'! +'+caught*14+' tummy';
-  if(label)label.textContent='Feeding time done!';
-  var wrap=document.getElementById('millieGameWrap');
-  if(wrap){var btn=document.createElement('button');btn.className='millie-game-btn';btn.textContent='Feed again 🍣';btn.onclick=startTreatGame;wrap.appendChild(btn);}
-}
-
 function openMillieGame(type){
   var wrap=document.getElementById('millieGameWrap');
   if(!wrap)return;
@@ -10694,4 +10694,3 @@ setInterval(updDate, 60000);
 </div>
 </body>
 </html>
-
