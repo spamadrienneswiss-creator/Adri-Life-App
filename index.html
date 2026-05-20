@@ -704,6 +704,7 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
   <div class="hdr-top">
     <div class="app-title" id="appTitleEl" ondblclick="editAppTitle()" title="Double-tap to rename">✨ Adri's Life</div>
     <div class="hdr-r">
+      <button onclick="openSearch()" style="background:rgba(255,255,255,.2);border:none;border-radius:8px;padding:4px 8px;cursor:pointer;font-size:15px;color:#fff;line-height:1" title="Search">🔍</button>
       <div class="ddate" id="dDate"></div>
       <div class="dstatus" id="dStatus">Loading...</div>
       <div class="sync-status" id="syncStatus">🔄 Syncing...</div>
@@ -735,11 +736,24 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     <div class="char-wrap" id="hub-char-helm"><svg viewBox="0 0 36 48" width="54" height="72" style="shape-rendering:auto"><rect x="6" y="32" width="24" height="16" rx="5" fill="#1e3a6e"/><circle cx="18" cy="37" r="1.2" fill="#d4a820"/><circle cx="18" cy="41" r="1.2" fill="#d4a820"/><rect x="15" y="26" width="6" height="8" fill="#d4a87c"/><ellipse cx="18" cy="21" rx="9" ry="10" fill="#d4a87c"/><ellipse cx="18" cy="28" rx="6" ry="3.5" fill="#b88c60"/><circle cx="14.5" cy="20" r="1.4" fill="#1e3a6e"/><circle cx="21.5" cy="20" r="1.4" fill="#1e3a6e"/><path d="M14 25 Q18 27 22 25" stroke="#8a6040" stroke-width="1.3" fill="none" stroke-linecap="round"/><rect x="7" y="13" width="22" height="2.5" rx="1.2" fill="#111e40"/><rect x="10" y="4" width="16" height="10" rx="3" fill="#111e40"/><rect x="7" y="13" width="22" height="2" fill="#d4a820"/><ellipse cx="18" cy="9" rx="2.5" ry="2" fill="#d4a820"/></svg></div>
     <div class="hub-info"><h2>The Helm</h2><p>Captain Reid keeps you on course — tasks, projects &amp; active lists, all in one command center.</p></div>
   </div>
+  <div style="display:flex;gap:8px;margin-bottom:10px">
+    <button class="ok-btn" style="flex:1;margin:0;padding:10px 8px;font-size:13px" onclick="openM('taskModal')">➕ New Task</button>
+    <button class="ok-btn" style="flex:1;margin:0;padding:10px 8px;font-size:13px;background:linear-gradient(135deg,var(--lav),var(--blue))" onclick="goTab('projects',null);setTimeout(openNewProj,200)">📁 New Project</button>
+  </div>
   <div class="hub-grid">
     <div id="helmMilestonePanel"></div>
     <div class="hub-card" onclick="goTab('tasks',null)"><div class="hub-card-ic">📋</div><div class="hub-card-name">Tasks</div><div class="hub-card-sub" id="hub-tasks-sub">Loading…</div></div>
     <div class="hub-card" onclick="goTab('projects',null)"><div class="hub-card-ic">📁</div><div class="hub-card-name">Projects</div><div class="hub-card-sub" id="hub-projects-sub">Loading…</div></div>
     <div class="hub-card span2" onclick="goTab('lists',null)"><div class="hub-card-ic">📝</div><div class="hub-card-name">Lists</div><div class="hub-card-sub" id="hub-lists-sub">Active working lists</div></div>
+    <div class="hub-card span2" style="cursor:default;padding:12px">
+      <div style="font-size:12px;font-weight:700;color:var(--textd);margin-bottom:8px">🧠 Brain Dump</div>
+      <div style="display:flex;gap:6px;margin-bottom:8px">
+        <input class="fi" id="helmDumpInput" placeholder="Quick thought..." style="flex:1;font-size:12px;padding:6px 10px;margin:0">
+        <button class="btn" onclick="helmQuickDump()" style="padding:6px 12px;font-size:13px;flex-shrink:0">↵</button>
+      </div>
+      <div id="helmDumpPreview"></div>
+      <button class="btn sec" style="font-size:11px;padding:3px 10px;margin-top:6px;width:100%" onclick="goTab('focus',null);setTimeout(function(){showFocusSec('dump',document.querySelector('#v-focus .pn-btn[onclick*=dump]'))},250)">See All Dumps →</button>
+    </div>
     <div class="hub-card span2" onclick="openCrateSprint()" style="background:linear-gradient(135deg,#e8f0f8,#d8e8f4);border-color:#b0c8e0"><div class="hub-card-ic">📦</div><div class="hub-card-name">Crate Sprint</div><div class="hub-card-sub">Race Reid's clock — how many crates can you load?</div></div>
   </div>
 </div>
@@ -795,7 +809,21 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     <div class="hub-info"><h2>Lighthouse</h2><p>A place of light and anchoring — Bible study, prayer, ministry &amp; your spiritual life.</p></div>
   </div>
   <div class="hub-grid">
-    <div class="hub-card span2" onclick="goTab('spirit',null)"><div class="hub-card-ic">✨</div><div class="hub-card-name">Spiritual</div><div class="hub-card-sub">Bible study, prayer &amp; ministry</div></div>
+    <div class="hub-card span2" style="cursor:default;padding:12px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <span style="font-size:12px;font-weight:700;color:var(--textd)">⚡ Quick Log</span>
+        <span style="font-size:10px;color:var(--textl)" id="lighthouseSpiritStatus">—</span>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <button class="btn" style="font-size:12px;padding:8px" onclick="lighthouseQuickPrayer()">🙏 Prayer</button>
+        <button class="btn" style="font-size:12px;padding:8px" onclick="goTab('spirit',null);setTimeout(function(){showSpiritSec('bible',document.querySelector('#v-spirit .pn-btn:nth-child(2)'))},200)">📖 Bible</button>
+        <button class="btn" style="font-size:12px;padding:8px" onclick="goTab('spirit',null);setTimeout(function(){showSpiritSec('ministry',document.querySelector('#v-spirit .pn-btn:nth-child(3)'))},200)">⏱️ Ministry</button>
+        <button class="btn" style="font-size:12px;padding:8px" onclick="goTab('spirit',null);setTimeout(function(){showSpiritSec('gratitude',document.querySelector('#v-spirit .pn-btn:nth-child(4)'))},200)">🌸 Gratitude</button>
+      </div>
+    </div>
+    <div class="hub-card span2" onclick="goTab('spirit',null)"><div class="hub-card-ic">✨</div><div class="hub-card-name">Spiritual</div><div class="hub-card-sub">Bible study, prayer, ministry &amp; gratitude</div></div>
+    <div class="hub-card span2" onclick="goTab('spirit',null);setTimeout(function(){showSpiritSec('notes',document.querySelector('#v-spirit .pn-btn:nth-child(6)'))},200)"><div class="hub-card-ic">📓</div><div class="hub-card-name">Meeting Notes</div><div class="hub-card-sub" id="hub-meet-notes-sub">Study notes &amp; meeting insights</div></div>
+    <div class="hub-card" onclick="goTab('projects',null)"><div class="hub-card-ic">📁</div><div class="hub-card-name">Spirit Projects</div><div class="hub-card-sub" id="hub-spirit-proj-sub">Active spiritual goals</div></div>
   </div>
 </div>
 
@@ -874,6 +902,10 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
   </div>
   <!-- Daily Quests -->
   <div id="dailyQuestWrap"></div>
+  <!-- Spiritual Runner -->
+  <div id="spiritRunWrap" style="margin-bottom:10px;border-radius:14px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.18);cursor:pointer" onclick="goTab('spirit',document.querySelector('[data-tab=\'spirit\']'))" title="Tap to open Spiritual hub">
+    <canvas id="spiritRunCanvas" style="width:100%;height:130px;display:block"></canvas>
+  </div>
   <div id="ministryHomeWrap" style="background:#fff;border-radius:14px;padding:11px 14px;margin-bottom:10px;box-shadow:0 1px 4px rgba(0,0,0,.06)">
     <div style="display:flex;align-items:center;gap:10px">
       <span style="font-size:11px;font-weight:700;color:var(--textl);letter-spacing:.5px;text-transform:uppercase;flex-shrink:0">⏱️ Ministry</span>
@@ -1900,10 +1932,21 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
   <div class="fg"><label class="fl">Due Date (optional)</label><input class="fi" type="date" id="tDue"></div>
   <div class="fg"><label class="fl">Repeat</label>
     <div class="bg bg4">
-      <button class="sb" data-g="rep" data-v="" onclick="pSB(this)">🚫 None</button>
-      <button class="sb" data-g="rep" data-v="daily" onclick="pSB(this)">📅 Daily</button>
-      <button class="sb" data-g="rep" data-v="weekly" onclick="pSB(this)">📆 Weekly</button>
-      <button class="sb" data-g="rep" data-v="monthly" onclick="pSB(this)">🗓️ Monthly</button>
+      <button class="sb" data-g="rep" data-v="" onclick="pSB(this);document.getElementById('repCustomWrap').style.display='none'">🚫 None</button>
+      <button class="sb" data-g="rep" data-v="daily" onclick="pSB(this);document.getElementById('repCustomWrap').style.display='none'">📅 Daily</button>
+      <button class="sb" data-g="rep" data-v="weekly" onclick="pSB(this);document.getElementById('repCustomWrap').style.display='none'">📆 Weekly</button>
+      <button class="sb" data-g="rep" data-v="monthly" onclick="pSB(this);document.getElementById('repCustomWrap').style.display='none'">🗓️ Monthly</button>
+    </div>
+    <div class="bg bg3" style="margin-top:4px">
+      <button class="sb" data-g="rep" data-v="yearly" onclick="pSB(this);document.getElementById('repCustomWrap').style.display='none'">🗓️ Yearly</button>
+      <button class="sb" data-g="rep" data-v="custom" onclick="pSB(this);document.getElementById('repCustomWrap').style.display=''">⚙️ Custom Days</button>
+    </div>
+    <div id="repCustomWrap" style="display:none;margin-top:6px;padding:8px 10px;background:var(--bg2);border-radius:8px">
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="font-size:12px;color:var(--textl)">Every</span>
+        <input class="fi" id="repCustomDays" type="number" min="1" max="365" placeholder="14" style="width:70px;padding:4px 8px;font-size:13px;margin:0">
+        <span style="font-size:12px;color:var(--textl)">days</span>
+      </div>
     </div>
   </div>
   <div class="fg"><label class="fl" style="display:flex;justify-content:space-between;align-items:center">Notes <button type="button" onclick="expandNotes()" style="background:none;border:none;font-size:11px;color:var(--lav);font-weight:700;cursor:pointer;font-family:'Quicksand',sans-serif">⛶ Full Screen</button></label><textarea class="fi fi-big" id="tNotes" placeholder="Details, links, context..."></textarea></div>
@@ -2186,6 +2229,27 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     </div>
   </div>
 </div>
+
+<!-- SEARCH OVERLAY -->
+<div class="ov" id="searchModal"><div class="mod" style="max-height:80vh;display:flex;flex-direction:column">
+  <div class="mh"></div>
+  <div class="mtit">🔍 Search Everything</div>
+  <div style="display:flex;gap:8px;margin-bottom:12px">
+    <input class="fi" id="searchInput" placeholder="Search tasks, lists, goals, meals..." style="flex:1;margin:0" oninput="runSearch(this.value)" autofocus>
+    <button class="cn-btn" style="margin:0;padding:8px 12px" onclick="closeM('searchModal')">✕</button>
+  </div>
+  <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px" id="searchFilterBar">
+    <button class="fchip on" onclick="setSearchFilter('all',this)">All</button>
+    <button class="fchip" onclick="setSearchFilter('tasks',this)">Tasks</button>
+    <button class="fchip" onclick="setSearchFilter('lists',this)">Lists</button>
+    <button class="fchip" onclick="setSearchFilter('goals',this)">Goals</button>
+    <button class="fchip" onclick="setSearchFilter('meals',this)">Meals</button>
+    <button class="fchip" onclick="setSearchFilter('notes',this)">Notes</button>
+  </div>
+  <div id="searchResults" style="overflow-y:auto;flex:1;min-height:100px">
+    <p style="color:var(--textl);text-align:center;padding:20px;font-size:13px">Start typing to search…</p>
+  </div>
+</div></div>
 
 <!-- PIN MODAL -->
 <div class="ov" id="pinModal"><div class="mod" style="text-align:center">
@@ -3158,6 +3222,8 @@ function goTabDirect(tab,btn){
   if(tab==='stories')renderStoriesList();
   if(tab==='mixtape')renderMixtape();
   if(SECTION_VIEWS[tab])renderHubPreviews(tab);
+  if(tab==='today'){ startSpiritRunLoop(); } else { stopSpiritRunLoop(); }
+  if(tab==='lighthouse'){ updateLighthouseSpiritStatus(); }
 }
 
 function renderHubPreviews(section){
@@ -3170,6 +3236,7 @@ function renderHubPreviews(section){
     var active=(PROJECTS||[]).filter(function(p){return p.status==='active';}).length;
     el=document.getElementById('hub-projects-sub');if(el)el.textContent=active+' active project'+(active!==1?'s':'');
     el=document.getElementById('hub-lists-sub');if(el)el.textContent=(LISTS||[]).length+' list'+((LISTS||[]).length!==1?'s':'')+' saved';
+    renderHelmDumpPreview();
   }else if(section==='conservatory'){
     renderConservatoryMilestone();
     var goals=(GOALS||[]).filter(function(g){return !g.done;}).length;
@@ -3953,7 +4020,7 @@ function renderT(f){
 
 function tHTML(t){
   var etm={'<10min':'⚡<10m','<1hr':'🕐<1hr','half-day':'📅Half','full-day':'🗓️Full'};
-  var repIco={'daily':'🔁','weekly':'📆','monthly':'🗓️'};
+  var repIco={'daily':'🔁','weekly':'📆','monthly':'🗓️','yearly':'📅','custom':'⚙️'};
   var subs=t.subs||[];
   var subDone=subs.filter(function(s){return s.done;}).length;
   var subPct=subs.length?Math.round(subDone/subs.length*100):0;
@@ -4089,6 +4156,7 @@ function saveTask(){
     notes:document.getElementById('tNotes').value.trim(),
     done:existing?existing.done:false,
     repeat:SBV.rep!==undefined?SBV.rep:(existing?existing.repeat||'':''),
+    repeatDays:(SBV.rep==='custom'||(!SBV.rep&&existing&&existing.repeat==='custom'))?parseInt((document.getElementById('repCustomDays')||{}).value)||7:(existing?existing.repeatDays||0:0),
     subs:existing?existing.subs||[]:[],
     created:existing?existing.created:new Date().toISOString(),
     meaningful:_taskMeaningful
@@ -4841,6 +4909,8 @@ function createRepeat(t){
     if(t.repeat==='daily')d.setDate(d.getDate()+1);
     else if(t.repeat==='weekly')d.setDate(d.getDate()+7);
     else if(t.repeat==='monthly')d.setMonth(d.getMonth()+1);
+    else if(t.repeat==='yearly')d.setFullYear(d.getFullYear()+1);
+    else if(t.repeat==='custom')d.setDate(d.getDate()+(t.repeatDays||7));
     nextDue=d.toISOString().split('T')[0];
   }
   var next={id:newId,title:t.title,cat:t.cat,urgency:t.urgency,etime:t.etime,due:nextDue,
@@ -5054,6 +5124,40 @@ function millieDrawEyes(mode){
 function millieDrawSVG(mode,sz){
   sz=sz||60;var h=Math.round(sz*1.3);
   var b='#f4834f',belly='#ffe0cc',ear='#ffb8b8',stripe='#d96020';
+  // Curled up sleeping cat
+  if(mode==='sleeping'){
+    var sw=sz,sh=Math.round(sz*0.8);
+    return'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 26 22" shape-rendering="auto" width="'+sw+'" height="'+sh+'">'
+      // Body oval (horizontal)
+      +'<ellipse cx="14" cy="15" rx="10" ry="6" fill="'+b+'"/>'
+      // Belly
+      +'<ellipse cx="13" cy="16" rx="6.5" ry="4" fill="'+belly+'"/>'
+      // Back stripes
+      +'<ellipse cx="10" cy="11.5" rx="1.5" ry="3" fill="'+stripe+'" opacity="0.5" transform="rotate(-20,10,11.5)"/>'
+      +'<ellipse cx="14" cy="10.5" rx="1.2" ry="2.5" fill="'+stripe+'" opacity="0.4" transform="rotate(-10,14,10.5)"/>'
+      // Tail curling around the body
+      +'<path d="M22 14 Q27 11 25 7 Q23 3 19 6 Q17 8 19 10" stroke="'+b+'" stroke-width="2.8" fill="none" stroke-linecap="round"/>'
+      +'<path d="M22 14 Q27 11 25 7 Q23 3 19 6 Q17 8 19 10" stroke="'+stripe+'" stroke-width="1" fill="none" stroke-linecap="round" opacity="0.4"/>'
+      // Head tucked down
+      +'<circle cx="5" cy="13.5" r="5.5" fill="'+b+'"/>'
+      // Left ear
+      +'<polygon points="1.5,8 4.5,6 7,10" fill="'+b+'"/>'
+      +'<polygon points="2.5,8.5 4.5,7 6,10" fill="'+ear+'"/>'
+      // Tiny sleeping eye (closed arc)
+      +'<path d="M3 13.5 Q5 12.5 7 13.5" stroke="#1a1a1a" stroke-width="1.6" fill="none" stroke-linecap="round"/>'
+      // Nose
+      +'<rect x="4" y="14.5" fill="#ff8899" width="2.5" height="1.5" rx="0.7"/>'
+      // Paws
+      +'<ellipse cx="10" cy="20.5" rx="3.5" ry="1.5" fill="'+b+'"/>'
+      +'<ellipse cx="17" cy="21" rx="3" ry="1.4" fill="'+b+'"/>'
+      +'<ellipse cx="10.5" cy="21" rx="2.5" ry="0.8" fill="'+belly+'"/>'
+      +'<ellipse cx="17.5" cy="21.5" rx="2" ry="0.7" fill="'+belly+'"/>'
+      // Zzz
+      +'<text x="10" y="7.5" font-size="4.5" fill="#b0b0dd" font-family="sans-serif" font-weight="bold">z</text>'
+      +'<text x="14.5" y="4.5" font-size="3.5" fill="#b0b0dd" font-family="sans-serif">z</text>'
+      +'<text x="17.5" y="2.5" font-size="2.5" fill="#b0b0dd" font-family="sans-serif">z</text>'
+      +'</svg>';
+  }
   return'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 26" shape-rendering="auto" width="'+sz+'" height="'+h+'">'
     // left ear (pointy triangle)
     +'<rect x="1" y="0" fill="'+b+'" width="1" height="1"/>'
@@ -5226,8 +5330,15 @@ function tickMillie(){
   var now=Date.now();
   var hrs=(now-(MILLIE.lastTick||now))/3600000;
   if(millieShouldSleep()){
-    MILLIE.energy=Math.min(100,MILLIE.energy+hrs*14);
-    MILLIE.hunger=Math.max(0,MILLIE.hunger-hrs*2);
+    // Sleep quality: check recent sleep log
+    var sleepLog=(MILLIE.sleepLog||[]);
+    var lastSleep=sleepLog.length?sleepLog[sleepLog.length-1]:null;
+    var goodSleep=lastSleep&&lastSleep.durH>=7;
+    var greatSleep=lastSleep&&lastSleep.durH>=8.5;
+    var energyRate=greatSleep?20:goodSleep?17:14;
+    var hungerDrain=goodSleep?1.5:2;
+    MILLIE.energy=Math.min(100,MILLIE.energy+hrs*energyRate);
+    MILLIE.hunger=Math.max(0,MILLIE.hunger-hrs*hungerDrain);
     // happiness stable during sleep
   } else {
     MILLIE.hunger=Math.max(0,MILLIE.hunger-hrs*8);
@@ -5249,8 +5360,7 @@ function renderMillieWidget(){
   if(w.classList.contains('treat'))cls+=' treat';
   w.className=cls;
   var badge=mode==='sleeping'?'💤':mode==='sleepy'?'😴':mode==='hungry'?'😿':mode==='sad'?'💔':mode==='happy'?'😻':'😺';
-  var svgMode=mode==='sleeping'?'sleepy':mode;
-  w.innerHTML=millieDrawSVG(svgMode,52)+'<div class="millie-mood-badge">'+badge+'</div>';
+  w.innerHTML=millieDrawSVG(mode,52)+'<div class="millie-mood-badge">'+badge+'</div>';
 }
 
 function renderMillieSleepLog(){
@@ -5269,10 +5379,9 @@ function openMillie(){
   tickMillie();
   var mode=millieMode();
   var sleeping=mode==='sleeping';
-  var svgMode=sleeping?'sleepy':mode;
   var age=millieAge();
   var bigSvg=document.getElementById('millieBigSvg');
-  if(bigSvg)bigSvg.innerHTML=millieDrawSVG(svgMode,100);
+  if(bigSvg)bigSvg.innerHTML=millieDrawSVG(mode,100);
   var moodTxt=document.getElementById('millieMoodTxt');
   if(moodTxt)moodTxt.textContent=millieMoodText(mode);
   var ageRow=document.getElementById('millieAgeRow');
@@ -8551,6 +8660,7 @@ function addPrayer(){
   PRAYERS.unshift({id:'p-'+Date.now(),text:text,date:new Date().toISOString().slice(0,10),answered:false,answeredDate:'',note:''});
   localStorage.setItem('aPrayers',JSON.stringify(PRAYERS));
   el.value='';
+  spiritRunAdd('prayer');
   renderPrayers();
 }
 
@@ -8689,6 +8799,7 @@ function openBibleBook(bookName){
   }
   BIBLE_LOG[bookName]=newLog;
   localStorage.setItem('aBibleLog',JSON.stringify(BIBLE_LOG));
+  spiritRunAdd('bible');
   renderBibleStats();
   renderBibleBooks();
 }
@@ -8705,6 +8816,7 @@ function logMinistry(){
   if(document.getElementById('minHrs'))document.getElementById('minHrs').value='';
   if(document.getElementById('minStudies'))document.getElementById('minStudies').value='';
   if(document.getElementById('minNotes'))document.getElementById('minNotes').value='';
+  spiritRunAdd('ministry');
   renderMinistryStats();
   renderMinistryLog();
 }
@@ -8759,6 +8871,7 @@ function saveGratitude(){
   GRAT_LOG.unshift({id:'g-'+Date.now(),date:new Date().toISOString().slice(0,10),items:items,extra:extra});
   localStorage.setItem('aGratLog',JSON.stringify(GRAT_LOG));
   ['grat1','grat2','grat3','gratExtra'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});
+  spiritRunAdd('gratitude');
   renderGratitudeLog();
 }
 
@@ -10373,6 +10486,323 @@ function endColorMix(){
     +'</div>';
 }
 
+// ═══════════════════════════════════════════════
+// SPIRITUAL RUNNER 🌿
+// ═══════════════════════════════════════════════
+var SPIRIT_RUN = JSON.parse(localStorage.getItem('aSpiritRun')||'{"safe":8,"totalPts":0,"lastTick":0}');
+if(!SPIRIT_RUN.lastTick) SPIRIT_RUN.lastTick = Date.now();
+var _sRunRaf = null;
+
+function saveSpiritRun(){ localStorage.setItem('aSpiritRun', JSON.stringify(SPIRIT_RUN)); }
+
+function spiritRunAdd(type){
+  var pts = {ministry:8, bible:5, prayer:3, notes:2, scripture:2, gratitude:1}[type] || 1;
+  SPIRIT_RUN.safe = Math.min(15, SPIRIT_RUN.safe + pts * 0.2);
+  SPIRIT_RUN.totalPts = (SPIRIT_RUN.totalPts||0) + pts;
+  SPIRIT_RUN.lastTick = Date.now();
+  saveSpiritRun();
+  showToast('+'+pts+' spirit '+(pts===1?'pt':'pts')+'! 🌿');
+}
+
+function tickSpiritRun(){
+  var now = Date.now();
+  var hrs = (now - (SPIRIT_RUN.lastTick||now)) / 3600000;
+  if(hrs > 0.25){
+    SPIRIT_RUN.safe = Math.max(0, SPIRIT_RUN.safe - hrs * 0.025);
+    SPIRIT_RUN.lastTick = now;
+    saveSpiritRun();
+  }
+}
+
+function startSpiritRunLoop(){
+  if(_sRunRaf) return;
+  function loop(){ renderSpiritRunner(); _sRunRaf = requestAnimationFrame(loop); }
+  _sRunRaf = requestAnimationFrame(loop);
+}
+
+function stopSpiritRunLoop(){
+  if(_sRunRaf){ cancelAnimationFrame(_sRunRaf); _sRunRaf = null; }
+}
+
+function renderSpiritRunner(){
+  var canvas = document.getElementById('spiritRunCanvas');
+  if(!canvas || !canvas.offsetParent) return;
+  tickSpiritRun();
+  var W = canvas.offsetWidth || 320;
+  if(canvas.width !== W) canvas.width = W;
+  var H = 130;
+  if(canvas.height !== H) canvas.height = H;
+  var ctx = canvas.getContext('2d');
+  if(!ctx) return;
+  var safe = Math.max(0, SPIRIT_RUN.safe || 0);
+  var TILE = W / 16;
+  var runX = Math.round(W * 0.52);
+  var groundY = H - 45;
+  var voidEdgeX = runX - safe * TILE;
+  var now = Date.now();
+  var t = now / 180;
+
+  // Sky
+  var sky = ctx.createLinearGradient(0,0,0,groundY);
+  sky.addColorStop(0,'#081808'); sky.addColorStop(0.5,'#163a16'); sky.addColorStop(1,'#1e5a1e');
+  ctx.fillStyle = sky; ctx.fillRect(0,0,W,groundY);
+
+  // Background tree layer (slow parallax)
+  var scroll1 = (now * 0.008) % 32;
+  ctx.fillStyle = '#0a1e08';
+  for(var i=0; i<Math.ceil(W/32)+2; i++){
+    var tx = ((i*32 - scroll1 % 32 + W) % (W+32)) - 16;
+    var th = 26 + (i*17+3)%18;
+    ctx.fillRect(tx-3, groundY-th, 6, th);
+    ctx.beginPath(); ctx.moveTo(tx, groundY-th-18); ctx.lineTo(tx-10, groundY-th+2); ctx.lineTo(tx+10, groundY-th+2); ctx.closePath(); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(tx, groundY-th-28); ctx.lineTo(tx-7, groundY-th-10); ctx.lineTo(tx+7, groundY-th-10); ctx.closePath(); ctx.fill();
+  }
+  // Foreground leaf layer (faster)
+  var scroll2 = (now * 0.022) % 24;
+  ctx.fillStyle = '#122810';
+  for(var j=0; j<Math.ceil(W/24)+2; j++){
+    var fx = ((j*24 - scroll2 % 24 + W) % (W+24)) - 12;
+    var fh = 14 + (j*11+5)%10;
+    ctx.fillRect(fx-2, groundY-fh, 4, fh);
+    ctx.beginPath(); ctx.moveTo(fx, groundY-fh-10); ctx.lineTo(fx-6, groundY-fh+1); ctx.lineTo(fx+6, groundY-fh+1); ctx.closePath(); ctx.fill();
+  }
+
+  // Ground rendering
+  ctx.save();
+  if(voidEdgeX > 0){
+    // Void (abyss)
+    var vg = ctx.createLinearGradient(0,groundY,0,H);
+    vg.addColorStop(0,'#1a0303'); vg.addColorStop(1,'#000');
+    ctx.fillStyle = vg; ctx.fillRect(0, groundY, voidEdgeX, H-groundY);
+    // Ember glow on crumble edge
+    ctx.shadowColor = '#ff4400'; ctx.shadowBlur = 10;
+    ctx.fillStyle = '#5a1a00'; ctx.fillRect(voidEdgeX-2, groundY, 4, H-groundY);
+    ctx.shadowBlur = 0;
+    // Crumble zone
+    var crW = TILE*2.5;
+    ctx.fillStyle = '#6b3a18'; ctx.fillRect(voidEdgeX+2, groundY, Math.min(crW, W-(voidEdgeX+2)), H-groundY);
+    ctx.strokeStyle = '#3a1a06'; ctx.lineWidth = 1;
+    for(var cx=voidEdgeX+4; cx<voidEdgeX+crW && cx<W; cx+=8){
+      ctx.beginPath(); ctx.moveTo(cx, groundY+3); ctx.lineTo(cx+4, groundY+9); ctx.lineTo(cx+2, groundY+16); ctx.stroke();
+    }
+    // Solid ground
+    var solidX = voidEdgeX + crW + 2;
+    if(solidX < W){
+      var gg = ctx.createLinearGradient(0,groundY,0,H);
+      gg.addColorStop(0,'#7a4820'); gg.addColorStop(0.3,'#5a3010'); gg.addColorStop(1,'#301800');
+      ctx.fillStyle = gg; ctx.fillRect(solidX, groundY, W-solidX, H-groundY);
+      ctx.fillStyle = '#3a8028'; ctx.fillRect(solidX, groundY, W-solidX, 6);
+      ctx.fillStyle = '#286018';
+      for(var gx=solidX+1; gx<W; gx+=5){ ctx.fillRect(gx, groundY-2, 2, 4); ctx.fillRect(gx+2, groundY-4, 2, 6); }
+    }
+  } else {
+    // Void under runner (danger)
+    var dg = ctx.createLinearGradient(0,groundY,0,H);
+    dg.addColorStop(0,'#2a0505'); dg.addColorStop(1,'#000');
+    ctx.fillStyle = dg; ctx.fillRect(0, groundY, W, H-groundY);
+    // Thin crumble patch ahead
+    if(safe > 0){ ctx.fillStyle = '#6b3a18'; ctx.fillRect(runX, groundY, TILE*1.5, H-groundY); }
+    var aheadX = runX + (safe>0 ? TILE*1.5 : 0);
+    if(aheadX < W){
+      ctx.fillStyle = '#5a3010'; ctx.fillRect(aheadX, groundY, W-aheadX, H-groundY);
+      ctx.fillStyle = '#3a8028'; ctx.fillRect(aheadX, groundY, W-aheadX, 6);
+    }
+  }
+  ctx.restore();
+
+  // Runner (explorer) at fixed runX, on top of ground
+  var ry = groundY;
+  var legOff = Math.sin(t) * 4;
+  var armOff = Math.sin(t + Math.PI) * 3;
+  var rx = runX;
+  // Shadow
+  ctx.fillStyle = 'rgba(0,0,0,0.3)'; ctx.beginPath(); ctx.ellipse(rx, ry, 6, 2, 0, 0, Math.PI*2); ctx.fill();
+  // Boots
+  ctx.fillStyle = '#2a1a08';
+  ctx.fillRect(rx-5, ry-2+legOff*0.4, 4, 3); ctx.fillRect(rx+1, ry-2-legOff*0.4, 4, 3);
+  // Legs
+  ctx.fillStyle = '#5a3a18';
+  ctx.fillRect(rx-4, ry-10+legOff*0.5, 3, 8); ctx.fillRect(rx+1, ry-10-legOff*0.5, 3, 8);
+  // Body/jacket
+  ctx.fillStyle = '#8b5a28';
+  ctx.fillRect(rx-4, ry-19, 8, 9);
+  // Backpack
+  ctx.fillStyle = '#3a6a3a'; ctx.fillRect(rx+3, ry-19, 4, 7);
+  // Arms
+  ctx.fillStyle = '#8b5a28';
+  ctx.fillRect(rx-7, ry-18+armOff*0.5, 3, 5); ctx.fillRect(rx+4, ry-18-armOff*0.5, 3, 5);
+  // Head
+  ctx.fillStyle = '#c89850'; ctx.fillRect(rx-3, ry-27, 6, 7);
+  // Hat brim
+  ctx.fillStyle = '#4a2e0e'; ctx.fillRect(rx-5, ry-21, 10, 2); ctx.fillRect(rx-3, ry-27, 6, -4);
+  ctx.fillRect(rx-2, ry-31, 4, 4);
+  // Eyes
+  ctx.fillStyle = '#2a1a08'; ctx.fillRect(rx-2, ry-25, 1, 2); ctx.fillRect(rx+1, ry-25, 1, 2);
+
+  // Danger flash overlay
+  if(safe < 2){
+    ctx.fillStyle = 'rgba(200,0,0,'+(0.15+0.1*Math.sin(now/180))+')';
+    ctx.fillRect(0,0,W,H);
+    ctx.fillStyle = '#ff4040'; ctx.font = 'bold 13px sans-serif'; ctx.textAlign = 'center';
+    ctx.fillText('⚠ SPIRIT DANGER! Log something! ⚠', W/2, H/2);
+    ctx.textAlign = 'left';
+  }
+
+  // HUD: safety bar (top-left)
+  ctx.fillStyle = 'rgba(0,0,0,0.55)'; ctx.fillRect(6, 6, 150, 26);
+  var safeRatio = Math.min(1, safe/12);
+  var barColor = safe>6 ? '#3aaa3a' : safe>3 ? '#d4a020' : '#cc3030';
+  ctx.fillStyle = '#222'; ctx.fillRect(8, 15, 106, 8);
+  ctx.fillStyle = barColor; ctx.fillRect(8, 15, Math.round(safeRatio*106), 8);
+  ctx.strokeStyle = 'rgba(255,255,255,0.25)'; ctx.lineWidth=1; ctx.strokeRect(8,15,106,8);
+  ctx.fillStyle = '#fff'; ctx.font = 'bold 9px sans-serif';
+  ctx.fillText('🌿 Spirit Run', 118, 22);
+  // Status label
+  ctx.fillStyle = barColor; ctx.font = '8px sans-serif';
+  ctx.fillText(safe>6?'Safe ✓':safe>3?'Slipping…':'DANGER!', 10, 13);
+  // Points
+  ctx.fillStyle = 'rgba(0,0,0,0.5)'; ctx.fillRect(W-62, 6, 56, 16);
+  ctx.fillStyle = '#ffe880'; ctx.font = '9px sans-serif'; ctx.textAlign='right';
+  ctx.fillText('✦ '+(SPIRIT_RUN.totalPts||0)+' pts', W-7, 17);
+  ctx.textAlign = 'left';
+}
+
+function updateLighthouseSpiritStatus(){
+  var el = document.getElementById('lighthouseSpiritStatus');
+  if(!el) return;
+  var safe = SPIRIT_RUN.safe || 0;
+  el.textContent = safe > 6 ? '✅ Spirit safe' : safe > 3 ? '⚠️ Slipping' : '🔴 Danger!';
+  el.style.color = safe > 6 ? 'var(--sage)' : safe > 3 ? '#d4a020' : '#cc3030';
+}
+
+// ═══════════════════════════════════════════════
+// GLOBAL SEARCH
+// ═══════════════════════════════════════════════
+var _searchFilter = 'all';
+
+function openSearch(){
+  openM('searchModal');
+  var inp = document.getElementById('searchInput');
+  if(inp){ inp.value=''; inp.focus(); }
+  document.getElementById('searchResults').innerHTML='<p style="color:var(--textl);text-align:center;padding:20px;font-size:13px">Start typing to search…</p>';
+}
+
+function setSearchFilter(f, btn){
+  _searchFilter = f;
+  document.querySelectorAll('#searchFilterBar .fchip').forEach(function(b){ b.classList.remove('on'); });
+  if(btn) btn.classList.add('on');
+  var inp = document.getElementById('searchInput');
+  if(inp && inp.value) runSearch(inp.value);
+}
+
+function runSearch(q){
+  q = (q||'').trim().toLowerCase();
+  var el = document.getElementById('searchResults');
+  if(!el) return;
+  if(!q){ el.innerHTML='<p style="color:var(--textl);text-align:center;padding:20px;font-size:13px">Start typing to search…</p>'; return; }
+  var results = [];
+  var f = _searchFilter;
+
+  // Tasks
+  if(f==='all'||f==='tasks'){
+    (TASKS||[]).filter(function(t){ return t.title.toLowerCase().includes(q)||(t.notes||'').toLowerCase().includes(q); }).forEach(function(t){
+      results.push({type:'task',icon:'📋',label:t.title,sub:(t.done?'✓ Done · ':'')+( t.due?'Due '+t.due:''),action:"closeM('searchModal');goTab('tasks',null)"});
+    });
+  }
+  // Goals
+  if(f==='all'||f==='goals'){
+    (GOALS||[]).filter(function(g){ return g.title.toLowerCase().includes(q); }).forEach(function(g){
+      results.push({type:'goal',icon:'🎯',label:g.title,sub:(g.done?'✓ Complete':'In progress'),action:"closeM('searchModal');goTab('goals',null)"});
+    });
+  }
+  // Projects
+  if(f==='all'||f==='tasks'){
+    (PROJECTS||[]).filter(function(p){ return p.title.toLowerCase().includes(q)||(p.notes||'').toLowerCase().includes(q); }).forEach(function(p){
+      results.push({type:'project',icon:'📁',label:p.title,sub:'Project · '+(p.status||'active'),action:"closeM('searchModal');goTab('projects',null)"});
+    });
+  }
+  // Lists
+  if(f==='all'||f==='lists'){
+    (LISTS||[]).filter(function(l){ return l.name.toLowerCase().includes(q); }).forEach(function(l){
+      results.push({type:'list',icon:'📝',label:l.name,sub:'List · '+(l.items||[]).length+' items',action:"closeM('searchModal');goTab('lists',null)"});
+    });
+    (LISTS||[]).forEach(function(l){
+      (l.items||[]).filter(function(i){ return i.text&&i.text.toLowerCase().includes(q); }).forEach(function(i){
+        results.push({type:'list-item',icon:'•',label:i.text,sub:'In list: '+l.name,action:"closeM('searchModal');goTab('lists',null)"});
+      });
+    });
+  }
+  // Meals
+  if(f==='all'||f==='meals'){
+    var allDays = Object.keys(MEAL_PLAN||{});
+    allDays.forEach(function(day){
+      var meals = MEAL_PLAN[day]||{};
+      Object.keys(meals).forEach(function(slot){
+        var m = meals[slot];
+        if(m&&typeof m==='string'&&m.toLowerCase().includes(q)){
+          results.push({type:'meal',icon:'🍽️',label:m,sub:'Meal plan · '+day+' '+slot,action:"closeM('searchModal');goTab('meals',null)"});
+        }
+      });
+    });
+  }
+  // Study notes / brain dump
+  if(f==='all'||f==='notes'){
+    (BRAIN_DUMP||[]).filter(function(d){ return d.text.toLowerCase().includes(q); }).forEach(function(d){
+      results.push({type:'dump',icon:'🧠',label:d.text,sub:'Brain dump · '+d.date,action:"closeM('searchModal');goTab('tasks',null)"});
+    });
+    (STUDY_NOTES||[]).filter(function(n){ return (n.title||n.content||'').toLowerCase().includes(q)||(n.content||'').toLowerCase().includes(q); }).forEach(function(n){
+      results.push({type:'note',icon:'📓',label:n.title||n.content||'Note',sub:'Study note · '+(n.date||''),action:"closeM('searchModal');goTab('spirit',null)"});
+    });
+  }
+
+  if(!results.length){
+    el.innerHTML='<p style="color:var(--textl);text-align:center;padding:20px;font-size:13px">No results for "'+escHtml(q)+'"</p>'; return;
+  }
+  el.innerHTML = results.slice(0,30).map(function(r,i){
+    return '<div style="padding:10px 12px;border-bottom:1px solid var(--bdr);cursor:pointer;display:flex;align-items:flex-start;gap:10px" onclick="'+r.action+'">'
+      +'<span style="font-size:16px;flex-shrink:0;margin-top:1px">'+r.icon+'</span>'
+      +'<div><div style="font-size:13px;font-weight:600;color:var(--textd)">'+escHtml(r.label)+'</div>'
+      +(r.sub?'<div style="font-size:11px;color:var(--textl);margin-top:2px">'+escHtml(r.sub)+'</div>':'')
+      +'</div></div>';
+  }).join('')+(results.length>30?'<p style="text-align:center;font-size:11px;color:var(--textl);padding:8px">+'+(results.length-30)+' more…</p>':'');
+}
+
+// ═══════════════════════════════════════════════
+// HELM BRAIN DUMP QUICK ADD
+// ═══════════════════════════════════════════════
+function helmQuickDump(){
+  var el = document.getElementById('helmDumpInput');
+  var text = (el&&el.value||'').trim();
+  if(!text) return;
+  BRAIN_DUMP.unshift({id:'bd-'+Date.now(), text:text, date:todayStr(), priority:'none', notes:'', due:''});
+  localStorage.setItem('aBrainDump', JSON.stringify(BRAIN_DUMP));
+  el.value = '';
+  renderHelmDumpPreview();
+  showToast('Added to brain dump 🧠');
+}
+
+function renderHelmDumpPreview(){
+  var el = document.getElementById('helmDumpPreview');
+  if(!el) return;
+  var recent = BRAIN_DUMP.slice(0,3);
+  if(!recent.length){ el.innerHTML='<p style="font-size:11px;color:var(--textl);margin:0;padding:2px 0">No dumps yet — clear your head!</p>'; return; }
+  el.innerHTML = recent.map(function(d){
+    return '<div style="font-size:11px;color:var(--textd);padding:3px 0;border-bottom:1px solid var(--bdr);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+escHtml(d.text)+'</div>';
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════
+// LIGHTHOUSE QUICK PRAYER
+// ═══════════════════════════════════════════════
+function lighthouseQuickPrayer(){
+  var text = prompt('Quick prayer request or note:');
+  if(!text||!text.trim()) return;
+  PRAYERS.unshift({id:'p-'+Date.now(), text:text.trim(), date:todayStr(), answered:false, answeredDate:'', note:''});
+  localStorage.setItem('aPrayers', JSON.stringify(PRAYERS));
+  spiritRunAdd('prayer');
+  showToast('Prayer added 🙏');
+}
+
 function startApp(){
   document.getElementById('loadingScreen').classList.add('hidden');
   chkReset();
@@ -10429,6 +10859,9 @@ function startApp(){
   ['helm','conservatory','hearthside','workshop','estate'].forEach(function(s){
     renderHubPreviews(s);
   });
+  startSpiritRunLoop();
+  renderHelmDumpPreview();
+  updateLighthouseSpiritStatus();
 }
 
 // Wait for Firebase then start
