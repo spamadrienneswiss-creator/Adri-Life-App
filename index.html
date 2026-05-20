@@ -876,6 +876,16 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     <div class="hub-info"><h2>The Archives</h2><p>Bran keeps everything in order — guides, app settings &amp; data export are shelved here.</p></div>
   </div>
   <div class="hub-grid">
+    <div class="hub-card span2" onclick="openTutorial()" style="background:linear-gradient(135deg,#f0eaff,#e8e0f8);border-color:#c4b0e8">
+      <div style="display:flex;align-items:center;gap:12px">
+        <div id="archivesCalSvg" style="flex-shrink:0"></div>
+        <div>
+          <div class="hub-card-ic" style="margin-bottom:2px">🎓</div>
+          <div class="hub-card-name">App Tour with Cal</div>
+          <div class="hub-card-sub" id="tutorialBadgeLine">Meet Cal and learn the app — earn a badge!</div>
+        </div>
+      </div>
+    </div>
     <div class="hub-card" onclick="goTab('guide',null)"><div class="hub-card-ic">📖</div><div class="hub-card-name">Guide</div><div class="hub-card-sub">App help &amp; tips</div></div>
     <div class="hub-card" onclick="goTab('export',null)"><div class="hub-card-ic">📤</div><div class="hub-card-name">Export</div><div class="hub-card-sub">Backup your data</div></div>
     <div class="hub-card span2" onclick="goTab('settings',null)"><div class="hub-card-ic">⚙️</div><div class="hub-card-name">Settings</div><div class="hub-card-sub">Themes, PIN, preferences</div></div>
@@ -1618,6 +1628,7 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     <button class="pn-btn on" onclick="showMealSec('meals',this)">🍽️ Meals</button>
     <button class="pn-btn" onclick="showMealSec('plan',this)">📅 Week</button>
     <button class="pn-btn" onclick="showMealSec('recipes',this)">📖 Recipes</button>
+    <button class="pn-btn" onclick="showMealSec('database',this)">🍲 Database</button>
     <button class="pn-btn" onclick="showMealSec('grocery',this)">🛒 Grocery</button>
     <button class="pn-btn" onclick="showMealSec('prices',this)">💰 Prices</button>
     <button class="pn-btn" onclick="showMealSec('inventory',this)">📦 Inventory</button>
@@ -1672,6 +1683,27 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     </div>
     <div id="mealPlanGrid" class="meal-grid"></div>
     <button class="btn" style="width:100%;margin-top:6px" onclick="genGroceryFromPlan()">🛒 Generate Grocery List from This Week</button>
+  </div>
+
+  <!-- FOOD DATABASE section -->
+  <div id="ms-database" style="display:none">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+      <span style="font-size:13px;font-weight:700;color:var(--textd)">🍲 Ember's Pantry</span>
+      <button class="btn" onclick="openFoodDbModal()">+ Add Food</button>
+    </div>
+    <div id="foodDbKitchen" style="margin-bottom:10px"></div>
+    <input class="fi" id="foodDbSearch" placeholder="Search foods…" oninput="renderFoodDb()" style="margin-bottom:10px">
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px" id="foodDbCatFilter">
+      <button class="fchip on" onclick="setFoodDbCat('',this)">All</button>
+      <button class="fchip" onclick="setFoodDbCat('protein',this)">🥩 Protein</button>
+      <button class="fchip" onclick="setFoodDbCat('vegetable',this)">🥦 Veggies</button>
+      <button class="fchip" onclick="setFoodDbCat('grain',this)">🌾 Grains</button>
+      <button class="fchip" onclick="setFoodDbCat('dairy',this)">🥛 Dairy</button>
+      <button class="fchip" onclick="setFoodDbCat('fruit',this)">🍎 Fruit</button>
+      <button class="fchip" onclick="setFoodDbCat('snack',this)">🍿 Snacks</button>
+      <button class="fchip" onclick="setFoodDbCat('other',this)">📦 Other</button>
+    </div>
+    <div id="foodDbList"></div>
   </div>
 
   <!-- RECIPES section -->
@@ -2263,6 +2295,44 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     </div>
   </div>
 </div>
+
+<!-- FOOD DB MODAL -->
+<div class="ov" id="foodDbModal"><div class="mod" style="max-height:88vh;overflow-y:auto">
+  <div class="mh"></div><div class="mtit">🍲 Add Food Item</div>
+  <input type="hidden" id="fdbId">
+  <div class="fg"><label class="fl">Name *</label><input class="fi" id="fdbName" placeholder="e.g. Grilled Chicken Breast"></div>
+  <div class="fg"><label class="fl">Category</label>
+    <select class="fi" id="fdbCat" style="padding:8px 10px">
+      <option value="protein">🥩 Protein</option>
+      <option value="vegetable">🥦 Vegetable</option>
+      <option value="grain">🌾 Grain</option>
+      <option value="dairy">🥛 Dairy</option>
+      <option value="fruit">🍎 Fruit</option>
+      <option value="snack">🍿 Snack</option>
+      <option value="other">📦 Other</option>
+    </select></div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+    <div class="fg"><label class="fl">Calories</label><input class="fi" id="fdbCal" type="number" placeholder="0"></div>
+    <div class="fg"><label class="fl">Protein (g)</label><input class="fi" id="fdbPro" type="number" placeholder="0" step="0.1"></div>
+    <div class="fg"><label class="fl">Carbs (g)</label><input class="fi" id="fdbCarb" type="number" placeholder="0" step="0.1"></div>
+    <div class="fg"><label class="fl">Fat (g)</label><input class="fi" id="fdbFat" type="number" placeholder="0" step="0.1"></div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+    <div class="fg"><label class="fl">Store</label><input class="fi" id="fdbStore" placeholder="e.g. Costco"></div>
+    <div class="fg"><label class="fl">Price / serving ($)</label><input class="fi" id="fdbPrice" type="number" placeholder="0.00" step="0.01"></div>
+  </div>
+  <div class="fg"><label class="fl">Recipe link (optional)</label><input class="fi" id="fdbRecipe" placeholder="Recipe name or URL"></div>
+  <div class="fg"><label class="fl">Serving size (optional)</label><input class="fi" id="fdbServing" placeholder="e.g. 4 oz, 1 cup"></div>
+  <button class="ok-btn" onclick="saveFoodDb()">Save ✨</button>
+  <button class="del-btn" id="fdbDelBtn" style="display:none" onclick="delFoodDb()">🗑️ Delete</button>
+  <button class="cn-btn" onclick="closeM('foodDbModal')">Cancel</button>
+</div></div>
+
+<!-- CAL TUTORIAL MODAL -->
+<div class="ov" id="tutorialModal"><div class="mod" style="max-height:88vh;overflow-y:auto;background:linear-gradient(135deg,#f8f4ff,#f0ecf8)">
+  <div class="mh" style="border-bottom-color:#d8ccf0"></div>
+  <div id="tutorialBody" style="padding-bottom:8px"></div>
+</div></div>
 
 <!-- SCRIPTURE CARD MODAL -->
 <div class="ov" id="scriptureCardModal"><div class="mod" style="max-height:88vh;overflow-y:auto">
@@ -3379,8 +3449,7 @@ function renderHubPreviews(section){
     var lastSl=MILLIE.sleepLog&&MILLIE.sleepLog.length?MILLIE.sleepLog[MILLIE.sleepLog.length-1]:null;
     if(el)el.textContent=lastSl?'Last sleep: '+((new Date(lastSl.wake)-new Date(lastSl.bed))/3600000).toFixed(1)+'h':'Log sleep, workouts & wellness';
     el=document.getElementById('hub-meals-sub');
-    var todayMeals=Object.values(MEAL_PLAN||{}).filter(function(v){return v&&v.date===today;}).length;
-    if(el)el.textContent='Meal planning & recipes';
+    if(el)el.textContent='Meal planning · '+(FOOD_DB.length?FOOD_DB.length+' pantry items':'Stock Ember\'s pantry');
   }else if(section==='workshop'){
     el=document.getElementById('hub-board-sub');if(el)el.textContent=(VB_ITEMS||[]).length+' item'+((VB_ITEMS||[]).length!==1?'s':'');
     el=document.getElementById('hub-faves-sub');if(el)el.textContent=(FAVES||[]).length+' saved fave'+((FAVES||[]).length!==1?'s':'');
@@ -9041,7 +9110,7 @@ var MEAL_SLOT_LABELS = {breakfast:'Breakfast',mains:'Main Meals',soup:'Soup',oth
 var GROCERY_CATS = ['Produce','Dairy','Meat & Fish','Bakery','Pantry','Frozen','Beverages','Other'];
 
 function showMealSec(sec,btn){
-  ['meals','plan','recipes','grocery','prices','inventory'].forEach(function(s){
+  ['meals','plan','recipes','database','grocery','prices','inventory'].forEach(function(s){
     var el=document.getElementById('ms-'+s);
     if(el)el.style.display=(s===sec)?'':'none';
   });
@@ -9050,6 +9119,7 @@ function showMealSec(sec,btn){
   if(sec==='meals')renderMealLog();
   if(sec==='plan')renderMealPlan();
   if(sec==='recipes')renderRecipes();
+  if(sec==='database'){renderFoodDb();renderFoodDbKitchen();}
   if(sec==='grocery')renderGrocery();
   if(sec==='inventory')renderInventory();
   if(sec==='prices')renderPriceLog();
@@ -9891,6 +9961,25 @@ var BUDGET_SAMPLE=[
 var _budgetGame=null;
 function openBudgetBlitz(){
   showOv('budgetBlitzOv');
+  var realCount=(EXPENSES||[]).filter(function(e){return e.cat&&e.desc;}).length;
+  var target=50;
+  if(realCount<target){
+    var el=document.getElementById('budgetBlitzBody');
+    if(el){
+      var pct=Math.round(realCount/target*100);
+      el.innerHTML='<div style="text-align:center;padding:24px 16px">'
+        +'<div style="font-size:48px;margin-bottom:12px">🔒</div>'
+        +'<div style="font-size:16px;font-weight:700;color:var(--textd);margin-bottom:8px">Locked — Elias needs data!</div>'
+        +'<p style="font-size:13px;color:var(--textl);margin:0 0 16px;line-height:1.5">Log <b>50 real expenses</b> before Budget Blitz unlocks.<br>Elias can\'t train without actual numbers.</p>'
+        +'<div style="height:12px;background:#f0e8e0;border-radius:6px;overflow:hidden;margin-bottom:8px">'
+        +'<div style="height:100%;border-radius:6px;background:linear-gradient(90deg,var(--lav),#8a6abf);width:'+pct+'%;transition:width .6s ease"></div>'
+        +'</div>'
+        +'<div style="font-size:12px;color:var(--textl);margin-bottom:20px">'+realCount+' / '+target+' expenses</div>'
+        +'<button class="ok-btn" onclick="closeOv(\'budgetBlitzOv\');goTab(\'estate\',null)">Log Expenses →</button>'
+        +'</div>';
+    }
+    return;
+  }
   startBudgetBlitz();
 }
 function startBudgetBlitz(){
@@ -10623,6 +10712,254 @@ function endColorMix(){
 }
 
 // ═══════════════════════════════════════════════
+// FOOD DATABASE 🍲
+// ═══════════════════════════════════════════════
+var FOOD_DB = JSON.parse(localStorage.getItem('aFoodDb')||'[]');
+var _foodDbCat = '';
+function saveFoodDbData(){ localStorage.setItem('aFoodDb', JSON.stringify(FOOD_DB)); }
+
+var FOOD_CAT_EMOJI = {protein:'🥩',vegetable:'🥦',grain:'🌾',dairy:'🥛',fruit:'🍎',snack:'🍿',other:'📦'};
+
+function openFoodDbModal(editId){
+  document.getElementById('fdbId').value = editId||'';
+  ['fdbName','fdbStore','fdbRecipe','fdbServing'].forEach(function(id){var e=document.getElementById(id);if(e)e.value='';});
+  ['fdbCal','fdbPro','fdbCarb','fdbFat','fdbPrice'].forEach(function(id){var e=document.getElementById(id);if(e)e.value='';});
+  var del = document.getElementById('fdbDelBtn');
+  if(editId){
+    var item = FOOD_DB.find(function(x){return x.id===editId;});
+    if(item){
+      ['name','store','recipe','serving'].forEach(function(f){var e=document.getElementById('fdb'+f.charAt(0).toUpperCase()+f.slice(1));if(e)e.value=item[f]||'';});
+      ['cal','pro','carb','fat','price'].forEach(function(f){var e=document.getElementById('fdb'+f.charAt(0).toUpperCase()+f.slice(1));if(e)e.value=item[f]||'';});
+      var catEl=document.getElementById('fdbCat');if(catEl)catEl.value=item.cat||'other';
+    }
+    if(del)del.style.display='';
+  } else { if(del)del.style.display='none'; }
+  openM('foodDbModal');
+}
+
+function saveFoodDb(){
+  var name=(document.getElementById('fdbName').value||'').trim();
+  if(!name)return alert('Enter a food name');
+  var id=document.getElementById('fdbId').value||('fd-'+Date.now());
+  var item={
+    id:id, name:name,
+    cat:(document.getElementById('fdbCat').value||'other'),
+    cal:parseFloat(document.getElementById('fdbCal').value)||0,
+    pro:parseFloat(document.getElementById('fdbPro').value)||0,
+    carb:parseFloat(document.getElementById('fdbCarb').value)||0,
+    fat:parseFloat(document.getElementById('fdbFat').value)||0,
+    price:parseFloat(document.getElementById('fdbPrice').value)||0,
+    store:(document.getElementById('fdbStore').value||'').trim(),
+    recipe:(document.getElementById('fdbRecipe').value||'').trim(),
+    serving:(document.getElementById('fdbServing').value||'').trim(),
+    added:todayStr()
+  };
+  var existing = FOOD_DB.findIndex(function(x){return x.id===id;});
+  if(existing>=0) FOOD_DB[existing]=item; else FOOD_DB.unshift(item);
+  saveFoodDbData();
+  closeM('foodDbModal');
+  renderFoodDb();
+  renderFoodDbKitchen();
+  renderHubPreviews('hearthside');
+}
+
+function delFoodDb(){
+  var id=document.getElementById('fdbId').value;
+  FOOD_DB=FOOD_DB.filter(function(x){return x.id!==id;});
+  saveFoodDbData();
+  closeM('foodDbModal');
+  renderFoodDb();
+  renderFoodDbKitchen();
+}
+
+function setFoodDbCat(cat,btn){
+  _foodDbCat=cat;
+  document.querySelectorAll('#foodDbCatFilter .fchip').forEach(function(b){b.classList.remove('on');});
+  if(btn)btn.classList.add('on');
+  renderFoodDb();
+}
+
+function renderFoodDbKitchen(){
+  var el=document.getElementById('foodDbKitchen');
+  if(!el)return;
+  var count=FOOD_DB.length;
+  var levels=['🍽️ Empty pantry — add your first food!','🥄 A few basics on the shelf','🧂 The pantry is taking shape','🍳 A well-stocked kitchen!','👩‍🍳 Ember\'s kitchen is thriving!','🌟 Full Brindleport feast!'];
+  var idx=Math.min(Math.floor(count/8), levels.length-1);
+  var pct=Math.min(100, Math.round(count/40*100));
+  el.innerHTML='<div style="background:linear-gradient(135deg,#fff8f0,#fff0e8);border-radius:10px;padding:10px 12px">'
+    +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">'
+    +'<span style="font-size:12px;font-weight:700;color:var(--textd)">'+levels[idx]+'</span>'
+    +'<span style="font-size:11px;color:var(--textl)">'+count+' items</span>'
+    +'</div>'
+    +'<div style="height:7px;background:#f0e8e0;border-radius:4px;overflow:hidden">'
+    +'<div style="height:100%;border-radius:4px;background:linear-gradient(90deg,#e07030,#d4a820);width:'+pct+'%;transition:width .6s ease"></div>'
+    +'</div></div>';
+}
+
+function renderFoodDb(){
+  var el=document.getElementById('foodDbList');
+  if(!el)return;
+  renderFoodDbKitchen();
+  var q=((document.getElementById('foodDbSearch')||{}).value||'').toLowerCase();
+  var list=FOOD_DB.filter(function(item){
+    if(_foodDbCat&&item.cat!==_foodDbCat)return false;
+    if(q&&!item.name.toLowerCase().includes(q)&&!(item.store||'').toLowerCase().includes(q))return false;
+    return true;
+  });
+  if(!list.length){
+    el.innerHTML='<div class="empty"><div class="emj">🍲</div><p>'+(FOOD_DB.length?'No items match.':'Ember\'s pantry is empty! Add your first food item.')+'</p></div>';return;
+  }
+  el.innerHTML=list.map(function(item){
+    var emoji=FOOD_CAT_EMOJI[item.cat]||'📦';
+    return'<div style="background:#fff;border-radius:12px;padding:12px 14px;margin-bottom:8px;box-shadow:0 1px 4px rgba(0,0,0,.06)">'
+      +'<div style="display:flex;align-items:flex-start;gap:10px">'
+      +'<span style="font-size:20px;flex-shrink:0;margin-top:1px">'+emoji+'</span>'
+      +'<div style="flex:1;min-width:0">'
+      +'<div style="font-size:13px;font-weight:700;color:var(--textd)">'+escHtml(item.name)+(item.serving?'<span style="font-weight:400;color:var(--textl);font-size:11px"> · '+escHtml(item.serving)+'</span>':'')+'</div>'
+      +(item.cal||item.pro?'<div style="font-size:11px;color:var(--textl);margin-top:3px">'
+        +(item.cal?'<span style="margin-right:8px">🔥 '+item.cal+'cal</span>':'')
+        +(item.pro?'<span style="margin-right:8px">💪 '+item.pro+'g pro</span>':'')
+        +(item.carb?'<span style="margin-right:8px">🌾 '+item.carb+'g carb</span>':'')
+        +(item.fat?'<span>🫒 '+item.fat+'g fat</span>':'')
+        +'</div>':'')
+      +((item.store||item.price)?'<div style="font-size:11px;color:var(--textl);margin-top:2px">'
+        +(item.store?'🏪 '+escHtml(item.store)+' ':'')
+        +(item.price?'· $'+item.price.toFixed(2)+'/srv':'')
+        +'</div>':'')
+      +(item.recipe?'<div style="font-size:11px;color:var(--lav);margin-top:2px">📖 '+escHtml(item.recipe)+'</div>':'')
+      +'</div>'
+      +'<div style="display:flex;flex-direction:column;gap:5px;flex-shrink:0">'
+      +'<button class="btn sec" style="font-size:11px;padding:4px 9px" onclick="foodDbAddToLog(\''+escHtml(item.name)+'\','+item.cal+','+item.pro+','+item.carb+','+item.fat+')">+ Log</button>'
+      +'<button class="btn sec" style="font-size:11px;padding:4px 9px" onclick="openFoodDbModal(\''+item.id+'\')">Edit</button>'
+      +'</div></div></div>';
+  }).join('');
+}
+
+function foodDbAddToLog(name, cal, pro, carb, fat){
+  var k=getTK();
+  if(!FL[k])FL[k]=[];
+  FL[k].push({name:name,cal:cal||0,pro:pro||0,carb:carb||0,fat:fat||0,fib:0,crb:carb||0,id:'f-'+Date.now()});
+  localStorage.setItem('aFL',JSON.stringify(FL));
+  updM();
+  showToast(name+' added to today\'s log 🍽️');
+}
+
+// ═══════════════════════════════════════════════
+// CAL TUTORIAL 🎓
+// ═══════════════════════════════════════════════
+var TUTORIAL = JSON.parse(localStorage.getItem('aTutorial')||'{"step":0,"completed":false}');
+function saveTutorial(){ localStorage.setItem('aTutorial',JSON.stringify(TUTORIAL)); }
+
+function calDrawSVG(sz){
+  sz=sz||54;var h=Math.round(sz*1.3);
+  return'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 36 48" width="'+sz+'" height="'+h+'" style="shape-rendering:auto">'
+    // Body - teal explorer jacket
+    +'<rect x="6" y="32" width="24" height="16" rx="5" fill="#2a7a8a"/>'
+    // Notebook tucked under arm
+    +'<rect x="20" y="33" width="9" height="12" rx="2" fill="#f5eed8"/>'
+    +'<rect x="20" y="33" width="9" height="2" fill="#e0d4b0"/>'
+    +'<line x1="22" y1="37" x2="28" y2="37" stroke="#b0a080" stroke-width="0.8"/>'
+    +'<line x1="22" y1="39" x2="28" y2="39" stroke="#b0a080" stroke-width="0.8"/>'
+    +'<line x1="22" y1="41" x2="26" y2="41" stroke="#b0a080" stroke-width="0.8"/>'
+    // Neck
+    +'<rect x="15" y="26" width="6" height="8" fill="#c8a060"/>'
+    // Head
+    +'<ellipse cx="18" cy="21" rx="9" ry="10" fill="#c8a060"/>'
+    // Short curly dark hair
+    +'<ellipse cx="18" cy="12" rx="9" ry="5" fill="#2a1808"/>'
+    +'<ellipse cx="9" cy="16" rx="3" ry="6" fill="#2a1808"/>'
+    +'<ellipse cx="27" cy="16" rx="3" ry="6" fill="#2a1808"/>'
+    +'<ellipse cx="12" cy="13" rx="2" ry="2.5" fill="#3a2810"/>'
+    +'<ellipse cx="24" cy="13" rx="2" ry="2.5" fill="#3a2810"/>'
+    // Eyes (friendly, slightly wide)
+    +'<circle cx="14.5" cy="21" r="1.8" fill="#2a5a70"/>'
+    +'<circle cx="21.5" cy="21" r="1.8" fill="#2a5a70"/>'
+    +'<circle cx="14.8" cy="20.7" r="0.7" fill="white"/>'
+    +'<circle cx="21.8" cy="20.7" r="0.7" fill="white"/>'
+    // Smile
+    +'<path d="M15 25 Q18 27.5 21 25" stroke="#9a6040" stroke-width="1.3" fill="none" stroke-linecap="round"/>'
+    // Rosy cheeks
+    +'<ellipse cx="11" cy="23" rx="2.2" ry="1.5" fill="#e89080" opacity="0.5"/>'
+    +'<ellipse cx="25" cy="23" rx="2.2" ry="1.5" fill="#e89080" opacity="0.5"/>'
+    // Left arm/hand (holding pencil)
+    +'<rect x="3" y="35" width="3" height="7" rx="1" fill="#2a7a8a"/>'
+    +'<rect x="3" y="41" width="3" height="3" rx="0.8" fill="#c8a060"/>'
+    +'<rect x="4" y="43.5" width="1" height="2" fill="#f5eed8"/>'
+    +'</svg>';
+}
+
+var TUTORIAL_STEPS = [
+  {title:'Welcome to Brindleport! 🌊',text:'Hi Adri! I\'m Cal, your guide. This tour will walk you through the whole app and help you get set up. Each section has its own character and purpose. Ready to explore?',btn:'Let\'s go! 🗺️',action:null},
+  {title:'⚓ The Helm',text:'This is your command center. Reid keeps you on course. Add tasks, manage projects, and do a quick brain dump here. Try adding your first task to get started!',btn:'Add a task →',action:"closeM('tutorialModal');openM('taskModal')"},
+  {title:'🌿 The Conservatory',text:'Tessa\'s quiet space for growth. Set goals, build routines, track learning, and use focus tools. The greenhouse unlocks when your Conservatory is thriving.',btn:'Visit Conservatory →',action:"closeM('tutorialModal');goTab('conservatory',null)"},
+  {title:'🏡 Hearthside',text:'Ember keeps the hearth warm. Log your meals, track sleep, plan workouts, and fill her pantry with your food database. A well-fed household is a happy one.',btn:'Visit Hearthside →',action:"closeM('tutorialModal');goTab('hearthside',null)"},
+  {title:'🔨 The Workshop',text:'Clara & Astrid\'s creative studio. Build your vision board, collect favorites, write stories, and add songs to your mixtape. Creative output keeps them inspired!',btn:'Visit Workshop →',action:"closeM('tutorialModal');goTab('workshop',null)"},
+  {title:'✨ The Lighthouse',text:'The most important section! Spiritual life lives here. Log prayers, track Bible reading, record ministry time, add scripture cards, and study them. The Spirit Runner on your Today page tracks your daily effort.',btn:'Visit Lighthouse →',action:"closeM('tutorialModal');goTab('lighthouse',null)"},
+  {title:'🏛️ The Estate',text:'Your financial foundation. Track expenses, pay bills, log income, and play Budget Blitz once you\'ve entered 50 real transactions. A healthy Estate unlocks a new building in Brindleport.',btn:'Visit Estate →',action:"closeM('tutorialModal');goTab('estate',null)"},
+  {title:'🏪 The Emporium',text:'Your business hub. Track wigs, income streams, and set a monthly income goal. The Emporium thrives as you log your earnings.',btn:'Visit Emporium →',action:"closeM('tutorialModal');goTab('emporium',null)"},
+  {title:'🌊 Brindleport Bay',text:'Your world grows as you use the app! Buildings unlock as each section gets healthier. Ember and Millie live here. Go fishing at the dock anytime.',btn:'Visit World →',action:"closeM('tutorialModal');goTab('world',null)"},
+  {title:'🏅 You did it!',text:'You\'ve earned the Pioneer Badge! The app is yours to explore. Come back to Cal anytime for a refresher. Brindleport is waiting!',btn:'Finish & Claim Badge 🏅',action:'completeTutorial()'}
+];
+
+function openTutorial(){
+  renderTutorialStep();
+  openM('tutorialModal');
+}
+
+function renderTutorialStep(){
+  var body=document.getElementById('tutorialBody');
+  if(!body)return;
+  var step=Math.min(TUTORIAL.step||0, TUTORIAL_STEPS.length-1);
+  var s=TUTORIAL_STEPS[step];
+  var prog=Math.round((step/(TUTORIAL_STEPS.length-1))*100);
+  body.innerHTML='<div style="text-align:center;margin-bottom:16px">'+calDrawSVG(64)+'</div>'
+    +'<div style="height:5px;background:#e0d8f0;border-radius:3px;overflow:hidden;margin-bottom:16px">'
+    +'<div style="height:100%;border-radius:3px;background:linear-gradient(90deg,var(--lav),#8a6abf);width:'+prog+'%;transition:width .4s ease"></div></div>'
+    +'<div style="font-size:11px;color:var(--textl);text-align:center;margin-bottom:4px">Step '+(step+1)+' of '+TUTORIAL_STEPS.length+'</div>'
+    +'<h3 style="text-align:center;color:var(--textd);margin:0 0 12px;font-size:17px">'+s.title+'</h3>'
+    +'<p style="color:var(--textd);font-size:13px;line-height:1.6;text-align:center;margin:0 0 20px">'+s.text+'</p>'
+    +(TUTORIAL.completed&&step===TUTORIAL_STEPS.length-1
+      ? '<div style="text-align:center;font-size:28px;margin-bottom:12px">🏅</div>'
+        +'<div style="text-align:center;font-weight:700;color:var(--lav);font-size:14px;margin-bottom:16px">Pioneer Badge Earned!</div>'
+        +'<button class="ok-btn" onclick="closeM(\'tutorialModal\')">Close</button>'
+      : '<button class="ok-btn" style="width:100%"'+(s.action?'onclick="tutorialAction(\''+step+'\')"':' onclick="tutorialNext()"')+'>'+s.btn+'</button>'
+        +(step>0&&!TUTORIAL.completed?'<button class="cn-btn" onclick="tutorialNext()">Skip step →</button>':'')
+        +'<button class="cn-btn" onclick="closeM(\'tutorialModal\')" style="color:var(--textl);font-size:12px">Continue later</button>'
+    );
+}
+
+function tutorialAction(step){
+  tutorialNext();
+  var s=TUTORIAL_STEPS[parseInt(step)];
+  if(s&&s.action&&s.action!=='completeTutorial()'){
+    try{ eval(s.action); }catch(e){}
+  }
+}
+
+function tutorialNext(){
+  TUTORIAL.step=Math.min((TUTORIAL.step||0)+1, TUTORIAL_STEPS.length-1);
+  saveTutorial();
+  renderTutorialStep();
+}
+
+function completeTutorial(){
+  TUTORIAL.completed=true;
+  TUTORIAL.step=TUTORIAL_STEPS.length-1;
+  saveTutorial();
+  renderTutorialStep();
+  celebrate();
+  var bl=document.getElementById('tutorialBadgeLine');
+  if(bl)bl.innerHTML='🏅 <b>Pioneer Badge earned!</b> Tour complete.';
+}
+
+function renderCalInArchives(){
+  var el=document.getElementById('archivesCalSvg');
+  if(el&&!el.querySelector('svg'))el.innerHTML=calDrawSVG(40);
+  var bl=document.getElementById('tutorialBadgeLine');
+  if(bl&&TUTORIAL.completed)bl.innerHTML='🏅 <b>Pioneer Badge earned!</b> Tour complete.';
+}
+
+// ═══════════════════════════════════════════════
 // SCRIPTURE FLASHCARDS 📜
 // ═══════════════════════════════════════════════
 var SCRIPTURE_CARDS = JSON.parse(localStorage.getItem('aScrCards')||'[]');
@@ -11248,6 +11585,7 @@ function startApp(){
   renderHelmDumpPreview();
   updateLighthouseSpiritStatus();
   renderEmporiumGoal();
+  renderCalInArchives();
 }
 
 // Wait for Firebase then start
