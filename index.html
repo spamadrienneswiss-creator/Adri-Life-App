@@ -790,8 +790,12 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
 <!-- THE WORKSHOP -->
 <div class="view" id="v-workshop">
   <div class="hub-banner" style="background:linear-gradient(135deg,rgba(138,74,191,.1),rgba(160,120,220,.08))">
-    <div class="char-wrap" id="hub-char-workshop"><svg viewBox="0 0 36 48" width="54" height="72" style="shape-rendering:auto"><rect x="6" y="32" width="24" height="16" rx="5" fill="#9a6abf"/><circle cx="10" cy="37" r="2.5" fill="#e0b8f0"/><circle cx="13.5" cy="40.5" r="1.8" fill="#a0d4f0"/><rect x="15" y="26" width="6" height="8" fill="#e8c4a0"/><ellipse cx="18" cy="21" rx="9" ry="10" fill="#e8c4a0"/><ellipse cx="9" cy="17" rx="4" ry="8" fill="#8a4abf"/><ellipse cx="27" cy="17" rx="4" ry="8" fill="#8a4abf"/><ellipse cx="18" cy="12" rx="10" ry="6" fill="#8a4abf"/><ellipse cx="18" cy="11" rx="6" ry="3" fill="#b07ae0"/><circle cx="14.5" cy="21" r="1.4" fill="#5a3a80"/><circle cx="21.5" cy="21" r="1.4" fill="#5a3a80"/><ellipse cx="11" cy="24" rx="2" ry="1" fill="#e89ab0" opacity="0.6"/><path d="M15 25.5 Q18 28 21 25.5" stroke="#c07080" stroke-width="1.2" fill="none" stroke-linecap="round"/></svg></div>
-    <div class="hub-info"><h2>The Workshop</h2><p>Clara's creative studio — vision board, inspiration, faves &amp; all your hobbies &amp; passions.</p></div>
+    <div style="display:flex;gap:4px">
+      <div class="char-wrap" id="hub-char-workshop"><svg viewBox="0 0 36 48" width="54" height="72" style="shape-rendering:auto"><rect x="6" y="32" width="24" height="16" rx="5" fill="#9a6abf"/><circle cx="10" cy="37" r="2.5" fill="#e0b8f0"/><circle cx="13.5" cy="40.5" r="1.8" fill="#a0d4f0"/><rect x="15" y="26" width="6" height="8" fill="#e8c4a0"/><ellipse cx="18" cy="21" rx="9" ry="10" fill="#e8c4a0"/><ellipse cx="9" cy="17" rx="4" ry="8" fill="#8a4abf"/><ellipse cx="27" cy="17" rx="4" ry="8" fill="#8a4abf"/><ellipse cx="18" cy="12" rx="10" ry="6" fill="#8a4abf"/><ellipse cx="18" cy="11" rx="6" ry="3" fill="#b07ae0"/><circle cx="14.5" cy="21" r="1.4" fill="#5a3a80"/><circle cx="21.5" cy="21" r="1.4" fill="#5a3a80"/><ellipse cx="11" cy="24" rx="2" ry="1" fill="#e89ab0" opacity="0.6"/><path d="M15 25.5 Q18 28 21 25.5" stroke="#c07080" stroke-width="1.2" fill="none" stroke-linecap="round"/></svg></div>
+      <!-- Astrid (second ADHD character) -->
+      <div class="char-wrap" id="hub-char-astrid"><svg viewBox="0 0 36 48" width="46" height="62" style="shape-rendering:auto"><rect x="6" y="32" width="24" height="16" rx="5" fill="#d45a3a"/><rect x="10" y="33" width="16" height="12" fill="#e87050"/><rect x="9" y="36" width="5" height="8" rx="1" fill="#f0b040"/><rect x="22" y="34" width="4" height="5" rx="1" fill="#f0b040" opacity="0.7"/><rect x="15" y="26" width="6" height="8" fill="#e8c090"/><ellipse cx="18" cy="21" rx="9" ry="10" fill="#e8c090"/><path d="M8 14 Q10 10 14 12 Q18 8 22 12 Q26 10 28 14 Q26 17 18 16 Q10 17 8 14Z" fill="#d4840a"/><path d="M10 13 Q12 9 16 11 Q18 7 20 11 Q24 9 26 13" stroke="#b06008" stroke-width="0.8" fill="none"/><circle cx="14.5" cy="21" r="1.4" fill="#5a3a10"/><circle cx="21.5" cy="21" r="1.4" fill="#5a3a10"/><ellipse cx="11.5" cy="24" rx="2" ry="1" fill="#e89ab0" opacity="0.5"/><ellipse cx="24.5" cy="24" rx="2" ry="1" fill="#e89ab0" opacity="0.5"/><path d="M15.5 25.5 Q18 27 20.5 25.5" stroke="#b07050" stroke-width="1.2" fill="none" stroke-linecap="round"/><text x="9" y="11" font-size="5" fill="#ffe050" font-family="sans-serif">✦</text></svg></div>
+    </div>
+    <div class="hub-info"><h2>The Workshop</h2><p>Clara &amp; Astrid's creative studio — vision board, inspiration, faves &amp; all your hobbies &amp; passions.</p></div>
   </div>
   <div class="hub-grid">
     <div class="hub-card" onclick="goTab('board',null)"><div class="hub-card-ic">🌈</div><div class="hub-card-name">Vision Board</div><div class="hub-card-sub" id="hub-board-sub">Loading…</div></div>
@@ -822,7 +826,7 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
       </div>
     </div>
     <div class="hub-card span2" onclick="goTab('spirit',null)"><div class="hub-card-ic">✨</div><div class="hub-card-name">Spiritual</div><div class="hub-card-sub">Bible study, prayer, ministry &amp; gratitude</div></div>
-    <div class="hub-card span2" onclick="goTab('spirit',null);setTimeout(function(){showSpiritSec('notes',document.querySelector('#v-spirit .pn-btn:nth-child(6)'))},200)"><div class="hub-card-ic">📓</div><div class="hub-card-name">Meeting Notes</div><div class="hub-card-sub" id="hub-meet-notes-sub">Study notes &amp; meeting insights</div></div>
+    <div class="hub-card span2" onclick="goTab('spirit',null);setTimeout(function(){showSpiritSec('notes',document.querySelector('#v-spirit .pn-btn:nth-child(7)'))},200)"><div class="hub-card-ic">📓</div><div class="hub-card-name">Meeting Notes</div><div class="hub-card-sub" id="hub-meet-notes-sub">Study notes &amp; meeting insights</div></div>
     <div class="hub-card" onclick="goTab('projects',null)"><div class="hub-card-ic">📁</div><div class="hub-card-name">Spirit Projects</div><div class="hub-card-sub" id="hub-spirit-proj-sub">Active spiritual goals</div></div>
   </div>
 </div>
@@ -846,7 +850,22 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     <div class="hub-info"><h2>The Emporium</h2><p>Elias &amp; Co.'s business front — wigs, L'Oréal &amp; all your income streams in one shop.</p></div>
   </div>
   <div class="hub-grid">
+    <div class="hub-card span2" style="cursor:default;padding:12px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <span style="font-size:12px;font-weight:700;color:var(--textd)">💰 Monthly Income Goal</span>
+        <button class="btn sec" style="font-size:10px;padding:2px 8px" onclick="setIncGoal()">Set Goal</button>
+      </div>
+      <div id="emporiumGoalBar" style="height:10px;background:#f0ebe6;border-radius:5px;overflow:hidden;margin-bottom:6px">
+        <div id="emporiumGoalFill" style="height:100%;border-radius:5px;background:linear-gradient(90deg,var(--sage),var(--teal));transition:width .6s ease;width:0%"></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--textl)">
+        <span id="emporiumGoalAmt">$0 this month</span>
+        <span id="emporiumGoalTarget">Goal: $—</span>
+      </div>
+    </div>
     <div class="hub-card span2" onclick="goTab('wigs',null)"><div class="hub-card-ic">🪄</div><div class="hub-card-name">Wigs</div><div class="hub-card-sub" id="hub-wigs-sub">Loading…</div></div>
+    <div class="hub-card" onclick="goTab('money',null)"><div class="hub-card-ic">💸</div><div class="hub-card-name">Expenses</div><div class="hub-card-sub" id="hub-expense-sub">Track spending</div></div>
+    <div class="hub-card" onclick="goTab('money',null);setTimeout(function(){showMoneySec('income',document.querySelector('#v-money .pn-btn[onclick*=income]'))},200)"><div class="hub-card-ic">💰</div><div class="hub-card-name">Income</div><div class="hub-card-sub" id="hub-income-sub">Log earnings</div></div>
   </div>
 </div>
 
@@ -1449,6 +1468,7 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     <button class="pn-btn" onclick="showSpiritSec('bible',this)">📖 Bible</button>
     <button class="pn-btn" onclick="showSpiritSec('ministry',this)">⏱️ Ministry</button>
     <button class="pn-btn" onclick="showSpiritSec('gratitude',this)">🌸 Gratitude</button>
+    <button class="pn-btn" onclick="showSpiritSec('scripture',this)">📜 Scripture</button>
     <button class="pn-btn" onclick="showSpiritSec('habits',this)">🔥 Habits</button>
     <button class="pn-btn" onclick="showSpiritSec('notes',this)">📓 Notes</button>
   </div>
@@ -1525,6 +1545,20 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
   </div>
 
   <!-- HABITS section -->
+  <!-- SCRIPTURE section -->
+  <div id="ss-scripture" style="display:none">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+      <span style="font-weight:700;font-size:14px;color:var(--textd)">📜 Scripture Cards</span>
+      <button class="btn sec" style="font-size:11px;padding:4px 10px" onclick="openNewScriptureCard()">+ New Card</button>
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:12px">
+      <button class="fchip on" onclick="setScriptureView('cards',this)">All Cards</button>
+      <button class="fchip" onclick="setScriptureView('study',this)">📖 Study Mode</button>
+    </div>
+    <div id="scriptureCardsList"></div>
+    <div id="scriptureStudyWrap" style="display:none"></div>
+  </div>
+
   <div id="ss-habits" style="display:none">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
       <span style="font-weight:700;font-size:14px;color:var(--textd)">🔥 Spiritual Habits</span>
@@ -2230,6 +2264,27 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
   </div>
 </div>
 
+<!-- SCRIPTURE CARD MODAL -->
+<div class="ov" id="scriptureCardModal"><div class="mod" style="max-height:88vh;overflow-y:auto">
+  <div class="mh"></div><div class="mtit">📜 Scripture Card</div>
+  <input type="hidden" id="scrCardId">
+  <div class="fg"><label class="fl">Question / Topic</label>
+    <textarea class="fi fi-big" id="scrQuestion" placeholder="e.g. What does the Bible say about prayer? / Why do we have hope?" style="min-height:60px"></textarea></div>
+  <div id="scrScriptureFields">
+    <div class="fg" style="margin-bottom:6px"><label class="fl">Scripture 1</label>
+      <div style="display:flex;gap:6px">
+        <input class="fi" id="scrRef0" placeholder="e.g. Phil 4:6,7" style="width:120px;flex-shrink:0">
+        <textarea class="fi" id="scrText0" placeholder="Scripture text…" style="flex:1;min-height:44px;resize:vertical"></textarea>
+      </div></div>
+  </div>
+  <button class="btn sec" style="font-size:12px;padding:5px 12px;margin-bottom:12px;width:100%" onclick="addScrField()">+ Add Another Scripture</button>
+  <div class="fg"><label class="fl">Tags (optional, comma-separated)</label>
+    <input class="fi" id="scrTags" placeholder="prayer, faith, hope…"></div>
+  <button class="ok-btn" onclick="saveScriptureCard()">Save Card ✨</button>
+  <button class="del-btn" id="scrDelBtn" style="display:none" onclick="delScriptureCard()">🗑️ Delete</button>
+  <button class="cn-btn" onclick="closeM('scriptureCardModal')">Cancel</button>
+</div></div>
+
 <!-- SEARCH OVERLAY -->
 <div class="ov" id="searchModal"><div class="mod" style="max-height:80vh;display:flex;flex-direction:column">
   <div class="mh"></div>
@@ -2704,6 +2759,12 @@ function drawBrindleport(){
   var W=320,H=160;
   canvas.width=W; canvas.height=H;
   function px(x,y,w,h,c){ctx.fillStyle=c;ctx.fillRect(x,y,w,h);}
+  // Calculate section health for unlocks
+  var helmH=calcSectionHealth('helm');
+  var consH=calcSectionHealth('conservatory');
+  var workshopH=calcSectionHealth('workshop');
+  var estateH=calcSectionHealth('estate');
+  var spiritSafe=SPIRIT_RUN?SPIRIT_RUN.safe||0:0;
 
   // Sky
   px(0,0,W,H,'#1a2a3a');
@@ -2762,26 +2823,94 @@ function drawBrindleport(){
   px(165,62,14,10,'#ffd060'); px(167,64,10,6,'#fff080');
   // === EMBER (simple figure near door) ===
   var ex=104,ey=72;
-  // hair
   px(ex+3,ey,5,1,'#b54020'); px(ex+2,ey+1,7,3,'#b54020'); px(ex+3,ey+1,3,1,'#d05028');
-  // face
   px(ex+3,ey+3,6,5,'#e8b896');
-  // eyes
   px(ex+4,ey+5,1,1,'#3a5a2a'); px(ex+7,ey+5,1,1,'#3a5a2a');
-  // mouth
   px(ex+4,ey+7,3,1,'#c07060');
-  // neck
   px(ex+4,ey+8,4,2,'#e8b896');
-  // dress body
   px(ex+2,ey+9,8,12,'#2e3535');
-  // apron
   px(ex+3,ey+10,6,10,'#e8e0cc');
-  // arms
   px(ex+1,ey+10,2,8,'#2e3535'); px(ex+9,ey+10,2,8,'#2e3535');
-  // skirt
   px(ex+1,ey+20,10,5,'#2e3535');
-  // boots
   px(ex+2,ey+25,3,3,'#5a3820'); px(ex+7,ey+25,3,3,'#5a3820');
+
+  // === UNLOCKABLE BUILDINGS ===
+  // Conservatory greenhouse (unlocks at consH >= 40) — glass building, x155-185
+  if(consH>=40){
+    px(155,80,28,28,'#2a3820'); // base
+    px(156,65,26,17,'#3a5a30'); // walls
+    // Glass panes
+    px(158,66,10,14,'#6abf6a'); px(169,66,10,14,'#6abf6a');
+    px(159,67,8,12,'#88e088'); px(170,67,8,12,'#88e088');
+    // Roof (pointed glass)
+    px(155,60,28,6,'#3a5a30'); px(161,54,16,7,'#4a7a40'); px(165,50,8,5,'#5a8a50');
+    // Door
+    px(161,90,10,18,'#1a1208'); px(162,91,8,16,'#2a1e10');
+    // Plants visible through glass
+    px(161,70,2,10,'#2a8a2a'); px(171,72,2,8,'#3a9a3a');
+    // Label 'C' marker
+    ctx.fillStyle='#88e088'; ctx.font='bold 7px sans-serif'; ctx.textAlign='center';
+    ctx.fillText('🌿',169,62); ctx.textAlign='left';
+  } else {
+    // Locked outline
+    px(155,65,28,43,'#1e1e1e'); px(156,66,26,41,'#222');
+    ctx.fillStyle='#555'; ctx.font='8px sans-serif'; ctx.textAlign='center';
+    ctx.fillText('🔒',169,90); ctx.textAlign='left';
+  }
+
+  // Workshop studio (unlocks at workshopH >= 35) — colorful stall, x190-215, in front of dock area
+  if(workshopH>=35){
+    px(186,85,22,22,'#4a2a60'); // building
+    px(186,80,22,6,'#7a40a0'); // awning
+    // Colorful bunting
+    for(var bi=0;bi<5;bi++){px(186+bi*4,80,3,2,['#e05050','#e0a030','#5050e0','#50b050','#c050c0'][bi]);}
+    // Window with rainbow
+    px(188,88,8,8,'#d0a0e8'); px(189,89,6,6,'#e8c0f8');
+    // Door
+    px(196,95,8,12,'#1a0e18');
+    // Sign
+    px(186,75,22,6,'#5a2070'); ctx.fillStyle='#e8c8f8'; ctx.font='6px sans-serif'; ctx.textAlign='center';
+    ctx.fillText('Studio',197,80); ctx.textAlign='left';
+  } else {
+    px(186,78,22,29,'#1a1a1a'); px(187,79,20,27,'#222');
+    ctx.fillStyle='#555'; ctx.font='8px sans-serif'; ctx.textAlign='center';
+    ctx.fillText('🔒',197,96); ctx.textAlign='left';
+  }
+
+  // Lighthouse beacon (unlocks when spirit run safe > 4) — tall tower, x212-226
+  if(spiritSafe>4){
+    px(215,52,12,56,'#e8e0d0'); // tower
+    px(213,102,16,6,'#c8baa0'); // base
+    // Stripe
+    px(215,65,12,8,'#d04040'); px(215,81,12,8,'#d04040');
+    // Light room
+    px(212,48,16,6,'#4a3a28');
+    // Glowing light
+    ctx.fillStyle='rgba(255,240,100,0.9)'; ctx.beginPath(); ctx.arc(221,45,7,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle='rgba(255,255,180,0.5)'; ctx.beginPath(); ctx.arc(221,45,12,0,Math.PI*2); ctx.fill();
+    // Light rays
+    ctx.strokeStyle='rgba(255,240,80,0.3)'; ctx.lineWidth=2;
+    [[221,45,200,20],[221,45,250,15],[221,45,240,35]].forEach(function(r){
+      ctx.beginPath(); ctx.moveTo(r[0],r[1]); ctx.lineTo(r[2],r[3]); ctx.stroke();
+    });
+    // Door
+    px(217,96,8,12,'#2a2010');
+  } else {
+    px(215,52,12,56,'#1e1e1e'); px(216,53,10,54,'#252525');
+    ctx.fillStyle='#555'; ctx.font='8px sans-serif'; ctx.textAlign='center';
+    ctx.fillText('🔒',221,82); ctx.textAlign='left';
+  }
+
+  // Estate bank / counting house (unlocks at estateH >= 40) — pillared building, x-5 to 20 area OR small top-left
+  if(estateH>=40){
+    // Small well-kept cottage top-left
+    px(0,70,18,38,'#3a2818'); // body
+    px(0,62,18,9,'#281e10'); // roof
+    px(3,55,12,8,'#1e1608');
+    px(4,74,6,14,'#ffd060'); px(5,75,4,12,'#ffe080'); // window (warm light)
+    px(6,85,6,23,'#1a0e06'); // door
+    px(14,82,4,6,'#ffd060'); // small window
+  }
 }
 
 function emberXpNeeded(level){ return Math.floor(50*Math.pow(level,1.5)); }
@@ -2900,10 +3029,10 @@ function renderWorld(){
   var ewSvg=document.getElementById('emberWidgetSvg');
   if(ewSvg)ewSvg.innerHTML=emberDrawSVG(50);
   var mwSvg=document.getElementById('millieWorldSvg');
-  var mmode=millieMode(); var msvg=mmode==='sleeping'?'sleepy':mmode;
-  if(mwSvg)mwSvg.innerHTML=millieDrawSVG(msvg,52);
+  if(mwSvg)mwSvg.innerHTML=millieDrawSVG(millieMode(),52);
   renderEmberSkillBars();
   renderSprintSign();
+  renderWorldUnlocks();
 }
 
 var BRAIN_DUMP = JSON.parse(localStorage.getItem('aBrainDump')||'[]');
@@ -3221,7 +3350,7 @@ function goTabDirect(tab,btn){
   if(tab==='world')renderWorld();
   if(tab==='stories')renderStoriesList();
   if(tab==='mixtape')renderMixtape();
-  if(SECTION_VIEWS[tab])renderHubPreviews(tab);
+  if(SECTION_VIEWS[tab]||tab==='emporium')renderHubPreviews(tab);
   if(tab==='today'){ startSpiritRunLoop(); } else { stopSpiritRunLoop(); }
   if(tab==='lighthouse'){ updateLighthouseSpiritStatus(); }
 }
@@ -3288,6 +3417,11 @@ function renderHubPreviews(section){
       var custIdx=Math.min(Math.floor(customers/5),custLevels.length-1);
       el.textContent=wigsCount+' wig'+(wigsCount!==1?'s':'')+' · '+custLevels[custIdx];
     }
+    renderEmporiumGoal();
+    var expSub=document.getElementById('hub-expense-sub');
+    if(expSub){var expLen=(JSON.parse(localStorage.getItem('aExpenses')||'[]')).length;expSub.textContent=expLen+' expense'+(expLen!==1?'s':'')+' logged';}
+    var incSub=document.getElementById('hub-income-sub');
+    if(incSub){var incLen=(INCOME||[]).length;incSub.textContent=incLen+' income entr'+(incLen!==1?'ies':'y');}
   }
   updateCharMoods(section);
 }
@@ -8173,6 +8307,7 @@ function saveStudyNote(){
   STUDY_NOTES.unshift({id:'sn-'+Date.now(),date:date,cat:cat,title:title,body:body,expanded:false});
   localStorage.setItem('aStudyNotes',JSON.stringify(STUDY_NOTES));
   ['snTitle','snBody'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});
+  spiritRunAdd('notes');
   renderStudyNotes();
 }
 
@@ -8638,7 +8773,7 @@ var BIBLE_BOOKS = [
 ];
 
 function showSpiritSec(sec,btn){
-  ['prayer','bible','ministry','gratitude','habits','notes'].forEach(function(s){
+  ['prayer','bible','ministry','gratitude','scripture','habits','notes'].forEach(function(s){
     var el=document.getElementById('ss-'+s);
     if(el)el.style.display=(s===sec)?'':'none';
   });
@@ -8648,6 +8783,7 @@ function showSpiritSec(sec,btn){
   if(sec==='bible'){renderBibleStats();renderBibleBooks();}
   if(sec==='ministry'){renderMinistryStats();renderMinistryLog();}
   if(sec==='gratitude')renderGratitudeLog();
+  if(sec==='scripture'){setScriptureView('cards',document.querySelector('#ss-scripture .fchip'));renderScriptureCards();}
   if(sec==='habits')renderHabits();
   if(sec==='notes'){renderStudyNotes();var snd=document.getElementById('snDate');if(snd&&!snd.value)snd.value=todayStr();}
 }
@@ -10487,6 +10623,255 @@ function endColorMix(){
 }
 
 // ═══════════════════════════════════════════════
+// SCRIPTURE FLASHCARDS 📜
+// ═══════════════════════════════════════════════
+var SCRIPTURE_CARDS = JSON.parse(localStorage.getItem('aScrCards')||'[]');
+var _scrView = 'cards';
+var _scrStudyIdx = 0;
+var _scrStudyQueue = [];
+var _scrFlipped = false;
+var _scrFieldCount = 1;
+
+function saveScrCards(){ localStorage.setItem('aScrCards', JSON.stringify(SCRIPTURE_CARDS)); }
+
+function openNewScriptureCard(editId){
+  _scrFieldCount = 1;
+  var modal = document.getElementById('scriptureCardModal');
+  document.getElementById('scrCardId').value = editId||'';
+  document.getElementById('scrQuestion').value = '';
+  document.getElementById('scrTags').value = '';
+  var del = document.getElementById('scrDelBtn');
+  // Reset scripture fields to 1
+  var fields = document.getElementById('scrScriptureFields');
+  fields.innerHTML = '<div class="fg" style="margin-bottom:6px"><label class="fl">Scripture 1</label>'
+    +'<div style="display:flex;gap:6px">'
+    +'<input class="fi" id="scrRef0" placeholder="e.g. Phil 4:6,7" style="width:120px;flex-shrink:0">'
+    +'<textarea class="fi" id="scrText0" placeholder="Scripture text…" style="flex:1;min-height:44px;resize:vertical"></textarea>'
+    +'</div></div>';
+  if(editId){
+    var c = SCRIPTURE_CARDS.find(function(x){return x.id===editId;});
+    if(c){
+      document.getElementById('scrQuestion').value = c.question||'';
+      document.getElementById('scrTags').value = (c.tags||[]).join(', ');
+      var f = fields;
+      f.innerHTML = (c.scriptures||[{ref:'',text:''}]).map(function(s,i){
+        return '<div class="fg" style="margin-bottom:6px"><label class="fl">Scripture '+(i+1)+'</label>'
+          +'<div style="display:flex;gap:6px">'
+          +'<input class="fi" id="scrRef'+i+'" value="'+escHtml(s.ref||'')+'" placeholder="e.g. Phil 4:6,7" style="width:120px;flex-shrink:0">'
+          +'<textarea class="fi" id="scrText'+i+'" style="flex:1;min-height:44px;resize:vertical">'+escHtml(s.text||'')+'</textarea>'
+          +'</div></div>';
+      }).join('');
+      _scrFieldCount = (c.scriptures||[]).length||1;
+    }
+    if(del) del.style.display='';
+  } else {
+    if(del) del.style.display='none';
+  }
+  openM('scriptureCardModal');
+}
+
+function addScrField(){
+  var i = _scrFieldCount;
+  var fields = document.getElementById('scrScriptureFields');
+  var div = document.createElement('div');
+  div.className='fg'; div.style.marginBottom='6px';
+  div.innerHTML='<label class="fl">Scripture '+(i+1)+'</label>'
+    +'<div style="display:flex;gap:6px">'
+    +'<input class="fi" id="scrRef'+i+'" placeholder="e.g. Rom 8:38,39" style="width:120px;flex-shrink:0">'
+    +'<textarea class="fi" id="scrText'+i+'" placeholder="Scripture text…" style="flex:1;min-height:44px;resize:vertical"></textarea>'
+    +'</div>';
+  fields.appendChild(div);
+  _scrFieldCount++;
+}
+
+function saveScriptureCard(){
+  var question = (document.getElementById('scrQuestion').value||'').trim();
+  if(!question) return alert('Enter a question or topic');
+  var scriptures = [];
+  for(var i=0; i<_scrFieldCount; i++){
+    var ref = (document.getElementById('scrRef'+i)||{}).value||'';
+    var text = (document.getElementById('scrText'+i)||{}).value||'';
+    if(ref||text) scriptures.push({ref:ref.trim(), text:text.trim()});
+  }
+  if(!scriptures.length) return alert('Add at least one scripture');
+  var tags = (document.getElementById('scrTags').value||'').split(',').map(function(t){return t.trim();}).filter(Boolean);
+  var editId = document.getElementById('scrCardId').value;
+  if(editId){
+    var idx = SCRIPTURE_CARDS.findIndex(function(c){return c.id===editId;});
+    if(idx>=0) SCRIPTURE_CARDS[idx] = Object.assign(SCRIPTURE_CARDS[idx], {question:question, scriptures:scriptures, tags:tags});
+  } else {
+    SCRIPTURE_CARDS.unshift({id:'sc-'+Date.now(), question:question, scriptures:scriptures, tags:tags, created:todayStr(), score:0, lastStudied:''});
+    spiritRunAdd('scripture');
+  }
+  saveScrCards();
+  closeM('scriptureCardModal');
+  renderScriptureCards();
+}
+
+function delScriptureCard(){
+  var id = document.getElementById('scrCardId').value;
+  SCRIPTURE_CARDS = SCRIPTURE_CARDS.filter(function(c){return c.id!==id;});
+  saveScrCards();
+  closeM('scriptureCardModal');
+  renderScriptureCards();
+}
+
+function setScriptureView(v, btn){
+  _scrView = v;
+  document.querySelectorAll('#ss-scripture .fchip').forEach(function(b){b.classList.remove('on');});
+  if(btn) btn.classList.add('on');
+  var cardsList = document.getElementById('scriptureCardsList');
+  var studyWrap = document.getElementById('scriptureStudyWrap');
+  if(v==='study'){
+    if(cardsList) cardsList.style.display='none';
+    if(studyWrap){ studyWrap.style.display=''; startScriptureStudy(); }
+  } else {
+    if(cardsList) cardsList.style.display='';
+    if(studyWrap) studyWrap.style.display='none';
+    renderScriptureCards();
+  }
+}
+
+function renderScriptureCards(){
+  var el = document.getElementById('scriptureCardsList');
+  if(!el) return;
+  if(!SCRIPTURE_CARDS.length){
+    el.innerHTML='<div class="empty"><div class="emj">📜</div><p>No scripture cards yet.<br><small>Tap "+ New Card" to add your first verse!</small></p></div>'; return;
+  }
+  el.innerHTML = SCRIPTURE_CARDS.map(function(c){
+    return '<div class="card" style="margin-bottom:10px;cursor:pointer" onclick="openNewScriptureCard(\''+c.id+'\')">'
+      +'<div style="font-size:13px;font-weight:700;color:var(--textd);margin-bottom:8px">'+escHtml(c.question)+'</div>'
+      +(c.scriptures||[]).map(function(s){
+        return '<div style="background:var(--bg2);border-radius:8px;padding:7px 10px;margin-bottom:5px">'
+          +(s.ref?'<div style="font-size:11px;font-weight:700;color:var(--lav);margin-bottom:3px">'+escHtml(s.ref)+'</div>':'')
+          +(s.text?'<div style="font-size:12px;color:var(--textd);font-style:italic">'+escHtml(s.text)+'</div>':'')
+          +'</div>';
+      }).join('')
+      +(c.tags&&c.tags.length?'<div style="margin-top:6px">'+c.tags.map(function(t){return'<span style="font-size:10px;background:var(--lav-faint,#e8e4f4);color:var(--lav);padding:2px 6px;border-radius:10px;margin-right:4px">'+escHtml(t)+'</span>';}).join('')+'</div>':'')
+      +'<div style="font-size:10px;color:var(--textl);margin-top:6px;text-align:right">'+c.created+' · ⭐ '+c.score+' studied</div>'
+      +'</div>';
+  }).join('');
+}
+
+function startScriptureStudy(){
+  var wrap = document.getElementById('scriptureStudyWrap');
+  if(!wrap) return;
+  if(!SCRIPTURE_CARDS.length){
+    wrap.innerHTML='<div class="empty"><div class="emj">📜</div><p>No cards to study yet. Add some first!</p></div>'; return;
+  }
+  // Shuffle cards, prioritize lower score
+  _scrStudyQueue = SCRIPTURE_CARDS.slice().sort(function(a,b){return (a.score||0)-(b.score||0);});
+  _scrStudyIdx = 0;
+  _scrFlipped = false;
+  renderScriptureStudyCard();
+}
+
+function renderScriptureStudyCard(){
+  var wrap = document.getElementById('scriptureStudyWrap');
+  if(!wrap) return;
+  if(!_scrStudyQueue.length){ wrap.innerHTML='<p style="text-align:center;color:var(--textl);padding:20px">No cards to study.</p>'; return; }
+  if(_scrStudyIdx >= _scrStudyQueue.length){
+    wrap.innerHTML='<div style="text-align:center;padding:30px">'
+      +'<div style="font-size:40px;margin-bottom:12px">🎉</div>'
+      +'<div style="font-size:16px;font-weight:700;color:var(--textd)">Session complete!</div>'
+      +'<p style="color:var(--textl);font-size:13px">You studied '+_scrStudyQueue.length+' card'+((_scrStudyQueue.length!==1)?'s':'')+'.</p>'
+      +'<button class="btn" onclick="startScriptureStudy()">Study Again</button>'
+      +'</div>'; return;
+  }
+  var card = _scrStudyQueue[_scrStudyIdx];
+  var prog = Math.round((_scrStudyIdx/_scrStudyQueue.length)*100);
+  wrap.innerHTML = '<div style="margin-bottom:8px">'
+    +'<div style="height:5px;background:var(--bg2);border-radius:3px;overflow:hidden"><div style="height:100%;background:var(--lav);width:'+prog+'%;transition:width .4s ease"></div></div>'
+    +'<div style="font-size:10px;color:var(--textl);margin-top:4px;text-align:right">'+_scrStudyIdx+' / '+_scrStudyQueue.length+'</div>'
+    +'</div>'
+    +'<div style="background:linear-gradient(135deg,#f0eaf8,#e8e0f4);border-radius:14px;padding:18px;min-height:120px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.08)" onclick="flipStudyCard()">'
+    +'<div style="font-size:14px;font-weight:700;color:var(--textd);margin-bottom:12px">'+escHtml(card.question)+'</div>'
+    +(_scrFlipped
+      ? (card.scriptures||[]).map(function(s){
+          return '<div style="background:rgba(255,255,255,.7);border-radius:8px;padding:8px 10px;margin-bottom:6px">'
+            +(s.ref?'<div style="font-size:11px;font-weight:700;color:var(--lav)">'+escHtml(s.ref)+'</div>':'')
+            +(s.text?'<div style="font-size:12px;color:var(--textd);font-style:italic;margin-top:3px">'+escHtml(s.text)+'</div>':'')
+            +'</div>';
+        }).join('')
+      : '<div style="text-align:center;color:var(--textl);font-size:13px;padding:20px 0">Tap to reveal scripture'+(card.scriptures&&card.scriptures.length>1?'s':'')+'…</div>'
+    )+'</div>'
+    +(_scrFlipped
+      ? '<div style="display:flex;gap:8px;margin-top:10px">'
+        +'<button class="btn" style="flex:1;background:linear-gradient(135deg,#e8f5e2,#d0ead0);color:#2a6a2a" onclick="scrStudyNext(true)">✓ Got it!</button>'
+        +'<button class="btn sec" style="flex:1" onclick="scrStudyNext(false)">↩ Practice more</button>'
+        +'</div>'
+      : ''
+    );
+}
+
+function flipStudyCard(){
+  _scrFlipped = !_scrFlipped;
+  renderScriptureStudyCard();
+}
+
+function scrStudyNext(knew){
+  var card = _scrStudyQueue[_scrStudyIdx];
+  if(knew){ card.score=(card.score||0)+1; card.lastStudied=todayStr(); spiritRunAdd('scripture'); }
+  else { _scrStudyQueue.push(_scrStudyQueue.splice(_scrStudyIdx,1)[0]); } // Move to end
+  saveScrCards();
+  _scrStudyIdx++;
+  _scrFlipped=false;
+  renderScriptureStudyCard();
+}
+
+// ═══════════════════════════════════════════════
+// BRINDLEPORT WORLD UNLOCKS
+// ═══════════════════════════════════════════════
+function renderWorldUnlocks(){
+  var el = document.getElementById('worldUnlocks');
+  if(!el) return;
+  var sections = [
+    {label:'🌿 Conservatory', health:calcSectionHealth('conservatory'), threshold:40, building:'Greenhouse'},
+    {label:'🔨 Workshop', health:calcSectionHealth('workshop'), threshold:35, building:'Studio'},
+    {label:'✨ Spiritual', health:Math.min(100,Math.round((SPIRIT_RUN&&SPIRIT_RUN.safe||0)/15*100)), threshold:27, building:'Lighthouse'},
+    {label:'🏛️ Estate', health:calcSectionHealth('estate'), threshold:40, building:'Counting House'},
+  ];
+  el.innerHTML = '<div style="font-size:11px;font-weight:700;color:var(--textl);letter-spacing:.5px;text-transform:uppercase;margin-bottom:6px">🏙️ Brindleport Unlocks</div>'
+    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">'
+    +sections.map(function(s){
+      var unlocked = s.health>=s.threshold;
+      var pct = Math.min(100, Math.round(s.health/s.threshold*100));
+      return '<div style="background:'+(unlocked?'var(--sage-faint,#e8f5e2)':'var(--bg2)')+';border-radius:9px;padding:7px 9px">'
+        +'<div style="font-size:11px;font-weight:700;color:var(--textd);margin-bottom:4px">'+s.label+'</div>'
+        +'<div style="font-size:10px;color:var(--textl);margin-bottom:4px">'+(unlocked?'✅ '+s.building+' unlocked':'🔒 '+s.building+' ('+pct+'%)')+'</div>'
+        +'<div style="height:4px;background:#e0ddd8;border-radius:2px"><div style="height:100%;border-radius:2px;background:'+(unlocked?'var(--sage)':'var(--lav)')+';width:'+Math.min(100,pct)+'%"></div></div>'
+        +'</div>';
+    }).join('')
+    +'</div>';
+}
+
+// ═══════════════════════════════════════════════
+// EMPORIUM MONTHLY INCOME GOAL
+// ═══════════════════════════════════════════════
+function renderEmporiumGoal(){
+  var goal = parseFloat(localStorage.getItem('aIncGoal')||'0');
+  var mon = new Date().toISOString().slice(0,7);
+  var thisMonth = (INCOME||[]).filter(function(i){return (i.created||i.date||'').slice(0,7)===mon;}).reduce(function(s,i){return s+(i.amt||0);},0);
+  var fill = document.getElementById('emporiumGoalFill');
+  var amt = document.getElementById('emporiumGoalAmt');
+  var target = document.getElementById('emporiumGoalTarget');
+  if(fill) fill.style.width = goal>0 ? Math.min(100,Math.round(thisMonth/goal*100))+'%' : '0%';
+  if(fill) fill.style.background = goal>0&&thisMonth>=goal ? 'linear-gradient(90deg,#3aaa3a,#2a8a2a)' : 'linear-gradient(90deg,var(--sage),var(--teal))';
+  if(amt) amt.textContent = '$'+thisMonth.toFixed(0)+' this month';
+  if(target) target.textContent = goal>0 ? 'Goal: $'+goal.toFixed(0)+(thisMonth>=goal?' ✅':'') : 'No goal set';
+}
+
+function setIncGoal(){
+  var current = localStorage.getItem('aIncGoal')||'';
+  var val = prompt('Monthly income goal ($):', current);
+  if(val===null) return;
+  var n = parseFloat(val)||0;
+  localStorage.setItem('aIncGoal', n.toString());
+  renderEmporiumGoal();
+  showToast('Income goal set to $'+n.toFixed(0)+' 💰');
+}
+
+// ═══════════════════════════════════════════════
 // SPIRITUAL RUNNER 🌿
 // ═══════════════════════════════════════════════
 var SPIRIT_RUN = JSON.parse(localStorage.getItem('aSpiritRun')||'{"safe":8,"totalPts":0,"lastTick":0}');
@@ -10856,12 +11241,13 @@ function startApp(){
   renderTodayMeds();
   renderHelmMilestone();
   renderConservatoryMilestone();
-  ['helm','conservatory','hearthside','workshop','estate'].forEach(function(s){
+  ['helm','conservatory','hearthside','workshop','estate','emporium'].forEach(function(s){
     renderHubPreviews(s);
   });
   startSpiritRunLoop();
   renderHelmDumpPreview();
   updateLighthouseSpiritStatus();
+  renderEmporiumGoal();
 }
 
 // Wait for Firebase then start
@@ -11182,6 +11568,7 @@ setInterval(updDate, 60000);
     <div id="emberSkillBars"></div>
     <button class="add-btn" onclick="openEmber()" style="margin-top:6px">⚙️ Manage Skills & Habits →</button>
   </div>
+  <div id="worldUnlocks" style="margin-top:10px"></div>
   <!-- Task Sprint streak sign (updates via renderSprintSign) -->
   <div id="sprintSign" style="margin-top:12px"></div>
   <button onclick="openFishing()" style="width:100%;margin-top:10px;padding:12px;border-radius:12px;border:none;background:linear-gradient(135deg,#0a2a4e,#1a3a5e);color:#88ddff;font-family:'Quicksand',sans-serif;font-size:14px;font-weight:700;cursor:pointer;letter-spacing:.3px">🎣 Go Fishing at the Dock</button>
