@@ -11603,6 +11603,421 @@ setTimeout(function(){
 }, 5000);
 
 setInterval(updDate, 60000);
+
+// ══════════════════════════════════════════════
+// EMBER'S INN RUSH — Overcooked-style mini game
+// ══════════════════════════════════════════════
+var INN_RECIPES = [
+  {name:'Stew',emoji:'🍲',ingredients:['veg','meat','herb'],time:28},
+  {name:'Salad',emoji:'🥗',ingredients:['veg','veg','fruit'],time:18},
+  {name:'Sandwich',emoji:'🥪',ingredients:['bread','meat','veg'],time:20},
+  {name:'Soup',emoji:'🍜',ingredients:['veg','veg','grain'],time:22},
+  {name:'Pie',emoji:'🥧',ingredients:['bread','meat','herb'],time:30},
+  {name:'Roast',emoji:'🍖',ingredients:['meat','meat','herb'],time:32},
+  {name:'Omelette',emoji:'🍳',ingredients:['egg','egg','veg'],time:20},
+  {name:'Fish Supper',emoji:'🐟',ingredients:['fish','bread','veg'],time:24},
+  {name:'Platter',emoji:'🧆',ingredients:['meat','veg','dairy'],time:26},
+  {name:'Porridge',emoji:'🥣',ingredients:['grain','grain','dairy'],time:16}
+];
+var INN_STATIONS = [
+  {id:'veg',emoji:'🥦',label:'Veg'},
+  {id:'meat',emoji:'🥩',label:'Meat'},
+  {id:'bread',emoji:'🍞',label:'Bread'},
+  {id:'dairy',emoji:'🧀',label:'Dairy'},
+  {id:'egg',emoji:'🥚',label:'Egg'},
+  {id:'herb',emoji:'🌿',label:'Herb'},
+  {id:'fish',emoji:'🐟',label:'Fish'},
+  {id:'fruit',emoji:'🍎',label:'Fruit'},
+  {id:'grain',emoji:'🌾',label:'Grain'}
+];
+var _inn = {active:false,orders:[],tray:[],hearts:3,score:0,combo:0,level:1,spawnTimer:0,spawnInterval:10,tick:0,interval:null,hs:parseInt(localStorage.getItem('aInnRushHS')||'0')};
+
+function openInnRush(){
+  showOv('innRushOv');
+  var b=document.getElementById('innRushBody');
+  if(!b)return;
+  b.innerHTML='<div style="text-align:center;padding:20px 10px"><div style="font-size:48px;margin-bottom:8px">🍽️</div>'
+    +'<div style="font-family:\'Playfair Display\',serif;font-size:22px;color:#7c3d12;margin-bottom:6px">Ember\'s Inn Rush</div>'
+    +'<div style="font-size:13px;color:#8b6a50;margin-bottom:16px;line-height:1.5">Orders come in fast — grab ingredients from<br>the stations and serve them before time runs out!</div>'
+    +'<div style="background:#fff8f0;border-radius:10px;padding:10px 14px;margin-bottom:16px;font-size:12px;color:#7c3d12;text-align:left">'
+    +'<b>How to play:</b><br>① Tap ingredient stations to fill your tray<br>② Tap <b>Serve</b> on a matching order<br>③ Don\'t let orders expire — you\'ll lose a ❤️<br>④ Tap <b>Clear</b> to empty your tray</div>'
+    +'<div style="font-size:13px;color:#8b6a50;margin-bottom:14px">🏆 Best: '+_inn.hs+' pts</div>'
+    +'<button onclick="startInnRush()" style="background:linear-gradient(135deg,#c05e2a,#e07840);color:#fff;border:none;border-radius:12px;padding:13px 32px;font-size:15px;font-weight:700;cursor:pointer;font-family:\'Quicksand\',sans-serif">Start Cooking! 🔥</button></div>';
+}
+
+function startInnRush(){
+  _inn.active=true; _inn.orders=[]; _inn.tray=[]; _inn.hearts=3; _inn.score=0; _inn.combo=0; _inn.level=1; _inn.spawnTimer=0; _inn.spawnInterval=10; _inn.tick=0;
+  if(_inn.interval)clearInterval(_inn.interval);
+  innSpawnOrder(); innSpawnOrder();
+  _inn.interval=setInterval(innTick,1000);
+  renderInnRush();
+}
+
+function innSpawnOrder(){
+  if(_inn.orders.length>=3)return;
+  var r=INN_RECIPES[Math.floor(Math.random()*INN_RECIPES.length)];
+  var timeLimit=Math.max(12,r.time - (_inn.level-1)*2);
+  _inn.orders.push({id:Date.now()+Math.random(),recipe:r,timeLeft:timeLimit,maxTime:timeLimit});
+}
+
+function innTick(){
+  if(!_inn.active)return;
+  _inn.tick++;
+  _inn.spawnTimer++;
+  if(_inn.spawnTimer>=_inn.spawnInterval){
+    _inn.spawnTimer=0;
+    innSpawnOrder();
+    _inn.spawnInterval=Math.max(6,10-Math.floor(_inn.tick/30));
+  }
+  if(_inn.tick%60===0&&_inn.tick>0) _inn.level=Math.min(5,_inn.level+1);
+  var expired=false;
+  _inn.orders=_inn.orders.filter(function(o){
+    o.timeLeft--;
+    if(o.timeLeft<=0){_inn.hearts--;_inn.combo=0;expired=true;return false;}
+    return true;
+  });
+  if(_inn.hearts<=0){innGameOver();return;}
+  if(expired)showToast('Order expired! ❌');
+  renderInnRush();
+}
+
+function innGrabIngredient(stId){
+  if(!_inn.active)return;
+  if(_inn.tray.length>=4){showToast('Tray full! Serve or clear first.');return;}
+  _inn.tray.push(stId);
+  renderInnRush();
+}
+
+function innClearTray(){_inn.tray=[];renderInnRush();}
+
+function canInnServe(order){
+  var needed=order.recipe.ingredients.slice();
+  var have=_inn.tray.slice();
+  for(var i=0;i<needed.length;i++){
+    var idx=have.indexOf(needed[i]);
+    if(idx===-1)return false;
+    have.splice(idx,1);
+  }
+  return true;
+}
+
+function innServe(orderId){
+  if(!_inn.active)return;
+  var order=_inn.orders.find(function(o){return o.id===orderId;});
+  if(!order){return;}
+  if(!canInnServe(order)){showToast('Wrong ingredients! Check the recipe.');return;}
+  var speedBonus=Math.floor((order.timeLeft/order.maxTime)*10);
+  var pts=10+speedBonus+(_inn.combo*2);
+  _inn.score+=pts; _inn.combo++;
+  _inn.orders=_inn.orders.filter(function(o){return o.id!==orderId;});
+  _inn.tray=[];
+  showToast(order.recipe.emoji+' Served! +'+pts+' pts'+(  _inn.combo>1?' ('+_inn.combo+'x combo!)':''));
+  if(_inn.score>_inn.hs){_inn.hs=_inn.score;localStorage.setItem('aInnRushHS',_inn.hs);}
+  renderInnRush();
+}
+
+function innGameOver(){
+  _inn.active=false;
+  if(_inn.interval)clearInterval(_inn.interval);
+  if(_inn.score>_inn.hs){_inn.hs=_inn.score;localStorage.setItem('aInnRushHS',_inn.hs);}
+  var b=document.getElementById('innRushBody');
+  if(!b)return;
+  b.innerHTML='<div style="text-align:center;padding:24px 10px">'
+    +'<div style="font-size:56px;margin-bottom:6px">😮</div>'
+    +'<div style="font-family:\'Playfair Display\',serif;font-size:22px;color:#7c3d12;margin-bottom:8px">Kitchen Closed!</div>'
+    +'<div style="font-size:28px;font-weight:700;color:#c05e2a;margin-bottom:4px">'+_inn.score+' pts</div>'
+    +'<div style="font-size:13px;color:#8b6a50;margin-bottom:16px">Level '+_inn.level+' reached &bull; 🏆 Best: '+_inn.hs+' pts</div>'
+    +'<button onclick="startInnRush()" style="background:linear-gradient(135deg,#c05e2a,#e07840);color:#fff;border:none;border-radius:12px;padding:12px 28px;font-size:14px;font-weight:700;cursor:pointer;margin-right:8px;font-family:\'Quicksand\',sans-serif">Try Again 🔥</button>'
+    +'<button onclick="closeOv(\'innRushOv\')" style="background:#f0e0d0;color:#7c3d12;border:none;border-radius:12px;padding:12px 20px;font-size:14px;font-weight:700;cursor:pointer;font-family:\'Quicksand\',sans-serif">Close</button></div>';
+}
+
+function renderInnRush(){
+  var b=document.getElementById('innRushBody');
+  if(!b||!_inn.active)return;
+  var heartsHtml=Array(_inn.hearts).fill('❤️').join('')+Array(3-_inn.hearts).fill('🖤').join('');
+  var html='<div style="padding:10px 12px 4px">';
+  // Header
+  html+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">'
+    +'<div style="font-size:15px">'+heartsHtml+'</div>'
+    +'<div style="font-weight:700;color:#c05e2a;font-size:15px">'+_inn.score+' pts</div>'
+    +'<div style="font-size:12px;color:#8b6a50">Lv '+_inn.level+(_inn.combo>1?' &bull; '+_inn.combo+'x🔥':''  )+'</div></div>';
+  // Orders
+  html+='<div style="font-size:11px;font-weight:700;color:#7c3d12;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">📋 Orders ('+_inn.orders.length+'/3)</div>';
+  if(_inn.orders.length===0){
+    html+='<div style="text-align:center;padding:10px;font-size:12px;color:#a08060;background:#fff8f0;border-radius:8px;margin-bottom:8px">New orders coming...</div>';
+  } else {
+    _inn.orders.forEach(function(o){
+      var pct=Math.round((o.timeLeft/o.maxTime)*100);
+      var barColor=pct>50?'#5cb85c':pct>25?'#f0a020':'#d94040';
+      var urgentStyle=pct<25?'border:2px solid #d94040;':'border:2px solid #e8d0b8;';
+      var canServe=canInnServe(o);
+      html+='<div style="background:#fff8f0;border-radius:10px;padding:9px 10px;margin-bottom:8px;'+urgentStyle+'">'
+        +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">'
+        +'<div style="font-size:14px">'+o.recipe.emoji+' <b style="color:#7c3d12">'+o.recipe.name+'</b></div>'
+        +'<div style="font-size:12px;color:#8b6a50">'+o.timeLeft+'s</div></div>'
+        +'<div style="background:#e8d0b8;border-radius:4px;height:5px;margin-bottom:6px">'
+        +'<div style="width:'+pct+'%;height:100%;border-radius:4px;background:'+barColor+';transition:width .4s"></div></div>'
+        +'<div style="font-size:11px;color:#8b6a50;margin-bottom:6px">'
+        +o.recipe.ingredients.map(function(ing){
+          var st=INN_STATIONS.find(function(s){return s.id===ing;});
+          return st?st.emoji+' '+st.label:'?';
+        }).join(' + ')+'</div>'
+        +'<button onclick="innServe('+o.id+')" style="width:100%;padding:6px;border-radius:8px;border:none;font-size:13px;font-weight:700;cursor:pointer;font-family:\'Quicksand\',sans-serif;'
+        +(canServe?'background:linear-gradient(135deg,#4a9a4a,#5cb85c);color:#fff;':'background:#e0c8b0;color:#a08060;')+'">Serve '+o.recipe.emoji+'</button></div>';
+    });
+  }
+  // Tray
+  html+='<div style="background:#fff3e6;border-radius:10px;padding:8px 10px;margin-bottom:10px;border:2px solid #e8c090">'
+    +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">'
+    +'<div style="font-size:11px;font-weight:700;color:#7c3d12;text-transform:uppercase;letter-spacing:.5px">🛁 Your Tray</div>'
+    +'<button onclick="innClearTray()" style="padding:3px 10px;border-radius:6px;border:none;background:#e8c090;color:#7c3d12;font-size:11px;font-weight:700;cursor:pointer">Clear ✕</button></div>'
+    +'<div style="min-height:32px;font-size:20px;letter-spacing:4px">'
+    +(_inn.tray.length===0?'<span style="font-size:12px;color:#a08060">Tap stations below to add ingredients</span>'
+      :_inn.tray.map(function(sid){var st=INN_STATIONS.find(function(s){return s.id===sid;});return st?st.emoji:'?';}).join(' '))
+    +'</div></div>';
+  // Stations
+  html+='<div style="font-size:11px;font-weight:700;color:#7c3d12;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">🏪 Stations</div>'
+    +'<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px">';
+  INN_STATIONS.forEach(function(st){
+    html+='<button onclick="innGrabIngredient(\''+st.id+'\')" style="padding:10px 4px;border-radius:10px;border:2px solid #e8d0b8;background:#fff8f0;cursor:pointer;text-align:center;transition:transform .1s;font-family:\'Quicksand\',sans-serif" onmousedown="this.style.transform=\'scale(.93)\'" onmouseup="this.style.transform=\'scale(1)\'" ontouchstart="this.style.transform=\'scale(.93)\'" ontouchend="this.style.transform=\'scale(1)\'">'
+      +'<div style="font-size:24px">'+st.emoji+'</div>'
+      +'<div style="font-size:10px;color:#7c3d12;font-weight:700">'+st.label+'</div></button>';
+  });
+  html+='</div></div>';
+  b.innerHTML=html;
+}
+
+// ══════════════════════════════════════════════
+// REID RUNNER — Brindleport endless runner
+// ══════════════════════════════════════════════
+var _reid = {active:false,raf:null,hs:parseInt(localStorage.getItem('aReidRunHS')||'0')};
+
+function openReidRunner(){
+  showOv('reidRunnerOv');
+  var b=document.getElementById('reidRunnerBody');
+  if(!b)return;
+  b.innerHTML='<div style="text-align:center;padding:20px 10px">'
+    +'<div style="font-size:48px;margin-bottom:8px">⚓</div>'
+    +'<div style="font-family:\'Playfair Display\',serif;font-size:22px;color:#0a2a4e;margin-bottom:6px">Reid Runner</div>'
+    +'<div style="font-size:13px;color:#3a5a80;margin-bottom:16px;line-height:1.5">Captain Reid races along the Brindleport docks!<br>Jump over obstacles to keep running.</div>'
+    +'<div style="background:#eef4fc;border-radius:10px;padding:10px 14px;margin-bottom:16px;font-size:12px;color:#0a2a4e;text-align:left">'
+    +'<b>Controls:</b> Tap canvas &bull; Space bar &bull; Touch screen<br><b>Miss 3 obstacles</b> = Man Overboard!</div>'
+    +'<div style="font-size:13px;color:#3a5a80;margin-bottom:14px">🏆 Best: '+_reid.hs+' pts</div>'
+    +'<button onclick="startReidRunner()" style="background:linear-gradient(135deg,#0a2a4e,#1a4a7e);color:#fff;border:none;border-radius:12px;padding:13px 32px;font-size:15px;font-weight:700;cursor:pointer;font-family:\'Quicksand\',sans-serif">Set Sail! ⛵</button></div>';
+}
+
+function startReidRunner(){
+  if(_reid.raf)cancelAnimationFrame(_reid.raf);
+  var b=document.getElementById('reidRunnerBody');
+  if(!b)return;
+  b.innerHTML='<canvas id="reidCanvas" style="width:100%;border-radius:12px;display:block;cursor:pointer;touch-action:none"></canvas>'
+    +'<div style="display:flex;justify-content:space-between;padding:8px 12px 2px;font-size:12px;color:#3a5a80">'
+    +'<span>Tap / Space to jump</span><span id="reidHsDisplay">Best: '+_reid.hs+'</span></div>';
+  var cv=document.getElementById('reidCanvas');
+  if(!cv)return;
+  var W=cv.parentElement.clientWidth||340;
+  cv.width=W; cv.height=200;
+  var ctx=cv.getContext('2d');
+  var GND=155, GRAVITY=0.55, JUMP_V=-11;
+  var state={
+    reid:{x:60,y:GND,vy:0,onGnd:true,lives:3,invuln:0},
+    obs:[],score:0,speed:3.2,frame:0,spawnT:0,spawnIn:70,
+    coins:[],gameOver:false,started:false,bgX:0,bgX2:W
+  };
+
+  function doJump(){
+    if(!state.started)state.started=true;
+    if(state.reid.onGnd){state.reid.vy=JUMP_V;state.reid.onGnd=false;}
+  }
+  cv.addEventListener('click',doJump);
+  cv.addEventListener('touchstart',function(e){e.preventDefault();doJump();},{passive:false});
+  document.addEventListener('keydown',function reidKey(e){
+    if(e.code==='Space'&&document.getElementById('reidCanvas')){doJump();}
+    else if(!document.getElementById('reidCanvas')){document.removeEventListener('keydown',reidKey);}
+  });
+
+  var OBS_TYPES=[
+    {w:18,h:30,color:'#8B4513',label:'barrel'},
+    {w:24,h:22,color:'#5a3a1a',label:'crate'},
+    {w:12,h:40,color:'#2a4a6a',label:'post'}
+  ];
+
+  function spawnObs(){
+    var t=OBS_TYPES[Math.floor(Math.random()*OBS_TYPES.length)];
+    state.obs.push({x:W+10,y:GND+28-t.h,w:t.w,h:t.h,color:t.color,label:t.label});
+  }
+  function spawnCoin(){
+    state.coins.push({x:W+10,y:GND-40-Math.random()*30,r:7,collected:false});
+  }
+
+  function drawBg(){
+    // Sky gradient
+    var sky=ctx.createLinearGradient(0,0,0,GND+28);
+    sky.addColorStop(0,'#b8d4f0'); sky.addColorStop(1,'#dceeff');
+    ctx.fillStyle=sky; ctx.fillRect(0,0,W,GND+28);
+    // Water below ground
+    ctx.fillStyle='#1a3a5e'; ctx.fillRect(0,GND+28,W,cv.height-GND-28);
+    // Scrolling buildings in bg
+    drawBuildings(state.bgX); drawBuildings(state.bgX2);
+    state.bgX-=state.speed*0.3; state.bgX2-=state.speed*0.3;
+    if(state.bgX<-W)state.bgX=state.bgX2+W;
+    if(state.bgX2<-W)state.bgX2=state.bgX+W;
+    // Ground / dock planks
+    ctx.fillStyle='#6b3a1a'; ctx.fillRect(0,GND+28,W,14);
+    ctx.strokeStyle='#8B4513'; ctx.lineWidth=2;
+    for(var px=0;px<W;px+=30){ctx.beginPath();ctx.moveTo(px,GND+28);ctx.lineTo(px,GND+42);ctx.stroke();}
+    // Water shimmer
+    ctx.fillStyle='rgba(100,180,255,0.2)';
+    for(var wx=0;wx<W;wx+=50){ctx.fillRect(wx,GND+44,30,4);}
+  }
+
+  function drawBuildings(ox){
+    var bldgs=[
+      {x:20,w:40,h:60,color:'#2a4a6a'},{x:70,w:30,h:80,color:'#1a3a5e'},
+      {x:110,w:50,h:50,color:'#3a5a7a'},{x:170,w:25,h:70,color:'#2a4070'},
+      {x:205,w:45,h:55,color:'#1e3860'},{x:260,w:35,h:75,color:'#2a4a6a'},
+      {x:305,w:20,h:45,color:'#3a5a7a'},{x:335,w:55,h:65,color:'#1a3a5e'}
+    ];
+    bldgs.forEach(function(bd){
+      ctx.fillStyle=bd.color;
+      ctx.fillRect(ox+bd.x,GND+28-bd.h,bd.w,bd.h);
+      // Window dots
+      ctx.fillStyle='rgba(255,230,100,0.5)';
+      for(var wy=GND+28-bd.h+8;wy<GND+24;wy+=14){
+        for(var wxi=ox+bd.x+6;wxi<ox+bd.x+bd.w-4;wxi+=12){
+          ctx.fillRect(wxi,wy,5,5);
+        }
+      }
+    });
+  }
+
+  function drawReid(r){
+    var x=r.x, y=r.y;
+    // Flash when invulnerable
+    if(r.invuln>0&&Math.floor(r.invuln/4)%2===0)return;
+    // Legs (running animation)
+    ctx.fillStyle='#1a3a6a';
+    var legSwing=r.onGnd?Math.sin(state.frame*0.3)*6:0;
+    ctx.fillRect(x+6,y+26,7,14+legSwing); ctx.fillRect(x+16,y+26,7,14-legSwing);
+    // Boots
+    ctx.fillStyle='#3a200a';
+    ctx.fillRect(x+4,y+38+legSwing,10,6); ctx.fillRect(x+14,y+38-legSwing,10,6);
+    // Body (blue jacket)
+    ctx.fillStyle='#1e4a8a';
+    ctx.beginPath(); ctx.roundRect(x+4,y+14,22,16,3); ctx.fill();
+    // Belt
+    ctx.fillStyle='#8B6914'; ctx.fillRect(x+4,y+26,22,3);
+    // Head
+    ctx.fillStyle='#f4c99a';
+    ctx.beginPath(); ctx.arc(x+15,y+8,9,0,Math.PI*2); ctx.fill();
+    // Captain hat
+    ctx.fillStyle='#0a1a3a';
+    ctx.fillRect(x+6,y+1,18,5);
+    ctx.fillRect(x+8,y-4,14,7);
+    // Hat brim stripe
+    ctx.fillStyle='#c8a820'; ctx.fillRect(x+6,y+1,18,2);
+    // Eyes
+    ctx.fillStyle='#2a1800';
+    ctx.fillRect(x+11,y+7,2,2); ctx.fillRect(x+17,y+7,2,2);
+    // Arms
+    ctx.fillStyle='#1e4a8a';
+    ctx.fillRect(x,y+15,6,10); ctx.fillRect(x+24,y+15,6,10);
+  }
+
+  function checkCollision(r){
+    if(r.invuln>0)return;
+    var rbox={x:r.x+4,y:r.y,w:26,h:44};
+    state.obs.forEach(function(o){
+      if(o.hit)return;
+      if(rbox.x<o.x+o.w&&rbox.x+rbox.w>o.x&&rbox.y<o.y+o.h&&rbox.y+rbox.h>o.y){
+        o.hit=true; r.lives--; r.invuln=60; r.vy=JUMP_V*0.6;
+        if(r.lives<=0)state.gameOver=true;
+        else showToast('Oof! '+(r.lives)+' lives left');
+      }
+    });
+    state.coins.forEach(function(c){
+      if(c.collected)return;
+      var dx=r.x+15-c.x, dy=r.y+22-c.y;
+      if(Math.sqrt(dx*dx+dy*dy)<18){c.collected=true;state.score+=5;}
+    });
+  }
+
+  function loop(){
+    if(!document.getElementById('reidCanvas')){cancelAnimationFrame(_reid.raf);return;}
+    ctx.clearRect(0,0,W,cv.height);
+    drawBg();
+    if(!state.started){
+      ctx.fillStyle='rgba(0,0,0,0.3)';ctx.fillRect(0,0,W,cv.height);
+      ctx.fillStyle='#fff';ctx.font='bold 16px Quicksand,sans-serif';ctx.textAlign='center';
+      ctx.fillText('Tap to Start!',W/2,cv.height/2);
+      drawReid(state.reid);
+      _reid.raf=requestAnimationFrame(loop);return;
+    }
+    state.frame++;
+    state.speed=3.2+state.frame*0.0012;
+    // Physics
+    var r=state.reid;
+    r.vy+=GRAVITY; r.y+=r.vy;
+    if(r.y>=GND){r.y=GND;r.vy=0;r.onGnd=true;}
+    if(r.invuln>0)r.invuln--;
+    // Spawn obstacles
+    state.spawnT++;
+    if(state.spawnT>=state.spawnIn){
+      state.spawnT=0; spawnObs();
+      state.spawnIn=Math.max(38,70-Math.floor(state.frame/80)*3);
+      if(Math.random()<0.4)spawnCoin();
+    }
+    // Move obstacles
+    state.obs=state.obs.filter(function(o){o.x-=state.speed;return o.x>-40;});
+    state.coins=state.coins.filter(function(c){c.x-=state.speed;return c.x>-20;});
+    // Draw obstacles
+    state.obs.forEach(function(o){
+      ctx.fillStyle=o.color; ctx.fillRect(o.x,o.y,o.w,o.h);
+      if(o.label==='barrel'){
+        ctx.strokeStyle='#4a2a0a';ctx.lineWidth=2;
+        ctx.beginPath();ctx.ellipse(o.x+o.w/2,o.y+6,o.w/2-1,4,0,0,Math.PI*2);ctx.stroke();
+        ctx.beginPath();ctx.ellipse(o.x+o.w/2,o.y+o.h-6,o.w/2-1,4,0,0,Math.PI*2);ctx.stroke();
+      }
+    });
+    // Draw coins
+    state.coins.forEach(function(c){
+      if(c.collected)return;
+      ctx.fillStyle='#f0c030';ctx.beginPath();ctx.arc(c.x,c.y,c.r,0,Math.PI*2);ctx.fill();
+      ctx.fillStyle='#c8a010';ctx.font='bold 8px sans-serif';ctx.textAlign='center';
+      ctx.fillText('$',c.x,c.y+3);
+    });
+    checkCollision(r);
+    drawReid(r);
+    state.score+=0.03;
+    var scoreDisplay=Math.floor(state.score);
+    // HUD
+    ctx.fillStyle='rgba(0,0,0,0.4)';ctx.beginPath();ctx.roundRect(8,8,90,22,6);ctx.fill();
+    ctx.fillStyle='#fff';ctx.font='bold 13px Quicksand,sans-serif';ctx.textAlign='left';
+    ctx.fillText('Score: '+scoreDisplay,14,24);
+    ctx.fillStyle='rgba(0,0,0,0.4)';ctx.beginPath();ctx.roundRect(W-62,8,54,22,6);ctx.fill();
+    ctx.fillStyle='#ff6060';ctx.textAlign='right';
+    ctx.fillText(Array(r.lives).fill('❤').join('')+Array(3-r.lives).fill('🖤').join(''),W-10,24);
+    if(state.gameOver){
+      if(scoreDisplay>_reid.hs){_reid.hs=scoreDisplay;localStorage.setItem('aReidRunHS',_reid.hs);}
+      ctx.fillStyle='rgba(0,0,30,0.75)';ctx.fillRect(0,0,W,cv.height);
+      ctx.fillStyle='#88ddff';ctx.font='bold 22px "Playfair Display",serif';ctx.textAlign='center';
+      ctx.fillText('Man Overboard!',W/2,70);
+      ctx.fillStyle='#fff';ctx.font='bold 17px Quicksand,sans-serif';
+      ctx.fillText('Score: '+scoreDisplay,W/2,100);
+      ctx.fillStyle='#f0c030';ctx.font='13px Quicksand,sans-serif';
+      ctx.fillText('Best: '+_reid.hs+' pts',W/2,122);
+      ctx.fillStyle='rgba(255,255,255,0.9)';ctx.font='bold 14px Quicksand,sans-serif';
+      ctx.fillText('Tap to play again',W/2,154);
+      ctx.textAlign='left';
+      cv.onclick=function(){cv.onclick=null;startReidRunner();};
+      cv.ontouchstart=function(e){e.preventDefault();cv.ontouchstart=null;startReidRunner();};
+      _reid.raf=requestAnimationFrame(loop);return;
+    }
+    _reid.raf=requestAnimationFrame(loop);
+  }
+  _reid.active=true;
+  _reid.raf=requestAnimationFrame(loop);
+}
 </script>
 <!-- INCOME MODAL -->
 <div class="ov" id="incModal"><div class="mod">
@@ -11910,6 +12325,10 @@ setInterval(updDate, 60000);
   <!-- Task Sprint streak sign (updates via renderSprintSign) -->
   <div id="sprintSign" style="margin-top:12px"></div>
   <button onclick="openFishing()" style="width:100%;margin-top:10px;padding:12px;border-radius:12px;border:none;background:linear-gradient(135deg,#0a2a4e,#1a3a5e);color:#88ddff;font-family:'Quicksand',sans-serif;font-size:14px;font-weight:700;cursor:pointer;letter-spacing:.3px">🎣 Go Fishing at the Dock</button>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px">
+    <button onclick="openInnRush()" style="padding:12px 6px;border-radius:12px;border:none;background:linear-gradient(135deg,#7c3d12,#c05e2a);color:#fff;font-family:'Quicksand',sans-serif;font-size:13px;font-weight:700;cursor:pointer;letter-spacing:.2px">🍽️ Ember's Inn Rush</button>
+    <button onclick="openReidRunner()" style="padding:12px 6px;border-radius:12px;border:none;background:linear-gradient(135deg,#0a2a4e,#1e4a8a);color:#88ddff;font-family:'Quicksand',sans-serif;font-size:13px;font-weight:700;cursor:pointer;letter-spacing:.2px">⚓ Reid Runner</button>
+  </div>
 </div>
 
 <!-- COLOR MIX MODAL -->
@@ -11957,6 +12376,28 @@ setInterval(updDate, 60000);
   <div class="mod" onclick="event.stopPropagation()" style="max-width:360px;background:linear-gradient(135deg,#f0f4f8,#e8f0f8);max-height:90vh;overflow-y:auto">
     <div class="mh"><span class="mt">⚡ Deadline Dash</span><button class="mc" onclick="closeOv('deadlineDashOv')">✕</button></div>
     <div id="deadlineDashBody" style="padding:0 2px 8px"></div>
+  </div>
+</div>
+
+<!-- INN RUSH MODAL -->
+<div class="ov" id="innRushOv" onclick="if(event.target===this){if(_inn.interval)clearInterval(_inn.interval);_inn.active=false;closeOv('innRushOv')}">
+  <div class="mod" onclick="event.stopPropagation()" style="max-width:360px;background:linear-gradient(135deg,#fff8f0,#fdf0e0);max-height:92vh;overflow-y:auto;padding-bottom:10px">
+    <div class="mh" style="border-bottom-color:#e8c090">
+      <span class="mt" style="color:#7c3d12">🍽️ Ember's Inn Rush</span>
+      <button class="mc" onclick="if(_inn.interval)clearInterval(_inn.interval);_inn.active=false;closeOv('innRushOv')" style="color:#a08060">✕</button>
+    </div>
+    <div id="innRushBody" style="padding:0 4px 4px"></div>
+  </div>
+</div>
+
+<!-- REID RUNNER MODAL -->
+<div class="ov" id="reidRunnerOv" onclick="if(event.target===this){if(_reid.raf)cancelAnimationFrame(_reid.raf);_reid.active=false;closeOv('reidRunnerOv')}">
+  <div class="mod" onclick="event.stopPropagation()" style="max-width:400px;background:linear-gradient(135deg,#0a1a2e,#0e2a44);border:1px solid rgba(100,180,255,0.15);max-height:92vh;overflow-y:auto;padding-bottom:12px">
+    <div class="mh" style="border-bottom-color:rgba(100,180,255,0.15)">
+      <span class="mt" style="color:#88ddff">⚓ Reid Runner</span>
+      <button class="mc" onclick="if(_reid.raf)cancelAnimationFrame(_reid.raf);_reid.active=false;closeOv('reidRunnerOv')" style="color:rgba(255,255,255,0.4)">✕</button>
+    </div>
+    <div id="reidRunnerBody" style="padding:0 4px 4px"></div>
   </div>
 </div>
 
