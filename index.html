@@ -682,6 +682,62 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
 .millie-game-label{font-size:12px;font-weight:700;color:var(--textl);margin-bottom:6px}
 .millie-game-score{font-size:13px;font-weight:700;color:var(--rose);margin-top:6px;min-height:18px}
 .millie-game-btn{padding:8px 20px;border-radius:10px;border:none;background:var(--sage);color:white;font-family:'Quicksand',sans-serif;font-size:12px;font-weight:700;cursor:pointer;margin-top:6px}
+/* ── CAL TUTORIAL + BADGE BOARD ─────────────────────── */
+.cal-modal-bg{display:none;position:fixed;inset:0;background:rgba(61,53,48,.5);z-index:600;align-items:flex-end;backdrop-filter:blur(2px)}
+.cal-modal-bg.show{display:flex}
+.cal-modal{background:linear-gradient(150deg,#f8f4ff 0%,#f0ecf8 100%);border-radius:24px 24px 0 0;padding:0 0 40px;width:100%;max-height:92vh;overflow-y:auto;animation:calSlideUp .35s cubic-bezier(.34,1.12,.64,1)}
+@keyframes calSlideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.cal-header{padding:20px 22px 14px;display:flex;align-items:center;gap:14px;border-bottom:1px solid rgba(169,159,201,.2)}
+.cal-char-wrap{flex-shrink:0;position:relative}
+.cal-speech-bubble{background:white;border-radius:14px 14px 14px 4px;padding:12px 14px;font-size:13px;color:#3d3530;line-height:1.6;flex:1;box-shadow:0 2px 8px rgba(0,0,0,.08);position:relative}
+.cal-speech-bubble::before{content:'';position:absolute;bottom:-8px;left:12px;border:8px solid transparent;border-top-color:white;border-bottom:0;margin-left:-8px;margin-bottom:0}
+.cal-progress-wrap{padding:14px 22px 0}
+.cal-prog-track{height:8px;background:rgba(169,159,201,.2);border-radius:4px;overflow:hidden;margin-bottom:6px}
+.cal-prog-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,#a99fc9,#8aafc9);transition:width .5s cubic-bezier(.34,1.12,.64,1)}
+.cal-prog-labels{display:flex;justify-content:space-between;font-size:10px;color:#a99fc9;font-weight:700}
+.cal-body{padding:18px 22px}
+.cal-step-title{font-family:'Playfair Display',serif;font-size:20px;color:#3d3530;margin:0 0 8px}
+.cal-step-desc{font-size:13px;color:#7a6e68;line-height:1.65;margin:0 0 16px}
+.cal-task-box{background:white;border-radius:14px;padding:14px 16px;margin-bottom:16px;border:2px solid transparent;transition:border-color .3s}
+.cal-task-box.complete{border-color:#8faa8b;background:#f4faf2}
+.cal-task-label{font-size:12px;font-weight:700;color:#a99fc9;text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px}
+.cal-task-text{font-size:13px;color:#3d3530;line-height:1.5;margin-bottom:10px}
+.cal-detect-status{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;margin-top:4px}
+.cal-detect-status.done{color:#5a8a5a}
+.cal-detect-status.pending{color:#a99fc9}
+.cal-btn-row{display:flex;gap:10px;flex-wrap:wrap}
+.cal-btn-primary{flex:1;padding:13px 16px;border-radius:13px;border:none;background:linear-gradient(135deg,#a99fc9,#8aafc9);color:white;font-family:'Quicksand',sans-serif;font-size:14px;font-weight:700;cursor:pointer;box-shadow:0 4px 12px rgba(169,159,201,.4);transition:transform .15s}
+.cal-btn-primary:active{transform:scale(.97)}
+.cal-btn-sec{padding:13px 16px;border-radius:13px;border:2px solid #ede8e3;background:white;color:#7a6e68;font-family:'Quicksand',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:border-color .2s}
+.cal-btn-sec:hover{border-color:#a99fc9}
+.cal-badge-preview{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.cal-mini-badge{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.badge-board-bg{display:none;position:fixed;inset:0;background:rgba(20,12,6,.6);z-index:600;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(3px)}
+.badge-board-bg.show{display:flex}
+.badge-board{background:#8B5E3C;border-radius:20px;width:100%;max-width:440px;max-height:90vh;overflow-y:auto;padding:0 0 20px;box-shadow:0 20px 60px rgba(0,0,0,.5);border:3px solid #6B4423;position:relative}
+.badge-board-header{background:linear-gradient(135deg,#6B4423,#8B5E3C);padding:18px 20px 14px;border-radius:17px 17px 0 0;display:flex;align-items:center;justify-content:space-between}
+.badge-board-title{font-family:'Playfair Display',serif;font-size:19px;color:#fde8b8;text-shadow:0 1px 3px rgba(0,0,0,.4)}
+.badge-board-close{background:rgba(0,0,0,.2);border:none;color:#fde8b8;width:32px;height:32px;border-radius:50%;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.badge-cork{background:#c8a46a;padding:16px;min-height:200px;background-image:radial-gradient(circle at 20% 30%,rgba(255,255,255,.06) 0%,transparent 40%),radial-gradient(circle at 80% 70%,rgba(0,0,0,.06) 0%,transparent 40%)}
+.badge-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.badge-item{display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;transition:transform .2s}
+.badge-item:active{transform:scale(.93)}
+.badge-circle{width:72px;height:72px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:28px;position:relative;box-shadow:0 4px 12px rgba(0,0,0,.3),inset 0 1px 0 rgba(255,255,255,.2)}
+.badge-circle.earned{animation:badgePop .4s cubic-bezier(.34,1.3,.64,1) both}
+@keyframes badgePop{from{transform:scale(0);opacity:0}to{transform:scale(1);opacity:1}}
+.badge-circle.locked{filter:grayscale(1) brightness(.6);cursor:default}
+.badge-pin{position:absolute;top:-4px;right:-4px;width:14px;height:14px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#e8c8a0,#c8a020);box-shadow:0 2px 4px rgba(0,0,0,.4)}
+.badge-label{font-size:10px;font-weight:700;color:#4a2e10;text-align:center;max-width:72px;line-height:1.3;text-shadow:0 1px 0 rgba(255,255,255,.4)}
+.badge-label.locked-lbl{color:#7a6050;opacity:.7}
+.badge-lock-icon{position:absolute;bottom:-2px;right:-2px;font-size:14px;filter:drop-shadow(0 1px 2px rgba(0,0,0,.4))}
+.badge-divider{border:none;border-top:2px dashed rgba(101,70,40,.3);margin:14px 0}
+.badge-master{grid-column:span 3;display:flex;flex-direction:column;align-items:center;gap:6px}
+.badge-master .badge-circle{width:88px;height:88px;font-size:36px}
+.badge-date{font-size:9px;color:#7a6050;margin-top:2px;font-style:italic}
+.badge-streak-banner{background:rgba(101,70,40,.25);border-radius:10px;padding:8px 12px;margin:0 0 14px;text-align:center;font-size:12px;font-weight:700;color:#4a2e10}
+.badge-earned-flash{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:white;border-radius:20px;padding:24px 28px;text-align:center;z-index:800;box-shadow:0 20px 60px rgba(0,0,0,.3);animation:badgeFlash .5s ease;pointer-events:none}
+@keyframes badgeFlash{0%{transform:translate(-50%,-50%) scale(.5);opacity:0}60%{transform:translate(-50%,-50%) scale(1.1)}100%{transform:translate(-50%,-50%) scale(1);opacity:1}}
+.cal-archives-badges-row{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;min-height:28px}
 </style>
 </head>
 <body>
@@ -883,11 +939,13 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     <div class="hub-card span2" onclick="openTutorial()" style="background:linear-gradient(135deg,#f0eaff,#e8e0f8);border-color:#c4b0e8">
       <div style="display:flex;align-items:center;gap:12px">
         <div id="archivesCalSvg" style="flex-shrink:0"></div>
-        <div>
+        <div style="flex:1">
           <div class="hub-card-ic" style="margin-bottom:2px">🎓</div>
           <div class="hub-card-name">App Tour with Cal</div>
-          <div class="hub-card-sub" id="tutorialBadgeLine">Meet Cal and learn the app — earn a badge!</div>
+          <div class="hub-card-sub" id="tutorialBadgeLine">Meet Cal and earn badges for each section!</div>
+          <div class="cal-archives-badges-row" id="calArchivesBadgeRow"></div>
         </div>
+        <button onclick="event.stopPropagation();openBadgeBoard()" style="background:rgba(169,159,201,.2);border:1.5px solid rgba(169,159,201,.4);border-radius:10px;padding:6px 10px;font-size:11px;font-weight:700;color:#6a5a90;cursor:pointer;flex-shrink:0;font-family:'Quicksand',sans-serif">🏅 Badges</button>
       </div>
     </div>
     <div class="hub-card" onclick="goTab('guide',null)"><div class="hub-card-ic">📖</div><div class="hub-card-name">Guide</div><div class="hub-card-sub">App help &amp; tips</div></div>
@@ -2436,10 +2494,25 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
 </div></div>
 
 <!-- CAL TUTORIAL MODAL -->
-<div class="ov" id="tutorialModal"><div class="mod" style="max-height:88vh;overflow-y:auto;background:linear-gradient(135deg,#f8f4ff,#f0ecf8)">
-  <div class="mh" style="border-bottom-color:#d8ccf0"></div>
-  <div id="tutorialBody" style="padding-bottom:8px"></div>
-</div></div>
+<div class="cal-modal-bg" id="calModal" onclick="if(event.target===this)closeCalModal()">
+  <div class="cal-modal" onclick="event.stopPropagation()">
+    <div style="width:40px;height:4px;background:rgba(169,159,201,.3);border-radius:2px;margin:14px auto 0"></div>
+    <div id="calModalInner"></div>
+  </div>
+</div>
+
+<!-- BADGE BOARD -->
+<div class="badge-board-bg" id="badgeBoardBg" onclick="if(event.target===this)closeBadgeBoard()">
+  <div class="badge-board" onclick="event.stopPropagation()">
+    <div class="badge-board-header">
+      <span class="badge-board-title">🏅 Badge Board</span>
+      <button class="badge-board-close" onclick="closeBadgeBoard()">✕</button>
+    </div>
+    <div class="badge-cork">
+      <div id="badgeBoardGrid"></div>
+    </div>
+  </div>
+</div>
 
 <!-- SCRIPTURE CARD MODAL -->
 <div class="ov" id="scriptureCardModal"><div class="mod" style="max-height:88vh;overflow-y:auto">
@@ -11113,10 +11186,64 @@ function foodDbAddToLog(name, cal, pro, carb, fat){
 }
 
 // ═══════════════════════════════════════════════
-// CAL TUTORIAL 🎓
+// CAL TUTORIAL + BADGE SYSTEM 🎓
 // ═══════════════════════════════════════════════
-var TUTORIAL = JSON.parse(localStorage.getItem('aTutorial')||'{"step":0,"completed":false}');
-function saveTutorial(){ localStorage.setItem('aTutorial',JSON.stringify(TUTORIAL)); }
+var TUTORIAL = JSON.parse(localStorage.getItem('aTutorial2')||localStorage.getItem('aTutorial')||'{"step":0,"completed":false,"sectionsDone":{}}');
+function saveTutorial(){ localStorage.setItem('aTutorial2', JSON.stringify(TUTORIAL)); }
+
+var BADGES = JSON.parse(localStorage.getItem('aBadges')||'{}');
+function saveBadges(){ localStorage.setItem('aBadges', JSON.stringify(BADGES)); }
+
+var BADGE_DEFS = [
+  {id:'today',label:'First Light',emoji:'☀️',color:'linear-gradient(135deg,#f5d06a,#e09030)',section:'Today',task:'Set 3 daily intentions or log your first water',detect:function(){ return (Object.keys(INTENTIONS||{}).length>0)||(getW()>0); }},
+  {id:'helm',label:'First Mate',emoji:'⚓',color:'linear-gradient(135deg,#5a8abf,#2a5a90)',section:'The Helm',task:'Add 3 tasks and start 1 project',detect:function(){ return (TASKS||[]).length>=3&&(PROJECTS||[]).length>=1; }},
+  {id:'conservatory',label:'Green Thumb',emoji:'🌿',color:'linear-gradient(135deg,#7ab87a,#4a8a4a)',section:'Conservatory',task:'Set 2 goals and complete 1 full routine',detect:function(){
+    var goalsDone=(GOALS||[]).length>=2;
+    var rtnDone=RTN_GROUPS.some(function(g){
+      if(!rtnIsDueToday(g))return false;
+      var items=RTNS[g.id]||[];
+      if(!items.length)return false;
+      var cs=rtnCompState(g,todayStr());
+      return items.every(function(_,i){return !!cs[i];});
+    });
+    return goalsDone&&rtnDone;
+  }},
+  {id:'hearthside',label:"Ember's Kin",emoji:'🏡',color:'linear-gradient(135deg,#e07840,#b04820)',section:'Hearthside',task:"Log a meal, log sleep, and add 3 foods to Ember's pantry",detect:function(){
+    var hasMeal=(FL[getTK()]||[]).length>0||MEAL_LOG_ITEMS.length>0;
+    var hasSleep=(MILLIE.sleepLog||[]).length>0;
+    var hasPantry=FOOD_DB.length>=3;
+    return hasMeal&&hasSleep&&hasPantry;
+  }},
+  {id:'workshop',label:'Artisan',emoji:'🎨',color:'linear-gradient(135deg,#b07ad0,#8050b0)',section:'Workshop',task:'Add 1 vision board item, 1 favorite, and 1 song',detect:function(){ return (VB_ITEMS||[]).length>=1&&(FAVES||[]).length>=1&&(MIXTAPE||[]).length>=1; }},
+  {id:'lighthouse',label:'Beacon',emoji:'✨',color:'linear-gradient(135deg,#f5e87a,#d4a820)',section:'Lighthouse',task:'Add a prayer, log 1 hour of ministry, write 1 gratitude entry',detect:function(){
+    var hasPrayer=(PRAYERS||[]).length>=1;
+    var hasMin=(MINISTRY_LOG||[]).some(function(m){return parseFloat(m.hours||0)>=1;});
+    var hasGrat=(GRAT_LOG||[]).length>=1;
+    return hasPrayer&&hasMin&&hasGrat;
+  }},
+  {id:'estate',label:'Bookkeeper',emoji:'🏛️',color:'linear-gradient(135deg,#7a7a9a,#4a4a6a)',section:'The Estate',task:'Log 5 expenses and add all your bills',detect:function(){ return (EXPENSES||[]).length>=5&&(BILLS||[]).length>=1; }},
+  {id:'emporium',label:'Merchant',emoji:'🏪',color:'linear-gradient(135deg,#d4a040,#a07020)',section:'Emporium',task:'Add a wig order and log your first income entry',detect:function(){ return (WIGS||[]).length>=1&&(INCOME||[]).length>=1; }},
+  {id:'world',label:'Brindleport Resident',emoji:'🌊',color:'linear-gradient(135deg,#5ab8d0,#2a7090)',section:'World',task:'Visit Brindleport, play one mini-game, and check on Millie',detect:function(){ return !!(BADGES['world_visited']); },manualOk:true},
+  {id:'pioneer',label:'Pioneer',emoji:'🏅',color:'linear-gradient(135deg,#e8b840,#c89020)',section:'All Sections',task:'Complete all 9 section badges',detect:function(){
+    return ['today','helm','conservatory','hearthside','workshop','lighthouse','estate','emporium','world'].every(function(id){return !!BADGES[id];});
+  },isMaster:true}
+];
+
+var TUTORIAL_STEPS = [
+  {id:'intro',title:'Welcome to Brindleport! 🌊',speech:"Hi Adri! I'm Cal — your guide to this whole universe. I'll walk you through each section of the app, one at a time. You'll earn a badge for each section you actually set up. Ready to start?",section:null,badge:null,actionLabel:"Let's go! 🗺️",skipLabel:'Skip intro'},
+  {id:'today',title:'☀️ Today — Your Daily Anchor',speech:"The Today tab is your morning launchpad. Set your intentions, track water, check your routines, and see what's urgent. Let's get it set up!",section:'today',badge:'today',actionLabel:'Go to Today →',actionFn:function(){goTabDirect('today',null);},task:'Set 3 intentions (Focus Tools) or log your first glass of water — then come back here.'},
+  {id:'helm',title:'⚓ The Helm — Command Center',speech:"Reid keeps you on course here. Tasks, projects, brain dump — this is where you load the cargo. Add a few tasks and kick off your first project!",section:'helm',badge:'helm',actionLabel:'Go to The Helm →',actionFn:function(){goTabDirect('helm',null);},task:'Add at least 3 tasks and create 1 project. Then come back!'},
+  {id:'conservatory',title:'🌿 The Conservatory — Growth Space',speech:"Tessa tends to this calm corner. Goals, routines, learning, focus. The greenhouse unlocks when this section is thriving — let's give it life!",section:'conservatory',badge:'conservatory',actionLabel:'Go to Conservatory →',actionFn:function(){goTabDirect('conservatory',null);},task:'Set 2 goals (any horizon) and complete at least 1 full routine today.'},
+  {id:'hearthside',title:'🏡 Hearthside — Hearth & Home',speech:"Ember keeps the hearth warm. Log your meals, stock her pantry with your go-to foods, and record a sleep session. A warm hearth feeds everyone!",section:'hearthside',badge:'hearthside',actionLabel:'Go to Hearthside →',actionFn:function(){goTabDirect('hearthside',null);},task:"Log a meal, record sleep for Millie, and add 3+ foods to Ember's Pantry."},
+  {id:'workshop',title:'🔨 The Workshop — Creative Studio',speech:"Clara and Astrid's creative space! Add something to your vision board, save a favorite link, and drop a song on your mixtape. Make it yours!",section:'workshop',badge:'workshop',actionLabel:'Go to Workshop →',actionFn:function(){goTabDirect('workshop',null);},task:'Add 1 vision board item, 1 favorite, and 1 song to your mixtape.'},
+  {id:'lighthouse',title:'✨ Lighthouse — Spiritual Life',speech:"This one matters most to you, Adri. Log a prayer, record ministry time, and write what you're grateful for. The Jungle on Today tracks your daily light.",section:'lighthouse',badge:'lighthouse',actionLabel:'Go to Lighthouse →',actionFn:function(){goTabDirect('lighthouse',null);},task:'Add 1 prayer, log at least 1 hour of ministry, and write 1 gratitude entry.'},
+  {id:'estate',title:'🏛️ The Estate — The Books',speech:"Elias runs a tight ship! Log your recurring bills, enter some expenses, and Budget Blitz unlocks when you've logged 50. Better late than overdrawn!",section:'estate',badge:'estate',actionLabel:'Go to The Estate →',actionFn:function(){goTabDirect('estate',null);},task:'Add your bills and log at least 5 expenses.'},
+  {id:'emporium',title:'🏪 The Emporium — Your Business',speech:"WWOW lives here! Add your active wig orders, set a monthly income goal, and log your first earnings. The Emporium thrives when the orders are flowing.",section:'emporium',badge:'emporium',actionLabel:'Go to Emporium →',actionFn:function(){goTabDirect('emporium',null);},task:'Add 1 wig order and log 1 income entry.'},
+  {id:'world',title:'🌊 Brindleport Bay — Your World',speech:"Now for the fun part! Visit Brindleport and watch it grow as each section gets healthier. Play a mini-game, check on Millie, and go fishing. This world is yours, Adri.",section:'world',badge:'world',actionLabel:'Go to Brindleport →',actionFn:function(){goTabDirect('world',null);BADGES['world_visited']=true;saveBadges();},task:'Visit Brindleport Bay and play at least one mini-game. Then tap "Mark Complete" below.',manualOk:true},
+  {id:'complete',title:'🏅 Pioneer Badge Unlocked!',speech:"You did it, Adri! Every section of Brindleport is alive. You've earned the Pioneer Badge — it's on your badge board in the Archives. This world is yours now.",section:null,badge:'pioneer',actionLabel:'Claim my badge! 🏅',actionFn:function(){earnBadge('pioneer');celebrate();}}
+];
+
+var _calStep = TUTORIAL.step || 0;
 
 function calDrawSVG(sz){
   sz=sz||54;var h=Math.round(sz*1.3);
@@ -11169,62 +11296,175 @@ var TUTORIAL_STEPS = [
   {title:'🏅 You did it!',text:'You\'ve earned the Pioneer Badge! The app is yours to explore. Come back to Cal anytime for a refresher. Brindleport is waiting!',btn:'Finish & Claim Badge 🏅',action:'completeTutorial()'}
 ];
 
+function earnBadge(id){
+  if(BADGES[id])return;
+  BADGES[id]=new Date().toISOString().slice(0,10);
+  saveBadges();
+  var def=BADGE_DEFS.find(function(b){return b.id===id;});
+  if(!def)return;
+  var flash=document.createElement('div');
+  flash.className='badge-earned-flash';
+  flash.innerHTML='<div style="font-size:52px;margin-bottom:8px">'+def.emoji+'</div>'
+    +'<div style="font-family:\'Playfair Display\',serif;font-size:20px;color:#3d3530;margin-bottom:4px">'+def.label+'</div>'
+    +'<div style="font-size:12px;color:#7a6e68">Badge earned! 🎉</div>';
+  document.body.appendChild(flash);
+  setTimeout(function(){if(flash.parentNode)flash.parentNode.removeChild(flash);},2200);
+  renderCalInArchives();
+  renderBadgeBoard();
+}
+
+function checkPioneerBadge(){
+  var allDone=['today','helm','conservatory','hearthside','workshop','lighthouse','estate','emporium','world'].every(function(id){return !!BADGES[id];});
+  if(allDone&&!BADGES['pioneer']){earnBadge('pioneer');celebrate&&celebrate();}
+}
+
 function openTutorial(){
-  renderTutorialStep();
-  openM('tutorialModal');
+  _calStep=TUTORIAL.step||0;
+  renderCalModal();
+  var el=document.getElementById('calModal');
+  if(el)el.classList.add('show');
 }
 
-function renderTutorialStep(){
-  var body=document.getElementById('tutorialBody');
-  if(!body)return;
-  var step=Math.min(TUTORIAL.step||0, TUTORIAL_STEPS.length-1);
-  var s=TUTORIAL_STEPS[step];
-  var prog=Math.round((step/(TUTORIAL_STEPS.length-1))*100);
-  body.innerHTML='<div style="text-align:center;margin-bottom:16px">'+calDrawSVG(64)+'</div>'
-    +'<div style="height:5px;background:#e0d8f0;border-radius:3px;overflow:hidden;margin-bottom:16px">'
-    +'<div style="height:100%;border-radius:3px;background:linear-gradient(90deg,var(--lav),#8a6abf);width:'+prog+'%;transition:width .4s ease"></div></div>'
-    +'<div style="font-size:11px;color:var(--textl);text-align:center;margin-bottom:4px">Step '+(step+1)+' of '+TUTORIAL_STEPS.length+'</div>'
-    +'<h3 style="text-align:center;color:var(--textd);margin:0 0 12px;font-size:17px">'+s.title+'</h3>'
-    +'<p style="color:var(--textd);font-size:13px;line-height:1.6;text-align:center;margin:0 0 20px">'+s.text+'</p>'
-    +(TUTORIAL.completed&&step===TUTORIAL_STEPS.length-1
-      ? '<div style="text-align:center;font-size:28px;margin-bottom:12px">🏅</div>'
-        +'<div style="text-align:center;font-weight:700;color:var(--lav);font-size:14px;margin-bottom:16px">Pioneer Badge Earned!</div>'
-        +'<button class="ok-btn" onclick="closeM(\'tutorialModal\')">Close</button>'
-      : '<button class="ok-btn" style="width:100%"'+(s.action?'onclick="tutorialAction(\''+step+'\')"':' onclick="tutorialNext()"')+'>'+s.btn+'</button>'
-        +(step>0&&!TUTORIAL.completed?'<button class="cn-btn" onclick="tutorialNext()">Skip step →</button>':'')
-        +'<button class="cn-btn" onclick="closeM(\'tutorialModal\')" style="color:var(--textl);font-size:12px">Continue later</button>'
-    );
+function closeCalModal(){
+  var el=document.getElementById('calModal');
+  if(el)el.classList.remove('show');
 }
 
-function tutorialAction(step){
-  tutorialNext();
-  var s=TUTORIAL_STEPS[parseInt(step)];
-  if(s&&s.action&&s.action!=='completeTutorial()'){
-    try{ eval(s.action); }catch(e){}
+function renderCalModal(){
+  var el=document.getElementById('calModalInner');
+  if(!el)return;
+  var step=TUTORIAL_STEPS[_calStep];
+  if(!step){_calStep=0;step=TUTORIAL_STEPS[0];}
+  var total=TUTORIAL_STEPS.length;
+  var pct=Math.round((_calStep/(total-1))*100);
+  var def=step.badge?BADGE_DEFS.find(function(b){return b.id===step.badge;}):null;
+  var alreadyEarned=def&&!!BADGES[def.id];
+  var detectedDone=def&&def.detect&&def.detect();
+  var earnedIds=Object.keys(BADGES).filter(function(k){return k!=='world_visited';});
+  var badgePreviewHTML=earnedIds.length
+    ?'<div class="cal-badge-preview">'+earnedIds.slice(-5).map(function(id){
+        var d=BADGE_DEFS.find(function(b){return b.id===id;});
+        return d?'<div class="cal-mini-badge" style="background:'+d.color+';box-shadow:0 2px 6px rgba(0,0,0,.2)">'+d.emoji+'</div>':'';
+      }).join('')+(earnedIds.length>5?'<div style="font-size:11px;color:#a99fc9;align-self:center">+'+(earnedIds.length-5)+' more</div>':'')+'</div>':'';
+  var html='<div class="cal-header">'
+    +'<div class="cal-char-wrap">'+calDrawSVG(52)+'</div>'
+    +'<div class="cal-speech-bubble">'+escHtml(step.speech)+'</div>'
+    +'</div>'
+    +'<div class="cal-progress-wrap">'
+    +'<div class="cal-prog-track"><div class="cal-prog-fill" style="width:'+pct+'%"></div></div>'
+    +'<div class="cal-prog-labels"><span>Start</span><span>Step '+(_calStep+1)+' / '+total+'</span><span>Pioneer Badge</span></div>'
+    +'</div>'
+    +'<div class="cal-body">'+badgePreviewHTML
+    +'<div class="cal-step-title">'+escHtml(step.title)+'</div>';
+  if(step.task){
+    html+='<div class="cal-task-box'+(alreadyEarned||detectedDone?' complete':'')+'">'
+      +'<div class="cal-task-label">📋 Your Task'+(alreadyEarned?' — Done! ✅':'')+'</div>'
+      +'<div class="cal-task-text">'+escHtml(step.task)+'</div>';
+    if(def){
+      if(alreadyEarned)html+='<div class="cal-detect-status done">✅ Badge earned! You\'re good to continue.</div>';
+      else if(detectedDone)html+='<div class="cal-detect-status done">✅ Cal detected this is done! Tap Continue to claim your badge.</div>';
+      else html+='<div class="cal-detect-status pending">⏳ Not detected yet — complete the task, then come back here.</div>';
+    }
+    html+='</div>';
   }
+  html+='<div class="cal-btn-row">';
+  if(_calStep>0&&_calStep<TUTORIAL_STEPS.length-1)html+='<button class="cal-btn-sec" onclick="calSkipStep()">Skip for now</button>';
+  if(step.actionFn||step.actionLabel){
+    if(alreadyEarned||detectedDone||!step.task){
+      html+='<button class="cal-btn-primary" onclick="calAdvance()">Continue →</button>';
+    } else {
+      html+='<button class="cal-btn-primary" onclick="calGoToSection()">'+escHtml(step.actionLabel)+'</button>';
+      if(step.manualOk)html+='</div><div class="cal-btn-row" style="margin-top:8px"><button class="cal-btn-sec" style="flex:1" onclick="calManualComplete()">✓ Mark Complete</button>';
+    }
+  }
+  html+='</div></div>';
+  el.innerHTML=html;
 }
 
-function tutorialNext(){
-  TUTORIAL.step=Math.min((TUTORIAL.step||0)+1, TUTORIAL_STEPS.length-1);
+function calGoToSection(){var step=TUTORIAL_STEPS[_calStep];if(step&&step.actionFn)step.actionFn();closeCalModal();}
+
+function calAdvance(){
+  var step=TUTORIAL_STEPS[_calStep];
+  if(step&&step.badge){var def=BADGE_DEFS.find(function(b){return b.id===step.badge;});if(def&&def.detect&&def.detect()&&!BADGES[def.id])earnBadge(def.id);}
+  checkPioneerBadge();
+  _calStep=Math.min(_calStep+1,TUTORIAL_STEPS.length-1);
+  TUTORIAL.step=_calStep;
+  if(_calStep===TUTORIAL_STEPS.length-1)TUTORIAL.completed=true;
   saveTutorial();
-  renderTutorialStep();
+  renderCalModal();
 }
 
-function completeTutorial(){
-  TUTORIAL.completed=true;
-  TUTORIAL.step=TUTORIAL_STEPS.length-1;
-  saveTutorial();
-  renderTutorialStep();
-  celebrate();
-  var bl=document.getElementById('tutorialBadgeLine');
-  if(bl)bl.innerHTML='🏅 <b>Pioneer Badge earned!</b> Tour complete.';
+function calSkipStep(){_calStep=Math.min(_calStep+1,TUTORIAL_STEPS.length-1);TUTORIAL.step=_calStep;saveTutorial();renderCalModal();}
+
+function calManualComplete(){var step=TUTORIAL_STEPS[_calStep];if(step&&step.badge)earnBadge(step.badge);calAdvance();}
+
+// Legacy compat
+function tutorialAction(){calGoToSection();}
+function tutorialNext(){calAdvance();}
+function completeTutorial(){TUTORIAL.completed=true;saveTutorial();earnBadge('pioneer');celebrate&&celebrate();closeCalModal();}
+function renderTutorialStep(){}
+
+function openBadgeBoard(){renderBadgeBoard();var el=document.getElementById('badgeBoardBg');if(el)el.classList.add('show');}
+function closeBadgeBoard(){var el=document.getElementById('badgeBoardBg');if(el)el.classList.remove('show');}
+
+function renderBadgeBoard(){
+  var el=document.getElementById('badgeBoardGrid');if(!el)return;
+  var sectionBadges=BADGE_DEFS.filter(function(b){return !b.isMaster;});
+  var masterBadge=BADGE_DEFS.find(function(b){return b.isMaster;});
+  var earnedCount=Object.keys(BADGES).filter(function(k){return k!=='world_visited';}).length;
+  var html='';
+  if(earnedCount>0)html+='<div class="badge-streak-banner">🏅 '+earnedCount+' / '+(sectionBadges.length+1)+' badges earned</div>';
+  html+='<div class="badge-grid">';
+  sectionBadges.forEach(function(def){
+    var earned=!!BADGES[def.id];
+    var date=BADGES[def.id]||'';
+    html+='<div class="badge-item" onclick="'+(earned?'showBadgeInfo(\''+def.id+'\')':'')+'">'
+      +'<div class="badge-circle'+(earned?' earned':' locked')+'" style="background:'+(earned?def.color:'#6b5040')+'">'+def.emoji
+      +(earned?'<div class="badge-pin"></div>':'<div class="badge-lock-icon">🔒</div>')
+      +'</div>'
+      +'<div class="badge-label'+(earned?'':' locked-lbl')+'">'+def.label+'</div>'
+      +(earned?'<div class="badge-date">'+date+'</div>':'')
+      +'</div>';
+  });
+  html+='</div>';
+  if(masterBadge){
+    var me=!!BADGES[masterBadge.id];
+    html+='<hr class="badge-divider"><div class="badge-grid"><div class="badge-master">'
+      +'<div class="badge-circle'+(me?' earned':' locked')+'" style="background:'+(me?masterBadge.color:'#6b5040')+'">'+masterBadge.emoji
+      +(me?'<div class="badge-pin"></div>':'<div class="badge-lock-icon">🔒</div>')
+      +'</div>'
+      +'<div class="badge-label'+(me?'':' locked-lbl')+'" style="font-size:12px;max-width:120px">'+masterBadge.label+'</div>'
+      +(me?'<div class="badge-date" style="font-size:10px">Earned '+BADGES[masterBadge.id]+'</div>':'<div class="badge-date">Complete all 9 sections</div>')
+      +'</div></div>';
+  }
+  el.innerHTML=html;
 }
+
+function showBadgeInfo(id){var def=BADGE_DEFS.find(function(b){return b.id===id;});if(!def)return;showToast(def.emoji+' '+def.label+' — '+def.section);}
 
 function renderCalInArchives(){
   var el=document.getElementById('archivesCalSvg');
   if(el&&!el.querySelector('svg'))el.innerHTML=calDrawSVG(40);
   var bl=document.getElementById('tutorialBadgeLine');
-  if(bl&&TUTORIAL.completed)bl.innerHTML='🏅 <b>Pioneer Badge earned!</b> Tour complete.';
+  if(bl){
+    var earnedCount=Object.keys(BADGES).filter(function(k){return k!=='world_visited';}).length;
+    var total=BADGE_DEFS.length;
+    if(BADGES['pioneer'])bl.innerHTML='🏅 <b>Pioneer Badge earned!</b> All sections complete.';
+    else if(earnedCount>0)bl.innerHTML='🎓 '+earnedCount+'/'+total+' badges earned — tour in progress!';
+    else bl.textContent='Meet Cal and earn badges for each section!';
+  }
+  var row=document.getElementById('calArchivesBadgeRow');
+  if(row){
+    var earnedIds=Object.keys(BADGES).filter(function(k){return k!=='world_visited';});
+    if(!earnedIds.length){
+      row.innerHTML='<span style="font-size:11px;color:#a99fc9;font-style:italic">No badges yet — start the tour!</span>';
+    } else {
+      row.innerHTML=earnedIds.map(function(id){
+        var d=BADGE_DEFS.find(function(b){return b.id===id;});
+        return d?'<div title="'+d.label+'" style="width:24px;height:24px;border-radius:50%;background:'+d.color+';display:inline-flex;align-items:center;justify-content:center;font-size:12px;box-shadow:0 2px 4px rgba(0,0,0,.2)">'+d.emoji+'</div>':'';
+      }).join('');
+    }
+  }
 }
 
 // ═══════════════════════════════════════════════
@@ -12129,6 +12369,11 @@ function startApp(){
   updateLighthouseSpiritStatus();
   renderEmporiumGoal();
   renderCalInArchives();
+  renderBadgeBoard();
+  BADGE_DEFS.forEach(function(def){
+    if(!def.isMaster&&!BADGES[def.id]&&def.detect&&def.detect()) earnBadge(def.id);
+  });
+  checkPioneerBadge();
   renderSleepGraph();
   renderTodaySleepChip();
   updHelmBadge();
