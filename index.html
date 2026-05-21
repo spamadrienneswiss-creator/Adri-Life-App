@@ -11792,293 +11792,177 @@ function renderSpiritRunner(){
   var safe = Math.max(0, SPIRIT_RUN.safe || 0);
   var fallen = !!SPIRIT_RUN.fallen;
   var now = Date.now();
-  var t = now / 200;
-  var TILE = 18;
-  var groundY = H - 38;
-  var runX = Math.round(W * 0.50);
-  var voidEdgeX = runX - safe * TILE;
+  var t = now / 300;
+  var P = 3; // canvas pixels per game pixel
+  var safeRatio = Math.min(1, safe / 15);
 
-  // ── Spawn dust particles on crumble edge ──────
-  if(safe < 6 && !fallen && Math.random() < 0.18){
-    _jungleParticles.push({x:voidEdgeX+Math.random()*8, y:groundY+Math.random()*6, vx:(Math.random()-0.6)*0.8, vy:-Math.random()*0.6, life:1, r:Math.random()*2+1, col:'rgba(180,140,60,'});
-  }
-  _jungleParticles = _jungleParticles.filter(function(p){ p.x+=p.vx; p.y+=p.vy; p.life-=0.035; return p.life>0; });
+  // ── SKY ─────────────────────────────────────────
+  var sky = ctx.createLinearGradient(0, 0, 0, H);
+  sky.addColorStop(0, '#c4b0e0');
+  sky.addColorStop(0.6, '#e8c4c8');
+  sky.addColorStop(1, '#f0d0d4');
+  ctx.fillStyle = sky;
+  ctx.fillRect(0, 0, W, H);
 
-  // ── SKY: warm jungle canopy ────────────────────
-  var sky = ctx.createLinearGradient(0,0,0,groundY);
-  sky.addColorStop(0,'#0a1a08'); sky.addColorStop(0.45,'#142e0e'); sky.addColorStop(1,'#1e4016');
-  ctx.fillStyle = sky; ctx.fillRect(0,0,W,groundY);
-
-  // Dappled light shafts
-  ctx.save();
-  for(var li=0; li<4; li++){
-    var lx = (li*90 + (now*0.004)%90)%W;
-    var lg = ctx.createLinearGradient(lx-8,0,lx+8,groundY);
-    lg.addColorStop(0,'rgba(200,210,100,0)'); lg.addColorStop(0.4,'rgba(200,210,80,0.07)'); lg.addColorStop(1,'rgba(200,210,80,0)');
-    ctx.fillStyle=lg; ctx.fillRect(lx-8,0,16,groundY);
-  }
-  ctx.restore();
-
-  // Far canopy layer — large round treetops (very slow)
-  var scroll0 = (now * 0.004) % 64;
-  for(var ci=0; ci<Math.ceil(W/64)+2; ci++){
-    var cx2 = ((ci*64 - scroll0%64 + W)%(W+64))-32;
-    var ch = 30 + (ci*23+3)%22;
-    ctx.fillStyle = '#0e2a0a';
-    ctx.beginPath(); ctx.arc(cx2, groundY-ch, 18+(ci*7)%10, 0, Math.PI*2); ctx.fill();
-    ctx.fillStyle = '#142e0e';
-    ctx.beginPath(); ctx.arc(cx2+10, groundY-ch+8, 13+(ci*5)%8, 0, Math.PI*2); ctx.fill();
+  // Stars
+  ctx.fillStyle = 'rgba(255,255,255,0.65)';
+  var _ss = [13,47,81,120,163,200,245,17,55,100,140,190];
+  for(var si=0; si<_ss.length; si++){
+    ctx.fillRect((_ss[si]*3+si*17)%W, (_ss[si]*2+si*11)%55, P, P);
   }
 
-  // Mid jungle layer — ancient stone columns + vines (medium parallax)
-  var scroll1 = (now * 0.012) % 56;
-  for(var ki=0; ki<Math.ceil(W/56)+2; ki++){
-    var kx = ((ki*56 - scroll1%56 + W)%(W+56))-28;
-    var kh = 28 + (ki*17+5)%24;
-    // Stone column
-    ctx.fillStyle = '#3a4a2a';
-    ctx.fillRect(kx-4, groundY-kh, 8, kh);
-    // Column cap
-    ctx.fillStyle = '#4a5a38';
-    ctx.fillRect(kx-6, groundY-kh, 12, 4);
-    // Moss patches
-    ctx.fillStyle = '#2a5020';
-    ctx.fillRect(kx-4, groundY-kh+4, 8, 3);
-    ctx.fillRect(kx-2, groundY-kh+10, 4, 2);
-    // Hanging vine
-    ctx.strokeStyle = '#2a6018'; ctx.lineWidth = 1.5;
-    ctx.beginPath();
-    var vineX = kx + 3;
-    ctx.moveTo(vineX, groundY-kh);
-    for(var vi=0; vi<kh; vi+=6){ ctx.lineTo(vineX + Math.sin(vi*0.4+t*0.3)*3, groundY-kh+vi); }
-    ctx.stroke();
+  // Pixel clouds
+  function _drawCloud(cx, cy){
+    ctx.fillStyle = 'rgba(255,255,255,0.68)';
+    var bs = [[0,0],[P,0],[P*2,0],[P*3,0],[P*4,0],[P,P*-1],[P*2,P*-1],[P*3,P*-1],[-P,0],[P*5,0]];
+    for(var i=0; i<bs.length; i++) ctx.fillRect(cx+bs[i][0], cy+bs[i][1], P, P);
   }
+  var cScr = (now * 0.008) % W;
+  _drawCloud(((80 - cScr) % (W+80) + W+80) % (W+80) - 30, 28);
+  _drawCloud(((210 - cScr*0.65) % (W+80) + W+80) % (W+80) - 30, 18);
+  _drawCloud(((350 - cScr*0.45) % (W+80) + W+80) % (W+80) - 30, 38);
 
-  // Near foliage layer — large leaves (faster)
-  var scroll2 = (now * 0.028) % 36;
-  for(var fi=0; fi<Math.ceil(W/36)+2; fi++){
-    var fx = ((fi*36 - scroll2%36 + W)%(W+36))-18;
-    ctx.fillStyle = fi%3===0 ? '#1a4a10' : fi%3===1 ? '#226018' : '#2a7020';
-    // Broad leaf shape
-    ctx.beginPath(); ctx.ellipse(fx, groundY-12-(fi*5)%14, 10+(fi*3)%6, 5+(fi*2)%4, -0.4+(fi%3)*0.3, 0, Math.PI*2); ctx.fill();
-    ctx.fillStyle = '#184010';
-    ctx.beginPath(); ctx.ellipse(fx+6, groundY-8-(fi*4)%10, 8, 4, 0.3, 0, Math.PI*2); ctx.fill();
-  }
+  // ── PLATFORM (meter bar) ────────────────────────
+  var platY = 106;
+  var platH = H - platY;
+  var platW = Math.round(safeRatio * W);
+  var platState = safe > 8 ? 'solid' : safe > 4 ? 'cracking' : 'crumbling';
+  var pCols = {
+    solid:    {top:'#8faa8b', mid:'#7a9876', bot:'#6a8866', mortar:'rgba(80,100,70,0.5)', moss:'#a8c4a4'},
+    cracking: {top:'#c8a840', mid:'#b89030', bot:'#a07820', mortar:'rgba(100,80,20,0.5)', moss:'#d4b850'},
+    crumbling:{top:'#c87880', mid:'#b86070', bot:'#a05060', mortar:'rgba(120,60,70,0.5)', moss:'#e09090'}
+  };
+  var pc = pCols[platState];
 
-  // ── GROUND ─────────────────────────────────────
-  // Helper: draw one mossy stone tile
-  function drawStoneTile(x, y, w, h, state){
-    // state: 'solid' | 'cracking' | 'crumbling'
-    var baseCol = state==='crumbling' ? '#6a5020' : state==='cracking' ? '#7a6830' : '#8a7840';
-    var topCol  = state==='crumbling' ? '#7a6030' : state==='cracking' ? '#9a8848' : '#a89858';
-    var mossCol = state==='crumbling' ? 'rgba(40,70,20,0.3)' : 'rgba(40,90,20,0.55)';
-    // Block body
-    var bg = ctx.createLinearGradient(x,y,x,y+h);
-    bg.addColorStop(0, topCol); bg.addColorStop(0.3, baseCol); bg.addColorStop(1,'#3a2e18');
-    ctx.fillStyle = bg; ctx.fillRect(x, y, w, h);
-    // Tile grid lines (mortar)
-    ctx.strokeStyle = 'rgba(0,0,0,0.35)'; ctx.lineWidth = 1;
-    var tw = 14, th2 = 10;
-    for(var tx2=x; tx2<x+w; tx2+=tw){ ctx.beginPath(); ctx.moveTo(tx2,y); ctx.lineTo(tx2,y+h); ctx.stroke(); }
-    for(var ty2=y; ty2<y+h; ty2+=th2){ ctx.beginPath(); ctx.moveTo(x,ty2); ctx.lineTo(x+w,ty2); ctx.stroke(); }
+  if(platW > 0){
+    var bg2 = ctx.createLinearGradient(0, platY, 0, H);
+    bg2.addColorStop(0, pc.top); bg2.addColorStop(0.3, pc.mid); bg2.addColorStop(1, pc.bot);
+    ctx.fillStyle = bg2;
+    ctx.fillRect(0, platY, platW, platH);
+    // Mortar grid
+    ctx.strokeStyle = pc.mortar; ctx.lineWidth = 1;
+    for(var tx=0; tx<platW; tx+=18){ ctx.beginPath(); ctx.moveTo(tx,platY); ctx.lineTo(tx,H); ctx.stroke(); }
+    for(var ty=platY+12; ty<H; ty+=12){ ctx.beginPath(); ctx.moveTo(0,ty); ctx.lineTo(platW,ty); ctx.stroke(); }
     // Moss top strip
-    ctx.fillStyle = mossCol; ctx.fillRect(x, y, w, 4);
-    // Crack overlay
-    if(state==='cracking' || state==='crumbling'){
-      ctx.strokeStyle = state==='crumbling' ? 'rgba(200,150,40,0.7)' : 'rgba(80,60,20,0.5)';
+    ctx.fillStyle = pc.moss; ctx.fillRect(0, platY, platW, P);
+    // Cracks
+    if(platState !== 'solid'){
+      ctx.strokeStyle = platState==='crumbling' ? 'rgba(200,100,110,0.7)' : 'rgba(160,120,20,0.6)';
       ctx.lineWidth = 1;
-      var cx3 = x + w*0.35, cy3 = y+2;
-      ctx.beginPath(); ctx.moveTo(cx3,cy3); ctx.lineTo(cx3+4,cy3+8); ctx.lineTo(cx3+1,cy3+14); ctx.stroke();
-      ctx.beginPath(); ctx.moveTo(cx3+w*0.3,cy3+3); ctx.lineTo(cx3+w*0.3-3,cy3+10); ctx.stroke();
-    }
-    // Crumbling: floating debris fragments
-    if(state==='crumbling'){
-      ctx.fillStyle = 'rgba(180,140,50,'+(0.5+0.4*Math.sin(t*3))+')';
-      ctx.fillRect(x+w*0.2, y-3+Math.sin(t*4)*2, 3, 3);
-      ctx.fillRect(x+w*0.6, y-5+Math.sin(t*3+1)*2, 2, 2);
-      ctx.fillRect(x+w*0.8, y-2+Math.sin(t*5)*1.5, 3, 2);
-    }
-  }
-
-  ctx.save();
-  var tileW = 16;
-
-  if(!fallen){
-    // PIT (void) to the left of runner
-    if(voidEdgeX > 0){
-      // Dark pit
-      var pitG = ctx.createLinearGradient(0,groundY,0,H);
-      pitG.addColorStop(0,'#0a0800'); pitG.addColorStop(1,'#000');
-      ctx.fillStyle = pitG; ctx.fillRect(0, groundY, voidEdgeX, H-groundY);
-      // Pit walls — rough stone edges
-      ctx.fillStyle = '#2a2010'; ctx.fillRect(0, groundY, 4, H-groundY);
-      ctx.fillStyle = '#2a2010'; ctx.fillRect(voidEdgeX-4, groundY, 4, H-groundY);
-      // Glowing amber pit bottom
-      var pitAmber = ctx.createLinearGradient(0,H-12,0,H);
-      pitAmber.addColorStop(0,'rgba(180,100,20,0)'); pitAmber.addColorStop(1,'rgba(180,100,20,0.25)');
-      ctx.fillStyle=pitAmber; ctx.fillRect(0,H-12,voidEdgeX,12);
-      // Dust particles
-      _jungleParticles.forEach(function(p){ ctx.fillStyle=p.col+p.life+')'; ctx.fillRect(p.x,p.y,p.r,p.r); });
-    }
-
-    // Determine ground states from voidEdgeX
-    // Tiles ahead of runner: decide state by distance into safe zone
-    var solidStart = voidEdgeX + TILE * 2.5;
-    var crackStart = voidEdgeX;
-    var runnerTileX = runX - (runX % tileW); // snap to tile grid
-
-    // Draw ground tiles from crumble edge to right
-    for(var gx2 = Math.max(0, Math.floor(voidEdgeX/tileW)*tileW); gx2 < W; gx2 += tileW){
-      var distFromVoid = gx2 - voidEdgeX;
-      var gState = distFromVoid < TILE*1.2 ? 'crumbling' : distFromVoid < TILE*2.5 ? 'cracking' : 'solid';
-      drawStoneTile(gx2, groundY, tileW, H-groundY, gState);
-    }
-
-    // Ancient ruin walls above ground (fixed, decorative)
-    ctx.fillStyle = '#4a3a22';
-    ctx.fillRect(W-30, groundY-22, 12, 22);
-    ctx.fillRect(W-30, groundY-22, 12, 4); // cap
-    ctx.fillStyle = '#3a4a28'; ctx.fillRect(W-30, groundY-22, 12, 3); // moss
-
-  } else {
-    // FALLEN STATE — full pit, rope hanging
-    var fallG = ctx.createLinearGradient(0,groundY,0,H);
-    fallG.addColorStop(0,'#120e04'); fallG.addColorStop(1,'#000');
-    ctx.fillStyle = fallG; ctx.fillRect(0, groundY, W, H-groundY);
-    // Rope
-    var ropeX = runX;
-    ctx.strokeStyle = '#c89840'; ctx.lineWidth = 3;
-    ctx.beginPath(); ctx.moveTo(ropeX, 4); ctx.lineTo(ropeX, H-10); ctx.stroke();
-    // Rope knots
-    ctx.fillStyle = '#a07830';
-    for(var ri=0; ri<5; ri++){
-      var ry2 = 10 + ri*((H-14)/5);
-      ctx.fillRect(ropeX-3, ry2, 6, 4);
-    }
-    // Rope anchor at top (ancient stone hook)
-    ctx.fillStyle = '#6a5a30';
-    ctx.fillRect(ropeX-6, 2, 12, 6);
-    ctx.fillStyle = '#8a7a48'; ctx.fillRect(ropeX-4, 0, 8, 3);
-    // Ground ledge on far right (safe zone — reward for climbing)
-    drawStoneTile(W-40, groundY, 40, H-groundY, 'solid');
-    ctx.fillStyle = '#4a7a30'; ctx.fillRect(W-40, groundY-3, 40, 3); // bright moss on safe ledge
-  }
-  ctx.restore();
-
-  // ── RUNNER ─────────────────────────────────────
-  var rx = runX;
-  var bounce = Math.sin(t * 2) * 1.5; // idle bounce
-  var legOff = Math.sin(t * 3.5) * 5;
-  var armOff = Math.sin(t * 3.5 + Math.PI) * 3;
-
-  if(fallen){
-    // Hanging on rope — bob up/down slightly, arms up
-    var climbPct = Math.min(1, (SPIRIT_RUN.climbPts||0) / 5);
-    var ry = Math.round(H - 18 - climbPct*(H-groundY-18) + Math.sin(t*2)*2);
-    // Shadow on rope
-    ctx.fillStyle = 'rgba(0,0,0,0.25)'; ctx.beginPath(); ctx.ellipse(rx, ry+1, 5, 1.5, 0, 0, Math.PI*2); ctx.fill();
-    // Boots (hanging down)
-    ctx.fillStyle = '#2a1a08'; ctx.fillRect(rx-5, ry+4, 4, 4); ctx.fillRect(rx+1, ry+4, 4, 4);
-    // Legs (dangling)
-    ctx.fillStyle = '#4a5a30'; ctx.fillRect(rx-4, ry-2, 3, 7); ctx.fillRect(rx+1, ry-2, 3, 7);
-    // Body
-    ctx.fillStyle = '#7a5a38'; ctx.fillRect(rx-4, ry-11, 8, 9);
-    // Satchel
-    ctx.fillStyle = '#6a3a18'; ctx.fillRect(rx+3, ry-11, 4, 6);
-    // Arms reaching up (gripping rope)
-    ctx.fillStyle = '#7a5a38';
-    ctx.fillRect(rx-7, ry-16, 3, 7); ctx.fillRect(rx+4, ry-16, 3, 7);
-    // Hands on rope
-    ctx.fillStyle = '#c89850'; ctx.fillRect(rx-5, ry-17, 3, 3); ctx.fillRect(rx+4, ry-17, 3, 3);
-    // Head (larger, chibi style)
-    ctx.fillStyle = '#c89850'; ctx.fillRect(rx-4, ry-20, 8, 8);
-    // Wide-brimmed hat
-    ctx.fillStyle = '#4a2e0e'; ctx.fillRect(rx-7, ry-13, 14, 2); // brim
-    ctx.fillStyle = '#5a380e'; ctx.fillRect(rx-4, ry-20, 8, -5); // crown
-    ctx.fillRect(rx-3, ry-25, 6, 5);
-    // Eyes — determined look upward
-    ctx.fillStyle = '#1a0a04'; ctx.fillRect(rx-3, ry-18, 2, 2); ctx.fillRect(rx+1, ry-18, 2, 2);
-    // Climb progress — glowing orbs on rope above
-    if(climbPct > 0){
-      ctx.fillStyle = 'rgba(220,190,60,'+(0.4+0.4*Math.sin(t*4))+')';
-      for(var oi=0; oi<Math.round(climbPct*5); oi++){
-        ctx.beginPath(); ctx.arc(rx, 12+oi*((ry-16)/6), 3, 0, Math.PI*2); ctx.fill();
+      for(var ci2=18; ci2<platW-18; ci2+=36){
+        ctx.beginPath(); ctx.moveTo(ci2,platY+2); ctx.lineTo(ci2+4,platY+8); ctx.lineTo(ci2+2,platY+14); ctx.stroke();
       }
     }
-    // Prompt text — rope message
-    ctx.fillStyle = 'rgba(0,0,0,0.55)'; ctx.fillRect(0, H-18, W, 18);
-    ctx.fillStyle = '#f0d870'; ctx.font = 'bold 9px sans-serif'; ctx.textAlign='center';
-    ctx.fillText('🌿 Log Bible / Prayer / Ministry to climb back! ('+Math.min(5,SPIRIT_RUN.climbPts||0)+'/5)', W/2, H-6);
-    ctx.textAlign='left';
-
-  } else {
-    // Normal running / bouncing
-    var ry = groundY - 1;
-    // Shadow
-    ctx.fillStyle = 'rgba(0,0,0,0.22)'; ctx.beginPath(); ctx.ellipse(rx, ry, 7, 2, 0, 0, Math.PI*2); ctx.fill();
-    // Boots
-    ctx.fillStyle = '#2a1a08';
-    ctx.fillRect(rx-5, ry-3+legOff*0.35, 5, 4); ctx.fillRect(rx+1, ry-3-legOff*0.35, 5, 4);
-    // Legs (chibi — slightly chubby)
-    ctx.fillStyle = '#4a5a30';
-    ctx.fillRect(rx-4, ry-12+legOff*0.5, 4, 9); ctx.fillRect(rx+1, ry-12-legOff*0.5, 4, 9);
-    // Body — tan explorer jacket
-    ctx.fillStyle = '#8a7040'; ctx.fillRect(rx-5, ry-22+bounce, 10, 10);
-    // Jacket detail
-    ctx.fillStyle = '#6a5028'; ctx.fillRect(rx-1, ry-22+bounce, 2, 10); // centre line
-    // Satchel / bag on side
-    ctx.fillStyle = '#7a4a20'; ctx.fillRect(rx+4, ry-21+bounce, 5, 7);
-    ctx.fillStyle = '#5a3010'; ctx.fillRect(rx+5, ry-19+bounce, 3, 1); // strap buckle
-    // Arms
-    ctx.fillStyle = '#8a7040';
-    ctx.fillRect(rx-8, ry-21+bounce+armOff*0.5, 4, 6); ctx.fillRect(rx+5, ry-21+bounce-armOff*0.5, 4, 6);
-    // Head (chibi — big round head)
-    ctx.fillStyle = '#d4a868'; ctx.fillRect(rx-5, ry-33+bounce, 10, 10);
-    // Wide-brimmed explorer hat
-    ctx.fillStyle = '#4a2e0e'; ctx.fillRect(rx-8, ry-24+bounce, 16, 2); // brim
-    ctx.fillStyle = '#5a380e'; ctx.fillRect(rx-5, ry-33+bounce, 10, -7); // crown
-    ctx.fillRect(rx-4, ry-40+bounce, 8, 7);
-    // Hat band
-    ctx.fillStyle = '#8a6a20'; ctx.fillRect(rx-5, ry-27+bounce, 10, 2);
-    // Eyes — big chibi dots
-    ctx.fillStyle = '#1a0a04'; ctx.fillRect(rx-3, ry-29+bounce, 3, 3); ctx.fillRect(rx+1, ry-29+bounce, 3, 3);
-    ctx.fillStyle = 'rgba(255,255,255,0.6)'; ctx.fillRect(rx-2, ry-30+bounce, 1, 1); ctx.fillRect(rx+2, ry-30+bounce, 1, 1); // eye shine
-
-    // Triumph flash after climbing out
-    if(SPIRIT_RUN.climbAnim && (now - SPIRIT_RUN.climbAnim) < 2000){
-      var fa = 1 - (now - SPIRIT_RUN.climbAnim)/2000;
-      ctx.fillStyle = 'rgba(220,200,50,'+fa*0.25+')'; ctx.fillRect(0,0,W,H);
-      ctx.fillStyle = 'rgba(220,200,50,'+fa+')'; ctx.font='bold 11px sans-serif'; ctx.textAlign='center';
-      ctx.fillText('🏆 Back on solid ground!', W/2, H/2-4);
-      ctx.textAlign='left';
-    }
-
-    // Warning amber flash when crumbling
-    if(safe < 2 && !fallen){
-      ctx.fillStyle = 'rgba(180,120,0,'+(0.12+0.08*Math.sin(now/150))+')';
-      ctx.fillRect(0,0,W,H);
-      ctx.fillStyle = '#e0a020'; ctx.font = 'bold 10px sans-serif'; ctx.textAlign = 'center';
-      ctx.fillText('🌿 Ground crumbling — log something!', W/2, H/2+4);
-      ctx.textAlign = 'left';
+    // Crumbling debris spawn
+    if(platState==='crumbling' && Math.random()<0.15){
+      _jungleParticles.push({x:Math.random()*platW, y:platY-2, vx:(Math.random()-0.5)*0.8, vy:-Math.random()*0.8-0.2, life:1, r:P, col:'rgba(180,100,110,'});
     }
   }
 
-  // ── HUD (top bar) ───────────────────────────────
-  ctx.fillStyle = 'rgba(10,20,8,0.72)'; ctx.fillRect(0, 0, W, 22);
-  // Ground bar
-  var safeRatio = Math.min(1, safe/15);
-  var barColor = safe>8 ? '#6ab040' : safe>4 ? '#c8a020' : '#d06020';
-  ctx.fillStyle = 'rgba(0,0,0,0.5)'; ctx.fillRect(6, 7, 110, 8);
-  ctx.fillStyle = barColor; ctx.fillRect(6, 7, Math.round(safeRatio*110), 8);
-  ctx.strokeStyle = 'rgba(180,210,100,0.3)'; ctx.lineWidth=1; ctx.strokeRect(6,7,110,8);
-  // Label
-  ctx.fillStyle = '#c8e870'; ctx.font = 'bold 8px sans-serif'; ctx.textAlign='left';
-  ctx.fillText(fallen?'🪢 Hanging…':safe>8?'🌿 Lush':safe>4?'🍂 Cracking':'⚠ Crumbling', 120, 15);
-  // Points
-  ctx.fillStyle = 'rgba(10,20,8,0.6)'; ctx.fillRect(W-66, 5, 60, 14);
-  ctx.fillStyle = '#f0e060'; ctx.font = '8px sans-serif'; ctx.textAlign='right';
-  ctx.fillText('✦ '+(SPIRIT_RUN.totalPts||0)+' pts', W-5, 15);
-  ctx.textAlign = 'left';
+  // Particles
+  _jungleParticles = _jungleParticles.filter(function(p){ p.x+=p.vx; p.y+=p.vy; p.vy+=0.05; p.life-=0.035; return p.life>0; });
+  _jungleParticles.forEach(function(p){ ctx.fillStyle=p.col+p.life+')'; ctx.fillRect(Math.round(p.x),Math.round(p.y),p.r,p.r); });
+
+  // ── PIXEL GIRL ──────────────────────────────────
+  function _drawGirl(gx, gy, bnc){
+    // gy = feet bottom; bnc = bounce offset in px
+    var b = Math.round(bnc/P)*P;
+    ctx.fillStyle='#a99fc9'; ctx.fillRect(gx-P*2,gy-P*8+b,P*5,P*2); ctx.fillRect(gx-P*2,gy-P*6+b,P*2,P*3); ctx.fillRect(gx+P*2,gy-P*6+b,P*2,P*3);
+    ctx.fillStyle='#f0c8b0'; ctx.fillRect(gx-P,gy-P*7+b,P*3,P*4);
+    ctx.fillStyle='#6040a0'; ctx.fillRect(gx-P,gy-P*5+b,P,P); ctx.fillRect(gx+P,gy-P*5+b,P,P);
+    ctx.fillStyle='#c87880'; ctx.fillRect(gx-P*2,gy-P*3+b,P*5,P*3);
+    ctx.fillStyle='#b86070'; ctx.fillRect(gx-P*2,gy-P+b,P*5,P);
+    ctx.fillStyle='#9080b8'; ctx.fillRect(gx+P*2,gy-P*3+b,P*2,P*2);
+    ctx.fillStyle='#7060a0'; ctx.fillRect(gx+P*2,gy-P*2+b,P*2,P);
+    ctx.fillStyle='#f0c8b0'; ctx.fillRect(gx-P*3,gy-P*3+b,P,P*2); ctx.fillRect(gx+P*3,gy-P*3+b,P,P*2);
+    ctx.fillRect(gx-P,gy-P+b,P,P*2); ctx.fillRect(gx+P,gy-P+b,P,P*2);
+    ctx.fillStyle='#7a9870'; ctx.fillRect(gx-P*2,gy+b,P*2,P); ctx.fillRect(gx+P,gy+b,P*2,P);
+  }
+  function _drawGirlClimb(gx, gy){
+    ctx.fillStyle='#a99fc9'; ctx.fillRect(gx-P*2,gy-P*8,P*5,P*2); ctx.fillRect(gx-P*2,gy-P*6,P*2,P*2); ctx.fillRect(gx+P*2,gy-P*6,P*2,P*2);
+    ctx.fillStyle='#f0c8b0'; ctx.fillRect(gx-P,gy-P*7,P*3,P*4);
+    ctx.fillStyle='#6040a0'; ctx.fillRect(gx-P,gy-P*5,P,P); ctx.fillRect(gx+P,gy-P*5,P,P);
+    ctx.fillStyle='#c87880'; ctx.fillRect(gx-P*2,gy-P*3,P*5,P*3);
+    ctx.fillStyle='#b86070'; ctx.fillRect(gx-P*2,gy-P,P*5,P);
+    ctx.fillStyle='#9080b8'; ctx.fillRect(gx+P*2,gy-P*3,P*2,P*2);
+    ctx.fillStyle='#f0c8b0';
+    ctx.fillRect(gx-P*3,gy-P*6,P,P*4); ctx.fillRect(gx+P*3,gy-P*6,P,P*4);
+    ctx.fillStyle='#ffddcc'; ctx.fillRect(gx-P*3,gy-P*6,P,P); ctx.fillRect(gx+P*3,gy-P*6,P,P);
+    ctx.fillStyle='#f0c8b0'; ctx.fillRect(gx-P,gy-P,P,P*2); ctx.fillRect(gx+P,gy-P,P,P*2);
+    ctx.fillStyle='#7a9870'; ctx.fillRect(gx-P*2,gy+P,P*2,P); ctx.fillRect(gx+P,gy+P,P*2,P);
+  }
+
+  if(!fallen){
+    var girlX = Math.max(P*7, platW - P*5);
+    var bounce = Math.round(Math.sin(t*2.5)*P);
+    if(platW > P*7) _drawGirl(girlX, platY, bounce);
+
+    // Platform edge drip hint when almost empty
+    if(safe < 1.5 && platW > 0){
+      ctx.fillStyle = 'rgba(200,120,130,'+(0.15+0.1*Math.sin(now/140))+')';
+      ctx.fillRect(0, 0, W, H);
+    }
+
+    // Triumph flash
+    if(SPIRIT_RUN.climbAnim && (now-SPIRIT_RUN.climbAnim)<2000){
+      var fa = 1-(now-SPIRIT_RUN.climbAnim)/2000;
+      ctx.fillStyle='rgba(200,160,180,'+fa*0.3+')'; ctx.fillRect(0,0,W,H);
+      ctx.fillStyle='rgba(160,100,120,'+fa+')'; ctx.font='bold 11px sans-serif'; ctx.textAlign='center';
+      ctx.fillText('Back on solid ground! ✨', W/2, H/2); ctx.textAlign='left';
+    }
+
+  } else {
+    // FALLEN — ladder on right, girl climbing
+    var ldX = W - P*12;
+    var ldW = P*5;
+    var ldTop = 10;
+    // Ladder rails (sage green)
+    ctx.fillStyle = '#7a9870';
+    ctx.fillRect(ldX, ldTop, P, platY-ldTop);
+    ctx.fillRect(ldX+ldW-P, ldTop, P, platY-ldTop);
+    // Rungs
+    ctx.fillStyle = '#8faa8b';
+    for(var ri=ldTop+P*2; ri<platY-P; ri+=P*4) ctx.fillRect(ldX, ri, ldW, P);
+    // Safe ledge at top right
+    ctx.fillStyle = '#8faa8b'; ctx.fillRect(ldX-P*2, platY, ldW+P*4, platH);
+    ctx.fillStyle = '#a8c4a4'; ctx.fillRect(ldX-P*2, platY, ldW+P*4, P);
+
+    // Girl position on ladder
+    var climbPct = Math.min(1, (SPIRIT_RUN.climbPts||0)/5);
+    var girlLY = Math.round(platY - climbPct*(platY-ldTop-P*14));
+    _drawGirlClimb(ldX+Math.round(ldW/2), girlLY + Math.round(Math.sin(t*4)*P));
+
+    // Glow strip behind ladder
+    if(climbPct > 0){
+      var glowH = climbPct*(platY-ldTop);
+      ctx.fillStyle = 'rgba(160,130,200,0.22)';
+      ctx.fillRect(ldX-P, platY-glowH, ldW+P*2, glowH);
+      ctx.fillStyle = 'rgba(180,150,220,0.75)';
+      for(var oi=0; oi<Math.round(climbPct*5); oi++)
+        ctx.fillRect(ldX+ldW+P*2, platY-(oi+1)*P*5, P*2, P*2);
+    }
+
+    // Bottom prompt strip
+    ctx.fillStyle = 'rgba(80,60,100,0.75)'; ctx.fillRect(0,H-18,W,18);
+    ctx.fillStyle = '#e8d0f0'; ctx.font='bold 9px sans-serif'; ctx.textAlign='center';
+    ctx.fillText('Log Bible / Prayer / Ministry to climb back! ('+Math.min(5,SPIRIT_RUN.climbPts||0)+'/5)', W/2, H-5);
+    ctx.textAlign='left';
+  }
+
+  // ── HUD ─────────────────────────────────────────
+  // Left pill: bar + status
+  ctx.fillStyle = 'rgba(80,60,100,0.62)'; ctx.fillRect(6,5,130,14);
+  ctx.fillStyle = 'rgba(0,0,0,0.3)'; ctx.fillRect(8,7,80,8);
+  var barCol = safe>8?'#8faa8b':safe>4?'#c8a840':'#c87880';
+  ctx.fillStyle = barCol; ctx.fillRect(8,7,Math.round(safeRatio*80),8);
+  ctx.strokeStyle='rgba(255,255,255,0.2)'; ctx.lineWidth=1; ctx.strokeRect(8,7,80,8);
+  ctx.fillStyle='#f0e8ff'; ctx.font='bold 8px sans-serif'; ctx.textAlign='left';
+  ctx.fillText(fallen?'Climbing…':safe>8?'Grounded':safe>4?'Wavering':'Slipping!', 92, 15);
+  // Right pill: points
+  ctx.fillStyle='rgba(80,60,100,0.62)'; ctx.fillRect(W-66,5,60,14);
+  ctx.fillStyle='#e8d0f0'; ctx.font='8px sans-serif'; ctx.textAlign='right';
+  ctx.fillText('✦ '+(SPIRIT_RUN.totalPts||0)+' pts', W-8, 15);
+  ctx.textAlign='left';
 }
 
 function updateLighthouseSpiritStatus(){
