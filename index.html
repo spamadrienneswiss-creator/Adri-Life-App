@@ -2453,6 +2453,29 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     </div>
   </div>
   <div class="card">
+    <div class="set-sec-t" onclick="togSetSec('sc-spirit-meter',this);renderSpiritPtsSettings()">🕊️ Spiritual Meter <span class="sst-arr">▶</span></div>
+    <div id="sc-spirit-meter" style="display:none">
+      <div style="font-size:12px;color:var(--textl);margin-bottom:10px">Adjust point values logged to the Daily Road meter. Changes apply immediately.</div>
+      <div id="spiritPtsSettings"></div>
+      <div style="display:flex;align-items:center;gap:8px;margin-top:10px;padding-top:10px;border-top:1px solid var(--bdr)">
+        <span style="font-size:12px;color:var(--textd);flex:1">Drain rate (pts/day)</span>
+        <input type="number" id="spiritDrainInput" min="0.5" max="15" step="0.5" style="width:66px;padding:6px 8px;border-radius:8px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px;text-align:center" onchange="saveSpiritSettingsUI()">
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;margin-top:6px">
+        <span style="font-size:12px;color:var(--textd);flex:1">Max points</span>
+        <input type="number" id="spiritMaxInput" min="10" max="100" step="5" style="width:66px;padding:6px 8px;border-radius:8px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px;text-align:center" onchange="saveSpiritSettingsUI()">
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;margin-top:6px">
+        <span style="font-size:12px;color:var(--textd);flex:1">Pts needed to climb back</span>
+        <input type="number" id="spiritClimbInput" min="1" max="20" step="0.5" style="width:66px;padding:6px 8px;border-radius:8px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px;text-align:center" onchange="saveSpiritSettingsUI()">
+      </div>
+      <div style="display:flex;gap:8px;margin-top:10px">
+        <button class="btn" style="flex:1" onclick="saveSpiritSettingsUI()">Save</button>
+        <button class="btn sec" style="flex:1" onclick="resetSpiritSettings()">Reset defaults</button>
+      </div>
+    </div>
+  </div>
+  <div class="card">
     <div class="set-sec-t" onclick="togSetSec('sc-index',this)">📚 App Index <span class="sst-arr">▶</span></div>
     <div id="sc-index" style="display:none">
       <div style="font-size:12px;color:var(--textl);margin-bottom:12px">Tap any section to navigate there.</div>
@@ -2545,11 +2568,14 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
   </div>
   <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px" id="searchFilterBar">
     <button class="fchip on" onclick="setSearchFilter('all',this)">All</button>
-    <button class="fchip" onclick="setSearchFilter('tasks',this)">Tasks</button>
-    <button class="fchip" onclick="setSearchFilter('lists',this)">Lists</button>
-    <button class="fchip" onclick="setSearchFilter('goals',this)">Goals</button>
-    <button class="fchip" onclick="setSearchFilter('meals',this)">Meals</button>
-    <button class="fchip" onclick="setSearchFilter('notes',this)">Notes</button>
+    <button class="fchip" onclick="setSearchFilter('tasks',this)">📋 Tasks</button>
+    <button class="fchip" onclick="setSearchFilter('goals',this)">🎯 Goals</button>
+    <button class="fchip" onclick="setSearchFilter('lists',this)">📝 Lists</button>
+    <button class="fchip" onclick="setSearchFilter('meals',this)">🍽️ Meals</button>
+    <button class="fchip" onclick="setSearchFilter('notes',this)">📓 Notes</button>
+    <button class="fchip" onclick="setSearchFilter('spiritual',this)">🕊️ Spiritual</button>
+    <button class="fchip" onclick="setSearchFilter('health',this)">🩺 Health</button>
+    <button class="fchip" onclick="setSearchFilter('money',this)">💰 Money</button>
   </div>
   <div id="searchResults" style="overflow-y:auto;flex:1;min-height:100px">
     <p style="color:var(--textl);text-align:center;padding:20px;font-size:13px">Start typing to search…</p>
@@ -8631,7 +8657,7 @@ function saveStudyNote(){
   STUDY_NOTES.unshift({id:'sn-'+Date.now(),date:date,cat:cat,title:title,body:body,expanded:false});
   localStorage.setItem('aStudyNotes',JSON.stringify(STUDY_NOTES));
   ['snTitle','snBody'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});
-  spiritRunAdd('notes');
+  spiritRunAdd('personalStudy');
   renderStudyNotes();
 }
 
@@ -9266,7 +9292,7 @@ function openBibleBook(bookName){
   }
   BIBLE_LOG[bookName]=newLog;
   localStorage.setItem('aBibleLog',JSON.stringify(BIBLE_LOG));
-  spiritRunAdd('bible');
+  spiritRunAdd('bibleReading');
   renderBibleStats();
   renderBibleBooks();
 }
@@ -9283,7 +9309,7 @@ function logMinistry(){
   if(document.getElementById('minHrs'))document.getElementById('minHrs').value='';
   if(document.getElementById('minStudies'))document.getElementById('minStudies').value='';
   if(document.getElementById('minNotes'))document.getElementById('minNotes').value='';
-  spiritRunAdd('ministry');
+  spiritRunAdd('service');
   checkSpiritMilestone('ministry');
   renderSpiritStreaks();
   renderMinistryStats();
@@ -11546,7 +11572,7 @@ function saveScriptureCard(){
     if(idx>=0) SCRIPTURE_CARDS[idx] = Object.assign(SCRIPTURE_CARDS[idx], {question:question, scriptures:scriptures, tags:tags});
   } else {
     SCRIPTURE_CARDS.unshift({id:'sc-'+Date.now(), question:question, scriptures:scriptures, tags:tags, created:todayStr(), score:0, lastStudied:''});
-    spiritRunAdd('scripture');
+    spiritRunAdd('personalStudy');
   }
   saveScrCards();
   closeM('scriptureCardModal');
@@ -11656,7 +11682,7 @@ function flipStudyCard(){
 
 function scrStudyNext(knew){
   var card = _scrStudyQueue[_scrStudyIdx];
-  if(knew){ card.score=(card.score||0)+1; card.lastStudied=todayStr(); spiritRunAdd('scripture'); }
+  if(knew){ card.score=(card.score||0)+1; card.lastStudied=todayStr(); spiritRunAdd('personalStudy'); }
   else { _scrStudyQueue.push(_scrStudyQueue.splice(_scrStudyIdx,1)[0]); } // Move to end
   saveScrCards();
   _scrStudyIdx++;
@@ -11717,39 +11743,44 @@ function setIncGoal(){
 }
 
 // ═══════════════════════════════════════════════
-// THE JUNGLE — activity runner 🌿
+// SPIRITUAL METER — pixel platformer widget
 // ═══════════════════════════════════════════════
-var SPIRIT_RUN = JSON.parse(localStorage.getItem('aSpiritRun')||'{"safe":8,"totalPts":0,"lastTick":0}');
+var _SPIRIT_SETTINGS_DEF = {maxPts:30,drainPerDay:4.5,climbThreshold:5,pts:{meeting:2,service:2,serviceGoal:2,familyWorship:2,bibleReading:1,personalStudy:1,dailyText:0.5,morningWorship:0.5,card:0.5,plans:0.5,gratitude:0.5,prayer:0.5}};
+var SPIRIT_SETTINGS = JSON.parse(localStorage.getItem('aSpiritSettings') || JSON.stringify(_SPIRIT_SETTINGS_DEF));
+// backfill any missing keys from defaults
+(function(){ Object.keys(_SPIRIT_SETTINGS_DEF).forEach(function(k){ if(SPIRIT_SETTINGS[k]===undefined) SPIRIT_SETTINGS[k]=_SPIRIT_SETTINGS_DEF[k]; }); if(!SPIRIT_SETTINGS.pts) SPIRIT_SETTINGS.pts={}; Object.keys(_SPIRIT_SETTINGS_DEF.pts).forEach(function(k){ if(SPIRIT_SETTINGS.pts[k]===undefined) SPIRIT_SETTINGS.pts[k]=_SPIRIT_SETTINGS_DEF.pts[k]; }); })();
+function saveSpiritSettings(){ localStorage.setItem('aSpiritSettings', JSON.stringify(SPIRIT_SETTINGS)); }
+
+var SPIRIT_RUN = JSON.parse(localStorage.getItem('aSpiritRun')||'{"safe":15,"totalPts":0,"lastTick":0}');
 if(!SPIRIT_RUN.lastTick) SPIRIT_RUN.lastTick = Date.now();
 if(SPIRIT_RUN.fallen === undefined) SPIRIT_RUN.fallen = false;
 if(!SPIRIT_RUN.climbPts) SPIRIT_RUN.climbPts = 0;
 var _sRunRaf = null;
-var _jungleParticles = []; // dust/leaf particles
+var _jungleParticles = [];
 
 function saveSpiritRun(){ localStorage.setItem('aSpiritRun', JSON.stringify(SPIRIT_RUN)); }
 
 function spiritRunAdd(type){
-  // Points: ministry/service = HIGH, bible = HIGH, prayer = MEDIUM, gratitude/notes = SMALL
-  var pts = {ministry:10, bible:8, prayer:4, notes:2, scripture:3, gratitude:2}[type] || 1;
-  var groundGain = {ministry:2.0, bible:1.6, prayer:0.8, notes:0.3, scripture:0.5, gratitude:0.3}[type] || 0.2;
+  var maxPts = SPIRIT_SETTINGS.maxPts || 30;
+  var pts = (SPIRIT_SETTINGS.pts[type] !== undefined) ? SPIRIT_SETTINGS.pts[type] : 0.5;
   var wasFallen = SPIRIT_RUN.fallen;
-  SPIRIT_RUN.safe = Math.min(15, SPIRIT_RUN.safe + groundGain);
+  SPIRIT_RUN.safe = Math.min(maxPts, (SPIRIT_RUN.safe||0) + pts);
   SPIRIT_RUN.totalPts = (SPIRIT_RUN.totalPts||0) + pts;
   SPIRIT_RUN.lastTick = Date.now();
-  // Climbing out of pit — track progress
   if(wasFallen){
     SPIRIT_RUN.climbPts = (SPIRIT_RUN.climbPts||0) + pts;
-    if(SPIRIT_RUN.climbPts >= 5){
+    var threshold = SPIRIT_SETTINGS.climbThreshold || 5;
+    if(SPIRIT_RUN.climbPts >= threshold){
       SPIRIT_RUN.fallen = false;
       SPIRIT_RUN.climbPts = 0;
-      SPIRIT_RUN.climbAnim = Date.now(); // triumph flash timestamp
-      showToast('🏆 Back on solid ground!');
+      SPIRIT_RUN.climbAnim = Date.now();
+      showToast('Back on solid ground! ✨');
     } else {
-      showToast('⬆️ Climbing... '+SPIRIT_RUN.climbPts+'/5 pts');
+      showToast('⬆️ Climbing… '+SPIRIT_RUN.climbPts.toFixed(1)+'/'+threshold+' pts');
     }
   } else {
-    var labels = {ministry:'Service',bible:'Bible',prayer:'Prayer',notes:'Notes',scripture:'Scripture',gratitude:'Gratitude'};
-    showToast('+'+ pts+' pts · '+(labels[type]||'Activity')+' 🌿');
+    var labels = {meeting:'Meeting',service:'Service day',serviceGoal:'Service goal!',familyWorship:'Family Worship',bibleReading:'Bible Reading',personalStudy:'Personal Study',dailyText:'Daily Text',morningWorship:'Morning Worship',card:'Card written',plans:'Plans made',gratitude:'Gratitude',prayer:'Prayer',ministry:'Ministry',bible:'Bible',scripture:'Scripture',notes:'Notes'};
+    showToast('+'+pts+' pts · '+(labels[type]||type));
   }
   saveSpiritRun();
 }
@@ -11757,8 +11788,9 @@ function spiritRunAdd(type){
 function tickSpiritRun(){
   var now = Date.now();
   var hrs = (now - (SPIRIT_RUN.lastTick||now)) / 3600000;
-  if(hrs > 0.25){
-    SPIRIT_RUN.safe = Math.max(0, SPIRIT_RUN.safe - hrs * 0.03);
+  var drainRate = (SPIRIT_SETTINGS.drainPerDay || 4.5) / 24;
+  if(hrs > 0.083){
+    SPIRIT_RUN.safe = Math.max(0, (SPIRIT_RUN.safe||0) - hrs * drainRate);
     SPIRIT_RUN.lastTick = now;
     if(SPIRIT_RUN.safe === 0 && !SPIRIT_RUN.fallen){
       SPIRIT_RUN.fallen = true;
@@ -11789,188 +11821,292 @@ function renderSpiritRunner(){
   var ctx = canvas.getContext('2d');
   if(!ctx) return;
 
+  var maxPts = SPIRIT_SETTINGS.maxPts || 30;
   var safe = Math.max(0, SPIRIT_RUN.safe || 0);
   var fallen = !!SPIRIT_RUN.fallen;
   var now = Date.now();
   var t = now / 300;
   var P = 3; // canvas pixels per game pixel
-  var safeRatio = Math.min(1, safe / 15);
+  var safeRatio = Math.min(1, safe / maxPts);
 
-  // ── SKY ─────────────────────────────────────────
-  var sky = ctx.createLinearGradient(0, 0, 0, H);
-  sky.addColorStop(0, '#c4b0e0');
-  sky.addColorStop(0.6, '#e8c4c8');
-  sky.addColorStop(1, '#f0d0d4');
-  ctx.fillStyle = sky;
-  ctx.fillRect(0, 0, W, H);
+  // ── BACKGROUND: cream/lavender, no forest ───────
+  var bg = ctx.createLinearGradient(0, 0, 0, H);
+  bg.addColorStop(0, '#ddd4f0');
+  bg.addColorStop(0.55, '#ece6f8');
+  bg.addColorStop(1, '#f8f0e8');
+  ctx.fillStyle = bg; ctx.fillRect(0, 0, W, H);
 
-  // Stars
-  ctx.fillStyle = 'rgba(255,255,255,0.65)';
-  var _ss = [13,47,81,120,163,200,245,17,55,100,140,190];
-  for(var si=0; si<_ss.length; si++){
-    ctx.fillRect((_ss[si]*3+si*17)%W, (_ss[si]*2+si*11)%55, P, P);
-  }
+  // Decorative pixel dots (static stars/sparkles)
+  ctx.fillStyle = 'rgba(160,140,200,0.35)';
+  var _dd = [22,55,88,130,170,210,250,290,40,100,155,220,275];
+  for(var di=0; di<_dd.length; di++) ctx.fillRect(_dd[di]%W, 6+(di*9)%38, P, P);
 
-  // Pixel clouds
-  function _drawCloud(cx, cy){
-    ctx.fillStyle = 'rgba(255,255,255,0.68)';
-    var bs = [[0,0],[P,0],[P*2,0],[P*3,0],[P*4,0],[P,P*-1],[P*2,P*-1],[P*3,P*-1],[-P,0],[P*5,0]];
-    for(var i=0; i<bs.length; i++) ctx.fillRect(cx+bs[i][0], cy+bs[i][1], P, P);
-  }
-  var cScr = (now * 0.008) % W;
-  _drawCloud(((80 - cScr) % (W+80) + W+80) % (W+80) - 30, 28);
-  _drawCloud(((210 - cScr*0.65) % (W+80) + W+80) % (W+80) - 30, 18);
-  _drawCloud(((350 - cScr*0.45) % (W+80) + W+80) % (W+80) - 30, 38);
+  // Soft horizon line
+  ctx.fillStyle = 'rgba(143,170,139,0.18)'; ctx.fillRect(0, 105, W, 2);
 
-  // ── PLATFORM (meter bar) ────────────────────────
-  var platY = 106;
+  // ── PLATFORM (meter bar, anchored left, drains from right) ──
+  var platY = 108;
   var platH = H - platY;
   var platW = Math.round(safeRatio * W);
+  // State thresholds: >8 happy, >4 scared, <=4 danger
   var platState = safe > 8 ? 'solid' : safe > 4 ? 'cracking' : 'crumbling';
-  var pCols = {
-    solid:    {top:'#8faa8b', mid:'#7a9876', bot:'#6a8866', mortar:'rgba(80,100,70,0.5)', moss:'#a8c4a4'},
-    cracking: {top:'#c8a840', mid:'#b89030', bot:'#a07820', mortar:'rgba(100,80,20,0.5)', moss:'#d4b850'},
-    crumbling:{top:'#c87880', mid:'#b86070', bot:'#a05060', mortar:'rgba(120,60,70,0.5)', moss:'#e09090'}
-  };
-  var pc = pCols[platState];
+  var pC = {
+    solid:    {top:'#8faa8b',mid:'#7a9876',bot:'#6a8866',mor:'rgba(80,100,70,0.5)',moss:'#a8c4a4',debr:'rgba(143,170,139,'},
+    cracking: {top:'#c8a840',mid:'#b89030',bot:'#a07820',mor:'rgba(100,80,20,0.5)',moss:'#d4b850',debr:'rgba(200,160,40,'},
+    crumbling:{top:'#c87880',mid:'#b86070',bot:'#a05060',mor:'rgba(120,60,70,0.5)',moss:'#e09090',debr:'rgba(200,100,110,'}
+  }[platState];
 
   if(platW > 0){
-    var bg2 = ctx.createLinearGradient(0, platY, 0, H);
-    bg2.addColorStop(0, pc.top); bg2.addColorStop(0.3, pc.mid); bg2.addColorStop(1, pc.bot);
-    ctx.fillStyle = bg2;
-    ctx.fillRect(0, platY, platW, platH);
+    var platGrad = ctx.createLinearGradient(0,platY,0,H);
+    platGrad.addColorStop(0,pC.top); platGrad.addColorStop(0.3,pC.mid); platGrad.addColorStop(1,pC.bot);
+    ctx.fillStyle = platGrad; ctx.fillRect(0, platY, platW, platH);
     // Mortar grid
-    ctx.strokeStyle = pc.mortar; ctx.lineWidth = 1;
+    ctx.strokeStyle = pC.mor; ctx.lineWidth = 1;
     for(var tx=0; tx<platW; tx+=18){ ctx.beginPath(); ctx.moveTo(tx,platY); ctx.lineTo(tx,H); ctx.stroke(); }
     for(var ty=platY+12; ty<H; ty+=12){ ctx.beginPath(); ctx.moveTo(0,ty); ctx.lineTo(platW,ty); ctx.stroke(); }
-    // Moss top strip
-    ctx.fillStyle = pc.moss; ctx.fillRect(0, platY, platW, P);
-    // Cracks
+    // Moss/grass top
+    ctx.fillStyle = pC.moss; ctx.fillRect(0, platY, platW, P);
+    // Crack lines on stressed states
     if(platState !== 'solid'){
-      ctx.strokeStyle = platState==='crumbling' ? 'rgba(200,100,110,0.7)' : 'rgba(160,120,20,0.6)';
+      ctx.strokeStyle = platState==='crumbling'?'rgba(200,100,110,0.65)':'rgba(160,120,20,0.55)';
       ctx.lineWidth = 1;
-      for(var ci2=18; ci2<platW-18; ci2+=36){
-        ctx.beginPath(); ctx.moveTo(ci2,platY+2); ctx.lineTo(ci2+4,platY+8); ctx.lineTo(ci2+2,platY+14); ctx.stroke();
+      for(var cri=20; cri<platW-10; cri+=34){
+        ctx.beginPath(); ctx.moveTo(cri,platY+2); ctx.lineTo(cri+5,platY+9); ctx.lineTo(cri+3,platY+16); ctx.stroke();
       }
     }
-    // Crumbling debris spawn
-    if(platState==='crumbling' && Math.random()<0.15){
-      _jungleParticles.push({x:Math.random()*platW, y:platY-2, vx:(Math.random()-0.5)*0.8, vy:-Math.random()*0.8-0.2, life:1, r:P, col:'rgba(180,100,110,'});
+    // Right-edge crumble visual: faded/torn edge
+    if(platState==='crumbling' && platW > 6){
+      var edgeX = platW - 6;
+      ctx.fillStyle = 'rgba(200,120,130,0.4)'; ctx.fillRect(edgeX, platY, 6, platH);
+    }
+    // Debris particles spawn from right edge when crumbling
+    if(platState==='crumbling' && Math.random()<0.18 && platW>3){
+      _jungleParticles.push({x:platW-Math.random()*8, y:platY+Math.random()*4, vx:Math.random()*0.6+0.2, vy:-Math.random()*0.9-0.1, life:1, r:P, col:pC.debr});
     }
   }
 
-  // Particles
-  _jungleParticles = _jungleParticles.filter(function(p){ p.x+=p.vx; p.y+=p.vy; p.vy+=0.05; p.life-=0.035; return p.life>0; });
+  // Update & draw particles
+  _jungleParticles = _jungleParticles.filter(function(p){ p.x+=p.vx; p.y+=p.vy; p.vy+=0.06; p.life-=0.032; return p.life>0; });
   _jungleParticles.forEach(function(p){ ctx.fillStyle=p.col+p.life+')'; ctx.fillRect(Math.round(p.x),Math.round(p.y),p.r,p.r); });
 
   // ── PIXEL GIRL ──────────────────────────────────
-  function _drawGirl(gx, gy, bnc){
-    // gy = feet bottom; bnc = bounce offset in px
+  // Girl is at LEFT edge of platform; draws from left side
+  var GIRL_X = P*5; // fixed left position (center x of girl)
+  var GIRL_W = P*8; // total width for fall detection
+
+  // Draw helpers — all pixel-snapped
+  function _girl(gx, gy, state, bnc){
+    // state: 'happy'|'scared'|'danger'
     var b = Math.round(bnc/P)*P;
-    ctx.fillStyle='#a99fc9'; ctx.fillRect(gx-P*2,gy-P*8+b,P*5,P*2); ctx.fillRect(gx-P*2,gy-P*6+b,P*2,P*3); ctx.fillRect(gx+P*2,gy-P*6+b,P*2,P*3);
-    ctx.fillStyle='#f0c8b0'; ctx.fillRect(gx-P,gy-P*7+b,P*3,P*4);
-    ctx.fillStyle='#6040a0'; ctx.fillRect(gx-P,gy-P*5+b,P,P); ctx.fillRect(gx+P,gy-P*5+b,P,P);
-    ctx.fillStyle='#c87880'; ctx.fillRect(gx-P*2,gy-P*3+b,P*5,P*3);
-    ctx.fillStyle='#b86070'; ctx.fillRect(gx-P*2,gy-P+b,P*5,P);
-    ctx.fillStyle='#9080b8'; ctx.fillRect(gx+P*2,gy-P*3+b,P*2,P*2);
-    ctx.fillStyle='#7060a0'; ctx.fillRect(gx+P*2,gy-P*2+b,P*2,P);
-    ctx.fillStyle='#f0c8b0'; ctx.fillRect(gx-P*3,gy-P*3+b,P,P*2); ctx.fillRect(gx+P*3,gy-P*3+b,P,P*2);
-    ctx.fillRect(gx-P,gy-P+b,P,P*2); ctx.fillRect(gx+P,gy-P+b,P,P*2);
-    ctx.fillStyle='#7a9870'; ctx.fillRect(gx-P*2,gy+b,P*2,P); ctx.fillRect(gx+P,gy+b,P*2,P);
+    // hair (lavender)
+    ctx.fillStyle='#b0a4d8';
+    ctx.fillRect(gx-P*2,gy-P*9+b,P*5,P*2);
+    ctx.fillRect(gx-P*2,gy-P*7+b,P,P*4);
+    ctx.fillRect(gx+P*2,gy-P*7+b,P,P*4);
+    // face (cream)
+    ctx.fillStyle='#f5d5b8';
+    ctx.fillRect(gx-P,gy-P*8+b,P*3,P*4);
+    // eyes
+    if(state==='happy'){
+      ctx.fillStyle='#5040a0'; ctx.fillRect(gx-P,gy-P*6+b,P,P); ctx.fillRect(gx+P,gy-P*6+b,P,P);
+      // happy mouth
+      ctx.fillStyle='#c07060'; ctx.fillRect(gx-P,gy-P*5+b,P,P); ctx.fillRect(gx,gy-P*4+b,P*2,P);
+    } else if(state==='scared'){
+      ctx.fillStyle='#5040a0'; ctx.fillRect(gx-P,gy-P*6+b,P,P*2); ctx.fillRect(gx+P,gy-P*6+b,P,P*2); // wide eyes
+      ctx.fillStyle='#f0f0f0'; ctx.fillRect(gx-P,gy-P*6+b,P,P); ctx.fillRect(gx+P,gy-P*6+b,P,P);   // whites
+      ctx.fillStyle='#5040a0'; ctx.fillRect(gx-P,gy-P*5+b,P,P); ctx.fillRect(gx+P,gy-P*5+b,P,P);   // pupils down
+      ctx.fillStyle='#c08070'; ctx.fillRect(gx,gy-P*4+b,P*2,P); // small o-mouth
+    } else { // danger
+      ctx.fillStyle='#5040a0'; ctx.fillRect(gx-P,gy-P*6+b,P,P*2); ctx.fillRect(gx+P,gy-P*6+b,P,P*2);
+      ctx.fillStyle='#f0f0f0'; ctx.fillRect(gx-P,gy-P*6+b,P,P); ctx.fillRect(gx+P,gy-P*6+b,P,P);
+      ctx.fillStyle='#5040a0'; ctx.fillRect(gx-P,gy-P*5+b,P,P); ctx.fillRect(gx+P,gy-P*5+b,P,P);
+      ctx.fillStyle='#c06050'; ctx.fillRect(gx-P,gy-P*4+b,P*3,P); // open scared mouth
+    }
+    // body/dress (rose)
+    ctx.fillStyle='#c87880'; ctx.fillRect(gx-P*2,gy-P*4+b,P*5,P*4);
+    // dress skirt flare
+    ctx.fillStyle='#d08890'; ctx.fillRect(gx-P*3,gy-P*2+b,P*7,P*2);
+    ctx.fillStyle='#b86070'; ctx.fillRect(gx-P*3,gy-P+b,P*7,P); // skirt hem
+    // arms — vary by state
+    ctx.fillStyle='#f5d5b8';
+    if(state==='happy'){
+      ctx.fillRect(gx-P*3,gy-P*3+b,P,P*2); // left arm down
+      ctx.fillRect(gx+P*3,gy-P*3+b,P,P*2); // right arm down
+    } else if(state==='scared'){
+      ctx.fillRect(gx-P*4,gy-P*4+b,P*2,P); // left arm out
+      ctx.fillRect(gx+P*3,gy-P*4+b,P*2,P); // right arm out
+    } else {
+      ctx.fillRect(gx-P*5,gy-P*4+b,P*3,P); // arms wide out
+      ctx.fillRect(gx+P*3,gy-P*4+b,P*3,P);
+    }
+    // satchel bag (lavender)
+    ctx.fillStyle='#9080b8';
+    ctx.fillRect(gx+P*3,gy-P*3+b,P*2,P*2);
+    ctx.fillStyle='#7060a0'; ctx.fillRect(gx+P*3,gy-P*2+b,P*2,P);
+    // legs
+    ctx.fillStyle='#f5d5b8'; ctx.fillRect(gx-P,gy+b,P,P*2); ctx.fillRect(gx+P,gy+b,P,P*2);
+    // shoes (sage)
+    ctx.fillStyle='#7a9870'; ctx.fillRect(gx-P*2,gy+P*2+b,P*2,P); ctx.fillRect(gx+P,gy+P*2+b,P*2,P);
   }
-  function _drawGirlClimb(gx, gy){
-    ctx.fillStyle='#a99fc9'; ctx.fillRect(gx-P*2,gy-P*8,P*5,P*2); ctx.fillRect(gx-P*2,gy-P*6,P*2,P*2); ctx.fillRect(gx+P*2,gy-P*6,P*2,P*2);
-    ctx.fillStyle='#f0c8b0'; ctx.fillRect(gx-P,gy-P*7,P*3,P*4);
-    ctx.fillStyle='#6040a0'; ctx.fillRect(gx-P,gy-P*5,P,P); ctx.fillRect(gx+P,gy-P*5,P,P);
-    ctx.fillStyle='#c87880'; ctx.fillRect(gx-P*2,gy-P*3,P*5,P*3);
-    ctx.fillStyle='#b86070'; ctx.fillRect(gx-P*2,gy-P,P*5,P);
-    ctx.fillStyle='#9080b8'; ctx.fillRect(gx+P*2,gy-P*3,P*2,P*2);
-    ctx.fillStyle='#f0c8b0';
-    ctx.fillRect(gx-P*3,gy-P*6,P,P*4); ctx.fillRect(gx+P*3,gy-P*6,P,P*4);
-    ctx.fillStyle='#ffddcc'; ctx.fillRect(gx-P*3,gy-P*6,P,P); ctx.fillRect(gx+P*3,gy-P*6,P,P);
-    ctx.fillStyle='#f0c8b0'; ctx.fillRect(gx-P,gy-P,P,P*2); ctx.fillRect(gx+P,gy-P,P,P*2);
-    ctx.fillStyle='#7a9870'; ctx.fillRect(gx-P*2,gy+P,P*2,P); ctx.fillRect(gx+P,gy+P,P*2,P);
+
+  function _girlClimb(gx, gy){
+    // Girl on ladder, arms up gripping rungs
+    ctx.fillStyle='#b0a4d8';
+    ctx.fillRect(gx-P*2,gy-P*9,P*5,P*2); ctx.fillRect(gx-P*2,gy-P*7,P,P*4); ctx.fillRect(gx+P*2,gy-P*7,P,P*4);
+    ctx.fillStyle='#f5d5b8'; ctx.fillRect(gx-P,gy-P*8,P*3,P*4);
+    ctx.fillStyle='#5040a0'; ctx.fillRect(gx-P,gy-P*6,P,P*2); ctx.fillRect(gx+P,gy-P*6,P,P*2);
+    ctx.fillStyle='#f0f0f0'; ctx.fillRect(gx-P,gy-P*6,P,P); ctx.fillRect(gx+P,gy-P*6,P,P);
+    ctx.fillStyle='#5040a0'; ctx.fillRect(gx-P,gy-P*5,P,P); ctx.fillRect(gx+P,gy-P*5,P,P);
+    ctx.fillStyle='#c87880'; ctx.fillRect(gx-P*2,gy-P*4,P*5,P*4);
+    ctx.fillStyle='#d08890'; ctx.fillRect(gx-P*3,gy-P*2,P*7,P*2);
+    ctx.fillStyle='#b86070'; ctx.fillRect(gx-P*3,gy-P,P*7,P);
+    // arms UP gripping ladder
+    ctx.fillStyle='#f5d5b8';
+    ctx.fillRect(gx-P*3,gy-P*7,P,P*4); ctx.fillRect(gx+P*3,gy-P*7,P,P*4);
+    ctx.fillStyle='#ffddcc'; // hands bright
+    ctx.fillRect(gx-P*3,gy-P*7,P,P); ctx.fillRect(gx+P*3,gy-P*7,P,P);
+    ctx.fillStyle='#9080b8'; ctx.fillRect(gx+P*3,gy-P*4,P*2,P*2);
+    ctx.fillStyle='#f5d5b8'; ctx.fillRect(gx-P,gy,P,P*2); ctx.fillRect(gx+P,gy,P,P*2);
+    ctx.fillStyle='#7a9870'; ctx.fillRect(gx-P*2,gy+P*2,P*2,P); ctx.fillRect(gx+P,gy+P*2,P*2,P);
   }
 
   if(!fallen){
-    var girlX = Math.max(P*7, platW - P*5);
-    var bounce = Math.round(Math.sin(t*2.5)*P);
-    if(platW > P*7) _drawGirl(girlX, platY, bounce);
+    var girlState = safe > 8 ? 'happy' : safe > 4 ? 'scared' : 'danger';
+    var bounce = Math.round(Math.sin(t * (safe>8?2:safe>4?3:4)) * P);
 
-    // Platform edge drip hint when almost empty
-    if(safe < 1.5 && platW > 0){
-      ctx.fillStyle = 'rgba(200,120,130,'+(0.15+0.1*Math.sin(now/140))+')';
-      ctx.fillRect(0, 0, W, H);
+    if(platW >= GIRL_W){
+      _girl(GIRL_X, platY, girlState, bounce);
     }
 
-    // Triumph flash
-    if(SPIRIT_RUN.climbAnim && (now-SPIRIT_RUN.climbAnim)<2000){
-      var fa = 1-(now-SPIRIT_RUN.climbAnim)/2000;
-      ctx.fillStyle='rgba(200,160,180,'+fa*0.3+')'; ctx.fillRect(0,0,W,H);
-      ctx.fillStyle='rgba(160,100,120,'+fa+')'; ctx.font='bold 11px sans-serif'; ctx.textAlign='center';
+    // Danger flash overlay
+    if(safe <= 4 && safe > 0){
+      var flashAlpha = (0.08 + 0.06*Math.sin(now/(safe>2?250:150)));
+      ctx.fillStyle = 'rgba(200,100,110,'+flashAlpha+')'; ctx.fillRect(0,0,W,H);
+    }
+
+    // Triumph flash after climbing back
+    if(SPIRIT_RUN.climbAnim && (now-SPIRIT_RUN.climbAnim)<2500){
+      var fa = 1-(now-SPIRIT_RUN.climbAnim)/2500;
+      ctx.fillStyle='rgba(180,150,200,'+fa*0.35+')'; ctx.fillRect(0,0,W,H);
+      ctx.fillStyle='rgba(120,80,160,'+fa+')'; ctx.font='bold 11px sans-serif'; ctx.textAlign='center';
       ctx.fillText('Back on solid ground! ✨', W/2, H/2); ctx.textAlign='left';
     }
 
   } else {
-    // FALLEN — ladder on right, girl climbing
-    var ldX = W - P*12;
-    var ldW = P*5;
-    var ldTop = 10;
-    // Ladder rails (sage green)
+    // ── FALLEN STATE — ladder on right ──────────────
+    var climbPct = Math.min(1, (SPIRIT_RUN.climbPts||0) / (SPIRIT_SETTINGS.climbThreshold||5));
+    var ldX = W - P*14;
+    var ldW = P*6;
+    var ldTop = 12;
+
+    // Ladder shadow
+    ctx.fillStyle = 'rgba(100,80,140,0.12)'; ctx.fillRect(ldX+P*2, ldTop+P, ldW, platY-ldTop);
+    // Ladder rails (sage)
     ctx.fillStyle = '#7a9870';
     ctx.fillRect(ldX, ldTop, P, platY-ldTop);
     ctx.fillRect(ldX+ldW-P, ldTop, P, platY-ldTop);
     // Rungs
-    ctx.fillStyle = '#8faa8b';
-    for(var ri=ldTop+P*2; ri<platY-P; ri+=P*4) ctx.fillRect(ldX, ri, ldW, P);
-    // Safe ledge at top right
-    ctx.fillStyle = '#8faa8b'; ctx.fillRect(ldX-P*2, platY, ldW+P*4, platH);
-    ctx.fillStyle = '#a8c4a4'; ctx.fillRect(ldX-P*2, platY, ldW+P*4, P);
+    ctx.fillStyle = '#a0c09a';
+    for(var ri=ldTop+P*3; ri<platY-P; ri+=P*5) ctx.fillRect(ldX, ri, ldW, P*2);
+    // Landing ledge at top
+    ctx.fillStyle='#8faa8b'; ctx.fillRect(ldX-P*3, platY, ldW+P*6, platH);
+    ctx.fillStyle='#a8c4a4'; ctx.fillRect(ldX-P*3, platY, ldW+P*6, P);
 
-    // Girl position on ladder
-    var climbPct = Math.min(1, (SPIRIT_RUN.climbPts||0)/5);
-    var girlLY = Math.round(platY - climbPct*(platY-ldTop-P*14));
-    _drawGirlClimb(ldX+Math.round(ldW/2), girlLY + Math.round(Math.sin(t*4)*P));
+    // Girl on ladder
+    var girlLY = Math.round(platY - 2 - climbPct*(platY-ldTop-P*14));
+    _girlClimb(ldX+Math.round(ldW/2), girlLY + Math.round(Math.sin(t*5)*P));
 
-    // Glow strip behind ladder
+    // Progress glow behind ladder
     if(climbPct > 0){
-      var glowH = climbPct*(platY-ldTop);
-      ctx.fillStyle = 'rgba(160,130,200,0.22)';
-      ctx.fillRect(ldX-P, platY-glowH, ldW+P*2, glowH);
-      ctx.fillStyle = 'rgba(180,150,220,0.75)';
-      for(var oi=0; oi<Math.round(climbPct*5); oi++)
-        ctx.fillRect(ldX+ldW+P*2, platY-(oi+1)*P*5, P*2, P*2);
+      ctx.fillStyle='rgba(160,130,210,0.2)';
+      ctx.fillRect(ldX-P, platY-climbPct*(platY-ldTop), ldW+P*2, climbPct*(platY-ldTop));
+      // Orb markers
+      ctx.fillStyle='rgba(180,150,230,0.8)';
+      var orbCount = Math.round(climbPct*(SPIRIT_SETTINGS.climbThreshold||5));
+      for(var oi=0; oi<orbCount; oi++) ctx.fillRect(ldX+ldW+P*2, platY-(oi+1)*P*6, P*2, P*2);
     }
 
-    // Bottom prompt strip
-    ctx.fillStyle = 'rgba(80,60,100,0.75)'; ctx.fillRect(0,H-18,W,18);
-    ctx.fillStyle = '#e8d0f0'; ctx.font='bold 9px sans-serif'; ctx.textAlign='center';
-    ctx.fillText('Log Bible / Prayer / Ministry to climb back! ('+Math.min(5,SPIRIT_RUN.climbPts||0)+'/5)', W/2, H-5);
+    // Prompt bar
+    ctx.fillStyle='rgba(80,55,110,0.78)'; ctx.fillRect(0,H-20,W,20);
+    ctx.fillStyle='#ede0ff'; ctx.font='bold 9px sans-serif'; ctx.textAlign='center';
+    var threshold = SPIRIT_SETTINGS.climbThreshold||5;
+    ctx.fillText('Log activities to climb back! ('+((SPIRIT_RUN.climbPts||0)).toFixed(1)+'/'+threshold+' pts)', W/2, H-6);
     ctx.textAlign='left';
   }
 
   // ── HUD ─────────────────────────────────────────
-  // Left pill: bar + status
-  ctx.fillStyle = 'rgba(80,60,100,0.62)'; ctx.fillRect(6,5,130,14);
-  ctx.fillStyle = 'rgba(0,0,0,0.3)'; ctx.fillRect(8,7,80,8);
-  var barCol = safe>8?'#8faa8b':safe>4?'#c8a840':'#c87880';
-  ctx.fillStyle = barCol; ctx.fillRect(8,7,Math.round(safeRatio*80),8);
-  ctx.strokeStyle='rgba(255,255,255,0.2)'; ctx.lineWidth=1; ctx.strokeRect(8,7,80,8);
-  ctx.fillStyle='#f0e8ff'; ctx.font='bold 8px sans-serif'; ctx.textAlign='left';
-  ctx.fillText(fallen?'Climbing…':safe>8?'Grounded':safe>4?'Wavering':'Slipping!', 92, 15);
-  // Right pill: points
-  ctx.fillStyle='rgba(80,60,100,0.62)'; ctx.fillRect(W-66,5,60,14);
-  ctx.fillStyle='#e8d0f0'; ctx.font='8px sans-serif'; ctx.textAlign='right';
-  ctx.fillText('✦ '+(SPIRIT_RUN.totalPts||0)+' pts', W-8, 15);
+  // Left pill: pts bar + status
+  ctx.fillStyle='rgba(80,55,110,0.55)'; ctx.fillRect(6,5,136,15);
+  ctx.fillStyle='rgba(0,0,0,0.28)'; ctx.fillRect(8,8,82,8);
+  var hudBar = safe>8?'#8faa8b':safe>4?'#c8a840':'#c87880';
+  ctx.fillStyle=hudBar; ctx.fillRect(8,8,Math.round(safeRatio*82),8);
+  ctx.strokeStyle='rgba(255,255,255,0.18)'; ctx.lineWidth=1; ctx.strokeRect(8,8,82,8);
+  ctx.fillStyle='#f0eaff'; ctx.font='bold 8px sans-serif'; ctx.textAlign='left';
+  ctx.fillText(fallen?'Climbing…':safe>8?'Faithful':'Wavering!', 94, 16);
+  // Right pill: pts total
+  ctx.fillStyle='rgba(80,55,110,0.55)'; ctx.fillRect(W-70,5,64,15);
+  ctx.fillStyle='#e8d8ff'; ctx.font='8px sans-serif'; ctx.textAlign='right';
+  ctx.fillText(safe.toFixed(1)+'/'+maxPts+' pts', W-9, 16);
   ctx.textAlign='left';
+}
+
+function renderSpiritPtsSettings(){
+  var el = document.getElementById('spiritPtsSettings');
+  if(!el) return;
+  var actLabels = [
+    ['meeting','🏛️ Meeting'],['service','⏱️ Service day'],['serviceGoal','🎯 Hit service goal'],
+    ['familyWorship','👨‍👩‍👧 Family Worship'],['bibleReading','📖 Bible Reading'],
+    ['personalStudy','📚 Personal Study'],['dailyText','📰 Daily Text'],
+    ['morningWorship','🎬 Morning Worship video'],['card','✉️ Writing a card'],
+    ['plans','📋 Making plans'],['gratitude','🌸 Gratitude'],['prayer','🙏 Prayer']
+  ];
+  var html = '<div style="font-size:11px;font-weight:700;color:var(--textl);margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px">Activity Point Values</div>';
+  actLabels.forEach(function(pair){
+    var key=pair[0], label=pair[1];
+    var pts = SPIRIT_SETTINGS.pts[key] !== undefined ? SPIRIT_SETTINGS.pts[key] : 0.5;
+    html += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:5px">'
+      +'<span style="font-size:12px;color:var(--textd);flex:1">'+label+'</span>'
+      +'<input type="number" min="0" max="10" step="0.5" value="'+pts+'" style="width:60px;padding:5px 7px;border-radius:8px;border:1.5px solid #e8e0d8;font-family:\'Quicksand\',sans-serif;font-size:12px;text-align:center" onchange="updateSpiritPt(\''+key+'\',this.value)">'
+      +'<span style="font-size:11px;color:var(--textl);width:16px">pt</span>'
+      +'</div>';
+  });
+  el.innerHTML = html;
+  var drEl=document.getElementById('spiritDrainInput'); if(drEl) drEl.value=SPIRIT_SETTINGS.drainPerDay||4.5;
+  var mxEl=document.getElementById('spiritMaxInput'); if(mxEl) mxEl.value=SPIRIT_SETTINGS.maxPts||30;
+  var clEl=document.getElementById('spiritClimbInput'); if(clEl) clEl.value=SPIRIT_SETTINGS.climbThreshold||5;
+}
+
+function updateSpiritPt(key, val){
+  if(!SPIRIT_SETTINGS.pts) SPIRIT_SETTINGS.pts={};
+  SPIRIT_SETTINGS.pts[key] = Math.max(0, parseFloat(val)||0);
+  saveSpiritSettings();
+}
+
+function saveSpiritSettingsUI(){
+  var drEl=document.getElementById('spiritDrainInput');
+  var mxEl=document.getElementById('spiritMaxInput');
+  var clEl=document.getElementById('spiritClimbInput');
+  if(drEl) SPIRIT_SETTINGS.drainPerDay=Math.max(0.1,parseFloat(drEl.value)||4.5);
+  if(mxEl) SPIRIT_SETTINGS.maxPts=Math.max(5,parseInt(mxEl.value)||30);
+  if(clEl) SPIRIT_SETTINGS.climbThreshold=Math.max(0.5,parseFloat(clEl.value)||5);
+  saveSpiritSettings();
+  showToast('Meter settings saved ✓');
+}
+
+function resetSpiritSettings(){
+  SPIRIT_SETTINGS = JSON.parse(JSON.stringify(_SPIRIT_SETTINGS_DEF));
+  saveSpiritSettings();
+  renderSpiritPtsSettings();
+  showToast('Reset to defaults ✓');
 }
 
 function updateLighthouseSpiritStatus(){
   var el = document.getElementById('lighthouseSpiritStatus');
   if(!el) return;
   var safe = SPIRIT_RUN.safe || 0;
-  el.textContent = safe > 6 ? '✅ Jungle lush' : safe > 3 ? '⚠️ Cracking' : fallen ? '🪢 Hanging on!' : '🔴 Crumbling!';
-  el.style.color = safe > 6 ? 'var(--sage)' : safe > 3 ? '#d4a020' : '#cc3030';
+  var fallen2 = !!SPIRIT_RUN.fallen;
+  el.textContent = fallen2 ? '🪢 Climbing back!' : safe > 8 ? '✅ Faithful' : safe > 4 ? '⚠️ Wavering' : '🔴 Slipping!';
+  el.style.color = fallen2 ? '#9080b8' : safe > 8 ? 'var(--sage)' : safe > 4 ? '#d4a020' : '#cc3030';
   renderSpiritStreaks();
 }
 
@@ -12002,68 +12138,128 @@ function runSearch(q){
   var results = [];
   var f = _searchFilter;
 
-  // Tasks
+  function push(r){ results.push(r); }
+  var nav = "closeM('searchModal');";
+
+  // ── Tasks
   if(f==='all'||f==='tasks'){
-    (TASKS||[]).filter(function(t){ return t.title.toLowerCase().includes(q)||(t.notes||'').toLowerCase().includes(q); }).forEach(function(t){
-      results.push({type:'task',icon:'📋',label:t.title,sub:(t.done?'✓ Done · ':'')+( t.due?'Due '+t.due:''),action:"closeM('searchModal');goTab('tasks',null)"});
+    (TASKS||[]).forEach(function(t){
+      if(t.title.toLowerCase().includes(q)||(t.notes||'').toLowerCase().includes(q))
+        push({icon:'📋',label:t.title,sub:(t.done?'✓ Done · ':'')+( t.due?'Due '+t.due:'Task'),action:nav+"goTab('tasks',null)"});
+    });
+    (PROJECTS||[]).forEach(function(p){
+      if(p.title.toLowerCase().includes(q)||(p.notes||'').toLowerCase().includes(q))
+        push({icon:'📁',label:p.title,sub:'Project · '+(p.status||'active'),action:nav+"goTab('projects',null)"});
     });
   }
-  // Goals
+  // ── Goals
   if(f==='all'||f==='goals'){
-    (GOALS||[]).filter(function(g){ return g.title.toLowerCase().includes(q); }).forEach(function(g){
-      results.push({type:'goal',icon:'🎯',label:g.title,sub:(g.done?'✓ Complete':'In progress'),action:"closeM('searchModal');goTab('goals',null)"});
+    (GOALS||[]).forEach(function(g){
+      if(g.title.toLowerCase().includes(q))
+        push({icon:'🎯',label:g.title,sub:(g.done?'✓ Complete':'In progress')+' · '+(g.horizon||''),action:nav+"goTab('goals',null)"});
     });
   }
-  // Projects
-  if(f==='all'||f==='tasks'){
-    (PROJECTS||[]).filter(function(p){ return p.title.toLowerCase().includes(q)||(p.notes||'').toLowerCase().includes(q); }).forEach(function(p){
-      results.push({type:'project',icon:'📁',label:p.title,sub:'Project · '+(p.status||'active'),action:"closeM('searchModal');goTab('projects',null)"});
-    });
-  }
-  // Lists
+  // ── Lists & list items
   if(f==='all'||f==='lists'){
-    (LISTS||[]).filter(function(l){ return l.name.toLowerCase().includes(q); }).forEach(function(l){
-      results.push({type:'list',icon:'📝',label:l.name,sub:'List · '+(l.items||[]).length+' items',action:"closeM('searchModal');goTab('lists',null)"});
-    });
     (LISTS||[]).forEach(function(l){
-      (l.items||[]).filter(function(i){ return i.text&&i.text.toLowerCase().includes(q); }).forEach(function(i){
-        results.push({type:'list-item',icon:'•',label:i.text,sub:'In list: '+l.name,action:"closeM('searchModal');goTab('lists',null)"});
+      if(l.name.toLowerCase().includes(q))
+        push({icon:'📝',label:l.name,sub:'List · '+(l.items||[]).length+' items',action:nav+"goTab('lists',null)"});
+      (l.items||[]).forEach(function(i){
+        if(i.text&&i.text.toLowerCase().includes(q))
+          push({icon:'•',label:i.text,sub:'In list: '+l.name,action:nav+"goTab('lists',null)"});
       });
     });
   }
-  // Meals
-  if(f==='all'||f==='meals'){
-    var allDays = Object.keys(MEAL_PLAN||{});
-    allDays.forEach(function(day){
-      var meals = MEAL_PLAN[day]||{};
+  // ── Recipes
+  if(f==='all'||f==='recipes'||f==='meals'){
+    (RECIPES||[]).forEach(function(r){
+      if((r.name||r.title||'').toLowerCase().includes(q)||(r.notes||r.desc||'').toLowerCase().includes(q)||(r.tags||[]).join(' ').toLowerCase().includes(q))
+        push({icon:'📖',label:r.name||r.title||'Recipe',sub:'Recipe · '+(r.mealType||r.type||''),action:nav+"goTab('meals',null);setTimeout(function(){showMealSec('recipes',null)},150)"});
+    });
+    // Meal plan entries
+    Object.keys(MEAL_PLAN||{}).forEach(function(day){
+      var meals=MEAL_PLAN[day]||{};
       Object.keys(meals).forEach(function(slot){
-        var m = meals[slot];
-        if(m&&typeof m==='string'&&m.toLowerCase().includes(q)){
-          results.push({type:'meal',icon:'🍽️',label:m,sub:'Meal plan · '+day+' '+slot,action:"closeM('searchModal');goTab('meals',null)"});
-        }
+        var m=meals[slot];
+        if(m&&typeof m==='string'&&m.toLowerCase().includes(q))
+          push({icon:'🍽️',label:m,sub:'Meal plan · '+day+' '+slot,action:nav+"goTab('meals',null)"});
+      });
+    });
+    // Meal log
+    (MEAL_LOG||[]).forEach(function(m){
+      if((m.name||'').toLowerCase().includes(q))
+        push({icon:'🍳',label:m.name,sub:'Meal log · '+(m.date||m.day||''),action:nav+"goTab('meals',null)"});
+    });
+  }
+  // ── Notes & brain dump
+  if(f==='all'||f==='notes'){
+    (BRAIN_DUMP||[]).forEach(function(d){
+      if(d.text&&d.text.toLowerCase().includes(q))
+        push({icon:'🧠',label:d.text,sub:'Brain dump · '+(d.date||''),action:nav+"goTab('tasks',null)"});
+    });
+    (STUDY_NOTES||[]).forEach(function(n){
+      var txt=(n.title||'')+(n.body||n.content||'');
+      if(txt.toLowerCase().includes(q))
+        push({icon:'📓',label:n.title||'Note',sub:'Study note · '+(n.cat||'')+(n.date?' · '+n.date:''),action:nav+"goTab('lighthouse',null)"});
+    });
+    (PRAYERS||[]).forEach(function(p){
+      if((p.text||'').toLowerCase().includes(q))
+        push({icon:'🙏',label:p.text,sub:(p.answered?'✓ Answered':'Prayer')+' · '+(p.date||''),action:nav+"goTab('lighthouse',null)"});
+    });
+    (SCRIPTURE_CARDS||[]).forEach(function(sc){
+      if((sc.question||'').toLowerCase().includes(q)||(sc.scriptures||[]).join(' ').toLowerCase().includes(q))
+        push({icon:'📜',label:sc.question||'Scripture',sub:'Scripture card · '+((sc.tags||[]).join(', ')||''),action:nav+"goTab('lighthouse',null)"});
+    });
+  }
+  // ── Spiritual / habits
+  if(f==='all'||f==='spiritual'){
+    (HABITS||[]).forEach(function(h){
+      if((h.name||h.title||'').toLowerCase().includes(q))
+        push({icon:'🔥',label:h.name||h.title,sub:'Spiritual habit',action:nav+"goTab('lighthouse',null)"});
+    });
+    (GRAT_LOG||[]).forEach(function(g){
+      var txt=(g.items||[]).join(' ')+(g.extra||'');
+      if(txt.toLowerCase().includes(q))
+        push({icon:'🌸',label:(g.items||[])[0]||'Gratitude entry',sub:'Gratitude · '+(g.date||''),action:nav+"goTab('lighthouse',null)"});
+    });
+  }
+  // ── Health
+  if(f==='all'||f==='health'){
+    (MEDS||[]).forEach(function(m){
+      if((m.name||'').toLowerCase().includes(q))
+        push({icon:'💊',label:m.name,sub:'Medication',action:nav+"goTab('health',null)"});
+    });
+    var symKeys=Object.keys(SYM_LOG||{});
+    symKeys.forEach(function(date){
+      var syms=SYM_LOG[date]||{};
+      Object.keys(syms).forEach(function(sym){
+        if(sym.toLowerCase().includes(q)&&syms[sym])
+          push({icon:'🩺',label:sym,sub:'Symptom · '+date,action:nav+"goTab('health',null)"});
       });
     });
   }
-  // Study notes / brain dump
-  if(f==='all'||f==='notes'){
-    (BRAIN_DUMP||[]).filter(function(d){ return d.text.toLowerCase().includes(q); }).forEach(function(d){
-      results.push({type:'dump',icon:'🧠',label:d.text,sub:'Brain dump · '+d.date,action:"closeM('searchModal');goTab('tasks',null)"});
+  // ── Finance
+  if(f==='all'||f==='money'){
+    (EXPENSES||[]).forEach(function(e){
+      if((e.label||e.name||e.desc||'').toLowerCase().includes(q)||(e.cat||'').toLowerCase().includes(q))
+        push({icon:'💰',label:e.label||e.name||'Expense',sub:'Expense · '+(e.cat||'')+(e.date?' · '+e.date:''),action:nav+"goTab('estate',null)"});
     });
-    (STUDY_NOTES||[]).filter(function(n){ return (n.title||n.content||'').toLowerCase().includes(q)||(n.content||'').toLowerCase().includes(q); }).forEach(function(n){
-      results.push({type:'note',icon:'📓',label:n.title||n.content||'Note',sub:'Study note · '+(n.date||''),action:"closeM('searchModal');goTab('spirit',null)"});
+    (BILLS||[]).forEach(function(b){
+      if((b.name||'').toLowerCase().includes(q))
+        push({icon:'📄',label:b.name,sub:'Bill · '+(b.amount?'$'+b.amount:''),action:nav+"goTab('estate',null)"});
     });
   }
 
   if(!results.length){
     el.innerHTML='<p style="color:var(--textl);text-align:center;padding:20px;font-size:13px">No results for "'+escHtml(q)+'"</p>'; return;
   }
-  el.innerHTML = results.slice(0,30).map(function(r,i){
+  el.innerHTML = results.slice(0,40).map(function(r){
     return '<div style="padding:10px 12px;border-bottom:1px solid var(--bdr);cursor:pointer;display:flex;align-items:flex-start;gap:10px" onclick="'+r.action+'">'
       +'<span style="font-size:16px;flex-shrink:0;margin-top:1px">'+r.icon+'</span>'
-      +'<div><div style="font-size:13px;font-weight:600;color:var(--textd)">'+escHtml(r.label)+'</div>'
+      +'<div style="min-width:0"><div style="font-size:13px;font-weight:600;color:var(--textd);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+escHtml(r.label)+'</div>'
       +(r.sub?'<div style="font-size:11px;color:var(--textl);margin-top:2px">'+escHtml(r.sub)+'</div>':'')
       +'</div></div>';
-  }).join('')+(results.length>30?'<p style="text-align:center;font-size:11px;color:var(--textl);padding:8px">+'+(results.length-30)+' more…</p>':'');
+  }).join('')+(results.length>40?'<p style="text-align:center;font-size:11px;color:var(--textl);padding:8px">+'+(results.length-40)+' more…</p>':'');
 }
 
 // ═══════════════════════════════════════════════
