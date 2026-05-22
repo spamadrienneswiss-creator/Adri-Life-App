@@ -737,6 +737,13 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
 .badge-streak-banner{background:rgba(101,70,40,.25);border-radius:10px;padding:8px 12px;margin:0 0 14px;text-align:center;font-size:12px;font-weight:700;color:#4a2e10}
 .badge-earned-flash{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:white;border-radius:20px;padding:24px 28px;text-align:center;z-index:800;box-shadow:0 20px 60px rgba(0,0,0,.3);animation:badgeFlash .5s ease;pointer-events:none}
 @keyframes badgeFlash{0%{transform:translate(-50%,-50%) scale(.5);opacity:0}60%{transform:translate(-50%,-50%) scale(1.1)}100%{transform:translate(-50%,-50%) scale(1);opacity:1}}
+.helm-sec-hdr{display:flex;align-items:center;justify-content:space-between;cursor:pointer;padding:4px 0;user-select:none;-webkit-user-select:none}
+.helm-sec-hdr:active{opacity:.72}
+.helm-count-badge{background:var(--rose);color:white;border-radius:14px;padding:1px 8px;font-size:11px;font-weight:700;margin-left:8px;vertical-align:middle;display:inline-block}
+.batch-urgency-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+.batch-urg-btn{padding:12px 8px;border-radius:12px;border:none;cursor:pointer;font-family:'Quicksand',sans-serif;font-size:13px;font-weight:700;color:white;text-align:center;width:100%;transition:transform .12s;line-height:1.4}
+.batch-urg-btn:active{transform:scale(.95)}
+.qcap-bar{background:linear-gradient(135deg,var(--lav-light),var(--rose-light));border-radius:16px;padding:12px 14px;margin-bottom:12px}
 .cal-archives-badges-row{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;min-height:28px}
 </style>
 </head>
@@ -808,7 +815,7 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
         <button class="btn" onclick="helmQuickDump()" style="padding:6px 12px;font-size:13px;flex-shrink:0">↵</button>
       </div>
       <div id="helmDumpPreview"></div>
-      <button class="btn sec" style="font-size:11px;padding:3px 10px;margin-top:6px;width:100%" onclick="goTab('focus',null);setTimeout(function(){showFocusSec('dump',document.querySelector('#v-focus .pn-btn[onclick*=dump]'))},250)">See All Dumps →</button>
+      <button class="btn sec" style="font-size:11px;padding:3px 10px;margin-top:6px;width:100%" onclick="goTab('tasks',null);setTimeout(function(){togHelmSec('hs-dump',true)},200)">See All Dumps →</button>
     </div>
     <div class="hub-card span2" onclick="openCrateSprint()" style="background:linear-gradient(135deg,#e8f0f8,#d8e8f4);border-color:#b0c8e0"><div class="hub-card-ic">📦</div><div class="hub-card-name">Crate Sprint</div><div class="hub-card-sub">Race Reid's clock — how many crates can you load?</div></div>
   </div>
@@ -1107,20 +1114,115 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
 
 <!-- TASKS -->
 <div class="view" id="v-tasks">
-  <div class="ul">
-    <div class="uli r"><div class="uln">🔴 Do Now</div><div class="uls">Urgent+Important</div></div>
-    <div class="uli y"><div class="uln">🟡 Schedule</div><div class="uls">Important, not urgent</div></div>
-    <div class="uli b"><div class="uln">🔵 Quick Win</div><div class="uls">Urgent, not important</div></div>
-    <div class="uli g"><div class="uln">⚪ Someday</div><div class="uls">Not urgent</div></div>
+  <!-- Quick Capture -->
+  <div class="qcap-bar">
+    <div style="font-size:10px;font-weight:700;color:var(--textl);margin-bottom:6px;letter-spacing:.5px;text-transform:uppercase">⚡ Quick Capture</div>
+    <div style="display:flex;gap:8px;align-items:center">
+      <input id="quickCaptureInput" type="text" placeholder="Type anything… press Enter to save instantly" style="flex:1;padding:10px 13px;border-radius:11px;border:1.5px solid rgba(0,0,0,.1);font-family:'Quicksand',sans-serif;font-size:14px;font-weight:600;background:rgba(255,255,255,.85)" onkeydown="if(event.key==='Enter')quickCapture(this.value)">
+      <button class="btn sec" onclick="openM('taskModal')" style="padding:9px 12px;flex-shrink:0;font-size:12px">Full +</button>
+    </div>
+    <div style="display:flex;align-items:center;margin-top:6px">
+      <span style="font-size:11px;color:var(--textl);flex:1">Enter = saved instantly, no popup</span>
+      <span id="unassignedBadge" style="display:none;background:var(--rose);color:white;border-radius:14px;padding:2px 9px;font-size:11px;font-weight:700;cursor:pointer" onclick="togHelmSec('hs-batch',true)">0 unsorted</span>
+    </div>
   </div>
-  <div class="fbar" id="taskFbar">
-    <button class="fchip on" onclick="fT('all',this)">All</button>
-    <button class="fchip" onclick="fT('urgent-important',this)">🔴 Now</button>
-    <button class="fchip" onclick="fT('important-not-urgent',this)">🟡 Soon</button>
-    <button class="fchip" onclick="fT('urgent-not-important',this)">🔵 Quick</button>
-    <button class="fchip" id="doneChip" onclick="fT('done',this)">✅ Done</button>
+
+  <!-- What Now? -->
+  <div class="card" style="margin-bottom:10px">
+    <div class="helm-sec-hdr" onclick="togHelmSec('hs-whatnow')">
+      <span style="font-size:13px;font-weight:700;color:var(--textd)">🎲 What Now?</span>
+      <span id="ha-whatnow" style="color:var(--textl);font-size:12px">▸</span>
+    </div>
+    <div id="hs-whatnow" style="display:none;margin-top:12px">
+      <div style="font-size:12px;color:var(--textl);margin-bottom:12px">Can't decide? Let the app pick for you.</div>
+      <div class="whatnow-card" id="whatnowCard">
+        <div class="whatnow-task" id="whatnowTask" style="color:var(--textl)">Tap below to get a task picked for you!</div>
+      </div>
+      <div style="display:flex;gap:8px;margin-bottom:12px" id="whatnowActions">
+        <button class="btn sec" style="flex:1;display:none" id="whatnowSkipBtn" onclick="pickWhatNow()">↩ Pick another</button>
+        <button class="btn" style="flex:1;background:var(--sage);display:none" id="whatnowDoneBtn" onclick="whatnowDone()">✓ Done!</button>
+      </div>
+      <button class="btn" style="width:100%;font-size:15px;padding:12px" onclick="pickWhatNow()">🎲 Pick for me!</button>
+      <div style="font-size:11px;color:var(--textl);text-align:center;margin-top:8px" id="whatnowStats"></div>
+    </div>
   </div>
-  <div id="taskList"></div>
+
+  <!-- Brain Dump -->
+  <div class="card" style="margin-bottom:10px">
+    <div class="helm-sec-hdr" onclick="togHelmSec('hs-dump')">
+      <span style="font-size:13px;font-weight:700;color:var(--textd)">🧠 Brain Dump <span id="dumpBadge" class="helm-count-badge" style="display:none"></span></span>
+      <span id="ha-dump" style="color:var(--textl);font-size:12px">▸</span>
+    </div>
+    <div id="hs-dump" style="display:none;margin-top:10px">
+      <div style="font-size:12px;color:var(--textl);margin-bottom:10px">Get it out of your head — no organizing needed yet.</div>
+      <div style="display:flex;gap:8px;margin-bottom:10px">
+        <textarea id="dumpInput" placeholder="What's on your mind? Press Enter to add…" rows="2" style="flex:1;padding:9px 12px;border-radius:10px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:14px;resize:none" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();dumpIt();}"></textarea>
+        <button class="btn" style="align-self:flex-end;padding:10px 16px" onclick="dumpIt()">+ Add</button>
+      </div>
+      <div class="bd-filter-row" id="bdFilters">
+        <button class="bd-filter on" onclick="setBdFilter('all',this)">All</button>
+        <button class="bd-filter" onclick="setBdFilter('none',this)">🔘 Unsorted</button>
+        <button class="bd-filter" onclick="setBdFilter('critical',this)">🔥 Critical</button>
+        <button class="bd-filter" onclick="setBdFilter('high',this)">⬆️ High</button>
+        <button class="bd-filter" onclick="setBdFilter('medium',this)">➡️ Medium</button>
+        <button class="bd-filter" onclick="setBdFilter('low',this)">⬇️ Low</button>
+        <button class="bd-filter" onclick="setBdFilter('ignore',this)">🗑️ Ignore</button>
+      </div>
+      <div class="bd-bulk-bar" id="bdBulkBar">
+        <span id="bdBulkCount" style="font-size:12px;font-weight:700;flex:1">0 selected</span>
+        <select id="bdBulkPri" style="padding:5px 8px;border-radius:7px;border:none;font-family:'Quicksand',sans-serif;font-size:12px;font-weight:700" onchange="bdBulkAssign(this.value);this.value=''">
+          <option value="">Assign priority…</option>
+          <option value="critical">🔥 Critical</option>
+          <option value="high">⬆️ High</option>
+          <option value="medium">➡️ Medium</option>
+          <option value="low">⬇️ Low</option>
+          <option value="ignore">🗑️ Ignore</option>
+          <option value="none">🔘 Unsorted</option>
+        </select>
+        <button class="bd-bulk-sel" onclick="bdBulkToTasks()">→ Tasks</button>
+        <button class="bd-bulk-sel" style="background:rgba(255,255,255,.15)" onclick="bdBulkDelete()">🗑️ Delete</button>
+        <button class="bd-bulk-sel" style="background:rgba(255,255,255,.1)" onclick="bdClearSel()">✕</button>
+      </div>
+      <div id="dumpList"></div>
+    </div>
+  </div>
+
+  <!-- Batch Sort -->
+  <div class="card" style="margin-bottom:10px">
+    <div class="helm-sec-hdr" onclick="togHelmSec('hs-batch')">
+      <span style="font-size:13px;font-weight:700;color:var(--textd)">⚡ Batch Sort <span id="batchBadge" class="helm-count-badge" style="display:none"></span></span>
+      <span id="ha-batch" style="color:var(--textl);font-size:12px">▸</span>
+    </div>
+    <div id="hs-batch" style="display:none;margin-top:10px">
+      <div style="font-size:12px;color:var(--textl);margin-bottom:12px">Sort unsorted tasks one at a time — one tap assigns urgency instantly.</div>
+      <div id="batchInner"></div>
+    </div>
+  </div>
+
+  <!-- Tasks -->
+  <div class="card">
+    <div class="helm-sec-hdr" onclick="togHelmSec('hs-tasklist')">
+      <span style="font-size:13px;font-weight:700;color:var(--textd)">📋 Tasks</span>
+      <span id="ha-tasklist" style="color:var(--textl);font-size:12px">▾</span>
+    </div>
+    <div id="hs-tasklist" style="padding-top:10px">
+      <div class="ul" style="margin-bottom:10px">
+        <div class="uli r"><div class="uln">🔴 Do Now</div><div class="uls">Urgent+Important</div></div>
+        <div class="uli y"><div class="uln">🟡 Schedule</div><div class="uls">Important, not urgent</div></div>
+        <div class="uli b"><div class="uln">🔵 Quick Win</div><div class="uls">Urgent, not important</div></div>
+        <div class="uli g"><div class="uln">⚪ Someday</div><div class="uls">Not urgent</div></div>
+      </div>
+      <div class="fbar" id="taskFbar">
+        <button class="fchip on" onclick="fT('all',this)">All</button>
+        <button class="fchip" onclick="fT('urgent-important',this)">🔴 Now</button>
+        <button class="fchip" onclick="fT('important-not-urgent',this)">🟡 Soon</button>
+        <button class="fchip" onclick="fT('urgent-not-important',this)">🔵 Quick</button>
+        <button class="fchip" onclick="fT('unassigned',this)">📥 Unsorted</button>
+        <button class="fchip" id="doneChip" onclick="fT('done',this)">✅ Done</button>
+      </div>
+      <div id="taskList"></div>
+    </div>
+  </div>
 </div>
 
 <!-- ROUTINES -->
@@ -1320,8 +1422,8 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
 <div class="view" id="v-focus">
   <div class="pill-nav" style="margin-bottom:12px">
     <button class="pn-btn on" onclick="showFocusSec('timer',this)">🍅 Timer</button>
-    <button class="pn-btn" onclick="showFocusSec('dump',this)">🧠 Dump</button>
-    <button class="pn-btn" onclick="showFocusSec('whatnow',this)">🎲 What Now?</button>
+    <button class="pn-btn" onclick="goTab('tasks',null);setTimeout(function(){togHelmSec('hs-dump',true)},200)">🧠 Dump →</button>
+    <button class="pn-btn" onclick="goTab('tasks',null);setTimeout(function(){togHelmSec('hs-whatnow',true)},200)">🎲 What Now →</button>
     <button class="pn-btn" onclick="showFocusSec('intentions',this)">🎯 Intentions</button>
   </div>
   <!-- TIMER -->
@@ -1354,53 +1456,6 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
         </div>
       </div>
     </div>
-  </div>
-  <!-- BRAIN DUMP -->
-  <div id="fs-dump" style="display:none">
-    <div style="font-size:12px;color:var(--textl);margin-bottom:10px">Get it out of your head — no organizing needed yet.</div>
-    <div style="display:flex;gap:8px;margin-bottom:10px">
-      <textarea id="dumpInput" placeholder="What's on your mind? Press Enter to add…" rows="2" style="flex:1;padding:9px 12px;border-radius:10px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:14px;resize:none" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();dumpIt();}"></textarea>
-      <button class="btn" style="align-self:flex-end;padding:10px 16px" onclick="dumpIt()">+ Add</button>
-    </div>
-    <div class="bd-filter-row" id="bdFilters">
-      <button class="bd-filter on" onclick="setBdFilter('all',this)">All</button>
-      <button class="bd-filter" onclick="setBdFilter('none',this)">🔘 Unsorted</button>
-      <button class="bd-filter" onclick="setBdFilter('critical',this)">🔥 Critical</button>
-      <button class="bd-filter" onclick="setBdFilter('high',this)">⬆️ High</button>
-      <button class="bd-filter" onclick="setBdFilter('medium',this)">➡️ Medium</button>
-      <button class="bd-filter" onclick="setBdFilter('low',this)">⬇️ Low</button>
-      <button class="bd-filter" onclick="setBdFilter('ignore',this)">🗑️ Ignore</button>
-    </div>
-    <div class="bd-bulk-bar" id="bdBulkBar">
-      <span id="bdBulkCount" style="font-size:12px;font-weight:700;flex:1">0 selected</span>
-      <select id="bdBulkPri" style="padding:5px 8px;border-radius:7px;border:none;font-family:'Quicksand',sans-serif;font-size:12px;font-weight:700" onchange="bdBulkAssign(this.value);this.value=''">
-        <option value="">Assign priority…</option>
-        <option value="critical">🔥 Critical</option>
-        <option value="high">⬆️ High</option>
-        <option value="medium">➡️ Medium</option>
-        <option value="low">⬇️ Low</option>
-        <option value="ignore">🗑️ Ignore</option>
-        <option value="none">🔘 Unsorted</option>
-      </select>
-      <button class="bd-bulk-sel" onclick="bdBulkToTasks()">→ Tasks</button>
-      <button class="bd-bulk-sel" style="background:rgba(255,255,255,.15)" onclick="bdBulkDelete()">🗑️ Delete</button>
-      <button class="bd-bulk-sel" style="background:rgba(255,255,255,.1)" onclick="bdClearSel()">✕</button>
-    </div>
-    <div id="dumpList"></div>
-  </div>
-  <!-- WHAT NOW -->
-  <div id="fs-whatnow" style="display:none">
-    <div style="font-weight:700;font-size:14px;color:var(--textd);margin-bottom:6px">🎲 What should I do now?</div>
-    <div style="font-size:12px;color:var(--textl);margin-bottom:14px">Can't decide? Let the app pick for you.</div>
-    <div class="whatnow-card" id="whatnowCard">
-      <div class="whatnow-task" id="whatnowTask" style="color:var(--textl)">Tap below to get a task picked for you!</div>
-    </div>
-    <div style="display:flex;gap:8px;margin-bottom:16px" id="whatnowActions">
-      <button class="btn sec" style="flex:1;display:none" id="whatnowSkipBtn" onclick="pickWhatNow()">↩ Pick another</button>
-      <button class="btn" style="flex:1;background:var(--sage);display:none" id="whatnowDoneBtn" onclick="whatnowDone()">✓ Done!</button>
-    </div>
-    <button class="btn" style="width:100%;font-size:16px;padding:14px" onclick="pickWhatNow()">🎲 Pick for me!</button>
-    <div style="font-size:11px;color:var(--textl);text-align:center;margin-top:8px" id="whatnowStats"></div>
   </div>
   <!-- INTENTIONS -->
   <div id="fs-intentions" style="display:none">
@@ -3538,6 +3593,16 @@ function initFirebase(){
     renderGoals();
     renderPinned();
   });
+
+  // Listen to ministry log
+  window.fsOnSnapshot(window.fsCollection(window.db,'ministry'), function(snap){
+    MINISTRY_LOG = [];
+    snap.forEach(function(d){ MINISTRY_LOG.push(d.data()); });
+    MINISTRY_LOG.sort(function(a,b){ return (b.date||'') > (a.date||'') ? 1 : -1; });
+    localStorage.setItem('aMinistryLog', JSON.stringify(MINISTRY_LOG));
+    renderMinistryStats();
+    renderMinistryLog();
+  });
 }
 
 // Save to Firebase
@@ -3630,6 +3695,7 @@ function goTabDirect(tab,btn){
   if(SECTION_VIEWS[tab]||tab==='emporium')renderHubPreviews(tab);
   if(tab==='today'){ startSpiritRunLoop(); } else { stopSpiritRunLoop(); }
   if(tab==='lighthouse'){ updateLighthouseSpiritStatus(); }
+  if(tab==='tasks'){ updateHelmBadges(); }
 }
 
 function renderHubPreviews(section){
@@ -4420,6 +4486,7 @@ function renderT(f){
   var arr;
   if(f==='done') arr=TASKS.filter(function(t){return t.done;});
   else if(f==='all') arr=TASKS.filter(function(t){return !t.done;});
+  else if(f==='unassigned') arr=TASKS.filter(function(t){return !t.done&&!t.urgency;});
   else if(['urgent-important','important-not-urgent','urgent-not-important','not-urgent'].indexOf(f)>-1)
     arr=TASKS.filter(function(t){return !t.done&&t.urgency===f;});
   else arr=TASKS.filter(function(t){return !t.done&&t.cat===f;});
@@ -7166,16 +7233,105 @@ function showMoneySec(sec,btn){
 }
 
 function showFocusSec(sec,btn){
-  ['timer','dump','whatnow','intentions'].forEach(function(s){
+  ['timer','intentions'].forEach(function(s){
     var el=document.getElementById('fs-'+s);
     if(el)el.style.display=(s===sec)?'':'none';
   });
   document.querySelectorAll('#v-focus .pn-btn').forEach(function(b){b.classList.remove('on');});
   if(btn)btn.classList.add('on');
-  if(sec==='dump')renderDumpList();
-  if(sec==='whatnow')renderWhatNowStats();
   if(sec==='intentions'){renderIntentionList();renderIntentionTaskPicks();}
 }
+
+// ── Helm / Tasks Tab Functions ────────────────
+function togHelmSec(id, forceOpen){
+  var el=document.getElementById(id);
+  if(!el)return;
+  var arrow=document.getElementById('h'+id.slice(1).replace('s-','a-'));
+  var arrowId='ha-'+id.slice(3);
+  var arr=document.getElementById(arrowId);
+  var open=(forceOpen===true)?true:(forceOpen===false)?false:(el.style.display==='none');
+  el.style.display=open?'':'none';
+  if(arr)arr.textContent=open?'▾':'▸';
+  if(open&&id==='hs-dump')renderDumpList();
+  if(open&&id==='hs-whatnow')renderWhatNowStats();
+  if(open&&id==='hs-batch')renderBatchCard();
+}
+
+function quickCapture(val){
+  var title=(val||'').trim();
+  if(!title)return;
+  var inp=document.getElementById('quickCaptureInput');
+  if(inp)inp.value='';
+  var t={id:'t-'+Date.now(),title:title,cat:'mis',urgency:'',etime:'',due:'',notes:'',done:false,repeat:'',subs:[],created:new Date().toISOString()};
+  TASKS.unshift(t);
+  localStorage.setItem('aTasks',JSON.stringify(TASKS));
+  fbSave('tasks',t.id,t);
+  updateHelmBadges();
+  showToast('Captured! Sort it later.');
+}
+
+function updateHelmBadges(){
+  var unsorted=TASKS.filter(function(t){return !t.done&&!t.urgency;}).length;
+  var badge=document.getElementById('unassignedBadge');
+  if(badge){badge.style.display=unsorted?'inline':'none';badge.textContent=unsorted+' unsorted';}
+  var bBadge=document.getElementById('batchBadge');
+  if(bBadge){bBadge.style.display=unsorted?'inline-block':'none';bBadge.textContent=unsorted;}
+  var dumpItems=(typeof BRAIN_DUMP!=='undefined')?BRAIN_DUMP.length:0;
+  var dBadge=document.getElementById('dumpBadge');
+  if(dBadge){dBadge.style.display=dumpItems?'inline-block':'none';dBadge.textContent=dumpItems;}
+}
+
+var _batchIdx=0;
+function renderBatchCard(){
+  var el=document.getElementById('batchInner');
+  if(!el)return;
+  var unsorted=TASKS.filter(function(t){return !t.done&&!t.urgency;});
+  updateHelmBadges();
+  if(!unsorted.length){
+    el.innerHTML='<div class="empty"><div class="emj">✨</div><p>All tasks sorted!</p></div>';
+    return;
+  }
+  if(_batchIdx>=unsorted.length)_batchIdx=0;
+  var t=unsorted[_batchIdx];
+  el.innerHTML='<div style="font-size:11px;color:var(--textl);margin-bottom:6px">'+(_batchIdx+1)+' of '+unsorted.length+' unsorted</div>'
+    +'<div style="background:var(--lav-light);border-radius:12px;padding:12px 14px;margin-bottom:10px;font-weight:700;font-size:14px;color:var(--textd)">'+escHtml(t.title)+'</div>'
+    +'<div class="batch-urgency-grid">'
+    +'<button class="batch-urg-btn" style="background:#e85555" onclick="batchAssign(\''+t.id+'\',\'urgent-important\')">🔴 Do Now<br><span style="font-size:10px;font-weight:400">Urgent + Important</span></button>'
+    +'<button class="batch-urg-btn" style="background:#e8a030" onclick="batchAssign(\''+t.id+'\',\'important-not-urgent\')">🟡 Schedule<br><span style="font-size:10px;font-weight:400">Important, not urgent</span></button>'
+    +'<button class="batch-urg-btn" style="background:#3a7fc4" onclick="batchAssign(\''+t.id+'\',\'urgent-not-important\')">🔵 Quick Win<br><span style="font-size:10px;font-weight:400">Urgent, not important</span></button>'
+    +'<button class="batch-urg-btn" style="background:#7cbb6e" onclick="batchAssign(\''+t.id+'\',\'not-urgent\')">⚪ Someday<br><span style="font-size:10px;font-weight:400">Not urgent or important</span></button>'
+    +'</div>'
+    +'<div style="display:flex;gap:8px">'
+    +'<button class="btn sec" style="flex:1;font-size:12px" onclick="batchSkip()">Skip →</button>'
+    +'<button class="btn sec" style="flex:0;background:rgba(200,50,50,.1);color:var(--rose);font-size:12px;padding:8px 14px" onclick="batchDelete(\''+t.id+'\')">Delete</button>'
+    +'</div>';
+}
+
+function batchAssign(id, urgency){
+  var t=TASKS.find(function(x){return x.id===id;});
+  if(!t)return;
+  t.urgency=urgency;
+  localStorage.setItem('aTasks',JSON.stringify(TASKS));
+  fbSave('tasks',t.id,t);
+  renderT();
+  renderBatchCard();
+}
+
+function batchSkip(){
+  var unsorted=TASKS.filter(function(t){return !t.done&&!t.urgency;});
+  _batchIdx=(_batchIdx+1)%Math.max(1,unsorted.length);
+  renderBatchCard();
+}
+
+function batchDelete(id){
+  TASKS=TASKS.filter(function(t){return t.id!==id;});
+  localStorage.setItem('aTasks',JSON.stringify(TASKS));
+  fbDelete('tasks',id);
+  renderT();
+  renderBatchCard();
+}
+
+function escHtml(s){return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 
 // ── Pomodoro Timer ────────────────────────────
 var TIMER_CIRCUMFERENCE=452.4;
@@ -9304,8 +9460,10 @@ function logMinistry(){
   var studies=parseInt((document.getElementById('minStudies')||{}).value||0)||0;
   var notes=((document.getElementById('minNotes')||{}).value||'').trim();
   if(!hrs&&!notes)return alert('Enter hours or notes');
-  MINISTRY_LOG.unshift({id:'m-'+Date.now(),date:date,hours:hrs,studies:studies,notes:notes});
+  var mItem={id:'m-'+Date.now(),date:date,hours:hrs,studies:studies,notes:notes,created:new Date().toISOString()};
+  MINISTRY_LOG.unshift(mItem);
   localStorage.setItem('aMinistryLog',JSON.stringify(MINISTRY_LOG));
+  fbSave('ministry', mItem.id, mItem);
   if(document.getElementById('minHrs'))document.getElementById('minHrs').value='';
   if(document.getElementById('minStudies'))document.getElementById('minStudies').value='';
   if(document.getElementById('minNotes'))document.getElementById('minNotes').value='';
@@ -9350,6 +9508,7 @@ function renderMinistryLog(){
 function delMinistry(id){
   MINISTRY_LOG=MINISTRY_LOG.filter(function(m){return m.id!==id;});
   localStorage.setItem('aMinistryLog',JSON.stringify(MINISTRY_LOG));
+  fbDelete('ministry', id);
   renderMinistryStats();
   renderMinistryLog();
 }
