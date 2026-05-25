@@ -779,10 +779,10 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
 <div class="tabs" id="tabBar">
   <button class="tab-btn on" data-tab="today" onclick="goTab('today',this)">Today</button>
   <button class="tab-btn" data-tab="helm" onclick="goTab('helm',this)">Tasks &amp; Projects</button>
+  <button class="tab-btn" data-tab="lighthouse" onclick="goTab('lighthouse',this)">Spiritual</button>
   <button class="tab-btn" data-tab="conservatory" onclick="goTab('conservatory',this)">Personal Growth</button>
   <button class="tab-btn" data-tab="hearthside" onclick="goTab('hearthside',this)">Health &amp; Wellness</button>
   <button class="tab-btn" data-tab="workshop" onclick="goTab('workshop',this)">Workshop</button>
-  <button class="tab-btn" data-tab="lighthouse" onclick="goTab('lighthouse',this)">Spiritual</button>
   <button class="tab-btn" data-tab="estate" onclick="goTab('estate',this)">Money &amp; Home</button>
   <button class="tab-btn" data-tab="emporium" onclick="goTab('emporium',this)">Work</button>
   <button class="tab-btn" data-tab="archives" onclick="goTab('archives',this)">Research Library</button>
@@ -1021,40 +1021,74 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
       <span class="sh-arr" id="sh-arr-todayStatsBody">▸</span>
     </div>
     <div id="todayStatsBody-wrap" style="display:none">
-      <div style="padding:0 14px 12px">
-        <div class="pr"><div class="pt"><span class="pn">🔥 Calories</span><span class="pm2" id="tcD">0/1900</span></div><div class="pb"><div class="pf pf-cal" id="tcB" style="width:0%"></div></div></div>
-        <div class="pr"><div class="pt"><span class="pn">💪 Protein</span><span class="pm2" id="tpD">0g/120g</span></div><div class="pb"><div class="pf pf-pro" id="tpB" style="width:0%"></div></div></div>
-        <div class="pr"><div class="pt"><span class="pn">🌿 Fiber</span><span class="pm2" id="tfD">0g/25g</span></div><div class="pb"><div class="pf pf-fib" id="tfB" style="width:0%"></div></div></div>
-        <div class="pr"><div class="pt"><span class="pn">👟 Steps</span><span class="pm2" id="tStepD">0 / 8,000</span></div><div class="pb"><div class="pf" id="tStepB" style="width:0%;background:var(--sage)"></div></div></div>
+      <div style="padding:0 14px 14px">
+        <!-- Today sub-section -->
+        <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;padding:6px 0 4px" onclick="togTodaySec('statToday')">
+          <span style="font-size:11px;font-weight:700;color:var(--rose);letter-spacing:.4px;text-transform:uppercase">Today</span>
+          <span class="sh-arr" id="sh-arr-statToday">▾</span>
+        </div>
+        <div id="statToday-wrap">
+          <div class="pr"><div class="pt"><span class="pn">💧 Water</span><span class="pm2" id="tWaterD">0 / 115 oz</span></div><div class="pb"><div class="pf pf-wat" id="tWaterB" style="width:0%"></div></div></div>
+          <div class="pr"><div class="pt"><span class="pn">🔥 Calories</span><span class="pm2" id="tcD">0/1900</span></div><div class="pb"><div class="pf pf-cal" id="tcB" style="width:0%"></div></div></div>
+          <div class="pr"><div class="pt"><span class="pn">💪 Protein</span><span class="pm2" id="tpD">0g/120g</span></div><div class="pb"><div class="pf pf-pro" id="tpB" style="width:0%"></div></div></div>
+          <div class="pr"><div class="pt"><span class="pn">🌿 Fiber</span><span class="pm2" id="tfD">0g/25g</span></div><div class="pb"><div class="pf pf-fib" id="tfB" style="width:0%"></div></div></div>
+          <div class="pr"><div class="pt"><span class="pn">👟 Steps</span><span class="pm2" id="tStepD">0 / 8,000</span></div><div class="pb"><div class="pf" id="tStepB" style="width:0%;background:var(--sage)"></div></div></div>
+          <div class="pr"><div class="pt"><span class="pn">😴 Sleep</span><span class="pm2" id="tSleepD">—</span></div><div class="pb"><div class="pf" id="tSleepB" style="width:0%;background:var(--lav)"></div></div></div>
+          <div class="pr"><div class="pt"><span class="pn">⏱️ Ministry</span><span class="pm2" id="tMinD">—</span></div><div class="pb"><div class="pf" id="tMinB" style="width:0%;background:var(--peach)"></div></div></div>
+        </div>
+        <!-- This Week sub-section -->
+        <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;padding:10px 0 4px;border-top:1px solid #f0ebe6;margin-top:8px" onclick="togTodaySec('statWeek')">
+          <span style="font-size:11px;font-weight:700;color:var(--rose);letter-spacing:.4px;text-transform:uppercase">This Week</span>
+          <span class="sh-arr" id="sh-arr-statWeek">▸</span>
+        </div>
+        <div id="statWeek-wrap" style="display:none">
+          <div id="weekStatsBody"></div>
+        </div>
       </div>
     </div>
   </div>
-  <!-- This Week summary (collapsible) -->
-  <div class="card" style="padding:0">
-    <div style="display:flex;align-items:center;justify-content:space-between;padding:11px 14px;cursor:pointer" onclick="togTodaySec('thisWeekBody')">
-      <span style="font-size:12px;font-weight:700;color:var(--textl);letter-spacing:.5px;text-transform:uppercase">📅 This Week</span>
-      <span class="sh-arr" id="sh-arr-thisWeekBody">▸</span>
+
+  <!-- Tasks & Routines (collapsible) -->
+  <div class="card" style="padding:0;margin-bottom:10px">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:11px 14px;cursor:pointer" onclick="togTodaySec('todayTasksSec')">
+      <span style="font-size:11px;font-weight:700;color:var(--textl);letter-spacing:.5px;text-transform:uppercase">Tasks &amp; Routines</span>
+      <span class="sh-arr" id="sh-arr-todayTasksSec">▾</span>
     </div>
-    <div id="thisWeekBody-wrap" style="display:none"><div id="thisWeekBody" style="padding:0 14px 12px"></div></div>
-  </div>
-  <!-- Active Goals (collapsible) -->
-  <div id="todayGoalsWrap" style="display:none">
-    <div class="card" style="padding:0">
-      <div style="display:flex;align-items:center;justify-content:space-between;padding:11px 14px;cursor:pointer" onclick="togTodaySec('todayGoalsBody')">
-        <span style="font-size:12px;font-weight:700;color:var(--textl);letter-spacing:.5px;text-transform:uppercase">🎯 Active Goals</span>
-        <span class="sh-arr" id="sh-arr-todayGoalsBody">▸</span>
+    <div id="todayTasksSec-wrap" style="padding:0 14px 14px">
+      <!-- Do Next widget -->
+      <div style="background:linear-gradient(135deg,var(--lav-light),var(--rose-light));border-radius:12px;padding:12px 14px;margin-bottom:14px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+          <span style="font-size:12px;font-weight:700;color:var(--textd)">Do Next</span>
+          <button class="btn sec" style="font-size:11px;padding:3px 10px" onclick="pickDoNext()">Pick for me</button>
+        </div>
+        <div id="doNextCard" style="font-size:13px;color:var(--textl);font-style:italic;min-height:20px">Tap "Pick for me" to get your next task.</div>
+        <div id="doNextActions" style="display:none;margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn" style="flex:1;background:var(--sage);font-size:12px;padding:8px" id="doNextTimerBtn" onclick="startDoNextTimer()">Start Timer</button>
+          <button class="btn" style="flex:1;font-size:12px;padding:8px" id="doNextDoneBtn" onclick="doNextDone()">Done ✓</button>
+          <button class="btn sec" style="flex:0;font-size:12px;padding:8px 12px" onclick="pickDoNext()">Skip →</button>
+        </div>
       </div>
-      <div id="todayGoalsBody-wrap" style="display:none"><div id="todayGoalsBody" style="padding:0 14px 12px"></div></div>
+      <!-- AM Routine -->
+      <div style="font-size:11px;font-weight:700;color:var(--textl);letter-spacing:.4px;text-transform:uppercase;cursor:pointer;display:flex;justify-content:space-between;align-items:center;margin-bottom:4px" onclick="togTodaySec('todayAM')">
+        <span>Morning Routine</span><span class="sh-arr" id="sh-arr-todayAM">▾</span>
+      </div>
+      <div id="todayAM-wrap" style="margin-bottom:12px"><div class="rc" id="todayAM"><div class="rt">✨ AM Routine</div></div></div>
+      <!-- Do Now -->
+      <div style="font-size:11px;font-weight:700;color:var(--rose);letter-spacing:.4px;text-transform:uppercase;margin-bottom:6px">Do Now</div>
+      <div id="todayUr" style="margin-bottom:12px"><div class="empty"><div class="emj">🎉</div><p>No urgent tasks!</p></div></div>
+      <!-- Do Soon -->
+      <div style="font-size:11px;font-weight:700;color:var(--textl);letter-spacing:.4px;text-transform:uppercase;cursor:pointer;display:flex;justify-content:space-between;align-items:center;margin-bottom:4px" onclick="togTodaySec('todaySo')">
+        <span style="color:#c48a20">Do Soon</span><span class="sh-arr" id="sh-arr-todaySo">▸</span>
+      </div>
+      <div id="todaySo-wrap" style="display:none;margin-bottom:12px"><div id="todaySo"><div class="empty"><div class="emj">📝</div><p>Add tasks to see them here.</p></div></div></div>
+      <!-- PM Routine -->
+      <div style="font-size:11px;font-weight:700;color:var(--textl);letter-spacing:.4px;text-transform:uppercase;cursor:pointer;display:flex;justify-content:space-between;align-items:center;margin-bottom:4px" onclick="togTodaySec('todayPM')">
+        <span>Evening Routine</span><span class="sh-arr" id="sh-arr-todayPM">▸</span>
+      </div>
+      <div id="todayPM-wrap" style="display:none"><div class="rc pm" id="todayPM"><div class="rt">🌙 PM Routine</div></div></div>
     </div>
   </div>
-  <div class="sh sh-toggle" onclick="togTodaySec('todayAM')">🌅 Morning Routine <span class="sh-arr" id="sh-arr-todayAM">▾</span></div>
-  <div id="todayAM-wrap"><div class="rc" id="todayAM"><div class="rt">✨ AM Routine</div></div></div>
-  <div class="sh">🔴 Do Now</div>
-  <div id="todayUr"><div class="empty"><div class="emj">🎉</div><p>No urgent tasks!</p></div></div>
-  <div class="sh sh-toggle" onclick="togTodaySec('todaySo')">🟡 Do Soon <span class="sh-arr" id="sh-arr-todaySo">▾</span></div>
-  <div id="todaySo-wrap"><div id="todaySo"><div class="empty"><div class="emj">📝</div><p>Add tasks to see them here.</p></div></div></div>
-  <div class="sh sh-toggle" onclick="togTodaySec('todayPM')">🌙 Evening Routine <span class="sh-arr" id="sh-arr-todayPM">▾</span></div>
-  <div id="todayPM-wrap"><div class="rc pm" id="todayPM"><div class="rt">🌙 PM Routine</div></div></div>
+
   <div id="todayNonDaily"></div>
   <div id="pinnedSection" style="display:none">
     <div class="sh">📌 Pinned</div>
@@ -3518,7 +3552,7 @@ var MEAL_COMBOS = JSON.parse(localStorage.getItem('aMC')||'null')||[
   {id:'mc4',name:'Recovery Meal',emoji:'🍗',foods:['f2','f3','f10']},
 ];
 
-var DEFAULT_TAB_ORDER=['today','helm','conservatory','hearthside','workshop','lighthouse','estate','emporium','archives','archive'];
+var DEFAULT_TAB_ORDER=['today','helm','lighthouse','conservatory','hearthside','workshop','estate','emporium','archives','archive'];
 var TAB_LABELS={today:'Today',helm:'Tasks & Projects',conservatory:'Personal Growth',hearthside:'Health & Wellness',workshop:'Workshop',lighthouse:'Spiritual',estate:'Money & Home',emporium:'Work',archives:'Research Library',archive:'Archive',stories:'Stories',mixtape:'Mixtape'};
 var TAB_ORDER=(function(){var o=JSON.parse(localStorage.getItem('aTabOrder')||'null');if(!o)return DEFAULT_TAB_ORDER.slice();var full=DEFAULT_TAB_ORDER.slice();o=o.filter(function(t){return full.indexOf(t)>-1;});full.forEach(function(t){if(o.indexOf(t)<0)o.push(t);});return o;})();
 var SECTION_VIEWS={today:['today'],helm:['tasks','projects','lists'],conservatory:['goals','routines','learn','focus'],hearthside:['food','meals','recap'],workshop:['board','faves','stories','mixtape'],lighthouse:['spirit'],estate:['money'],emporium:['wigs'],archives:['guide','export','settings'],archive:['archive']};
@@ -3716,7 +3750,7 @@ function goTabDirect(tab,btn){
   if(tab==='stories')renderStoriesList();
   if(tab==='mixtape')renderMixtape();
   if(SECTION_VIEWS[tab]||tab==='emporium')renderHubPreviews(tab);
-  if(tab==='today'){ tickSpiritRun(); renderWaterBottle(); renderTodayStatsBars(); }
+  if(tab==='today'){ tickSpiritRun(); renderWaterBottle(); renderTodayStatsBars(); renderWeekStats(); }
   if(tab==='lighthouse'){ updateLighthouseSpiritStatus(); }
   if(tab==='tasks'){ updateHelmBadges(); }
 }
@@ -4122,15 +4156,17 @@ function initTodaySecDefaults(){
   var today=todayStr();
   if(_todaySecC._autoDate!==today){
     var h=new Date().getHours();
-    _todaySecC['todayPM']=(h<19); // PM collapsed before 7pm
-    _todaySecC['todayAM']=(h>=19); // AM collapsed after 7pm
-    _todaySecC['todaySo']=false;
+    _todaySecC['todayPM']=(h<19);
+    _todaySecC['todayAM']=(h>=19);
+    _todaySecC['todaySo']=true; // Do Soon starts collapsed
     _todaySecC._autoDate=today;
     localStorage.setItem('aTodaySecC',JSON.stringify(_todaySecC));
   }
-  if(_todaySecC['thisWeekBody']===undefined) _todaySecC['thisWeekBody']=true;
-  if(_todaySecC['todayGoalsBody']===undefined) _todaySecC['todayGoalsBody']=true;
-  ['todayAM','todayPM','todaySo','thisWeekBody','todayGoalsBody'].forEach(applyTodaySecState);
+  if(_todaySecC['todayStatsBody']===undefined) _todaySecC['todayStatsBody']=true; // stats collapsed by default
+  if(_todaySecC['statToday']===undefined) _todaySecC['statToday']=false; // Today open
+  if(_todaySecC['statWeek']===undefined) _todaySecC['statWeek']=true; // This Week collapsed
+  if(_todaySecC['todayTasksSec']===undefined) _todaySecC['todayTasksSec']=false; // Tasks open
+  ['todayAM','todayPM','todaySo','todayStatsBody','statToday','statWeek','todayTasksSec'].forEach(applyTodaySecState);
 }
 
 function togTodaySec(id){
@@ -4751,17 +4787,172 @@ function saveSteps(){
 }
 
 function renderTodayStatsBars(){
-  var t=getTot();var steps=getTodaySteps();
+  var t=getTot(); var steps=getTodaySteps(); var oz=WATER_OZ_LOG[getTK()]||0;
   var pct=function(v,g){return Math.min(100,Math.round(v/g*100))+'%';};
   var el;
+  // water
+  el=document.getElementById('tWaterD');if(el)el.textContent=oz+' / '+WATER_OZ_GOAL+' oz';
+  el=document.getElementById('tWaterB');if(el)el.style.width=pct(oz,WATER_OZ_GOAL);
+  // calories, protein, fiber
   el=document.getElementById('tcD');if(el)el.textContent=Math.round(t.cal)+'/'+S.gCal;
   el=document.getElementById('tcB');if(el)el.style.width=pct(t.cal,S.gCal);
   el=document.getElementById('tpD');if(el)el.textContent=Math.round(t.pro)+'g/'+S.gPro+'g';
   el=document.getElementById('tpB');if(el)el.style.width=pct(t.pro,S.gPro);
   el=document.getElementById('tfD');if(el)el.textContent=Math.round(t.fib)+'g/'+S.gFib+'g';
   el=document.getElementById('tfB');if(el)el.style.width=pct(t.fib,S.gFib);
+  // steps
   el=document.getElementById('tStepD');if(el)el.textContent=steps.toLocaleString()+' / '+STEPS_GOAL.toLocaleString();
   el=document.getElementById('tStepB');if(el)el.style.width=pct(steps,STEPS_GOAL);
+  // sleep — most recent entry, date = night they fell asleep
+  var lastSleep=(MILLIE.sleepLog||[]).length?(MILLIE.sleepLog[MILLIE.sleepLog.length-1]):null;
+  el=document.getElementById('tSleepD');
+  if(el){
+    if(lastSleep){
+      var h=lastSleep.durH||0,m=lastSleep.durM||0;
+      var sleptDate=lastSleep.slept?new Date(lastSleep.slept).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'}):'';
+      el.textContent=h+'h '+(m<10?'0':'')+m+'m'+(sleptDate?' · '+sleptDate:'');
+      var sleepEl=document.getElementById('tSleepB');
+      if(sleepEl)sleepEl.style.width=pct(h+(m/60),9); // 9h ideal
+    } else { el.textContent='No sleep logged'; }
+  }
+  // ministry this month
+  var mon=todayStr().slice(0,7);
+  var monHrs=MINISTRY_LOG.filter(function(m){return(m.date||'').startsWith(mon);}).reduce(function(s,m){return s+(m.hours||0);},0);
+  el=document.getElementById('tMinD');if(el)el.textContent=monHrs+' hrs this month';
+  el=document.getElementById('tMinB');if(el)el.style.width=pct(monHrs,20); // 20h monthly goal rough
+}
+
+// ── This Week Stats ────────────────────────────
+function getWeekDates(){
+  var d=[];
+  for(var i=6;i>=0;i--){var dt=new Date();dt.setDate(dt.getDate()-i);d.push(dt.toDateString());}
+  return d;
+}
+
+function renderWeekStats(){
+  var el=document.getElementById('weekStatsBody');
+  if(!el)return;
+  var days=getWeekDates();
+  var today=new Date().toDateString();
+  var weekIso=days.map(function(d){return new Date(d).toISOString().slice(0,10);});
+
+  // Tasks done this week
+  var tasksDone=TASKS.filter(function(t){return t.done&&t.doneDate&&weekIso.indexOf(t.doneDate)>-1;}).length;
+
+  // Routine completion today (what % of due-today routines are checked)
+  var dueRtns=RTN_GROUPS.filter(function(g){return rtnIsDueToday(g);});
+  var doneRtns=dueRtns.filter(function(g){
+    var items=g.items||[];
+    return items.length>0&&items.every(function(item){return RS[g.id]&&RS[g.id][item.id];});
+  });
+  var routineRate=dueRtns.length?Math.round(doneRtns.length/dueRtns.length*100):0;
+
+  // Active goals
+  var activeGoals=(GOALS||[]).filter(function(g){return !g.done;}).length;
+
+  // Ministry this week
+  var minHrs=MINISTRY_LOG.filter(function(m){return weekIso.indexOf(m.date)>-1;}).reduce(function(s,m){return s+(m.hours||0);},0);
+
+  // Food averages over days with any data
+  function foodAvg(key){
+    var vals=days.map(function(d){var items=FL[d]||[];return items.reduce(function(s,f){return s+(f[key]||0);},0);});
+    var nz=vals.filter(function(v){return v>0;});
+    return nz.length?Math.round(nz.reduce(function(s,v){return s+v;},0)/nz.length):0;
+  }
+  var calAvg=foodAvg('cal'), proAvg=foodAvg('pro'), fibAvg=foodAvg('fib');
+
+  // Water average
+  var waterVals=days.map(function(d){return WATER_OZ_LOG[d]||0;});
+  var waterNz=waterVals.filter(function(v){return v>0;});
+  var waterAvg=waterNz.length?Math.round(waterNz.reduce(function(s,v){return s+v;},0)/waterNz.length):0;
+
+  // Steps average
+  var stepVals=days.map(function(d){return STEPS_LOG[d]||0;});
+  var stepNz=stepVals.filter(function(v){return v>0;});
+  var stepAvg=stepNz.length?Math.round(stepNz.reduce(function(s,v){return s+v;},0)/stepNz.length):0;
+
+  // Weekly spending
+  var spending=EXPENSES.filter(function(e){return weekIso.some(function(d){return(e.created||'').startsWith(d);});}).reduce(function(s,e){return s+(parseFloat(e.amt)||0);},0);
+
+  // Mood average
+  var moodVals=days.map(function(d){return MOOD[d]||0;}).filter(function(v){return v>0;});
+  var moodAvg=moodVals.length?(moodVals.reduce(function(s,v){return s+v;},0)/moodVals.length).toFixed(1):null;
+  var moodEmoji=['','😔','😕','😐','🙂','😊'];
+
+  function row(icon,label,val){
+    return '<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid #f5f0eb">'
+      +'<span style="font-size:12px;color:var(--textl)">'+icon+' '+label+'</span>'
+      +'<span style="font-size:12px;font-weight:700;color:var(--textd)">'+val+'</span></div>';
+  }
+
+  el.innerHTML=
+    row('✅','Tasks done',tasksDone)+
+    row('🔄','Routines today',routineRate+'%')+
+    row('🎯','Active goals',activeGoals)+
+    row('⏱️','Ministry',minHrs+' hrs')+
+    '<div style="height:6px"></div>'+
+    row('💧','Water avg',waterAvg+' oz/day')+
+    row('🔥','Calories avg',calAvg+'/day')+
+    row('💪','Protein avg',proAvg+'g/day')+
+    row('🌿','Fiber avg',fibAvg+'g/day')+
+    row('👟','Steps avg',stepAvg.toLocaleString()+'/day')+
+    row('💸','Spending','$'+spending.toFixed(2))+
+    row('😊','Mood avg',moodAvg?moodAvg+'/5 '+moodEmoji[Math.round(moodAvg)]:'—');
+}
+
+// ── Do Next ────────────────────────────────────
+var _doNextTaskId = null;
+
+function pickDoNext(){
+  // Pool: all undone tasks from TASKS, sorted by urgency priority
+  var pool = TASKS.filter(function(t){return !t.done;});
+  // Also pull goal/project tasks if any
+  var order = {'urgent-important':0,'important-not-urgent':1,'urgent-not-important':2,'not-urgent':3,'':4};
+  pool.sort(function(a,b){
+    var ao=order[a.urgency]!==undefined?order[a.urgency]:4;
+    var bo=order[b.urgency]!==undefined?order[b.urgency]:4;
+    return ao-bo;
+  });
+  if(!pool.length){
+    document.getElementById('doNextCard').innerHTML='<span style="color:var(--sage);font-weight:700">All clear! No tasks remaining. 🎉</span>';
+    document.getElementById('doNextActions').style.display='none';
+    _doNextTaskId=null;
+    return;
+  }
+  // If already showing one, skip to next in pool
+  if(_doNextTaskId){
+    var cur=pool.findIndex(function(t){return t.id===_doNextTaskId;});
+    var next=pool[(cur+1)%pool.length];
+    _doNextTaskId=next.id;
+  } else {
+    _doNextTaskId=pool[0].id;
+  }
+  var task=pool.find(function(t){return t.id===_doNextTaskId;});
+  if(!task)return;
+  var urgLabels={'urgent-important':'🔴 Do Now','important-not-urgent':'🟡 Schedule','urgent-not-important':'🔵 Quick Win','not-urgent':'⚪ Someday','':'📥 Unsorted'};
+  document.getElementById('doNextCard').innerHTML=
+    '<div style="font-size:14px;font-weight:700;color:var(--textd);margin-bottom:4px">'+escHtml(task.title)+'</div>'+
+    '<div style="font-size:11px;color:var(--textl)">'+(urgLabels[task.urgency]||'')+(task.due?' · Due '+task.due:'')+'</div>';
+  var acts=document.getElementById('doNextActions');
+  if(acts)acts.style.display='flex';
+}
+
+function doNextDone(){
+  if(!_doNextTaskId)return;
+  togT(_doNextTaskId);
+  _doNextTaskId=null;
+  setTimeout(pickDoNext,400);
+}
+
+function startDoNextTimer(){
+  if(!_doNextTaskId)return;
+  var task=TASKS.find(function(t){return t.id===_doNextTaskId;});
+  goTab('focus',document.querySelector('[data-tab="focus"]'));
+  setTimeout(function(){
+    showFocusSec('timer',document.querySelector('#v-focus .pn-btn'));
+    var modeEl=document.getElementById('timerMode');
+    if(modeEl&&task)modeEl.textContent=task.title;
+  },200);
 }
 
 function updM(){
@@ -12411,6 +12602,7 @@ function startApp(){
   updM();
   renderWaterBottle();
   renderTodayStatsBars();
+  renderWeekStats();
   renderTaskCatBtns();
   renderCatFilters();
   renderTmplBar();
