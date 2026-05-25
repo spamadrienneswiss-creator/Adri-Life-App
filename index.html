@@ -1000,9 +1000,7 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
   <!-- Daily Quests -->
   <div id="dailyQuestWrap"></div>
   <!-- Spiritual Runner -->
-  <div id="spiritRunWrap" style="margin-bottom:10px;border-radius:14px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.18);cursor:pointer" onclick="goTab('lighthouse',document.querySelector('[data-tab=\'lighthouse\']'));setTimeout(function(){showSpiritSec('prayer',document.querySelector('#v-spirit .pn-btn'))},150)" title="Tap to open Lighthouse — log to grow ground">
-    <canvas id="spiritRunCanvas" style="width:100%;height:150px;display:block"></canvas>
-  </div>
+  <!-- Spiritual meter placeholder — being redesigned -->
   <div id="ministryHomeWrap" style="background:#fff;border-radius:14px;padding:11px 14px;margin-bottom:10px;box-shadow:0 1px 4px rgba(0,0,0,.06)">
     <div style="display:flex;align-items:center;gap:10px">
       <span style="font-size:11px;font-weight:700;color:var(--textl);letter-spacing:.5px;text-transform:uppercase;flex-shrink:0">⏱️ Ministry</span>
@@ -3707,7 +3705,7 @@ function goTabDirect(tab,btn){
   if(tab==='stories')renderStoriesList();
   if(tab==='mixtape')renderMixtape();
   if(SECTION_VIEWS[tab]||tab==='emporium')renderHubPreviews(tab);
-  if(tab==='today'){ startSpiritRunLoop(); } else { stopSpiritRunLoop(); }
+  if(tab==='today'){ tickSpiritRun(); }
   if(tab==='lighthouse'){ updateLighthouseSpiritStatus(); }
   if(tab==='tasks'){ updateHelmBadges(); }
 }
@@ -11973,255 +11971,12 @@ function tickSpiritRun(){
   }
 }
 
-function startSpiritRunLoop(){
-  if(_sRunRaf) return;
-  function loop(){ renderSpiritRunner(); _sRunRaf = requestAnimationFrame(loop); }
-  _sRunRaf = requestAnimationFrame(loop);
-}
+function startSpiritRunLoop(){ tickSpiritRun(); }
 
 function stopSpiritRunLoop(){
   if(_sRunRaf){ cancelAnimationFrame(_sRunRaf); _sRunRaf = null; }
 }
 
-function renderSpiritRunner(){
-  var canvas = document.getElementById('spiritRunCanvas');
-  if(!canvas || !canvas.offsetParent) return;
-  tickSpiritRun();
-  var W = canvas.offsetWidth || 320;
-  if(canvas.width !== W) canvas.width = W;
-  var H = 150;
-  if(canvas.height !== H) canvas.height = H;
-  var ctx = canvas.getContext('2d');
-  if(!ctx) return;
-
-  var maxPts = SPIRIT_SETTINGS.maxPts || 30;
-  var safe = Math.max(0, SPIRIT_RUN.safe || 0);
-  var fallen = !!SPIRIT_RUN.fallen;
-  var now = Date.now();
-  var t = now / 300;
-  var P = 3; // canvas pixels per game pixel
-  var safeRatio = Math.min(1, safe / maxPts);
-
-  // ── BACKGROUND: cream/lavender, no forest ───────
-  var bg = ctx.createLinearGradient(0, 0, 0, H);
-  bg.addColorStop(0, '#ddd4f0');
-  bg.addColorStop(0.55, '#ece6f8');
-  bg.addColorStop(1, '#f8f0e8');
-  ctx.fillStyle = bg; ctx.fillRect(0, 0, W, H);
-
-  // Decorative pixel dots (static stars/sparkles)
-  ctx.fillStyle = 'rgba(160,140,200,0.35)';
-  var _dd = [22,55,88,130,170,210,250,290,40,100,155,220,275];
-  for(var di=0; di<_dd.length; di++) ctx.fillRect(_dd[di]%W, 6+(di*9)%38, P, P);
-
-  // Soft horizon line
-  ctx.fillStyle = 'rgba(143,170,139,0.18)'; ctx.fillRect(0, 105, W, 2);
-
-  // ── PLATFORM (meter bar, anchored left, drains from right) ──
-  var platY = 108;
-  var platH = H - platY;
-  var platW = Math.round(safeRatio * W);
-  // State thresholds: >8 happy, >4 scared, <=4 danger
-  var platState = safe > 8 ? 'solid' : safe > 4 ? 'cracking' : 'crumbling';
-  var pC = {
-    solid:    {top:'#8faa8b',mid:'#7a9876',bot:'#6a8866',mor:'rgba(80,100,70,0.5)',moss:'#a8c4a4',debr:'rgba(143,170,139,'},
-    cracking: {top:'#c8a840',mid:'#b89030',bot:'#a07820',mor:'rgba(100,80,20,0.5)',moss:'#d4b850',debr:'rgba(200,160,40,'},
-    crumbling:{top:'#c87880',mid:'#b86070',bot:'#a05060',mor:'rgba(120,60,70,0.5)',moss:'#e09090',debr:'rgba(200,100,110,'}
-  }[platState];
-
-  if(platW > 0){
-    var platGrad = ctx.createLinearGradient(0,platY,0,H);
-    platGrad.addColorStop(0,pC.top); platGrad.addColorStop(0.3,pC.mid); platGrad.addColorStop(1,pC.bot);
-    ctx.fillStyle = platGrad; ctx.fillRect(0, platY, platW, platH);
-    // Mortar grid
-    ctx.strokeStyle = pC.mor; ctx.lineWidth = 1;
-    for(var tx=0; tx<platW; tx+=18){ ctx.beginPath(); ctx.moveTo(tx,platY); ctx.lineTo(tx,H); ctx.stroke(); }
-    for(var ty=platY+12; ty<H; ty+=12){ ctx.beginPath(); ctx.moveTo(0,ty); ctx.lineTo(platW,ty); ctx.stroke(); }
-    // Moss/grass top
-    ctx.fillStyle = pC.moss; ctx.fillRect(0, platY, platW, P);
-    // Crack lines on stressed states
-    if(platState !== 'solid'){
-      ctx.strokeStyle = platState==='crumbling'?'rgba(200,100,110,0.65)':'rgba(160,120,20,0.55)';
-      ctx.lineWidth = 1;
-      for(var cri=20; cri<platW-10; cri+=34){
-        ctx.beginPath(); ctx.moveTo(cri,platY+2); ctx.lineTo(cri+5,platY+9); ctx.lineTo(cri+3,platY+16); ctx.stroke();
-      }
-    }
-    // Right-edge crumble visual: faded/torn edge
-    if(platState==='crumbling' && platW > 6){
-      var edgeX = platW - 6;
-      ctx.fillStyle = 'rgba(200,120,130,0.4)'; ctx.fillRect(edgeX, platY, 6, platH);
-    }
-    // Debris particles spawn from right edge when crumbling
-    if(platState==='crumbling' && Math.random()<0.18 && platW>3){
-      _jungleParticles.push({x:platW-Math.random()*8, y:platY+Math.random()*4, vx:Math.random()*0.6+0.2, vy:-Math.random()*0.9-0.1, life:1, r:P, col:pC.debr});
-    }
-  }
-
-  // Update & draw particles
-  _jungleParticles = _jungleParticles.filter(function(p){ p.x+=p.vx; p.y+=p.vy; p.vy+=0.06; p.life-=0.032; return p.life>0; });
-  _jungleParticles.forEach(function(p){ ctx.fillStyle=p.col+p.life+')'; ctx.fillRect(Math.round(p.x),Math.round(p.y),p.r,p.r); });
-
-  // ── PIXEL GIRL ──────────────────────────────────
-  // Girl is at LEFT edge of platform; draws from left side
-  var GIRL_X = P*5; // fixed left position (center x of girl)
-  var GIRL_W = P*8; // total width for fall detection
-
-  // Draw helpers — all pixel-snapped
-  function _girl(gx, gy, state, bnc){
-    // state: 'happy'|'scared'|'danger'
-    var b = Math.round(bnc/P)*P;
-    // hair (lavender)
-    ctx.fillStyle='#b0a4d8';
-    ctx.fillRect(gx-P*2,gy-P*9+b,P*5,P*2);
-    ctx.fillRect(gx-P*2,gy-P*7+b,P,P*4);
-    ctx.fillRect(gx+P*2,gy-P*7+b,P,P*4);
-    // face (cream)
-    ctx.fillStyle='#f5d5b8';
-    ctx.fillRect(gx-P,gy-P*8+b,P*3,P*4);
-    // eyes
-    if(state==='happy'){
-      ctx.fillStyle='#5040a0'; ctx.fillRect(gx-P,gy-P*6+b,P,P); ctx.fillRect(gx+P,gy-P*6+b,P,P);
-      // happy mouth
-      ctx.fillStyle='#c07060'; ctx.fillRect(gx-P,gy-P*5+b,P,P); ctx.fillRect(gx,gy-P*4+b,P*2,P);
-    } else if(state==='scared'){
-      ctx.fillStyle='#5040a0'; ctx.fillRect(gx-P,gy-P*6+b,P,P*2); ctx.fillRect(gx+P,gy-P*6+b,P,P*2); // wide eyes
-      ctx.fillStyle='#f0f0f0'; ctx.fillRect(gx-P,gy-P*6+b,P,P); ctx.fillRect(gx+P,gy-P*6+b,P,P);   // whites
-      ctx.fillStyle='#5040a0'; ctx.fillRect(gx-P,gy-P*5+b,P,P); ctx.fillRect(gx+P,gy-P*5+b,P,P);   // pupils down
-      ctx.fillStyle='#c08070'; ctx.fillRect(gx,gy-P*4+b,P*2,P); // small o-mouth
-    } else { // danger
-      ctx.fillStyle='#5040a0'; ctx.fillRect(gx-P,gy-P*6+b,P,P*2); ctx.fillRect(gx+P,gy-P*6+b,P,P*2);
-      ctx.fillStyle='#f0f0f0'; ctx.fillRect(gx-P,gy-P*6+b,P,P); ctx.fillRect(gx+P,gy-P*6+b,P,P);
-      ctx.fillStyle='#5040a0'; ctx.fillRect(gx-P,gy-P*5+b,P,P); ctx.fillRect(gx+P,gy-P*5+b,P,P);
-      ctx.fillStyle='#c06050'; ctx.fillRect(gx-P,gy-P*4+b,P*3,P); // open scared mouth
-    }
-    // body/dress (rose)
-    ctx.fillStyle='#c87880'; ctx.fillRect(gx-P*2,gy-P*4+b,P*5,P*4);
-    // dress skirt flare
-    ctx.fillStyle='#d08890'; ctx.fillRect(gx-P*3,gy-P*2+b,P*7,P*2);
-    ctx.fillStyle='#b86070'; ctx.fillRect(gx-P*3,gy-P+b,P*7,P); // skirt hem
-    // arms — vary by state
-    ctx.fillStyle='#f5d5b8';
-    if(state==='happy'){
-      ctx.fillRect(gx-P*3,gy-P*3+b,P,P*2); // left arm down
-      ctx.fillRect(gx+P*3,gy-P*3+b,P,P*2); // right arm down
-    } else if(state==='scared'){
-      ctx.fillRect(gx-P*4,gy-P*4+b,P*2,P); // left arm out
-      ctx.fillRect(gx+P*3,gy-P*4+b,P*2,P); // right arm out
-    } else {
-      ctx.fillRect(gx-P*5,gy-P*4+b,P*3,P); // arms wide out
-      ctx.fillRect(gx+P*3,gy-P*4+b,P*3,P);
-    }
-    // satchel bag (lavender)
-    ctx.fillStyle='#9080b8';
-    ctx.fillRect(gx+P*3,gy-P*3+b,P*2,P*2);
-    ctx.fillStyle='#7060a0'; ctx.fillRect(gx+P*3,gy-P*2+b,P*2,P);
-    // legs
-    ctx.fillStyle='#f5d5b8'; ctx.fillRect(gx-P,gy+b,P,P*2); ctx.fillRect(gx+P,gy+b,P,P*2);
-    // shoes (sage)
-    ctx.fillStyle='#7a9870'; ctx.fillRect(gx-P*2,gy+P*2+b,P*2,P); ctx.fillRect(gx+P,gy+P*2+b,P*2,P);
-  }
-
-  function _girlClimb(gx, gy){
-    // Girl on ladder, arms up gripping rungs
-    ctx.fillStyle='#b0a4d8';
-    ctx.fillRect(gx-P*2,gy-P*9,P*5,P*2); ctx.fillRect(gx-P*2,gy-P*7,P,P*4); ctx.fillRect(gx+P*2,gy-P*7,P,P*4);
-    ctx.fillStyle='#f5d5b8'; ctx.fillRect(gx-P,gy-P*8,P*3,P*4);
-    ctx.fillStyle='#5040a0'; ctx.fillRect(gx-P,gy-P*6,P,P*2); ctx.fillRect(gx+P,gy-P*6,P,P*2);
-    ctx.fillStyle='#f0f0f0'; ctx.fillRect(gx-P,gy-P*6,P,P); ctx.fillRect(gx+P,gy-P*6,P,P);
-    ctx.fillStyle='#5040a0'; ctx.fillRect(gx-P,gy-P*5,P,P); ctx.fillRect(gx+P,gy-P*5,P,P);
-    ctx.fillStyle='#c87880'; ctx.fillRect(gx-P*2,gy-P*4,P*5,P*4);
-    ctx.fillStyle='#d08890'; ctx.fillRect(gx-P*3,gy-P*2,P*7,P*2);
-    ctx.fillStyle='#b86070'; ctx.fillRect(gx-P*3,gy-P,P*7,P);
-    // arms UP gripping ladder
-    ctx.fillStyle='#f5d5b8';
-    ctx.fillRect(gx-P*3,gy-P*7,P,P*4); ctx.fillRect(gx+P*3,gy-P*7,P,P*4);
-    ctx.fillStyle='#ffddcc'; // hands bright
-    ctx.fillRect(gx-P*3,gy-P*7,P,P); ctx.fillRect(gx+P*3,gy-P*7,P,P);
-    ctx.fillStyle='#9080b8'; ctx.fillRect(gx+P*3,gy-P*4,P*2,P*2);
-    ctx.fillStyle='#f5d5b8'; ctx.fillRect(gx-P,gy,P,P*2); ctx.fillRect(gx+P,gy,P,P*2);
-    ctx.fillStyle='#7a9870'; ctx.fillRect(gx-P*2,gy+P*2,P*2,P); ctx.fillRect(gx+P,gy+P*2,P*2,P);
-  }
-
-  if(!fallen){
-    var girlState = safe > 8 ? 'happy' : safe > 4 ? 'scared' : 'danger';
-    var bounce = Math.round(Math.sin(t * (safe>8?2:safe>4?3:4)) * P);
-
-    if(platW >= GIRL_W){
-      _girl(GIRL_X, platY, girlState, bounce);
-    }
-
-    // Danger flash overlay
-    if(safe <= 4 && safe > 0){
-      var flashAlpha = (0.08 + 0.06*Math.sin(now/(safe>2?250:150)));
-      ctx.fillStyle = 'rgba(200,100,110,'+flashAlpha+')'; ctx.fillRect(0,0,W,H);
-    }
-
-    // Triumph flash after climbing back
-    if(SPIRIT_RUN.climbAnim && (now-SPIRIT_RUN.climbAnim)<2500){
-      var fa = 1-(now-SPIRIT_RUN.climbAnim)/2500;
-      ctx.fillStyle='rgba(180,150,200,'+fa*0.35+')'; ctx.fillRect(0,0,W,H);
-      ctx.fillStyle='rgba(120,80,160,'+fa+')'; ctx.font='bold 11px sans-serif'; ctx.textAlign='center';
-      ctx.fillText('Back on solid ground! ✨', W/2, H/2); ctx.textAlign='left';
-    }
-
-  } else {
-    // ── FALLEN STATE — ladder on right ──────────────
-    var climbPct = Math.min(1, (SPIRIT_RUN.climbPts||0) / (SPIRIT_SETTINGS.climbThreshold||5));
-    var ldX = W - P*14;
-    var ldW = P*6;
-    var ldTop = 12;
-
-    // Ladder shadow
-    ctx.fillStyle = 'rgba(100,80,140,0.12)'; ctx.fillRect(ldX+P*2, ldTop+P, ldW, platY-ldTop);
-    // Ladder rails (sage)
-    ctx.fillStyle = '#7a9870';
-    ctx.fillRect(ldX, ldTop, P, platY-ldTop);
-    ctx.fillRect(ldX+ldW-P, ldTop, P, platY-ldTop);
-    // Rungs
-    ctx.fillStyle = '#a0c09a';
-    for(var ri=ldTop+P*3; ri<platY-P; ri+=P*5) ctx.fillRect(ldX, ri, ldW, P*2);
-    // Landing ledge at top
-    ctx.fillStyle='#8faa8b'; ctx.fillRect(ldX-P*3, platY, ldW+P*6, platH);
-    ctx.fillStyle='#a8c4a4'; ctx.fillRect(ldX-P*3, platY, ldW+P*6, P);
-
-    // Girl on ladder
-    var girlLY = Math.round(platY - 2 - climbPct*(platY-ldTop-P*14));
-    _girlClimb(ldX+Math.round(ldW/2), girlLY + Math.round(Math.sin(t*5)*P));
-
-    // Progress glow behind ladder
-    if(climbPct > 0){
-      ctx.fillStyle='rgba(160,130,210,0.2)';
-      ctx.fillRect(ldX-P, platY-climbPct*(platY-ldTop), ldW+P*2, climbPct*(platY-ldTop));
-      // Orb markers
-      ctx.fillStyle='rgba(180,150,230,0.8)';
-      var orbCount = Math.round(climbPct*(SPIRIT_SETTINGS.climbThreshold||5));
-      for(var oi=0; oi<orbCount; oi++) ctx.fillRect(ldX+ldW+P*2, platY-(oi+1)*P*6, P*2, P*2);
-    }
-
-    // Prompt bar
-    ctx.fillStyle='rgba(80,55,110,0.78)'; ctx.fillRect(0,H-20,W,20);
-    ctx.fillStyle='#ede0ff'; ctx.font='bold 9px sans-serif'; ctx.textAlign='center';
-    var threshold = SPIRIT_SETTINGS.climbThreshold||5;
-    ctx.fillText('Log activities to climb back! ('+((SPIRIT_RUN.climbPts||0)).toFixed(1)+'/'+threshold+' pts)', W/2, H-6);
-    ctx.textAlign='left';
-  }
-
-  // ── HUD ─────────────────────────────────────────
-  // Left pill: pts bar + status
-  ctx.fillStyle='rgba(80,55,110,0.55)'; ctx.fillRect(6,5,136,15);
-  ctx.fillStyle='rgba(0,0,0,0.28)'; ctx.fillRect(8,8,82,8);
-  var hudBar = safe>8?'#8faa8b':safe>4?'#c8a840':'#c87880';
-  ctx.fillStyle=hudBar; ctx.fillRect(8,8,Math.round(safeRatio*82),8);
-  ctx.strokeStyle='rgba(255,255,255,0.18)'; ctx.lineWidth=1; ctx.strokeRect(8,8,82,8);
-  ctx.fillStyle='#f0eaff'; ctx.font='bold 8px sans-serif'; ctx.textAlign='left';
-  ctx.fillText(fallen?'Climbing…':safe>8?'Faithful':'Wavering!', 94, 16);
-  // Right pill: pts total
-  ctx.fillStyle='rgba(80,55,110,0.55)'; ctx.fillRect(W-70,5,64,15);
-  ctx.fillStyle='#e8d8ff'; ctx.font='8px sans-serif'; ctx.textAlign='right';
-  ctx.fillText(safe.toFixed(1)+'/'+maxPts+' pts', W-9, 16);
-  ctx.textAlign='left';
-}
 
 function renderSpiritPtsSettings(){
   var el = document.getElementById('spiritPtsSettings');
