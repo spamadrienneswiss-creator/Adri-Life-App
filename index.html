@@ -816,6 +816,7 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
       <div id="helmDumpPreview"></div>
       <button class="btn sec" style="font-size:11px;padding:3px 10px;margin-top:6px;width:100%" onclick="goTab('tasks',null);setTimeout(function(){togHelmSec('hs-dump',true)},200)">See All Dumps →</button>
     </div>
+    <div class="hub-card span2" onclick="goTab('focus-session',null)" style="background:linear-gradient(135deg,#eee8f8,#f8e8e8);border-color:#c8b8e8"><div class="hub-card-ic">🎯</div><div class="hub-card-name">Focus Session</div><div class="hub-card-sub" id="hub-focus-session-sub">Timer + task queue</div></div>
     <div class="hub-card span2" onclick="openCrateSprint()" style="background:linear-gradient(135deg,#e8f0f8,#d8e8f4);border-color:#b0c8e0"><div class="hub-card-ic">📦</div><div class="hub-card-name">Crate Sprint</div><div class="hub-card-sub">Focus mini-game — log tasks as fast as you can</div></div>
   </div>
 </div>
@@ -1273,6 +1274,59 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     <button class="fchip" onclick="setLF('archived',this)">📦 Archived</button>
   </div>
   <div id="allLists"><div class="empty"><div class="emj">📝</div><p>No lists yet. Create one or pick a Quick Start above.</p></div></div>
+</div>
+
+<!-- FOCUS SESSION -->
+<div class="view" id="v-focus-session">
+  <!-- Compact timer -->
+  <div style="text-align:center;padding:14px 0 6px;background:linear-gradient(135deg,rgba(74,62,107,.07),rgba(212,168,32,.05));border-radius:16px;margin-bottom:12px">
+    <svg width="120" height="120" viewBox="0 0 120 120" style="display:block;margin:0 auto">
+      <circle class="timer-ring-track" cx="60" cy="60" r="50" style="stroke-width:7"/>
+      <circle class="timer-ring-fill timer-ring" id="fssRingFill" cx="60" cy="60" r="50" stroke-dasharray="314.2" stroke-dashoffset="0" style="stroke-width:7"/>
+    </svg>
+    <div id="fssTimerDisplay" style="font-size:30px;font-weight:800;font-family:'Playfair Display',serif;color:var(--textd);margin-top:-84px;position:relative;z-index:2;line-height:1">25:00</div>
+    <div id="fssTimerMode" style="font-size:10px;font-weight:700;color:var(--rose);letter-spacing:.8px;text-transform:uppercase;position:relative;z-index:2;margin-top:2px">Work</div>
+    <div style="height:44px"></div>
+    <div style="display:flex;gap:8px;justify-content:center;margin-top:4px">
+      <button class="btn sec" style="padding:7px 16px;font-size:13px" onclick="fssResetTimer()">↺ Reset</button>
+      <button class="btn" style="padding:7px 28px;font-size:15px" id="fssStartBtn" onclick="fssToggleTimer()">▶ Start</button>
+      <button class="btn sec" style="padding:7px 16px;font-size:13px" onclick="fssSkipPhase()">⏭ Skip</button>
+    </div>
+    <div id="fssSessions" style="font-size:11px;color:var(--textl);margin-top:8px;padding-bottom:6px">🍅 0 sessions today</div>
+  </div>
+
+  <!-- Current task card -->
+  <div id="fss-empty-state" style="text-align:center;padding:18px 0 14px;color:var(--textl)">
+    <div style="font-size:32px;margin-bottom:6px">🎯</div>
+    <div style="font-size:14px;font-weight:700;color:var(--textd);margin-bottom:4px">No task loaded</div>
+    <div style="font-size:12px">Add tasks to your queue below, then tap the first one to start</div>
+    <button class="btn" style="margin-top:10px;font-size:12px;padding:8px 18px" onclick="fssAutoPick()">Auto-pick tasks</button>
+  </div>
+  <div id="fss-current-card" style="display:none;background:linear-gradient(135deg,var(--lav-light),var(--rose-light));border-radius:16px;padding:14px;margin-bottom:12px">
+    <div style="font-size:10px;font-weight:700;color:var(--textl);letter-spacing:.5px;text-transform:uppercase;margin-bottom:5px">Working on</div>
+    <div id="fssCurrentTitle" style="font-size:16px;font-weight:800;color:var(--textd);margin-bottom:3px"></div>
+    <div id="fssCurrentMeta" style="font-size:11px;color:var(--textl);margin-bottom:10px"></div>
+    <textarea id="fssTaskNotes" placeholder="Add a note to this task..." style="width:100%;min-height:52px;padding:8px 10px;border-radius:10px;border:1.5px solid rgba(0,0,0,.1);font-family:'Quicksand',sans-serif;font-size:13px;resize:vertical;box-sizing:border-box;background:rgba(255,255,255,.75)" oninput="fssSaveTaskNote()"></textarea>
+    <div style="display:flex;gap:8px;margin-top:8px">
+      <button class="btn" style="flex:1;background:var(--sage);font-size:13px;padding:10px" onclick="fssCompleteTask()">Done ✓</button>
+      <button class="btn sec" style="font-size:13px;padding:10px 16px" onclick="fssSkipTask()">Skip →</button>
+    </div>
+  </div>
+
+  <!-- Queue -->
+  <div class="card" style="padding:0;margin-bottom:10px">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:11px 14px;border-bottom:1px solid var(--bdr)">
+      <span style="font-size:12px;font-weight:700;color:var(--textd)">Queue <span id="fssQueueCount" style="color:var(--textl);font-weight:500;font-size:11px"></span></span>
+      <div style="display:flex;gap:6px">
+        <button class="btn sec" style="font-size:11px;padding:4px 10px" onclick="fssAutoPick()">Auto-pick</button>
+        <button class="btn sec" style="font-size:11px;padding:4px 10px" onclick="fssShuffle()">Shuffle</button>
+        <button class="btn" style="font-size:11px;padding:4px 10px" onclick="openFssPicker()">+ Add</button>
+      </div>
+    </div>
+    <div id="fssQueueList" style="padding:8px 14px 12px;max-height:280px;overflow-y:auto">
+      <div style="color:var(--textl);font-size:12px;text-align:center;padding:10px 0">Queue is empty — tap + Add or Auto-pick</div>
+    </div>
+  </div>
 </div>
 
 <!-- FOOD -->
@@ -3553,9 +3607,9 @@ var MEAL_COMBOS = JSON.parse(localStorage.getItem('aMC')||'null')||[
 ];
 
 var DEFAULT_TAB_ORDER=['today','helm','lighthouse','conservatory','hearthside','workshop','estate','emporium','archives','archive'];
-var TAB_LABELS={today:'Today',helm:'Tasks & Projects',conservatory:'Personal Growth',hearthside:'Health & Wellness',workshop:'Workshop',lighthouse:'Spiritual',estate:'Money & Home',emporium:'Work',archives:'Research Library',archive:'Archive',stories:'Stories',mixtape:'Mixtape'};
+var TAB_LABELS={today:'Today',helm:'Tasks & Projects',conservatory:'Personal Growth',hearthside:'Health & Wellness',workshop:'Workshop',lighthouse:'Spiritual',estate:'Money & Home',emporium:'Work',archives:'Research Library',archive:'Archive',stories:'Stories',mixtape:'Mixtape','focus-session':'Focus Session'};
 var TAB_ORDER=(function(){var o=JSON.parse(localStorage.getItem('aTabOrder')||'null');if(!o)return DEFAULT_TAB_ORDER.slice();var full=DEFAULT_TAB_ORDER.slice();o=o.filter(function(t){return full.indexOf(t)>-1;});full.forEach(function(t){if(o.indexOf(t)<0)o.push(t);});return o;})();
-var SECTION_VIEWS={today:['today'],helm:['tasks','projects','lists'],conservatory:['goals','routines','learn','focus'],hearthside:['food','meals','recap'],workshop:['board','faves','stories','mixtape'],lighthouse:['spirit'],estate:['money'],emporium:['wigs'],archives:['guide','export','settings'],archive:['archive']};
+var SECTION_VIEWS={today:['today'],helm:['tasks','projects','lists','focus-session'],conservatory:['goals','routines','learn','focus'],hearthside:['food','meals','recap'],workshop:['board','faves','stories','mixtape'],lighthouse:['spirit'],estate:['money'],emporium:['wigs'],archives:['guide','export','settings'],archive:['archive']};
 var SECTION_LABELS={today:'Today',helm:'Tasks & Projects',conservatory:'Personal Growth',hearthside:'Health & Wellness',workshop:'Workshop',lighthouse:'Spiritual',estate:'Money & Home',emporium:'Work',archives:'Research Library',archive:'Archive'};
 var VIEW_SECTION=(function(){var m={};Object.keys(SECTION_VIEWS).forEach(function(s){SECTION_VIEWS[s].forEach(function(v){m[v]=s;});});return m;})();
 
@@ -3753,6 +3807,7 @@ function goTabDirect(tab,btn){
   if(tab==='today'){ tickSpiritRun(); renderWaterBottle(); renderTodayStatsBars(); renderWeekStats(); }
   if(tab==='lighthouse'){ updateLighthouseSpiritStatus(); }
   if(tab==='tasks'){ updateHelmBadges(); }
+  if(tab==='focus-session'){ renderFocusSession(); }
 }
 
 function renderHubPreviews(section){
@@ -3765,6 +3820,8 @@ function renderHubPreviews(section){
     var active=(PROJECTS||[]).filter(function(p){return p.status==='active';}).length;
     el=document.getElementById('hub-projects-sub');if(el)el.textContent=active+' active project'+(active!==1?'s':'');
     el=document.getElementById('hub-lists-sub');if(el)el.textContent=(LISTS||[]).length+' list'+((LISTS||[]).length!==1?'s':'')+' saved';
+    var fssQ=FOCUS_QUEUE.tasks.length;
+    el=document.getElementById('hub-focus-session-sub');if(el)el.textContent=fssQ?fssQ+' task'+(fssQ!==1?'s':'')+' in queue':'Timer + task queue';
     renderHelmDumpPreview();
   }else if(section==='conservatory'){
     renderConservatoryMilestone();
@@ -4947,12 +5004,246 @@ function doNextDone(){
 function startDoNextTimer(){
   if(!_doNextTaskId)return;
   var task=TASKS.find(function(t){return t.id===_doNextTaskId;});
-  goTab('focus',document.querySelector('[data-tab="focus"]'));
-  setTimeout(function(){
-    showFocusSec('timer',document.querySelector('#v-focus .pn-btn'));
-    var modeEl=document.getElementById('timerMode');
-    if(modeEl&&task)modeEl.textContent=task.title;
-  },200);
+  // Add task to focus queue and open focus session
+  if(task){
+    var already=FOCUS_QUEUE.tasks.find(function(q){return q.id===task.id;});
+    if(!already){
+      FOCUS_QUEUE.tasks.unshift({id:task.id,title:task.title,urgency:task.urgency||'',source:'tasks',notes:task.notes||''});
+      FOCUS_QUEUE.current=0;
+      saveFocusQueue();
+    }
+  }
+  goTab('focus-session',null);
+}
+
+// ── Focus Session ──────────────────────────────
+var FOCUS_QUEUE = (function(){
+  try{return JSON.parse(localStorage.getItem('aFocusQueue')||'null')||{tasks:[],current:0};}
+  catch(e){return {tasks:[],current:0};}
+})();
+
+function saveFocusQueue(){
+  localStorage.setItem('aFocusQueue',JSON.stringify(FOCUS_QUEUE));
+}
+
+function fssToggleTimer(){ toggleTimer(); }
+function fssResetTimer(){ resetTimer(); }
+function fssSkipPhase(){ skipTimerPhase(); }
+
+function renderFocusSession(){
+  renderTimerDisplay();
+  var queue=FOCUS_QUEUE.tasks;
+  var cur=Math.min(FOCUS_QUEUE.current,queue.length-1);
+  if(cur<0)cur=0;
+  FOCUS_QUEUE.current=cur;
+  var task=queue[cur]||null;
+  var emptyState=document.getElementById('fss-empty-state');
+  var curCard=document.getElementById('fss-current-card');
+  if(task&&queue.length>0){
+    if(emptyState)emptyState.style.display='none';
+    if(curCard){
+      curCard.style.display='';
+      var urgLabels={'urgent-important':'🔴 Do Now','important-not-urgent':'🟡 Schedule','urgent-not-important':'🔵 Quick Win','not-urgent':'⚪ Someday','':'📥 Unsorted'};
+      var el=document.getElementById('fssCurrentTitle');if(el)el.textContent=task.title;
+      var em=document.getElementById('fssCurrentMeta');
+      if(em)em.textContent=(urgLabels[task.urgency]||'')+(task.source&&task.source!=='tasks'?' · from '+task.source:'');
+      var tn=document.getElementById('fssTaskNotes');if(tn)tn.value=task.notes||'';
+    }
+  } else {
+    if(emptyState)emptyState.style.display='';
+    if(curCard)curCard.style.display='none';
+  }
+  // Queue list
+  var ql=document.getElementById('fssQueueList');
+  if(!ql)return;
+  var qc=document.getElementById('fssQueueCount');
+  if(qc)qc.textContent=queue.length?'('+queue.length+')':'';
+  if(!queue.length){
+    ql.innerHTML='<div style="color:var(--textl);font-size:12px;text-align:center;padding:10px 0">Queue is empty — tap + Add or Auto-pick</div>';
+    return;
+  }
+  var html='';
+  queue.forEach(function(qt,i){
+    var isCur=(i===cur);
+    var urgColors={'urgent-important':'var(--rose)','important-not-urgent':'#c8a820','urgent-not-important':'var(--blue)','not-urgent':'var(--textl)','':'var(--textl)'};
+    var dot='<span style="width:8px;height:8px;border-radius:50%;background:'+(urgColors[qt.urgency]||'var(--textl)')+';display:inline-block;flex-shrink:0;margin-top:4px"></span>';
+    html+='<div style="display:flex;align-items:flex-start;gap:8px;padding:8px 0;border-bottom:1px solid var(--bdr);'+(isCur?'background:rgba(180,160,220,.08);border-radius:8px;padding:8px;margin:2px -4px;':'')+'cursor:pointer" onclick="fssJumpTo('+i+')">';
+    html+=dot;
+    html+='<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:'+(isCur?'700':'600')+';color:'+(isCur?'var(--textd)':'var(--textm||var(--textd))')+';white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+escHtml(qt.title)+'</div>';
+    if(isCur)html+='<div style="font-size:10px;color:var(--rose);font-weight:700;margin-top:1px">← current</div>';
+    html+='</div>';
+    html+='<button onclick="event.stopPropagation();fssRemoveTask('+i+')" style="background:none;border:none;cursor:pointer;color:var(--textl);font-size:14px;padding:0 2px;flex-shrink:0">✕</button>';
+    html+='</div>';
+  });
+  ql.innerHTML=html;
+}
+
+function fssJumpTo(i){
+  FOCUS_QUEUE.current=i;
+  saveFocusQueue();
+  renderFocusSession();
+}
+
+function fssCompleteTask(){
+  var queue=FOCUS_QUEUE.tasks;
+  var cur=FOCUS_QUEUE.current;
+  if(!queue.length)return;
+  var qt=queue[cur];
+  if(qt){
+    // Save any notes back to the source task
+    var noteEl=document.getElementById('fssTaskNotes');
+    var note=noteEl?noteEl.value:'';
+    var srcTask=TASKS.find(function(t){return t.id===qt.id;});
+    if(srcTask&&note){srcTask.notes=note;fbSave('tasks',srcTask.id,srcTask);}
+    // Mark done
+    togT(qt.id);
+    showToast(escHtml(qt.title)+' done! ✓');
+  }
+  queue.splice(cur,1);
+  if(FOCUS_QUEUE.current>=queue.length)FOCUS_QUEUE.current=Math.max(0,queue.length-1);
+  saveFocusQueue();
+  renderFocusSession();
+}
+
+function fssSkipTask(){
+  var queue=FOCUS_QUEUE.tasks;
+  if(!queue.length)return;
+  // Save notes before skipping
+  var noteEl=document.getElementById('fssTaskNotes');
+  if(noteEl&&queue[FOCUS_QUEUE.current]){queue[FOCUS_QUEUE.current].notes=noteEl.value;}
+  FOCUS_QUEUE.current=(FOCUS_QUEUE.current+1)%queue.length;
+  saveFocusQueue();
+  renderFocusSession();
+}
+
+function fssSaveTaskNote(){
+  var noteEl=document.getElementById('fssTaskNotes');
+  var queue=FOCUS_QUEUE.tasks;
+  var cur=FOCUS_QUEUE.current;
+  if(!noteEl||!queue[cur])return;
+  queue[cur].notes=noteEl.value;
+  saveFocusQueue();
+}
+
+function fssRemoveTask(i){
+  FOCUS_QUEUE.tasks.splice(i,1);
+  if(FOCUS_QUEUE.current>=FOCUS_QUEUE.tasks.length)FOCUS_QUEUE.current=Math.max(0,FOCUS_QUEUE.tasks.length-1);
+  saveFocusQueue();
+  renderFocusSession();
+}
+
+function fssAutoPick(){
+  var order={'urgent-important':0,'important-not-urgent':1,'urgent-not-important':2,'not-urgent':3,'':4};
+  var pool=TASKS.filter(function(t){return !t.done;}).slice();
+  pool.sort(function(a,b){return (order[a.urgency]!==undefined?order[a.urgency]:4)-(order[b.urgency]!==undefined?order[b.urgency]:4);});
+  if(!pool.length){showToast('No open tasks!');return;}
+  var existing=FOCUS_QUEUE.tasks.map(function(q){return q.id;});
+  var added=0;
+  pool.forEach(function(t){
+    if(existing.indexOf(t.id)<0){
+      FOCUS_QUEUE.tasks.push({id:t.id,title:t.title,urgency:t.urgency||'',source:'tasks',notes:t.notes||''});
+      added++;
+    }
+  });
+  if(FOCUS_QUEUE.current===0&&FOCUS_QUEUE.tasks.length>0)FOCUS_QUEUE.current=0;
+  saveFocusQueue();
+  renderFocusSession();
+  showToast(added?added+' task'+(added!==1?'s':'')+' added to queue!':'All tasks already in queue');
+}
+
+function fssShuffle(){
+  var queue=FOCUS_QUEUE.tasks;
+  if(queue.length<2)return;
+  // Fisher-Yates
+  for(var i=queue.length-1;i>0;i--){
+    var j=Math.floor(Math.random()*(i+1));
+    var tmp=queue[i];queue[i]=queue[j];queue[j]=tmp;
+  }
+  FOCUS_QUEUE.current=0;
+  saveFocusQueue();
+  renderFocusSession();
+  showToast('Queue shuffled!');
+}
+
+function openFssPicker(){
+  var el=document.getElementById('fssPickerSearch');
+  if(el)el.value='';
+  renderFssPicker();
+  openM('fssPickerModal');
+}
+
+function renderFssPicker(){
+  var el=document.getElementById('fssPickerList');
+  if(!el)return;
+  var q=(document.getElementById('fssPickerSearch')||{}).value||'';
+  var ql=q.toLowerCase();
+  var inQueue=FOCUS_QUEUE.tasks.map(function(t){return t.id;});
+  var order={'urgent-important':0,'important-not-urgent':1,'urgent-not-important':2,'not-urgent':3,'':4};
+  var urgLabels={'urgent-important':'🔴 Do Now','important-not-urgent':'🟡 Schedule','urgent-not-important':'🔵 Quick Win','not-urgent':'⚪ Someday','':'📥 Unsorted'};
+  var groups={};
+  // Tasks
+  TASKS.filter(function(t){return !t.done&&(!ql||t.title.toLowerCase().indexOf(ql)>-1);}).forEach(function(t){
+    var grp=urgLabels[t.urgency]||'📥 Unsorted';
+    if(!groups[grp])groups[grp]={order:order[t.urgency]!==undefined?order[t.urgency]:4,items:[]};
+    groups[grp].items.push({id:t.id,title:t.title,urgency:t.urgency,source:'tasks'});
+  });
+  // Project tasks
+  (PROJECTS||[]).forEach(function(p){
+    if(!p.steps||p.status==='done')return;
+    p.steps.filter(function(s){return !s.done&&(!ql||s.text.toLowerCase().indexOf(ql)>-1);}).forEach(function(s){
+      var pid='proj-'+p.id+'-'+s.id;
+      if(!groups['📁 Projects'])groups['📁 Projects']={order:5,items:[]};
+      groups['📁 Projects'].items.push({id:pid,title:s.text+' ('+p.name+')',source:'project',urgency:''});
+    });
+  });
+  // Goal tasks
+  (GOALS||[]).forEach(function(g){
+    if(g.done)return;
+    if(!ql||g.name.toLowerCase().indexOf(ql)>-1){
+      var gid='goal-'+g.id;
+      if(!groups['🎯 Goals'])groups['🎯 Goals']={order:6,items:[]};
+      groups['🎯 Goals'].items.push({id:gid,title:g.name,source:'goal',urgency:''});
+    }
+  });
+  var keys=Object.keys(groups).sort(function(a,b){return groups[a].order-groups[b].order;});
+  if(!keys.length){el.innerHTML='<div style="text-align:center;padding:20px;color:var(--textl);font-size:13px">'+(ql?'No tasks match "'+escHtml(q)+'"':'No open tasks found')+'</div>';return;}
+  var html='';
+  keys.forEach(function(grp){
+    html+='<div style="font-size:10px;font-weight:700;color:var(--textl);letter-spacing:.5px;text-transform:uppercase;padding:10px 0 4px">'+grp+'</div>';
+    groups[grp].items.forEach(function(item){
+      var added=inQueue.indexOf(item.id)>-1;
+      html+='<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--bdr)">';
+      html+='<div style="flex:1;font-size:13px;color:var(--textd);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+escHtml(item.title)+'</div>';
+      if(added){
+        html+='<button onclick="fssPickerRemove(\''+item.id+'\')" style="flex-shrink:0;padding:4px 10px;border-radius:8px;border:1.5px solid var(--bdr);background:var(--sage);color:white;font-family:\'Quicksand\',sans-serif;font-size:11px;font-weight:700;cursor:pointer">✓ Added</button>';
+      } else {
+        html+='<button onclick="fssPickerAdd(\''+escHtml(item.id)+'\',\''+escHtml(item.title)+'\',\''+item.urgency+'\',\''+item.source+'\')" style="flex-shrink:0;padding:4px 10px;border-radius:8px;border:1.5px solid var(--bdr);background:none;font-family:\'Quicksand\',sans-serif;font-size:11px;font-weight:700;cursor:pointer;color:var(--textd)">+ Add</button>';
+      }
+      html+='</div>';
+    });
+  });
+  el.innerHTML=html;
+}
+
+function fssPickerAdd(id,title,urgency,source){
+  var already=FOCUS_QUEUE.tasks.find(function(q){return q.id===id;});
+  if(already)return;
+  // Find source notes
+  var notes='';
+  var srcTask=TASKS.find(function(t){return t.id===id;});
+  if(srcTask)notes=srcTask.notes||'';
+  FOCUS_QUEUE.tasks.push({id:id,title:title,urgency:urgency||'',source:source||'tasks',notes:notes});
+  saveFocusQueue();
+  renderFssPicker();
+  renderFocusSession();
+}
+
+function fssPickerRemove(id){
+  FOCUS_QUEUE.tasks=FOCUS_QUEUE.tasks.filter(function(q){return q.id!==id;});
+  if(FOCUS_QUEUE.current>=FOCUS_QUEUE.tasks.length)FOCUS_QUEUE.current=Math.max(0,FOCUS_QUEUE.tasks.length-1);
+  saveFocusQueue();
+  renderFssPicker();
+  renderFocusSession();
 }
 
 function updM(){
@@ -7632,17 +7923,20 @@ function updateTimerSettings(){
 function toggleTimer(){
   if(PMD.running){
     PMD.running=false;clearInterval(PMD.iv);PMD.iv=null;
-    document.getElementById('timerStartBtn').textContent='▶ Start';
+    var tsb=document.getElementById('timerStartBtn');if(tsb)tsb.textContent='▶ Start';
+    var fsb=document.getElementById('fssStartBtn');if(fsb)fsb.textContent='▶ Start';
   } else {
     PMD.running=true;
-    document.getElementById('timerStartBtn').textContent='⏸ Pause';
+    var tsb2=document.getElementById('timerStartBtn');if(tsb2)tsb2.textContent='⏸ Pause';
+    var fsb2=document.getElementById('fssStartBtn');if(fsb2)fsb2.textContent='⏸ Pause';
     PMD.iv=setInterval(function(){
       PMD.remaining--;renderTimerDisplay();
       if(PMD.remaining<=0){
         clearInterval(PMD.iv);PMD.iv=null;PMD.running=false;
         if(PMD.mode==='work'){PMD.sessions++;pingTimer('Work done! Take a break 🌿');PMD.mode='break';PMD.remaining=PMD.breakMin*60;}
         else{pingTimer('Break over! Time to focus 🍅');PMD.mode='work';PMD.remaining=PMD.workMin*60;}
-        document.getElementById('timerStartBtn').textContent='▶ Start';
+        var tsb3=document.getElementById('timerStartBtn');if(tsb3)tsb3.textContent='▶ Start';
+        var fsb3=document.getElementById('fssStartBtn');if(fsb3)fsb3.textContent='▶ Start';
         renderTimerDisplay();
       }
     },1000);
@@ -7680,6 +7974,21 @@ function renderTimerDisplay(){
   }
   var sc=document.getElementById('timerSessions');
   if(sc)sc.textContent='🍅 '+PMD.sessions+' session'+(PMD.sessions!==1?'s':'')+' today';
+  // mirror to focus session display
+  var fd=document.getElementById('fssTimerDisplay');if(fd)fd.textContent=txt;
+  var fm=document.getElementById('fssTimerMode');
+  if(fm){fm.textContent=PMD.mode==='work'?'Work 🍅':'Break 🌿';fm.style.color=PMD.mode==='work'?'var(--rose)':'var(--sage)';}
+  var fring=document.getElementById('fssRingFill');
+  if(fring){
+    var ftotal=(PMD.mode==='work'?PMD.workMin:PMD.breakMin)*60;
+    var fpct=ftotal>0?PMD.remaining/ftotal:1;
+    fring.style.strokeDashoffset=314.2*(1-fpct);
+    fring.style.stroke=PMD.mode==='work'?'var(--rose)':'var(--sage)';
+  }
+  var fsc=document.getElementById('fssSessions');
+  if(fsc)fsc.textContent='🍅 '+PMD.sessions+' session'+(PMD.sessions!==1?'s':'')+' today';
+  var fsb=document.getElementById('fssStartBtn');
+  if(fsb)fsb.textContent=PMD.running?'⏸ Pause':'▶ Start';
 }
 
 function pingTimer(msg){
@@ -14018,6 +14327,17 @@ function startReidRunner(){
         <button onclick="addEmberSkill()" style="padding:7px 14px;border-radius:9px;border:none;background:var(--rose);color:white;font-family:'Quicksand',sans-serif;font-size:13px;font-weight:700;cursor:pointer">Add</button>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- FOCUS SESSION TASK PICKER MODAL -->
+<div class="ov" id="fssPickerModal">
+  <div class="mod" style="max-height:85vh;display:flex;flex-direction:column">
+    <div class="mh"></div>
+    <div class="mtit">Add to Queue</div>
+    <input type="text" id="fssPickerSearch" placeholder="Search tasks..." class="fi" style="margin-bottom:10px" oninput="renderFssPicker()">
+    <div id="fssPickerList" style="flex:1;overflow-y:auto;max-height:55vh"></div>
+    <button class="cn-btn" onclick="closeM('fssPickerModal')">Close</button>
   </div>
 </div>
 </body>
