@@ -955,25 +955,6 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     <h2 id="gTxt">Good morning, Adri! 🌸</h2>
     <p id="gQuote">The plans of the diligent lead to success. — Prov 21:5</p>
   </div>
-  <!-- Meds / Supplements (collapsible) -->
-  <div id="todayMedsWrap" style="background:#fff;border-radius:14px;padding:10px 14px;margin-bottom:10px;box-shadow:0 1px 4px rgba(0,0,0,.06)">
-    <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer" onclick="togTodayMeds()">
-      <span style="font-size:11px;font-weight:700;color:var(--textl);letter-spacing:.5px;text-transform:uppercase">💊 Meds &amp; Supplements</span>
-      <span id="todayMedsArr" style="font-size:12px;color:var(--textl)">▾</span>
-    </div>
-    <div id="todayMedsBody" style="margin-top:8px"></div>
-  </div>
-  <!-- Sleep summary chip -->
-  <div id="todaySleepChip" style="display:none;background:#fff;border-radius:14px;padding:10px 14px;margin-bottom:10px;box-shadow:0 1px 4px rgba(0,0,0,.06);cursor:pointer" onclick="goTab('food',null)">
-    <div style="display:flex;align-items:center;gap:10px">
-      <span style="font-size:20px" id="todaySleepEmoji">😴</span>
-      <div style="flex:1">
-        <div style="font-size:12px;font-weight:700;color:var(--textd)" id="todaySleepTitle">Last night</div>
-        <div style="font-size:11px;color:var(--textl)" id="todaySleepSub">—</div>
-      </div>
-      <div id="todaySleepBars" style="display:flex;align-items:flex-end;gap:2px;height:28px"></div>
-    </div>
-  </div>
   <!-- Intentions widget -->
   <div id="intentionsHomeWrap" style="display:none;margin-bottom:10px">
     <div style="background:#fff;border-radius:14px;padding:12px 14px;box-shadow:0 1px 4px rgba(0,0,0,.06)">
@@ -984,6 +965,7 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
       <div id="intentionsHomeList"></div>
     </div>
   </div>
+  <!-- Kingdom Events -->
   <div id="keventsWrap" style="display:none">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
       <span style="font-size:12px;font-weight:700;color:var(--textl);letter-spacing:.5px;text-transform:uppercase">⏳ Kingdom Events</span>
@@ -991,16 +973,40 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     </div>
     <div class="kevents-strip" id="keventsStrip"></div>
   </div>
+  <!-- Quick Add -->
   <div class="quick-add">
     <button class="qa" onclick="openM('taskModal')" style="background:linear-gradient(135deg,#f2dede,#fdf6ee)"><div class="qa-ic">➕</div><div class="qa-lb">Task</div></button>
-    <button class="qa" onclick="openM('expModal')" style="background:linear-gradient(135deg,#d4e4d0,#fdf6ee)"><div class="qa-ic">💸</div><div class="qa-lb">Expense</div></button>
-    <button class="qa" onclick="openM('fwModal')" style="background:linear-gradient(135deg,#daeaf5,#fdf6ee)"><div class="qa-ic">🍽️💧</div><div class="qa-lb">Food/Water</div></button>
-    <button class="qa" onclick="goTab('food',document.querySelector('[data-tab=\'food\']'));setTimeout(function(){document.getElementById('wplanList').scrollIntoView({behavior:'smooth'});},200)" style="background:linear-gradient(135deg,#d4e4d0,#fdf6ee)"><div class="qa-ic">💪</div><div class="qa-lb">Workout</div></button>
+    <button class="qa" onclick="openM('expModal')" style="background:linear-gradient(135deg,#f5e8d8,#fdf6ee)"><div class="qa-ic">💸</div><div class="qa-lb">Expense</div></button>
+    <button class="qa" onclick="openM('fwModal')" style="background:linear-gradient(135deg,#e8f0e8,#fdf6ee)"><div class="qa-ic">🍽️</div><div class="qa-lb">Food</div></button>
+    <button class="qa" onclick="openM('stepModal')" style="background:linear-gradient(135deg,#e8eef8,#fdf6ee)"><div class="qa-ic">👟</div><div class="qa-lb">Move</div></button>
   </div>
-  <!-- Daily Quests -->
-  <div id="dailyQuestWrap"></div>
-  <!-- Spiritual Runner -->
-  <!-- Spiritual meter placeholder — being redesigned -->
+  <!-- Water Bottle -->
+  <div class="card" style="margin-bottom:10px">
+    <div style="display:flex;align-items:flex-start;gap:14px">
+      <div style="flex-shrink:0;display:flex;flex-direction:column;align-items:center">
+        <div style="width:22px;height:8px;background:var(--lav);border-radius:4px 4px 0 0"></div>
+        <div style="width:22px;height:10px;background:#e8f4fd;border:2px solid #a8cceb;border-bottom:none"></div>
+        <div style="width:54px;height:108px;border:2px solid #a8cceb;border-radius:4px 4px 12px 12px;overflow:hidden;position:relative;background:#f0f8ff">
+          <div id="bottleFill" style="position:absolute;bottom:0;left:0;right:0;height:0%;background:linear-gradient(0deg,#3a9cd8,#7cc4f0);transition:height .7s ease;border-radius:0 0 10px 10px"></div>
+          <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:2">
+            <span id="bottleOzNum" style="font-size:15px;font-weight:800;color:var(--textd);line-height:1.1">0</span>
+            <span style="font-size:8px;font-weight:700;color:var(--textl)">OZ</span>
+          </div>
+        </div>
+      </div>
+      <div style="flex:1;padding-top:18px">
+        <div style="font-size:11px;font-weight:700;color:var(--textl);letter-spacing:.5px;text-transform:uppercase;margin-bottom:3px">💧 Water</div>
+        <div id="bottleOzLabel" style="font-size:14px;font-weight:700;color:var(--textd);margin-bottom:8px">0 / 115 oz</div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px">
+          <button onclick="addWaterOz(8)" style="padding:6px 11px;border-radius:8px;border:1.5px solid #a8cceb;background:#f0f8ff;font-family:'Quicksand',sans-serif;font-size:12px;font-weight:700;color:#2e88c8;cursor:pointer">+8 oz</button>
+          <button onclick="addWaterOz(16)" style="padding:6px 11px;border-radius:8px;border:1.5px solid #a8cceb;background:#f0f8ff;font-family:'Quicksand',sans-serif;font-size:12px;font-weight:700;color:#2e88c8;cursor:pointer">+16 oz</button>
+          <button onclick="addWaterOz(32)" style="padding:6px 11px;border-radius:8px;border:none;background:linear-gradient(135deg,var(--lav),#5a90d0);font-family:'Quicksand',sans-serif;font-size:11px;font-weight:700;color:white;cursor:pointer">Owala 32oz</button>
+        </div>
+        <div style="font-size:10px;color:var(--textl)" id="bottleNote">115 oz to go</div>
+      </div>
+    </div>
+  </div>
+  <!-- Ministry -->
   <div id="ministryHomeWrap" style="background:#fff;border-radius:14px;padding:11px 14px;margin-bottom:10px;box-shadow:0 1px 4px rgba(0,0,0,.06)">
     <div style="display:flex;align-items:center;gap:10px">
       <span style="font-size:11px;font-weight:700;color:var(--textl);letter-spacing:.5px;text-transform:uppercase;flex-shrink:0">⏱️ Ministry</span>
@@ -1008,15 +1014,20 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
       <button class="btn sec" style="font-size:11px;padding:3px 10px" onclick="goTab('lighthouse',document.querySelector('[data-tab=\'lighthouse\']'));setTimeout(function(){showSpiritSec('ministry',document.querySelector('#v-spirit .pn-btn:nth-child(3)'));},200)">Log</button>
     </div>
   </div>
-  <div class="card">
-    <div class="ct">📊 Quick Stats</div>
-    <div class="pr">
-      <div class="pt"><span class="pn">💧 Water</span><span class="pm2" id="twD">0/8</span></div>
-      <div class="pb"><div class="pf pf-wat" id="twB" style="width:0%"></div></div>
-      <div id="waterDropRow" style="display:flex;gap:4px;margin-top:6px;flex-wrap:wrap"></div>
+  <!-- Quick Stats (collapsible) -->
+  <div class="card" style="padding:0;margin-bottom:10px">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:11px 14px;cursor:pointer" onclick="togTodaySec('todayStatsBody')">
+      <span style="font-size:11px;font-weight:700;color:var(--textl);letter-spacing:.5px;text-transform:uppercase">📊 Today's Stats</span>
+      <span class="sh-arr" id="sh-arr-todayStatsBody">▸</span>
     </div>
-    <div class="pr"><div class="pt"><span class="pn">🔥 Calories</span><span class="pm2" id="tcD">0/1900</span></div><div class="pb"><div class="pf pf-cal" id="tcB" style="width:0%"></div></div></div>
-    <div class="pr"><div class="pt"><span class="pn">💪 Protein</span><span class="pm2" id="tpD">0g/120g</span></div><div class="pb"><div class="pf pf-pro" id="tpB" style="width:0%"></div></div></div>
+    <div id="todayStatsBody-wrap" style="display:none">
+      <div style="padding:0 14px 12px">
+        <div class="pr"><div class="pt"><span class="pn">🔥 Calories</span><span class="pm2" id="tcD">0/1900</span></div><div class="pb"><div class="pf pf-cal" id="tcB" style="width:0%"></div></div></div>
+        <div class="pr"><div class="pt"><span class="pn">💪 Protein</span><span class="pm2" id="tpD">0g/120g</span></div><div class="pb"><div class="pf pf-pro" id="tpB" style="width:0%"></div></div></div>
+        <div class="pr"><div class="pt"><span class="pn">🌿 Fiber</span><span class="pm2" id="tfD">0g/25g</span></div><div class="pb"><div class="pf pf-fib" id="tfB" style="width:0%"></div></div></div>
+        <div class="pr"><div class="pt"><span class="pn">👟 Steps</span><span class="pm2" id="tStepD">0 / 8,000</span></div><div class="pb"><div class="pf" id="tStepB" style="width:0%;background:var(--sage)"></div></div></div>
+      </div>
+    </div>
   </div>
   <!-- This Week summary (collapsible) -->
   <div class="card" style="padding:0">
@@ -3705,7 +3716,7 @@ function goTabDirect(tab,btn){
   if(tab==='stories')renderStoriesList();
   if(tab==='mixtape')renderMixtape();
   if(SECTION_VIEWS[tab]||tab==='emporium')renderHubPreviews(tab);
-  if(tab==='today'){ tickSpiritRun(); }
+  if(tab==='today'){ tickSpiritRun(); renderWaterBottle(); renderTodayStatsBars(); }
   if(tab==='lighthouse'){ updateLighthouseSpiritStatus(); }
   if(tab==='tasks'){ updateHelmBadges(); }
 }
@@ -4690,20 +4701,88 @@ function logWat(){
   updM();closeM('fwModal');
 }
 
+// ── Water Bottle (oz-based, Today page) ──────
+var WATER_OZ_LOG = JSON.parse(localStorage.getItem('aWaterOzLog')||'{}');
+var WATER_OZ_GOAL = 115;
+
+function addWaterOz(oz){
+  var k=getTK();
+  WATER_OZ_LOG[k]=(WATER_OZ_LOG[k]||0)+oz;
+  localStorage.setItem('aWaterOzLog',JSON.stringify(WATER_OZ_LOG));
+  renderWaterBottle();
+  showToast('+'+oz+' oz');
+}
+
+function renderWaterBottle(){
+  var oz=WATER_OZ_LOG[getTK()]||0;
+  var pct=Math.min(100,Math.round(oz/WATER_OZ_GOAL*100));
+  var fill=document.getElementById('bottleFill');
+  if(fill)fill.style.height=pct+'%';
+  var num=document.getElementById('bottleOzNum');
+  if(num)num.textContent=oz;
+  var lbl=document.getElementById('bottleOzLabel');
+  if(lbl)lbl.textContent=oz+' / '+WATER_OZ_GOAL+' oz';
+  var note=document.getElementById('bottleNote');
+  if(note){
+    var rem=Math.max(0,WATER_OZ_GOAL-oz);
+    note.textContent=rem>0?rem+' oz to go':'Goal reached! 🎉';
+    note.style.color=rem>0?'var(--textl)':'var(--sage)';
+  }
+}
+
+// ── Steps ─────────────────────────────────────
+var STEPS_LOG = JSON.parse(localStorage.getItem('aStepsLog')||'{}');
+var STEPS_GOAL = 8000;
+
+function getTodaySteps(){ return STEPS_LOG[getTK()]||0; }
+
+function addStepPreset(n){
+  var inp=document.getElementById('stepInput');
+  if(inp)inp.value=(parseInt(inp.value)||0)+n;
+}
+
+function saveSteps(){
+  var n=parseInt((document.getElementById('stepInput')||{}).value)||0;
+  STEPS_LOG[getTK()]=n;
+  localStorage.setItem('aStepsLog',JSON.stringify(STEPS_LOG));
+  closeM('stepModal');
+  renderTodayStatsBars();
+  showToast(n.toLocaleString()+' steps logged!');
+}
+
+function renderTodayStatsBars(){
+  var t=getTot();var steps=getTodaySteps();
+  var pct=function(v,g){return Math.min(100,Math.round(v/g*100))+'%';};
+  var el;
+  el=document.getElementById('tcD');if(el)el.textContent=Math.round(t.cal)+'/'+S.gCal;
+  el=document.getElementById('tcB');if(el)el.style.width=pct(t.cal,S.gCal);
+  el=document.getElementById('tpD');if(el)el.textContent=Math.round(t.pro)+'g/'+S.gPro+'g';
+  el=document.getElementById('tpB');if(el)el.style.width=pct(t.pro,S.gPro);
+  el=document.getElementById('tfD');if(el)el.textContent=Math.round(t.fib)+'g/'+S.gFib+'g';
+  el=document.getElementById('tfB');if(el)el.style.width=pct(t.fib,S.gFib);
+  el=document.getElementById('tStepD');if(el)el.textContent=steps.toLocaleString()+' / '+STEPS_GOAL.toLocaleString();
+  el=document.getElementById('tStepB');if(el)el.style.width=pct(steps,STEPS_GOAL);
+}
+
 function updM(){
   var t=getTot();var w=getW();
   var pct=function(v,g){return Math.min(100,Math.round(v/g*100))+'%';};
-  document.getElementById('twD').textContent=w+'/'+S.gWat;document.getElementById('twB').style.width=pct(w,S.gWat);
-  renderWaterDrops();
-  document.getElementById('tcD').textContent=Math.round(t.cal)+'/'+S.gCal;document.getElementById('tcB').style.width=pct(t.cal,S.gCal);
-  document.getElementById('tpD').textContent=Math.round(t.pro)+'g/'+S.gPro+'g';document.getElementById('tpB').style.width=pct(t.pro,S.gPro);
-  document.getElementById('fCD').textContent=Math.round(t.cal)+'/'+S.gCal;document.getElementById('fCB').style.width=pct(t.cal,S.gCal);
-  document.getElementById('fPD').textContent=Math.round(t.pro)+'g/'+S.gPro+'g';document.getElementById('fPB').style.width=pct(t.pro,S.gPro);
-  document.getElementById('fFD').textContent=Math.round(t.fib)+'g/'+S.gFib+'g';document.getElementById('fFB').style.width=pct(t.fib,S.gFib);
-  document.getElementById('fRD').textContent=Math.round(t.crb)+'g/'+S.gCrb+'g';document.getElementById('fRB').style.width=pct(t.crb,S.gCrb);
-  document.getElementById('fAD').textContent=Math.round(t.fat)+'g/'+S.gFat+'g';document.getElementById('fAB').style.width=pct(t.fat,S.gFat);
-  document.getElementById('fWD').textContent=w+'/'+S.gWat;document.getElementById('fWB').style.width=pct(w,S.gWat);
-  document.getElementById('sWat').textContent=w+'/'+S.gWat;
+  var el;
+  renderWaterBottle();
+  renderTodayStatsBars();
+  el=document.getElementById('fCD');if(el)el.textContent=Math.round(t.cal)+'/'+S.gCal;
+  el=document.getElementById('fCB');if(el)el.style.width=pct(t.cal,S.gCal);
+  el=document.getElementById('fPD');if(el)el.textContent=Math.round(t.pro)+'g/'+S.gPro+'g';
+  el=document.getElementById('fPB');if(el)el.style.width=pct(t.pro,S.gPro);
+  el=document.getElementById('fFD');if(el)el.textContent=Math.round(t.fib)+'g/'+S.gFib+'g';
+  el=document.getElementById('fFB');if(el)el.style.width=pct(t.fib,S.gFib);
+  el=document.getElementById('fRD');if(el)el.textContent=Math.round(t.crb)+'g/'+S.gCrb+'g';
+  el=document.getElementById('fRB');if(el)el.style.width=pct(t.crb,S.gCrb);
+  el=document.getElementById('fAD');if(el)el.textContent=Math.round(t.fat)+'g/'+S.gFat+'g';
+  el=document.getElementById('fAB');if(el)el.style.width=pct(t.fat,S.gFat);
+  el=document.getElementById('fWD');if(el)el.textContent=w+'/'+S.gWat;
+  el=document.getElementById('fWB');if(el)el.style.width=pct(w,S.gWat);
+  el=document.getElementById('sWat');if(el)el.textContent=w+'/'+S.gWat;
 }
 
 function srchFood(q){
@@ -4968,6 +5047,10 @@ function openM(id){
     document.querySelector('[data-g="fwt"][data-v="water"]').classList.add('on');
     SBV.fwt='water';
     renderWatBtns();
+  }
+  if(id==='stepModal'){
+    var sInp=document.getElementById('stepInput');
+    if(sInp)sInp.value=getTodaySteps()||'';
   }
   document.getElementById(id).classList.add('show');
 }
@@ -12326,6 +12409,8 @@ function startApp(){
   renderAllR();
   renderFL();
   updM();
+  renderWaterBottle();
+  renderTodayStatsBars();
   renderTaskCatBtns();
   renderCatFilters();
   renderTmplBar();
@@ -13219,6 +13304,20 @@ function startReidRunner(){
   _reid.raf=requestAnimationFrame(loop);
 }
 </script>
+<!-- STEP MODAL -->
+<div class="ov" id="stepModal"><div class="mod">
+  <div class="mtit">Log Steps 👟</div>
+  <div style="font-size:12px;color:var(--textl);text-align:center;margin-bottom:14px">Today's step count</div>
+  <input class="fi" type="number" id="stepInput" placeholder="e.g. 5000" style="text-align:center;font-size:22px;font-weight:700;padding:12px">
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:10px">
+    <button class="btn sec" style="font-size:13px" onclick="addStepPreset(1000)">+1,000</button>
+    <button class="btn sec" style="font-size:13px" onclick="addStepPreset(2500)">+2,500</button>
+    <button class="btn sec" style="font-size:13px" onclick="addStepPreset(5000)">+5,000</button>
+  </div>
+  <button class="ok-btn" style="margin-top:14px" onclick="saveSteps()">Save</button>
+  <button class="cn-btn" onclick="closeM('stepModal')">Cancel</button>
+</div></div>
+
 <!-- INCOME MODAL -->
 <div class="ov" id="incModal"><div class="mod">
   <div class="mh"></div><div class="mtit">Log Income 💰</div>
