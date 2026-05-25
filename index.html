@@ -1056,19 +1056,11 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
       <span class="sh-arr" id="sh-arr-todayTasksSec">▾</span>
     </div>
     <div id="todayTasksSec-wrap" style="padding:0 14px 14px">
-      <!-- Do Next widget -->
-      <div style="background:linear-gradient(135deg,var(--lav-light),var(--rose-light));border-radius:12px;padding:12px 14px;margin-bottom:14px">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-          <span style="font-size:12px;font-weight:700;color:var(--textd)">Do Next</span>
-          <button class="btn sec" style="font-size:11px;padding:3px 10px" onclick="pickDoNext()">Pick for me</button>
-        </div>
-        <div id="doNextCard" style="font-size:13px;color:var(--textl);font-style:italic;min-height:20px">Tap "Pick for me" to get your next task.</div>
-        <div id="doNextActions" style="display:none;margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
-          <button class="btn" style="flex:1;background:var(--sage);font-size:12px;padding:8px" id="doNextTimerBtn" onclick="startDoNextTimer()">Start Timer</button>
-          <button class="btn" style="flex:1;font-size:12px;padding:8px" id="doNextDoneBtn" onclick="doNextDone()">Done ✓</button>
-          <button class="btn sec" style="flex:0;font-size:12px;padding:8px 12px" onclick="pickDoNext()">Skip →</button>
-        </div>
-      </div>
+      <!-- Focus Session link -->
+      <button class="btn" style="width:100%;margin-bottom:14px;background:linear-gradient(135deg,var(--lav),var(--rose-light));color:var(--textd);font-size:13px;font-weight:700;padding:12px;border-radius:12px;text-align:left;display:flex;align-items:center;justify-content:space-between" onclick="goTab('focus-session',null)">
+        <span>🎯 Focus Session</span>
+        <span style="font-size:12px;color:var(--textl)">Timer + task queue →</span>
+      </button>
       <!-- AM Routine -->
       <div style="font-size:11px;font-weight:700;color:var(--textl);letter-spacing:.4px;text-transform:uppercase;cursor:pointer;display:flex;justify-content:space-between;align-items:center;margin-bottom:4px" onclick="togTodaySec('todayAM')">
         <span>Morning Routine</span><span class="sh-arr" id="sh-arr-todayAM">▾</span>
@@ -1158,6 +1150,12 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
       <span id="unassignedBadge" style="display:none;background:var(--rose);color:white;border-radius:14px;padding:2px 9px;font-size:11px;font-weight:700;cursor:pointer" onclick="togHelmSec('hs-batch',true)">0 unsorted</span>
     </div>
   </div>
+
+  <!-- Focus Session link -->
+  <button class="btn" style="width:100%;margin-bottom:10px;background:linear-gradient(135deg,#eee8f8,#f8e8e8);color:var(--textd);font-size:13px;font-weight:700;padding:11px 14px;border-radius:12px;text-align:left;display:flex;align-items:center;justify-content:space-between;border:1.5px solid #c8b8e8" onclick="goTab('focus-session',null)">
+    <span>🎯 Focus Session</span>
+    <span style="font-size:12px;color:var(--textl)">Timer + task queue →</span>
+  </button>
 
   <!-- What Now? -->
   <div class="card" style="margin-bottom:10px">
@@ -4611,6 +4609,7 @@ function renderT(f){
   restorePanels(list);
   renderTdTasks();
   updStats();
+  updFssQueueBtns();
 }
 
 function tHTML(t){
@@ -4644,6 +4643,7 @@ function tHTML(t){
         '<button class="tact" onclick="togSP(\''+t.id+'\')" title="Subtasks">'+subBtnIco+'</button>'+
         (t.notes?'<button class="tact" onclick="openNotes(\''+t.id+'\')">📝</button>':'')+
         (!t.done?'<button class="tact" onclick="setResumeNote(\''+t.id+'\')" title="Resume note">⏸️</button>':'')+
+        (!t.done?'<button class="tact fss-q-btn" onclick="fssAddFromTask(\''+t.id+'\')" title="Add to Focus Queue" id="fssBtn-'+t.id+'">🎯</button>':'')+
         '<button class="tact" onclick="delTask(\''+t.id+'\')">🗑️</button>'+
       '</div>'+
     '</div>'+
@@ -4661,11 +4661,10 @@ function renderTdTasks(){
   var u=TASKS.filter(function(t){return !t.done&&t.urgency==='urgent-important';});
   var s=TASKS.filter(function(t){return !t.done&&t.urgency==='important-not-urgent';});
   var urEl=document.getElementById('todayUr');
-  urEl.innerHTML=u.length?u.map(tHTML).join(''):'<div class="empty"><div class="emj">🎉</div><p>No urgent tasks!</p></div>';
-  restorePanels(urEl);
+  if(urEl){urEl.innerHTML=u.length?u.map(tHTML).join(''):'<div class="empty"><div class="emj">🎉</div><p>No urgent tasks!</p></div>';restorePanels(urEl);}
   var soEl=document.getElementById('todaySo');
-  soEl.innerHTML=s.length?s.map(tHTML).join(''):'<div class="empty"><div class="emj">📝</div><p>Nothing scheduled yet.</p></div>';
-  restorePanels(soEl);
+  if(soEl){soEl.innerHTML=s.length?s.map(tHTML).join(''):'<div class="empty"><div class="emj">📝</div><p>Nothing scheduled yet.</p></div>';restorePanels(soEl);}
+  updFssQueueBtns();
 }
 
 var _taskMeaningful=false;
@@ -5244,6 +5243,31 @@ function fssPickerRemove(id){
   saveFocusQueue();
   renderFssPicker();
   renderFocusSession();
+}
+
+function fssAddFromTask(id){
+  var task=TASKS.find(function(t){return t.id===id;});
+  if(!task)return;
+  var already=FOCUS_QUEUE.tasks.find(function(q){return q.id===id;});
+  if(already){
+    showToast('Already in queue!');
+    return;
+  }
+  FOCUS_QUEUE.tasks.push({id:task.id,title:task.title,urgency:task.urgency||'',source:'tasks',notes:task.notes||''});
+  saveFocusQueue();
+  // Update button appearance in place
+  var btn=document.getElementById('fssBtn-'+id);
+  if(btn){btn.textContent='✓';btn.style.color='var(--sage)';btn.title='In Focus Queue';}
+  showToast('"'+task.title+'" added to queue!');
+}
+
+function updFssQueueBtns(){
+  var inQueue=FOCUS_QUEUE.tasks.map(function(q){return q.id;});
+  document.querySelectorAll('.fss-q-btn').forEach(function(btn){
+    var id=btn.id.replace('fssBtn-','');
+    if(inQueue.indexOf(id)>-1){btn.textContent='✓';btn.style.color='var(--sage)';btn.title='In Focus Queue';}
+    else{btn.textContent='🎯';btn.style.color='';btn.title='Add to Focus Queue';}
+  });
 }
 
 function updM(){
