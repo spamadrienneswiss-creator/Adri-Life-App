@@ -4149,6 +4149,7 @@ var CUSTOM_COLORS = JSON.parse(localStorage.getItem('aCustomColors')||'{}');
 var BANNER_IMG = localStorage.getItem('aBannerImg')||'';
 var PRAYERS = JSON.parse(localStorage.getItem('aPrayers')||'[]');
 var BIBLE_LOG = JSON.parse(localStorage.getItem('aBibleLog')||'{}');
+var BIBLE_CHAPTER_NOTES = JSON.parse(localStorage.getItem('aBibleChapNotes')||'{}');
 var MINISTRY_LOG = JSON.parse(localStorage.getItem('aMinistryLog')||'[]');
 var GRAT_LOG = JSON.parse(localStorage.getItem('aGratLog')||'[]');
 var RECIPES = JSON.parse(localStorage.getItem('aRecipes')||'[]');
@@ -12635,52 +12636,143 @@ function renderBibleBooks(){
   }).join('');
 }
 
+var _bibleBookOpen='';
+
 function openBibleBook(bookName){
   var book=BIBLE_BOOKS.find(function(b){return b.name===bookName;});
   if(!book)return;
+  _bibleBookOpen=bookName;
+  var titleEl=document.getElementById('bibleBookModalTitle');
+  if(titleEl)titleEl.textContent='📖 '+bookName;
+  renderBibleBookModal();
+  showOv('ovBibleBook');
+}
+
+function renderBibleBookModal(){
+  var bookName=_bibleBookOpen;
+  var book=BIBLE_BOOKS.find(function(b){return b.name===bookName;});
+  if(!book)return;
+  var el=document.getElementById('bibleBookModalContent');
+  if(!el)return;
   var log=BIBLE_LOG[bookName]||[];
-  var chaps=[];
-  for(var i=1;i<=book.chaps;i++)chaps.push(i);
-  var input=prompt(
-    book.name+' ('+book.chaps+' chapters)\n'+
-    'Currently read: '+(log.length?log.join(', '):'none')+'\n\n'+
-    'Enter chapter numbers to toggle (e.g. "1-5" or "1,3,7" or "all" or "none"):'
-  );
-  if(input===null)return;
-  input=input.trim().toLowerCase();
-  var newLog=log.slice();
-  if(input==='all'){
-    newLog=chaps.slice();
-  } else if(input==='none'){
-    newLog=[];
-  } else {
-    var toToggle=[];
-    input.split(',').forEach(function(part){
-      part=part.trim();
-      if(part.indexOf('-')>0){
-        var range=part.split('-');
-        var from=parseInt(range[0]);
-        var to=parseInt(range[1]);
-        if(!isNaN(from)&&!isNaN(to)){
-          for(var i=from;i<=to;i++)if(i>=1&&i<=book.chaps)toToggle.push(i);
-        }
-      } else {
-        var n=parseInt(part);
-        if(!isNaN(n)&&n>=1&&n<=book.chaps)toToggle.push(n);
-      }
-    });
-    toToggle.forEach(function(c){
-      var idx=newLog.indexOf(c);
-      if(idx>=0)newLog.splice(idx,1);
-      else newLog.push(c);
-    });
-    newLog.sort(function(a,b){return a-b;});
+  var notes=BIBLE_CHAPTER_NOTES[bookName]||{};
+  var pct=book.chaps?Math.round(log.length/book.chaps*100):0;
+
+  var chapHtml='';
+  for(var i=1;i<=book.chaps;i++){
+    var read=log.indexOf(i)>=0;
+    var hasNote=!!(notes[i+'']||'').trim();
+    chapHtml+='<div style="display:flex;flex-direction:column;align-items:center;gap:3px">'
+      +'<button onclick="toggleBibleChap(\''+bookName.replace(/'/g,"\\'")+'\',' +i+')" style="width:42px;height:42px;border-radius:10px;border:2px solid '+(read?'var(--sage)':'#e0d8d0')+';background:'+(read?'var(--sage)':'#fff')+';color:'+(read?'#fff':'var(--textd)')+';font-size:12px;font-weight:700;cursor:pointer;position:relative;transition:all .15s" id="bbc-'+i+'">'
+      +i+(hasNote?'<span style="position:absolute;top:2px;right:2px;width:7px;height:7px;border-radius:50%;background:var(--blue);display:block"></span>':'')
+      +'</button>'
+      +'<button onclick="openBibleChapNote(\''+bookName.replace(/'/g,"\\'")+'\',' +i+')" style="background:none;border:none;font-size:11px;cursor:pointer;color:var(--textl);padding:0;line-height:1" title="Chapter note">'+(hasNote?'📝':'✏️')+'</button>'
+      +'</div>';
   }
-  BIBLE_LOG[bookName]=newLog;
+
+  el.innerHTML=
+    '<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">'
+    +'<div style="flex:1;background:#f0ebe4;border-radius:6px;height:8px"><div id="bibleProgBar" style="height:8px;border-radius:6px;background:var(--sage);width:'+pct+'%;transition:width .4s"></div></div>'
+    +'<span id="bibleProgLabel" style="font-size:12px;font-weight:700;color:var(--textd);flex-shrink:0">'+log.length+'/'+book.chaps+'</span>'
+    +'</div>'
+    +'<div style="display:flex;gap:6px;margin-bottom:14px">'
+    +'<button class="btn sec" style="flex:1;font-size:12px" onclick="markAllBibleChaps(\''+bookName.replace(/'/g,"\\'")+'\')">✓ Mark All</button>'
+    +'<button class="btn sec" style="flex:1;font-size:12px" onclick="clearAllBibleChaps(\''+bookName.replace(/'/g,"\\'")+'\')">✕ Clear All</button>'
+    +'</div>'
+    +'<div style="display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-bottom:12px">'+chapHtml+'</div>'
+    +'<div id="bibleChapNotePanel"></div>';
+}
+
+function toggleBibleChap(bookName,chap){
+  var log=BIBLE_LOG[bookName]||[];
+  var idx=log.indexOf(chap);
+  if(idx>=0)log.splice(idx,1);
+  else{log.push(chap);log.sort(function(a,b){return a-b;});}
+  BIBLE_LOG[bookName]=log;
   localStorage.setItem('aBibleLog',JSON.stringify(BIBLE_LOG));
   spiritRunAdd('bibleReading');
+  // Update button appearance in place
+  var btn=document.getElementById('bbc-'+chap);
+  if(btn){
+    var read=log.indexOf(chap)>=0;
+    var notes=BIBLE_CHAPTER_NOTES[bookName]||{};
+    var hasNote=!!(notes[chap+'']||'').trim();
+    btn.style.border='2px solid '+(read?'var(--sage)':'#e0d8d0');
+    btn.style.background=read?'var(--sage)':'#fff';
+    btn.style.color=read?'#fff':'var(--textd)';
+    btn.innerHTML=chap+(hasNote?'<span style="position:absolute;top:2px;right:2px;width:7px;height:7px;border-radius:50%;background:var(--blue);display:block"></span>':'');
+  }
+  // Update progress bar
+  var book=BIBLE_BOOKS.find(function(b){return b.name===bookName;});
+  if(book){
+    var pct=Math.round(log.length/book.chaps*100);
+    var pb=document.getElementById('bibleProgBar');if(pb)pb.style.width=pct+'%';
+    var pl=document.getElementById('bibleProgLabel');if(pl)pl.textContent=log.length+'/'+book.chaps;
+  }
   renderBibleStats();
   renderBibleBooks();
+}
+
+function markAllBibleChaps(bookName){
+  var book=BIBLE_BOOKS.find(function(b){return b.name===bookName;});
+  if(!book)return;
+  var all=[];for(var i=1;i<=book.chaps;i++)all.push(i);
+  BIBLE_LOG[bookName]=all;
+  localStorage.setItem('aBibleLog',JSON.stringify(BIBLE_LOG));
+  spiritRunAdd('bibleReading');
+  renderBibleBookModal();
+  renderBibleStats();
+  renderBibleBooks();
+}
+
+function clearAllBibleChaps(bookName){
+  BIBLE_LOG[bookName]=[];
+  localStorage.setItem('aBibleLog',JSON.stringify(BIBLE_LOG));
+  renderBibleBookModal();
+  renderBibleStats();
+  renderBibleBooks();
+}
+
+function openBibleChapNote(bookName,chap){
+  var panel=document.getElementById('bibleChapNotePanel');
+  if(!panel)return;
+  var notes=BIBLE_CHAPTER_NOTES[bookName]||{};
+  var existing=notes[chap+'']||'';
+  // If same chapter already open, close it
+  if(panel.dataset.chap==chap&&panel.style.display!=='none'){panel.style.display='none';panel.dataset.chap='';return;}
+  panel.dataset.chap=chap;
+  panel.style.display='';
+  panel.innerHTML='<div style="background:#f8f5f0;border-radius:12px;padding:12px 14px;border:1.5px solid #e8e0d8">'
+    +'<div style="font-size:12px;font-weight:700;color:var(--textd);margin-bottom:8px">📝 Chapter '+chap+' Notes</div>'
+    +'<textarea id="bibleChapNoteInput" rows="4" style="width:100%;padding:9px 12px;border-radius:9px;border:1.5px solid #e8e0d8;font-family:\'Quicksand\',sans-serif;font-size:13px;resize:vertical;box-sizing:border-box" placeholder="Thoughts, key verses, insights from chapter '+chap+'…">'+escHtml(existing)+'</textarea>'
+    +'<div style="display:flex;gap:8px;margin-top:8px">'
+    +'<button class="ok-btn" style="flex:1;padding:8px" onclick="saveBibleChapNote(\''+bookName.replace(/'/g,"\\'")+'\',' +chap+')">Save Note</button>'
+    +(existing?'<button class="btn sec" style="font-size:12px;padding:8px 12px" onclick="deleteBibleChapNote(\''+bookName.replace(/'/g,"\\'")+'\',' +chap+')">🗑️</button>':'')
+    +'</div>'
+    +'</div>';
+  panel.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+function saveBibleChapNote(bookName,chap){
+  var val=(document.getElementById('bibleChapNoteInput')||{}).value||'';
+  if(!BIBLE_CHAPTER_NOTES[bookName])BIBLE_CHAPTER_NOTES[bookName]={};
+  BIBLE_CHAPTER_NOTES[bookName][chap+'']=val.trim();
+  localStorage.setItem('aBibleChapNotes',JSON.stringify(BIBLE_CHAPTER_NOTES));
+  showToast('Note saved 📝');
+  var panel=document.getElementById('bibleChapNotePanel');
+  if(panel){panel.style.display='none';panel.dataset.chap='';}
+  // Refresh note dots on chips
+  renderBibleBookModal();
+}
+
+function deleteBibleChapNote(bookName,chap){
+  if(!BIBLE_CHAPTER_NOTES[bookName])return;
+  delete BIBLE_CHAPTER_NOTES[bookName][chap+''];
+  localStorage.setItem('aBibleChapNotes',JSON.stringify(BIBLE_CHAPTER_NOTES));
+  showToast('Note deleted');
+  var panel=document.getElementById('bibleChapNotePanel');
+  if(panel){panel.style.display='none';panel.dataset.chap='';}
+  renderBibleBookModal();
 }
 
 // ── Ministry ──────────────────────────────────
@@ -17899,6 +17991,14 @@ function delProjInc(id){
     <button class="ok-btn" onclick="confirmAddWplan()">Save Plan</button>
   </div>
 </div>
+<!-- BIBLE BOOK MODAL -->
+<div class="ov" id="ovBibleBook" onclick="if(event.target===this)closeOv('ovBibleBook')">
+  <div class="mod" onclick="event.stopPropagation()" style="max-height:90vh;overflow-y:auto">
+    <div class="mh"><span class="mt" id="bibleBookModalTitle">📖 Book</span><button class="mc" onclick="closeOv('ovBibleBook')">✕</button></div>
+    <div id="bibleBookModalContent"></div>
+  </div>
+</div>
+
 <!-- EDIT EXERCISE MODAL -->
 <div class="ov" id="ovEditWplanEx" onclick="closeOv('ovEditWplanEx')">
   <div class="mod" onclick="event.stopPropagation()" style="max-height:88vh;overflow-y:auto">
