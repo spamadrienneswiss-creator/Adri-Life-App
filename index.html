@@ -906,8 +906,8 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
 </div>
 
 <!-- Wine Review Modal -->
-<div class="modal" id="wdModal">
-  <div class="modal-box" style="max-width:420px">
+<div class="ov" id="wdModal" onclick="if(event.target===this)closeM('wdModal')">
+  <div class="mod" style="max-width:420px">
     <div class="modal-title" id="wdModalTitle">🍷 Add Wine</div>
     <input type="hidden" id="wdId">
     <input type="hidden" id="wdType">
@@ -947,8 +947,8 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
 </div>
 
 <!-- Places Modal -->
-<div class="modal" id="placesModal">
-  <div class="modal-box" style="max-width:420px">
+<div class="ov" id="placesModal" onclick="if(event.target===this)closeM('placesModal')">
+  <div class="mod" style="max-width:420px">
     <div class="modal-title" id="placeModalTitle">📍 Add Place</div>
     <input type="hidden" id="placeId">
     <div class="fi-row"><label class="fi-label">Name</label><input class="fi" id="placeName" placeholder="Place name…"></div>
