@@ -1235,11 +1235,6 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
       <span class="sh-arr" id="sh-arr-todayTasksSec">▾</span>
     </div>
     <div id="todayTasksSec-wrap" style="padding:0 14px 14px">
-      <!-- Focus Session link -->
-      <button class="btn" style="width:100%;margin-bottom:14px;background:linear-gradient(135deg,var(--lav),var(--rose-light));color:var(--textd);font-size:13px;font-weight:700;padding:12px;border-radius:12px;text-align:left;display:flex;align-items:center;justify-content:space-between" onclick="goTab('focus-session',null)">
-        <span>🎯 Focus Session</span>
-        <span style="font-size:12px;color:var(--textl)">Timer + task queue →</span>
-      </button>
       <!-- AM Routine -->
       <div style="font-size:11px;font-weight:700;color:var(--textl);letter-spacing:.4px;text-transform:uppercase;cursor:pointer;display:flex;justify-content:space-between;align-items:center;margin-bottom:4px" onclick="togTodaySec('todayAM')">
         <span>Morning Routine</span><span class="sh-arr" id="sh-arr-todayAM">▾</span>
@@ -1329,12 +1324,6 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
       <span id="unassignedBadge" style="display:none;background:var(--rose);color:white;border-radius:14px;padding:2px 9px;font-size:11px;font-weight:700;cursor:pointer" onclick="togHelmSec('hs-batch',true)">0 unsorted</span>
     </div>
   </div>
-
-  <!-- Focus Session link -->
-  <button class="btn" style="width:100%;margin-bottom:10px;background:linear-gradient(135deg,#eee8f8,#f8e8e8);color:var(--textd);font-size:13px;font-weight:700;padding:11px 14px;border-radius:12px;text-align:left;display:flex;align-items:center;justify-content:space-between;border:1.5px solid #c8b8e8" onclick="goTab('focus-session',null)">
-    <span>🎯 Focus Session</span>
-    <span style="font-size:12px;color:var(--textl)">Timer + task queue →</span>
-  </button>
 
   <!-- Brain Dump -->
   <div class="card" style="margin-bottom:10px">
@@ -11727,7 +11716,14 @@ function renderWplanList(){
       +'</div>'
       +'<div class="wplan-exercises" id="wpex-'+p.id+'">'
       +p.exercises.map(function(ex){
-        return '<div class="wplan-ex-row"><span class="wplan-ex-name">'+ex.name+'</span><span class="wplan-ex-detail">'+ex.detail+'</span></div>';
+        var photos=(ex.photo1||ex.photo2)?'<div style="display:flex;gap:6px;margin-top:5px">'
+          +(ex.photo1?'<img src="'+ex.photo1+'" style="width:64px;height:48px;object-fit:cover;border-radius:7px;border:1.5px solid var(--border)">':'')
+          +(ex.photo2?'<img src="'+ex.photo2+'" style="width:64px;height:48px;object-fit:cover;border-radius:7px;border:1.5px solid var(--border)">':'')
+          +'</div>':'';
+        return '<div class="wplan-ex-row" style="align-items:flex-start">'
+          +'<div style="flex:1"><span class="wplan-ex-name">'+ex.name+'</span><span class="wplan-ex-detail">'+ex.detail+'</span>'+photos+'</div>'
+          +'<button onclick="event.stopPropagation();editWplanEx(\''+p.id+'\',\''+ex.id+'\')" style="background:none;border:1.5px solid var(--border);border-radius:7px;font-size:11px;padding:2px 8px;cursor:pointer;color:var(--textl);flex-shrink:0;margin-left:6px">✏️</button>'
+          +'</div>';
       }).join('')
       +'<div style="display:flex;gap:8px;margin-top:10px">'
       +'<button class="btn" style="flex:1;background:var(--sage)" onclick="loadWplan(\''+p.id+'\')">▶ Start Workout</button>'
@@ -11753,6 +11749,51 @@ function delWplan(id){
   renderWplanList();
 }
 
+function editWplanEx(planId,exId){
+  var plan=WORKOUT_PLANS.find(function(p){return p.id===planId;});
+  if(!plan)return;
+  var ex=plan.exercises.find(function(e){return e.id===exId;});
+  if(!ex)return;
+  document.getElementById('editExPlanId').value=planId;
+  document.getElementById('editExId').value=exId;
+  document.getElementById('editExName').value=ex.name||'';
+  document.getElementById('editExDetail').value=ex.detail||'';
+  // photo 1
+  var p1d=document.getElementById('editExPhoto1Data');
+  var p1p=document.getElementById('editExPhoto1Prev');
+  var p1c=document.getElementById('editExPhoto1Clear');
+  p1d.value=ex.photo1||'';
+  if(ex.photo1){p1p.src=ex.photo1;p1p.style.display='block';p1c.style.display='';}
+  else{p1p.style.display='none';p1p.src='';p1c.style.display='none';}
+  // photo 2
+  var p2d=document.getElementById('editExPhoto2Data');
+  var p2p=document.getElementById('editExPhoto2Prev');
+  var p2c=document.getElementById('editExPhoto2Clear');
+  p2d.value=ex.photo2||'';
+  if(ex.photo2){p2p.src=ex.photo2;p2p.style.display='block';p2c.style.display='';}
+  else{p2p.style.display='none';p2p.src='';p2c.style.display='none';}
+  document.getElementById('editExPhoto1File').value='';
+  document.getElementById('editExPhoto2File').value='';
+  showOv('ovEditWplanEx');
+}
+
+function saveWplanEx(){
+  var planId=document.getElementById('editExPlanId').value;
+  var exId=document.getElementById('editExId').value;
+  var plan=WORKOUT_PLANS.find(function(p){return p.id===planId;});
+  if(!plan)return;
+  var ex=plan.exercises.find(function(e){return e.id===exId;});
+  if(!ex)return;
+  ex.name=document.getElementById('editExName').value.trim()||ex.name;
+  ex.detail=document.getElementById('editExDetail').value.trim();
+  ex.photo1=document.getElementById('editExPhoto1Data').value||'';
+  ex.photo2=document.getElementById('editExPhoto2Data').value||'';
+  localStorage.setItem('aWplans',JSON.stringify(WORKOUT_PLANS));
+  closeOv('ovEditWplanEx');
+  renderWplanList();
+  showToast('Exercise updated!');
+}
+
 function loadWplan(id){
   var plan=WORKOUT_PLANS.find(function(p){return p.id===id;});
   if(!plan)return;
@@ -11762,10 +11803,15 @@ function loadWplan(id){
   var list=document.getElementById('wplanActiveExList');
   if(list){
     list.innerHTML=plan.exercises.map(function(ex){
+      var photos=(ex.photo1||ex.photo2)?'<div style="display:flex;gap:6px;margin-top:6px">'
+        +(ex.photo1?'<img src="'+ex.photo1+'" style="width:72px;height:54px;object-fit:cover;border-radius:8px;cursor:pointer" onclick="this.style.width=this.style.width===\'72px\'?\'100%\':\'72px\'">':'')
+        +(ex.photo2?'<img src="'+ex.photo2+'" style="width:72px;height:54px;object-fit:cover;border-radius:8px;cursor:pointer" onclick="this.style.width=this.style.width===\'72px\'?\'100%\':\'72px\'">':'')
+        +'</div>':'';
       return '<div class="wplan-active-ex">'
         +'<div class="wplan-active-chk" id="wac-'+ex.id+'" onclick="toggleWplanEx(\''+ex.id+'\')"></div>'
         +'<div style="flex:1"><div style="font-size:13px;font-weight:600;color:var(--textd)">'+ex.name+'</div>'
         +(ex.detail?'<div style="font-size:11px;color:var(--textl)">'+ex.detail+'</div>':'')
+        +photos
         +'</div>'
         +'</div>';
     }).join('');
@@ -13379,6 +13425,12 @@ function addGroceryManual(){
   if(!name)return;
   GROCERY_LIST.push({name:name,qty:qty,unit:'',category:'Other',store:store||'',checked:false});
   localStorage.setItem('aGroceryList',JSON.stringify(GROCERY_LIST));
+  // Auto-create FOOD_DB entry if new
+  var nl=name.toLowerCase();
+  if(!FOOD_DB.find(function(x){return (x.name||'').toLowerCase()===nl;})){
+    FOOD_DB.unshift({id:'fd-'+Date.now(),name:name,tags:[],useCount:0,staple:false,store:store||'',price:0,calories:0,protein:0,carbs:0,fat:0,notes:'',created:todayStr()});
+    saveFoodDbData();
+  }
   document.getElementById('groceryAddName').value='';
   document.getElementById('groceryAddQty').value='';
   var storeEl=document.getElementById('groceryAddStore');if(storeEl)storeEl.value='';
@@ -17774,6 +17826,32 @@ function delProjInc(id){
     <div id="wplanExInputs"></div>
     <button class="btn sec" style="width:100%;margin-bottom:14px" onclick="addWplanExInput()">+ Add Exercise</button>
     <button class="ok-btn" onclick="confirmAddWplan()">Save Plan</button>
+  </div>
+</div>
+<!-- EDIT EXERCISE MODAL -->
+<div class="ov" id="ovEditWplanEx" onclick="closeOv('ovEditWplanEx')">
+  <div class="mod" onclick="event.stopPropagation()" style="max-height:88vh;overflow-y:auto">
+    <div class="mh"><span class="mt">✏️ Edit Exercise</span><button class="mc" onclick="closeOv('ovEditWplanEx')">✕</button></div>
+    <input type="hidden" id="editExPlanId">
+    <input type="hidden" id="editExId">
+    <div class="fg"><label class="fl">Exercise Name</label><input class="fi" id="editExName" placeholder="e.g. Squat"></div>
+    <div class="fg"><label class="fl">Sets × Reps / Detail</label><input class="fi" id="editExDetail" placeholder="e.g. 3×12 or 30 min"></div>
+    <div class="fg">
+      <label class="fl">Photo 1 (form / reference)</label>
+      <input type="file" id="editExPhoto1File" accept="image/*" style="font-size:12px;margin-bottom:4px" onchange="(function(f){if(!f.files[0])return;var r=new FileReader();r.onload=function(e){document.getElementById('editExPhoto1Data').value=e.target.result;var p=document.getElementById('editExPhoto1Prev');p.src=e.target.result;p.style.display='block';document.getElementById('editExPhoto1Clear').style.display='';};r.readAsDataURL(f.files[0]);})(this)">
+      <input type="hidden" id="editExPhoto1Data">
+      <img id="editExPhoto1Prev" style="display:none;width:100%;max-height:160px;object-fit:cover;border-radius:10px;margin-bottom:6px" alt="">
+      <button class="btn sec" id="editExPhoto1Clear" style="font-size:11px;padding:3px 10px;display:none" onclick="document.getElementById('editExPhoto1Data').value='';document.getElementById('editExPhoto1Prev').style.display='none';document.getElementById('editExPhoto1File').value='';this.style.display='none'">✕ Remove</button>
+    </div>
+    <div class="fg">
+      <label class="fl">Photo 2 (angle / detail)</label>
+      <input type="file" id="editExPhoto2File" accept="image/*" style="font-size:12px;margin-bottom:4px" onchange="(function(f){if(!f.files[0])return;var r=new FileReader();r.onload=function(e){document.getElementById('editExPhoto2Data').value=e.target.result;var p=document.getElementById('editExPhoto2Prev');p.src=e.target.result;p.style.display='block';document.getElementById('editExPhoto2Clear').style.display='';};r.readAsDataURL(f.files[0]);})(this)">
+      <input type="hidden" id="editExPhoto2Data">
+      <img id="editExPhoto2Prev" style="display:none;width:100%;max-height:160px;object-fit:cover;border-radius:10px;margin-bottom:6px" alt="">
+      <button class="btn sec" id="editExPhoto2Clear" style="font-size:11px;padding:3px 10px;display:none" onclick="document.getElementById('editExPhoto2Data').value='';document.getElementById('editExPhoto2Prev').style.display='none';document.getElementById('editExPhoto2File').value='';this.style.display='none'">✕ Remove</button>
+    </div>
+    <button class="ok-btn" onclick="saveWplanEx()">Save Exercise</button>
+    <button class="cn-btn" onclick="closeOv('ovEditWplanEx')">Cancel</button>
   </div>
 </div>
 <!-- HABIT ADD MODAL -->
