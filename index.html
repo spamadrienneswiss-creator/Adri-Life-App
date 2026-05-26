@@ -3908,42 +3908,81 @@ function renderArchiveYear(yr){
   var ydata=ARCHIVE_YEARS[yr]||{tasks:[],goals:[],notes:''};
   var tasks=ydata.tasks||[];
   var goals=ydata.goals||[];
-
-  // Food trends for this year from MEAL_LOG_ITEMS
   var yearStr=''+yr;
+
+  // Food trends
   var meals=(MEAL_LOG_ITEMS||[]).filter(function(m){return m.date&&m.date.startsWith(yearStr);});
   var foodCount={};
-  meals.forEach(function(m){
-    var name=(m.name||'').trim().toLowerCase();
-    if(name)foodCount[name]=(foodCount[name]||0)+1;
-  });
+  meals.forEach(function(m){var n=(m.name||'').trim().toLowerCase();if(n)foodCount[n]=(foodCount[n]||0)+1;});
   var topFoods=Object.keys(foodCount).sort(function(a,b){return foodCount[b]-foodCount[a];}).slice(0,10);
 
-  // Mood trend for this year
+  // Mood
   var moodEntries=Object.keys(MOOD||{}).filter(function(k){return k.startsWith(yearStr);});
-  var moodSum=0,moodCount=0;
-  moodEntries.forEach(function(k){var v=MOOD[k];if(v){moodSum+=v;moodCount++;}});
-  var avgMood=moodCount?Math.round(moodSum/moodCount*10)/10:null;
+  var moodSum=0,moodCnt=0;
+  moodEntries.forEach(function(k){var v=MOOD[k];if(v){moodSum+=v;moodCnt++;}});
+  var avgMood=moodCnt?Math.round(moodSum/moodCnt*10)/10:null;
   var moodEmoji=['','😔','😕','😐','🙂','😊'];
 
+  // Ministry
+  var ministryHrs=(MINISTRY_LOG||[]).filter(function(m){return (m.date||'').startsWith(yearStr);}).reduce(function(s,m){return s+(parseFloat(m.hours)||0);},0);
+  var ministryEntries=(MINISTRY_LOG||[]).filter(function(m){return (m.date||'').startsWith(yearStr);});
+
+  // Expenses
+  var yearExps=EXPENSES.filter(function(e){return (e.created||e.date||'').startsWith(yearStr);});
+  var yearExpTotal=yearExps.reduce(function(s,e){return s+(parseFloat(e.amt)||0);},0);
+  var yearExpBiz=yearExps.filter(function(e){return e.ty==='business';}).reduce(function(s,e){return s+(parseFloat(e.amt)||0);},0);
+
+  // Bible (lifetime chapters — no date tracking)
+  var totalChapsRead=0;
+  Object.keys(BIBLE_LOG||{}).forEach(function(b){totalChapsRead+=(BIBLE_LOG[b]||[]).length;});
+
+  // Wine reviews
+  var yearWines=(WINE_DRINKS||[]).filter(function(w){return (w.date||'').startsWith(yearStr);});
+  var wineAvgRating=yearWines.length?Math.round(yearWines.reduce(function(s,w){return s+(w.rating||0);},0)/yearWines.length*10)/10:null;
+
+  // Habits
+  var habitLog=JSON.parse(localStorage.getItem('aHabitLog')||'{}');
+  var yearHabitDays=Object.keys(habitLog).filter(function(k){return k.startsWith(yearStr);}).length;
+
   content.innerHTML=
-    // Stats strip
-    '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px">'
+    // Stats row 1
+    '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:8px">'
       +'<div class="card" style="text-align:center;padding:10px"><div style="font-size:22px;font-weight:700;color:var(--rose)">'+tasks.length+'</div><div style="font-size:10px;color:var(--textl)">Tasks done</div></div>'
       +'<div class="card" style="text-align:center;padding:10px"><div style="font-size:22px;font-weight:700;color:var(--sage)">'+goals.length+'</div><div style="font-size:10px;color:var(--textl)">Goals achieved</div></div>'
       +'<div class="card" style="text-align:center;padding:10px"><div style="font-size:22px;font-weight:700;color:var(--blue)">'+(avgMood?moodEmoji[Math.round(avgMood)]||avgMood:'—')+'</div><div style="font-size:10px;color:var(--textl)">Avg mood</div></div>'
     +'</div>'
+    // Stats row 2
+    +'<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px">'
+      +'<div class="card" style="text-align:center;padding:10px"><div style="font-size:18px;font-weight:700;color:#8a5a20">'+ministryHrs.toFixed(1)+'h</div><div style="font-size:10px;color:var(--textl)">Ministry</div></div>'
+      +'<div class="card" style="text-align:center;padding:10px"><div style="font-size:18px;font-weight:700;color:#4a7a9b">$'+yearExpTotal.toFixed(0)+'</div><div style="font-size:10px;color:var(--textl)">Spent</div></div>'
+      +'<div class="card" style="text-align:center;padding:10px"><div style="font-size:18px;font-weight:700;color:var(--rose)">'+meals.length+'</div><div style="font-size:10px;color:var(--textl)">Meals logged</div></div>'
+    +'</div>'
 
     // Notes
     +'<div class="card" style="margin-bottom:10px">'
-      +'<div style="font-size:13px;font-weight:700;color:var(--textd);margin-bottom:8px">📝 Year Notes</div>'
+      +'<div style="font-size:13px;font-weight:700;color:var(--textd);margin-bottom:8px">📝 Year Notes & Reflections</div>'
       +'<textarea id="archiveYearNotes" rows="3" style="width:100%;padding:8px 11px;border-radius:9px;border:1.5px solid #e8e0d8;font-family:\'Quicksand\',sans-serif;font-size:13px;resize:vertical;box-sizing:border-box" placeholder="Reflections, highlights, lessons from '+yr+'…" onchange="saveArchiveYearNotes('+yr+',this.value)">'+escHtml(ydata.notes||'')+'</textarea>'
     +'</div>'
+
+    // Ministry highlights
+    +(ministryEntries.length?
+      '<div class="card" style="margin-bottom:10px">'
+        +'<div style="font-size:13px;font-weight:700;color:var(--textd);margin-bottom:8px">⛪ Ministry Log — '+yr+' ('+ministryHrs.toFixed(1)+'h total)</div>'
+        +ministryEntries.slice(0,8).map(function(m){
+          return '<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--border)">'
+            +'<span style="font-size:11px;color:var(--textl);flex-shrink:0;width:70px">'+m.date+'</span>'
+            +'<span style="flex:1;font-size:12px;color:var(--textd)">'+(m.notes||m.studies||'Ministry time')+'</span>'
+            +'<span style="font-size:12px;font-weight:700;color:#8a5a20;flex-shrink:0">'+m.hours+'h</span>'
+            +'</div>';
+        }).join('')
+        +(ministryEntries.length>8?'<div style="font-size:11px;color:var(--textl);text-align:center;padding:6px">+ '+(ministryEntries.length-8)+' more entries</div>':'')
+      +'</div>'
+    :'')
 
     // Food trends
     +(topFoods.length?
       '<div class="card" style="margin-bottom:10px">'
-        +'<div style="font-size:13px;font-weight:700;color:var(--textd);margin-bottom:8px">🍽️ Most Eaten in '+yr+'</div>'
+        +'<div style="font-size:13px;font-weight:700;color:var(--textd);margin-bottom:8px">🍽️ Most Eaten in '+yr+' ('+meals.length+' logged)</div>'
         +topFoods.map(function(f,i){
           return '<div style="display:flex;align-items:center;gap:8px;padding:4px 0;border-bottom:1px solid var(--border)">'
             +'<span style="font-size:11px;font-weight:700;color:var(--textl);width:16px">'+(i+1)+'.</span>'
@@ -3951,6 +3990,62 @@ function renderArchiveYear(yr){
             +'<span style="font-size:11px;color:var(--textl)">×'+foodCount[f]+'</span>'
             +'</div>';
         }).join('')
+      +'</div>'
+    :'')
+
+    // Wine reviews
+    +(yearWines.length?
+      '<div class="card" style="margin-bottom:10px">'
+        +'<div style="font-size:13px;font-weight:700;color:var(--textd);margin-bottom:8px">🍷 Wine & Drinks in '+yr+' ('+yearWines.length+(wineAvgRating?' · avg ⭐'+wineAvgRating:'')+')</div>'
+        +yearWines.slice(0,6).map(function(w){
+          return '<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--border)">'
+            +'<span style="font-size:13px">'+('⭐'.repeat(Math.round(w.rating||0)))+'</span>'
+            +'<span style="flex:1;font-size:12px;color:var(--textd)">'+escHtml(w.name||'')+'</span>'
+            +(w.price?'<span style="font-size:11px;color:var(--textl)">$'+w.price+'</span>':'')
+            +'</div>';
+        }).join('')
+        +(yearWines.length>6?'<div style="font-size:11px;color:var(--textl);text-align:center;padding:6px">+ '+(yearWines.length-6)+' more</div>':'')
+      +'</div>'
+    :'')
+
+    // Expenses
+    +(yearExps.length?
+      '<div class="card" style="margin-bottom:10px">'
+        +'<div style="font-size:13px;font-weight:700;color:var(--textd);margin-bottom:8px">💸 Spending in '+yr+'</div>'
+        +'<div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:8px">'
+          +'<span style="font-size:12px;color:var(--textd)">Total: <strong>$'+yearExpTotal.toFixed(2)+'</strong></span>'
+          +(yearExpBiz?'<span style="font-size:12px;color:var(--textd)">Business: <strong>$'+yearExpBiz.toFixed(2)+'</strong></span>':'')
+          +'<span style="font-size:12px;color:var(--textl)">'+yearExps.length+' transactions</span>'
+        +'</div>'
+        +(function(){
+          var byCat={};
+          yearExps.forEach(function(e){var c=e.cat||'Other';byCat[c]=(byCat[c]||0)+(parseFloat(e.amt)||0);});
+          return Object.keys(byCat).sort(function(a,b){return byCat[b]-byCat[a];}).slice(0,5).map(function(c){
+            return '<div style="display:flex;align-items:center;gap:8px;padding:3px 0"><span style="flex:1;font-size:12px;color:var(--textd)">'+escHtml(c)+'</span><span style="font-size:12px;color:#4a7a9b;font-weight:600">$'+byCat[c].toFixed(0)+'</span></div>';
+          }).join('');
+        })()
+      +'</div>'
+    :'')
+
+    // Bible progress (lifetime)
+    +(totalChapsRead>0?
+      '<div class="card" style="margin-bottom:10px">'
+        +'<div style="font-size:13px;font-weight:700;color:var(--textd);margin-bottom:8px">📖 Bible Progress (lifetime)</div>'
+        +'<div style="display:flex;align-items:center;gap:10px">'
+          +'<div style="flex:1;background:#f0ebe4;border-radius:8px;height:8px;overflow:hidden">'
+            +'<div style="height:8px;border-radius:8px;background:var(--sage);width:'+Math.min(100,(totalChapsRead/1189*100)).toFixed(1)+'%"></div>'
+          +'</div>'
+          +'<span style="font-size:12px;font-weight:700;color:var(--textd)">'+totalChapsRead+'/1189</span>'
+          +'<span style="font-size:11px;color:var(--textl)">'+(totalChapsRead/1189*100).toFixed(1)+'%</span>'
+        +'</div>'
+      +'</div>'
+    :'')
+
+    // Habits
+    +(yearHabitDays>0?
+      '<div class="card" style="margin-bottom:10px">'
+        +'<div style="font-size:13px;font-weight:700;color:var(--textd);margin-bottom:4px">✅ Habit Tracking</div>'
+        +'<div style="font-size:13px;color:var(--textl)">'+yearHabitDays+' days with habits logged in '+yr+'</div>'
       +'</div>'
     :'')
 
@@ -12690,10 +12785,11 @@ function addMealLogItem(){
   var day=(document.getElementById('mealLogDay')||{}).value||'';
   MEAL_LOG_ITEMS.unshift({id:'ml-'+Date.now(),name:name,category:cat,day:day,date:todayStr()});
   localStorage.setItem('aMealLogItems',JSON.stringify(MEAL_LOG_ITEMS));
-  // Track useCount on matching FOOD_DB item
+  // Track useCount on matching FOOD_DB item; auto-create if new
   var nl=name.toLowerCase();
   var dbItem=FOOD_DB.find(function(x){return (x.name||'').toLowerCase()===nl;});
   if(dbItem){dbItem.useCount=(dbItem.useCount||0)+1;saveFoodDbData();}
+  else{FOOD_DB.unshift({id:'fd-'+Date.now(),name:name,tags:[],useCount:1,staple:false,store:'',price:0,calories:0,protein:0,carbs:0,fat:0,notes:'',created:todayStr()});saveFoodDbData();}
   autoFlagStaples();
   document.getElementById('mealLogName').value='';
   document.getElementById('mealLogDay').value='';
@@ -13083,6 +13179,15 @@ function saveRecipe(){
   if(idx>=0)RECIPES[idx]=rec;
   else RECIPES.push(rec);
   localStorage.setItem('aRecipes',JSON.stringify(RECIPES));
+  // Auto-create FOOD_DB entries for any new ingredients
+  var _dbChanged=false;
+  (MEAL_EDIT_INGS||[]).forEach(function(ing){
+    if(!ing.name)return;
+    var n=ing.name.toLowerCase();
+    var exists=FOOD_DB.find(function(x){return (x.name||'').toLowerCase()===n;});
+    if(!exists){FOOD_DB.unshift({id:'fd-'+Date.now()+'-'+Math.random().toString(36).slice(2,6),name:ing.name,tags:[],useCount:0,staple:false,store:'',price:0,calories:0,protein:0,carbs:0,fat:0,notes:'',created:todayStr()});_dbChanged=true;}
+  });
+  if(_dbChanged)saveFoodDbData();
   closeOv('recipeModal');
   renderRecipes();
 }
