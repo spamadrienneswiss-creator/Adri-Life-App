@@ -2661,14 +2661,25 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     </div>
   </div>
   <div class="fg"><label class="fl">Estimated Time</label>
-    <div class="bg bg4">
-      <button class="sb" data-g="etm" data-v="<10min" onclick="pSB(this)">⚡&lt;10m</button>
-      <button class="sb" data-g="etm" data-v="<1hr" onclick="pSB(this)">🕐&lt;1hr</button>
-      <button class="sb" data-g="etm" data-v="half-day" onclick="pSB(this)">📅Half</button>
-      <button class="sb" data-g="etm" data-v="full-day" onclick="pSB(this)">🗓️Full</button>
-    </div>
+  <div class="bg bg4">
+    <button class="sb" data-g="etm" data-v="<10min" onclick="pSB(this);document.getElementById('etmCustomWrap').style.display='none'">⚡&lt;10m</button>
+    <button class="sb" data-g="etm" data-v="<1hr" onclick="pSB(this);document.getElementById('etmCustomWrap').style.display='none'">🕐&lt;1hr</button>
+    <button class="sb" data-g="etm" data-v="half-day" onclick="pSB(this);document.getElementById('etmCustomWrap').style.display='none'">📅Half</button>
+    <button class="sb" data-g="etm" data-v="full-day" onclick="pSB(this);document.getElementById('etmCustomWrap').style.display='none'">🗓️Full</button>
   </div>
-  <div class="fg"><label class="fl">Due Date (optional)</label><input class="fi" type="date" id="tDue"></div>
+  <div class="bg bg3" style="margin-top:4px">
+    <button class="sb" data-g="etm" data-v="custom" onclick="pSB(this);document.getElementById('etmCustomWrap').style.display=''">✏️ Custom</button>
+  </div>
+  <div id="etmCustomWrap" style="display:none;margin-top:6px">
+    <input class="fi" id="etmCustomVal" placeholder="e.g. 2h 30m or 45 min" style="font-size:13px;padding:7px 10px">
+  </div>
+</div>
+  <div class="fg"><label class="fl">Due Date &amp; Time (optional)</label>
+  <div style="display:flex;gap:8px">
+    <input class="fi" type="date" id="tDue" style="flex:1">
+    <input class="fi" type="time" id="tDueTime" style="width:130px">
+  </div>
+</div>
   <div class="fg"><label class="fl">Repeat</label>
     <div class="bg bg4">
       <button class="sb" data-g="rep" data-v="" onclick="pSB(this);document.getElementById('repCustomWrap').style.display='none'">🚫 None</button>
@@ -4576,7 +4587,8 @@ function goTabDirect(tab,btn){
   if(tab==='mixtape')renderMixtape();
   if(tab==='places')renderPlaces();
   if(SECTION_VIEWS[tab]||tab==='emporium')renderHubPreviews(tab);
-  if(tab==='today'){ tickSpiritRun(); renderWaterBottle(); renderTodayStatsBars(); renderWeekStats(); renderTodayMoodBtns(); renderTodayPlanBar(); }
+  if(tab==='today'){ syncRoutinesToTasks(); tickSpiritRun(); renderWaterBottle(); renderTodayStatsBars(); renderWeekStats(); renderTodayMoodBtns(); renderTodayPlanBar(); }
+  if(tab==='routines'){ syncRoutinesToTasks(); renderRtnGroups(); }
   if(tab==='hearthside'){ renderHWHubStats(); }
   if(tab==='lighthouse'){ updateLighthouseSpiritStatus(); }
   if(tab==='tasks'){ updateHelmBadges(); }
@@ -5131,6 +5143,32 @@ function sendRtnToTask(text){
   showToast('→ Added to Tasks!');
 }
 
+function syncRoutinesToTasks(){
+  var today=todayStr();
+  var changed=false;
+  RTN_GROUPS.forEach(function(g){
+    if(!rtnIsDueToday(g))return;
+    var items=RTNS[g.id]||[];
+    var cs=rtnCompState(g,today);
+    items.forEach(function(item,oi){
+      if(cs[oi])return; // already done, skip
+      var exists=TASKS.find(function(t){
+        return t.source==='routine'&&t.rtnGroupId===g.id&&t.rtnItemIdx===oi&&t.rtnDate===today;
+      });
+      if(exists)return;
+      var tid='t-rtn-'+g.id+'-'+oi+'-'+Date.now();
+      var newT={id:tid,title:item,cat:'mis',urgency:'important-not-urgent',etime:'',due:today,notes:'📅 Routine: '+g.name,done:false,repeat:'',repeatDays:0,subs:[],created:new Date().toISOString(),source:'routine',rtnGroupId:g.id,rtnItemIdx:oi,rtnDate:today,meaningful:false};
+      TASKS.push(newT);
+      changed=true;
+    });
+  });
+  if(changed){
+    localStorage.setItem('aTasks',JSON.stringify(TASKS));
+    TASKS.forEach(function(t){if(t.source==='routine'&&t.rtnDate===today)fbSave('tasks',t.id,t);});
+    showToast('Routine tasks synced!');
+  }
+}
+
 function togRtnDone(id){
   var el=document.getElementById(id);if(!el)return;
   var btn=document.getElementById('btn_'+id);
@@ -5336,6 +5374,9 @@ function togR(key,idx,el){
   var cs=rtnCompState(g||{id:key,freq:'daily'},today);
   var newVal=!cs[idx];
   rtnSetComp(key,today,idx,newVal);
+  // Sync with tasks: if checking off, mark linked routine task done; if unchecking, mark undone
+  var _rtnTask=TASKS.find(function(t){return t.source==='routine'&&t.rtnGroupId===key&&t.rtnItemIdx===idx&&t.rtnDate===today;});
+  if(_rtnTask){_rtnTask.done=newVal;localStorage.setItem('aTasks',JSON.stringify(TASKS));fbSave('tasks',_rtnTask.id,_rtnTask);}
   el.classList.toggle('done',newVal);
   el.querySelector('.rchk').textContent=newVal?'✓':'';
   updRS();
@@ -5489,11 +5530,15 @@ function editT(id){
   // Reset form fields without clearing editTId (openM would wipe it)
   SBV={};
   document.querySelectorAll('[data-g]').forEach(function(b){b.classList.remove('on');});
-  ['tTit','tDue','tNotes'].forEach(function(f){var el=document.getElementById(f);if(el)el.value='';});
+  ['tTit','tDue','tDueTime','tNotes','etmCustomVal'].forEach(function(f){var el=document.getElementById(f);if(el)el.value='';});
   document.getElementById('tModTit').textContent='Edit Task ✏️';
   document.getElementById('editTId').value=id;
   document.getElementById('tTit').value=t.title;
-  document.getElementById('tDue').value=t.due||'';
+  var _dueRaw=t.due||'';
+  var _dueParts=_dueRaw.split('T');
+  document.getElementById('tDue').value=_dueParts[0]||'';
+  var _dueTimeEl=document.getElementById('tDueTime');
+  if(_dueTimeEl)_dueTimeEl.value=_dueParts[1]||'';
   document.getElementById('tNotes').value=t.notes||'';
   document.getElementById('delTBtn').style.display='block';
   _taskMeaningful=!!(t.meaningful);
@@ -5504,6 +5549,17 @@ function editT(id){
     document.querySelectorAll('[data-g="urg"]').forEach(function(b){if(b.dataset.v===t.urgency){b.classList.add('on');SBV.urg=t.urgency;}});
     document.querySelectorAll('[data-g="etm"]').forEach(function(b){if(b.dataset.v===t.etime){b.classList.add('on');SBV.etm=t.etime;}});
     document.querySelectorAll('[data-g="rep"]').forEach(function(b){if(b.dataset.v===(t.repeat||'')){b.classList.add('on');SBV.rep=t.repeat||'';}});
+    var _etmCustomWrap=document.getElementById('etmCustomWrap');
+    var _etmCustomVal=document.getElementById('etmCustomVal');
+    var _standardEtimes=['<10min','<1hr','half-day','full-day'];
+    if(t.etime&&_standardEtimes.indexOf(t.etime)<0){
+      if(_etmCustomWrap)_etmCustomWrap.style.display='';
+      if(_etmCustomVal)_etmCustomVal.value=t.etime;
+      SBV.etm='custom';
+      document.querySelectorAll('[data-g="etm"]').forEach(function(b){b.classList.toggle('on',b.dataset.v==='custom');});
+    }else{
+      if(_etmCustomWrap)_etmCustomWrap.style.display='none';
+    }
   },50);
   document.getElementById('taskModal').classList.add('show');
 }
@@ -5543,13 +5599,17 @@ function saveTask(){
   if(!title){alert('Please enter a task!');return;}
   var id=document.getElementById('editTId').value||Date.now().toString();
   var existing=TASKS.find(function(t){return t.id===id;});
+  var _dueDate=document.getElementById('tDue').value;
+  var _dueTimeEl=document.getElementById('tDueTime');
+  var _dueTime=_dueTimeEl?_dueTimeEl.value:'';
+  var _due=_dueDate+(_dueTime?'T'+_dueTime:'');
   var t={
     id:id,
     title:title,
     cat:SBV.cat||(existing&&existing.cat)||'mis',
     urgency:SBV.urg||(existing&&existing.urgency)||'important-not-urgent',
-    etime:SBV.etm||(existing&&existing.etime)||'',
-    due:document.getElementById('tDue').value,
+    etime:(SBV.etm==='custom'?((document.getElementById('etmCustomVal')||{}).value||'').trim()||'custom':(SBV.etm||(existing&&existing.etime)||'')),
+    due:_due,
     notes:document.getElementById('tNotes').value.trim(),
     done:existing?existing.done:false,
     repeat:SBV.rep!==undefined?SBV.rep:(existing?existing.repeat||'':''),
@@ -5561,6 +5621,7 @@ function saveTask(){
   var isNew=!TASKS.find(function(x){return x.id===id;});
   if(isNew){TASKS.push(t);bumpHelmTask();}else{var idx=TASKS.findIndex(function(x){return x.id===id;});if(idx>=0)TASKS[idx]=t;}
   fbSave('tasks',id,t);
+  localStorage.setItem('aTasks',JSON.stringify(TASKS));
   updHelmBadge();
   closeM('taskModal');
   if(document.getElementById('v-plan')&&document.getElementById('v-plan').classList.contains('on'))renderPlan();
@@ -7288,6 +7349,12 @@ function addGoalStep(goalId){
   if(!g.steps)g.steps=[];
   g.steps.push({id:goalId+'_gs'+Date.now(),title:title,done:false});
   fbSave('goals',goalId,g);
+  // Auto-create a linked task
+  var _gsTaskId='t-gs-'+Date.now();
+  var _gsTask={id:_gsTaskId,title:title,cat:g.cat||'mis',urgency:'important-not-urgent',etime:'',due:g.due?g.due.split('T')[0]:'',notes:'🎯 Goal: '+g.title,done:false,repeat:'',repeatDays:0,subs:[],created:new Date().toISOString(),source:'goal',goalId:goalId,stepId:g.steps[g.steps.length-1].id,meaningful:false};
+  TASKS.push(_gsTask);
+  localStorage.setItem('aTasks',JSON.stringify(TASKS));
+  fbSave('tasks',_gsTaskId,_gsTask);
   inp.value='';OPEN_GOAL[goalId]=true;
 }
 
@@ -7295,6 +7362,9 @@ function togGoalStep(goalId,stepId){
   var g=GOALS.find(function(g){return g.id===goalId;});if(!g||!g.steps)return;
   var s=g.steps.find(function(s){return s.id===stepId;});if(s)s.done=!s.done;
   fbSave('goals',goalId,g);
+  // Sync to linked task if any
+  var _linkedT=TASKS.find(function(t){return t.source==='goal'&&t.goalId===goalId&&t.stepId===stepId;});
+  if(_linkedT){_linkedT.done=s?s.done:false;localStorage.setItem('aTasks',JSON.stringify(TASKS));fbSave('tasks',_linkedT.id,_linkedT);}
 }
 
 function delGoalStep(goalId,stepId){
@@ -7403,10 +7473,37 @@ function addSub(taskId){
   var title=inp.value.trim();if(!title)return;
   var t=TASKS.find(function(t){return t.id===taskId;});if(!t)return;
   if(!t.subs)t.subs=[];
+  var isFirst=t.subs.length===0;
   t.subs.push({id:taskId+'_s'+Date.now(),title:title,done:false});
   fbSave('tasks',taskId,t);
   inp.value='';
   OPEN_PANELS[taskId]=true;
+  if(isFirst)promoteTaskToProject(taskId);
+}
+
+function promoteTaskToProject(taskId){
+  var t=TASKS.find(function(x){return x.id===taskId;});if(!t)return;
+  var proj={
+    id:'p'+Date.now(),
+    title:t.title,
+    cat:t.cat||'mis',
+    status:'active',
+    due:t.due?t.due.split('T')[0]:'',
+    notes:t.notes||'',
+    steps:(t.subs||[]).map(function(s){return{id:s.id,title:s.title,done:s.done};}),
+    created:new Date().toISOString()
+  };
+  if(!PROJECTS)window.PROJECTS=[];
+  PROJECTS.unshift(proj);
+  localStorage.setItem('aProjects',JSON.stringify(PROJECTS));
+  fbSave('projects',proj.id,proj);
+  fbDelete('tasks',taskId);
+  showToast('📁 Task promoted to project!');
+  setTimeout(function(){
+    if(document.getElementById('v-tasks')&&document.getElementById('v-tasks').classList.contains('on')){
+      renderT(CF);
+    }
+  },400);
 }
 
 function delSub(taskId,subId){
