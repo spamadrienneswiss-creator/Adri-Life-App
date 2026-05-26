@@ -778,6 +778,7 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
 <!-- TABS -->
 <div class="tabs" id="tabBar">
   <button class="tab-btn on" data-tab="today" onclick="goTab('today',this)">Today</button>
+  <button class="tab-btn" data-tab="plan" onclick="goTab('plan',this)">Plan</button>
   <button class="tab-btn" data-tab="helm" onclick="goTab('helm',this)">Tasks &amp; Projects</button>
   <button class="tab-btn" data-tab="lighthouse" onclick="goTab('lighthouse',this)">Spiritual</button>
   <button class="tab-btn" data-tab="conservatory" onclick="goTab('conservatory',this)">Personal Growth</button>
@@ -981,40 +982,6 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     <button class="qa" onclick="openM('fwModal')" style="background:linear-gradient(135deg,#e8f0e8,#fdf6ee)"><div class="qa-ic">🍽️</div><div class="qa-lb">Food</div></button>
     <button class="qa" onclick="openM('stepModal')" style="background:linear-gradient(135deg,#e8eef8,#fdf6ee)"><div class="qa-ic">👟</div><div class="qa-lb">Move</div></button>
   </div>
-  <!-- Water Bottle -->
-  <div class="card" style="margin-bottom:10px">
-    <div style="display:flex;align-items:flex-start;gap:14px">
-      <div style="flex-shrink:0;display:flex;flex-direction:column;align-items:center">
-        <div style="width:22px;height:8px;background:var(--lav);border-radius:4px 4px 0 0"></div>
-        <div style="width:22px;height:10px;background:#e8f4fd;border:2px solid #a8cceb;border-bottom:none"></div>
-        <div style="width:54px;height:108px;border:2px solid #a8cceb;border-radius:4px 4px 12px 12px;overflow:hidden;position:relative;background:#f0f8ff">
-          <div id="bottleFill" style="position:absolute;bottom:0;left:0;right:0;height:0%;background:linear-gradient(0deg,#3a9cd8,#7cc4f0);transition:height .7s ease;border-radius:0 0 10px 10px"></div>
-          <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:2">
-            <span id="bottleOzNum" style="font-size:15px;font-weight:800;color:var(--textd);line-height:1.1">0</span>
-            <span style="font-size:8px;font-weight:700;color:var(--textl)">OZ</span>
-          </div>
-        </div>
-      </div>
-      <div style="flex:1;padding-top:18px">
-        <div style="font-size:11px;font-weight:700;color:var(--textl);letter-spacing:.5px;text-transform:uppercase;margin-bottom:3px">💧 Water</div>
-        <div id="bottleOzLabel" style="font-size:14px;font-weight:700;color:var(--textd);margin-bottom:8px">0 / 115 oz</div>
-        <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px">
-          <button onclick="addWaterOz(8)" style="padding:6px 11px;border-radius:8px;border:1.5px solid #a8cceb;background:#f0f8ff;font-family:'Quicksand',sans-serif;font-size:12px;font-weight:700;color:#2e88c8;cursor:pointer">+8 oz</button>
-          <button onclick="addWaterOz(16)" style="padding:6px 11px;border-radius:8px;border:1.5px solid #a8cceb;background:#f0f8ff;font-family:'Quicksand',sans-serif;font-size:12px;font-weight:700;color:#2e88c8;cursor:pointer">+16 oz</button>
-          <button onclick="addWaterOz(32)" style="padding:6px 11px;border-radius:8px;border:none;background:linear-gradient(135deg,var(--lav),#5a90d0);font-family:'Quicksand',sans-serif;font-size:11px;font-weight:700;color:white;cursor:pointer">Owala 32oz</button>
-        </div>
-        <div style="font-size:10px;color:var(--textl)" id="bottleNote">115 oz to go</div>
-      </div>
-    </div>
-  </div>
-  <!-- Ministry -->
-  <div id="ministryHomeWrap" style="background:#fff;border-radius:14px;padding:11px 14px;margin-bottom:10px;box-shadow:0 1px 4px rgba(0,0,0,.06)">
-    <div style="display:flex;align-items:center;gap:10px">
-      <span style="font-size:11px;font-weight:700;color:var(--textl);letter-spacing:.5px;text-transform:uppercase;flex-shrink:0">⏱️ Ministry</span>
-      <span id="ministryHomeTxt" style="font-size:13px;color:var(--textd);font-weight:600;flex:1">—</span>
-      <button class="btn sec" style="font-size:11px;padding:3px 10px" onclick="goTab('lighthouse',document.querySelector('[data-tab=\'lighthouse\']'));setTimeout(function(){showSpiritSec('ministry',document.querySelector('#v-spirit .pn-btn:nth-child(3)'));},200)">Log</button>
-    </div>
-  </div>
   <!-- Quick Stats (collapsible) -->
   <div class="card" style="padding:0;margin-bottom:10px">
     <div style="display:flex;align-items:center;justify-content:space-between;padding:11px 14px;cursor:pointer" onclick="togTodaySec('todayStatsBody')">
@@ -1029,13 +996,64 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
           <span class="sh-arr" id="sh-arr-statToday">▾</span>
         </div>
         <div id="statToday-wrap">
-          <div class="pr"><div class="pt"><span class="pn">💧 Water</span><span class="pm2" id="tWaterD">0 / 115 oz</span></div><div class="pb"><div class="pf pf-wat" id="tWaterB" style="width:0%"></div></div></div>
+          <!-- Water bottle inside stats -->
+          <div style="display:flex;align-items:flex-start;gap:14px;margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid #f0ebe6">
+            <div style="flex-shrink:0;display:flex;flex-direction:column;align-items:center">
+              <div style="width:22px;height:8px;background:var(--lav);border-radius:4px 4px 0 0"></div>
+              <div style="width:22px;height:10px;background:#e8f4fd;border:2px solid #a8cceb;border-bottom:none"></div>
+              <div style="width:54px;height:108px;border:2px solid #a8cceb;border-radius:4px 4px 12px 12px;overflow:hidden;position:relative;background:#f0f8ff">
+                <div id="bottleFill" style="position:absolute;bottom:0;left:0;right:0;height:0%;background:linear-gradient(0deg,#3a9cd8,#7cc4f0);transition:height .7s ease;border-radius:0 0 10px 10px"></div>
+                <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:2">
+                  <span id="bottleOzNum" style="font-size:15px;font-weight:800;color:var(--textd);line-height:1.1">0</span>
+                  <span style="font-size:8px;font-weight:700;color:var(--textl)">OZ</span>
+                </div>
+              </div>
+            </div>
+            <div style="flex:1;padding-top:18px">
+              <div style="font-size:11px;font-weight:700;color:var(--textl);letter-spacing:.5px;text-transform:uppercase;margin-bottom:3px">💧 Water</div>
+              <div id="bottleOzLabel" style="font-size:14px;font-weight:700;color:var(--textd);margin-bottom:8px">0 / 115 oz</div>
+              <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px">
+                <button onclick="addWaterOz(8)" style="padding:6px 11px;border-radius:8px;border:1.5px solid #a8cceb;background:#f0f8ff;font-family:'Quicksand',sans-serif;font-size:12px;font-weight:700;color:#2e88c8;cursor:pointer">+8 oz</button>
+                <button onclick="addWaterOz(16)" style="padding:6px 11px;border-radius:8px;border:1.5px solid #a8cceb;background:#f0f8ff;font-family:'Quicksand',sans-serif;font-size:12px;font-weight:700;color:#2e88c8;cursor:pointer">+16 oz</button>
+                <button onclick="addWaterOz(32)" style="padding:6px 11px;border-radius:8px;border:none;background:linear-gradient(135deg,var(--lav),#5a90d0);font-family:'Quicksand',sans-serif;font-size:11px;font-weight:700;color:white;cursor:pointer">Owala 32oz</button>
+              </div>
+              <div style="font-size:10px;color:var(--textl)" id="bottleNote">115 oz to go</div>
+            </div>
+          </div>
+          <!-- Mood -->
+          <div style="margin-bottom:12px">
+            <div style="font-size:11px;font-weight:700;color:var(--textl);letter-spacing:.4px;text-transform:uppercase;margin-bottom:6px">😊 Mood</div>
+            <div style="display:flex;gap:6px">
+              <button class="today-mood-btn" data-m="1" onclick="logMoodToday(1)" style="flex:1;padding:7px 4px;border-radius:10px;border:2px solid transparent;background:#f8f4f0;font-size:18px;cursor:pointer;transition:all .15s">😔</button>
+              <button class="today-mood-btn" data-m="2" onclick="logMoodToday(2)" style="flex:1;padding:7px 4px;border-radius:10px;border:2px solid transparent;background:#f8f4f0;font-size:18px;cursor:pointer;transition:all .15s">😕</button>
+              <button class="today-mood-btn" data-m="3" onclick="logMoodToday(3)" style="flex:1;padding:7px 4px;border-radius:10px;border:2px solid transparent;background:#f8f4f0;font-size:18px;cursor:pointer;transition:all .15s">😐</button>
+              <button class="today-mood-btn" data-m="4" onclick="logMoodToday(4)" style="flex:1;padding:7px 4px;border-radius:10px;border:2px solid transparent;background:#f8f4f0;font-size:18px;cursor:pointer;transition:all .15s">🙂</button>
+              <button class="today-mood-btn" data-m="5" onclick="logMoodToday(5)" style="flex:1;padding:7px 4px;border-radius:10px;border:2px solid transparent;background:#f8f4f0;font-size:18px;cursor:pointer;transition:all .15s">😊</button>
+            </div>
+          </div>
+          <!-- Steps (clickable) -->
+          <div class="pr" style="cursor:pointer" onclick="openM('stepModal')">
+            <div class="pt"><span class="pn">👟 Steps</span><span class="pm2" id="tStepD">0 / 8,000</span><span style="font-size:10px;color:var(--blue);margin-left:6px">+ log</span></div>
+            <div class="pb"><div class="pf" id="tStepB" style="width:0%;background:var(--sage)"></div></div>
+          </div>
+          <!-- Sleep (clickable) -->
+          <div class="pr" style="cursor:pointer" onclick="openM('todaySleepModal')">
+            <div class="pt"><span class="pn">😴 Sleep</span><span class="pm2" id="tSleepD">—</span><span style="font-size:10px;color:var(--blue);margin-left:6px">+ log</span></div>
+            <div class="pb"><div class="pf" id="tSleepB" style="width:0%;background:var(--lav)"></div></div>
+          </div>
+          <!-- Ministry (with Log button) -->
+          <div class="pr">
+            <div class="pt" style="align-items:center">
+              <span class="pn">⏱️ Ministry</span>
+              <span class="pm2" id="tMinD">—</span>
+              <button onclick="openM('todayMinModal')" style="margin-left:auto;padding:2px 9px;border-radius:6px;border:1.5px solid var(--bdr);background:none;font-family:'Quicksand',sans-serif;font-size:10px;font-weight:700;cursor:pointer;color:var(--textl);flex-shrink:0">+ log</button>
+            </div>
+            <div class="pb"><div class="pf" id="tMinB" style="width:0%;background:var(--peach)"></div></div>
+          </div>
+          <!-- Calories / Protein / Fiber -->
           <div class="pr"><div class="pt"><span class="pn">🔥 Calories</span><span class="pm2" id="tcD">0/1900</span></div><div class="pb"><div class="pf pf-cal" id="tcB" style="width:0%"></div></div></div>
           <div class="pr"><div class="pt"><span class="pn">💪 Protein</span><span class="pm2" id="tpD">0g/120g</span></div><div class="pb"><div class="pf pf-pro" id="tpB" style="width:0%"></div></div></div>
           <div class="pr"><div class="pt"><span class="pn">🌿 Fiber</span><span class="pm2" id="tfD">0g/25g</span></div><div class="pb"><div class="pf pf-fib" id="tfB" style="width:0%"></div></div></div>
-          <div class="pr"><div class="pt"><span class="pn">👟 Steps</span><span class="pm2" id="tStepD">0 / 8,000</span></div><div class="pb"><div class="pf" id="tStepB" style="width:0%;background:var(--sage)"></div></div></div>
-          <div class="pr"><div class="pt"><span class="pn">😴 Sleep</span><span class="pm2" id="tSleepD">—</span></div><div class="pb"><div class="pf" id="tSleepB" style="width:0%;background:var(--lav)"></div></div></div>
-          <div class="pr"><div class="pt"><span class="pn">⏱️ Ministry</span><span class="pm2" id="tMinD">—</span></div><div class="pb"><div class="pf" id="tMinB" style="width:0%;background:var(--peach)"></div></div></div>
         </div>
         <!-- This Week sub-section -->
         <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;padding:10px 0 4px;border-top:1px solid #f0ebe6;margin-top:8px" onclick="togTodaySec('statWeek')">
@@ -1047,6 +1065,16 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
         </div>
       </div>
     </div>
+  </div>
+
+  <!-- Today's Plan preview -->
+  <div id="todayPlanBar" style="display:none;background:#fff;border-radius:12px;padding:10px 14px;margin-bottom:10px;box-shadow:0 1px 4px rgba(0,0,0,.05);cursor:pointer;border:1.5px solid rgba(170,150,220,.2)" onclick="goTab('plan',document.querySelector('[data-tab=\'plan\']'))">
+    <div style="display:flex;align-items:center;gap:8px">
+      <span style="font-size:14px">📅</span>
+      <span style="font-size:12px;font-weight:700;color:var(--textd);flex:1" id="todayPlanBlocks">—</span>
+      <span style="font-size:11px;color:var(--lav);font-weight:700">View Plan →</span>
+    </div>
+    <div id="todayPlanChips" style="display:flex;flex-wrap:wrap;gap:4px;margin-top:6px"></div>
   </div>
 
   <!-- Tasks & Routines (collapsible) -->
@@ -3604,11 +3632,11 @@ var MEAL_COMBOS = JSON.parse(localStorage.getItem('aMC')||'null')||[
   {id:'mc4',name:'Recovery Meal',emoji:'🍗',foods:['f2','f3','f10']},
 ];
 
-var DEFAULT_TAB_ORDER=['today','helm','lighthouse','conservatory','hearthside','workshop','estate','emporium','archives','archive'];
-var TAB_LABELS={today:'Today',helm:'Tasks & Projects',conservatory:'Personal Growth',hearthside:'Health & Wellness',workshop:'Workshop',lighthouse:'Spiritual',estate:'Money & Home',emporium:'Work',archives:'Research Library',archive:'Archive',stories:'Stories',mixtape:'Mixtape','focus-session':'Focus Session'};
+var DEFAULT_TAB_ORDER=['today','plan','helm','lighthouse','conservatory','hearthside','workshop','estate','emporium','archives','archive'];
+var TAB_LABELS={today:'Today',plan:'Plan',helm:'Tasks & Projects',conservatory:'Personal Growth',hearthside:'Health & Wellness',workshop:'Workshop',lighthouse:'Spiritual',estate:'Money & Home',emporium:'Work',archives:'Research Library',archive:'Archive',stories:'Stories',mixtape:'Mixtape','focus-session':'Focus Session'};
 var TAB_ORDER=(function(){var o=JSON.parse(localStorage.getItem('aTabOrder')||'null');if(!o)return DEFAULT_TAB_ORDER.slice();var full=DEFAULT_TAB_ORDER.slice();o=o.filter(function(t){return full.indexOf(t)>-1;});full.forEach(function(t){if(o.indexOf(t)<0)o.push(t);});return o;})();
-var SECTION_VIEWS={today:['today'],helm:['tasks','projects','lists','focus-session'],conservatory:['goals','routines','learn','focus'],hearthside:['food','meals','recap'],workshop:['board','faves','stories','mixtape'],lighthouse:['spirit'],estate:['money'],emporium:['wigs'],archives:['guide','export','settings'],archive:['archive']};
-var SECTION_LABELS={today:'Today',helm:'Tasks & Projects',conservatory:'Personal Growth',hearthside:'Health & Wellness',workshop:'Workshop',lighthouse:'Spiritual',estate:'Money & Home',emporium:'Work',archives:'Research Library',archive:'Archive'};
+var SECTION_VIEWS={today:['today'],plan:['plan'],helm:['tasks','projects','lists','focus-session'],conservatory:['goals','routines','learn','focus'],hearthside:['food','meals','recap'],workshop:['board','faves','stories','mixtape'],lighthouse:['spirit'],estate:['money'],emporium:['wigs'],archives:['guide','export','settings'],archive:['archive']};
+var SECTION_LABELS={today:'Today',plan:'Plan',helm:'Tasks & Projects',conservatory:'Personal Growth',hearthside:'Health & Wellness',workshop:'Workshop',lighthouse:'Spiritual',estate:'Money & Home',emporium:'Work',archives:'Research Library',archive:'Archive'};
 var VIEW_SECTION=(function(){var m={};Object.keys(SECTION_VIEWS).forEach(function(s){SECTION_VIEWS[s].forEach(function(v){m[v]=s;});});return m;})();
 
 var S = {
@@ -3711,6 +3739,82 @@ function initFirebase(){
     localStorage.setItem('aMinistryLog', JSON.stringify(MINISTRY_LOG));
     renderMinistryStats();
     renderMinistryLog();
+    renderTodayStatsBars();
+  });
+
+  // Listen to water log
+  window.fsOnSnapshot(window.fsDoc(window.db,'waterlog','log'), function(snap){
+    if(!snap.exists())return;
+    var remote=snap.data().data||{};
+    Object.keys(remote).forEach(function(k){
+      if(!WATER_OZ_LOG[k]||remote[k]>WATER_OZ_LOG[k])WATER_OZ_LOG[k]=remote[k];
+    });
+    localStorage.setItem('aWaterOzLog',JSON.stringify(WATER_OZ_LOG));
+    renderWaterBottle();
+    renderTodayStatsBars();
+  });
+
+  // Listen to steps log
+  window.fsOnSnapshot(window.fsDoc(window.db,'stepslog','log'), function(snap){
+    if(!snap.exists())return;
+    var remote=snap.data().data||{};
+    Object.keys(remote).forEach(function(k){
+      if(!STEPS_LOG[k]||remote[k]>STEPS_LOG[k])STEPS_LOG[k]=remote[k];
+    });
+    localStorage.setItem('aStepsLog',JSON.stringify(STEPS_LOG));
+    renderTodayStatsBars();
+  });
+
+  // Listen to mood log
+  window.fsOnSnapshot(window.fsDoc(window.db,'mood','log'), function(snap){
+    if(!snap.exists())return;
+    var remote=snap.data().data||{};
+    Object.keys(remote).forEach(function(k){ if(!MOOD[k])MOOD[k]=remote[k]; });
+    localStorage.setItem('aMood',JSON.stringify(MOOD));
+    renderTodayMoodBtns();
+    renderWeekStats();
+  });
+
+  // Listen to sleep log
+  window.fsOnSnapshot(window.fsDoc(window.db,'sleeplog','log'), function(snap){
+    if(!snap.exists())return;
+    var remote=snap.data().entries||[];
+    var localIds=(MILLIE.sleepLog||[]).map(function(e){return e.id||e.slept;});
+    var changed=false;
+    remote.forEach(function(e){
+      if(!e.id||localIds.indexOf(e.id)<0){
+        MILLIE.sleepLog=(MILLIE.sleepLog||[]).concat([e]).slice(-30);
+        localIds.push(e.id||e.slept);
+        changed=true;
+      }
+    });
+    if(changed){
+      MILLIE.sleepLog.sort(function(a,b){return (a.slept||'')<(b.slept||'')?-1:1;});
+      saveMillie();
+      renderTodayStatsBars();
+    }
+  });
+
+  // Listen to plan blocks
+  window.fsOnSnapshot(window.fsDoc(window.db,'planblocks','log'), function(snap){
+    if(!snap.exists())return;
+    var remote=snap.data().data||{};
+    var changed=false;
+    Object.keys(remote).forEach(function(date){
+      var remBlocks=remote[date]||[];
+      var localIds=(PLAN_BLOCKS[date]||[]).map(function(b){return b.id;});
+      remBlocks.forEach(function(b){
+        if(b.id&&localIds.indexOf(b.id)<0){
+          if(!PLAN_BLOCKS[date])PLAN_BLOCKS[date]=[];
+          PLAN_BLOCKS[date].push(b);
+          changed=true;
+        }
+      });
+    });
+    if(changed){
+      localStorage.setItem('aPlanBlocks',JSON.stringify(PLAN_BLOCKS));
+      if(document.getElementById('planMonthBody')&&document.getElementById('v-plan').classList.contains('on'))renderPlan();
+    }
   });
 }
 
@@ -3802,10 +3906,11 @@ function goTabDirect(tab,btn){
   if(tab==='stories')renderStoriesList();
   if(tab==='mixtape')renderMixtape();
   if(SECTION_VIEWS[tab]||tab==='emporium')renderHubPreviews(tab);
-  if(tab==='today'){ tickSpiritRun(); renderWaterBottle(); renderTodayStatsBars(); renderWeekStats(); }
+  if(tab==='today'){ tickSpiritRun(); renderWaterBottle(); renderTodayStatsBars(); renderWeekStats(); renderTodayMoodBtns(); renderTodayPlanBar(); }
   if(tab==='lighthouse'){ updateLighthouseSpiritStatus(); }
   if(tab==='tasks'){ updateHelmBadges(); }
   if(tab==='focus-session'){ renderFocusSession(); }
+  if(tab==='plan'){ renderPlan(); }
 }
 
 function renderHubPreviews(section){
@@ -4801,7 +4906,9 @@ function addWaterOz(oz){
   var k=getTK();
   WATER_OZ_LOG[k]=(WATER_OZ_LOG[k]||0)+oz;
   localStorage.setItem('aWaterOzLog',JSON.stringify(WATER_OZ_LOG));
+  fbSave('waterlog','log',{data:WATER_OZ_LOG,updated:new Date().toISOString()});
   renderWaterBottle();
+  renderTodayStatsBars();
   showToast('+'+oz+' oz');
 }
 
@@ -4837,6 +4944,7 @@ function saveSteps(){
   var n=parseInt((document.getElementById('stepInput')||{}).value)||0;
   STEPS_LOG[getTK()]=n;
   localStorage.setItem('aStepsLog',JSON.stringify(STEPS_LOG));
+  fbSave('stepslog','log',{data:STEPS_LOG,updated:new Date().toISOString()});
   closeM('stepModal');
   renderTodayStatsBars();
   showToast(n.toLocaleString()+' steps logged!');
@@ -4846,9 +4954,6 @@ function renderTodayStatsBars(){
   var t=getTot(); var steps=getTodaySteps(); var oz=WATER_OZ_LOG[getTK()]||0;
   var pct=function(v,g){return Math.min(100,Math.round(v/g*100))+'%';};
   var el;
-  // water
-  el=document.getElementById('tWaterD');if(el)el.textContent=oz+' / '+WATER_OZ_GOAL+' oz';
-  el=document.getElementById('tWaterB');if(el)el.style.width=pct(oz,WATER_OZ_GOAL);
   // calories, protein, fiber
   el=document.getElementById('tcD');if(el)el.textContent=Math.round(t.cal)+'/'+S.gCal;
   el=document.getElementById('tcB');if(el)el.style.width=pct(t.cal,S.gCal);
@@ -4998,6 +5103,83 @@ function doNextDone(){
   togT(_doNextTaskId);
   _doNextTaskId=null;
   setTimeout(pickDoNext,400);
+}
+
+// ── Today quick-log helpers ────────────────────
+function logMoodToday(m){
+  var k=getTK();
+  MOOD[k]=m;
+  localStorage.setItem('aMood',JSON.stringify(MOOD));
+  fbSave('mood','log',{data:MOOD,updated:new Date().toISOString()});
+  renderTodayMoodBtns();
+  renderWeekStats();
+  showToast('Mood logged!');
+}
+
+function renderTodayMoodBtns(){
+  var k=getTK();
+  var m=MOOD[k]||0;
+  document.querySelectorAll('.today-mood-btn').forEach(function(b){
+    var bm=parseInt(b.dataset.m);
+    b.style.borderColor=bm===m?'var(--rose)':'transparent';
+    b.style.background=bm===m?'rgba(210,140,140,.18)':'#f8f4f0';
+  });
+}
+
+function logSleepToday(){
+  var dateEl=document.getElementById('tdSlDate');
+  var bedEl=document.getElementById('tdSlBed');
+  var wakeEl=document.getElementById('tdSlWake');
+  var msgEl=document.getElementById('tdSlMsg');
+  if(!dateEl||!bedEl||!wakeEl)return;
+  var d=dateEl.value||todayStr();
+  var bed=bedEl.value;var wake=wakeEl.value;
+  if(!bed||!wake){
+    if(msgEl){msgEl.textContent='Enter both times.';msgEl.style.color='#cc5566';msgEl.style.display='';}
+    return;
+  }
+  var wokeDT=new Date(d+'T'+wake+':00');
+  var sleptDT=new Date(d+'T'+bed+':00');
+  if(sleptDT>=wokeDT)sleptDT.setDate(sleptDT.getDate()-1);
+  var dur=wokeDT-sleptDT;
+  var hrs=Math.floor(dur/3600000);var mins=Math.floor((dur%3600000)/60000);
+  if(hrs<0||hrs>20){
+    if(msgEl){msgEl.textContent='Times look off — check them.';msgEl.style.color='#cc5566';msgEl.style.display='';}
+    return;
+  }
+  var entry={id:'sl-'+Date.now(),slept:sleptDT.toISOString(),woke:wokeDT.toISOString(),durH:hrs,durM:mins,date:d};
+  MILLIE.sleepLog=(MILLIE.sleepLog||[]).concat([entry]).slice(-30);
+  saveMillie();
+  fbSave('sleeplog','log',{entries:MILLIE.sleepLog,updated:new Date().toISOString()});
+  if(msgEl){msgEl.textContent=hrs+'h '+mins+'m logged ✓';msgEl.style.color='var(--sage)';msgEl.style.display='';}
+  renderTodayStatsBars();
+  showToast(hrs+'h '+mins+'m sleep logged!');
+  setTimeout(function(){
+    closeM('todaySleepModal');
+    if(msgEl)msgEl.style.display='none';
+    dateEl.value='';bedEl.value='';wakeEl.value='';
+  },1200);
+}
+
+function logMinistryToday(){
+  var date=(document.getElementById('tdMinDate')||{}).value||todayStr();
+  var hrs=parseFloat((document.getElementById('tdMinHrs')||{}).value)||0;
+  var studies=parseInt((document.getElementById('tdMinStudies')||{}).value)||0;
+  var notes=((document.getElementById('tdMinNotes')||{}).value||'').trim();
+  if(!hrs&&!notes){showToast('Enter hours or notes');return;}
+  var mItem={id:'m-'+Date.now(),date:date,hours:hrs,studies:studies,notes:notes,created:new Date().toISOString()};
+  MINISTRY_LOG.unshift(mItem);
+  localStorage.setItem('aMinistryLog',JSON.stringify(MINISTRY_LOG));
+  fbSave('ministry',mItem.id,mItem);
+  closeM('todayMinModal');
+  var hEl=document.getElementById('tdMinHrs');if(hEl)hEl.value='';
+  var sEl=document.getElementById('tdMinStudies');if(sEl)sEl.value='';
+  var nEl=document.getElementById('tdMinNotes');if(nEl)nEl.value='';
+  renderTodayStatsBars();
+  renderMinistryStats();
+  renderMinistryLog();
+  spiritRunAdd('service');
+  showToast(hrs?hrs+'h ministry logged!':'Ministry entry saved!');
 }
 
 function startDoNextTimer(){
@@ -5268,6 +5450,266 @@ function updFssQueueBtns(){
     if(inQueue.indexOf(id)>-1){btn.textContent='✓';btn.style.color='var(--sage)';btn.title='In Focus Queue';}
     else{btn.textContent='🎯';btn.style.color='';btn.title='Add to Focus Queue';}
   });
+}
+
+// ── Plan / Time Blocking ──────────────────────
+var PLAN_BLOCKS=(function(){try{return JSON.parse(localStorage.getItem('aPlanBlocks')||'null')||{};}catch(e){return {};}}());
+var _planYear=new Date().getFullYear();
+var _planMonth=new Date().getMonth(); // 0-indexed
+var _planExpanded={}; // tracks expanded weeks/days
+
+function savePlanBlocks(){
+  localStorage.setItem('aPlanBlocks',JSON.stringify(PLAN_BLOCKS));
+  fbSave('planblocks','log',{data:PLAN_BLOCKS,updated:new Date().toISOString()});
+  renderTodayPlanBar();
+}
+
+function renderPlan(){
+  var monthNames=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  var el=document.getElementById('planMonthTitle');
+  if(el)el.textContent=monthNames[_planMonth]+' '+_planYear;
+  var body=document.getElementById('planMonthBody');
+  if(!body)return;
+  var daysInMonth=new Date(_planYear,_planMonth+1,0).getDate();
+  var today=todayStr();
+  var dayNames=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  // Build weeks
+  var weeks=[];var week=[];
+  var firstDay=new Date(_planYear,_planMonth,1);
+  var startPad=(firstDay.getDay()+6)%7;
+  for(var p=0;p<startPad;p++)week.push(null);
+  for(var day=1;day<=daysInMonth;day++){
+    week.push(new Date(_planYear,_planMonth,day));
+    if(week.length===7){weeks.push(week);week=[];}
+  }
+  if(week.length)weeks.push(week);
+  var html='';
+  weeks.forEach(function(wk,wi){
+    var firstReal=wk.find(function(d){return d;});
+    var allReal=wk.filter(function(d){return d;});
+    var lastReal=allReal[allReal.length-1];
+    if(!firstReal)return;
+    // Auto-expand week that contains today
+    var wkContainsToday=allReal.some(function(d){return d.toISOString().slice(0,10)===today;});
+    if(_planExpanded['_wk'+wi]===undefined)_planExpanded['_wk'+wi]=wkContainsToday;
+    var wkOpen=_planExpanded['_wk'+wi];
+    var wkLabel='Week of '+firstReal.toLocaleDateString('en-US',{month:'short',day:'numeric'});
+    if(lastReal&&lastReal!==firstReal){
+      var diffMon=lastReal.getMonth()!==firstReal.getMonth();
+      wkLabel+=' – '+(diffMon?lastReal.toLocaleDateString('en-US',{month:'short',day:'numeric'}):lastReal.getDate());
+    }
+    html+='<div style="margin-bottom:8px">';
+    html+='<div style="display:flex;align-items:center;justify-content:space-between;padding:9px 14px;background:linear-gradient(135deg,rgba(170,150,220,.1),rgba(210,140,140,.07));border-radius:12px;cursor:pointer;margin-bottom:4px;border:1.5px solid rgba(170,150,220,.15)" onclick="togPlanWeek('+wi+')">';
+    html+='<span style="font-size:12px;font-weight:700;color:var(--textd)">'+wkLabel+'</span>';
+    html+='<span id="pwa-'+wi+'" style="color:var(--textl);font-size:13px">'+(wkOpen?'▾':'▸')+'</span>';
+    html+='</div>';
+    html+='<div id="pw-'+wi+'" style="'+(wkOpen?'':'display:none')+';">';
+    allReal.forEach(function(dayDate){
+      var dStr=dayDate.toISOString().slice(0,10);
+      var isToday=dStr===today;
+      var isFuture=dStr>today;
+      var isPast=dStr<today;
+      var dName=dayNames[(dayDate.getDay()+6)%7];
+      var blocks=(PLAN_BLOCKS[dStr]||[]).slice().sort(function(a,b){return (a.time||'')>(b.time||'')?1:-1;});
+      if(_planExpanded[dStr]===undefined)_planExpanded[dStr]=isToday;
+      var dayOpen=_planExpanded[dStr];
+      html+='<div style="margin-bottom:5px;border-radius:12px;overflow:hidden;border:1.5px solid '+(isToday?'var(--rose)':isPast?'#ede8e4':'var(--bdr)')+';">';
+      // Day header row
+      html+='<div style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:'+(isToday?'rgba(210,140,140,.06)':isPast?'rgba(0,0,0,.02)':'#fff')+';cursor:pointer" onclick="togPlanDay(\''+dStr+'\')">';
+      // Date label
+      html+='<div style="width:38px;text-align:center;flex-shrink:0">';
+      html+='<div style="font-size:9px;font-weight:800;color:'+(isToday?'var(--rose)':isPast?'var(--textl)':'var(--textl)')+';text-transform:uppercase;letter-spacing:.5px">'+dName+'</div>';
+      html+='<div style="font-size:20px;font-weight:800;color:'+(isToday?'var(--rose)':isPast?'#bbb':'var(--textd)')+'">'+dayDate.getDate()+'</div>';
+      html+='</div>';
+      // Block chips preview
+      html+='<div style="flex:1;display:flex;flex-wrap:wrap;gap:4px;align-items:center;min-width:0;overflow:hidden">';
+      if(blocks.length){
+        blocks.slice(0,3).forEach(function(b){
+          html+='<span style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:6px;background:'+planBlockBg(b.color)+';color:var(--textd);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:110px">'+planFmtTime(b.time)+' '+escHtml(b.title)+'</span>';
+        });
+        if(blocks.length>3)html+='<span style="font-size:10px;color:var(--textl)">+' +(blocks.length-3)+' more</span>';
+      } else {
+        html+='<span style="font-size:11px;color:'+(isPast?'#ccc':'var(--textl)')+';font-style:italic">'+( isPast?'—':'No blocks')+'</span>';
+      }
+      html+='</div>';
+      // Right actions
+      html+='<div style="display:flex;align-items:center;gap:5px;flex-shrink:0">';
+      if(isToday)html+='<button onclick="event.stopPropagation();goTab(\'today\',document.querySelector(\'[data-tab=&quot;today&quot;]\'))" style="font-size:10px;padding:3px 7px;border-radius:6px;border:1.5px solid var(--rose);background:none;color:var(--rose);font-family:\'Quicksand\',sans-serif;font-weight:700;cursor:pointer">Today →</button>';
+      html+='<button onclick="event.stopPropagation();openPlanModal(\''+dStr+'\',\'\')" style="font-size:12px;padding:3px 9px;border-radius:7px;border:1.5px solid var(--bdr);background:none;font-family:\'Quicksand\',sans-serif;font-weight:700;cursor:pointer;color:var(--textl)">+</button>';
+      html+='<span id="pda-'+dStr+'" style="color:var(--textl);font-size:12px;min-width:12px">'+(dayOpen?'▾':'▸')+'</span>';
+      html+='</div>';
+      html+='</div>'; // day header end
+      // Hours grid
+      html+='<div id="phours-'+dStr+'" style="'+(dayOpen?'':'display:none')+'">'+renderPlanHoursHTML(dStr,blocks)+'</div>';
+      html+='</div>'; // day card end
+    });
+    html+='</div>'; // week body
+    html+='</div>'; // week container
+  });
+  body.innerHTML=html;
+}
+
+function renderPlanHoursHTML(dStr,blocks){
+  var blocksByHour={};
+  (blocks||[]).forEach(function(b){
+    if(!b.time)return;
+    var h=parseInt(b.time.split(':')[0]);
+    if(!blocksByHour[h])blocksByHour[h]=[];
+    blocksByHour[h].push(b);
+  });
+  var html='<div style="background:#fafaf8">';
+  for(var h=5;h<=23;h++){
+    var label=h<12?(h+' AM'):h===12?'12 PM':(h-12)+' PM';
+    var hBlocks=blocksByHour[h]||[];
+    var isEmpty=hBlocks.length===0;
+    html+='<div style="display:flex;align-items:flex-start;min-height:32px;border-top:1px solid #f0ebe6;padding:3px 10px 3px 0" '+(isEmpty?'onclick="openPlanModal(\''+dStr+'\',\''+String(h).padStart(2,'0')+':00\')" style="display:flex;align-items:flex-start;min-height:32px;border-top:1px solid #f0ebe6;padding:3px 10px 3px 0;cursor:pointer"':'')+'>';
+    html+='<div style="width:48px;font-size:10px;color:var(--textl);font-weight:600;padding:5px 6px 0 12px;flex-shrink:0">'+label+'</div>';
+    html+='<div style="flex:1;display:flex;flex-direction:column;gap:3px;padding:3px 0">';
+    if(hBlocks.length){
+      hBlocks.forEach(function(b){
+        var durLabel=b.duration>=60?(b.duration/60)+'h':b.duration+'m';
+        html+='<div style="display:flex;align-items:center;gap:6px;padding:5px 8px;border-radius:8px;background:'+planBlockBg(b.color)+'">';
+        html+='<div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:700;color:var(--textd)">'+escHtml(b.title)+'</div>';
+        if(b.notes)html+='<div style="font-size:10px;color:var(--textl);margin-top:1px">'+escHtml(b.notes)+'</div>';
+        html+='</div>';
+        html+='<span style="font-size:10px;color:var(--textl);flex-shrink:0">'+durLabel+'</span>';
+        html+='<button onclick="event.stopPropagation();editPlanBlock(\''+dStr+'\',\''+b.id+'\')" style="background:none;border:none;cursor:pointer;font-size:12px;color:var(--textl);padding:0 2px;line-height:1">✏️</button>';
+        html+='<button onclick="event.stopPropagation();deletePlanBlock(\''+dStr+'\',\''+b.id+'\')" style="background:none;border:none;cursor:pointer;font-size:12px;color:var(--textl);padding:0 2px;line-height:1">✕</button>';
+        html+='</div>';
+      });
+      html+='<div onclick="event.stopPropagation();openPlanModal(\''+dStr+'\',\''+String(h).padStart(2,'0')+':00\')" style="font-size:10px;color:var(--blue);cursor:pointer;padding:1px 2px">+ add here</div>';
+    }
+    html+='</div></div>';
+  }
+  html+='</div>';
+  return html;
+}
+
+function planBlockBg(c){
+  return {lav:'rgba(170,150,220,.2)',rose:'rgba(210,140,140,.2)',sage:'rgba(120,180,140,.2)',peach:'rgba(220,170,120,.2)',blue:'rgba(100,150,220,.2)',gold:'rgba(210,190,100,.2)'}[c]||'rgba(170,150,220,.2)';
+}
+
+function planFmtTime(t){
+  if(!t)return '';
+  var p=t.split(':');var h=parseInt(p[0]);var m=p[1]||'00';
+  return (h%12||12)+(m!=='00'?':'+m:'')+(h>=12?'p':'a');
+}
+
+function togPlanWeek(wi){
+  _planExpanded['_wk'+wi]=!_planExpanded['_wk'+wi];
+  var body=document.getElementById('pw-'+wi);
+  var arr=document.getElementById('pwa-'+wi);
+  if(body)body.style.display=_planExpanded['_wk'+wi]?'':'none';
+  if(arr)arr.textContent=_planExpanded['_wk'+wi]?'▾':'▸';
+}
+
+function togPlanDay(dStr){
+  _planExpanded[dStr]=!_planExpanded[dStr];
+  var hours=document.getElementById('phours-'+dStr);
+  var arr=document.getElementById('pda-'+dStr);
+  if(hours)hours.style.display=_planExpanded[dStr]?'':'none';
+  if(arr)arr.textContent=_planExpanded[dStr]?'▾':'▸';
+}
+
+function prevPlanMonth(){
+  _planMonth--;if(_planMonth<0){_planMonth=11;_planYear--;}
+  _planExpanded={};renderPlan();
+}
+
+function nextPlanMonth(){
+  _planMonth++;if(_planMonth>11){_planMonth=0;_planYear++;}
+  _planExpanded={};renderPlan();
+}
+
+var _planEditId=null,_planEditDate=null;
+
+function openPlanModal(dStr,time){
+  _planEditDate=dStr;_planEditId=null;
+  var titEl=document.getElementById('pbTitle');if(titEl)titEl.value='';
+  var tEl=document.getElementById('pbTime');if(tEl)tEl.value=time||'';
+  var durEl=document.getElementById('pbDur');if(durEl)durEl.value='60';
+  var notEl=document.getElementById('pbNotes');if(notEl)notEl.value='';
+  var dateEl=document.getElementById('pbDate');
+  if(dateEl){var d=new Date(dStr+'T12:00:00');dateEl.textContent=d.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'});}
+  document.getElementById('pbModalTitle').textContent='Add Block';
+  document.getElementById('pbDelete').style.display='none';
+  document.querySelectorAll('.pb-color-btn').forEach(function(b){b.style.outline=b.dataset.c==='lav'?'2.5px solid #7060b0':'none';b.classList.toggle('on',b.dataset.c==='lav');});
+  openM('planBlockModal');
+}
+
+function editPlanBlock(dStr,blockId){
+  var block=(PLAN_BLOCKS[dStr]||[]).find(function(b){return b.id===blockId;});
+  if(!block)return;
+  _planEditDate=dStr;_planEditId=blockId;
+  var titEl=document.getElementById('pbTitle');if(titEl)titEl.value=block.title||'';
+  var tEl=document.getElementById('pbTime');if(tEl)tEl.value=block.time||'';
+  var durEl=document.getElementById('pbDur');if(durEl)durEl.value=String(block.duration||60);
+  var notEl=document.getElementById('pbNotes');if(notEl)notEl.value=block.notes||'';
+  var dateEl=document.getElementById('pbDate');
+  if(dateEl){var d=new Date(dStr+'T12:00:00');dateEl.textContent=d.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'});}
+  document.getElementById('pbModalTitle').textContent='Edit Block';
+  document.getElementById('pbDelete').style.display='';
+  var c=block.color||'lav';
+  document.querySelectorAll('.pb-color-btn').forEach(function(b){b.style.outline=b.dataset.c===c?'2.5px solid #7060b0':'none';b.classList.toggle('on',b.dataset.c===c);});
+  openM('planBlockModal');
+}
+
+function selPlanColor(btn){
+  document.querySelectorAll('.pb-color-btn').forEach(function(b){b.style.outline='none';b.classList.remove('on');});
+  btn.style.outline='2.5px solid #7060b0';btn.classList.add('on');
+}
+
+function savePlanBlock(){
+  var dStr=_planEditDate;if(!dStr)return;
+  var title=((document.getElementById('pbTitle')||{}).value||'').trim();
+  var time=(document.getElementById('pbTime')||{}).value||'';
+  var duration=parseInt((document.getElementById('pbDur')||{}).value)||60;
+  var notes=((document.getElementById('pbNotes')||{}).value||'').trim();
+  var colorBtn=document.querySelector('.pb-color-btn.on');
+  var color=colorBtn?colorBtn.dataset.c:'lav';
+  if(!title){showToast('Add a title first');return;}
+  if(!PLAN_BLOCKS[dStr])PLAN_BLOCKS[dStr]=[];
+  if(_planEditId){
+    var idx=PLAN_BLOCKS[dStr].findIndex(function(b){return b.id===_planEditId;});
+    if(idx>-1)PLAN_BLOCKS[dStr][idx]={id:_planEditId,time:time,title:title,duration:duration,color:color,notes:notes};
+  } else {
+    PLAN_BLOCKS[dStr].push({id:'pb-'+Date.now(),time:time,title:title,duration:duration,color:color,notes:notes});
+  }
+  PLAN_BLOCKS[dStr].sort(function(a,b){return (a.time||'')>(b.time||'')?1:-1;});
+  savePlanBlocks();
+  closeM('planBlockModal');
+  renderPlan();
+  showToast('Block saved!');
+}
+
+function deletePlanBlock(dStr,blockId){
+  if(!PLAN_BLOCKS[dStr])return;
+  PLAN_BLOCKS[dStr]=PLAN_BLOCKS[dStr].filter(function(b){return b.id!==blockId;});
+  if(!PLAN_BLOCKS[dStr].length)delete PLAN_BLOCKS[dStr];
+  savePlanBlocks();renderPlan();showToast('Block removed');
+}
+
+function deletePlanBlockFromModal(){
+  if(!_planEditDate||!_planEditId)return;
+  deletePlanBlock(_planEditDate,_planEditId);
+  closeM('planBlockModal');
+}
+
+function renderTodayPlanBar(){
+  var bar=document.getElementById('todayPlanBar');
+  if(!bar)return;
+  var today=todayStr();
+  var blocks=(PLAN_BLOCKS[today]||[]).slice().sort(function(a,b){return (a.time||'')>(b.time||'')?1:-1;});
+  if(!blocks.length){bar.style.display='none';return;}
+  bar.style.display='';
+  var lbl=document.getElementById('todayPlanBlocks');
+  if(lbl)lbl.textContent=blocks.length+' block'+(blocks.length!==1?'s':'')+' today';
+  var chips=document.getElementById('todayPlanChips');
+  if(chips){
+    chips.innerHTML=blocks.slice(0,4).map(function(b){
+      return '<span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:6px;background:'+planBlockBg(b.color)+';color:var(--textd)">'+planFmtTime(b.time)+' '+escHtml(b.title)+'</span>';
+    }).join('');
+  }
 }
 
 function updM(){
@@ -5557,6 +5999,15 @@ function openM(id){
   if(id==='stepModal'){
     var sInp=document.getElementById('stepInput');
     if(sInp)sInp.value=getTodaySteps()||'';
+  }
+  if(id==='todaySleepModal'){
+    var tdsd=document.getElementById('tdSlDate');
+    if(tdsd&&!tdsd.value)tdsd.value=todayStr();
+    var msg=document.getElementById('tdSlMsg');if(msg)msg.style.display='none';
+  }
+  if(id==='todayMinModal'){
+    var tdmd=document.getElementById('tdMinDate');
+    if(tdmd&&!tdmd.value)tdmd.value=todayStr();
   }
   document.getElementById(id).classList.add('show');
 }
@@ -14147,6 +14598,16 @@ function startReidRunner(){
 </div>
 
 <!-- WORLD: BRINDLEPORT BAY -->
+<!-- PLAN -->
+<div class="view" id="v-plan">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+    <button onclick="prevPlanMonth()" style="padding:8px 16px;border-radius:10px;border:1.5px solid var(--bdr);background:#fff;font-size:18px;font-weight:700;cursor:pointer;color:var(--textd)">‹</button>
+    <div id="planMonthTitle" style="font-size:20px;font-weight:800;font-family:'Playfair Display',serif;color:var(--textd)"></div>
+    <button onclick="nextPlanMonth()" style="padding:8px 16px;border-radius:10px;border:1.5px solid var(--bdr);background:#fff;font-size:18px;font-weight:700;cursor:pointer;color:var(--textd)">›</button>
+  </div>
+  <div id="planMonthBody"></div>
+</div>
+
 <div class="view" id="v-archive">
   <div style="font-size:16px;font-weight:700;color:var(--textd);margin-bottom:4px">Archive</div>
   <div style="font-size:12px;color:var(--textl);margin-bottom:14px">Completed tasks and past entries. Read-only history.</div>
@@ -14351,6 +14812,76 @@ function startReidRunner(){
         <button onclick="addEmberSkill()" style="padding:7px 14px;border-radius:9px;border:none;background:var(--rose);color:white;font-family:'Quicksand',sans-serif;font-size:13px;font-weight:700;cursor:pointer">Add</button>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- PLAN BLOCK MODAL -->
+<div class="ov" id="planBlockModal">
+  <div class="mod">
+    <div class="mh"></div>
+    <div class="mtit" id="pbModalTitle">Add Block</div>
+    <div id="pbDate" style="text-align:center;font-size:12px;color:var(--textl);margin-bottom:14px;font-weight:600"></div>
+    <div class="fg"><label class="fl">Title</label><input class="fi" id="pbTitle" placeholder="e.g. Morning Routine, Doctor Appt"></div>
+    <div style="display:flex;gap:10px;margin-bottom:10px">
+      <div class="fg" style="flex:1;margin:0"><label class="fl">Time</label><input class="fi" type="time" id="pbTime"></div>
+      <div class="fg" style="flex:1;margin:0">
+        <label class="fl">Duration</label>
+        <select class="fi" id="pbDur" style="padding:10px 12px">
+          <option value="15">15 min</option>
+          <option value="30">30 min</option>
+          <option value="60" selected>1 hour</option>
+          <option value="90">1.5 hours</option>
+          <option value="120">2 hours</option>
+          <option value="180">3 hours</option>
+          <option value="240">4 hours</option>
+          <option value="480">All day (8h)</option>
+        </select>
+      </div>
+    </div>
+    <div class="fg">
+      <label class="fl">Color</label>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="pb-color-btn on" data-c="lav" onclick="selPlanColor(this)" style="width:34px;height:34px;border-radius:9px;background:rgba(170,150,220,.45);border:2.5px solid rgba(120,100,180,.6);cursor:pointer"></button>
+        <button class="pb-color-btn" data-c="rose" onclick="selPlanColor(this)" style="width:34px;height:34px;border-radius:9px;background:rgba(210,140,140,.45);border:2.5px solid transparent;cursor:pointer"></button>
+        <button class="pb-color-btn" data-c="sage" onclick="selPlanColor(this)" style="width:34px;height:34px;border-radius:9px;background:rgba(120,180,140,.45);border:2.5px solid transparent;cursor:pointer"></button>
+        <button class="pb-color-btn" data-c="peach" onclick="selPlanColor(this)" style="width:34px;height:34px;border-radius:9px;background:rgba(220,170,120,.45);border:2.5px solid transparent;cursor:pointer"></button>
+        <button class="pb-color-btn" data-c="blue" onclick="selPlanColor(this)" style="width:34px;height:34px;border-radius:9px;background:rgba(100,150,220,.45);border:2.5px solid transparent;cursor:pointer"></button>
+        <button class="pb-color-btn" data-c="gold" onclick="selPlanColor(this)" style="width:34px;height:34px;border-radius:9px;background:rgba(210,190,100,.45);border:2.5px solid transparent;cursor:pointer"></button>
+      </div>
+    </div>
+    <div class="fg"><label class="fl">Notes (optional)</label><input class="fi" id="pbNotes" placeholder="Any details..."></div>
+    <button class="ok-btn" onclick="savePlanBlock()">Save Block</button>
+    <button class="del-btn" id="pbDelete" onclick="deletePlanBlockFromModal()" style="display:none">Remove Block</button>
+    <button class="cn-btn" onclick="closeM('planBlockModal')">Cancel</button>
+  </div>
+</div>
+
+<!-- TODAY SLEEP QUICK LOG MODAL -->
+<div class="ov" id="todaySleepModal">
+  <div class="mod">
+    <div class="mh"></div>
+    <div class="mtit">Log Sleep 😴</div>
+    <div style="font-size:12px;color:var(--textl);text-align:center;margin-bottom:14px">Enter the night you fell asleep</div>
+    <div class="fg"><label class="fl">Date (night you fell asleep)</label><input class="fi" type="date" id="tdSlDate"></div>
+    <div class="fg"><label class="fl">Bedtime</label><input class="fi" type="time" id="tdSlBed"></div>
+    <div class="fg"><label class="fl">Wake time</label><input class="fi" type="time" id="tdSlWake"></div>
+    <div id="tdSlMsg" style="display:none;font-size:12px;text-align:center;margin-bottom:8px"></div>
+    <button class="ok-btn" onclick="logSleepToday()">Save Sleep</button>
+    <button class="cn-btn" onclick="closeM('todaySleepModal')">Cancel</button>
+  </div>
+</div>
+
+<!-- TODAY MINISTRY QUICK LOG MODAL -->
+<div class="ov" id="todayMinModal">
+  <div class="mod">
+    <div class="mh"></div>
+    <div class="mtit">Log Ministry ⏱️</div>
+    <div class="fg"><label class="fl">Date</label><input class="fi" type="date" id="tdMinDate"></div>
+    <div class="fg"><label class="fl">Hours</label><input class="fi" type="number" id="tdMinHrs" placeholder="e.g. 1.5" step="0.25" min="0"></div>
+    <div class="fg"><label class="fl">Bible Studies</label><input class="fi" type="number" id="tdMinStudies" placeholder="0" min="0"></div>
+    <div class="fg"><label class="fl">Notes (optional)</label><input class="fi" id="tdMinNotes" placeholder="What did you do?"></div>
+    <button class="ok-btn" onclick="logMinistryToday()">Save</button>
+    <button class="cn-btn" onclick="closeM('todayMinModal')">Cancel</button>
   </div>
 </div>
 
