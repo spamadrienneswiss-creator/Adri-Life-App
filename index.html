@@ -5022,6 +5022,17 @@ function togT(id){
   renderThisWeek();
 }
 
+function toggleTaskDone(id,done){
+  var t=TASKS.find(function(x){return x.id===id;});
+  if(!t)return;
+  t.done=!!done;
+  if(t.done)t.doneDate=todayStr();else delete t.doneDate;
+  localStorage.setItem('aTasks',JSON.stringify(TASKS));
+  fbSave('tasks',id,t);
+  if(t.done){if(t.meaningful)celebrate();millieTaskTreat();}
+  updHelmBadge();
+}
+
 function editT(id){
   var t=TASKS.find(function(t){return t.id===id;});
   if(!t)return;
@@ -5737,6 +5748,34 @@ function renderPlan(){
     html+='<span id="pwa-'+wi+'" style="color:var(--textl);font-size:13px">'+(wkOpen?'▾':'▸')+'</span>';
     html+='</div>';
     html+='<div id="pw-'+wi+'" style="'+(wkOpen?'':'display:none')+';">';
+    // Weekly tasks strip — tasks due within this week that aren't tied to a specific day
+    var wkStart=allReal[0].toISOString().slice(0,10);
+    var wkEnd=allReal[allReal.length-1].toISOString().slice(0,10);
+    var wkTasks=(TASKS||[]).filter(function(t){
+      if(t.done)return false;
+      if(t.due&&t.due>=wkStart&&t.due<=wkEnd)return true;
+      if(!t.due&&t.repeat&&(t.repeat==='weekly'||t.repeat==='daily'))return true;
+      return false;
+    });
+    var wkMeals={};
+    allReal.forEach(function(d){var ds=d.toISOString().slice(0,10);var dm=MEAL_PLAN[ds]||{};MEAL_SLOTS.forEach(function(s){if(dm[s]&&!wkMeals[s])wkMeals[s]=[];if(dm[s])wkMeals[s].push({date:ds,name:dm[s]});});});
+    var hasMealsThisWeek=Object.keys(wkMeals).some(function(s){return wkMeals[s]&&wkMeals[s].length;});
+    if(wkTasks.length||hasMealsThisWeek){
+      html+='<div style="margin:0 0 6px 0;background:rgba(170,150,220,.05);border:1.5px solid rgba(170,150,220,.15);border-radius:10px;padding:8px 12px">';
+      if(wkTasks.length){
+        html+='<div style="font-size:10px;font-weight:800;color:var(--lav,#9a8abc);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px">📋 This Week\'s Tasks</div>';
+        html+='<div style="display:flex;flex-direction:column;gap:3px">';
+        wkTasks.forEach(function(t){
+          html+='<div style="display:flex;align-items:center;gap:7px;padding:3px 6px;border-radius:7px;background:#fff">';
+          html+='<input type="checkbox" style="flex-shrink:0" onchange="toggleTaskDone(\''+t.id+'\',this.checked);renderPlan()">';
+          html+='<span style="flex:1;font-size:12px;color:var(--textd)">'+escHtml(t.title)+'</span>';
+          if(t.due)html+='<span style="font-size:10px;color:var(--textl);flex-shrink:0">'+t.due+'</span>';
+          html+='</div>';
+        });
+        html+='</div>';
+      }
+      html+='</div>';
+    }
     allReal.forEach(function(dayDate){
       var dStr=dayDate.toISOString().slice(0,10);
       var isToday=dStr===today;
@@ -5756,8 +5795,10 @@ function renderPlan(){
       html+='</div>';
       // Block chips preview + due tasks badge
       var dueCnt=(TASKS||[]).filter(function(t){return !t.done&&t.due===dStr;}).length+((GOALS||[]).filter(function(g){return !g.done&&g.due===dStr;}).length);
+      var mealCnt=MEAL_SLOTS.filter(function(s){return (MEAL_PLAN[dStr]||{})[s];}).length;
       html+='<div style="flex:1;display:flex;flex-wrap:wrap;gap:4px;align-items:center;min-width:0;overflow:hidden">';
       if(dueCnt>0)html+='<span style="font-size:10px;font-weight:800;padding:2px 7px;border-radius:6px;background:rgba(210,140,140,.15);color:var(--rose);white-space:nowrap;flex-shrink:0">📌 '+dueCnt+' due</span>';
+      if(mealCnt>0)html+='<span style="font-size:10px;font-weight:800;padding:2px 7px;border-radius:6px;background:rgba(100,180,220,.15);color:var(--blue);white-space:nowrap;flex-shrink:0">🍽️ '+mealCnt+'</span>';
       if(blocks.length){
         blocks.slice(0,3).forEach(function(b){
           html+='<span style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:6px;background:'+planBlockBg(b.color)+';color:var(--textd);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:110px">'+planFmtTime(b.time)+' '+escHtml(b.title)+'</span>';
@@ -5795,6 +5836,8 @@ function renderPlanHoursHTML(dStr,blocks){
   // Tasks due on this day
   var dueTasks=(TASKS||[]).filter(function(t){return !t.done&&t.due===dStr;});
   var dueGoals=(GOALS||[]).filter(function(g){return !g.done&&g.due===dStr;});
+  // Meals planned for this day
+  var dayMeals=MEAL_PLAN[dStr]||{};
   var urgLabels={'urgent-important':'🔴 Do Now','important-not-urgent':'🟡 Schedule','urgent-not-important':'🔵 Quick Win','not-urgent':'⚪ Someday'};
   var html='<div style="background:#fafaf8">';
   if(dueGoals.length){
@@ -5821,6 +5864,27 @@ function renderPlanHoursHTML(dStr,blocks){
       if(t.urgency)html+='<div style="font-size:10px;color:var(--textl)">'+(urgLabels[t.urgency]||'')+'</div>';
       html+='</div>';
       html+='<button onclick="event.stopPropagation();fssAddFromTask(\''+t.id+'\')" title="Add to Focus Queue" style="background:none;border:none;cursor:pointer;font-size:13px;padding:0 2px">🎯</button>';
+      html+='</div>';
+    });
+    html+='</div></div>';
+  }
+  // Meals planned for this day
+  var plannedMealSlots=MEAL_SLOTS.filter(function(s){return dayMeals[s];});
+  if(plannedMealSlots.length){
+    html+='<div style="padding:8px 12px;border-bottom:2px solid rgba(100,180,220,.2);background:rgba(100,180,220,.04)">';
+    html+='<div style="font-size:10px;font-weight:800;color:var(--blue);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px">🍽️ Meals</div>';
+    html+='<div style="display:flex;flex-direction:column;gap:4px">';
+    plannedMealSlots.forEach(function(slot){
+      var mealName=dayMeals[slot];
+      var rec=RECIPES.find(function(r){return r.name===mealName;});
+      var macStr='';
+      if(rec&&rec.macros&&rec.macros.cal)macStr=' · '+rec.macros.cal+' cal';
+      html+='<div style="display:flex;align-items:center;gap:7px;padding:4px 8px;border-radius:8px;background:#fff;border:1.5px solid rgba(100,180,220,.2)">';
+      html+='<span style="font-size:12px;flex-shrink:0">'+(MEAL_SLOT_ICONS[slot]||'🍽️')+'</span>';
+      html+='<div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:700;color:var(--textd);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+escHtml(mealName)+'</div>';
+      if(macStr)html+='<div style="font-size:10px;color:var(--textl)">'+macStr+'</div>';
+      html+='</div>';
+      html+='<button onclick="event.stopPropagation();goTab(\'meals\',null);setTimeout(function(){showMealSec(\'plan\',document.querySelector(\'#v-meals .pn-btn:nth-child(2)\'))},200)" style="background:none;border:none;color:var(--blue);font-size:10px;cursor:pointer;font-family:\'Quicksand\',sans-serif;font-weight:700;padding:0 2px;flex-shrink:0">Edit →</button>';
       html+='</div>';
     });
     html+='</div></div>';
