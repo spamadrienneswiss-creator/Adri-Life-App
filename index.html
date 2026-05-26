@@ -2261,7 +2261,10 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
         <input type="checkbox" id="mealLogAddToDB" style="width:16px;height:16px;flex-shrink:0">
         <label for="mealLogAddToDB" style="font-size:12px;color:var(--textl);cursor:pointer">Add to Food Database</label>
       </div>
-      <button class="btn" style="width:100%" onclick="addMealLogItem()">+ Log Meal</button>
+      <div style="display:flex;gap:8px;margin-top:4px">
+        <button class="btn" style="flex:1" onclick="addMealLogItem()">+ Log Meal</button>
+        <button class="btn sec" style="flex-shrink:0;padding:8px 14px;font-size:13px" onclick="openFoodLibPick()">📚 From Library</button>
+      </div>
     </div>
     <div class="bd-filter-row" id="mealLogFilter" style="margin-bottom:10px">
       <button class="bd-filter on" onclick="setMealLogFilter('',this)">All</button>
@@ -2397,13 +2400,15 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
   <!-- INVENTORY section -->
   <div id="ms-inventory" style="display:none">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-      <span style="font-weight:700;font-size:14px;color:var(--text)">📦 Pantry Inventory</span>
-      <button class="btn sec" style="font-size:12px;padding:5px 10px" onclick="clearInventory()">Clear all</button>
+      <span style="font-weight:700;font-size:14px;color:var(--textd)">📦 Inventory</span>
+      <div style="display:flex;gap:6px">
+        <button class="btn sec" style="font-size:11px;padding:4px 9px" onclick="openInvAddModal()">+ Add</button>
+        <button class="btn sec" style="font-size:11px;padding:4px 9px" onclick="openInvSectionsModal()">⚙️ Sections</button>
+        <button class="btn sec" style="font-size:11px;padding:4px 9px" onclick="clearInventory()">Clear all</button>
+      </div>
     </div>
-    <div style="display:flex;gap:6px;margin-bottom:10px">
-      <input id="invAddName" type="text" placeholder="Item name" style="flex:2;padding:8px 11px;border-radius:10px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px">
-      <input id="invAddQty" type="text" placeholder="Qty" style="flex:1;padding:8px 11px;border-radius:10px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px;max-width:70px">
-      <button class="btn" onclick="addInventoryManual()">Add</button>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px" id="invSectionFilter">
+      <button class="fchip on" onclick="setInvFilter('',this)">All</button>
     </div>
     <div id="inventoryListEl"></div>
   </div>
@@ -4688,7 +4693,70 @@ var RECIPES = JSON.parse(localStorage.getItem('aRecipes')||'[]');
 var MEAL_PLAN = JSON.parse(localStorage.getItem('aMealPlan')||'{}');
 var GROCERY_LIST = JSON.parse(localStorage.getItem('aGroceryList')||'[]');
 var INVENTORY = JSON.parse(localStorage.getItem('aInventory')||'[]');
-// Each inventory item: {id, name, qty, unit, addedDate}
+// Each inventory item: {id, name, qty, unit, section, expDate, notes, addedDate, dbItemId, lastPrice, lastPriceStore, priceHistory}
+var INV_SECTIONS = JSON.parse(localStorage.getItem('aInvSections')||'null')||['Pantry','Fridge','Freezer','Snacks','Baking','Supplements'];
+function saveInvSections(){ localStorage.setItem('aInvSections',JSON.stringify(INV_SECTIONS)); }
+function openInvSectionsModal(){
+  renderInvSectionsModal();
+  showOv('ovInvSections');
+}
+function renderInvSectionsModal(){
+  var el=document.getElementById('invSectionsBody');
+  if(!el)return;
+  var DEFAULT_SECTIONS=['Pantry','Fridge','Freezer','Snacks','Baking','Supplements'];
+  el.innerHTML=INV_SECTIONS.map(function(s,i){
+    var isDefault=DEFAULT_SECTIONS.indexOf(s)>=0;
+    var itemCount=INVENTORY.filter(function(inv){return (inv.section||'Pantry')===s;}).length;
+    return '<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--bdr)">'
+      +'<span style="flex:1;font-size:13px;font-weight:600;color:var(--textd)">'+escHtml(s)+(itemCount?'<span style="font-size:11px;font-weight:400;color:var(--textl)"> · '+itemCount+' item'+(itemCount===1?'':'s')+'</span>':'')+'</span>'
+      +(i>0?'<button onclick="moveInvSection('+i+',-1)" style="background:none;border:1.5px solid var(--bdr);border-radius:7px;padding:2px 7px;cursor:pointer;font-size:12px;color:var(--textl)">↑</button>':'<span style="width:28px"></span>')
+      +(i<INV_SECTIONS.length-1?'<button onclick="moveInvSection('+i+',1)" style="background:none;border:1.5px solid var(--bdr);border-radius:7px;padding:2px 7px;cursor:pointer;font-size:12px;color:var(--textl)">↓</button>':'<span style="width:28px"></span>')
+      +(isDefault?'<span style="font-size:10px;color:var(--textl);padding:0 4px">default</span>':'<button onclick="delInvSection('+i+')" style="background:none;border:none;font-size:14px;cursor:pointer;color:#e74c3c;padding:2px 4px">🗑️</button>')
+      +'</div>';
+  }).join('');
+}
+function addInvSection(){
+  var inp=document.getElementById('invNewSectionName');
+  var name=(inp?inp.value:'').trim();
+  if(!name){showToast('Enter a section name');return;}
+  if(INV_SECTIONS.some(function(s){return s.toLowerCase()===name.toLowerCase();})){showToast('Section already exists');return;}
+  INV_SECTIONS.push(name);
+  saveInvSections();
+  if(inp)inp.value='';
+  renderInvSectionsModal();
+  renderInventory();
+  showToast('Section added ✨');
+}
+function delInvSection(i){
+  var sec=INV_SECTIONS[i];
+  var count=INVENTORY.filter(function(inv){return (inv.section||'Pantry')===sec;}).length;
+  if(count>0&&!confirm('Move '+count+' item'+(count===1?'':'s')+' in "'+sec+'" to Pantry and delete section?'))return;
+  INVENTORY.forEach(function(inv){if((inv.section||'Pantry')===sec)inv.section='Pantry';});
+  localStorage.setItem('aInventory',JSON.stringify(INVENTORY));
+  INV_SECTIONS.splice(i,1);
+  saveInvSections();
+  renderInvSectionsModal();
+  renderInventory();
+  showToast('Section removed');
+}
+function moveInvSection(i,dir){
+  var j=i+dir;
+  if(j<0||j>=INV_SECTIONS.length)return;
+  var tmp=INV_SECTIONS[i];INV_SECTIONS[i]=INV_SECTIONS[j];INV_SECTIONS[j]=tmp;
+  saveInvSections();
+  renderInvSectionsModal();
+  renderInventory();
+}
+function getAutoSection(dbItem){
+  if(!dbItem)return 'Pantry';
+  var tags=dbItem.tags||(dbItem.cat?[dbItem.cat]:[]);
+  if(tags.some(function(t){return['meat','protein','seafood'].indexOf(t)>=0;}))return 'Freezer';
+  if(tags.some(function(t){return['dairy','produce','fruit','vegetable','beverage'].indexOf(t)>=0;}))return 'Fridge';
+  if(tags.some(function(t){return t==='snack';}))return 'Snacks';
+  if(tags.some(function(t){return t==='supplement';}))return 'Supplements';
+  if(tags.some(function(t){return['grain','baking','condiment'].indexOf(t)>=0;}))return 'Pantry';
+  return 'Pantry';
+}
 var PRICE_LOG = JSON.parse(localStorage.getItem('aPriceLog')||'[]');
 var MEAL_WEEK_OFFSET = 0; // weeks from current
 var MEAL_EDIT_INGS = []; // temp for recipe modal
@@ -14051,6 +14119,114 @@ function addMealLogItem(){
   renderMealLog();
 }
 
+// ── Food Library Picker ──────────────────────────────
+var _flpSelectedItem = null;
+
+function openFoodLibPick(){
+  _flpSelectedItem = null;
+  var el = document.getElementById('flpDetail');
+  if(el) el.style.display = 'none';
+  var srch = document.getElementById('flpSearch');
+  if(srch) srch.value = '';
+  renderFlpList();
+  showOv('ovFoodLibPick');
+}
+
+function renderFlpList(){
+  var el = document.getElementById('flpList');
+  if(!el) return;
+  var q = ((document.getElementById('flpSearch')||{}).value||'').toLowerCase().trim();
+  var list = q ? FOOD_DB.filter(function(x){ return (x.name||'').toLowerCase().indexOf(q)>=0 || (x.brand||'').toLowerCase().indexOf(q)>=0; }) : FOOD_DB.slice(0,40);
+  if(!list.length){ el.innerHTML='<p style="color:var(--textl);text-align:center;padding:12px">No matches</p>'; return; }
+  el.innerHTML = list.map(function(item){
+    return '<button onclick="selectFlpItem(\''+escHtml(item.id)+'\')" style="display:block;width:100%;text-align:left;padding:8px 10px;border:1.5px solid var(--bdr);border-radius:10px;margin-bottom:6px;background:var(--bg);font-family:\'Quicksand\',sans-serif;cursor:pointer">'
+      +'<span style="font-size:13px;font-weight:600;color:var(--textd)">'+escHtml(item.name)+'</span>'
+      +(item.brand?'<span style="font-size:11px;color:var(--textl)"> · '+escHtml(item.brand)+'</span>':'')
+      +(item.per100&&item.per100.cal!=null?'<span style="font-size:11px;color:var(--textl)"> · '+item.per100.cal+'cal/100g</span>':'')
+      +'</button>';
+  }).join('');
+}
+
+function selectFlpItem(id){
+  var item = FOOD_DB.find(function(x){ return x.id===id; });
+  if(!item) return;
+  _flpSelectedItem = item;
+  var sel = document.getElementById('flpServSelect');
+  if(sel){
+    var servings = (item.servings && item.servings.length) ? item.servings : [{id:'100g',label:'100g',grams:100}];
+    sel.innerHTML = servings.map(function(sv){
+      return '<option value="'+escHtml(sv.id)+'" data-grams="'+sv.grams+'">'+escHtml(sv.label)+'</option>';
+    }).join('');
+    if(item.myUsual && item.myUsual.svId){
+      sel.value = item.myUsual.svId;
+    }
+  }
+  var qtyEl = document.getElementById('flpQty');
+  if(qtyEl) qtyEl.value = (item.myUsual && item.myUsual.qty) ? item.myUsual.qty : 1;
+  var nameEl = document.getElementById('flpItemName');
+  if(nameEl) nameEl.textContent = item.name;
+  var detailEl = document.getElementById('flpDetail');
+  if(detailEl) detailEl.style.display = 'block';
+  updateFlpCalc();
+}
+
+function updateFlpCalc(){
+  if(!_flpSelectedItem) return;
+  var sel = document.getElementById('flpServSelect');
+  var opt = sel ? sel.options[sel.selectedIndex] : null;
+  var grams = opt ? parseFloat(opt.getAttribute('data-grams'))||100 : 100;
+  var qty = parseFloat((document.getElementById('flpQty')||{}).value)||1;
+  var n = calcNutFromLib(_flpSelectedItem, grams, qty);
+  var el = document.getElementById('flpCalcPreview');
+  if(el) el.innerHTML = '<strong>'+n.cal+'</strong> cal · <strong>'+n.pro+'g</strong> protein · <strong>'+n.carb+'g</strong> carbs · <strong>'+n.fat+'g</strong> fat';
+}
+
+function calcNutFromLib(item, svGrams, qty){
+  var q = parseFloat(qty)||1;
+  var g = parseFloat(svGrams)||100;
+  if(item.per100 && item.per100.cal!=null){
+    return {
+      cal: Math.round(item.per100.cal * g * q / 100),
+      pro: Math.round((item.per100.pro||0) * g * q / 100 * 10)/10,
+      carb: Math.round((item.per100.carb||0) * g * q / 100 * 10)/10,
+      fat: Math.round((item.per100.fat||0) * g * q / 100 * 10)/10
+    };
+  }
+  return {
+    cal: Math.round((item.cal||0)*q),
+    pro: Math.round((item.pro||0)*q*10)/10,
+    carb: Math.round((item.carb||0)*q*10)/10,
+    fat: Math.round((item.fat||0)*q*10)/10
+  };
+}
+
+function logFromLibrary(){
+  if(!_flpSelectedItem) return;
+  var sel = document.getElementById('flpServSelect');
+  var opt = sel ? sel.options[sel.selectedIndex] : null;
+  var grams = opt ? parseFloat(opt.getAttribute('data-grams'))||100 : 100;
+  var qty = parseFloat((document.getElementById('flpQty')||{}).value)||1;
+  var n = calcNutFromLib(_flpSelectedItem, grams, qty);
+  closeOv('ovFoodLibPick');
+  addFoodFromLib(_flpSelectedItem.name, n.cal, n.pro, n.carb, n.fat);
+}
+
+function addFoodFromLib(name, cal, pro, carb, fat){
+  var cat = (document.getElementById('mealLogCat')||{}).value||'main';
+  var day = (document.getElementById('mealLogDay')||{}).value||'';
+  MEAL_LOG_ITEMS.unshift({id:'ml-'+Date.now(),name:name,category:cat,day:day,date:todayStr(),cal:cal,pro:pro,carb:carb,fat:fat});
+  localStorage.setItem('aMealLogItems',JSON.stringify(MEAL_LOG_ITEMS));
+  var nl = name.toLowerCase();
+  var dbItem = FOOD_DB.find(function(x){ return (x.name||'').toLowerCase()===nl; });
+  if(dbItem){ dbItem.useCount=(dbItem.useCount||0)+1; saveFoodDbData(); }
+  autoFlagStaples();
+  document.getElementById('mealLogDay').value='';
+  checkQuestAutoComplete('meal');
+  renderMealLog();
+  showToast(name+' logged ✨');
+}
+// ── End Food Library Picker ──────────────────────────
+
 function renderMealLog(){
   var el=document.getElementById('mealLogList');if(!el)return;
   var list=_mealLogFilter?MEAL_LOG_ITEMS.filter(function(m){return m.category===_mealLogFilter;}):MEAL_LOG_ITEMS;
@@ -14723,40 +14899,138 @@ function confirmRecipeToGrocery(rec){
 function renderInventory(){
   var el=document.getElementById('inventoryListEl');
   if(!el)return;
-  if(!INVENTORY.length){
-    el.innerHTML='<p style="color:var(--textl);text-align:center;padding:20px">Inventory is empty. Items checked off your grocery list appear here automatically, or add them manually.</p>';
+  // Update section filter chips
+  var filterEl=document.getElementById('invSectionFilter');
+  if(filterEl){
+    var usedSections={};
+    INVENTORY.forEach(function(inv){usedSections[inv.section||'Pantry']=true;});
+    filterEl.innerHTML='<button class="fchip'+((!_invFilter)?' on':'')+'" onclick="setInvFilter(\'\',this)">All</button>'
+      +INV_SECTIONS.filter(function(s){return usedSections[s];}).map(function(s){
+        var count=INVENTORY.filter(function(inv){return (inv.section||'Pantry')===s;}).length;
+        return'<button class="fchip'+((_invFilter===s)?' on':'')+'" onclick="setInvFilter(\''+escHtml(s)+'\',this)">'+escHtml(s)+' <span style="font-size:10px;opacity:.7">'+count+'</span></button>';
+      }).join('');
+  }
+  var list=_invFilter?INVENTORY.filter(function(inv){return (inv.section||'Pantry')===_invFilter;}):INVENTORY;
+  if(!list.length){
+    el.innerHTML='<p style="color:var(--textl);text-align:center;padding:20px">'+(_invFilter?'Nothing in '+_invFilter+' — tap + Add':'Inventory is empty. Items checked off your grocery list appear here automatically.')+'</p>';
     return;
   }
-  el.innerHTML=INVENTORY.map(function(inv,i){
-    var priceHist=inv.priceHistory&&inv.priceHistory.length?inv.priceHistory:[];
-    var lastP=inv.lastPrice?'$'+parseFloat(inv.lastPrice).toFixed(2)+(inv.lastPriceStore?' @ '+inv.lastPriceStore:''):'';
-    return'<div style="padding:9px 0;border-bottom:1px solid #f5f0eb">'
-      +'<div style="display:flex;align-items:center;gap:8px">'
-      +'<div style="flex:1">'
-      +'<div style="font-size:13px;font-weight:600">'+escHtml(inv.name)+'</div>'
-      +'<div style="font-size:11px;color:var(--textl)">Qty: '+escHtml(inv.qty)+(inv.unit?' '+inv.unit:'')+(lastP?' · Last price: <strong>'+lastP+'</strong>':'')+'</div>'
-      +(priceHist.length>1?'<div style="font-size:10px;color:var(--textl);margin-top:1px">History: '+priceHist.slice(1,4).map(function(p){return'$'+parseFloat(p.price).toFixed(2)+(p.store?' @ '+p.store:'');}).join(' · ')+'</div>':'')
-      +'</div>'
-      +'<button onclick="priceToGrocery(\''+escHtml(inv.name)+'\','+(inv.lastPrice||0)+',\''+escHtml(inv.lastPriceStore||'')+'\');showMealSec(\'grocery\',document.querySelector(\'#v-meals .pn-btn:nth-child(1)\'))" style="background:var(--blue-light);border:none;border-radius:8px;padding:4px 9px;font-size:11px;font-weight:700;color:#4a7a9b;cursor:pointer;flex-shrink:0">→ 🛒</button>'
-      +'<button onclick="useInventoryItem('+i+')" style="background:var(--sage-light);border:none;border-radius:8px;padding:4px 9px;font-size:11px;font-weight:700;color:#3a6a3a;cursor:pointer;flex-shrink:0">Use</button>'
-      +'<button onclick="delInventoryItem('+i+')" style="background:none;border:none;font-size:13px;cursor:pointer;color:var(--textl);padding:2px 4px;flex-shrink:0">🗑️</button>'
-      +'</div>'
-      +'</div>';
-  }).join('');
+  // Group by section
+  var today=todayStr();
+  var sections={};
+  list.forEach(function(inv){
+    var sec=inv.section||'Pantry';
+    if(!sections[sec])sections[sec]=[];
+    sections[sec].push(inv);
+  });
+  var sectionOrder=INV_SECTIONS.concat(Object.keys(sections).filter(function(s){return INV_SECTIONS.indexOf(s)<0;}));
+  var html='';
+  sectionOrder.forEach(function(sec){
+    if(!sections[sec]||!sections[sec].length)return;
+    var emoji={Pantry:'🏠',Fridge:'❄️',Freezer:'🧊',Snacks:'🍿',Baking:'🧁',Supplements:'💊'}[sec]||'📦';
+    html+='<div style="font-size:11px;font-weight:700;color:var(--textl);letter-spacing:.5px;text-transform:uppercase;margin:12px 0 6px">'+emoji+' '+escHtml(sec)+'</div>';
+    sections[sec].forEach(function(inv){
+      var dbi=inv.dbItemId?FOOD_DB.find(function(x){return x.id===inv.dbItemId;}):null;
+      if(!dbi)dbi=FOOD_DB.find(function(x){return x.name.toLowerCase()===(inv.name||'').toLowerCase();});
+      var nutLine=dbi&&dbi.cal?'<span style="font-size:10px;color:var(--textl)"> · '+dbi.cal+'cal'+(dbi.pro?' · '+dbi.pro+'g pro':'')+'</span>':'';
+      // Expiration
+      var expLine='';
+      if(inv.expDate){
+        var daysLeft=Math.ceil((new Date(inv.expDate)-new Date(today))/(1000*60*60*24));
+        var expColor=daysLeft<0?'#e74c3c':daysLeft<=3?'#e74c3c':daysLeft<=7?'#f0a020':'#888';
+        var expText=daysLeft<0?'Expired '+Math.abs(daysLeft)+'d ago':daysLeft===0?'Expires today':daysLeft===1?'Expires tomorrow':'Exp '+inv.expDate;
+        expLine='<span style="font-size:10px;color:'+expColor+';font-weight:700;margin-left:6px">⏰ '+expText+'</span>';
+      }
+      html+='<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--bdr)">'
+        +'<div style="flex:1;min-width:0">'
+        +'<div style="font-size:13px;font-weight:600;color:var(--textd)">'+escHtml(inv.name)
+        +'<span style="font-size:12px;font-weight:400;color:var(--textl)"> '+escHtml(inv.qty||'')+(inv.unit?' '+escHtml(inv.unit):'')+'</span>'
+        +nutLine+expLine+'</div>'
+        +(inv.notes?'<div style="font-size:10px;color:var(--textl)">'+escHtml(inv.notes)+'</div>':'')
+        +'</div>'
+        +'<button onclick="openInvAddModal(\''+inv.id+'\')" style="background:none;border:1.5px solid var(--bdr);border-radius:8px;padding:3px 8px;font-size:11px;cursor:pointer;color:var(--textl)">✏️</button>'
+        +'<button onclick="priceToGrocery(\''+escHtml(inv.name)+'\','+(inv.lastPrice||0)+',\''+escHtml(inv.lastPriceStore||'')+'\');showMealSec(\'grocery\',document.querySelector(\'#v-meals .pn-btn:nth-child(1)\'))" style="background:var(--blue-light);border:none;border-radius:8px;padding:4px 9px;font-size:11px;font-weight:700;color:#4a7a9b;cursor:pointer">→ 🛒</button>'
+        +'<button onclick="delInventoryById(\''+inv.id+'\')" style="background:none;border:none;font-size:14px;cursor:pointer;color:var(--textl);padding:2px 4px">🗑️</button>'
+        +'</div>';
+    });
+  });
+  el.innerHTML=html;
 }
 
 function addInventoryManual(){
-  var name=((document.getElementById('invAddName')||{}).value||'').trim();
-  var qty=((document.getElementById('invAddQty')||{}).value||'1').trim();
-  if(!name)return;
-  INVENTORY.push({id:Date.now().toString(),name:name,qty:qty,unit:'',addedDate:todayStr()});
+  openInvAddModal();
+}
+
+var _invFilter='';
+function openInvAddModal(editId){
+  var item=editId?INVENTORY.find(function(x){return x.id===editId;}):null;
+  var el=document.getElementById('invAddModalBody');
+  if(!el)return;
+  var sectionOpts=INV_SECTIONS.map(function(s){return '<option value="'+escHtml(s)+'"'+(item&&item.section===s?' selected':'')+'>'+escHtml(s)+'</option>';}).join('');
+  el.innerHTML=
+    '<div class="fg"><label class="fl">Name *</label>'
+    +'<input class="fi" id="invEditName" list="invDbSuggest" placeholder="e.g. Chicken Breast" value="'+escHtml(item?item.name:'')+'">'
+    +'<datalist id="invDbSuggest">'+FOOD_DB.map(function(x){return'<option value="'+escHtml(x.name)+'">';}).join('')+'</datalist>'
+    +'</div>'
+    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">'
+    +'<div class="fg"><label class="fl">Qty</label><input class="fi" id="invEditQty" type="text" placeholder="1" value="'+escHtml(item?item.qty||'':'1')+'"></div>'
+    +'<div class="fg"><label class="fl">Unit</label><input class="fi" id="invEditUnit" placeholder="lbs, oz, bag…" value="'+escHtml(item?item.unit||'':'')+'"></div>'
+    +'</div>'
+    +'<div class="fg"><label class="fl">Section</label>'
+    +'<select class="fi" id="invEditSection" style="padding:8px 10px">'+sectionOpts+'</select>'
+    +'</div>'
+    +'<div class="fg"><label class="fl">Expiration date <span style="color:var(--textl);font-weight:400">(optional)</span></label>'
+    +'<input class="fi" id="invEditExp" type="date" value="'+escHtml(item?item.expDate||'':'')+'">'
+    +'</div>'
+    +'<div class="fg"><label class="fl">Notes</label><input class="fi" id="invEditNotes" placeholder="brand, location…" value="'+escHtml(item?item.notes||'':'')+'"></div>'
+    +'<input type="hidden" id="invEditId" value="'+escHtml(editId||'')+'">'
+    +'<div style="display:flex;gap:8px;margin-top:4px">'
+    +'<button class="ok-btn" style="flex:1" onclick="saveInvItem()">Save ✨</button>'
+    +(editId?'<button class="btn sec" style="color:#e74c3c;border-color:#e74c3c" onclick="delInventoryById(\''+editId+'\');closeOv(\'ovInvAdd\')">🗑</button>':'')
+    +'</div>';
+  showOv('ovInvAdd');
+}
+function saveInvItem(){
+  var name=((document.getElementById('invEditName')||{}).value||'').trim();
+  if(!name){showToast('Enter an item name');return;}
+  var id=(document.getElementById('invEditId').value)||('inv-'+Date.now());
+  var qty=((document.getElementById('invEditQty')||{}).value||'1').trim();
+  var unit=((document.getElementById('invEditUnit')||{}).value||'').trim();
+  var section=((document.getElementById('invEditSection')||{}).value||'Pantry');
+  var expDate=((document.getElementById('invEditExp')||{}).value||'').trim();
+  var notes=((document.getElementById('invEditNotes')||{}).value||'').trim();
+  var dbi=FOOD_DB.find(function(x){return x.name.toLowerCase()===name.toLowerCase();});
+  var existing=INVENTORY.find(function(x){return x.id===id;});
+  var item=Object.assign(existing||{},{
+    id:id, name:name, qty:qty, unit:unit, section:section,
+    expDate:expDate||'', notes:notes,
+    addedDate:existing?existing.addedDate:todayStr(),
+    dbItemId:dbi?dbi.id:(existing?existing.dbItemId||'':''),
+    lastPrice:existing?existing.lastPrice||0:0,
+    lastPriceStore:existing?existing.lastPriceStore||'':'',
+    priceHistory:existing?existing.priceHistory||[]:[]
+  });
+  if(existing){var idx=INVENTORY.indexOf(existing);INVENTORY[idx]=item;}
+  else{INVENTORY.push(item);}
   localStorage.setItem('aInventory',JSON.stringify(INVENTORY));
-  document.getElementById('invAddName').value='';
-  document.getElementById('invAddQty').value='';
+  closeOv('ovInvAdd');
+  renderInventory();
+  showToast(existing?'Updated ✨':'Added to inventory ✨');
+}
+function delInventoryById(id){
+  INVENTORY=INVENTORY.filter(function(x){return x.id!==id;});
+  localStorage.setItem('aInventory',JSON.stringify(INVENTORY));
+  renderInventory();
+}
+function setInvFilter(section,btn){
+  document.querySelectorAll('#invSectionFilter .fchip').forEach(function(b){b.classList.remove('on');});
+  if(btn)btn.classList.add('on');
+  _invFilter=section;
   renderInventory();
 }
 
 function useInventoryItem(i){
+  // Legacy index-based remove (kept for backward compat)
   INVENTORY.splice(i,1);
   localStorage.setItem('aInventory',JSON.stringify(INVENTORY));
   renderInventory();
@@ -14843,8 +15117,10 @@ function toggleGrocery(i){
     if(exists){
       exists.qty=item.qty||exists.qty;
       if(item.dbItemId&&!exists.dbItemId)exists.dbItemId=item.dbItemId;
+      if(!exists.section){var dbiForSec2=item.dbItemId?FOOD_DB.find(function(x){return x.id===item.dbItemId;}):null;exists.section=getAutoSection(dbiForSec2);}
     } else {
-      INVENTORY.push({id:Date.now().toString(),name:item.name,qty:item.qty||'1',unit:item.unit||'',addedDate:todayStr(),dbItemId:item.dbItemId||''});
+      var dbiForSec=item.dbItemId?FOOD_DB.find(function(x){return x.id===item.dbItemId;}):null;
+      INVENTORY.push({id:'inv-'+Date.now(),name:item.name,qty:item.qty||'1',unit:item.unit||'',section:getAutoSection(dbiForSec),expDate:'',notes:'',addedDate:todayStr(),dbItemId:item.dbItemId||''});
     }
     localStorage.setItem('aInventory',JSON.stringify(INVENTORY));
   }
@@ -19510,6 +19786,26 @@ function delProjInc(id){
   </div>
 </div></div>
 
+<!-- INVENTORY ADD/EDIT MODAL -->
+<div class="ov" id="ovInvAdd" onclick="closeOv('ovInvAdd')">
+  <div class="mod" style="max-height:88vh;overflow-y:auto" onclick="event.stopPropagation()">
+    <div class="mh"><span class="mt">📦 Add to Inventory</span><button class="mc" onclick="closeOv('ovInvAdd')">✕</button></div>
+    <div id="invAddModalBody"></div>
+  </div>
+</div>
+
+<!-- INVENTORY SECTIONS MODAL -->
+<div class="ov" id="ovInvSections" onclick="closeOv('ovInvSections')">
+  <div class="mod" onclick="event.stopPropagation()">
+    <div class="mh"><span class="mt">⚙️ Manage Sections</span><button class="mc" onclick="closeOv('ovInvSections')">✕</button></div>
+    <div id="invSectionsBody"></div>
+    <div style="display:flex;gap:8px;margin-top:12px">
+      <input class="fi" id="invNewSectionName" placeholder="New section name…" style="flex:1" onkeydown="if(event.key==='Enter')addInvSection()">
+      <button class="ok-btn" style="margin:0;padding:8px 16px" onclick="addInvSection()">+ Add</button>
+    </div>
+  </div>
+</div>
+
 <!-- RECIPE TO GROCERY MODAL -->
 <div class="ov" id="ovRecToGroc" onclick="closeOv('ovRecToGroc')">
   <div class="mod" style="max-height:88vh;overflow-y:auto" onclick="event.stopPropagation()">
@@ -20325,6 +20621,28 @@ function delProjInc(id){
     <div style="font-size:11px;font-weight:700;color:var(--textl);letter-spacing:.5px;text-transform:uppercase;margin-bottom:6px">📝 Month Notes</div>
     <textarea class="fi" id="reflNotes" rows="4" placeholder="General notes about this month…" style="resize:vertical;margin-bottom:10px" onchange="saveReflNotes()"></textarea>
     <button class="ok-btn" onclick="saveReflNotes();closeOv('ovMonthReflection');showToast('Saved ✨')">Save &amp; Close</button>
+  </div>
+</div>
+
+<!-- FOOD LIBRARY PICKER MODAL -->
+<div class="ov" id="ovFoodLibPick" onclick="closeOv('ovFoodLibPick')">
+  <div class="mod" style="max-height:90vh;overflow-y:auto" onclick="event.stopPropagation()">
+    <div class="mh"><span class="mt">🧩 Pick from Library</span><button class="mc" onclick="closeOv('ovFoodLibPick')">✕</button></div>
+    <input class="fi" id="flpSearch" placeholder="Search ingredient…" oninput="renderFlpList()" style="margin-bottom:10px">
+    <div id="flpList" style="max-height:220px;overflow-y:auto;margin-bottom:12px"></div>
+    <div id="flpDetail" style="display:none">
+      <div style="font-size:13px;font-weight:700;color:var(--textd);margin-bottom:8px" id="flpItemName"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+        <div class="fg"><label class="fl">Serving</label>
+          <select class="fi" id="flpServSelect" style="padding:8px 10px" onchange="updateFlpCalc()"></select>
+        </div>
+        <div class="fg"><label class="fl">Qty</label>
+          <input class="fi" id="flpQty" type="number" min="0.25" step="0.25" value="1" oninput="updateFlpCalc()">
+        </div>
+      </div>
+      <div id="flpCalcPreview" style="background:var(--bg2);border-radius:10px;padding:8px 12px;font-size:12px;color:var(--textl);margin-bottom:10px"></div>
+      <button class="ok-btn" style="width:100%" onclick="logFromLibrary()">Log It ✨</button>
+    </div>
   </div>
 </div>
 
