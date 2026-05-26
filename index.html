@@ -1087,8 +1087,7 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
       </div>
     </div>
     <div class="hub-card span2" onclick="goTab('wigs',null)"><div class="hub-card-ic">🪄</div><div class="hub-card-name">Wigs</div><div class="hub-card-sub" id="hub-wigs-sub">Loading…</div></div>
-    <div class="hub-card" onclick="goTab('money',null)"><div class="hub-card-ic">💸</div><div class="hub-card-name">Expenses</div><div class="hub-card-sub" id="hub-expense-sub">Track spending</div></div>
-    <div class="hub-card" onclick="goTab('money',null);setTimeout(function(){showMoneySec('income',document.querySelector('#v-money .pn-btn[onclick*=income]'))},200)"><div class="hub-card-ic">💰</div><div class="hub-card-name">Income</div><div class="hub-card-sub" id="hub-income-sub">Log earnings</div></div>
+    <div class="hub-card span2" onclick="goTab('work-projects',null)"><div class="hub-card-ic">📁</div><div class="hub-card-name">Work Projects</div><div class="hub-card-sub" id="hub-work-proj-sub">Wig projects &amp; tasks</div></div>
   </div>
 </div>
 
@@ -1577,6 +1576,14 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
   <div id="wigList"><div class="empty"><div class="emj">🪄</div><p>No wig orders yet.</p></div></div>
 </div>
 
+<div class="view" id="v-work-projects">
+  <div style="font-family:'Playfair Display',serif;font-size:20px;color:var(--textd);margin-bottom:10px">📁 Work Projects</div>
+  <div style="display:flex;gap:8px;margin-bottom:12px">
+    <button class="ok-btn" style="margin:0;padding:8px 14px;flex:1" onclick="openWorkProjectModal(null)">＋ New Project</button>
+  </div>
+  <div id="workProjectsList"></div>
+</div>
+
 <!-- MONEY -->
 <div class="view" id="v-money">
   <div class="pill-nav" style="margin-bottom:12px;flex-wrap:wrap">
@@ -1588,6 +1595,7 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     <button class="pn-btn" data-sec="home-items" onclick="showMoneySec('home-items',this)">🏠 Home</button>
     <button class="pn-btn" data-sec="projects" onclick="showMoneySec('projects',this)">💼 Projects</button>
     <button class="pn-btn" data-sec="tax" onclick="showMoneySec('tax',this)">💸 Tax</button>
+    <button class="pn-btn" data-sec="money-plan" onclick="showMoneySec('money-plan',this)">📈 Plan</button>
   </div>
   <!-- Overview -->
   <div id="ms-overview" class="money-sec">
@@ -1707,6 +1715,36 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     </div>
     <button class="ok-btn" style="width:100%;margin-bottom:12px" onclick="openTaxModal(null)">＋ Add Tax Entry</button>
     <div id="taxList"></div>
+  </div>
+  <div id="ms-money-plan" class="money-sec" style="display:none">
+    <!-- Monthly income goal -->
+    <div class="card" style="margin-bottom:12px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <span style="font-size:13px;font-weight:700;color:var(--textd)">🎯 Monthly Income Goal</span>
+        <button class="btn sec" style="font-size:11px;padding:3px 10px" onclick="setMonthlyIncGoal()">Set Goal</button>
+      </div>
+      <div id="monPlanGoalBar" style="height:8px;background:#f0ebe6;border-radius:4px;overflow:hidden;margin-bottom:6px">
+        <div id="monPlanGoalFill" style="height:100%;background:linear-gradient(90deg,var(--sage),var(--teal));transition:width .6s;width:0%"></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--textl)">
+        <span id="monPlanGoalActual">$0 this month</span>
+        <span id="monPlanGoalTarget">Goal: $—</span>
+      </div>
+    </div>
+    <!-- Projected income entries -->
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <span style="font-size:13px;font-weight:700;color:var(--textd)">📈 Projected Income</span>
+      <button class="btn sec" style="font-size:11px;padding:3px 10px" onclick="openProjIncModal(null)">＋ Add</button>
+    </div>
+    <div id="projIncList"></div>
+    <!-- Linked tasks -->
+    <div style="margin-top:12px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <span style="font-size:13px;font-weight:700;color:var(--textd)">📋 Money Tasks</span>
+        <button class="btn sec" style="font-size:11px;padding:3px 10px" onclick="openMoneyTask()">＋ Task</button>
+      </div>
+      <div id="moneyTasksList"></div>
+    </div>
   </div>
 </div>
 
@@ -2115,13 +2153,13 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
 </div>
 <div class="view" id="v-meals">
   <div class="pill-nav" style="margin-bottom:12px">
-    <button class="pn-btn on" onclick="showMealSec('meals',this)">🍽️ Meals</button>
-    <button class="pn-btn" onclick="showMealSec('plan',this)">📅 Week</button>
-    <button class="pn-btn" onclick="showMealSec('recipes',this)">📖 Recipes</button>
-    <button class="pn-btn" onclick="showMealSec('database',this)">🍲 Database</button>
     <button class="pn-btn" onclick="showMealSec('grocery',this)">🛒 Grocery</button>
-    <button class="pn-btn" onclick="showMealSec('prices',this)">💰 Prices</button>
+    <button class="pn-btn on" onclick="showMealSec('meals',this)">🍽️ Meals</button>
     <button class="pn-btn" onclick="showMealSec('inventory',this)">📦 Inventory</button>
+    <button class="pn-btn" onclick="showMealSec('recipes',this)">📖 Recipes</button>
+    <button class="pn-btn" onclick="showMealSec('ingredients',this)">🧩 Ingredients</button>
+    <button class="pn-btn" onclick="showMealSec('prices',this)">💰 Prices</button>
+    <button class="pn-btn" onclick="showMealSec('database',this)">🍲 Database</button>
   </div>
 
   <!-- MEALS section (category-based log) -->
@@ -2163,17 +2201,23 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
       <button class="bd-filter" onclick="setMealLogFilter('supplement',this)">💊 Supps</button>
     </div>
     <div id="mealLogList"></div>
-  </div>
 
-  <!-- PLAN section -->
-  <div id="ms-plan" style="display:none">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-      <button class="btn sec" style="padding:5px 10px;font-size:12px" onclick="shiftMealWeek(-1)">◀</button>
-      <span id="mealWeekLbl" style="font-weight:700;font-size:13px;color:var(--textd)"></span>
-      <button class="btn sec" style="padding:5px 10px;font-size:12px" onclick="shiftMealWeek(1)">▶</button>
+    <!-- Collapsible weekly plan -->
+    <div style="margin-top:14px;border-top:1px solid var(--border);padding-top:10px">
+      <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer" onclick="toggleWeeklyPlan()">
+        <span style="font-weight:700;font-size:13px;color:var(--textd)">📅 Weekly Meal Plan</span>
+        <button id="weeklyPlanToggleBtn" style="background:none;border:none;font-size:16px;cursor:pointer;color:var(--textl);padding:2px 6px">▼</button>
+      </div>
+      <div id="weeklyPlanCollapsible" style="display:none;margin-top:8px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+          <button class="btn sec" style="padding:5px 10px;font-size:12px" onclick="shiftMealWeek(-1)">◀</button>
+          <span id="mealWeekLbl" style="font-weight:700;font-size:13px;color:var(--textd)"></span>
+          <button class="btn sec" style="padding:5px 10px;font-size:12px" onclick="shiftMealWeek(1)">▶</button>
+        </div>
+        <div id="mealPlanGrid" class="meal-grid"></div>
+        <button class="btn" style="width:100%;margin-top:6px" onclick="genGroceryFromPlan()">🛒 Generate Grocery List from This Week</button>
+      </div>
     </div>
-    <div id="mealPlanGrid" class="meal-grid"></div>
-    <button class="btn" style="width:100%;margin-top:6px" onclick="genGroceryFromPlan()">🛒 Generate Grocery List from This Week</button>
   </div>
 
   <!-- FOOD DATABASE section -->
@@ -2194,13 +2238,6 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     </div>
     <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px" id="foodDbCatFilter">
       <button class="fchip on" onclick="setFoodDbCat('',this)">All</button>
-      <button class="fchip" onclick="setFoodDbCat('protein',this)">🥩 Protein</button>
-      <button class="fchip" onclick="setFoodDbCat('vegetable',this)">🥦 Veggies</button>
-      <button class="fchip" onclick="setFoodDbCat('grain',this)">🌾 Grains</button>
-      <button class="fchip" onclick="setFoodDbCat('dairy',this)">🥛 Dairy</button>
-      <button class="fchip" onclick="setFoodDbCat('fruit',this)">🍎 Fruit</button>
-      <button class="fchip" onclick="setFoodDbCat('snack',this)">🍿 Snacks</button>
-      <button class="fchip" onclick="setFoodDbCat('other',this)">📦 Other</button>
     </div>
     <div id="foodDbList"></div>
   </div>
@@ -2219,6 +2256,8 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
       <button class="fchip" onclick="setRecipeFilter('snack',this)">🥨 Snack</button>
       <button class="fchip" onclick="setRecipeFilter('soup',this)">🍲 Soup</button>
       <button class="fchip" onclick="setRecipeFilter('dessert',this)">🍰 Dessert</button>
+      <button class="fchip" onclick="setRecipeFilter('side',this)">🥗 Side</button>
+      <button class="fchip" onclick="setRecipeFilter('drink',this)">🥤 Drink</button>
     </div>
     <div id="recipeList"></div>
   </div>
@@ -2238,6 +2277,15 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     </div>
     <div id="groceryEstTotal" style="font-size:13px;color:var(--textl);margin-bottom:8px"></div>
     <div id="groceryListEl"></div>
+  </div>
+
+  <!-- INGREDIENTS section -->
+  <div id="ms-ingredients" style="display:none">
+    <div style="display:flex;gap:8px;margin-bottom:12px">
+      <input id="ingSearch" class="fi" placeholder="Search ingredients…" oninput="renderIngredients()" style="flex:1;margin-bottom:0">
+      <button class="ok-btn" style="margin:0;padding:8px 14px" onclick="openIngModal(null)">+ Add</button>
+    </div>
+    <div id="ingList"></div>
   </div>
 
   <!-- PRICES section -->
@@ -2946,16 +2994,25 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
   <div class="mh"></div><div class="mtit">🍲 Add Food Item</div>
   <input type="hidden" id="fdbId">
   <div class="fg"><label class="fl">Name *</label><input class="fi" id="fdbName" placeholder="e.g. Grilled Chicken Breast"></div>
-  <div class="fg"><label class="fl">Category</label>
-    <select class="fi" id="fdbCat" style="padding:8px 10px">
-      <option value="protein">🥩 Protein</option>
-      <option value="vegetable">🥦 Vegetable</option>
-      <option value="grain">🌾 Grain</option>
-      <option value="dairy">🥛 Dairy</option>
-      <option value="fruit">🍎 Fruit</option>
-      <option value="snack">🍿 Snack</option>
-      <option value="other">📦 Other</option>
-    </select></div>
+  <div class="fg">
+    <label class="fl">Tags (select all that apply)</label>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px" id="fdbTagChips">
+      <button type="button" class="fchip" data-tag="protein" onclick="toggleFdbTag(this)">🥩 Protein</button>
+      <button type="button" class="fchip" data-tag="vegetable" onclick="toggleFdbTag(this)">🥦 Vegetable</button>
+      <button type="button" class="fchip" data-tag="grain" onclick="toggleFdbTag(this)">🌾 Grain</button>
+      <button type="button" class="fchip" data-tag="dairy" onclick="toggleFdbTag(this)">🥛 Dairy</button>
+      <button type="button" class="fchip" data-tag="fruit" onclick="toggleFdbTag(this)">🍎 Fruit</button>
+      <button type="button" class="fchip" data-tag="snack" onclick="toggleFdbTag(this)">🍿 Snack</button>
+      <button type="button" class="fchip" data-tag="beverage" onclick="toggleFdbTag(this)">☕ Beverage</button>
+      <button type="button" class="fchip" data-tag="condiment" onclick="toggleFdbTag(this)">🧂 Condiment</button>
+      <button type="button" class="fchip" data-tag="other" onclick="toggleFdbTag(this)">📦 Other</button>
+    </div>
+    <div style="display:flex;gap:6px;align-items:center">
+      <input class="fi" id="fdbCustomTag" placeholder="+ custom tag" style="flex:1;margin-bottom:0;font-size:12px;padding:6px 10px">
+      <button type="button" class="btn sec" style="font-size:11px;padding:5px 10px;flex-shrink:0" onclick="addFdbCustomTag()">Add</button>
+    </div>
+    <div id="fdbCustomTagList" style="display:flex;gap:5px;flex-wrap:wrap;margin-top:6px"></div>
+  </div>
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
     <div class="fg"><label class="fl">Calories</label><input class="fi" id="fdbCal" type="number" placeholder="0"></div>
     <div class="fg"><label class="fl">Protein (g)</label><input class="fi" id="fdbPro" type="number" placeholder="0" step="0.1"></div>
@@ -2971,6 +3028,35 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
   <button class="ok-btn" onclick="saveFoodDb()">Save ✨</button>
   <button class="del-btn" id="fdbDelBtn" style="display:none" onclick="delFoodDb()">🗑️ Delete</button>
   <button class="cn-btn" onclick="closeM('foodDbModal')">Cancel</button>
+</div></div>
+
+<!-- INGREDIENT MODAL -->
+<div class="ov" id="ingModal"><div class="mod" style="max-height:88vh;overflow-y:auto">
+  <div class="mh"></div><div class="mtit" id="ingModalTitle">🧩 Add Ingredient</div>
+  <input type="hidden" id="ingId">
+  <div class="fg"><label class="fl">Name *</label><input class="fi" id="ingName" placeholder="e.g. Cottage Cheese"></div>
+  <div class="fg">
+    <label class="fl">Link to Food DB Item</label>
+    <input class="fi" id="ingDbLink" list="ingDbSuggest" placeholder="Type to search food database…">
+    <datalist id="ingDbSuggest"></datalist>
+    <input type="hidden" id="ingDbItemId">
+  </div>
+  <div class="fg">
+    <label class="fl">Linked Ingredients</label>
+    <input class="fi" id="ingLinkedSearch" placeholder="Search ingredients to link…" oninput="filterIngLinkedSuggest(this.value)">
+    <div id="ingLinkedSuggest" style="display:flex;gap:5px;flex-wrap:wrap;margin-top:5px;max-height:80px;overflow-y:auto"></div>
+    <div id="ingLinkedSelected" style="display:flex;gap:5px;flex-wrap:wrap;margin-top:5px"></div>
+  </div>
+  <div class="fg">
+    <label class="fl">Linked Recipes</label>
+    <input class="fi" id="ingRecipeSearch" placeholder="Search recipes to link…" oninput="filterIngRecipeSuggest(this.value)">
+    <div id="ingRecipeSuggest" style="display:flex;gap:5px;flex-wrap:wrap;margin-top:5px;max-height:80px;overflow-y:auto"></div>
+    <div id="ingRecipeSelected" style="display:flex;gap:5px;flex-wrap:wrap;margin-top:5px"></div>
+  </div>
+  <div class="fg"><label class="fl">Notes</label><textarea class="fi fi-big" id="ingNotes" placeholder="Notes about this ingredient…" style="min-height:50px"></textarea></div>
+  <button class="ok-btn" onclick="saveIngredient()">Save ✨</button>
+  <button class="del-btn" id="ingDelBtn" style="display:none" onclick="deleteIngredient()">🗑️ Delete</button>
+  <button class="cn-btn" onclick="document.getElementById('ingModal').classList.remove('show')">Cancel</button>
 </div></div>
 
 <!-- CAL TUTORIAL MODAL -->
@@ -4042,6 +4128,10 @@ var MONEY_PROJECTS = JSON.parse(localStorage.getItem('aMoneyProjects')||'[]');
 // {id, name, goal, saved, notes, color, items:[{id,name,cat,amount,due:'',paid:false,date:''}], days:[{id,label,date,items:[{cat,amount,note}]}]}
 var TAX_LOG = JSON.parse(localStorage.getItem('aTaxLog')||'[]');
 // {id, type:'paid'|'owed'|'set-aside', amount, description, date, notes}
+var WORK_PROJECTS = JSON.parse(localStorage.getItem('aWorkProjects')||'[]');
+// {id, name, wigId:'', status:'active'|'complete'|'pending', notes:'', budget:0, actualIncome:0, projectedIncome:0, expenses:[], tasks:[], created:''}
+var PROJ_INCOME = JSON.parse(localStorage.getItem('aProjIncome')||'[]');
+// {id, description, amount, expectedDate:'', source:'wig'|'loreal'|'nick-window'|'other', wigProjectId:'', actual:0, status:'projected'|'received', notes:''}
 var EXPENSE_CATS = JSON.parse(localStorage.getItem('aExpCats')||JSON.stringify([
   "Adrienne's Stuff","Clothing","Dining Out & Drinks","Disneyland","Donations",
   "Entertainment","Fee","Gas","Groceries & Personal Care","Health","Home and Car",
@@ -4079,7 +4169,7 @@ var MEAL_COMBOS = JSON.parse(localStorage.getItem('aMC')||'null')||[
 var DEFAULT_TAB_ORDER=['today','plan','helm','lighthouse','conservatory','hearthside','workshop','estate','emporium','archives','archive'];
 var TAB_LABELS={today:'Today',plan:'Plan',helm:'Tasks & Projects',conservatory:'Personal Growth',hearthside:'Health & Wellness',workshop:'Workshop',lighthouse:'Spiritual',estate:'Money & Home',emporium:'Work',archives:'Research Library',archive:'Archive',stories:'Stories',mixtape:'Mixtape','focus-session':'Focus Session',grocery:'Grocery List'};
 var TAB_ORDER=(function(){var o=JSON.parse(localStorage.getItem('aTabOrder')||'null');if(!o)return DEFAULT_TAB_ORDER.slice();var full=DEFAULT_TAB_ORDER.slice();o=o.filter(function(t){return full.indexOf(t)>-1;});full.forEach(function(t){if(o.indexOf(t)<0)o.push(t);});return o;})();
-var SECTION_VIEWS={today:['today'],plan:['plan'],helm:['tasks','projects','lists','focus-session','grocery'],conservatory:['goals','routines','learn','focus'],hearthside:['food','meals','wellness','recap'],workshop:['board','faves','stories','mixtape','winedrinks','places'],lighthouse:['spirit'],estate:['money','accounts','home-items','money-projects'],emporium:['wigs'],archives:['guide','export','settings'],archive:['archive']};
+var SECTION_VIEWS={today:['today'],plan:['plan'],helm:['tasks','projects','lists','focus-session','grocery'],conservatory:['goals','routines','learn','focus'],hearthside:['food','meals','wellness','recap'],workshop:['board','faves','stories','mixtape','winedrinks','places'],lighthouse:['spirit'],estate:['money','accounts','home-items','money-projects'],emporium:['wigs','work-projects'],archives:['guide','export','settings'],archive:['archive']};
 var SECTION_LABELS={today:'Today',plan:'Plan',helm:'Tasks & Projects',conservatory:'Personal Growth',hearthside:'Health & Wellness',workshop:'Workshop',lighthouse:'Spiritual',estate:'Money & Home',emporium:'Work',archives:'Research Library',archive:'Archive'};
 var VIEW_SECTION=(function(){var m={};Object.keys(SECTION_VIEWS).forEach(function(s){SECTION_VIEWS[s].forEach(function(v){m[v]=s;});});return m;})();
 
@@ -4384,6 +4474,7 @@ function goTabDirect(tab,btn){
   if(tab==='plan'){ renderPlan(); }
   if(tab==='grocery'){ renderGroceryList(); populateGrocTaskDatalist(); }
   if(tab==='guide'){ renderResearchLib(); renderGuide(); }
+  if(tab==='work-projects'){ renderWorkProjects(); }
   if(tab==='helm'||tab==='conservatory'||tab==='hearthside'||tab==='lighthouse'||tab==='estate'||tab==='workshop'||tab==='food'||tab==='meals'||tab==='wellness'){ renderAllLearnWidgets(); }
 }
 
@@ -4457,6 +4548,9 @@ function renderHubPreviews(section){
     if(expSub){var expLen=(JSON.parse(localStorage.getItem('aExpenses')||'[]')).length;expSub.textContent=expLen+' expense'+(expLen!==1?'s':'')+' logged';}
     var incSub=document.getElementById('hub-income-sub');
     if(incSub){var incLen=(INCOME||[]).length;incSub.textContent=incLen+' income entr'+(incLen!==1?'ies':'y');}
+    // Work projects hub subtitle
+    var wpSub=document.getElementById('hub-work-proj-sub');
+    if(wpSub){var active=(WORK_PROJECTS||[]).filter(function(p){return p.status==='active';}).length;wpSub.textContent=active+' active project'+(active!==1?'s':'');}
   }
   updateCharMoods(section);
 }
@@ -9653,7 +9747,7 @@ function celebrate(){
 // ═══════════════════════════════════════════════
 
 function showMoneySec(sec,btn){
-  ['overview','bills','expenses','income','accounts','home-items','projects','tax'].forEach(function(s){
+  ['overview','bills','expenses','income','accounts','home-items','projects','tax','money-plan'].forEach(function(s){
     var el=document.getElementById('ms-'+s);
     if(el)el.style.display=(s===sec)?'':'none';
   });
@@ -9664,6 +9758,7 @@ function showMoneySec(sec,btn){
   if(sec==='projects')renderMoneyProjects();
   if(sec==='tax')renderTaxSection();
   if(sec==='overview')renderMoneyOverview();
+  if(sec==='money-plan')renderMoneyPlan();
 }
 
 function showFocusSec(sec,btn){
@@ -12471,19 +12566,21 @@ var MEAL_SLOT_LABELS = {breakfast:'Breakfast',mains:'Main Meals',soup:'Soup',oth
 var GROCERY_CATS = ['Produce','Dairy','Meat & Fish','Bakery','Pantry','Frozen','Beverages','Other'];
 
 function showMealSec(sec,btn){
-  ['meals','plan','recipes','database','grocery','prices','inventory'].forEach(function(s){
+  // 'plan' is an alias for 'meals' (backward compat)
+  if(sec==='plan')sec='meals';
+  ['meals','recipes','database','grocery','prices','inventory','ingredients'].forEach(function(s){
     var el=document.getElementById('ms-'+s);
     if(el)el.style.display=(s===sec)?'':'none';
   });
   document.querySelectorAll('#v-meals .pn-btn').forEach(function(b){b.classList.remove('on');});
   if(btn)btn.classList.add('on');
-  if(sec==='meals')renderMealLog();
-  if(sec==='plan')renderMealPlan();
+  if(sec==='meals'){renderMealLog();renderMealPlan();}
   if(sec==='recipes')renderRecipes();
   if(sec==='database'){renderFoodDb();renderFoodDbKitchen();}
   if(sec==='grocery')renderGrocery();
   if(sec==='inventory')renderInventory();
   if(sec==='prices')renderPriceLog();
+  if(sec==='ingredients'){renderIngredients();populateIngDatalist();}
 }
 
 // ── Meal Log (category-based) ─────────────────
@@ -12714,7 +12811,7 @@ function setRecipeFilter(val,btn){
 }
 
 function setRecMealType(val,btn){
-  document.getElementById('recMealType').value=val;
+  // Legacy: no-op since we use multi-select chips now
   document.querySelectorAll('#recMealTypeBar .fchip').forEach(function(b){b.classList.remove('on');});
   if(btn)btn.classList.add('on');
 }
@@ -12746,30 +12843,34 @@ function renderRecipes(){
   var el=document.getElementById('recipeList');
   if(!el)return;
   var list=RECIPES.filter(function(r){
+    // Migrate mealType→mealTypes if needed
+    if(r.mealType&&!r.mealTypes)r.mealTypes=[r.mealType];
+    if(!r.mealTypes)r.mealTypes=[];
     var matchQ=!q||r.name.toLowerCase().includes(q.toLowerCase());
-    var matchF=!_recipeFilter||(r.mealType||'')=== _recipeFilter;
+    var matchF=!_recipeFilter||r.mealTypes.indexOf(_recipeFilter)>=0;
     return matchQ&&matchF;
   });
   if(!list.length){el.innerHTML='<p style="color:var(--textl);text-align:center;padding:20px">No recipes yet. Add one!</p>';return;}
   el.innerHTML=list.map(function(r){
     var m=r.macros||{};
-    var mt=r.mealType||'';
+    var mts=r.mealTypes||[];
+    var mt=mts[0]||r.mealType||'';
     var mtColor=MEAL_TYPE_COLORS[mt]||'white';
-    var mtIcon=MEAL_TYPE_ICONS[mt]||'';
     var timeStr='';
     if(r.prepTime||r.cookTime){
       var total=(r.prepTime||0)+(r.cookTime||0);
       timeStr='⏱️ '+total+' min';
     }
-    var tags=(r.tags||[]).map(function(t){return '<span class="recipe-macro-tag">'+t+'</span>';}).join('');
-    var ingHtml=(r.ingredients&&r.ingredients.length)?r.ingredients.map(function(i){return '<span style="font-size:11px;color:var(--textl)">'+i.qty+' '+i.unit+' '+i.name+'</span>';}).join('<br>'):'';
+    var tags=(r.tags||[]).map(function(t){return '<span class="recipe-macro-tag">'+escHtml(t)+'</span>';}).join('');
+    var mtChips=mts.map(function(t){var ic=MEAL_TYPE_ICONS[t]||'';return '<span class="recipe-macro-tag" style="background:rgba(0,0,0,0.08)">'+(ic?ic+' ':'')+escHtml(t)+'</span>';}).join('');
+    var ingHtml=(r.ingredients&&r.ingredients.length)?r.ingredients.map(function(i){return '<span style="font-size:11px;color:var(--textl)">'+escHtml(i.qty)+' '+escHtml(i.unit)+' '+escHtml(i.name)+'</span>';}).join('<br>'):'';
     var thumbHtml=r.photo1?'<img src="'+r.photo1+'" alt="" style="width:52px;height:52px;object-fit:cover;border-radius:8px;flex-shrink:0;margin-right:4px">':'';
     return '<div class="recipe-card" style="background:'+mtColor+';position:relative">'
       +'<div style="display:flex;align-items:flex-start;gap:8px">'
       +(thumbHtml?'<div style="flex-shrink:0">'+thumbHtml+'</div>':'')
       +'<div style="flex:1;min-width:0">'
       +'<div style="display:flex;align-items:center;justify-content:space-between">'
-      +'<span class="recipe-card-name">'+r.name+'</span>'
+      +'<span class="recipe-card-name">'+escHtml(r.name)+'</span>'
       +'<div style="display:flex;gap:4px;flex-shrink:0">'
       +'<button title="Add to today\'s meal plan" style="background:var(--sage-light);border:none;border-radius:8px;padding:3px 8px;font-size:13px;cursor:pointer" onclick="event.stopPropagation();quickPlanRecipe({id:\''+r.id+'\',name:\''+r.name.replace(/'/g,"\\'")+'\'})">📋</button>'
       +'<button class="btn sec" style="font-size:11px;padding:3px 8px" onclick="event.stopPropagation();openRecipeModal(\''+r.id+'\')">✏️</button>'
@@ -12777,7 +12878,7 @@ function renderRecipes(){
       +'</div>'
       +'</div>'
       +'<div style="display:flex;gap:4px;flex-wrap:wrap;margin:4px 0">'
-      +(mt?'<span class="recipe-macro-tag" style="background:rgba(0,0,0,0.08)">'+mtIcon+' '+mt+'</span>':'')
+      +mtChips
       +(timeStr?'<span class="recipe-macro-tag">'+timeStr+'</span>':'')
       +'</div>'
       +'<div class="recipe-card-macros">'
@@ -12807,9 +12908,11 @@ function openRecipeModal(id){
   document.getElementById('recTags').value=rec&&rec.tags?rec.tags.join(', '):'';
   document.getElementById('recNotes').value=rec?rec.notes||'':'';
   document.getElementById('recId').value=rec?rec.id:'';
-  var mt=rec?rec.mealType||'':'';
-  document.getElementById('recMealType').value=mt;
-  document.querySelectorAll('#recMealTypeBar .fchip').forEach(function(b){b.classList.toggle('on',b.getAttribute('onclick').includes("'"+mt+"'"));});
+  // mealTypes multi-select chips (migrate mealType→mealTypes if needed)
+  var mts=rec?(rec.mealTypes||(rec.mealType?[rec.mealType]:[])):[];
+  document.querySelectorAll('#recMealTypeBar .fchip').forEach(function(b){
+    b.classList.toggle('on',mts.indexOf(b.dataset.val)>=0);
+  });
   var prepEl=document.getElementById('recPrepTime');
   var cookEl=document.getElementById('recCookTime');
   if(prepEl)prepEl.value=rec?rec.prepTime||'':'';
@@ -12864,14 +12967,17 @@ function saveRecipe(){
   var name=document.getElementById('recName').value.trim();
   if(!name)return alert('Recipe name required');
   var id=document.getElementById('recId').value||'rec-'+Date.now();
-  var mtEl=document.getElementById('recMealType');
   var prepEl=document.getElementById('recPrepTime');
   var cookEl=document.getElementById('recCookTime');
+  // Read mealTypes from multi-select chips
+  var mealTypes=[];
+  document.querySelectorAll('#recMealTypeBar .fchip.on').forEach(function(b){if(b.dataset.val)mealTypes.push(b.dataset.val);});
   var rec={
     id:id,
     name:name,
     servings:parseInt(document.getElementById('recServings').value)||1,
-    mealType:mtEl?mtEl.value:'',
+    mealTypes:mealTypes,
+    mealType:mealTypes[0]||'', // keep for backward compat
     prepTime:prepEl?parseInt(prepEl.value)||0:0,
     cookTime:cookEl?parseInt(cookEl.value)||0:0,
     macros:{
@@ -12927,7 +13033,7 @@ function genGroceryFromPlan(){
   });
   localStorage.setItem('aGroceryList',JSON.stringify(GROCERY_LIST));
   // Switch to grocery tab
-  var btn=document.querySelector('#v-meals .pn-btn:nth-child(3)');
+  var btn=document.querySelector('#v-meals .pn-btn:nth-child(1)');
   showMealSec('grocery',btn);
   renderGrocery();
 }
@@ -12949,7 +13055,7 @@ function renderInventory(){
       +'<div style="font-size:11px;color:var(--textl)">Qty: '+escHtml(inv.qty)+(inv.unit?' '+inv.unit:'')+(lastP?' · Last price: <strong>'+lastP+'</strong>':'')+'</div>'
       +(priceHist.length>1?'<div style="font-size:10px;color:var(--textl);margin-top:1px">History: '+priceHist.slice(1,4).map(function(p){return'$'+parseFloat(p.price).toFixed(2)+(p.store?' @ '+p.store:'');}).join(' · ')+'</div>':'')
       +'</div>'
-      +'<button onclick="priceToGrocery(\''+escHtml(inv.name)+'\','+(inv.lastPrice||0)+',\''+escHtml(inv.lastPriceStore||'')+'\');showMealSec(\'grocery\',document.querySelector(\'#v-meals .pn-btn:nth-child(4)\'))" style="background:var(--blue-light);border:none;border-radius:8px;padding:4px 9px;font-size:11px;font-weight:700;color:#4a7a9b;cursor:pointer;flex-shrink:0">→ 🛒</button>'
+      +'<button onclick="priceToGrocery(\''+escHtml(inv.name)+'\','+(inv.lastPrice||0)+',\''+escHtml(inv.lastPriceStore||'')+'\');showMealSec(\'grocery\',document.querySelector(\'#v-meals .pn-btn:nth-child(1)\'))" style="background:var(--blue-light);border:none;border-radius:8px;padding:4px 9px;font-size:11px;font-weight:700;color:#4a7a9b;cursor:pointer;flex-shrink:0">→ 🛒</button>'
       +'<button onclick="useInventoryItem('+i+')" style="background:var(--sage-light);border:none;border-radius:8px;padding:4px 9px;font-size:11px;font-weight:700;color:#3a6a3a;cursor:pointer;flex-shrink:0">Use</button>'
       +'<button onclick="delInventoryItem('+i+')" style="background:none;border:none;font-size:13px;cursor:pointer;color:var(--textl);padding:2px 4px;flex-shrink:0">🗑️</button>'
       +'</div>'
@@ -14312,11 +14418,14 @@ function endColorMix(){
 // FOOD DATABASE 🍲
 // ═══════════════════════════════════════════════
 var FOOD_DB = JSON.parse(localStorage.getItem('aFoodDb')||'[]');
-// Ensure legacy items have required flags
+// Ensure legacy items have required flags and migrate cat→tags
 FOOD_DB.forEach(function(item){
   if(item.favorite===undefined)item.favorite=false;
   if(item.staple===undefined)item.staple=false;
   if(item.useCount===undefined)item.useCount=0;
+  // Migrate single cat string to tags array
+  if(item.cat&&!item.tags){item.tags=[item.cat];}
+  if(!item.tags)item.tags=[];
 });
 var _foodDbCat = '';
 var _foodDbSort = 'fav'; // 'fav','az','store','cat'
@@ -14367,19 +14476,38 @@ function addDbItemToGrocery(id){
   showToast(item.name+' added to grocery list 🛒');
 }
 
-var FOOD_CAT_EMOJI = {protein:'🥩',vegetable:'🥦',grain:'🌾',dairy:'🥛',fruit:'🍎',snack:'🍿',other:'📦'};
+var FOOD_CAT_EMOJI = {protein:'🥩',vegetable:'🥦',grain:'🌾',dairy:'🥛',fruit:'🍎',snack:'🍿',beverage:'☕',condiment:'🧂',other:'📦'};
 
 function openFoodDbModal(editId){
   document.getElementById('fdbId').value = editId||'';
-  ['fdbName','fdbStore','fdbRecipe','fdbServing'].forEach(function(id){var e=document.getElementById(id);if(e)e.value='';});
+  ['fdbName','fdbStore','fdbRecipe','fdbServing','fdbCustomTag'].forEach(function(id){var e=document.getElementById(id);if(e)e.value='';});
   ['fdbCal','fdbPro','fdbCarb','fdbFat','fdbPrice'].forEach(function(id){var e=document.getElementById(id);if(e)e.value='';});
+  // Reset tag chips
+  document.querySelectorAll('#fdbTagChips .fchip').forEach(function(b){b.classList.remove('on');});
+  var customTagList=document.getElementById('fdbCustomTagList');
+  if(customTagList)customTagList.innerHTML='';
   var del = document.getElementById('fdbDelBtn');
   if(editId){
     var item = FOOD_DB.find(function(x){return x.id===editId;});
     if(item){
       ['name','store','recipe','serving'].forEach(function(f){var e=document.getElementById('fdb'+f.charAt(0).toUpperCase()+f.slice(1));if(e)e.value=item[f]||'';});
       ['cal','pro','carb','fat','price'].forEach(function(f){var e=document.getElementById('fdb'+f.charAt(0).toUpperCase()+f.slice(1));if(e)e.value=item[f]||'';});
-      var catEl=document.getElementById('fdbCat');if(catEl)catEl.value=item.cat||'other';
+      // Set tag chips from item.tags (with fallback from item.cat)
+      var itemTags=item.tags||(item.cat?[item.cat]:[]);
+      var knownTags=['protein','vegetable','grain','dairy','fruit','snack','beverage','condiment','other'];
+      itemTags.forEach(function(tag){
+        var chip=document.querySelector('#fdbTagChips .fchip[data-tag="'+tag+'"]');
+        if(chip){chip.classList.add('on');}
+        else if(knownTags.indexOf(tag)<0&&customTagList){
+          // custom tag
+          var span=document.createElement('span');
+          span.className='fchip on';span.dataset.customTag=tag;
+          span.style.cursor='pointer';
+          span.textContent=tag;
+          span.onclick=function(){span.remove();};
+          customTagList.appendChild(span);
+        }
+      });
     }
     if(del)del.style.display='';
   } else { if(del)del.style.display='none'; }
@@ -14392,9 +14520,17 @@ function saveFoodDb(){
   var id=document.getElementById('fdbId').value||('fd-'+Date.now());
   var isNew=!document.getElementById('fdbId').value;
   var existingItem=FOOD_DB.find(function(x){return x.id===id;});
+  // Collect selected tags from chip buttons
+  var selectedTags=[];
+  document.querySelectorAll('#fdbTagChips .fchip.on').forEach(function(b){if(b.dataset.tag)selectedTags.push(b.dataset.tag);});
+  // Also collect custom tags
+  var customTagList=document.getElementById('fdbCustomTagList');
+  if(customTagList){customTagList.querySelectorAll('[data-custom-tag]').forEach(function(s){selectedTags.push(s.dataset.customTag);});}
+  if(!selectedTags.length)selectedTags=['other'];
   var item={
     id:id, name:name,
-    cat:(document.getElementById('fdbCat').value||'other'),
+    tags:selectedTags,
+    cat:selectedTags[0], // keep cat for backward compat
     cal:parseFloat(document.getElementById('fdbCal').value)||0,
     pro:parseFloat(document.getElementById('fdbPro').value)||0,
     carb:parseFloat(document.getElementById('fdbCarb').value)||0,
@@ -14415,7 +14551,7 @@ function saveFoodDb(){
   if(isNew){
     var alreadyInGrocery=GROCERY_LIST.some(function(g){return g.name.toLowerCase()===name.toLowerCase();});
     if(!alreadyInGrocery){
-      GROCERY_LIST.push({id:'gr-'+Date.now(),name:name,qty:'1',unit:item.serving||'',category:item.cat||'Other',store:item.store||'',checked:false});
+      GROCERY_LIST.push({id:'gr-'+Date.now(),name:name,qty:'1',unit:item.serving||'',category:selectedTags[0]||'Other',store:item.store||'',checked:false});
       localStorage.setItem('aGroceryList',JSON.stringify(GROCERY_LIST));
       showToast('Added to grocery — tap 🛒 to view');
     }
@@ -14440,6 +14576,53 @@ function setFoodDbCat(cat,btn){
   document.querySelectorAll('#foodDbCatFilter .fchip').forEach(function(b){b.classList.remove('on');});
   if(btn)btn.classList.add('on');
   renderFoodDb();
+}
+
+function renderFoodDbCatFilter(){
+  var el=document.getElementById('foodDbCatFilter');
+  if(!el)return;
+  // Collect all unique tags from FOOD_DB
+  var tagSet={};
+  FOOD_DB.forEach(function(item){
+    var tags=item.tags||(item.cat?[item.cat]:[]);
+    tags.forEach(function(t){if(t)tagSet[t]=true;});
+  });
+  var knownOrder=['protein','vegetable','grain','dairy','fruit','snack','beverage','condiment','other'];
+  var allTags=knownOrder.filter(function(t){return tagSet[t];});
+  Object.keys(tagSet).forEach(function(t){if(knownOrder.indexOf(t)<0)allTags.push(t);});
+  var html='<button class="fchip'+((!_foodDbCat)?' on':'')+'" onclick="setFoodDbCat(\'\',this)">All</button>';
+  allTags.forEach(function(t){
+    var emoji=FOOD_CAT_EMOJI[t]||'🏷️';
+    html+='<button class="fchip'+((_foodDbCat===t)?' on':'')+'" onclick="setFoodDbCat(\''+t+'\',this)">'+emoji+' '+t.charAt(0).toUpperCase()+t.slice(1)+'</button>';
+  });
+  el.innerHTML=html;
+}
+
+function toggleFdbTag(btn){
+  btn.classList.toggle('on');
+}
+
+function addFdbCustomTag(){
+  var input=document.getElementById('fdbCustomTag');
+  var val=(input.value||'').trim().toLowerCase();
+  if(!val)return;
+  // Check if it matches a known chip first
+  var existingChip=document.querySelector('#fdbTagChips .fchip[data-tag="'+val+'"]');
+  if(existingChip){existingChip.classList.add('on');input.value='';return;}
+  var list=document.getElementById('fdbCustomTagList');
+  if(!list)return;
+  // Avoid duplicates
+  var already=[].slice.call(list.querySelectorAll('[data-custom-tag]')).some(function(s){return s.dataset.customTag===val;});
+  if(already){input.value='';return;}
+  var span=document.createElement('span');
+  span.className='fchip on';
+  span.dataset.customTag=val;
+  span.style.cursor='pointer';
+  span.textContent=val;
+  span.title='Click to remove';
+  span.onclick=function(){span.remove();};
+  list.appendChild(span);
+  input.value='';
 }
 
 function renderFoodDbKitchen(){
@@ -14468,9 +14651,11 @@ function renderFoodDb(){
   var el=document.getElementById('foodDbList');
   if(!el)return;
   renderFoodDbKitchen();
+  renderFoodDbCatFilter();
   var q=((document.getElementById('foodDbSearch')||{}).value||'').toLowerCase();
   var list=FOOD_DB.filter(function(item){
-    if(_foodDbCat&&item.cat!==_foodDbCat)return false;
+    var tags=item.tags||(item.cat?[item.cat]:[]);
+    if(_foodDbCat&&tags.indexOf(_foodDbCat)<0)return false;
     if(q&&!item.name.toLowerCase().includes(q)&&!(item.store||'').toLowerCase().includes(q))return false;
     return true;
   });
@@ -14483,13 +14668,15 @@ function renderFoodDb(){
   } else if(sort==='store'){
     list=list.slice().sort(function(a,b){return (a.store||'').localeCompare(b.store||'')||(a.name||'').localeCompare(b.name||'');});
   } else if(sort==='cat'){
-    list=list.slice().sort(function(a,b){return (a.cat||'').localeCompare(b.cat||'')||(a.name||'').localeCompare(b.name||'');});
+    list=list.slice().sort(function(a,b){return ((a.tags&&a.tags[0])||a.cat||'').localeCompare((b.tags&&b.tags[0])||b.cat||'')||(a.name||'').localeCompare(b.name||'');});
   }
   if(!list.length){
     el.innerHTML='<div class="empty"><div class="emj">🍲</div><p>'+(FOOD_DB.length?'No items match.':'Food database is empty! Add your first food item.')+'</p></div>';return;
   }
   el.innerHTML=list.map(function(item){
-    var emoji=FOOD_CAT_EMOJI[item.cat]||'📦';
+    var tags=item.tags||(item.cat?[item.cat]:[]);
+    var emoji=FOOD_CAT_EMOJI[tags[0]]||FOOD_CAT_EMOJI[item.cat]||'📦';
+    var tagChips=tags.map(function(t){return '<span style="font-size:10px;background:#f0ece8;border-radius:6px;padding:1px 5px;color:var(--textl)">'+escHtml(t)+'</span>';}).join(' ');
     var favBtn='<button title="Favorite" onclick="toggleFoodFav(\''+item.id+'\')" style="background:none;border:none;font-size:16px;cursor:pointer;line-height:1;padding:2px">'+(item.favorite?'⭐':'☆')+'</button>';
     var stapleBtn=item.staple?'<button title="Unflag staple" onclick="toggleFoodStaple(\''+item.id+'\')" style="background:none;border:none;font-size:13px;cursor:pointer;line-height:1;padding:2px">🏷️</button>':'';
     var grocBtn='<button title="Add to Grocery" onclick="addDbItemToGrocery(\''+item.id+'\')" style="background:none;border:none;font-size:15px;cursor:pointer;line-height:1;padding:2px">🛒</button>';
@@ -14498,6 +14685,7 @@ function renderFoodDb(){
       +'<span style="font-size:20px;flex-shrink:0;margin-top:1px">'+emoji+'</span>'
       +'<div style="flex:1;min-width:0">'
       +'<div style="font-size:13px;font-weight:700;color:var(--textd)">'+escHtml(item.name)+(item.serving?'<span style="font-weight:400;color:var(--textl);font-size:11px"> · '+escHtml(item.serving)+'</span>':'')+(item.staple?' <span style="font-size:10px;background:#fff0d0;border-radius:6px;padding:1px 5px;color:#a07020">staple</span>':'')+'</div>'
+      +(tags.length?'<div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:3px">'+tagChips+'</div>':'')
       +(item.cal||item.pro?'<div style="font-size:11px;color:var(--textl);margin-top:3px">'
         +(item.cal?'<span style="margin-right:8px">🔥 '+item.cal+'cal</span>':'')
         +(item.pro?'<span style="margin-right:8px">💪 '+item.pro+'g pro</span>':'')
@@ -14525,6 +14713,229 @@ function foodDbAddToLog(name, cal, pro, carb, fat){
   localStorage.setItem('aFL',JSON.stringify(FL));
   updM();
   showToast(name+' added to today\'s log 🍽️');
+}
+
+// ═══════════════════════════════════════════════
+// WEEKLY PLAN TOGGLE (inside Meals section)
+// ═══════════════════════════════════════════════
+function toggleWeeklyPlan(){
+  var body=document.getElementById('weeklyPlanCollapsible');
+  var btn=document.getElementById('weeklyPlanToggleBtn');
+  if(!body)return;
+  var open=body.style.display!=='none';
+  body.style.display=open?'none':'';
+  if(btn)btn.textContent=open?'▼':'▲';
+  if(!open)renderMealPlan();
+}
+
+// ═══════════════════════════════════════════════
+// INGREDIENTS
+// ═══════════════════════════════════════════════
+var INGREDIENTS = JSON.parse(localStorage.getItem('aIngredients')||'[]');
+
+function saveIngredientsData(){
+  localStorage.setItem('aIngredients',JSON.stringify(INGREDIENTS));
+}
+
+function populateIngDatalist(){
+  var dl=document.getElementById('ingDbSuggest');
+  if(!dl)return;
+  dl.innerHTML=FOOD_DB.map(function(item){return '<option value="'+escHtml(item.name)+'" data-id="'+item.id+'">';}).join('');
+}
+
+function renderIngredients(){
+  var el=document.getElementById('ingList');
+  if(!el)return;
+  var q=((document.getElementById('ingSearch')||{}).value||'').toLowerCase();
+  var list=INGREDIENTS.filter(function(ing){
+    return !q||ing.name.toLowerCase().includes(q);
+  });
+  if(!list.length){
+    el.innerHTML='<div class="empty"><div class="emj">🧩</div><p>'+(INGREDIENTS.length?'No matches.':'No ingredients yet. Add one!')+'</p></div>';
+    return;
+  }
+  el.innerHTML=list.map(function(ing){
+    // Linked DB item nutrition
+    var dbItem=ing.dbItemId?FOOD_DB.find(function(x){return x.id===ing.dbItemId;}):null;
+    var nutHtml=dbItem?(dbItem.cal||dbItem.pro?'<span style="font-size:11px;color:var(--textl)">'+(dbItem.cal?'🔥 '+dbItem.cal+'cal ':'')+( dbItem.pro?'💪 '+dbItem.pro+'g pro':'')+'</span>':''):'';
+    // Linked ingredients chips
+    var linkedIngChips=(ing.linkedIngIds||[]).map(function(lid){
+      var li=INGREDIENTS.find(function(x){return x.id===lid;});
+      return li?'<span style="font-size:11px;background:#e8f0f5;border-radius:6px;padding:2px 7px;color:#4a7a9b">🧩 '+escHtml(li.name)+'</span>':'';
+    }).join('');
+    // Linked recipes chips
+    var linkedRecChips=(ing.linkedRecipeIds||[]).map(function(rid){
+      var rec=RECIPES.find(function(x){return x.id===rid;});
+      return rec?'<span style="font-size:11px;background:#f5ece8;border-radius:6px;padding:2px 7px;color:#a07050">📖 '+escHtml(rec.name)+'</span>':'';
+    }).join('');
+    return '<div style="background:#fff;border-radius:12px;padding:12px 14px;margin-bottom:8px;box-shadow:0 1px 4px rgba(0,0,0,.06)">'
+      +'<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px">'
+      +'<div style="flex:1;min-width:0">'
+      +'<div style="font-size:13px;font-weight:700;color:var(--textd)">🧩 '+escHtml(ing.name)+(dbItem?' <span style="font-size:11px;font-weight:400;color:var(--textl)">· '+escHtml(dbItem.name)+'</span>':'')+'</div>'
+      +(nutHtml?'<div style="margin-top:3px">'+nutHtml+'</div>':'')
+      +((linkedIngChips||linkedRecChips)?'<div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:5px">'+linkedIngChips+linkedRecChips+'</div>':'')
+      +(ing.notes?'<div style="font-size:11px;color:var(--textl);margin-top:4px">'+escHtml(ing.notes)+'</div>':'')
+      +'</div>'
+      +'<div style="display:flex;flex-direction:column;gap:4px;flex-shrink:0">'
+      +'<button class="btn sec" style="font-size:11px;padding:3px 8px" onclick="openIngModal(\''+ing.id+'\')">✏️</button>'
+      +'<button class="btn sec" style="font-size:11px;padding:3px 8px" onclick="deleteIngredient(\''+ing.id+'\')">✕</button>'
+      +'</div>'
+      +'</div>'
+      +'</div>';
+  }).join('');
+}
+
+var _ingLinkedSelected=[];
+var _ingRecipeSelected=[];
+
+function openIngModal(id){
+  var ing=id?INGREDIENTS.find(function(x){return x.id===id;}):null;
+  _ingLinkedSelected=ing?(ing.linkedIngIds||[]).slice():[];
+  _ingRecipeSelected=ing?(ing.linkedRecipeIds||[]).slice():[];
+  document.getElementById('ingId').value=ing?ing.id:'';
+  document.getElementById('ingName').value=ing?ing.name:'';
+  document.getElementById('ingNotes').value=ing?ing.notes||'':'';
+  document.getElementById('ingDbLink').value=ing&&ing.dbItemId?(function(){var d=FOOD_DB.find(function(x){return x.id===ing.dbItemId;});return d?d.name:'';})():'';
+  document.getElementById('ingDbItemId').value=ing?ing.dbItemId||'':'';
+  document.getElementById('ingLinkedSearch').value='';
+  document.getElementById('ingRecipeSearch').value='';
+  var delBtn=document.getElementById('ingDelBtn');
+  if(delBtn)delBtn.style.display=ing?'':'none';
+  document.getElementById('ingModalTitle').textContent=ing?'✏️ Edit Ingredient':'🧩 Add Ingredient';
+  renderIngLinkedSelected();
+  renderIngRecipeSelected();
+  filterIngLinkedSuggest('');
+  filterIngRecipeSuggest('');
+  populateIngDatalist();
+  document.getElementById('ingModal').classList.add('show');
+  // Wire up datalist selection
+  var dbLinkInput=document.getElementById('ingDbLink');
+  dbLinkInput.oninput=function(){
+    // Try to find matching FOOD_DB item by name
+    var val=dbLinkInput.value.trim();
+    var found=FOOD_DB.find(function(x){return x.name.toLowerCase()===val.toLowerCase();});
+    document.getElementById('ingDbItemId').value=found?found.id:'';
+  };
+}
+
+function renderIngLinkedSelected(){
+  var el=document.getElementById('ingLinkedSelected');
+  if(!el)return;
+  el.innerHTML=_ingLinkedSelected.map(function(lid){
+    var li=INGREDIENTS.find(function(x){return x.id===lid;});
+    if(!li)return '';
+    return '<span style="font-size:11px;background:#e8f0f5;border-radius:6px;padding:3px 8px;color:#4a7a9b;cursor:pointer" onclick="removeIngLinked(\''+lid+'\')" title="Click to remove">🧩 '+escHtml(li.name)+' ✕</span>';
+  }).join('');
+}
+
+function removeIngLinked(lid){
+  _ingLinkedSelected=_ingLinkedSelected.filter(function(x){return x!==lid;});
+  renderIngLinkedSelected();
+  filterIngLinkedSuggest(document.getElementById('ingLinkedSearch').value||'');
+}
+
+function renderIngRecipeSelected(){
+  var el=document.getElementById('ingRecipeSelected');
+  if(!el)return;
+  el.innerHTML=_ingRecipeSelected.map(function(rid){
+    var rec=RECIPES.find(function(x){return x.id===rid;});
+    if(!rec)return '';
+    return '<span style="font-size:11px;background:#f5ece8;border-radius:6px;padding:3px 8px;color:#a07050;cursor:pointer" onclick="removeIngRecipe(\''+rid+'\')" title="Click to remove">📖 '+escHtml(rec.name)+' ✕</span>';
+  }).join('');
+}
+
+function removeIngRecipe(rid){
+  _ingRecipeSelected=_ingRecipeSelected.filter(function(x){return x!==rid;});
+  renderIngRecipeSelected();
+  filterIngRecipeSuggest(document.getElementById('ingRecipeSearch').value||'');
+}
+
+function filterIngLinkedSuggest(q){
+  var el=document.getElementById('ingLinkedSuggest');
+  if(!el)return;
+  var currentId=document.getElementById('ingId').value;
+  var matches=INGREDIENTS.filter(function(x){
+    return x.id!==currentId&&_ingLinkedSelected.indexOf(x.id)<0&&(!q||x.name.toLowerCase().includes(q.toLowerCase()));
+  }).slice(0,10);
+  el.innerHTML=matches.map(function(x){
+    return '<span style="font-size:11px;background:#e8f0f5;border-radius:6px;padding:3px 8px;color:#4a7a9b;cursor:pointer" onclick="addIngLinked(\''+x.id+'\')">+ '+escHtml(x.name)+'</span>';
+  }).join('');
+}
+
+function addIngLinked(id){
+  if(_ingLinkedSelected.indexOf(id)<0)_ingLinkedSelected.push(id);
+  renderIngLinkedSelected();
+  filterIngLinkedSuggest(document.getElementById('ingLinkedSearch').value||'');
+}
+
+function filterIngRecipeSuggest(q){
+  var el=document.getElementById('ingRecipeSuggest');
+  if(!el)return;
+  var matches=RECIPES.filter(function(x){
+    return _ingRecipeSelected.indexOf(x.id)<0&&(!q||x.name.toLowerCase().includes(q.toLowerCase()));
+  }).slice(0,10);
+  el.innerHTML=matches.map(function(x){
+    return '<span style="font-size:11px;background:#f5ece8;border-radius:6px;padding:3px 8px;color:#a07050;cursor:pointer" onclick="addIngRecipe(\''+x.id+'\')">+ '+escHtml(x.name)+'</span>';
+  }).join('');
+}
+
+function addIngRecipe(id){
+  if(_ingRecipeSelected.indexOf(id)<0)_ingRecipeSelected.push(id);
+  renderIngRecipeSelected();
+  filterIngRecipeSuggest(document.getElementById('ingRecipeSearch').value||'');
+}
+
+function saveIngredient(){
+  var name=(document.getElementById('ingName').value||'').trim();
+  if(!name){showToast('Enter a name');return;}
+  var id=document.getElementById('ingId').value||('ing-'+Date.now());
+  var dbItemId=document.getElementById('ingDbItemId').value||'';
+  // If dbItemId not set but name matches, try to find by name
+  if(!dbItemId){
+    var dbLinkVal=(document.getElementById('ingDbLink').value||'').trim();
+    if(dbLinkVal){
+      var found=FOOD_DB.find(function(x){return x.name.toLowerCase()===dbLinkVal.toLowerCase();});
+      if(found)dbItemId=found.id;
+    }
+  }
+  var ing={
+    id:id,
+    name:name,
+    dbItemId:dbItemId,
+    notes:(document.getElementById('ingNotes').value||'').trim(),
+    linkedIngIds:_ingLinkedSelected.slice(),
+    linkedRecipeIds:_ingRecipeSelected.slice(),
+    created:todayStr()
+  };
+  var idx=INGREDIENTS.findIndex(function(x){return x.id===id;});
+  if(idx>=0)INGREDIENTS[idx]=ing;else INGREDIENTS.unshift(ing);
+  // Two-way linking: update other ingredients to include this one
+  _ingLinkedSelected.forEach(function(lid){
+    var other=INGREDIENTS.find(function(x){return x.id===lid;});
+    if(other&&(other.linkedIngIds||[]).indexOf(id)<0){
+      if(!other.linkedIngIds)other.linkedIngIds=[];
+      other.linkedIngIds.push(id);
+    }
+  });
+  saveIngredientsData();
+  document.getElementById('ingModal').classList.remove('show');
+  renderIngredients();
+  showToast('Ingredient saved ✨');
+}
+
+function deleteIngredient(id){
+  var ingId=id||document.getElementById('ingId').value;
+  if(!ingId)return;
+  if(!confirm('Delete this ingredient?'))return;
+  // Remove from other ingredients' links
+  INGREDIENTS.forEach(function(x){
+    if(x.linkedIngIds)x.linkedIngIds=x.linkedIngIds.filter(function(l){return l!==ingId;});
+  });
+  INGREDIENTS=INGREDIENTS.filter(function(x){return x.id!==ingId;});
+  saveIngredientsData();
+  document.getElementById('ingModal').classList.remove('show');
+  renderIngredients();
+  showToast('Ingredient deleted');
 }
 
 // ─── Grocery Quick Modal ────────────────────────
@@ -15140,7 +15551,7 @@ function renderWorldUnlocks(){
 // EMPORIUM MONTHLY INCOME GOAL
 // ═══════════════════════════════════════════════
 function renderEmporiumGoal(){
-  var goal = parseFloat(localStorage.getItem('aIncGoal')||'0');
+  var goal = S.monthlyIncGoal || parseFloat(localStorage.getItem('aMonIncGoal')||localStorage.getItem('aIncGoal')||'0');
   var mon = new Date().toISOString().slice(0,7);
   var thisMonth = (INCOME||[]).filter(function(i){return (i.created||i.date||'').slice(0,7)===mon;}).reduce(function(s,i){return s+(i.amt||0);},0);
   var fill = document.getElementById('emporiumGoalFill');
@@ -15153,12 +15564,25 @@ function renderEmporiumGoal(){
 }
 
 function setIncGoal(){
-  var current = localStorage.getItem('aIncGoal')||'';
+  var current = S.monthlyIncGoal || localStorage.getItem('aMonIncGoal') || localStorage.getItem('aIncGoal') || '';
   var val = prompt('Monthly income goal ($):', current);
   if(val===null) return;
   var n = parseFloat(val)||0;
-  localStorage.setItem('aIncGoal', n.toString());
+  S.monthlyIncGoal = n;
+  localStorage.setItem('aMonIncGoal', n.toString());
   renderEmporiumGoal();
+  showToast('Income goal set to $'+n.toFixed(0)+' 💰');
+}
+
+function setMonthlyIncGoal(){
+  var current = S.monthlyIncGoal || localStorage.getItem('aMonIncGoal') || localStorage.getItem('aIncGoal') || '';
+  var val = prompt('Monthly income goal ($):', current);
+  if(val===null) return;
+  var n = parseFloat(val)||0;
+  S.monthlyIncGoal = n;
+  localStorage.setItem('aMonIncGoal', n.toString());
+  renderEmporiumGoal();
+  renderMoneyPlan();
   showToast('Income goal set to $'+n.toFixed(0)+' 💰');
 }
 
@@ -16472,6 +16896,323 @@ function startReidRunner(){
   _reid.active=true;
   _reid.raf=requestAnimationFrame(loop);
 }
+
+// ═══════════════════════════════════════════════
+// WORK PROJECTS
+// ═══════════════════════════════════════════════
+function renderWorkProjects(){
+  var el=document.getElementById('workProjectsList');
+  if(!el)return;
+  if(!WORK_PROJECTS.length){
+    el.innerHTML='<div class="empty"><div class="emj">📁</div><p>No work projects yet.</p></div>';
+    return;
+  }
+  var statusColors={active:'var(--teal)',complete:'var(--sage)',pending:'var(--lav)'};
+  el.innerHTML=WORK_PROJECTS.map(function(p){
+    var wig=WIGS.find(function(w){return w.id===p.wigId;});
+    var budget=parseFloat(p.budget)||0;
+    var actual=parseFloat(p.actualIncome)||0;
+    var proj=parseFloat(p.projectedIncome)||0;
+    var pct=budget>0?Math.min(100,Math.round(actual/budget*100)):0;
+    var tasks=p.tasks||[];
+    var doneTasks=tasks.filter(function(t){return t.done;}).length;
+    var expenses=p.expenses||[];
+    var expTotal=expenses.reduce(function(s,e){return s+(parseFloat(e.amount)||0);},0);
+    return '<div class="card" style="margin-bottom:10px">'
+      +'<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">'
+        +'<div>'
+          +'<div style="font-size:15px;font-weight:700;color:var(--textd)">'+escHtml(p.name)+'</div>'
+          +(wig?'<div style="font-size:12px;color:var(--textl);margin-top:2px">🪄 '+escHtml(wig.client)+'</div>':'')
+          +'<div style="display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:10px;background:'+statusColors[p.status||'active']+'20;color:'+statusColors[p.status||'active']+';margin-top:4px">'+escHtml(p.status||'active')+'</div>'
+        +'</div>'
+        +'<div style="display:flex;gap:6px">'
+          +'<button class="btn sec" style="font-size:11px;padding:3px 9px" onclick="openWorkProjectModal(\''+p.id+'\')">Edit</button>'
+          +'<button class="btn" style="font-size:11px;padding:3px 9px;background:var(--ured)" onclick="delWorkProject(\''+p.id+'\')">🗑️</button>'
+        +'</div>'
+      +'</div>'
+      +(budget>0||actual>0||proj>0?'<div style="margin-bottom:8px">'
+        +'<div style="display:flex;justify-content:space-between;font-size:11px;color:var(--textl);margin-bottom:3px">'
+          +'<span>Budget: $'+budget.toFixed(0)+'</span>'
+          +'<span>Actual: $'+actual.toFixed(0)+(proj>0?' / Proj: $'+proj.toFixed(0):'')+'</span>'
+        +'</div>'
+        +'<div style="height:5px;background:#f0ebe6;border-radius:3px;overflow:hidden">'
+          +'<div style="height:100%;background:linear-gradient(90deg,var(--sage),var(--teal));width:'+pct+'%"></div>'
+        +'</div>'
+      +'</div>':'')
+      +(expenses.length?'<div style="margin-bottom:8px;font-size:12px;color:var(--textl)">💸 Expenses: $'+expTotal.toFixed(2)+'</div>':'')
+      +'<div style="margin-top:6px">'
+        +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">'
+          +'<span style="font-size:12px;font-weight:700;color:var(--textd)">Tasks ('+doneTasks+'/'+tasks.length+')</span>'
+          +'<button class="btn sec" style="font-size:10px;padding:2px 7px" onclick="addWorkProjTask(\''+p.id+'\')">＋ Task</button>'
+        +'</div>'
+        +(tasks.length?tasks.map(function(t){
+          return '<div style="display:flex;align-items:center;gap:8px;padding:3px 0">'
+            +'<input type="checkbox" '+(t.done?'checked':'')+' onchange="toggleWorkProjTask(\''+p.id+'\',\''+t.id+'\')">'
+            +'<span style="font-size:13px;color:var(--textd);'+(t.done?'text-decoration:line-through;opacity:.6':'')+'">'
+              +escHtml(t.title)+'</span>'
+          +'</div>';
+        }).join(''):'<div style="font-size:12px;color:var(--textl)">No tasks yet.</div>')
+      +'</div>'
+      +(p.notes?'<div style="margin-top:6px;font-size:12px;color:var(--textl);font-style:italic">'+escHtml(p.notes)+'</div>':'')
+    +'</div>';
+  }).join('');
+  // Update hub subtitle
+  var hubSub=document.getElementById('hub-work-proj-sub');
+  if(hubSub){
+    var active=WORK_PROJECTS.filter(function(p){return p.status==='active';}).length;
+    hubSub.textContent=active+' active project'+(active!==1?'s':'');
+  }
+}
+
+function openWorkProjectModal(id){
+  var p=id?WORK_PROJECTS.find(function(x){return x.id===id;}):null;
+  document.getElementById('wpModalTitle').textContent=p?'Edit Work Project':'New Work Project';
+  document.getElementById('wpId').value=id||'';
+  document.getElementById('wpName').value=p?p.name:'';
+  document.getElementById('wpBudget').value=p?p.budget:'';
+  document.getElementById('wpProjIncome').value=p?p.projectedIncome:'';
+  document.getElementById('wpNotes').value=p?p.notes:'';
+  // Populate wig select
+  var sel=document.getElementById('wpWigSel');
+  sel.innerHTML='<option value="">— None —</option>'+(WIGS.map(function(w){return '<option value="'+w.id+'"'+(p&&p.wigId===w.id?' selected':'')+'>'+escHtml(w.client)+'</option>';})).join('');
+  // Status chips
+  var status=p?p.status||'active':'active';
+  document.querySelectorAll('[data-g="wpStatus"]').forEach(function(b){
+    b.classList.toggle('on',b.dataset.v===status);
+  });
+  SBV.wpStatus=status;
+  document.getElementById('workProjectModal').classList.add('show');
+}
+
+function saveWorkProject(){
+  var name=document.getElementById('wpName').value.trim();
+  if(!name){showToast('Please enter a project name');return;}
+  var id=document.getElementById('wpId').value||Date.now().toString();
+  var existing=WORK_PROJECTS.find(function(x){return x.id===id;});
+  var p={
+    id:id,
+    name:name,
+    wigId:document.getElementById('wpWigSel').value,
+    status:SBV.wpStatus||'active',
+    notes:document.getElementById('wpNotes').value.trim(),
+    budget:parseFloat(document.getElementById('wpBudget').value)||0,
+    projectedIncome:parseFloat(document.getElementById('wpProjIncome').value)||0,
+    actualIncome:existing?existing.actualIncome||0:0,
+    expenses:existing?existing.expenses||[]:[],
+    tasks:existing?existing.tasks||[]:[],
+    created:existing?existing.created:new Date().toISOString()
+  };
+  if(existing){
+    var idx=WORK_PROJECTS.findIndex(function(x){return x.id===id;});
+    if(idx>=0)WORK_PROJECTS[idx]=p;
+  } else {
+    WORK_PROJECTS.push(p);
+  }
+  localStorage.setItem('aWorkProjects',JSON.stringify(WORK_PROJECTS));
+  document.getElementById('workProjectModal').classList.remove('show');
+  renderWorkProjects();
+  showToast('Work project saved 📁');
+}
+
+function delWorkProject(id){
+  if(!confirm('Delete this work project?'))return;
+  WORK_PROJECTS=WORK_PROJECTS.filter(function(x){return x.id!==id;});
+  localStorage.setItem('aWorkProjects',JSON.stringify(WORK_PROJECTS));
+  renderWorkProjects();
+  showToast('Project deleted');
+}
+
+function addWorkProjTask(projectId){
+  var title=prompt('Task name:');
+  if(!title||!title.trim())return;
+  var p=WORK_PROJECTS.find(function(x){return x.id===projectId;});
+  if(!p)return;
+  var taskId=Date.now().toString();
+  if(!p.tasks)p.tasks=[];
+  p.tasks.push({id:taskId,title:title.trim(),done:false,created:new Date().toISOString()});
+  localStorage.setItem('aWorkProjects',JSON.stringify(WORK_PROJECTS));
+  // Also add to global TASKS
+  var globalTask={id:taskId,title:title.trim(),cat:'work',urgency:'important-not-urgent',etime:'',due:'',notes:'Work Project: '+escHtml(p.name),done:false,created:new Date().toISOString()};
+  TASKS.push(globalTask);
+  fbSave('tasks',taskId,globalTask);
+  renderWorkProjects();
+  showToast('Task added ✅');
+}
+
+function toggleWorkProjTask(projectId, taskId){
+  var p=WORK_PROJECTS.find(function(x){return x.id===projectId;});
+  if(!p||!p.tasks)return;
+  var t=p.tasks.find(function(x){return x.id===taskId;});
+  if(!t)return;
+  t.done=!t.done;
+  localStorage.setItem('aWorkProjects',JSON.stringify(WORK_PROJECTS));
+  // Sync to global tasks
+  var gt=TASKS.find(function(x){return x.id===taskId;});
+  if(gt){gt.done=t.done;fbSave('tasks',taskId,gt);}
+  renderWorkProjects();
+}
+
+// ═══════════════════════════════════════════════
+// MONEY PLAN
+// ═══════════════════════════════════════════════
+function renderMoneyPlan(){
+  // Goal bar
+  var goal=S.monthlyIncGoal||parseFloat(localStorage.getItem('aMonIncGoal')||localStorage.getItem('aIncGoal')||'0');
+  var mon=new Date().toISOString().slice(0,7);
+  var thisMonth=(INCOME||[]).filter(function(i){return (i.created||i.date||'').slice(0,7)===mon;}).reduce(function(s,i){return s+(i.amt||0);},0);
+  var fill=document.getElementById('monPlanGoalFill');
+  var actualEl=document.getElementById('monPlanGoalActual');
+  var targetEl=document.getElementById('monPlanGoalTarget');
+  if(fill)fill.style.width=goal>0?Math.min(100,Math.round(thisMonth/goal*100))+'%':'0%';
+  if(actualEl)actualEl.textContent='$'+thisMonth.toFixed(0)+' this month';
+  if(targetEl)targetEl.textContent=goal>0?'Goal: $'+goal.toFixed(0)+(thisMonth>=goal?' ✅':''):'Goal: $—';
+  // Projected income list
+  renderProjIncList();
+  // Money tasks
+  renderMoneyTasksList();
+}
+
+function renderProjIncList(){
+  var el=document.getElementById('projIncList');
+  if(!el)return;
+  if(!PROJ_INCOME.length){
+    el.innerHTML='<div style="color:var(--textl);font-size:13px;padding:8px 0">No projected income entries yet.</div>';
+    return;
+  }
+  var srcIcons={wig:'💜',loreal:'💄','nick-window':'🪟',other:'📦'};
+  var total=PROJ_INCOME.reduce(function(s,p){return s+(parseFloat(p.amount)||0);},0);
+  var received=PROJ_INCOME.filter(function(p){return p.status==='received';}).reduce(function(s,p){return s+(parseFloat(p.actual)||parseFloat(p.amount)||0);},0);
+  el.innerHTML='<div style="display:flex;justify-content:space-between;font-size:12px;color:var(--textl);margin-bottom:8px">'
+    +'<span>Total projected: $'+total.toFixed(2)+'</span>'
+    +'<span>Received: $'+received.toFixed(2)+'</span>'
+    +'</div>'
+    +PROJ_INCOME.map(function(p){
+      var wp=WORK_PROJECTS.find(function(x){return x.id===p.wigProjectId;});
+      return '<div class="card" style="margin-bottom:8px;padding:10px 12px">'
+        +'<div style="display:flex;justify-content:space-between;align-items:flex-start">'
+          +'<div>'
+            +'<div style="font-size:13px;font-weight:700;color:var(--textd)">'+(srcIcons[p.source]||'📦')+' '+escHtml(p.description)+'</div>'
+            +'<div style="font-size:12px;color:var(--textl);margin-top:2px">'
+              +'$'+(parseFloat(p.amount)||0).toFixed(2)
+              +(p.expectedDate?' • Due: '+p.expectedDate:'')
+              +(p.status==='received'?' • ✅ Received $'+(parseFloat(p.actual)||0).toFixed(2):'')
+            +'</div>'
+            +(wp?'<div style="font-size:11px;color:var(--textl)">📁 '+escHtml(wp.name)+'</div>':'')
+          +'</div>'
+          +'<div style="display:flex;gap:5px">'
+            +'<button class="btn sec" style="font-size:11px;padding:2px 7px" onclick="openProjIncModal(\''+p.id+'\')">Edit</button>'
+            +'<button class="btn" style="font-size:11px;padding:2px 7px;background:var(--ured)" onclick="delProjInc(\''+p.id+'\')">🗑️</button>'
+          +'</div>'
+        +'</div>'
+      +'</div>';
+    }).join('');
+}
+
+function renderMoneyTasksList(){
+  var el=document.getElementById('moneyTasksList');
+  if(!el)return;
+  var moneyTasks=(TASKS||[]).filter(function(t){return t.cat==='money'&&!t.done;});
+  if(!moneyTasks.length){
+    el.innerHTML='<div style="color:var(--textl);font-size:13px;padding:4px 0">No money tasks. Add one above!</div>';
+    return;
+  }
+  el.innerHTML=moneyTasks.map(function(t){
+    return '<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid #f0ebe6">'
+      +'<input type="checkbox" onchange="toggleMoneyTask(\''+t.id+'\')">'
+      +'<span style="font-size:13px;color:var(--textd)">'+escHtml(t.title)+'</span>'
+      +(t.due?'<span style="font-size:11px;color:var(--textl);margin-left:auto">📅 '+t.due+'</span>':'')
+    +'</div>';
+  }).join('');
+}
+
+function toggleMoneyTask(id){
+  var t=TASKS.find(function(x){return x.id===id;});
+  if(!t)return;
+  t.done=true;
+  fbSave('tasks',id,t);
+  setTimeout(function(){renderMoneyTasksList();},300);
+}
+
+function openMoneyTask(){
+  // Use editT approach: manually set up modal for new money task
+  closeFAB();
+  SBV={};
+  document.querySelectorAll('[data-g]').forEach(function(b){b.classList.remove('on');});
+  ['tTit','tDue','tNotes'].forEach(function(f){var el=document.getElementById(f);if(el)el.value='';});
+  document.getElementById('tModTit').textContent='Add Money Task 💰';
+  document.getElementById('editTId').value='';
+  document.getElementById('delTBtn').style.display='none';
+  var _mb=document.getElementById('tMeaningfulBtn');
+  if(_mb){_mb.classList.remove('on');_mb.textContent='⭐ Mark as meaningful goal';}
+  setTimeout(function(){
+    document.querySelectorAll('[data-g="cat"]').forEach(function(b){
+      var isMatch=b.dataset.v==='money';
+      b.classList.toggle('on',isMatch);
+      if(isMatch)SBV.cat='money';
+    });
+  },50);
+  document.getElementById('taskModal').classList.add('show');
+}
+
+function openProjIncModal(id){
+  var p=id?PROJ_INCOME.find(function(x){return x.id===id;}):null;
+  document.getElementById('piModalTitle').textContent=p?'Edit Projected Income':'Projected Income';
+  document.getElementById('piId').value=id||'';
+  document.getElementById('piDesc').value=p?p.description:'';
+  document.getElementById('piAmt').value=p?p.amount:'';
+  document.getElementById('piDate').value=p?p.expectedDate||'':'';
+  document.getElementById('piActual').value=p?p.actual||'':'';
+  document.getElementById('piNotes').value=p?p.notes||'':'';
+  // Populate work projects select
+  var sel=document.getElementById('piWigProj');
+  sel.innerHTML='<option value="">— None —</option>'+(WORK_PROJECTS.map(function(wp){return '<option value="'+wp.id+'"'+(p&&p.wigProjectId===wp.id?' selected':'')+'>'+escHtml(wp.name)+'</option>';})).join('');
+  // Source chips
+  var source=p?p.source||'wig':'wig';
+  document.querySelectorAll('[data-g="piSource"]').forEach(function(b){b.classList.toggle('on',b.dataset.v===source);});
+  SBV.piSource=source;
+  // Status chips
+  var status=p?p.status||'projected':'projected';
+  document.querySelectorAll('[data-g="piStatus"]').forEach(function(b){b.classList.toggle('on',b.dataset.v===status);});
+  SBV.piStatus=status;
+  document.getElementById('projIncModal').classList.add('show');
+}
+
+function saveProjInc(){
+  var desc=document.getElementById('piDesc').value.trim();
+  if(!desc){showToast('Please enter a description');return;}
+  var id=document.getElementById('piId').value||Date.now().toString();
+  var existing=PROJ_INCOME.find(function(x){return x.id===id;});
+  var p={
+    id:id,
+    description:desc,
+    amount:parseFloat(document.getElementById('piAmt').value)||0,
+    expectedDate:document.getElementById('piDate').value,
+    source:SBV.piSource||'wig',
+    wigProjectId:document.getElementById('piWigProj').value,
+    actual:parseFloat(document.getElementById('piActual').value)||0,
+    status:SBV.piStatus||'projected',
+    notes:document.getElementById('piNotes').value.trim(),
+    created:existing?existing.created:new Date().toISOString()
+  };
+  if(existing){
+    var idx=PROJ_INCOME.findIndex(function(x){return x.id===id;});
+    if(idx>=0)PROJ_INCOME[idx]=p;
+  } else {
+    PROJ_INCOME.push(p);
+  }
+  localStorage.setItem('aProjIncome',JSON.stringify(PROJ_INCOME));
+  document.getElementById('projIncModal').classList.remove('show');
+  renderMoneyPlan();
+  showToast('Projected income saved 📈');
+}
+
+function delProjInc(id){
+  if(!confirm('Delete this projected income entry?'))return;
+  PROJ_INCOME=PROJ_INCOME.filter(function(x){return x.id!==id;});
+  localStorage.setItem('aProjIncome',JSON.stringify(PROJ_INCOME));
+  renderMoneyPlan();
+  showToast('Entry deleted');
+}
 </script>
 <!-- STEP MODAL -->
 <div class="ov" id="stepModal"><div class="mod">
@@ -16663,18 +17404,17 @@ function startReidRunner(){
   <label style="font-size:12px;color:var(--textl)">Recipe Name *</label>
   <input id="recName" type="text" placeholder="e.g. Chicken & Rice Bowl" style="width:100%;padding:9px 11px;border-radius:10px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px;margin-bottom:10px;box-sizing:border-box">
   <div style="margin-bottom:10px">
-    <div style="font-size:12px;color:var(--textl);margin-bottom:6px">Meal Type</div>
+    <div style="font-size:12px;color:var(--textl);margin-bottom:6px">Meal Types (select all that apply)</div>
     <div class="fbar" style="flex-wrap:wrap" id="recMealTypeBar">
-      <button class="fchip" onclick="setRecMealType('',this)">Any</button>
-      <button class="fchip" onclick="setRecMealType('breakfast',this)">🌅 Breakfast</button>
-      <button class="fchip" onclick="setRecMealType('lunch',this)">🥙 Lunch</button>
-      <button class="fchip" onclick="setRecMealType('dinner',this)">🍽️ Dinner</button>
-      <button class="fchip" onclick="setRecMealType('snack',this)">🥨 Snack</button>
-      <button class="fchip" onclick="setRecMealType('soup',this)">🍲 Soup</button>
-      <button class="fchip" onclick="setRecMealType('dessert',this)">🍰 Dessert</button>
-      <button class="fchip" onclick="setRecMealType('side',this)">🥗 Side</button>
+      <button type="button" class="fchip" data-g="recMealType" data-val="breakfast" onclick="this.classList.toggle('on')">🌅 Breakfast</button>
+      <button type="button" class="fchip" data-g="recMealType" data-val="lunch" onclick="this.classList.toggle('on')">🥙 Lunch</button>
+      <button type="button" class="fchip" data-g="recMealType" data-val="dinner" onclick="this.classList.toggle('on')">🍽️ Dinner</button>
+      <button type="button" class="fchip" data-g="recMealType" data-val="snack" onclick="this.classList.toggle('on')">🥨 Snack</button>
+      <button type="button" class="fchip" data-g="recMealType" data-val="soup" onclick="this.classList.toggle('on')">🍲 Soup</button>
+      <button type="button" class="fchip" data-g="recMealType" data-val="dessert" onclick="this.classList.toggle('on')">🍰 Dessert</button>
+      <button type="button" class="fchip" data-g="recMealType" data-val="side" onclick="this.classList.toggle('on')">🥗 Side</button>
+      <button type="button" class="fchip" data-g="recMealType" data-val="drink" onclick="this.classList.toggle('on')">🥤 Drink</button>
     </div>
-    <input type="hidden" id="recMealType">
   </div>
   <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px">
     <div>
@@ -17327,6 +18067,74 @@ function startReidRunner(){
     </div>
     <div id="rtList" style="max-height:50vh;overflow-y:auto"></div>
     <button class="cn-btn" style="margin-top:12px;width:100%" onclick="closeM('researchTopicsModal')">Close</button>
+  </div>
+</div>
+
+<!-- WORK PROJECT MODAL -->
+<div class="ov" id="workProjectModal" onclick="if(event.target===this)this.classList.remove('show')">
+  <div class="mod" style="max-height:90vh;overflow-y:auto">
+    <div class="mh"></div>
+    <div class="mtit" id="wpModalTitle">New Work Project</div>
+    <input type="hidden" id="wpId">
+    <label class="fl">Project Name</label>
+    <input id="wpName" class="fi" placeholder="e.g. Custom Wig Order — Sarah">
+    <label class="fl" style="margin-top:8px">Link to Wig Order</label>
+    <select id="wpWigSel" class="fi"><option value="">— None —</option></select>
+    <label class="fl" style="margin-top:8px">Status</label>
+    <div style="display:flex;gap:6px;margin-bottom:8px">
+      <button class="fchip on" data-g="wpStatus" data-v="active" onclick="pSB(this)">🔵 Active</button>
+      <button class="fchip" data-g="wpStatus" data-v="complete" onclick="pSB(this)">✅ Complete</button>
+      <button class="fchip" data-g="wpStatus" data-v="pending" onclick="pSB(this)">⏳ Pending</button>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+      <div><label class="fl">Budget ($)</label><input id="wpBudget" type="number" class="fi" placeholder="0"></div>
+      <div><label class="fl">Projected Income ($)</label><input id="wpProjIncome" type="number" class="fi" placeholder="0"></div>
+    </div>
+    <label class="fl">Notes</label>
+    <textarea id="wpNotes" class="fi" rows="3" style="resize:vertical"></textarea>
+    <div style="display:flex;gap:8px;margin-top:8px">
+      <button class="ok-btn" style="flex:1;margin:0" onclick="saveWorkProject()">Save</button>
+      <button class="cn-btn" style="flex:1;margin:0" onclick="this.closest('.ov').classList.remove('show')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- PROJECTED INCOME MODAL -->
+<div class="ov" id="projIncModal" onclick="if(event.target===this)this.classList.remove('show')">
+  <div class="mod">
+    <div class="mh"></div>
+    <div class="mtit" id="piModalTitle">Projected Income</div>
+    <input type="hidden" id="piId">
+    <label class="fl">Description</label>
+    <input id="piDesc" class="fi" placeholder="e.g. Custom wig order for Sarah">
+    <label class="fl" style="margin-top:8px">Amount ($)</label>
+    <input id="piAmt" type="number" class="fi" placeholder="0">
+    <label class="fl" style="margin-top:8px">Expected Date</label>
+    <input id="piDate" type="date" class="fi">
+    <label class="fl" style="margin-top:8px">Source</label>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px">
+      <button class="fchip on" data-g="piSource" data-v="wig" onclick="pSB(this)">💜 Wig</button>
+      <button class="fchip" data-g="piSource" data-v="loreal" onclick="pSB(this)">💄 Loreal</button>
+      <button class="fchip" data-g="piSource" data-v="nick-window" onclick="pSB(this)">🪟 Nick-Window</button>
+      <button class="fchip" data-g="piSource" data-v="other" onclick="pSB(this)">📦 Other</button>
+    </div>
+    <label class="fl">Link to Work Project</label>
+    <select id="piWigProj" class="fi"><option value="">— None —</option></select>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;margin-top:8px">
+      <div><label class="fl">Actual Received ($)</label><input id="piActual" type="number" class="fi" placeholder="0"></div>
+      <div><label class="fl">Status</label>
+        <div style="display:flex;gap:6px;margin-top:4px">
+          <button class="fchip on" data-g="piStatus" data-v="projected" onclick="pSB(this)">📈 Projected</button>
+          <button class="fchip" data-g="piStatus" data-v="received" onclick="pSB(this)">✅ Received</button>
+        </div>
+      </div>
+    </div>
+    <label class="fl">Notes</label>
+    <textarea id="piNotes" class="fi" rows="2" style="resize:vertical"></textarea>
+    <div style="display:flex;gap:8px;margin-top:8px">
+      <button class="ok-btn" style="flex:1;margin:0" onclick="saveProjInc()">Save</button>
+      <button class="cn-btn" style="flex:1;margin:0" onclick="this.closest('.ov').classList.remove('show')">Cancel</button>
+    </div>
   </div>
 </div>
 
