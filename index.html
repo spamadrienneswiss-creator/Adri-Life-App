@@ -885,7 +885,8 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
   <div class="hub-grid">
     <div class="hub-card" onclick="goTab('food',null)"><div class="hub-card-ic">🏃</div><div class="hub-card-name">Move</div><div class="hub-card-sub" id="hub-health-sub">Workouts &amp; movement</div></div>
     <div class="hub-card" onclick="goTab('meals',null)"><div class="hub-card-ic">🥗</div><div class="hub-card-name">Eat</div><div class="hub-card-sub" id="hub-meals-sub">Nutrition &amp; meals</div></div>
-    <div class="hub-card span2" onclick="goTab('wellness',null)"><div class="hub-card-ic">💆</div><div class="hub-card-name">Wellness</div><div class="hub-card-sub">Mood, sleep, symptoms &amp; meds</div></div>
+    <div class="hub-card" onclick="goTab('wellness',null)"><div class="hub-card-ic">💆</div><div class="hub-card-name">Wellness</div><div class="hub-card-sub">Mood, sleep, symptoms &amp; meds</div></div>
+    <div class="hub-card" onclick="goTab('wellness',null);setTimeout(function(){showWellnessSec('body',document.querySelector('#v-wellness .pn-btn:nth-child(6)'));renderMeasurements();},200)" style="background:linear-gradient(135deg,#f5f0ff,#ede8f8);border-color:#c8b8e8"><div class="hub-card-ic">📏</div><div class="hub-card-name">Body</div><div class="hub-card-sub" id="hub-body-sub">Measurements &amp; trends</div></div>
     <div class="hub-card span2" onclick="goTab('recap',null)"><div class="hub-card-ic">📊</div><div class="hub-card-name">Recap</div><div class="hub-card-sub">Stats &amp; year in review</div></div>
   </div>
   <div class="learn-widget" id="lw-health">
@@ -900,11 +901,30 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     <div class="hub-info"><h2>Workshop</h2></div>
   </div>
   <div class="hub-grid">
-    <div class="hub-card" onclick="goTab('board',null)"><div class="hub-card-ic">🌈</div><div class="hub-card-name">Vision Board</div><div class="hub-card-sub" id="hub-board-sub">Loading…</div></div>
+    <div class="hub-card" onclick="goTab('board',null)"><div class="hub-card-ic">🌈</div><div class="hub-card-name">Mood Board</div><div class="hub-card-sub" id="hub-board-sub">Loading…</div></div>
     <div class="hub-card" onclick="goTab('faves',null)"><div class="hub-card-ic">⭐</div><div class="hub-card-name">Faves</div><div class="hub-card-sub" id="hub-faves-sub">Loading…</div></div>
     <div class="hub-card" onclick="goTab('stories',null)"><div class="hub-card-ic">📖</div><div class="hub-card-name">Stories</div><div class="hub-card-sub" id="hub-stories-sub">Your creative worlds</div></div>
     <div class="hub-card span2" onclick="goTab('mixtape',null)"><div class="hub-card-ic">🎵</div><div class="hub-card-name">Mixtape</div><div class="hub-card-sub">Songs &amp; musical memories</div></div>
     <div class="hub-card" onclick="goTab('places',null)" style="background:linear-gradient(135deg,#f0f4f8,#e8f0f8);border-color:#b0c8d8"><div class="hub-card-ic">📍</div><div class="hub-card-name">Places</div><div class="hub-card-sub">Restaurants, cafes &amp; spots</div></div>
+  </div>
+  <div class="card" style="margin-top:12px;padding:0">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;cursor:pointer" onclick="togTodaySec('wsTasksBody')">
+      <span style="font-size:12px;font-weight:700;color:var(--textd)">🔨 Active Work</span>
+      <span id="sh-arr-wsTasksBody" style="color:var(--textl);font-size:13px">▸</span>
+    </div>
+    <div id="wsTasksBody-wrap" style="display:none;padding:0 14px 12px">
+      <div id="wsProjectsList" style="margin-bottom:8px"></div>
+      <button class="btn sec" style="width:100%;font-size:12px;margin-top:4px" onclick="goTab('helm',null);setTimeout(function(){goTab('projects',null)},200)">All Projects →</button>
+    </div>
+  </div>
+  <div class="card" style="margin-top:10px">
+    <div style="font-size:12px;font-weight:700;color:var(--textd);margin-bottom:8px">🔗 Quick Links</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="fchip" onclick="goTab('guide',null)">📚 Research Library</button>
+      <button class="fchip" onclick="goTab('goals',null)">🎯 Goals</button>
+      <button class="fchip" onclick="goTab('projects',null)">📁 Projects</button>
+      <button class="fchip" onclick="goTab('lists',null)">📝 Lists</button>
+    </div>
   </div>
   <div class="learn-widget" id="lw-workshop">
     <button class="learn-widget-toggle" onclick="toggleLearnWidget('workshop')">📚 Learning <span id="lw-workshop-count"></span></button>
@@ -1175,7 +1195,11 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
                 <button onclick="addWaterOz(16)" style="padding:6px 11px;border-radius:8px;border:1.5px solid #a8cceb;background:#f0f8ff;font-family:'Quicksand',sans-serif;font-size:12px;font-weight:700;color:#2e88c8;cursor:pointer">+16 oz</button>
                 <button onclick="addWaterOz(32)" style="padding:6px 11px;border-radius:8px;border:none;background:linear-gradient(135deg,var(--lav),#5a90d0);font-family:'Quicksand',sans-serif;font-size:11px;font-weight:700;color:white;cursor:pointer">Owala 32oz</button>
               </div>
-              <div style="font-size:10px;color:var(--textl)" id="bottleNote">115 oz to go</div>
+              <div style="display:flex;gap:6px;margin-top:6px;align-items:center">
+                <input type="number" id="waterCustomTodayOz" placeholder="oz" min="1" max="200" style="width:60px;padding:5px 8px;border-radius:8px;border:1.5px solid #a8cceb;font-family:'Quicksand',sans-serif;font-size:12px;text-align:center">
+                <button onclick="(function(){var v=parseInt(document.getElementById('waterCustomTodayOz').value);if(v>0){addWaterOz(v);document.getElementById('waterCustomTodayOz').value='';}})()" style="padding:5px 12px;border-radius:8px;border:1.5px solid #a8cceb;background:#f0f8ff;font-family:'Quicksand',sans-serif;font-size:12px;font-weight:700;color:#2e88c8;cursor:pointer">+ Custom</button>
+              </div>
+              <div style="font-size:10px;color:var(--textl);margin-top:4px" id="bottleNote">115 oz to go</div>
             </div>
           </div>
           <!-- Mood -->
@@ -1915,6 +1939,12 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     <input id="faveUrl" type="url" placeholder="URL (https://…)" style="width:100%;padding:9px 12px;border-radius:10px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px;box-sizing:border-box;margin-bottom:7px">
     <input id="faveCat" type="text" placeholder="Category (optional)" style="width:100%;padding:9px 12px;border-radius:10px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px;box-sizing:border-box;margin-bottom:7px" list="faveCatSuggestions">
     <datalist id="faveCatSuggestions"></datalist>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:7px">
+      <input id="faveSource" type="text" placeholder="Where from? (store, site…)" style="padding:9px 12px;border-radius:10px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px;box-sizing:border-box">
+      <input id="faveDateGot" type="date" style="padding:9px 12px;border-radius:10px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px;box-sizing:border-box">
+    </div>
+    <input id="faveSize" type="text" placeholder="Size (optional — e.g. M, 8, 34B, 8.5)" style="width:100%;padding:9px 12px;border-radius:10px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px;box-sizing:border-box;margin-bottom:7px">
+    <textarea id="faveNotes" placeholder="Notes (optional)" rows="2" style="width:100%;padding:9px 12px;border-radius:10px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px;box-sizing:border-box;margin-bottom:7px;resize:vertical"></textarea>
     <div style="font-size:11px;color:var(--textl);margin-bottom:5px">Image (pick one):</div>
     <div style="display:flex;gap:8px;margin-bottom:7px;flex-wrap:wrap;align-items:center">
       <input id="faveImgUrl" type="url" placeholder="Image URL (optional)" style="flex:1;min-width:120px;padding:8px 11px;border-radius:10px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:12px">
@@ -2179,6 +2209,10 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
       <button onclick="addWaterOz(16)" style="padding:6px 10px;border-radius:8px;border:1.5px solid #a8cceb;background:#f0f8ff;font-family:'Quicksand',sans-serif;font-size:12px;font-weight:700;color:#2e88c8;cursor:pointer">+16 oz</button>
       <button onclick="addWaterOz(32)" style="padding:6px 10px;border-radius:8px;border:none;background:linear-gradient(135deg,var(--lav),#5a90d0);font-family:'Quicksand',sans-serif;font-size:11px;font-weight:700;color:white;cursor:pointer">Owala 32oz</button>
     </div>
+    <div style="display:flex;gap:6px;margin-top:6px;align-items:center">
+      <input type="number" id="waterCustomFoodOz" placeholder="oz" min="1" max="200" style="width:60px;padding:5px 8px;border-radius:8px;border:1.5px solid #a8cceb;font-family:'Quicksand',sans-serif;font-size:12px;text-align:center">
+      <button onclick="(function(){var v=parseInt(document.getElementById('waterCustomFoodOz').value);if(v>0){addWaterOz(v);document.getElementById('waterCustomFoodOz').value='';}})()" style="padding:5px 12px;border-radius:8px;border:1.5px solid #a8cceb;background:#f0f8ff;font-family:'Quicksand',sans-serif;font-size:12px;font-weight:700;color:#2e88c8;cursor:pointer">+ Custom</button>
+    </div>
   </div>
   <button class="health-section-btn" style="margin-bottom:14px" onclick="openSubpage('sp-nutrition')">
     <span class="health-section-icon">🥗</span>
@@ -2191,9 +2225,8 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     <button class="pn-btn" onclick="showMealSec('inventory',this)">📦 Inventory</button>
     <button class="pn-btn" onclick="showMealSec('recipes',this)">📖 Recipes</button>
     <button class="pn-btn" onclick="showMealSec('wine',this)">🍷 Wine</button>
-    <button class="pn-btn" onclick="showMealSec('ingredients',this)">🧩 Ingredients</button>
     <button class="pn-btn" onclick="showMealSec('prices',this)">💰 Prices</button>
-    <button class="pn-btn" onclick="showMealSec('database',this)">🍲 Database</button>
+    <button class="pn-btn" onclick="showMealSec('database',this)">🧩 Ingredient Library</button>
   </div>
 
   <!-- MEALS section (category-based log) -->
@@ -2496,6 +2529,7 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     <button class="pn-btn" onclick="showWellnessSec('symptoms',this)">🩺 Symptoms</button>
     <button class="pn-btn" onclick="showWellnessSec('period',this)">🩸 Period</button>
     <button class="pn-btn" onclick="showWellnessSec('meds',this)">💊 Meds</button>
+    <button class="pn-btn" onclick="showWellnessSec('body',this);renderMeasurements()">📏 Body</button>
   </div>
 
   <!-- MOOD -->
@@ -2524,7 +2558,7 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
       </div>
       <div id="sleepGraphBars" style="display:flex;align-items:flex-end;gap:3px;height:56px;margin-bottom:6px"></div>
       <div style="display:flex;gap:10px;font-size:10px;color:var(--textl)">
-        <span style="color:var(--sage)">● ≥8h great</span>
+        <span style="color:var(--sage)">● ≥goal great</span>
         <span style="color:#f0a020">● ≥6h ok</span>
         <span style="color:#d94040">● &lt;6h short</span>
       </div>
@@ -2566,6 +2600,123 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
       <div id="medList"><p style="color:var(--textl);font-size:13px;text-align:center;padding:8px">No meds added yet. Tap "+ Add" above.</p></div>
     </div>
   </div>
+
+  <!-- BODY MEASUREMENTS -->
+  <div id="ws-body" style="display:none">
+    <div style="display:flex;gap:12px;align-items:flex-start;flex-wrap:wrap">
+      <!-- SVG Mannequin -->
+      <div style="flex-shrink:0;width:180px">
+        <svg viewBox="0 0 300 500" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block">
+          <defs><style>
+            .bline{fill:none;stroke:#d4b0b0;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
+            .blinef{fill:none;stroke:#e8d0d0;stroke-width:1.5;stroke-linecap:round}
+            .mdot{fill:#fff8f5;stroke:#c9908a;stroke-width:2;cursor:pointer}
+            .mdot:hover{fill:#fce8e5}
+            .mdot.tup{stroke:#e07070}
+            .mdot.tdn{stroke:#70a878}
+            .mlb{font-family:Quicksand,sans-serif;font-size:8px;fill:#996655;text-anchor:middle;font-weight:700;pointer-events:none}
+            .mvl{font-family:Quicksand,sans-serif;font-size:9px;fill:#663333;text-anchor:middle;font-weight:800;pointer-events:none}
+            .cln{stroke:#e0c0c0;stroke-width:1;stroke-dasharray:4,3;fill:none}
+          </style></defs>
+          <!-- HEAD -->
+          <ellipse cx="150" cy="55" rx="35" ry="40" class="bline"/>
+          <!-- NECK -->
+          <line x1="134" y1="94" x2="130" y2="112" class="bline"/>
+          <line x1="166" y1="94" x2="170" y2="112" class="bline"/>
+          <!-- SHOULDERS -->
+          <path d="M130,112 Q105,110 82,125 Q68,134 65,148" class="bline"/>
+          <path d="M170,112 Q195,110 218,125 Q232,134 235,148" class="bline"/>
+          <!-- TORSO LEFT -->
+          <path d="M65,148 Q57,165 59,182 Q62,202 68,222 Q70,242 66,262 Q65,270 72,278" class="bline"/>
+          <!-- TORSO RIGHT -->
+          <path d="M235,148 Q243,165 241,182 Q238,202 232,222 Q230,242 234,262 Q235,270 228,278" class="bline"/>
+          <!-- TORSO BOTTOM -->
+          <path d="M72,278 Q100,292 150,294 Q200,292 228,278" class="bline"/>
+          <!-- LEFT ARM -->
+          <path d="M65,148 Q48,178 50,212 Q51,230 53,248" class="bline"/>
+          <path d="M72,150 Q58,178 60,212 Q61,230 63,248" class="blinef"/>
+          <!-- RIGHT ARM -->
+          <path d="M235,148 Q252,178 250,212 Q249,230 247,248" class="bline"/>
+          <path d="M228,150 Q242,178 240,212 Q239,230 237,248" class="blinef"/>
+          <!-- LEFT LEG OUTER -->
+          <path d="M72,278 Q64,312 66,352 Q68,392 68,432 Q69,452 70,472" class="bline"/>
+          <!-- LEFT LEG INNER -->
+          <path d="M118,294 Q115,328 116,368 Q117,405 117,445 Q117,460 117,476" class="blinef"/>
+          <!-- RIGHT LEG OUTER -->
+          <path d="M228,278 Q236,312 234,352 Q232,392 232,432 Q231,452 230,472" class="bline"/>
+          <!-- RIGHT LEG INNER -->
+          <path d="M182,294 Q185,328 184,368 Q183,405 183,445 Q183,460 183,476" class="blinef"/>
+          <!-- KNEE HINTS -->
+          <path d="M67,354 Q69,348 71,354" class="blinef"/>
+          <path d="M233,354 Q231,348 229,354" class="blinef"/>
+
+          <!-- === MEASUREMENT DOTS === -->
+          <!-- WEIGHT left -->
+          <line x1="30" y1="155" x2="64" y2="155" class="cln"/>
+          <circle id="md-weight" class="mdot" cx="18" cy="155" r="14" onclick="focusMeasInput('weight')"/>
+          <text class="mlb" x="18" y="152">lbs</text>
+          <text class="mvl" x="18" y="163" id="mv-weight">—</text>
+          <!-- ARM left -->
+          <line x1="30" y1="195" x2="52" y2="195" class="cln"/>
+          <circle id="md-arm" class="mdot" cx="18" cy="195" r="12" onclick="focusMeasInput('arm')"/>
+          <text class="mlb" x="18" y="192">arm</text>
+          <text class="mvl" x="18" y="201" id="mv-arm">—</text>
+          <!-- THIGH left -->
+          <line x1="30" y1="335" x2="66" y2="335" class="cln"/>
+          <circle id="md-thigh" class="mdot" cx="18" cy="335" r="12" onclick="focusMeasInput('thigh')"/>
+          <text class="mlb" x="18" y="332">thigh</text>
+          <text class="mvl" x="18" y="341" id="mv-thigh">—</text>
+          <!-- CALF left -->
+          <line x1="30" y1="408" x2="67" y2="408" class="cln"/>
+          <circle id="md-calf" class="mdot" cx="18" cy="408" r="12" onclick="focusMeasInput('calf')"/>
+          <text class="mlb" x="18" y="405">calf</text>
+          <text class="mvl" x="18" y="414" id="mv-calf">—</text>
+          <!-- NECK right -->
+          <line x1="172" y1="108" x2="270" y2="108" class="cln"/>
+          <circle id="md-neck" class="mdot" cx="282" cy="108" r="12" onclick="focusMeasInput('neck')"/>
+          <text class="mlb" x="282" y="105">neck</text>
+          <text class="mvl" x="282" y="114" id="mv-neck">—</text>
+          <!-- BUST right -->
+          <line x1="242" y1="170" x2="270" y2="170" class="cln"/>
+          <circle id="md-bust" class="mdot" cx="282" cy="170" r="12" onclick="focusMeasInput('bust')"/>
+          <text class="mlb" x="282" y="167">bust</text>
+          <text class="mvl" x="282" y="176" id="mv-bust">—</text>
+          <!-- WAIST right -->
+          <line x1="232" y1="220" x2="270" y2="220" class="cln"/>
+          <circle id="md-waist" class="mdot" cx="282" cy="220" r="12" onclick="focusMeasInput('waist')"/>
+          <text class="mlb" x="282" y="217">waist</text>
+          <text class="mvl" x="282" y="226" id="mv-waist">—</text>
+          <!-- HIPS right -->
+          <line x1="234" y1="265" x2="270" y2="265" class="cln"/>
+          <circle id="md-hips" class="mdot" cx="282" cy="265" r="12" onclick="focusMeasInput('hips')"/>
+          <text class="mlb" x="282" y="262">hips</text>
+          <text class="mvl" x="282" y="271" id="mv-hips">—</text>
+        </svg>
+      </div>
+
+      <!-- INPUT FIELDS -->
+      <div style="flex:1;min-width:160px">
+        <div style="font-size:11px;font-weight:700;color:var(--textl);letter-spacing:.5px;text-transform:uppercase;margin-bottom:8px">Enter Measurements</div>
+        <div id="measInputs" style="display:flex;flex-direction:column;gap:6px">
+          <!-- rendered by renderMeasInputs() -->
+        </div>
+        <div style="margin-top:10px">
+          <label style="font-size:11px;color:var(--textl);display:block;margin-bottom:3px">Date</label>
+          <input type="date" id="measDate" class="fi" style="width:100%;padding:7px 10px;margin-bottom:8px">
+        </div>
+        <input id="measNotes" class="fi" placeholder="Notes (optional)" style="width:100%;padding:7px 10px;margin-bottom:10px">
+        <button class="btn" style="width:100%;background:var(--sage)" onclick="logMeasurements()">💾 Save Log Entry</button>
+        <button class="btn sec" style="width:100%;margin-top:6px;font-size:12px" onclick="openMeasLog()">📋 View History</button>
+      </div>
+    </div>
+
+    <!-- Trend summary card -->
+    <div class="card" style="margin-top:12px;padding:12px">
+      <div style="font-size:12px;font-weight:700;color:var(--textd);margin-bottom:8px">📈 Trends (vs previous entry)</div>
+      <div id="measTrendSummary" style="font-size:12px;color:var(--textl)">Log 2 or more entries to see trends.</div>
+    </div>
+  </div>
+
   <div class="learn-widget" id="lw-wellness">
     <button class="learn-widget-toggle" onclick="toggleLearnWidget('wellness')">📚 Learning <span id="lw-wellness-count"></span></button>
     <div id="lw-wellness-body" style="display:none"></div>
@@ -3035,6 +3186,7 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
       </div>
       <div class="set-row"><div class="set-lbl" id="sWatLbl">💧 Water Goal (glasses/day)</div><input class="fi" type="number" id="sWat" style="width:90px;padding:7px 10px"></div>
       <div class="set-row"><div class="set-lbl">💪 Exercise Goal (workouts/week)</div><input class="fi" type="number" id="sEx" style="width:90px;padding:7px 10px"></div>
+      <div class="set-row"><div class="set-lbl">😴 Sleep Goal (hrs/night)</div><input class="fi" type="number" id="sSleep" step="0.5" min="4" max="12" style="width:90px;padding:7px 10px"></div>
       <button class="ok-btn" style="margin-top:14px" onclick="saveGoals()">Save Goals ✨</button>
     </div>
   </div>
@@ -3090,15 +3242,115 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
       </div>
     </div>
   </div>
+  <div class="card">
+    <div class="set-sec-t" onclick="togSetSec('sc-aboutme',this);loadAboutMe()">🪞 About Me <span class="sst-arr">▶</span></div>
+    <div id="sc-aboutme" style="display:none">
+      <div style="font-size:12px;color:var(--textl);margin-bottom:10px">Personal info, measurements, health details. Stored locally only.</div>
+      <div style="font-size:11px;font-weight:700;color:var(--textl);letter-spacing:.5px;text-transform:uppercase;margin-bottom:6px">Personal</div>
+      <div class="set-row"><div class="set-lbl">Birthday</div><input class="fi" type="date" id="amBirthday" style="width:160px;padding:7px 10px"></div>
+      <div class="set-row"><div class="set-lbl">Height</div><input class="fi" id="amHeight" placeholder="e.g. 5'4&quot; or 163cm" style="width:140px;padding:7px 10px"></div>
+      <div class="set-row"><div class="set-lbl">Weight</div><input class="fi" id="amWeight" placeholder="e.g. 130 lbs or 59 kg" style="width:140px;padding:7px 10px"></div>
+      <div style="font-size:11px;font-weight:700;color:var(--textl);letter-spacing:.5px;text-transform:uppercase;margin:10px 0 6px">Clothing Sizes</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+        <div class="set-row" style="border:none;padding:0;flex-direction:column;align-items:flex-start;gap:3px"><div class="set-lbl">Shirt / Top</div><input class="fi" id="amSizeShirt" placeholder="S / M / 8 / 40" style="width:100%;padding:6px 10px"></div>
+        <div class="set-row" style="border:none;padding:0;flex-direction:column;align-items:flex-start;gap:3px"><div class="set-lbl">Pants / Bottom</div><input class="fi" id="amSizePants" placeholder="28x30 / 6 / 36" style="width:100%;padding:6px 10px"></div>
+        <div class="set-row" style="border:none;padding:0;flex-direction:column;align-items:flex-start;gap:3px"><div class="set-lbl">Dress / Outfit</div><input class="fi" id="amSizeDress" placeholder="S / 4 / 36" style="width:100%;padding:6px 10px"></div>
+        <div class="set-row" style="border:none;padding:0;flex-direction:column;align-items:flex-start;gap:3px"><div class="set-lbl">Shoe</div><input class="fi" id="amSizeShoe" placeholder="8 / 38 / 8.5W" style="width:100%;padding:6px 10px"></div>
+        <div class="set-row" style="border:none;padding:0;flex-direction:column;align-items:flex-start;gap:3px"><div class="set-lbl">Bra / Undergarment</div><input class="fi" id="amSizeBra" placeholder="34B / 75C" style="width:100%;padding:6px 10px"></div>
+        <div class="set-row" style="border:none;padding:0;flex-direction:column;align-items:flex-start;gap:3px"><div class="set-lbl">Wig Cap Size</div><input class="fi" id="amSizeWig" placeholder="S / Petite / 22.5&quot;" style="width:100%;padding:6px 10px"></div>
+      </div>
+      <div style="font-size:11px;font-weight:700;color:var(--textl);letter-spacing:.5px;text-transform:uppercase;margin:10px 0 6px">Health Info</div>
+      <div class="set-row"><div class="set-lbl">Blood Type</div><input class="fi" id="amBloodType" placeholder="A+ / O- etc." style="width:100px;padding:7px 10px"></div>
+      <div class="set-row"><div class="set-lbl">Allergies</div><input class="fi" id="amAllergies" placeholder="e.g. penicillin, peanuts" style="width:100%;max-width:240px;padding:7px 10px"></div>
+      <div class="set-row" style="flex-direction:column;align-items:flex-start;gap:4px"><div class="set-lbl">Health Notes</div><textarea class="fi" id="amHealthNotes" rows="3" placeholder="Conditions, important info, doctor info…" style="width:100%;resize:vertical"></textarea></div>
+      <button class="btn sec" style="width:100%;margin-bottom:8px;font-size:12px" onclick="goTab('wellness',null);setTimeout(function(){showWellnessSec('body',document.querySelector('#v-wellness .pn-btn:nth-child(6)'));renderMeasurements();},200)">📏 Go to Body Measurements →</button>
+      <button class="ok-btn" style="margin-top:10px" onclick="saveAboutMe()">Save ✨</button>
+    </div>
+  </div>
 </div>
 
 <!-- FOOD DB MODAL -->
-<div class="ov" id="foodDbModal"><div class="mod" style="max-height:88vh;overflow-y:auto">
-  <div class="mh"></div><div class="mtit">🍲 Add Food Item</div>
+<div class="ov" id="foodDbModal" onclick="closeM('foodDbModal')"><div class="mod" style="max-height:92vh;overflow-y:auto" onclick="event.stopPropagation()">
+  <div class="mh"><span class="mt" id="fdbModalTitle">🧩 Add Ingredient</span><button class="mc" onclick="closeM('foodDbModal')">✕</button></div>
   <input type="hidden" id="fdbId">
-  <div class="fg"><label class="fl">Name *</label><input class="fi" id="fdbName" placeholder="e.g. Grilled Chicken Breast"></div>
+
+  <!-- Name + Brand -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
+    <div class="fg" style="margin:0"><label class="fl">Name *</label><input class="fi" id="fdbName" placeholder="e.g. Chicken Breast"></div>
+    <div class="fg" style="margin:0"><label class="fl">Brand</label><input class="fi" id="fdbBrand" placeholder="e.g. Tyson (optional)"></div>
+  </div>
+
+  <!-- Type + Category row -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
+    <div class="fg" style="margin:0">
+      <label class="fl">Type</label>
+      <select class="fi" id="fdbType" style="padding:8px 10px">
+        <option value="generic">🌿 Generic</option>
+        <option value="branded">🏷️ Branded</option>
+        <option value="restaurant">🍽️ Restaurant</option>
+        <option value="supplement">💊 Supplement</option>
+      </select>
+    </div>
+    <div class="fg" style="margin:0"><label class="fl">Aliases</label><input class="fi" id="fdbAliases" placeholder="e.g. chickpeas (comma separated)"></div>
+  </div>
+
+  <!-- Primary Serving Size -->
+  <div class="card" style="margin-bottom:10px;background:#f8f5ff;border:1.5px solid #ddd6f3">
+    <div style="font-size:12px;font-weight:700;color:var(--textd);margin-bottom:8px">📏 Primary Serving Size</div>
+    <div style="display:grid;grid-template-columns:1fr 100px;gap:8px;margin-bottom:8px">
+      <div class="fg" style="margin:0"><label class="fl">Label</label><input class="fi" id="fdbSvLabel" placeholder="e.g. 1 medium apple, 1 cup, 30g" oninput="calcFdbPer100Preview()"></div>
+      <div class="fg" style="margin:0"><label class="fl">Weight (g)</label><input class="fi" id="fdbSvGrams" type="number" placeholder="182" step="0.1" oninput="calcFdbPer100Preview()"></div>
+    </div>
+    <div style="font-size:11px;color:var(--textl);margin-bottom:10px">Enter how much ONE serving weighs in grams. For whole foods (apple, egg): weigh one typical piece. For packaged: use the label.</div>
+
+    <!-- Nutrition for this serving -->
+    <div style="font-size:12px;font-weight:700;color:var(--textd);margin-bottom:6px">🔢 Nutrition (for this serving)</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:6px">
+      <div class="fg" style="margin:0"><label class="fl">Calories</label><input class="fi" id="fdbCal" type="number" placeholder="0" oninput="calcFdbPer100Preview()"></div>
+      <div class="fg" style="margin:0"><label class="fl">Protein (g)</label><input class="fi" id="fdbPro" type="number" placeholder="0" step="0.1" oninput="calcFdbPer100Preview()"></div>
+      <div class="fg" style="margin:0"><label class="fl">Fiber (g)</label><input class="fi" id="fdbFib" type="number" placeholder="0" step="0.1" oninput="calcFdbPer100Preview()"></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px">
+      <div class="fg" style="margin:0"><label class="fl">Carbs (g)</label><input class="fi" id="fdbCarb" type="number" placeholder="0" step="0.1" oninput="calcFdbPer100Preview()"></div>
+      <div class="fg" style="margin:0"><label class="fl">Fat (g)</label><input class="fi" id="fdbFat" type="number" placeholder="0" step="0.1" oninput="calcFdbPer100Preview()"></div>
+    </div>
+    <div id="fdbPer100Preview" style="font-size:11px;color:var(--textl);background:#fff;border-radius:8px;padding:6px 10px;display:none"></div>
+  </div>
+
+  <!-- Additional Serving Sizes -->
+  <div class="card" style="margin-bottom:10px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+      <span style="font-size:12px;font-weight:700;color:var(--textd)">📐 Additional Serving Sizes</span>
+      <button type="button" onclick="addFdbServing()" style="font-size:11px;padding:3px 10px;border-radius:8px;border:1.5px solid var(--lav);background:#f5f0ff;color:var(--lav);font-family:'Quicksand',sans-serif;font-weight:700;cursor:pointer">+ Add</button>
+    </div>
+    <div id="fdbServingsList" style="display:flex;flex-direction:column;gap:6px"></div>
+    <div style="font-size:10px;color:var(--textl);margin-top:4px">Add cup, tbsp, piece, bag, scoop etc. — the app calculates nutrition for each automatically.</div>
+  </div>
+
+  <!-- My Usual Amount -->
+  <div class="card" style="margin-bottom:10px;background:#f0fbf5;border:1.5px solid #c8e8d8">
+    <div style="font-size:12px;font-weight:700;color:var(--textd);margin-bottom:8px">⭐ My Usual Amount</div>
+    <div style="display:grid;grid-template-columns:80px 1fr;gap:8px;align-items:center">
+      <div class="fg" style="margin:0"><label class="fl">Qty</label><input class="fi" id="fdbUsualQty" type="number" placeholder="1" step="0.5" min="0.5" value="1"></div>
+      <div class="fg" style="margin:0"><label class="fl">Serving size</label><select class="fi" id="fdbUsualSv" style="padding:8px 10px"><option value="">— primary serving —</option></select></div>
+    </div>
+    <div style="font-size:10px;color:var(--textl);margin-top:4px">When logging this food, it pre-fills with this amount.</div>
+  </div>
+
+  <!-- Barcode -->
+  <div class="card" style="margin-bottom:10px">
+    <div style="font-size:12px;font-weight:700;color:var(--textd);margin-bottom:8px">🔢 Barcode</div>
+    <div style="display:flex;gap:8px;align-items:center;margin-bottom:6px">
+      <input class="fi" id="fdbBarcode" placeholder="UPC / EAN number" style="flex:1;margin-bottom:0">
+      <button type="button" onclick="scanBarcode()" style="padding:8px 14px;border-radius:9px;border:none;background:var(--lav);color:white;font-family:'Quicksand',sans-serif;font-size:12px;font-weight:700;cursor:pointer;flex-shrink:0">📷 Scan</button>
+      <button type="button" onclick="lookupBarcode()" style="padding:8px 14px;border-radius:9px;border:1.5px solid var(--sage);background:#f0f8f0;color:var(--sage);font-family:'Quicksand',sans-serif;font-size:12px;font-weight:700;cursor:pointer;flex-shrink:0">🔍 Look up</button>
+    </div>
+    <div id="fdbBarcodeStatus" style="font-size:11px;color:var(--textl)"></div>
+  </div>
+
+  <!-- Tags -->
   <div class="fg">
-    <label class="fl">Tags (select all that apply)</label>
+    <label class="fl">Tags</label>
     <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px" id="fdbTagChips">
       <button type="button" class="fchip" data-tag="protein" onclick="toggleFdbTag(this)">🥩 Protein</button>
       <button type="button" class="fchip" data-tag="vegetable" onclick="toggleFdbTag(this)">🥦 Vegetable</button>
@@ -3108,6 +3360,7 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
       <button type="button" class="fchip" data-tag="snack" onclick="toggleFdbTag(this)">🍿 Snack</button>
       <button type="button" class="fchip" data-tag="beverage" onclick="toggleFdbTag(this)">☕ Beverage</button>
       <button type="button" class="fchip" data-tag="condiment" onclick="toggleFdbTag(this)">🧂 Condiment</button>
+      <button type="button" class="fchip" data-tag="supplement" onclick="toggleFdbTag(this)">💊 Supplement</button>
       <button type="button" class="fchip" data-tag="other" onclick="toggleFdbTag(this)">📦 Other</button>
     </div>
     <div style="display:flex;gap:6px;align-items:center">
@@ -3116,21 +3369,19 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     </div>
     <div id="fdbCustomTagList" style="display:flex;gap:5px;flex-wrap:wrap;margin-top:6px"></div>
   </div>
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-    <div class="fg"><label class="fl">Calories</label><input class="fi" id="fdbCal" type="number" placeholder="0"></div>
-    <div class="fg"><label class="fl">Protein (g)</label><input class="fi" id="fdbPro" type="number" placeholder="0" step="0.1"></div>
-    <div class="fg"><label class="fl">Carbs (g)</label><input class="fi" id="fdbCarb" type="number" placeholder="0" step="0.1"></div>
-    <div class="fg"><label class="fl">Fat (g)</label><input class="fi" id="fdbFat" type="number" placeholder="0" step="0.1"></div>
-  </div>
+
+  <!-- Store / Price / URL / Notes -->
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
     <div class="fg"><label class="fl">Store</label><input class="fi" id="fdbStore" placeholder="e.g. Costco"></div>
-    <div class="fg"><label class="fl">Price / serving ($)</label><input class="fi" id="fdbPrice" type="number" placeholder="0.00" step="0.01"></div>
+    <div class="fg"><label class="fl">Price / pkg ($)</label><input class="fi" id="fdbPrice" type="number" placeholder="0.00" step="0.01"></div>
   </div>
-  <div class="fg"><label class="fl">Recipe link (optional)</label><input class="fi" id="fdbRecipe" placeholder="Recipe name or URL"></div>
-  <div class="fg"><label class="fl">Serving size (optional)</label><input class="fi" id="fdbServing" placeholder="e.g. 4 oz, 1 cup"></div>
-  <button class="ok-btn" onclick="saveFoodDb()">Save ✨</button>
-  <button class="del-btn" id="fdbDelBtn" style="display:none" onclick="delFoodDb()">🗑️ Delete</button>
-  <button class="cn-btn" onclick="closeM('foodDbModal')">Cancel</button>
+  <div class="fg"><label class="fl">URL / Link</label><input class="fi" id="fdbUrl" placeholder="Product page, recipe link…"></div>
+  <div class="fg"><label class="fl">Notes</label><textarea class="fi" id="fdbNotes" rows="2" placeholder="Anything else…" style="resize:vertical"></textarea></div>
+
+  <div style="display:flex;gap:8px;margin-top:4px">
+    <button class="ok-btn" style="flex:1" onclick="saveFoodDb()">Save ✨</button>
+    <button id="fdbDelBtn" class="btn sec" style="display:none;color:#e74c3c;border-color:#e74c3c" onclick="delFoodDb()">🗑 Delete</button>
+  </div>
 </div></div>
 
 <!-- INGREDIENT MODAL -->
@@ -3953,7 +4204,7 @@ function addArchiveYear(){
   var yr=prompt('Enter year to add (e.g. 2025):',''+new Date().getFullYear());
   if(!yr||isNaN(+yr))return;
   yr=+yr;
-  if(!ARCHIVE_YEARS[yr])ARCHIVE_YEARS[yr]={tasks:[],goals:[],notes:'',created:new Date().toISOString()};
+  if(!ARCHIVE_YEARS[yr])ARCHIVE_YEARS[yr]={tasks:[],goals:[],notes:'',months:{},created:new Date().toISOString()};
   saveArchiveYears();
   _archiveYear=yr;
   renderArchive();
@@ -3992,14 +4243,14 @@ function snapshotToArchiveYear(){
   // Snapshot completed tasks into their done year
   (TASKS||[]).filter(function(t){return t.done;}).forEach(function(t){
     var yr=t.doneDate?+t.doneDate.substring(0,4):now.getFullYear();
-    if(!ARCHIVE_YEARS[yr])ARCHIVE_YEARS[yr]={tasks:[],goals:[],notes:'',created:new Date().toISOString()};
+    if(!ARCHIVE_YEARS[yr])ARCHIVE_YEARS[yr]={tasks:[],goals:[],notes:'',months:{},created:new Date().toISOString()};
     var already=ARCHIVE_YEARS[yr].tasks.find(function(x){return x.id===t.id;});
     if(!already)ARCHIVE_YEARS[yr].tasks.push({id:t.id,title:t.title,cat:t.cat,doneDate:t.doneDate||'',due:t.due||''});
   });
   // Snapshot completed goals
   (GOALS||[]).filter(function(g){return g.done;}).forEach(function(g){
     var yr=g.doneDate?+g.doneDate.substring(0,4):now.getFullYear();
-    if(!ARCHIVE_YEARS[yr])ARCHIVE_YEARS[yr]={tasks:[],goals:[],notes:'',created:new Date().toISOString()};
+    if(!ARCHIVE_YEARS[yr])ARCHIVE_YEARS[yr]={tasks:[],goals:[],notes:'',months:{},created:new Date().toISOString()};
     var already=(ARCHIVE_YEARS[yr].goals||[]).find(function(x){return x.id===g.id;});
     if(!already){if(!ARCHIVE_YEARS[yr].goals)ARCHIVE_YEARS[yr].goals=[];ARCHIVE_YEARS[yr].goals.push({id:g.id,title:g.title,due:g.due||'',doneDate:g.doneDate||''});}
   });
@@ -4009,7 +4260,7 @@ function snapshotToArchiveYear(){
 function renderArchiveYear(yr){
   var content=document.getElementById('archiveYearContent');
   if(!content)return;
-  var ydata=ARCHIVE_YEARS[yr]||{tasks:[],goals:[],notes:''};
+  var ydata=ARCHIVE_YEARS[yr]||{tasks:[],goals:[],notes:'',months:{}};
   var tasks=ydata.tasks||[];
   var goals=ydata.goals||[];
   var yearStr=''+yr;
@@ -4112,6 +4363,27 @@ function renderArchiveYear(yr){
       +'</div>'
     :'')
 
+    // Mood Board
+    +(function(){
+      var yrItems=(VB_ITEMS||[]).filter(function(v){return (v.year||new Date().getFullYear())===yr;});
+      if(!yrItems.length)return '';
+      return '<div class="card" style="margin-bottom:10px">'
+        +'<div style="font-size:13px;font-weight:700;color:var(--textd);margin-bottom:8px">🌈 Mood Board — '+yr+' ('+yrItems.length+' item'+(yrItems.length!==1?'s':'')+')</div>'
+        +'<div class="board-grid" style="gap:6px">'
+        +yrItems.map(function(item){
+          if(item.type==='image'){
+            return '<div class="board-item" style="font-size:12px"><img class="board-item-img" src="'+item.text+'" alt="'+(item.caption||'')+'" onerror="this.style.display=\'none\'">'+(item.caption?'<div style="font-size:11px;color:var(--textl)">'+escHtml(item.caption)+'</div>':'')+'</div>';
+          } else if(item.type==='quote'){
+            return '<div class="board-item"><div class="board-item-label">Affirmation</div><div class="board-item-quote">'+escHtml(item.text)+'</div></div>';
+          } else {
+            return '<div class="board-item"><div class="board-item-label">Goal</div><div class="board-item-text" style="font-weight:600">🎯 '+escHtml(item.text)+'</div></div>';
+          }
+        }).join('')
+        +'</div>'
+        +'<button class="btn sec" style="width:100%;margin-top:8px;font-size:12px" onclick="goTab(\'board\',null)">+ Add to '+yr+' Mood Board →</button>'
+        +'</div>';
+    })()
+
     // Expenses
     +(yearExps.length?
       '<div class="card" style="margin-bottom:10px">'
@@ -4177,12 +4449,136 @@ function renderArchiveYear(yr){
             +'</div>';
         }).join('')
       :'<p style="color:var(--textl);font-size:12px;text-align:center;padding:12px">No completed tasks for '+yr+'.</p>')
-    +'</div>';
+    +'</div>'
+
+    // Memories for this year
+    +(function(){
+      var yearMems=(MEMORIES||[]).filter(function(m){return (m.date||'').startsWith(yearStr);});
+      var memsByMonth={};
+      yearMems.forEach(function(m){
+        var mo=(m.date||'').slice(5,7)||'00';
+        if(!memsByMonth[mo])memsByMonth[mo]=[];
+        memsByMonth[mo].push(m);
+      });
+      var MONTH_NAMES=['','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      var memsHtml=Object.keys(memsByMonth).sort().map(function(mo){
+        var mems=memsByMonth[mo];
+        return '<div style="margin-bottom:12px">'
+          +'<div style="font-size:11px;font-weight:700;color:var(--textl);letter-spacing:.5px;text-transform:uppercase;margin-bottom:6px">'+MONTH_NAMES[parseInt(mo,10)]+'</div>'
+          +mems.map(function(m){
+            return '<div class="card" style="padding:10px;margin-bottom:6px">'
+              +(m.photo?'<img src="'+m.photo+'" style="width:100%;max-height:120px;object-fit:cover;border-radius:8px;margin-bottom:6px" alt="">':'')
+              +'<div style="font-size:13px;font-weight:700;color:var(--textd)">'+(m.title||'Memory')+'</div>'
+              +(m.note?'<div style="font-size:12px;color:var(--textl);margin-top:3px">'+escHtml(m.note)+'</div>':'')
+              +'<div style="font-size:11px;color:var(--textl);margin-top:4px">'+escHtml(m.date||'')+'</div>'
+              +'</div>';
+          }).join('')
+          +'</div>';
+      }).join('');
+      return '<div style="margin-top:14px">'
+        +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">'
+        +'<span style="font-size:13px;font-weight:700;color:var(--textd)">📸 Memories</span>'
+        +'<button onclick="goTab(\'board\',null);setTimeout(function(){showBoardSec(\'memories\',document.querySelector(\'#v-board .pn-btn:nth-child(2)\'))},200)" style="background:none;border:none;color:var(--sage);font-size:12px;font-weight:700;cursor:pointer;font-family:\'Quicksand\',sans-serif">+ Add →</button>'
+        +'</div>'
+        +(yearMems.length?memsHtml:'<div style="font-size:12px;color:var(--textl);padding:8px 0">No memories logged for '+yr+'.</div>')
+        +'</div>';
+    })()
+
+    // Monthly reflections
+    +(function(){
+      var ymonths=(ydata.months)||{};
+      var months=['01','02','03','04','05','06','07','08','09','10','11','12'];
+      var MONTH_NAMES2=['','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      var yearMems2=(MEMORIES||[]).filter(function(m){return (m.date||'').startsWith(yearStr);});
+      var memsByMonth2={};
+      yearMems2.forEach(function(m){var mo=(m.date||'').slice(5,7)||'00';if(!memsByMonth2[mo])memsByMonth2[mo]=[];memsByMonth2[mo].push(m);});
+      return '<div style="margin-top:14px">'
+        +'<div style="font-size:13px;font-weight:700;color:var(--textd);margin-bottom:8px">📓 Monthly Reflections</div>'
+        +'<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:10px">'
+        +months.map(function(mo){
+          var hasMem=(memsByMonth2[mo]||[]).length>0;
+          var hasQ=(ymonths[mo]&&(ymonths[mo].questions||[]).length>0);
+          var label=MONTH_NAMES2[parseInt(mo,10)];
+          return '<button class="fchip'+(hasQ||hasMem?' on':'')+'" style="font-size:12px;padding:5px 4px" onclick="openMonthReflection('+yr+',\''+mo+'\')">'+label+'</button>';
+        }).join('')
+        +'</div>'
+        +'</div>';
+    })();
 }
 
 function saveArchiveYearNotes(yr,val){
-  if(!ARCHIVE_YEARS[yr])ARCHIVE_YEARS[yr]={tasks:[],goals:[],notes:'',created:new Date().toISOString()};
+  if(!ARCHIVE_YEARS[yr])ARCHIVE_YEARS[yr]={tasks:[],goals:[],notes:'',months:{},created:new Date().toISOString()};
   ARCHIVE_YEARS[yr].notes=val;
+  saveArchiveYears();
+}
+
+var _reflYear=0,_reflMo='';
+function openMonthReflection(yr,mo){
+  _reflYear=yr;_reflMo=mo;
+  if(!ARCHIVE_YEARS[yr])ARCHIVE_YEARS[yr]={tasks:[],goals:[],notes:'',months:{},created:new Date().toISOString()};
+  if(!ARCHIVE_YEARS[yr].months)ARCHIVE_YEARS[yr].months={};
+  var mdata=ARCHIVE_YEARS[yr].months[mo]||{questions:[],notes:''};
+  var MONTH_NAMES2=['','January','February','March','April','May','June','July','August','September','October','November','December'];
+  var el=document.getElementById('reflModalTitle');
+  if(el)el.textContent='📓 '+MONTH_NAMES2[parseInt(mo,10)]+' '+yr;
+  renderReflQuestions(yr,mo);
+  var mems=(MEMORIES||[]).filter(function(m){return (m.date||'').startsWith(yr+'-'+mo);});
+  var memEl=document.getElementById('reflMemories');
+  if(memEl)memEl.innerHTML=mems.length?mems.map(function(m){
+    return '<div style="padding:6px 0;border-bottom:1px solid var(--bdr)">'
+      +(m.photo?'<img src="'+m.photo+'" style="width:100%;max-height:80px;object-fit:cover;border-radius:6px;margin-bottom:4px" alt="">':'')
+      +'<div style="font-size:13px;font-weight:600;color:var(--textd)">'+(m.title||'Memory')+'</div>'
+      +(m.note?'<div style="font-size:11px;color:var(--textl)">'+escHtml(m.note)+'</div>':'')
+      +'</div>';
+  }).join(''):'<div style="font-size:12px;color:var(--textl)">No memories this month.</div>';
+  var notesEl=document.getElementById('reflNotes');
+  if(notesEl)notesEl.value=mdata.notes||'';
+  showOv('ovMonthReflection');
+}
+function renderReflQuestions(yr,mo){
+  var el=document.getElementById('reflQList');
+  if(!el)return;
+  var mdata=(ARCHIVE_YEARS[yr]&&ARCHIVE_YEARS[yr].months&&ARCHIVE_YEARS[yr].months[mo])||{questions:[]};
+  var qs=mdata.questions||[];
+  if(!qs.length){el.innerHTML='<div style="font-size:12px;color:var(--textl);padding:6px 0">No questions yet. Add one below.</div>';return;}
+  el.innerHTML=qs.map(function(q,i){
+    return '<div style="display:flex;align-items:flex-start;gap:8px;padding:6px 0;border-bottom:1px solid var(--bdr)">'
+      +'<div style="flex:1">'
+      +'<div style="font-size:12px;font-weight:600;color:var(--textd);margin-bottom:3px">'+escHtml(q.text)+'</div>'
+      +'<textarea class="fi" style="font-size:12px;padding:6px;min-height:50px;resize:vertical" placeholder="Your answer…" onchange="saveReflAnswer(\''+q.id+'\',this.value)">'+escHtml(q.answer||'')+'</textarea>'
+      +'</div>'
+      +'<button onclick="delReflQuestion(\''+q.id+'\')" style="border:none;background:none;color:#c9a0a0;font-size:14px;cursor:pointer;flex-shrink:0;padding:2px">✕</button>'
+      +'</div>';
+  }).join('');
+}
+function addReflQuestion(){
+  var inp=document.getElementById('reflQInput');
+  var text=(inp?inp.value:'').trim();
+  if(!text)return;
+  if(!ARCHIVE_YEARS[_reflYear].months[_reflMo])ARCHIVE_YEARS[_reflYear].months[_reflMo]={questions:[],notes:''};
+  ARCHIVE_YEARS[_reflYear].months[_reflMo].questions.push({id:'rq-'+Date.now(),text:text,answer:''});
+  saveArchiveYears();
+  if(inp)inp.value='';
+  renderReflQuestions(_reflYear,_reflMo);
+}
+function delReflQuestion(qid){
+  var mdata=ARCHIVE_YEARS[_reflYear].months[_reflMo];
+  if(!mdata)return;
+  mdata.questions=mdata.questions.filter(function(q){return q.id!==qid;});
+  saveArchiveYears();renderReflQuestions(_reflYear,_reflMo);
+}
+function saveReflAnswer(qid,val){
+  var mdata=ARCHIVE_YEARS[_reflYear].months[_reflMo];
+  if(!mdata)return;
+  var q=mdata.questions.find(function(x){return x.id===qid;});
+  if(q)q.answer=val;
+  saveArchiveYears();
+}
+function saveReflNotes(){
+  var notesEl=document.getElementById('reflNotes');
+  if(!notesEl)return;
+  if(!ARCHIVE_YEARS[_reflYear].months[_reflMo])ARCHIVE_YEARS[_reflYear].months[_reflMo]={questions:[],notes:''};
+  ARCHIVE_YEARS[_reflYear].months[_reflMo].notes=notesEl.value;
   saveArchiveYears();
 }
 
@@ -4211,6 +4607,21 @@ function renderWorld(){
   renderEmberSkillBars();
   renderSprintSign();
   renderWorldUnlocks();
+}
+
+function renderWSProjects(){
+  var el=document.getElementById('wsProjectsList');
+  if(!el)return;
+  var active=(PROJECTS||[]).filter(function(p){return p.status!=='done'&&p.status!=='complete';}).slice(0,5);
+  if(!active.length){el.innerHTML='<div style="font-size:12px;color:var(--textl)">No active projects.</div>';return;}
+  el.innerHTML=active.map(function(p){
+    var done=(p.steps||[]).filter(function(s){return s.done;}).length;
+    var total=(p.steps||[]).length;
+    return '<div style="padding:6px 0;border-bottom:1px solid var(--bdr);cursor:pointer" onclick="goTab(\'projects\',null)">'
+      +'<div style="font-size:13px;font-weight:600;color:var(--textd)">'+escHtml(p.title)+'</div>'
+      +(total?'<div style="font-size:11px;color:var(--textl)">'+done+'/'+total+' steps</div>':'')
+      +'</div>';
+  }).join('');
 }
 
 var BRAIN_DUMP = JSON.parse(localStorage.getItem('aBrainDump')||'[]');
@@ -4262,6 +4673,8 @@ var _faveCatFilter = 'all';
 var FAVE_ACCENTS = ['#c9a0a0','#a99fc9','#8faa8b','#d4a574','#7fb5b0','#8aafc9'];
 var VB_ITEMS = JSON.parse(localStorage.getItem('aVbItems')||'[]');
 var MEMORIES = JSON.parse(localStorage.getItem('aMemories')||'[]');
+var MEASUREMENT_LOG = JSON.parse(localStorage.getItem('aMeasLog')||'[]');
+// Each entry: {id, date, weight, neck, bust, waist, hips, arm, thigh, calf, notes}
 var CUSTOM_COLORS = JSON.parse(localStorage.getItem('aCustomColors')||'{}');
 var BANNER_IMG = localStorage.getItem('aBannerImg')||'';
 var PRAYERS = JSON.parse(localStorage.getItem('aPrayers')||'[]');
@@ -4389,6 +4802,7 @@ var S = {
   protTabs:JSON.parse(localStorage.getItem('aProtTabs')||'{"estate":true}'),
   wUnit:localStorage.getItem('aWUnit')||'glasses',
   gEx:parseInt(localStorage.getItem('aGEx'))||3,
+  gSleep:parseFloat(localStorage.getItem('aGSleep'))||7,
   hideMillie:localStorage.getItem('aHideMillie')==='1',
   appTitle:localStorage.getItem('aSAppTitle')||'✨ Adri\'s Life',
 };
@@ -4675,6 +5089,8 @@ function goTabDirect(tab,btn){
   if(tab==='guide'){ renderResearchLib(); renderGuide(); renderTmplList(); renderAppIndex(); }
   if(tab==='work-projects'){ renderWorkProjects(); }
   if(tab==='helm'||tab==='conservatory'||tab==='hearthside'||tab==='lighthouse'||tab==='estate'||tab==='workshop'||tab==='food'||tab==='meals'||tab==='wellness'){ renderAllLearnWidgets(); }
+  if(tab==='meals'||tab==='food') renderWaterBottle();
+  if(tab==='workshop'){ renderWSProjects(); }
 }
 
 function renderHubPreviews(section){
@@ -4768,6 +5184,11 @@ function renderHWHubStats(){
   if(ts)ts.textContent=sleepHrs;
   if(tc)tc.textContent=totalCal?Math.round(totalCal):'—';
   if(tmd)tmd.textContent=medsDone;
+  var bodySubEl=document.getElementById('hub-body-sub');
+  if(bodySubEl){
+    var lastM=MEASUREMENT_LOG.length?MEASUREMENT_LOG.slice().sort(function(a,b){return a.date<b.date?1:-1;})[0]:null;
+    bodySubEl.textContent=lastM?('Last: '+lastM.date):'Tap to log measurements';
+  }
 }
 
 // ── Character condition (mood) system ──────────
@@ -5795,7 +6216,7 @@ function logWat(){
 
 // ── Water Bottle (oz-based, Today page) ──────
 var WATER_OZ_LOG = JSON.parse(localStorage.getItem('aWaterOzLog')||'{}');
-var WATER_OZ_GOAL = 115;
+var WATER_OZ_GOAL = (function(){ var s=S||{}; if(s.wUnit==='oz') return s.gWat||115; return (s.gWat||8)*8; })();
 
 function addWaterOz(oz){
   var k=getTK();
@@ -8543,6 +8964,7 @@ function renderSettings(){
   document.getElementById('sFib').value=S.gFib;document.getElementById('sCrb').value=S.gCrb;
   document.getElementById('sFat').value=S.gFat;document.getElementById('sWat').value=S.gWat;
   document.getElementById('sEx').value=S.gEx||3;
+  var sslEl=document.getElementById('sSleep');if(sslEl)sslEl.value=S.gSleep||7;
   document.getElementById('wUnitGl').classList.toggle('on',S.wUnit!=='oz');
   document.getElementById('wUnitOz').classList.toggle('on',S.wUnit==='oz');
   document.getElementById('sWatLbl').textContent='💧 Water Goal ('+(S.wUnit==='oz'?'oz/day':'glasses/day')+')';
@@ -8614,6 +9036,25 @@ function saveAppearance(){
   alert('✅ Appearance saved!');
 }
 
+var ABOUT_ME = JSON.parse(localStorage.getItem('aAboutMe')||'{}');
+function loadAboutMe(){
+  var a=ABOUT_ME;
+  ['Birthday','Height','Weight','SizeShirt','SizePants','SizeDress','SizeShoe','SizeBra','SizeWig','BloodType','Allergies','HealthNotes'].forEach(function(k){
+    var el=document.getElementById('am'+k);
+    if(el)el.value=a[k]||'';
+  });
+}
+function saveAboutMe(){
+  var a={};
+  ['Birthday','Height','Weight','SizeShirt','SizePants','SizeDress','SizeShoe','SizeBra','SizeWig','BloodType','Allergies','HealthNotes'].forEach(function(k){
+    var el=document.getElementById('am'+k);
+    if(el)a[k]=el.value;
+  });
+  ABOUT_ME=a;
+  localStorage.setItem('aAboutMe',JSON.stringify(a));
+  showToast('About Me saved ✨');
+}
+
 function saveGoals(){
   S.gCal=parseInt(document.getElementById('sCal').value)||1900;
   S.gPro=parseInt(document.getElementById('sPro').value)||120;
@@ -8622,12 +9063,14 @@ function saveGoals(){
   S.gFat=parseInt(document.getElementById('sFat').value)||65;
   S.gWat=parseInt(document.getElementById('sWat').value)||8;
   S.gEx=parseInt(document.getElementById('sEx').value)||3;
+  S.gSleep=parseFloat(document.getElementById('sSleep').value)||7;
   localStorage.setItem('aGCal',S.gCal);localStorage.setItem('aGPro',S.gPro);
   localStorage.setItem('aGFib',S.gFib);localStorage.setItem('aGCrb',S.gCrb);
   localStorage.setItem('aGFat',S.gFat);localStorage.setItem('aGWat',S.gWat);
-  localStorage.setItem('aGEx',S.gEx);
-  fbSave('settings','goals',{gCal:S.gCal,gPro:S.gPro,gFib:S.gFib,gCrb:S.gCrb,gFat:S.gFat,gWat:S.gWat,gEx:S.gEx,updated:new Date().toISOString()});
-  updM();updExWeek();alert('✅ Goals saved!');
+  localStorage.setItem('aGEx',S.gEx);localStorage.setItem('aGSleep',S.gSleep);
+  fbSave('settings','goals',{gCal:S.gCal,gPro:S.gPro,gFib:S.gFib,gCrb:S.gCrb,gFat:S.gFat,gWat:S.gWat,gEx:S.gEx,gSleep:S.gSleep,updated:new Date().toISOString()});
+  WATER_OZ_GOAL=(S.wUnit==='oz')?S.gWat:(S.gWat*8);
+  renderWaterBottle();updM();updExWeek();alert('✅ Goals saved!');
 }
 
 // ═══════════════════════════════════════════════
@@ -8689,7 +9132,7 @@ function quickList(name,emoji){
   var q=LIST_Q.find(function(q){return q.name===name;});
   var items=(q&&q.items||[]).map(function(t,i){return{id:'li'+Date.now()+i,text:t,done:false};});
   var col=LIST_AUTO_COLS[LISTS.length%LIST_AUTO_COLS.length];
-  LISTS.unshift({id:Date.now().toString(),name:name,emoji:emoji,col:col,items:items,created:new Date().toISOString(),archived:false});
+  LISTS.unshift({id:Date.now().toString(),name:name,emoji:emoji,col:col,items:items,tags:[],tabLink:'',created:new Date().toISOString(),archived:false});
   localStorage.setItem('aLists',JSON.stringify(LISTS));
   LIST_FILTER='active';
   document.querySelectorAll('#v-lists .fchip').forEach(function(b){b.classList.toggle('on',b.textContent==='Active');});
@@ -8728,7 +9171,9 @@ function listHTML(lst){
       '<div style="display:flex;align-items:center;gap:8px">'+
         '<span style="font-size:20px">'+lst.emoji+'</span>'+
         '<div><div class="list-title">'+lst.name+'</div>'+
-          (items.length?'<div style="font-size:11px;color:var(--textl)">'+done+'/'+items.length+' done</div>':'')+'</div>'+
+          (items.length?'<div style="font-size:11px;color:var(--textl)">'+done+'/'+items.length+' done</div>':'')
+          +((lst.tags&&lst.tags.length)?'<div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:3px">'+lst.tags.map(function(t){return'<span style="font-size:10px;padding:1px 6px;border-radius:8px;background:'+col+'22;color:'+col+';font-weight:600">'+t+'</span>';}).join('')+'</div>':'')
+          +'</div>'+
       '</div>'+
       '<div style="display:flex;gap:2px;align-items:center">'+
         (items.length?'<span class="list-prog" style="background:'+col+'22;color:'+col+'">'+pct+'%</span>':'')+
@@ -8761,6 +9206,7 @@ function openNewList(){
   document.getElementById('listEditId').value='';
   document.getElementById('listEmoji').value='';
   document.getElementById('listName').value='';
+  var ti=document.getElementById('listTagsInp');if(ti)ti.value='';
   document.getElementById('listDelBtn').style.display='none';
   document.getElementById('listModal').classList.add('show');
 }
@@ -8773,6 +9219,7 @@ function editList(id){
   document.getElementById('listEditId').value=id;
   document.getElementById('listEmoji').value=lst.emoji||'📝';
   document.getElementById('listName').value=lst.name;
+  var ti=document.getElementById('listTagsInp');if(ti)ti.value=(lst.tags||[]).join(', ');
   document.getElementById('listDelBtn').style.display='block';
   setTimeout(function(){
     document.querySelectorAll('[data-g="lcol"]').forEach(function(b){if(b.dataset.v===lst.col){b.classList.add('on');SBV.lcol=lst.col;}});
@@ -8788,9 +9235,17 @@ function saveList(){
   var col=SBV.lcol||LIST_AUTO_COLS[LISTS.filter(function(l){return!l.archived;}).length%LIST_AUTO_COLS.length];
   if(id){
     var lst=LISTS.find(function(l){return l.id===id;});
-    if(lst){lst.emoji=emoji;lst.name=name;lst.col=col;}
+    if(lst){
+      lst.emoji=emoji;lst.name=name;lst.col=col;
+      var tagsInpE=document.getElementById('listTagsInp');
+      var tagsValE=tagsInpE?tagsInpE.value.trim():'';
+      lst.tags=tagsValE?tagsValE.split(',').map(function(t){return t.trim();}).filter(Boolean):lst.tags||[];
+    }
   }else{
-    LISTS.unshift({id:Date.now().toString(),name:name,emoji:emoji,col:col,items:[],created:new Date().toISOString(),archived:false});
+    var tagsInp=document.getElementById('listTagsInp');
+    var tagsVal=tagsInp?tagsInp.value.trim():'';
+    var tags=tagsVal?tagsVal.split(',').map(function(t){return t.trim();}).filter(Boolean):[];
+    LISTS.unshift({id:Date.now().toString(),name:name,emoji:emoji,col:col,items:[],tags:tags,tabLink:'',created:new Date().toISOString(),archived:false});
   }
   localStorage.setItem('aLists',JSON.stringify(LISTS));
   renderLists();closeM('listModal');
@@ -9702,6 +10157,8 @@ function setWUnit(u){
   document.getElementById('wUnitGl').classList.toggle('on',u==='glasses');
   document.getElementById('wUnitOz').classList.toggle('on',u==='oz');
   document.getElementById('sWatLbl').textContent='💧 Water Goal ('+(u==='oz'?'oz/day':'glasses/day')+')';
+  WATER_OZ_GOAL=(u==='oz')?S.gWat:(S.gWat*8);
+  renderWaterBottle();
 }
 
 // ═══════════════════════════════════════════════
@@ -10964,7 +11421,7 @@ function renderYearlyReflection(){
 
 // ── Recap Sections ────────────────────────────────
 function showWellnessSec(sec,btn){
-  ['mood','sleep','symptoms','period','meds'].forEach(function(s){
+  ['mood','sleep','symptoms','period','meds','body'].forEach(function(s){
     var el=document.getElementById('ws-'+s);if(el)el.style.display=s===sec?'':'none';
   });
   document.querySelectorAll('#v-wellness .pn-btn').forEach(function(b){b.classList.remove('on');});
@@ -10974,6 +11431,151 @@ function showWellnessSec(sec,btn){
   if(sec==='symptoms'){renderSymptoms();}
   if(sec==='period'){renderPeriodList();}
   if(sec==='meds'){renderMedList();}
+}
+
+// ── Body Measurements ─────────────────────────────────
+var MEAS_FIELDS=[
+  {id:'weight',label:'⚖️ Weight',unit:'lbs'},
+  {id:'neck',label:'Neck',unit:'in'},
+  {id:'bust',label:'Bust',unit:'in'},
+  {id:'waist',label:'Waist',unit:'in'},
+  {id:'hips',label:'Hips',unit:'in'},
+  {id:'arm',label:'💪 Upper Arm',unit:'in'},
+  {id:'thigh',label:'🦵 Thigh',unit:'in'},
+  {id:'calf',label:'Calf',unit:'in'}
+];
+function getMeasTrend(field){
+  var sorted=MEASUREMENT_LOG.slice().sort(function(a,b){return a.date<b.date?1:-1;});
+  var entries=sorted.filter(function(e){return e[field]!==undefined&&e[field]!==''&&e[field]!==null;});
+  if(entries.length<2)return '→';
+  var a=parseFloat(entries[1][field]),b2=parseFloat(entries[0][field]);
+  if(isNaN(a)||isNaN(b2))return '→';
+  if(b2>a)return '↑';
+  if(b2<a)return '↓';
+  return '→';
+}
+function getMeasLast(field){
+  var sorted=MEASUREMENT_LOG.slice().sort(function(a,b){return a.date<b.date?1:-1;});
+  var entry=sorted.find(function(e){return e[field]!==undefined&&e[field]!==''&&e[field]!==null;});
+  return entry?entry[field]:'';
+}
+function renderMeasurements(){
+  var di=document.getElementById('measDate');
+  if(di&&!di.value)di.value=getTK();
+  renderMeasInputs();
+  updateMannequin();
+  renderMeasTrend();
+}
+function renderMeasInputs(){
+  var c=document.getElementById('measInputs');
+  if(!c)return;
+  var html='';
+  MEAS_FIELDS.forEach(function(f){
+    var last=getMeasLast(f.id);
+    var trend=getMeasTrend(f.id);
+    var tcolor=trend==='↑'?'#e74c3c':trend==='↓'?'#27ae60':'#888';
+    html+='<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">'
+      +'<label style="flex:1;font-size:13px;font-weight:600;color:var(--textd)"onclick="focusMeasInput(\''+f.id+'\')" style="cursor:pointer">'+f.label+'</label>'
+      +'<span style="font-size:12px;color:var(--textl);min-width:60px;text-align:right">'+( last?('Last: '+last+' '+f.unit):'—' )+'</span>'
+      +'<span style="font-size:16px;font-weight:700;color:'+tcolor+';min-width:18px">'+trend+'</span>'
+      +'<input class="fi" id="mi-'+f.id+'" type="number" step="0.1" placeholder="'+f.unit+'" style="width:72px;padding:5px 8px;text-align:center" oninput="updateMannequin()">'
+      +'</div>';
+  });
+  c.innerHTML=html;
+}
+function focusMeasInput(field){
+  var el=document.getElementById('mi-'+field);
+  if(el)el.focus();
+}
+function updateMannequin(){
+  MEAS_FIELDS.forEach(function(f){
+    var input=document.getElementById('mi-'+f.id);
+    var val=input?input.value.trim():'';
+    var last=getMeasLast(f.id);
+    var display=val||(last?last+' '+f.unit:'—');
+    var tv=document.getElementById('mv-'+f.id);
+    if(tv)tv.textContent=display;
+    var dot=document.getElementById('md-'+f.id);
+    if(dot){
+      dot.setAttribute('fill',val?'#a78bfa':'#c8b8e8');
+      dot.setAttribute('r',val?'7':'5');
+    }
+  });
+}
+function renderMeasTrend(){
+  var c=document.getElementById('measTrendSummary');
+  if(!c)return;
+  if(!MEASUREMENT_LOG.length){c.innerHTML='<p style="color:var(--textl);font-size:13px;text-align:center">No entries yet — log your first measurements!</p>';return;}
+  var html='<div style="display:flex;flex-wrap:wrap;gap:8px">';
+  MEAS_FIELDS.forEach(function(f){
+    var last=getMeasLast(f.id);
+    var trend=getMeasTrend(f.id);
+    if(!last)return;
+    var tcolor=trend==='↑'?'#e74c3c':trend==='↓'?'#27ae60':'#888';
+    html+='<div style="background:#f8f5ff;border:1px solid #ddd6f3;border-radius:8px;padding:6px 10px;min-width:80px;text-align:center">'
+      +'<div style="font-size:10px;color:var(--textl)">'+(f.label.replace(/[^\w\s]/g,'').trim()||f.id)+'</div>'
+      +'<div style="font-size:14px;font-weight:700;color:var(--textd)">'+last+' <span style="font-size:10px;color:var(--textl)">'+f.unit+'</span></div>'
+      +'<div style="font-size:18px;font-weight:700;color:'+tcolor+'">'+trend+'</div>'
+      +'</div>';
+  });
+  html+='</div>';
+  c.innerHTML=html;
+}
+function logMeasurements(){
+  var di=document.getElementById('measDate');
+  var ni=document.getElementById('measNotes');
+  var date=di?di.value:getTK();
+  if(!date)date=getTK();
+  var entry={id:'ml_'+Date.now(),date:date,notes:ni?ni.value.trim():''};
+  var hasVal=false;
+  MEAS_FIELDS.forEach(function(f){
+    var inp=document.getElementById('mi-'+f.id);
+    if(inp&&inp.value.trim()){entry[f.id]=inp.value.trim();hasVal=true;}
+  });
+  if(!hasVal){showToast('Enter at least one measurement');return;}
+  MEASUREMENT_LOG.push(entry);
+  localStorage.setItem('aMeasLog',JSON.stringify(MEASUREMENT_LOG));
+  if(typeof fbSave==='function')fbSave('measlog',entry.id,entry);
+  showToast('Measurements saved ✨');
+  if(ni)ni.value='';
+  MEAS_FIELDS.forEach(function(f){var inp=document.getElementById('mi-'+f.id);if(inp)inp.value='';});
+  renderMeasurements();
+  if(typeof renderHWHubStats==='function')renderHWHubStats();
+}
+function openMeasLog(){
+  var c=document.getElementById('measLogList');
+  if(!c)return;
+  if(!MEASUREMENT_LOG.length){c.innerHTML='<p style="color:var(--textl);font-size:13px;text-align:center;padding:20px">No entries yet.</p>';showOv('ovMeasLog');return;}
+  var sorted=MEASUREMENT_LOG.slice().sort(function(a,b){return a.date<b.date?1:-1;});
+  var html='';
+  sorted.forEach(function(e){
+    html+='<div style="border:1px solid #e8e0f8;border-radius:10px;padding:12px;margin-bottom:10px">'
+      +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">'
+      +'<span style="font-weight:700;color:var(--textd)">'+e.date+'</span>'
+      +'<button onclick="delMeasEntry(\''+e.id+'\')" style="background:none;border:none;color:#e74c3c;cursor:pointer;font-size:16px">🗑</button>'
+      +'</div>'
+      +'<div style="display:flex;flex-wrap:wrap;gap:6px">';
+    MEAS_FIELDS.forEach(function(f){
+      if(e[f.id]){
+        html+='<span style="background:#f0ebff;border-radius:6px;padding:3px 8px;font-size:12px"><b>'+f.label.replace(/[^\w\s]/g,'').trim()+':</b> '+e[f.id]+' '+f.unit+'</span>';
+      }
+    });
+    html+='</div>';
+    if(e.notes)html+='<div style="margin-top:6px;font-size:12px;color:var(--textl)">'+escHtml(e.notes)+'</div>';
+    html+='</div>';
+  });
+  c.innerHTML=html;
+  showOv('ovMeasLog');
+}
+function delMeasEntry(id){
+  if(!confirm('Delete this entry?'))return;
+  MEASUREMENT_LOG=MEASUREMENT_LOG.filter(function(e){return e.id!==id;});
+  localStorage.setItem('aMeasLog',JSON.stringify(MEASUREMENT_LOG));
+  if(typeof fbDelete==='function')fbDelete('measlog',id);
+  openMeasLog();
+  renderMeasTrend();
+  updateMannequin();
+  if(typeof renderHWHubStats==='function')renderHWHubStats();
 }
 
 function showRecapSec(sec,btn){
@@ -12655,10 +13257,14 @@ function addFave(){
   var imgUrl=((document.getElementById('faveImgUrl')||{}).value||'').trim();
   var img=_favePendingImg||imgUrl||'';
   var cat=((document.getElementById('faveCat')||{}).value||'').trim();
-  FAVES.unshift({id:'fv-'+Date.now(),name:name,url:url,img:img,cat:cat,accent:_faveAccent});
+  var source=((document.getElementById('faveSource')||{}).value||'').trim();
+  var dateGot=((document.getElementById('faveDateGot')||{}).value||'');
+  var size=((document.getElementById('faveSize')||{}).value||'').trim();
+  var notes=((document.getElementById('faveNotes')||{}).value||'').trim();
+  FAVES.unshift({id:'fv-'+Date.now(),name:name,url:url,img:img,cat:cat,accent:_faveAccent,source:source,dateGot:dateGot,size:size,notes:notes});
   localStorage.setItem('aFaves',JSON.stringify(FAVES));
   _favePendingImg='';
-  ['faveName','faveUrl','faveImgUrl','faveCat'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});
+  ['faveName','faveUrl','faveImgUrl','faveCat','faveSource','faveDateGot','faveSize','faveNotes'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});
   var fp=document.getElementById('faveImgPreview');if(fp){fp.src='';fp.style.display='none';}
   var ff=document.getElementById('faveImgFile');if(ff)ff.value='';
   renderFaves();
@@ -12711,6 +13317,12 @@ function renderFavesGrid(){
       +'<div class="fave-card-body">'
       +'<div class="fave-card-name">'+f.name+'</div>'
       +(f.cat?'<span class="fave-card-cat">'+f.cat+'</span>':'')
+      +(f.size||f.source||f.dateGot?'<div style="font-size:11px;color:var(--textl);margin-top:3px">'
+        +(f.size?'📏 '+escHtml(f.size)+'  ':'')
+        +(f.source?'🛍️ '+escHtml(f.source)+'  ':'')
+        +(f.dateGot?'📅 '+f.dateGot.slice(0,7):'')
+      +'</div>':'')
+      +(f.notes?'<div style="font-size:11px;color:var(--textl);font-style:italic;margin-top:2px">'+escHtml(f.notes)+'</div>':'')
       +'</div>'
       +'</div>'
       +'<button class="fave-card-del" onclick="delFaveById(event,\''+f.id+'\')">✕</button>'
@@ -12782,7 +13394,7 @@ function addVbItem(){
   var caption=((document.getElementById('vbCaption')||{}).value||'').trim();
   if(type==='image'&&_vbPendingImg){text=_vbPendingImg;}
   if(!text)return alert('Enter some text or a URL');
-  VB_ITEMS.unshift({id:'vb-'+Date.now(),type:type,text:text,caption:caption});
+  VB_ITEMS.unshift({id:'vb-'+Date.now(),type:type,text:text,caption:caption,year:new Date().getFullYear()});
   _vbPendingImg='';
   var fp=document.getElementById('vbImgPreview');if(fp){fp.src='';fp.style.display='none';}
   var ff=document.getElementById('vbImgFile');if(ff)ff.value='';
@@ -15239,39 +15851,61 @@ function addDbItemToGrocery(id){
 
 var FOOD_CAT_EMOJI = {protein:'🥩',vegetable:'🥦',grain:'🌾',dairy:'🥛',fruit:'🍎',snack:'🍿',beverage:'☕',condiment:'🧂',other:'📦'};
 
+var _fdbServings = []; // working array for serving sizes in modal
 function openFoodDbModal(editId){
+  document.getElementById('fdbModalTitle').textContent = editId ? '✏️ Edit Ingredient' : '🧩 Add Ingredient';
   document.getElementById('fdbId').value = editId||'';
-  ['fdbName','fdbStore','fdbRecipe','fdbServing','fdbCustomTag'].forEach(function(id){var e=document.getElementById(id);if(e)e.value='';});
-  ['fdbCal','fdbPro','fdbCarb','fdbFat','fdbPrice'].forEach(function(id){var e=document.getElementById(id);if(e)e.value='';});
-  // Reset tag chips
+  // Reset all fields
+  ['fdbName','fdbBrand','fdbAliases','fdbSvLabel','fdbBarcode','fdbUrl','fdbNotes','fdbCustomTag','fdbStore'].forEach(function(id){var e=document.getElementById(id);if(e)e.value='';});
+  ['fdbCal','fdbPro','fdbCarb','fdbFat','fdbFib','fdbPrice','fdbSvGrams','fdbUsualQty'].forEach(function(id){var e=document.getElementById(id);if(e)e.value='';});
   document.querySelectorAll('#fdbTagChips .fchip').forEach(function(b){b.classList.remove('on');});
-  var customTagList=document.getElementById('fdbCustomTagList');
-  if(customTagList)customTagList.innerHTML='';
-  var del = document.getElementById('fdbDelBtn');
+  var ctl=document.getElementById('fdbCustomTagList');if(ctl)ctl.innerHTML='';
+  var per100el=document.getElementById('fdbPer100Preview');if(per100el){per100el.style.display='none';per100el.textContent='';}
+  var bst=document.getElementById('fdbBarcodeStatus');if(bst)bst.textContent='';
+  var typeEl=document.getElementById('fdbType');if(typeEl)typeEl.value='generic';
+  _fdbServings=[];
+  var del=document.getElementById('fdbDelBtn');
   if(editId){
-    var item = FOOD_DB.find(function(x){return x.id===editId;});
+    var item=FOOD_DB.find(function(x){return x.id===editId;});
     if(item){
-      ['name','store','recipe','serving'].forEach(function(f){var e=document.getElementById('fdb'+f.charAt(0).toUpperCase()+f.slice(1));if(e)e.value=item[f]||'';});
-      ['cal','pro','carb','fat','price'].forEach(function(f){var e=document.getElementById('fdb'+f.charAt(0).toUpperCase()+f.slice(1));if(e)e.value=item[f]||'';});
-      // Set tag chips from item.tags (with fallback from item.cat)
-      var itemTags=item.tags||(item.cat?[item.cat]:[]);
-      var knownTags=['protein','vegetable','grain','dairy','fruit','snack','beverage','condiment','other'];
-      itemTags.forEach(function(tag){
+      var ne=document.getElementById('fdbName');if(ne)ne.value=item.name||'';
+      var be=document.getElementById('fdbBrand');if(be)be.value=item.brand||'';
+      var ae=document.getElementById('fdbAliases');if(ae)ae.value=(item.aliases||[]).join(', ');
+      var te=document.getElementById('fdbType');if(te)te.value=item.type||'generic';
+      var ure=document.getElementById('fdbUrl');if(ure)ure.value=item.url||'';
+      var bar=document.getElementById('fdbBarcode');if(bar)bar.value=item.barcode||'';
+      var no=document.getElementById('fdbNotes');if(no)no.value=item.notes||'';
+      var st=document.getElementById('fdbStore');if(st)st.value=item.store||'';
+      var pr=document.getElementById('fdbPrice');if(pr)pr.value=item.price||'';
+      // Primary serving
+      var primarySv=item.servings&&item.servings.length?item.servings[0]:null;
+      var svl=document.getElementById('fdbSvLabel');if(svl)svl.value=primarySv?primarySv.label:(item.serving||'');
+      var svg2=document.getElementById('fdbSvGrams');if(svg2)svg2.value=primarySv?primarySv.grams:'';
+      // Nutrition (per default serving)
+      var ce=document.getElementById('fdbCal');if(ce)ce.value=item.cal||'';
+      var pe=document.getElementById('fdbPro');if(pe)pe.value=item.pro||'';
+      var cbe=document.getElementById('fdbCarb');if(cbe)cbe.value=item.carb||'';
+      var fe=document.getElementById('fdbFat');if(fe)fe.value=item.fat||'';
+      var fie=document.getElementById('fdbFib');if(fie)fie.value=item.fiber||'';
+      // Additional servings (index 1+)
+      _fdbServings=(item.servings&&item.servings.length>1)?item.servings.slice(1).map(function(s){return {id:s.id,label:s.label,grams:s.grams};}):[];
+      // My usual
+      var uqe=document.getElementById('fdbUsualQty');if(uqe)uqe.value=(item.myUsual&&item.myUsual.qty)||1;
+      // Tags
+      var knownTags=['protein','vegetable','grain','dairy','fruit','snack','beverage','condiment','supplement','other'];
+      (item.tags||(item.cat?[item.cat]:[])).forEach(function(tag){
         var chip=document.querySelector('#fdbTagChips .fchip[data-tag="'+tag+'"]');
-        if(chip){chip.classList.add('on');}
-        else if(knownTags.indexOf(tag)<0&&customTagList){
-          // custom tag
-          var span=document.createElement('span');
-          span.className='fchip on';span.dataset.customTag=tag;
-          span.style.cursor='pointer';
-          span.textContent=tag;
-          span.onclick=function(){span.remove();};
-          customTagList.appendChild(span);
-        }
+        if(chip)chip.classList.add('on');
+        else if(ctl&&knownTags.indexOf(tag)<0){var sp=document.createElement('span');sp.className='fchip on';sp.dataset.customTag=tag;sp.style.cursor='pointer';sp.textContent=tag;sp.onclick=function(){sp.remove();};ctl.appendChild(sp);}
       });
     }
     if(del)del.style.display='';
-  } else { if(del)del.style.display='none'; }
+  } else {
+    if(del)del.style.display='none';
+    document.getElementById('fdbUsualQty').value='1';
+  }
+  renderFdbServings();
+  calcFdbPer100Preview();
   openM('foodDbModal');
 }
 
@@ -15281,46 +15915,206 @@ function saveFoodDb(){
   var id=document.getElementById('fdbId').value||('fd-'+Date.now());
   var isNew=!document.getElementById('fdbId').value;
   var existingItem=FOOD_DB.find(function(x){return x.id===id;});
-  // Collect selected tags from chip buttons
+  // Tags
   var selectedTags=[];
   document.querySelectorAll('#fdbTagChips .fchip.on').forEach(function(b){if(b.dataset.tag)selectedTags.push(b.dataset.tag);});
-  // Also collect custom tags
-  var customTagList=document.getElementById('fdbCustomTagList');
-  if(customTagList){customTagList.querySelectorAll('[data-custom-tag]').forEach(function(s){selectedTags.push(s.dataset.customTag);});}
+  var ctl=document.getElementById('fdbCustomTagList');
+  if(ctl)ctl.querySelectorAll('[data-custom-tag]').forEach(function(s){selectedTags.push(s.dataset.customTag);});
   if(!selectedTags.length)selectedTags=['other'];
+  // Primary serving
+  var svLabel=(document.getElementById('fdbSvLabel').value||'').trim();
+  var svGrams=parseFloat(document.getElementById('fdbSvGrams').value)||0;
+  var primarySvId=existingItem&&existingItem.servings&&existingItem.servings.length?existingItem.servings[0].id:('sv-'+Date.now());
+  var primaryServing=svLabel?{id:primarySvId,label:svLabel,grams:svGrams}:null;
+  // All servings = primary + additional
+  var allServings=primaryServing?[primaryServing].concat(_fdbServings):_fdbServings.slice();
+  // Nutrition per default serving
+  var cal=parseFloat(document.getElementById('fdbCal').value)||0;
+  var pro=parseFloat(document.getElementById('fdbPro').value)||0;
+  var carb=parseFloat(document.getElementById('fdbCarb').value)||0;
+  var fat=parseFloat(document.getElementById('fdbFat').value)||0;
+  var fiber=parseFloat(document.getElementById('fdbFib').value)||0;
+  // per100 calc
+  var per100={cal:0,pro:0,carb:0,fat:0,fib:0};
+  if(svGrams>0){
+    per100.cal=Math.round(cal/svGrams*100*10)/10;
+    per100.pro=Math.round(pro/svGrams*100*10)/10;
+    per100.carb=Math.round(carb/svGrams*100*10)/10;
+    per100.fat=Math.round(fat/svGrams*100*10)/10;
+    per100.fib=Math.round(fiber/svGrams*100*10)/10;
+  }
+  // My usual
+  var usualQty=parseFloat(document.getElementById('fdbUsualQty').value)||1;
+  var usualSvEl=document.getElementById('fdbUsualSv');
+  var usualSvId=usualSvEl?usualSvEl.value:'';
+  var myUsual={qty:usualQty,svId:usualSvId||(primaryServing?primaryServing.id:'')};
+  // Aliases
+  var aliasesRaw=(document.getElementById('fdbAliases').value||'').trim();
+  var aliases=aliasesRaw?aliasesRaw.split(',').map(function(a){return a.trim();}).filter(Boolean):[];
   var item={
     id:id, name:name,
-    tags:selectedTags,
-    cat:selectedTags[0], // keep cat for backward compat
-    cal:parseFloat(document.getElementById('fdbCal').value)||0,
-    pro:parseFloat(document.getElementById('fdbPro').value)||0,
-    carb:parseFloat(document.getElementById('fdbCarb').value)||0,
-    fat:parseFloat(document.getElementById('fdbFat').value)||0,
+    brand:(document.getElementById('fdbBrand').value||'').trim(),
+    type:(document.getElementById('fdbType').value||'generic'),
+    tags:selectedTags, cat:selectedTags[0],
+    cal:cal, pro:pro, carb:carb, fat:fat, fiber:fiber,
+    per100:per100,
+    servings:allServings,
+    myUsual:myUsual,
+    serving:svLabel||(existingItem?existingItem.serving||'':''),
     price:parseFloat(document.getElementById('fdbPrice').value)||0,
     store:(document.getElementById('fdbStore').value||'').trim(),
-    recipe:(document.getElementById('fdbRecipe').value||'').trim(),
-    serving:(document.getElementById('fdbServing').value||'').trim(),
+    url:(document.getElementById('fdbUrl').value||'').trim(),
+    barcode:(document.getElementById('fdbBarcode').value||'').trim(),
+    notes:(document.getElementById('fdbNotes').value||'').trim(),
+    aliases:aliases,
     added:todayStr(),
     favorite:existingItem?existingItem.favorite:false,
     staple:existingItem?existingItem.staple:false,
     useCount:existingItem?existingItem.useCount:0
   };
-  var existing = FOOD_DB.findIndex(function(x){return x.id===id;});
-  if(existing>=0) FOOD_DB[existing]=item; else FOOD_DB.unshift(item);
+  var existing=FOOD_DB.findIndex(function(x){return x.id===id;});
+  if(existing>=0)FOOD_DB[existing]=item;else FOOD_DB.unshift(item);
   saveFoodDbData();
   closeM('foodDbModal');
-  if(isNew){
-    var alreadyInGrocery=GROCERY_LIST.some(function(g){return g.name.toLowerCase()===name.toLowerCase();});
-    if(!alreadyInGrocery){
-      GROCERY_LIST.push({id:'gr-'+Date.now(),name:name,qty:'1',unit:item.serving||'',category:selectedTags[0]||'Other',store:item.store||'',checked:false});
-      localStorage.setItem('aGroceryList',JSON.stringify(GROCERY_LIST));
-      showToast('Added to grocery — tap 🛒 to view');
-    }
-  }
   renderFoodDb();
   renderFoodDbKitchen();
   renderHubPreviews('hearthside');
   renderHWHubStats();
+  showToast(isNew?'Added to Ingredient Library ✨':'Updated ✨');
+}
+
+function calcFdbPer100Preview(){
+  var grams=parseFloat((document.getElementById('fdbSvGrams')||{}).value)||0;
+  var cal=parseFloat((document.getElementById('fdbCal')||{}).value)||0;
+  var pro=parseFloat((document.getElementById('fdbPro')||{}).value)||0;
+  var carb=parseFloat((document.getElementById('fdbCarb')||{}).value)||0;
+  var fat=parseFloat((document.getElementById('fdbFat')||{}).value)||0;
+  var fib=parseFloat((document.getElementById('fdbFib')||{}).value)||0;
+  var el=document.getElementById('fdbPer100Preview');
+  if(!el)return;
+  if(!grams){el.style.display='none';return;}
+  var p100c=Math.round(cal/grams*100*10)/10;
+  var p100p=Math.round(pro/grams*100*10)/10;
+  var p100cb=Math.round(carb/grams*100*10)/10;
+  var p100f=Math.round(fat/grams*100*10)/10;
+  el.style.display='';
+  el.innerHTML='Per 100g: <b>'+p100c+' cal</b> · '+p100p+'g protein · '+p100cb+'g carbs · '+p100f+'g fat'+(fib?' · '+Math.round(fib/grams*100*10)/10+'g fiber':'');
+  updateFdbUsualSelect();
+}
+function renderFdbServings(){
+  var el=document.getElementById('fdbServingsList');
+  if(!el)return;
+  if(!_fdbServings.length){el.innerHTML='<div style="font-size:11px;color:var(--textl)">No additional serving sizes yet.</div>';updateFdbUsualSelect();return;}
+  el.innerHTML=_fdbServings.map(function(sv,i){
+    return '<div style="display:flex;gap:6px;align-items:center">'
+      +'<input class="fi" value="'+escHtml(sv.label)+'" placeholder="Label (e.g. 1 cup)" style="flex:1;margin-bottom:0;font-size:12px;padding:6px 10px" oninput="_fdbServings['+i+'].label=this.value;updateFdbUsualSelect()">'
+      +'<input class="fi" type="number" value="'+(sv.grams||'')+'" placeholder="g" style="width:66px;margin-bottom:0;font-size:12px;padding:6px 8px;text-align:center" oninput="_fdbServings['+i+'].grams=parseFloat(this.value)||0">'
+      +'<button onclick="_fdbServings.splice('+i+',1);renderFdbServings()" style="background:none;border:none;color:#e74c3c;font-size:16px;cursor:pointer;flex-shrink:0;padding:2px">✕</button>'
+      +'</div>';
+  }).join('');
+  updateFdbUsualSelect();
+}
+function addFdbServing(){
+  _fdbServings.push({id:'sv-'+Date.now(),label:'',grams:0});
+  renderFdbServings();
+  var el=document.getElementById('fdbServingsList');
+  if(el){var inputs=el.querySelectorAll('input[placeholder="Label (e.g. 1 cup)"]');if(inputs.length)inputs[inputs.length-1].focus();}
+}
+function updateFdbUsualSelect(){
+  var sel=document.getElementById('fdbUsualSv');
+  if(!sel)return;
+  var svLabel=(document.getElementById('fdbSvLabel')||{}).value||'';
+  var prevVal=sel.value;
+  var opts='<option value="">— primary: '+(svLabel||'(label above)')+'</option>';
+  _fdbServings.forEach(function(sv){if(sv.label)opts+='<option value="'+sv.id+'">'+escHtml(sv.label)+'</option>';});
+  sel.innerHTML=opts;
+  sel.value=prevVal;
+}
+function scanBarcode(){
+  var status=document.getElementById('fdbBarcodeStatus');
+  if(!('BarcodeDetector' in window)){
+    if(status)status.textContent='Camera scanning not supported on this browser. Enter barcode manually and tap Look Up.';
+    return;
+  }
+  if(status)status.textContent='Opening camera…';
+  var video=document.createElement('video');
+  video.style.cssText='width:100%;border-radius:10px;margin-top:8px;max-height:200px;object-fit:cover';
+  var scanWrap=document.createElement('div');
+  scanWrap.id='barcodeScanWrap';
+  var cancelBtn=document.createElement('button');
+  cancelBtn.textContent='Cancel';
+  cancelBtn.style.cssText='margin-top:6px;padding:6px 16px;border-radius:8px;border:1.5px solid #ccc;background:#fff;font-family:\'Quicksand\',sans-serif;font-size:12px;cursor:pointer;width:100%';
+  scanWrap.appendChild(video);
+  scanWrap.appendChild(cancelBtn);
+  var barcodeEl=document.getElementById('fdbBarcode');
+  var insertAfter=barcodeEl?barcodeEl.parentElement:null;
+  if(insertAfter)insertAfter.parentElement.insertBefore(scanWrap,insertAfter.nextSibling);
+  var stream=null;
+  var detector=new BarcodeDetector({formats:['ean_13','ean_8','upc_a','upc_e','code_128','code_39']});
+  var scanning=true;
+  cancelBtn.onclick=function(){scanning=false;if(stream)stream.getTracks().forEach(function(t){t.stop();});scanWrap.remove();if(status)status.textContent='';};
+  navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}}).then(function(s){
+    stream=s;video.srcObject=s;video.play();
+    if(status)status.textContent='Point camera at barcode…';
+    function tick(){
+      if(!scanning)return;
+      if(video.readyState===video.HAVE_ENOUGH_DATA){
+        detector.detect(video).then(function(codes){
+          if(codes&&codes.length){
+            var code=codes[0].rawValue;
+            scanning=false;stream.getTracks().forEach(function(t){t.stop();});scanWrap.remove();
+            if(barcodeEl)barcodeEl.value=code;
+            if(status)status.textContent='Barcode: '+code+' — tap Look Up to auto-fill';
+            lookupBarcode();
+          } else { requestAnimationFrame(tick); }
+        }).catch(function(){requestAnimationFrame(tick);});
+      } else { requestAnimationFrame(tick); }
+    }
+    requestAnimationFrame(tick);
+  }).catch(function(err){if(stream)stream.getTracks().forEach(function(t){t.stop();});scanWrap.remove();if(status)status.textContent='Camera access denied. Enter barcode manually.';});
+}
+function lookupBarcode(){
+  var barcode=(document.getElementById('fdbBarcode').value||'').trim();
+  var status=document.getElementById('fdbBarcodeStatus');
+  if(!barcode){if(status)status.textContent='Enter a barcode number first';return;}
+  if(status)status.innerHTML='🔍 Looking up barcode…';
+  fetch('https://world.openfoodfacts.org/api/v0/product/'+encodeURIComponent(barcode)+'.json')
+    .then(function(r){return r.json();})
+    .then(function(data){
+      if(data.status!==1||!data.product){if(status)status.textContent='Not found in Open Food Facts. Fill in manually.';return;}
+      var p=data.product;
+      var n=p.nutriments||{};
+      var svG=parseFloat(p.serving_quantity)||0;
+      var svLabel=p.serving_size||'';
+      var ne=document.getElementById('fdbName');if(ne&&!ne.value)ne.value=p.product_name||p.product_name_en||'';
+      var br=document.getElementById('fdbBrand');if(br&&!br.value)br.value=p.brands||'';
+      var cal100=parseFloat(n['energy-kcal_100g']||n.energy_100g)||0;
+      var pro100=parseFloat(n.proteins_100g)||0;
+      var carb100=parseFloat(n.carbohydrates_100g)||0;
+      var fat100=parseFloat(n.fat_100g)||0;
+      var fib100=parseFloat(n.fiber_100g)||0;
+      if(svG>0){
+        var f=svG/100;
+        document.getElementById('fdbCal').value=Math.round(cal100*f);
+        document.getElementById('fdbPro').value=Math.round(pro100*f*10)/10;
+        document.getElementById('fdbCarb').value=Math.round(carb100*f*10)/10;
+        document.getElementById('fdbFat').value=Math.round(fat100*f*10)/10;
+        document.getElementById('fdbFib').value=Math.round(fib100*f*10)/10;
+        document.getElementById('fdbSvGrams').value=svG;
+        document.getElementById('fdbSvLabel').value=svLabel||svG+'g';
+      } else {
+        document.getElementById('fdbCal').value=Math.round(cal100);
+        document.getElementById('fdbPro').value=Math.round(pro100*10)/10;
+        document.getElementById('fdbCarb').value=Math.round(carb100*10)/10;
+        document.getElementById('fdbFat').value=Math.round(fat100*10)/10;
+        document.getElementById('fdbFib').value=Math.round(fib100*10)/10;
+        document.getElementById('fdbSvGrams').value=100;
+        document.getElementById('fdbSvLabel').value='100g';
+      }
+      calcFdbPer100Preview();
+      if(status)status.innerHTML='<span style="color:var(--sage)">✅ Found: '+escHtml(p.product_name||barcode)+'</span> — review and save';
+    })
+    .catch(function(){if(status)status.textContent='Lookup failed. Check your connection or fill in manually.';});
 }
 
 function delFoodDb(){
@@ -15451,7 +16245,13 @@ function renderFoodDb(){
         +(item.cal?'<span style="margin-right:8px">🔥 '+item.cal+'cal</span>':'')
         +(item.pro?'<span style="margin-right:8px">💪 '+item.pro+'g pro</span>':'')
         +(item.carb?'<span style="margin-right:8px">🌾 '+item.carb+'g carb</span>':'')
-        +(item.fat?'<span>🫒 '+item.fat+'g fat</span>':'')
+        +(item.fat?'<span style="margin-right:6px">🫒 '+item.fat+'g fat</span>':'')
+        +(item.fiber?'<span>🌿 '+item.fiber+'g fiber</span>':'')
+        +(item.per100&&item.per100.cal?'<span style="margin-left:6px;color:#bbb">· per 100g: '+item.per100.cal+'cal</span>':'')
+        +'</div>':'')
+      +(item.servings&&item.servings.length?'<div style="font-size:10px;color:var(--textl);margin-top:2px">📏 '
+        +item.servings.map(function(s){return escHtml(s.label)+(s.grams?' ('+s.grams+'g)':'');}).join(' · ')
+        +(item.myUsual&&item.myUsual.qty&&item.myUsual.qty!==1?'  ⭐ usual: '+item.myUsual.qty+'×':'')
         +'</div>':'')
       +((item.store||item.price)?'<div style="font-size:11px;color:var(--textl);margin-top:2px">'
         +(item.store?'🏪 '+escHtml(item.store)+' ':'')
@@ -17338,12 +18138,13 @@ function renderSleepGraph(){
   var totals = days.map(function(day){ return dur[day]||0; });
   var logged = totals.filter(function(h){ return h>0; });
   var avg = logged.length ? (logged.reduce(function(a,b){return a+b;},0)/logged.length).toFixed(1) : 0;
-  if(avgLbl) avgLbl.textContent = logged.length ? 'avg '+avg+'h' : 'no data';
-  var maxH = Math.max(10, Math.max.apply(null, totals));
+  var goalH = (S&&S.gSleep)||7;
+  if(avgLbl) avgLbl.textContent = logged.length ? 'avg '+avg+'h / goal '+goalH+'h' : 'goal: '+goalH+'h';
+  var maxH = Math.max(goalH+1, Math.max.apply(null, totals));
   bars.innerHTML = days.map(function(day,i){
     var h = totals[i];
     var pct = h ? Math.round((h/maxH)*100) : 0;
-    var color = h>=8?'var(--sage)':h>=6?'#f0a020':'#d94040';
+    var color = h>=goalH?'var(--sage)':h>=6?'#f0a020':'#d94040';
     var dayLbl = ['Su','Mo','Tu','We','Th','Fr','Sa'][new Date(day+'T12:00:00').getDay()];
     var isToday = day===todayStr();
     return '<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px">'
@@ -18524,6 +19325,7 @@ function delProjInc(id){
     <div class="fg" style="flex-shrink:0"><label class="fl">Emoji</label><input class="fi" id="listEmoji" placeholder="📝" maxlength="4" style="width:64px;text-align:center"></div>
     <div class="fg" style="flex:1"><label class="fl">List Name</label><input class="fi" id="listName" placeholder="e.g. Grocery Run"></div>
   </div>
+  <input id="listTagsInp" type="text" placeholder="Tags (comma-separated, e.g. work, daily, shopping)" class="fi" style="margin-bottom:8px">
   <div class="fg"><label class="fl">Color</label>
     <div class="bg bg4">
       <button class="sb" data-g="lcol" data-v="rose" onclick="pSB(this)">🌸 Rose</button>
@@ -19262,6 +20064,33 @@ function delProjInc(id){
       <button class="ok-btn" style="flex:1;margin:0" onclick="saveProjInc()">Save</button>
       <button class="cn-btn" style="flex:1;margin:0" onclick="this.closest('.ov').classList.remove('show')">Cancel</button>
     </div>
+  </div>
+</div>
+
+<!-- MEASUREMENT LOG MODAL -->
+<div class="ov" id="ovMeasLog" onclick="closeOv('ovMeasLog')">
+  <div class="mod" style="max-height:88vh;overflow-y:auto" onclick="event.stopPropagation()">
+    <div class="mh"><span class="mt">📋 Measurement History</span><button class="mc" onclick="closeOv('ovMeasLog')">✕</button></div>
+    <div id="measLogList" style="padding:4px 0"></div>
+    <button class="cn-btn" onclick="closeOv('ovMeasLog')">Close</button>
+  </div>
+</div>
+
+<!-- MONTHLY REFLECTION MODAL -->
+<div class="ov" id="ovMonthReflection" onclick="closeOv('ovMonthReflection')">
+  <div class="mod" style="max-height:90vh;overflow-y:auto" onclick="event.stopPropagation()">
+    <div class="mh"><span class="mt" id="reflModalTitle">📓 Monthly Reflection</span><button class="mc" onclick="closeOv('ovMonthReflection')">✕</button></div>
+    <div style="font-size:11px;font-weight:700;color:var(--textl);letter-spacing:.5px;text-transform:uppercase;margin-bottom:6px">Reflection Questions</div>
+    <div id="reflQList" style="margin-bottom:10px"></div>
+    <div style="display:flex;gap:6px;margin-bottom:14px">
+      <input class="fi" id="reflQInput" placeholder="Add a question… (e.g. What was your highlight this month?)" style="flex:1;padding:8px;font-size:12px" onkeydown="if(event.key==='Enter')addReflQuestion()">
+      <button onclick="addReflQuestion()" style="padding:8px 14px;border-radius:9px;border:none;background:var(--sage);color:white;font-family:'Quicksand',sans-serif;font-size:13px;font-weight:700;cursor:pointer">Add</button>
+    </div>
+    <div style="font-size:11px;font-weight:700;color:var(--textl);letter-spacing:.5px;text-transform:uppercase;margin-bottom:6px">📸 Memories</div>
+    <div id="reflMemories" style="margin-bottom:12px"></div>
+    <div style="font-size:11px;font-weight:700;color:var(--textl);letter-spacing:.5px;text-transform:uppercase;margin-bottom:6px">📝 Month Notes</div>
+    <textarea class="fi" id="reflNotes" rows="4" placeholder="General notes about this month…" style="resize:vertical;margin-bottom:10px" onchange="saveReflNotes()"></textarea>
+    <button class="ok-btn" onclick="saveReflNotes();closeOv('ovMonthReflection');showToast('Saved ✨')">Save &amp; Close</button>
   </div>
 </div>
 
