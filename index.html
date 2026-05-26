@@ -85,6 +85,8 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
 .fbar::-webkit-scrollbar{display:none}
 .fchip{flex-shrink:0;padding:6px 13px;border-radius:20px;border:2px solid #ede8e3;background:white;font-family:'Quicksand',sans-serif;font-size:12px;font-weight:700;color:var(--textl);cursor:pointer;transition:all .2s}
 .fchip.on{background:var(--rose);border-color:var(--rose);color:white}
+.tf-chip{padding:5px 11px;border-radius:20px;border:1.5px solid var(--bdr);background:#fff;font-family:'Quicksand',sans-serif;font-size:12px;font-weight:700;color:var(--textl);cursor:pointer;transition:all .15s}
+.tf-chip.on{background:var(--lav);border-color:var(--lav);color:#fff}
 
 /* EMPTY */
 .empty{text-align:center;padding:36px 20px;color:var(--textl)}
@@ -1095,7 +1097,6 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
 <!-- TODAY -->
 <div class="view on" id="v-today">
   <div class="gbanner" id="gBanner" style="background:linear-gradient(135deg,rgba(201,160,160,.15),rgba(169,159,201,.15))">
-    <h2 id="gTxt">Good morning, Adri! 🌸</h2>
     <p id="gQuote">The plans of the diligent lead to success. — Prov 21:5</p>
   </div>
   <!-- Intentions widget -->
@@ -1383,24 +1384,29 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
         <div class="uli b"><div class="uln">🔵 Quick Win</div><div class="uls">Urgent, not important</div></div>
         <div class="uli g"><div class="uln">⚪ Someday</div><div class="uls">Not urgent</div></div>
       </div>
-      <div style="display:flex;gap:6px;margin-bottom:8px">
-        <select id="taskFilterSel" onchange="fT(this.value)" style="flex:1;padding:9px 12px;border-radius:10px;border:1.5px solid var(--bdr);font-family:'Quicksand',sans-serif;font-size:13px;font-weight:700;color:var(--textd);background:#fff;cursor:pointer">
-          <option value="all">All Tasks</option>
-          <option value="urgent-important">🔴 Do Now</option>
-          <option value="important-not-urgent">🟡 Schedule</option>
-          <option value="urgent-not-important">🔵 Quick Win</option>
-          <option value="not-urgent">⚪ Someday</option>
-          <option value="unassigned">📥 Unsorted</option>
-          <option value="done">✅ Done</option>
-        </select>
-        <select id="taskSortSel" onchange="setTaskSort(this.value)" style="width:130px;padding:9px 12px;border-radius:10px;border:1.5px solid var(--bdr);font-family:'Quicksand',sans-serif;font-size:13px;font-weight:700;color:var(--textd);background:#fff;cursor:pointer">
-          <option value="urgency">By Priority</option>
-          <option value="due">By Due Date</option>
-          <option value="az">A → Z</option>
-          <option value="cat">By Category</option>
-          <option value="newest">Newest First</option>
-          <option value="oldest">Oldest First</option>
-        </select>
+      <div style="margin-bottom:10px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+          <span style="font-size:11px;font-weight:700;color:var(--textl);text-transform:uppercase;letter-spacing:.5px">Filter</span>
+          <div style="display:flex;gap:6px;align-items:center">
+            <select id="taskSortSel" onchange="setTaskSort(this.value)" style="padding:5px 10px;border-radius:9px;border:1.5px solid var(--bdr);font-family:'Quicksand',sans-serif;font-size:12px;font-weight:700;color:var(--textd);background:#fff;cursor:pointer">
+              <option value="urgency">By Priority</option>
+              <option value="due">By Due Date</option>
+              <option value="az">A → Z</option>
+              <option value="cat">By Category</option>
+              <option value="newest">Newest First</option>
+              <option value="oldest">Oldest First</option>
+            </select>
+            <button onclick="clearTaskFilters()" style="padding:5px 10px;border-radius:9px;border:1.5px solid var(--bdr);background:#fff;font-family:'Quicksand',sans-serif;font-size:12px;font-weight:700;color:var(--textl);cursor:pointer">Clear</button>
+          </div>
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:5px" id="urgFilterChips">
+          <button class="tf-chip" data-tf="urg" data-tv="urgent-important" onclick="togTaskFilter('urg','urgent-important',this)">🔴 Do Now</button>
+          <button class="tf-chip" data-tf="urg" data-tv="important-not-urgent" onclick="togTaskFilter('urg','important-not-urgent',this)">🟡 Schedule</button>
+          <button class="tf-chip" data-tf="urg" data-tv="urgent-not-important" onclick="togTaskFilter('urg','urgent-not-important',this)">🔵 Quick</button>
+          <button class="tf-chip" data-tf="urg" data-tv="not-urgent" onclick="togTaskFilter('urg','not-urgent',this)">⚪ Someday</button>
+          <button class="tf-chip" data-tf="urg" data-tv="done" onclick="togTaskFilter('urg','done',this)">✅ Done</button>
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:5px" id="catFilterChips"></div>
       </div>
       <div id="taskList"></div>
     </div>
@@ -1499,18 +1505,11 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
 <!-- FOOD -->
 <div class="view" id="v-food">
   <!-- MOVE — Workouts & Movement -->
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
-    <button class="health-section-btn" onclick="openSubpage('sp-workouts')">
-      <span class="health-section-icon">💪</span>
-      <div class="health-section-info"><div class="health-section-name">Workouts</div><div class="health-section-sub" id="hd-workout-sub">Plans &amp; log</div></div>
-      <span style="color:var(--textl);font-size:14px">›</span>
-    </button>
-    <button class="health-section-btn" onclick="openSubpage('sp-nutrition')">
-      <span class="health-section-icon">🥗</span>
-      <div class="health-section-info"><div class="health-section-name">Nutrition</div><div class="health-section-sub">Log food &amp; macros</div></div>
-      <span style="color:var(--textl);font-size:14px">›</span>
-    </button>
-  </div>
+  <button class="health-section-btn" style="margin-bottom:14px" onclick="openSubpage('sp-workouts')">
+    <span class="health-section-icon">💪</span>
+    <div class="health-section-info"><div class="health-section-name">Workouts</div><div class="health-section-sub" id="hd-workout-sub">Plans &amp; log</div></div>
+    <span style="color:var(--textl);font-size:14px">›</span>
+  </button>
   <div class="sh" style="display:flex;align-items:center;justify-content:space-between">
     <span>🏋️ Today's Exercise</span>
     <button onclick="openAddEx()" style="background:var(--sage-light);border:none;border-radius:9px;padding:5px 11px;font-family:'Quicksand',sans-serif;font-size:12px;font-weight:700;color:#5a7a56;cursor:pointer">+ Log</button>
@@ -2151,6 +2150,11 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
   </div>
 </div>
 <div class="view" id="v-meals">
+  <button class="health-section-btn" style="margin-bottom:14px" onclick="openSubpage('sp-nutrition')">
+    <span class="health-section-icon">🥗</span>
+    <div class="health-section-info"><div class="health-section-name">Nutrition Log</div><div class="health-section-sub">Log food &amp; macros</div></div>
+    <span style="color:var(--textl);font-size:14px">›</span>
+  </button>
   <div class="pill-nav" style="margin-bottom:12px">
     <button class="pn-btn" onclick="showMealSec('grocery',this)">🛒 Grocery</button>
     <button class="pn-btn on" onclick="showMealSec('meals',this)">🍽️ Meals</button>
@@ -4550,9 +4554,6 @@ function updDate(){
 }
 
 function updGreet(){
-  var h=new Date().getHours();
-  var g=h<12?'Good morning':h<17?'Good afternoon':'Good evening';
-  document.getElementById('gTxt').textContent=g+', '+S.name+'! 🌸';
   var u=TASKS.filter(function(t){return !t.done&&t.urgency==='urgent-important';}).length;
   var l=TASKS.filter(function(t){return !t.done;}).length;
   document.getElementById('dStatus').textContent=u>0?'🔴 '+u+' urgent':l>0?l+' tasks left':'✅ All clear!';
@@ -4638,8 +4639,8 @@ function renderHubPreviews(section){
     var charEl=document.getElementById('hub-char-hearthside');
     if(charEl&&!charEl.querySelector('svg'))charEl.insertAdjacentHTML('afterbegin',emberDrawSVG(36));
     el=document.getElementById('hub-health-sub');
-    var lastSl=MILLIE.sleepLog&&MILLIE.sleepLog.length?MILLIE.sleepLog[MILLIE.sleepLog.length-1]:null;
-    if(el)el.textContent=lastSl?'Last sleep: '+((new Date(lastSl.wake)-new Date(lastSl.bed))/3600000).toFixed(1)+'h':'Log sleep, workouts & wellness';
+    var exToday=(MILLIE.exLog||[]).filter(function(e){return e.date===today;}).length;
+    if(el)el.textContent=exToday?exToday+' workout'+(exToday!==1?'s':'')+' logged today':'Workouts & movement';
     el=document.getElementById('hub-meals-sub');
     if(el)el.textContent='Meal planning · '+(FOOD_DB.length?FOOD_DB.length+' foods in database':'Add foods to your database');
   }else if(section==='workshop'){
@@ -5453,19 +5454,46 @@ function sortTaskArr(arr){
   return arr;
 }
 
-function renderT(f){
-  f=f||CF;
-  var list=document.getElementById('taskList');
-  if(!list)return;
-  var arr;
-  if(f==='done') arr=TASKS.filter(function(t){return t.done;});
-  else if(f==='all') arr=TASKS.filter(function(t){return !t.done;});
-  else if(f==='unassigned') arr=TASKS.filter(function(t){return !t.done&&!t.urgency;});
-  else if(['urgent-important','important-not-urgent','urgent-not-important','not-urgent'].indexOf(f)>-1)
-    arr=TASKS.filter(function(t){return !t.done&&t.urgency===f;});
-  else arr=TASKS.filter(function(t){return !t.done&&t.cat===f;});
+var TASK_FILTERS={urgs:[],cats:[]};
+
+function togTaskFilter(type,val,btn){
+  var arr=type==='urg'?TASK_FILTERS.urgs:TASK_FILTERS.cats;
+  var idx=arr.indexOf(val);
+  if(idx>-1)arr.splice(idx,1);else arr.push(val);
+  if(btn)btn.classList.toggle('on',arr.indexOf(val)>-1);
+  renderT();
+}
+
+function clearTaskFilters(){
+  TASK_FILTERS={urgs:[],cats:[]};
+  document.querySelectorAll('.tf-chip').forEach(function(b){b.classList.remove('on');});
+  renderT();
+}
+
+function renderCatFilterChips(){
+  var el=document.getElementById('catFilterChips');if(!el)return;
+  el.innerHTML=(CATS||[]).map(function(c){
+    var on=TASK_FILTERS.cats.indexOf(c.id)>-1;
+    return'<button class="tf-chip'+(on?' on':'')+'" data-tf="cat" data-tv="'+c.id+'" onclick="togTaskFilter(\'cat\',\''+c.id+'\',this)">'+c.emoji+' '+c.name+'</button>';
+  }).join('');
+}
+
+function renderT(){
+  var list=document.getElementById('taskList');if(!list)return;
+  renderCatFilterChips();
+  var urgs=TASK_FILTERS.urgs;
+  var cats=TASK_FILTERS.cats;
+  var showDone=urgs.indexOf('done')>-1;
+  var urgFilter=urgs.filter(function(u){return u!=='done';});
+  var arr=TASKS.filter(function(t){
+    if(showDone&&t.done)return true;
+    if(t.done&&!showDone)return false;
+    var urgMatch=urgFilter.length===0||urgFilter.indexOf(t.urgency||'')>-1;
+    var catMatch=cats.length===0||cats.indexOf(t.cat||'')>-1;
+    return urgMatch&&catMatch;
+  });
   arr=sortTaskArr(arr);
-  list.innerHTML=arr.length?arr.map(tHTML).join(''):'<div class="empty"><div class="emj">✨</div><p>'+(f==='done'?'Nothing done yet.':'No tasks here.')+'</p></div>';
+  list.innerHTML=arr.length?arr.map(tHTML).join(''):'<div class="empty"><div class="emj">✨</div><p>No tasks match this filter.</p></div>';
   restorePanels(list);
   renderTdTasks();
   updStats();
@@ -5661,10 +5689,8 @@ function saveTask(){
 }
 
 function fT(f){
-  CF=f;
-  var sel=document.getElementById('taskFilterSel');
-  if(sel&&sel.value!==f)sel.value=f;
-  renderT(f);
+  CF=f||'all';
+  renderT();
 }
 
 function updStats(){
@@ -7576,7 +7602,7 @@ function promoteTaskToProject(taskId){
   showToast('📁 Task promoted to project!');
   setTimeout(function(){
     if(document.getElementById('v-tasks')&&document.getElementById('v-tasks').classList.contains('on')){
-      renderT(CF);
+      renderT();
     }
   },400);
 }
@@ -16565,73 +16591,82 @@ var APP_INDEX=[
   {hub:'🏠 Today',items:[
     {label:'Today Overview',action:"goTab('today',null)"},
     {label:'Daily Intentions',action:"goTab('today',null)"},
-    {label:'Quick Stats (Water, Tasks)',action:"goTab('today',null)"},
+    {label:'Quick Stats — Water, Tasks, Mood',action:"goTab('today',null)"},
     {label:'This Week Summary',action:"goTab('today',null)"},
     {label:'Active Goals Widget',action:"goTab('today',null)"},
+    {label:'Spirit Run Meter',action:"goTab('today',null)"},
   ]},
-  {hub:'⛵ Helm',items:[
-    {label:'Tasks',action:"goTab('tasks',null)"},
+  {hub:'📅 Plan',items:[
+    {label:'Monthly Calendar View',action:"goTab('plan',null)"},
+    {label:'This Month\'s To-Do List',action:"goTab('plan',null)"},
+    {label:'Weekly Block Planner',action:"goTab('plan',null)"},
+  ]},
+  {hub:'⚓ Helm — Tasks & Projects',items:[
+    {label:'Tasks (multi-filter, sort)',action:"goTab('tasks',null)"},
     {label:'Projects',action:"goTab('projects',null)"},
     {label:'Lists',action:"goTab('lists',null)"},
     {label:'Brain Dump',action:"goTab('tasks',null)"},
-    {label:'Focus Timer',action:"goTab('tasks',null)"},
+    {label:'Focus Session / Timer',action:"goTab('focus-session',null)"},
+    {label:'Grocery List',action:"goTab('grocery',null)"},
   ]},
-  {hub:'🌿 Conservatory',items:[
+  {hub:'🌿 Conservatory — Personal Growth',items:[
     {label:'Goals (Yearly/Quarterly/Monthly)',action:"goTab('goals',null)"},
-    {label:'Routines & Habits',action:"goTab('routines',null)"},
-    {label:'Flashcards / Learning',action:"goTab('learn',null)"},
-    {label:'Focus Mode',action:"goTab('focus',null)"},
+    {label:'Learning & Flashcards',action:"goTab('learn',null)"},
+    {label:'Focus Tools & Intentions',action:"goTab('focus',null)"},
   ]},
-  {hub:'🍳 Hearthside',items:[
-    {label:'Food & Macros',action:"goTab('food',null)"},
-    {label:'Sleep Tracker',action:"goTab('food',null)"},
-    {label:'Symptom Tracker',action:"goTab('food',null)"},
-    {label:'Mood Log',action:"goTab('recap',null)"},
-    {label:'Meals & Recipes',action:"goTab('meals',null)"},
-    {label:'Meal Plan',action:"goTab('meals',null)"},
-    {label:'Grocery List',action:"goTab('meals',null)"},
-    {label:'Pantry Inventory',action:"goTab('meals',null)"},
-    {label:'Recap',action:"goTab('recap',null)"},
+  {hub:'🏡 Hearthside — Health & Wellness',items:[
+    {label:'Move — Workouts & Exercise Log',action:"goTab('food',null)"},
+    {label:'Eat — Meals, Recipes, Grocery, Nutrition',action:"goTab('meals',null)"},
+    {label:'Wellness — Sleep, Mood, Symptoms, Meds',action:"goTab('wellness',null)"},
+    {label:'Food Database',action:"goTab('meals',null)"},
+    {label:'Meal Plan (weekly)',action:"goTab('meals',null)"},
+    {label:'Recap & Year Stats',action:"goTab('recap',null)"},
   ]},
-  {hub:'🎨 Workshop',items:[
+  {hub:'🔨 Workshop — Creative',items:[
     {label:'Vision Board',action:"goTab('board',null)"},
     {label:'Favorites',action:"goTab('faves',null)"},
     {label:'Stories',action:"goTab('stories',null)"},
     {label:'Mixtape',action:"goTab('mixtape',null)"},
+    {label:'Places',action:"goTab('places',null)"},
   ]},
-  {hub:'🏠 Estate',items:[
-    {label:'Bills & Budget',action:"goTab('estate',null)"},
+  {hub:'🕯️ Lighthouse — Spiritual',items:[
+    {label:'Prayer Log',action:"goTab('spirit',null)"},
+    {label:'Ministry Log',action:"goTab('spirit',null)"},
+    {label:'Gratitude Journal',action:"goTab('spirit',null)"},
+    {label:'Bible Reading Tracker',action:"goTab('spirit',null)"},
+    {label:'Favorite Scriptures',action:"goTab('spirit',null)"},
+    {label:'Spiritual To-Do\'s',action:"goTab('spirit',null)"},
+    {label:'Spirit Books',action:"goTab('spirit',null)"},
+    {label:'Study Notes',action:"goTab('spirit',null)"},
+  ]},
+  {hub:'🏛️ Estate — Money & Home',items:[
+    {label:'Bills & Budget',action:"goTab('money',null)"},
+    {label:'Accounts',action:"goTab('accounts',null)"},
+    {label:'Expenses',action:"goTab('money',null)"},
     {label:'Income',action:"goTab('money',null)"},
-    {label:'Monthly Expenses',action:"goTab('money',null)"},
+    {label:'Home Items',action:"goTab('home-items',null)"},
+    {label:'Money Projects',action:"goTab('money-projects',null)"},
   ]},
-  {hub:'🕯️ Lighthouse',items:[
-    {label:'Prayer Log',action:"goTab('lighthouse',null)"},
-    {label:'Ministry Log',action:"goTab('lighthouse',null)"},
-    {label:'Gratitude Journal',action:"goTab('lighthouse',null)"},
-    {label:'Bible Reading',action:"goTab('lighthouse',null)"},
-    {label:'Scripture Notes',action:"goTab('lighthouse',null)"},
-    {label:'Flashcard Decks',action:"goTab('lighthouse',null)"},
-    {label:'Spiritual Streaks',action:"goTab('lighthouse',null)"},
+  {hub:'🏪 Emporium — Work',items:[
+    {label:'Wig Inventory',action:"goTab('wigs',null)"},
+    {label:'Work Projects',action:"goTab('work-projects',null)"},
+    {label:'Income Goal',action:"goTab('wigs',null)"},
   ]},
-  {hub:'🧺 Emporium',items:[
-    {label:'Wig Inventory',action:"goTab('emporium',null)"},
-    {label:'Business Goal',action:"goTab('emporium',null)"},
+  {hub:'📚 Research Library',items:[
+    {label:'Study Cards & Research Notes',action:"goTab('guide',null)"},
+    {label:'Routines (Daily & Weekly)',action:"goTab('routines',null)"},
+    {label:'App Index',action:"openAppIndexInGuide()"},
+    {label:'Project Templates',action:"openTemplatesInGuide()"},
+    {label:'Year Archive',action:"goTab('archive',null)"},
   ]},
-  {hub:'🌍 World',items:[
-    {label:'Brindleport World',action:"goTab('world',null)"},
-    {label:"Ember's Inn Rush Game",action:"openInnRush()"},
-    {label:'Reid Runner Game',action:"openReidRunner()"},
-    {label:'Daily Road (Activity)',action:"goTab('today',null)"},
-  ]},
-  {hub:'🐱 Millie',items:[
-    {label:'Millie the Cat',action:"openMillie()"},
-    {label:'Millie Feed Game',action:"openMillie()"},
-    {label:'Millie Play (Yarn)',action:"openMillie()"},
-  ]},
-  {hub:'📚 Archives',items:[
-    {label:'App Guide',action:"goTab('guide',null)"},
-    {label:'Data Export',action:"goTab('export',null)"},
-    {label:'Settings',action:"goTab('settings',null)"},
+  {hub:'⚙️ Settings',items:[
+    {label:'Appearance & Banner',action:"goTab('settings',null)"},
+    {label:'Theme Colors',action:"goTab('settings',null)"},
+    {label:'Task Categories',action:"goTab('settings',null)"},
+    {label:'PIN & Tab Protection',action:"goTab('settings',null)"},
+    {label:'Export & Backup',action:"goTab('export',null)"},
+    {label:'Spiritual Meter',action:"goTab('settings',null)"},
+    {label:'Health Goals (calories, water, exercise)',action:"goTab('settings',null)"},
   ]},
 ];
 
@@ -16666,6 +16701,7 @@ function startApp(){
   renderWeekStats();
   renderTaskCatBtns();
   renderCatFilters();
+  renderCatFilterChips();
   renderTmplBar();
   renderMood();
   renderSymCard();
