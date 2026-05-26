@@ -857,17 +857,29 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
   </div>
   <!-- Quick recap inline on hub -->
   <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px">
-    <div style="background:#fff;border-radius:12px;padding:10px;text-align:center;box-shadow:0 1px 4px rgba(0,0,0,.06)">
-      <div style="font-size:20px;font-weight:700;color:var(--rose)" id="hwHub-tasks">—</div>
-      <div style="font-size:10px;color:var(--textl);margin-top:2px">Tasks done</div>
+    <div style="background:#fff;border-radius:12px;padding:10px;text-align:center;box-shadow:0 1px 4px rgba(0,0,0,.06);cursor:pointer" onclick="goTab('wellness',null);setTimeout(function(){showWellnessSec('sleep',document.querySelector('#v-wellness .pn-btn:nth-child(2)'))},200)">
+      <div style="font-size:18px;font-weight:700;color:var(--lav)" id="hwHub-sleep">—</div>
+      <div style="font-size:10px;color:var(--textl);margin-top:2px">Sleep hrs</div>
     </div>
-    <div style="background:#fff;border-radius:12px;padding:10px;text-align:center;box-shadow:0 1px 4px rgba(0,0,0,.06)">
-      <div style="font-size:20px;font-weight:700;color:var(--blue)" id="hwHub-water">—</div>
+    <div style="background:#fff;border-radius:12px;padding:10px;text-align:center;box-shadow:0 1px 4px rgba(0,0,0,.06);cursor:pointer" onclick="goTab('meals',null)">
+      <div style="font-size:18px;font-weight:700;color:var(--blue)" id="hwHub-water">—</div>
       <div style="font-size:10px;color:var(--textl);margin-top:2px">Water oz</div>
     </div>
-    <div style="background:#fff;border-radius:12px;padding:10px;text-align:center;box-shadow:0 1px 4px rgba(0,0,0,.06)">
-      <div style="font-size:20px;font-weight:700;color:var(--sage)" id="hwHub-mood">—</div>
+    <div style="background:#fff;border-radius:12px;padding:10px;text-align:center;box-shadow:0 1px 4px rgba(0,0,0,.06);cursor:pointer" onclick="goTab('wellness',null);setTimeout(function(){showWellnessSec('mood',document.querySelector('#v-wellness .pn-btn:nth-child(1)'))},200)">
+      <div style="font-size:18px;font-weight:700;color:var(--sage)" id="hwHub-mood">—</div>
       <div style="font-size:10px;color:var(--textl);margin-top:2px">Today's mood</div>
+    </div>
+    <div style="background:#fff;border-radius:12px;padding:10px;text-align:center;box-shadow:0 1px 4px rgba(0,0,0,.06);cursor:pointer" onclick="goTab('meals',null)">
+      <div style="font-size:18px;font-weight:700;color:var(--peach)" id="hwHub-cal">—</div>
+      <div style="font-size:10px;color:var(--textl);margin-top:2px">Cal today</div>
+    </div>
+    <div style="background:#fff;border-radius:12px;padding:10px;text-align:center;box-shadow:0 1px 4px rgba(0,0,0,.06);cursor:pointer" onclick="goTab('wellness',null);setTimeout(function(){showWellnessSec('meds',document.querySelector('#v-wellness .pn-btn:nth-child(5)'))},200)">
+      <div style="font-size:18px;font-weight:700;color:var(--lav)" id="hwHub-meds">—</div>
+      <div style="font-size:10px;color:var(--textl);margin-top:2px">Meds</div>
+    </div>
+    <div style="background:#fff;border-radius:12px;padding:10px;text-align:center;box-shadow:0 1px 4px rgba(0,0,0,.06);cursor:pointer" onclick="goTab('food',null)">
+      <div style="font-size:18px;font-weight:700;color:var(--sage)" id="hwHub-tasks">—</div>
+      <div style="font-size:10px;color:var(--textl);margin-top:2px">Workouts</div>
     </div>
   </div>
   <div class="hub-grid">
@@ -1158,6 +1170,7 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
               <div style="font-size:11px;font-weight:700;color:var(--textl);letter-spacing:.5px;text-transform:uppercase;margin-bottom:3px">💧 Water</div>
               <div id="bottleOzLabel" style="font-size:14px;font-weight:700;color:var(--textd);margin-bottom:8px">0 / 115 oz</div>
               <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px">
+                <button onclick="addWaterOz(-8)" style="padding:6px 11px;border-radius:8px;border:1.5px solid #f0a0a0;background:#fff5f5;font-family:'Quicksand',sans-serif;font-size:12px;font-weight:700;color:#c05050;cursor:pointer">−8 oz</button>
                 <button onclick="addWaterOz(8)" style="padding:6px 11px;border-radius:8px;border:1.5px solid #a8cceb;background:#f0f8ff;font-family:'Quicksand',sans-serif;font-size:12px;font-weight:700;color:#2e88c8;cursor:pointer">+8 oz</button>
                 <button onclick="addWaterOz(16)" style="padding:6px 11px;border-radius:8px;border:1.5px solid #a8cceb;background:#f0f8ff;font-family:'Quicksand',sans-serif;font-size:12px;font-weight:700;color:#2e88c8;cursor:pointer">+16 oz</button>
                 <button onclick="addWaterOz(32)" style="padding:6px 11px;border-radius:8px;border:none;background:linear-gradient(135deg,var(--lav),#5a90d0);font-family:'Quicksand',sans-serif;font-size:11px;font-weight:700;color:white;cursor:pointer">Owala 32oz</button>
@@ -1182,8 +1195,8 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
             <div class="pb"><div class="pf" id="tStepB" style="width:0%;background:var(--sage)"></div></div>
           </div>
           <!-- Sleep (clickable) -->
-          <div class="pr" style="cursor:pointer" onclick="openM('todaySleepModal')">
-            <div class="pt"><span class="pn">😴 Sleep</span><span class="pm2" id="tSleepD">—</span><span style="font-size:10px;color:var(--blue);margin-left:6px">+ log</span></div>
+          <div class="pr">
+            <div class="pt" style="cursor:pointer" onclick="openM('todaySleepModal')"><span class="pn">😴 Sleep</span><span class="pm2" id="tSleepD">—</span><span style="font-size:10px;color:var(--blue);margin-left:6px">+ log</span><button onclick="event.stopPropagation();goTab('wellness',null);setTimeout(function(){showWellnessSec('sleep',document.querySelector('#v-wellness .pn-btn:nth-child(2)'))},200)" style="margin-left:auto;background:none;border:none;color:var(--lav);font-size:10px;font-weight:700;cursor:pointer;font-family:'Quicksand',sans-serif;flex-shrink:0;padding:0 2px">History →</button></div>
             <div class="pb"><div class="pf" id="tSleepB" style="width:0%;background:var(--lav)"></div></div>
           </div>
           <!-- Ministry (with Log button) -->
@@ -1196,9 +1209,12 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
             <div class="pb"><div class="pf" id="tMinB" style="width:0%;background:var(--peach)"></div></div>
           </div>
           <!-- Calories / Protein / Fiber -->
-          <div class="pr"><div class="pt"><span class="pn">🔥 Calories</span><span class="pm2" id="tcD">0/1900</span></div><div class="pb"><div class="pf pf-cal" id="tcB" style="width:0%"></div></div></div>
-          <div class="pr"><div class="pt"><span class="pn">💪 Protein</span><span class="pm2" id="tpD">0g/120g</span></div><div class="pb"><div class="pf pf-pro" id="tpB" style="width:0%"></div></div></div>
-          <div class="pr"><div class="pt"><span class="pn">🌿 Fiber</span><span class="pm2" id="tfD">0g/25g</span></div><div class="pb"><div class="pf pf-fib" id="tfB" style="width:0%"></div></div></div>
+          <div class="pr" style="cursor:pointer" onclick="goTab('meals',null)"><div class="pt"><span class="pn">🔥 Calories</span><span class="pm2" id="tcD">0/1900</span><span style="font-size:10px;color:var(--blue);margin-left:auto;flex-shrink:0">Log →</span></div><div class="pb"><div class="pf pf-cal" id="tcB" style="width:0%"></div></div></div>
+          <div class="pr" style="cursor:pointer" onclick="goTab('meals',null)"><div class="pt"><span class="pn">💪 Protein</span><span class="pm2" id="tpD">0g/120g</span></div><div class="pb"><div class="pf pf-pro" id="tpB" style="width:0%"></div></div></div>
+          <div class="pr" style="cursor:pointer" onclick="goTab('meals',null)"><div class="pt"><span class="pn">🌿 Fiber</span><span class="pm2" id="tfD">0g/25g</span></div><div class="pb"><div class="pf pf-fib" id="tfB" style="width:0%"></div></div></div>
+          <div class="pr" style="cursor:pointer" onclick="goTab('wellness',null);setTimeout(function(){showWellnessSec('meds',document.querySelector('#v-wellness .pn-btn:nth-child(5)'))},200)">
+            <div class="pt"><span class="pn">💊 Meds</span><span class="pm2" id="tMedsD">—</span><span style="font-size:10px;color:var(--lav);margin-left:auto;flex-shrink:0">Check off →</span></div>
+          </div>
         </div>
         <!-- This Week sub-section -->
         <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;padding:10px 0 4px;border-top:1px solid #f0ebe6;margin-top:8px" onclick="togTodaySec('statWeek')">
@@ -2152,6 +2168,18 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
   </div>
 </div>
 <div class="view" id="v-meals">
+  <div class="card" style="margin-bottom:10px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+      <span style="font-size:13px;font-weight:700;color:var(--textd)">💧 Water Today</span>
+      <span id="eatWaterLabel" style="font-size:14px;font-weight:700;color:#2e88c8">0 oz</span>
+    </div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap">
+      <button onclick="addWaterOz(-8)" style="padding:6px 10px;border-radius:8px;border:1.5px solid #f0a0a0;background:#fff5f5;font-family:'Quicksand',sans-serif;font-size:12px;font-weight:700;color:#c05050;cursor:pointer">−8 oz</button>
+      <button onclick="addWaterOz(8)" style="padding:6px 10px;border-radius:8px;border:1.5px solid #a8cceb;background:#f0f8ff;font-family:'Quicksand',sans-serif;font-size:12px;font-weight:700;color:#2e88c8;cursor:pointer">+8 oz</button>
+      <button onclick="addWaterOz(16)" style="padding:6px 10px;border-radius:8px;border:1.5px solid #a8cceb;background:#f0f8ff;font-family:'Quicksand',sans-serif;font-size:12px;font-weight:700;color:#2e88c8;cursor:pointer">+16 oz</button>
+      <button onclick="addWaterOz(32)" style="padding:6px 10px;border-radius:8px;border:none;background:linear-gradient(135deg,var(--lav),#5a90d0);font-family:'Quicksand',sans-serif;font-size:11px;font-weight:700;color:white;cursor:pointer">Owala 32oz</button>
+    </div>
+  </div>
   <button class="health-section-btn" style="margin-bottom:14px" onclick="openSubpage('sp-nutrition')">
     <span class="health-section-icon">🥗</span>
     <div class="health-section-info"><div class="health-section-name">Nutrition Log</div><div class="health-section-sub">Log food &amp; macros</div></div>
@@ -2797,6 +2825,10 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
   <div class="mh"></div><div class="mtit">New Wig Order 🪄</div>
   <div class="fg"><label class="fl">Client Name</label><input class="fi" id="wCli" placeholder="e.g. Lara"></div>
   <div class="fg"><label class="fl">Character / Wig</label><input class="fi" id="wCha" placeholder="e.g. Ariel Restyle"></div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+    <div class="fg"><label class="fl">Social @ or Location</label><input class="fi" id="wSocial" placeholder="@handle or State/Country"></div>
+    <div class="fg"><label class="fl">Due Date</label><input class="fi" type="date" id="wDue"></div>
+  </div>
   <div class="fg"><label class="fl">Type</label>
     <div class="bg">
       <button class="sb" data-g="wty" data-v="premium" onclick="pSB(this)">👑 Premium</button>
@@ -4714,14 +4746,28 @@ function renderHubPreviews(section){
 
 function renderHWHubStats(){
   var today=getTK();
-  var tasksDone=(TASKS||[]).filter(function(t){return t.done&&t.doneDate===todayStr();}).length;
+  var todayStr2=todayStr();
   var waterOz=WATER_OZ_LOG?WATER_OZ_LOG[today]||0:0;
-  var moodVal=MOOD?MOOD[today]:null;
+  var moodVal=MOOD?MOOD[todayStr2]:null;
   var moodEmoji=['','😔','😕','😐','🙂','😊'];
+  var lastSleep=(MILLIE.sleepLog||[]).slice().reverse().find(function(s){return s.date===todayStr2;});
+  var sleepHrs=lastSleep&&lastSleep.durH!=null?(lastSleep.durH+(lastSleep.durM>=30?0.5:0))+'h':'—';
+  var totalCal=getTot().cal;
+  var workoutCount=(EX_LOG[today]||[]).length;
+  var totalMeds=(MEDS||[]).length;
+  var medsDone=totalMeds>0?(function(){
+    var log=(MED_LOG&&MED_LOG[todayStr2])||{};
+    var done=MEDS.filter(function(m){return (m.am&&log[m.id+'_am'])||(m.pm&&log[m.id+'_pm']);}).length;
+    return done+'/'+totalMeds;
+  })():'—';
   var td=document.getElementById('hwHub-tasks');var tw=document.getElementById('hwHub-water');var tm=document.getElementById('hwHub-mood');
-  if(td)td.textContent=tasksDone;
-  if(tw)tw.textContent=waterOz+'oz';
+  var ts=document.getElementById('hwHub-sleep');var tc=document.getElementById('hwHub-cal');var tmd=document.getElementById('hwHub-meds');
+  if(td)td.textContent=workoutCount||'—';
+  if(tw)tw.textContent=waterOz?waterOz+'oz':'—';
   if(tm)tm.textContent=moodVal?moodEmoji[moodVal]||'—':'—';
+  if(ts)ts.textContent=sleepHrs;
+  if(tc)tc.textContent=totalCal?Math.round(totalCal):'—';
+  if(tmd)tmd.textContent=medsDone;
 }
 
 // ── Character condition (mood) system ──────────
@@ -5753,7 +5799,7 @@ var WATER_OZ_GOAL = 115;
 
 function addWaterOz(oz){
   var k=getTK();
-  WATER_OZ_LOG[k]=(WATER_OZ_LOG[k]||0)+oz;
+  WATER_OZ_LOG[k]=Math.max(0,(WATER_OZ_LOG[k]||0)+oz);
   localStorage.setItem('aWaterOzLog',JSON.stringify(WATER_OZ_LOG));
   fbSave('waterlog','log',{data:WATER_OZ_LOG,updated:new Date().toISOString()});
   renderWaterBottle();
@@ -5776,6 +5822,8 @@ function renderWaterBottle(){
     note.textContent=rem>0?rem+' oz to go':'Goal reached! 🎉';
     note.style.color=rem>0?'var(--textl)':'var(--sage)';
   }
+  var eatLbl=document.getElementById('eatWaterLabel');
+  if(eatLbl)eatLbl.textContent=oz+' / '+WATER_OZ_GOAL+' oz';
 }
 
 // ── Steps ─────────────────────────────────────
@@ -5810,6 +5858,21 @@ function renderTodayStatsBars(){
   el=document.getElementById('tpB');if(el)el.style.width=pct(t.pro,S.gPro);
   el=document.getElementById('tfD');if(el)el.textContent=Math.round(t.fib)+'g/'+S.gFib+'g';
   el=document.getElementById('tfB');if(el)el.style.width=pct(t.fib,S.gFib);
+  // meds
+  var medsEl=document.getElementById('tMedsD');
+  if(medsEl){
+    var totalMeds=MEDS.length;
+    if(!totalMeds){medsEl.textContent='none logged';}
+    else{
+      var todayMedKey=todayStr();
+      var amMeds=MEDS.filter(function(m){return m.am;}).length;
+      var pmMeds=MEDS.filter(function(m){return m.pm;}).length;
+      var medLog=MED_LOG[todayMedKey]||{};
+      var amDone=MEDS.filter(function(m){return m.am&&medLog[m.id+'_am'];}).length;
+      var pmDone=MEDS.filter(function(m){return m.pm&&medLog[m.id+'_pm'];}).length;
+      medsEl.textContent='AM '+amDone+'/'+amMeds+' · PM '+pmDone+'/'+pmMeds;
+    }
+  }
   // steps
   el=document.getElementById('tStepD');if(el)el.textContent=steps.toLocaleString()+' / '+STEPS_GOAL.toLocaleString();
   el=document.getElementById('tStepB');if(el)el.style.width=pct(steps,STEPS_GOAL);
@@ -6899,7 +6962,7 @@ function renderW(){
   var sc={pending:'stp','in-progress':'sti',done:'std'};
   var sl={pending:'⏳ Pending','in-progress':'🔨 In Progress',done:'✅ Done'};
   el.innerHTML=WIGS.map(function(w){
-    return'<div class="wc"><div style="display:flex;justify-content:space-between;align-items:flex-start"><div><div class="wn">'+w.client+'</div><div class="wd">'+w.char+' • '+w.ty+' • $'+(w.price||'?')+'</div><div class="wd">Deposit:'+(w.dep==='yes'?'✅':'⏳')+(w.ca==='yes'?' • 📍 CA':'')+'</div>'+(w.notes?'<div class="wd">📝 '+w.notes+'</div>':'')+'</div><button class="tact" onclick="delWig(\''+w.id+'\')">🗑️</button></div><span class="wst '+(sc[w.st]||'stp')+'">'+(sl[w.st]||w.st)+'</span>'+(w.st!=='done'?'<button class="adv" onclick="advWig(\''+w.id+'\')">Next →</button>':'')+'</div>';
+    return'<div class="wc"><div style="display:flex;justify-content:space-between;align-items:flex-start"><div><div class="wn">'+w.client+(w.social?' <span style="font-size:11px;color:var(--textl);font-weight:400">'+escHtml(w.social)+'</span>':'')+'</div><div class="wd">'+w.char+' • '+w.ty+' • $'+(w.price||'?')+'</div><div class="wd">Deposit:'+(w.dep==='yes'?'✅':'⏳')+(w.ca==='yes'?' • 📍 CA':'')+(w.due?' • Due:'+w.due.slice(5):'')+'</div>'+(w.notes?'<div class="wd">📝 '+w.notes+'</div>':'')+'</div><button class="tact" onclick="delWig(\''+w.id+'\')">🗑️</button></div><span class="wst '+(sc[w.st]||'stp')+'">'+(sl[w.st]||w.st)+'</span>'+(w.st!=='done'?'<button class="adv" onclick="advWig(\''+w.id+'\')">Next →</button>':'')+'</div>';
   }).join('');
   var tot=WIGS.reduce(function(s,w){return s+(parseFloat(w.price)||0);},0);
   document.getElementById('mInc').textContent='$'+tot.toFixed(0);
@@ -6910,7 +6973,7 @@ function saveWig(){
   var char=document.getElementById('wCha').value.trim();
   if(!client||!char){alert('Please enter client name and character!');return;}
   var id=Date.now().toString();
-  var w={id:id,client:client,char:char,ty:SBV.wty||'ship-style',price:document.getElementById('wPri').value,dep:SBV.wdep||'no',st:SBV.wst||'pending',ca:SBV.wca||'no',notes:document.getElementById('wNot').value.trim(),created:new Date().toISOString()};
+  var w={id:id,client:client,char:char,ty:SBV.wty||'ship-style',price:document.getElementById('wPri').value,dep:SBV.wdep||'no',st:SBV.wst||'pending',ca:SBV.wca||'no',social:document.getElementById('wSocial').value.trim(),due:document.getElementById('wDue').value,notes:document.getElementById('wNot').value.trim(),created:new Date().toISOString()};
   fbSave('wigs',id,w);
   var taskId=Date.now().toString()+'_w';
   var task={id:taskId,title:'Work on: '+char+' for '+client,cat:'wwow',urgency:'urgent-important',etime:'',due:'',notes:'$'+(w.price||'?')+' • '+w.ty,done:false,created:new Date().toISOString()};
@@ -17840,7 +17903,9 @@ function renderWorkProjects(){
           +'<div style="height:100%;background:linear-gradient(90deg,var(--sage),var(--teal));width:'+pct+'%"></div>'
         +'</div>'
       +'</div>':'')
-      +(expenses.length?'<div style="margin-bottom:8px;font-size:12px;color:var(--textl)">💸 Expenses: $'+expTotal.toFixed(2)+'</div>':'')
+      +(expenses.length?'<div style="margin-bottom:4px;font-size:12px;color:var(--textl)">💸 Expenses: $'+expTotal.toFixed(2)+'</div>':'')
+      +(p.supplies&&p.supplies.length?'<div style="margin-bottom:4px;font-size:12px;color:var(--textl)">🛍️ Supplies: $'+(p.supplies.reduce(function(s,x){return s+(x.cost||0);},0)).toFixed(2)+'</div>'
+        +(p.projectedIncome>0?'<div style="margin-bottom:8px;font-size:12px;color:var(--sage)">✨ Est. Profit: $'+(p.projectedIncome-p.supplies.reduce(function(s,x){return s+(x.cost||0);},0)).toFixed(2)+'</div>':''):'')
       +'<div style="margin-top:6px">'
         +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">'
           +'<span style="font-size:12px;font-weight:700;color:var(--textd)">Tasks ('+doneTasks+'/'+tasks.length+')</span>'
@@ -17865,6 +17930,45 @@ function renderWorkProjects(){
   }
 }
 
+function addWpSupplyRow(item){
+  var el=document.getElementById('wpSuppliesList');
+  if(!el)return;
+  var row=document.createElement('div');
+  row.style.cssText='display:flex;gap:6px;align-items:center;margin-bottom:5px';
+  row.innerHTML='<input placeholder="Item name" class="fi" style="flex:2;margin:0;padding:6px 8px;font-size:12px" value="'+(item?escHtml(item.name||''):'')+'"><input placeholder="Cost $" type="number" class="fi" style="width:70px;margin:0;padding:6px 8px;font-size:12px" value="'+(item?item.cost||'':'')+'"><input placeholder="Link (optional)" class="fi" style="flex:2;margin:0;padding:6px 8px;font-size:12px" value="'+(item?escHtml(item.url||''):'')+'"><button onclick="this.parentNode.remove();calcWpSupplyTotal()" style="border:none;background:none;color:#c9a0a0;font-size:16px;cursor:pointer;flex-shrink:0;padding:2px 6px">✕</button>';
+  row.querySelector('input:nth-child(2)').addEventListener('input',calcWpSupplyTotal);
+  el.appendChild(row);
+  calcWpSupplyTotal();
+}
+function calcWpSupplyTotal(){
+  var el=document.getElementById('wpSuppliesList');
+  var totEl=document.getElementById('wpSuppliesTotal');
+  if(!el||!totEl)return;
+  var total=0;
+  el.querySelectorAll('div').forEach(function(row){
+    var costInp=row.querySelector('input:nth-child(2)');
+    if(costInp)total+=parseFloat(costInp.value)||0;
+  });
+  var proj=parseFloat((document.getElementById('wpProjIncome')||{}).value)||0;
+  var profit=proj-total;
+  totEl.textContent='Supplies total: $'+total.toFixed(2)+(proj>0?' · Projected profit: $'+profit.toFixed(2):'');
+}
+function getWpSupplies(){
+  var el=document.getElementById('wpSuppliesList');
+  var supplies=[];
+  if(!el)return supplies;
+  el.querySelectorAll('div').forEach(function(row){
+    var inputs=row.querySelectorAll('input');
+    if(inputs.length>=2){
+      var name=(inputs[0].value||'').trim();
+      var cost=parseFloat(inputs[1].value)||0;
+      var url=(inputs[2]?inputs[2].value||'':'').trim();
+      if(name||cost)supplies.push({name:name,cost:cost,url:url});
+    }
+  });
+  return supplies;
+}
+
 function openWorkProjectModal(id){
   var p=id?WORK_PROJECTS.find(function(x){return x.id===id;}):null;
   document.getElementById('wpModalTitle').textContent=p?'Edit Work Project':'New Work Project';
@@ -17882,6 +17986,13 @@ function openWorkProjectModal(id){
     b.classList.toggle('on',b.dataset.v===status);
   });
   SBV.wpStatus=status;
+  // Populate supplies
+  var supEl=document.getElementById('wpSuppliesList');
+  if(supEl){
+    supEl.innerHTML='';
+    (p?p.supplies||[]:[]).forEach(function(s){addWpSupplyRow(s);});
+    calcWpSupplyTotal();
+  }
   document.getElementById('workProjectModal').classList.add('show');
 }
 
@@ -17901,6 +18012,7 @@ function saveWorkProject(){
     actualIncome:existing?existing.actualIncome||0:0,
     expenses:existing?existing.expenses||[]:[],
     tasks:existing?existing.tasks||[]:[],
+    supplies:getWpSupplies(),
     created:existing?existing.created:new Date().toISOString()
   };
   if(existing){
@@ -19096,6 +19208,14 @@ function delProjInc(id){
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
       <div><label class="fl">Budget ($)</label><input id="wpBudget" type="number" class="fi" placeholder="0"></div>
       <div><label class="fl">Projected Income ($)</label><input id="wpProjIncome" type="number" class="fi" placeholder="0"></div>
+    </div>
+    <div style="margin-bottom:8px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+        <label class="fl" style="margin:0">🛍️ Supplies / Materials</label>
+        <button type="button" onclick="addWpSupplyRow()" style="padding:3px 10px;border-radius:7px;border:none;background:var(--sage-light);color:#5a7a56;font-family:'Quicksand',sans-serif;font-size:12px;font-weight:700;cursor:pointer">+ Add</button>
+      </div>
+      <div id="wpSuppliesList" style="margin-bottom:6px"></div>
+      <div style="font-size:11px;color:var(--textl)" id="wpSuppliesTotal"></div>
     </div>
     <label class="fl">Notes</label>
     <textarea id="wpNotes" class="fi" rows="3" style="resize:vertical"></textarea>
