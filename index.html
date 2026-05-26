@@ -800,6 +800,7 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
   <button class="tab-btn" data-tab="emporium" onclick="goTab('emporium',this)">Work</button>
   <button class="tab-btn" data-tab="archives" onclick="goTab('archives',this)">Research Library</button>
   <button class="tab-btn" data-tab="archive" onclick="goTab('archive',this)">Archive</button>
+  <button class="tab-btn" data-tab="settings" onclick="goTab('settings',this)">Settings</button>
 </div>
 
 <div class="pg">
@@ -809,7 +810,7 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
 <!-- THE HELM -->
 <div class="view" id="v-helm">
   <div class="hub-banner" style="background:linear-gradient(135deg,rgba(44,62,107,.1),rgba(212,168,32,.08))">
-    <div class="hub-info"><h2>Tasks &amp; Projects</h2><p>Your tasks, projects, brain dump, and active lists in one place.</p></div>
+    <div class="hub-info"><h2>Tasks &amp; Projects</h2></div>
   </div>
   <div style="display:flex;gap:8px;margin-bottom:10px">
     <button class="ok-btn" style="flex:1;margin:0;padding:10px 8px;font-size:13px" onclick="openM('taskModal')">➕ New Task</button>
@@ -840,11 +841,10 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
 <!-- THE CONSERVATORY -->
 <div class="view" id="v-conservatory">
   <div class="hub-banner" style="background:linear-gradient(135deg,rgba(90,138,90,.12),rgba(212,170,96,.08))">
-    <div class="hub-info"><h2>Personal Growth</h2><p>Goals, routines, learning, and focus tools.</p></div>
+    <div class="hub-info"><h2>Personal Growth</h2></div>
   </div>
   <div class="hub-grid">
     <div class="hub-card" onclick="goTab('goals',null)"><div class="hub-card-ic">🎯</div><div class="hub-card-name">Goals</div><div class="hub-card-sub" id="hub-goals-sub">Loading…</div></div>
-    <div class="hub-card" onclick="goTab('routines',null)"><div class="hub-card-ic">🔄</div><div class="hub-card-name">Routines</div><div class="hub-card-sub" id="hub-routines-sub">Loading…</div></div>
     <div class="hub-card" onclick="goTab('learn',null)"><div class="hub-card-ic">📚</div><div class="hub-card-name">Learning</div><div class="hub-card-sub">Research &amp; study</div></div>
     <div class="hub-card" onclick="goTab('focus',null)"><div class="hub-card-ic">🧠</div><div class="hub-card-name">Focus Tools</div><div class="hub-card-sub">Intentions &amp; ADHD aids</div></div>
   </div>
@@ -857,7 +857,7 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
 <!-- HEARTHSIDE -->
 <div class="view" id="v-hearthside">
   <div class="hub-banner" style="background:linear-gradient(135deg,rgba(181,64,32,.1),rgba(212,160,100,.08))">
-    <div class="hub-info"><h2>Health &amp; Wellness</h2><p>Move, eat well, and take care of your whole self.</p></div>
+    <div class="hub-info"><h2>Health &amp; Wellness</h2></div>
   </div>
   <!-- Quick recap inline on hub -->
   <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px">
@@ -889,7 +889,7 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
 <!-- THE WORKSHOP -->
 <div class="view" id="v-workshop">
   <div class="hub-banner" style="background:linear-gradient(135deg,rgba(138,74,191,.1),rgba(160,120,220,.08))">
-    <div class="hub-info"><h2>Workshop</h2><p>Vision board, inspiration, favorites, stories, and music.</p></div>
+    <div class="hub-info"><h2>Workshop</h2></div>
   </div>
   <div class="hub-grid">
     <div class="hub-card" onclick="goTab('board',null)"><div class="hub-card-ic">🌈</div><div class="hub-card-name">Vision Board</div><div class="hub-card-sub" id="hub-board-sub">Loading…</div></div>
@@ -988,7 +988,7 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
 <!-- LIGHTHOUSE -->
 <div class="view" id="v-lighthouse">
   <div class="hub-banner" style="background:linear-gradient(135deg,rgba(26,58,90,.1),rgba(200,220,255,.08))">
-    <div class="hub-info"><h2>Spiritual</h2><p>Bible study, prayer, ministry, and spiritual tracking.</p></div>
+    <div class="hub-info"><h2>Spiritual</h2></div>
   </div>
   <div class="hub-grid">
     <div class="hub-card span2" style="cursor:default;padding:12px">
@@ -1020,7 +1020,7 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
 <!-- THE ESTATE -->
 <div class="view" id="v-estate">
   <div class="hub-banner" style="background:linear-gradient(135deg,rgba(42,46,54,.1),rgba(212,168,32,.08))">
-    <div class="hub-info"><h2>Money &amp; Home</h2><p>Bills, budget, expenses, and household finances.</p></div>
+    <div class="hub-info"><h2>Money &amp; Home</h2></div>
   </div>
   <!-- Financial summary strip -->
   <div class="card" style="margin-bottom:10px;padding:10px 14px">
@@ -1053,7 +1053,7 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
 <!-- THE EMPORIUM -->
 <div class="view" id="v-emporium">
   <div class="hub-banner" style="background:linear-gradient(135deg,rgba(60,42,80,.1),rgba(212,168,32,.08))">
-    <div class="hub-info"><h2>Work</h2><p>Wig orders, income goals, and business tracking.</p></div>
+    <div class="hub-info"><h2>Work</h2></div>
   </div>
   <div class="hub-grid">
     <div class="hub-card span2" style="cursor:default;padding:12px">
@@ -1077,12 +1077,11 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
 <!-- THE ARCHIVES -->
 <div class="view" id="v-archives">
   <div class="hub-banner" style="background:linear-gradient(135deg,rgba(138,88,40,.1),rgba(212,170,96,.08))">
-    <div class="hub-info"><h2>Research Library</h2><p>App guide, settings, and data export.</p></div>
+    <div class="hub-info"><h2>Research Library</h2></div>
   </div>
   <div class="hub-grid">
     <div class="hub-card span2" onclick="openTutorial()" style="background:linear-gradient(135deg,#f0eaff,#e8e0f8);border-color:#c4b0e8">
       <div style="display:flex;align-items:center;gap:12px">
-        <div id="archivesCalSvg" style="flex-shrink:0"></div>
         <div style="flex:1">
           <div class="hub-card-ic" style="margin-bottom:2px">🎓</div>
           <div class="hub-card-name">App Tour</div>
@@ -1093,9 +1092,10 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
       </div>
     </div>
     <div class="hub-card" onclick="goTab('guide',null)"><div class="hub-card-ic">📚</div><div class="hub-card-name">Research Library</div><div class="hub-card-sub">Notes, guides &amp; learning</div></div>
+    <div class="hub-card" onclick="goTab('routines',null)"><div class="hub-card-ic">🔄</div><div class="hub-card-name">Routines</div><div class="hub-card-sub" id="hub-routines-sub2">Daily &amp; weekly routines</div></div>
     <div class="hub-card" onclick="goTab('archive',null)"><div class="hub-card-ic">📁</div><div class="hub-card-name">Year Archive</div><div class="hub-card-sub" id="hub-archive-sub">Year-by-year history</div></div>
-    <div class="hub-card" onclick="goTab('export',null)"><div class="hub-card-ic">📤</div><div class="hub-card-name">Export</div><div class="hub-card-sub">Backup your data</div></div>
-    <div class="hub-card span2" onclick="goTab('settings',null)"><div class="hub-card-ic">⚙️</div><div class="hub-card-name">Settings</div><div class="hub-card-sub">Themes, PIN, preferences</div></div>
+    <div class="hub-card" onclick="goTab('guide',null);setTimeout(function(){openAppIndexInGuide()},300)"><div class="hub-card-ic">🗂️</div><div class="hub-card-name">App Index</div><div class="hub-card-sub">Navigate all sections</div></div>
+    <div class="hub-card span2" onclick="goTab('guide',null);setTimeout(function(){openTemplatesInGuide()},300)"><div class="hub-card-ic">📋</div><div class="hub-card-name">Project Templates</div><div class="hub-card-sub">Load a template to start fast</div></div>
   </div>
 </div>
 
@@ -2345,7 +2345,21 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
   <div id="rlSectionChips" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px"></div>
   <div id="rlTopicChips" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px"></div>
   <div id="rlList"></div>
-  <div style="margin-top:20px;border-top:1px solid var(--border);padding-top:14px">
+  <div style="margin-top:16px;border-top:1px solid var(--border);padding-top:14px">
+    <div class="sh sect-toggle" onclick="togSect('rlTemplatesBody','rlTemplatesArr')" id="rlTemplatesHeader">📋 Project Templates <span id="rlTemplatesArr">▸</span></div>
+    <div id="rlTemplatesBody" style="display:none;padding:8px 0">
+      <div id="tmplSettingsList"></div>
+      <button class="add-btn" onclick="openAddTmpl()">➕ Create Template</button>
+    </div>
+  </div>
+  <div style="margin-top:8px;border-top:1px solid var(--border);padding-top:14px">
+    <div class="sh sect-toggle" onclick="togSect('rlIndexBody','rlIndexArr')" id="rlIndexHeader">🗂️ App Index <span id="rlIndexArr">▸</span></div>
+    <div id="rlIndexBody" style="display:none;padding:8px 0">
+      <div style="font-size:12px;color:var(--textl);margin-bottom:10px">Tap any section to navigate there.</div>
+      <div id="appIndexBody"></div>
+    </div>
+  </div>
+  <div style="margin-top:8px;border-top:1px solid var(--border);padding-top:14px">
     <div style="font-weight:700;font-size:13px;color:var(--textl);margin-bottom:8px">📖 App Guide</div>
     <div id="guideContent"></div>
   </div>
@@ -2861,6 +2875,9 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
 
 <!-- SETTINGS VIEW -->
 <div class="view" id="v-settings">
+  <div style="display:flex;gap:8px;margin-bottom:12px">
+    <button class="ok-btn" style="flex:1;margin:0" onclick="goTab('export',null)">📤 Export &amp; Backup</button>
+  </div>
   <div class="card">
     <div class="set-sec-t" onclick="togSetSec('sc-appear',this)">🎨 Appearance <span class="sst-arr">▶</span></div>
     <div id="sc-appear" style="display:none">
@@ -2935,14 +2952,6 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     </div>
   </div>
   <div class="card">
-    <div class="set-sec-t" onclick="togSetSec('sc-tmpls',this)">📋 Project Templates <span class="sst-arr">▶</span></div>
-    <div id="sc-tmpls" style="display:none">
-      <div style="font-size:12px;color:var(--textl);margin-bottom:10px">Tap any template from the Projects tab to load it instantly as a new project.</div>
-      <div id="tmplSettingsList"></div>
-      <button class="add-btn" onclick="openAddTmpl()">➕ Create Template</button>
-    </div>
-  </div>
-  <div class="card">
     <div class="set-sec-t" onclick="togSetSec('sc-rtns',this)">🔄 Routines <span class="sst-arr">▶</span></div>
     <div id="sc-rtns" style="display:none">
       <div style="font-size:12px;color:var(--textl);margin-bottom:10px">Items you've hidden from routines. Tap Restore to bring them back.</div>
@@ -2970,7 +2979,7 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     </div>
   </div>
   <div class="card">
-    <div class="set-sec-t" onclick="togSetSec('sc-spirit-meter',this);renderSpiritPtsSettings()">🕊️ Spiritual Meter <span class="sst-arr">▶</span></div>
+    <div class="set-sec-t" onclick="togSetSec('sc-spirit-meter',this);renderSpiritPtsSettings()">🌱 Spiritual Meter <span class="sst-arr">▶</span></div>
     <div id="sc-spirit-meter" style="display:none">
       <div style="font-size:12px;color:var(--textl);margin-bottom:10px">Adjust point values logged to the Daily Road meter. Changes apply immediately.</div>
       <div id="spiritPtsSettings"></div>
@@ -2990,13 +2999,6 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
         <button class="btn" style="flex:1" onclick="saveSpiritSettingsUI()">Save</button>
         <button class="btn sec" style="flex:1" onclick="resetSpiritSettings()">Reset defaults</button>
       </div>
-    </div>
-  </div>
-  <div class="card">
-    <div class="set-sec-t" onclick="togSetSec('sc-index',this)">📚 App Index <span class="sst-arr">▶</span></div>
-    <div id="sc-index" style="display:none">
-      <div style="font-size:12px;color:var(--textl);margin-bottom:12px">Tap any section to navigate there.</div>
-      <div id="appIndexBody"></div>
     </div>
   </div>
 </div>
@@ -4275,11 +4277,11 @@ var MEAL_COMBOS = JSON.parse(localStorage.getItem('aMC')||'null')||[
   {id:'mc4',name:'Recovery Meal',emoji:'🍗',foods:['f2','f3','f10']},
 ];
 
-var DEFAULT_TAB_ORDER=['today','plan','helm','lighthouse','conservatory','hearthside','workshop','estate','emporium','archives','archive'];
-var TAB_LABELS={today:'Today',plan:'Plan',helm:'Tasks & Projects',conservatory:'Personal Growth',hearthside:'Health & Wellness',workshop:'Workshop',lighthouse:'Spiritual',estate:'Money & Home',emporium:'Work',archives:'Research Library',archive:'Archive',stories:'Stories',mixtape:'Mixtape','focus-session':'Focus Session',grocery:'Grocery List'};
+var DEFAULT_TAB_ORDER=['today','plan','helm','lighthouse','conservatory','hearthside','workshop','estate','emporium','archives','archive','settings'];
+var TAB_LABELS={today:'Today',plan:'Plan',helm:'Tasks & Projects',conservatory:'Personal Growth',hearthside:'Health & Wellness',workshop:'Workshop',lighthouse:'Spiritual',estate:'Money & Home',emporium:'Work',archives:'Research Library',archive:'Archive',settings:'Settings',stories:'Stories',mixtape:'Mixtape','focus-session':'Focus Session',grocery:'Grocery List',export:'Export',routines:'Routines'};
 var TAB_ORDER=(function(){var o=JSON.parse(localStorage.getItem('aTabOrder')||'null');if(!o)return DEFAULT_TAB_ORDER.slice();var full=DEFAULT_TAB_ORDER.slice();o=o.filter(function(t){return full.indexOf(t)>-1;});full.forEach(function(t){if(o.indexOf(t)<0)o.push(t);});return o;})();
-var SECTION_VIEWS={today:['today'],plan:['plan'],helm:['tasks','projects','lists','focus-session','grocery'],conservatory:['goals','routines','learn','focus'],hearthside:['food','meals','wellness','recap'],workshop:['board','faves','stories','mixtape','places'],lighthouse:['spirit'],estate:['money','accounts','home-items','money-projects'],emporium:['wigs','work-projects'],archives:['guide','export','settings'],archive:['archive']};
-var SECTION_LABELS={today:'Today',plan:'Plan',helm:'Tasks & Projects',conservatory:'Personal Growth',hearthside:'Health & Wellness',workshop:'Workshop',lighthouse:'Spiritual',estate:'Money & Home',emporium:'Work',archives:'Research Library',archive:'Archive'};
+var SECTION_VIEWS={today:['today'],plan:['plan'],helm:['tasks','projects','lists','focus-session','grocery'],conservatory:['goals','learn','focus'],hearthside:['food','meals','wellness','recap'],workshop:['board','faves','stories','mixtape','places'],lighthouse:['spirit'],estate:['money','accounts','home-items','money-projects'],emporium:['wigs','work-projects'],archives:['guide','routines'],settings:['settings','export'],archive:['archive']};
+var SECTION_LABELS={today:'Today',plan:'Plan',helm:'Tasks & Projects',conservatory:'Personal Growth',hearthside:'Health & Wellness',workshop:'Workshop',lighthouse:'Spiritual',estate:'Money & Home',emporium:'Work',archives:'Research Library',archive:'Archive',settings:'Settings'};
 var VIEW_SECTION=(function(){var m={};Object.keys(SECTION_VIEWS).forEach(function(s){SECTION_VIEWS[s].forEach(function(v){m[v]=s;});});return m;})();
 
 var S = {
@@ -4581,7 +4583,7 @@ function goTabDirect(tab,btn){
   if(tab==='focus-session'){ renderFocusSession(); }
   if(tab==='plan'){ renderPlan(); }
   if(tab==='grocery'){ renderGroceryList(); populateGrocTaskDatalist(); }
-  if(tab==='guide'){ renderResearchLib(); renderGuide(); }
+  if(tab==='guide'){ renderResearchLib(); renderGuide(); renderTmplList(); renderAppIndex(); }
   if(tab==='work-projects'){ renderWorkProjects(); }
   if(tab==='helm'||tab==='conservatory'||tab==='hearthside'||tab==='lighthouse'||tab==='estate'||tab==='workshop'||tab==='food'||tab==='meals'||tab==='wellness'){ renderAllLearnWidgets(); }
 }
@@ -4601,12 +4603,14 @@ function renderHubPreviews(section){
     var grocCount=GROCERY_LIST.filter(function(g){return !g.checked;}).length;
     el=document.getElementById('hub-grocery-sub');if(el)el.textContent=grocCount?grocCount+' item'+(grocCount!==1?'s':'')+' to buy':'Shopping list by store';
     renderHelmDumpPreview();
+  }else if(section==='archives'){
+    var due3=RTN_GROUPS.filter(function(g){return rtnIsDueToday(g);}).length;
+    el=document.getElementById('hub-routines-sub2');if(el)el.textContent=due3+' group'+(due3!==1?'s':'')+' due today';
+    el=document.getElementById('hub-archive-sub');if(el)el.textContent='Year-by-year history';
   }else if(section==='conservatory'){
     renderConservatoryMilestone();
     var goals=(GOALS||[]).filter(function(g){return !g.done;}).length;
     el=document.getElementById('hub-goals-sub');if(el)el.textContent=goals+' goal'+(goals!==1?'s':'')+' in progress';
-    var due2=RTN_GROUPS.filter(function(g){return rtnIsDueToday(g);}).length;
-    el=document.getElementById('hub-routines-sub');if(el)el.textContent=due2+' group'+(due2!==1?'s':'')+' due today';
   }else if(section==='hearthside'){
     var charEl=document.getElementById('hub-char-hearthside');
     if(charEl&&!charEl.querySelector('svg'))charEl.insertAdjacentHTML('afterbegin',emberDrawSVG(36));
@@ -5823,33 +5827,40 @@ function logSleepToday(){
   var bedEl=document.getElementById('tdSlBed');
   var wakeEl=document.getElementById('tdSlWake');
   var msgEl=document.getElementById('tdSlMsg');
-  if(!dateEl||!bedEl||!wakeEl)return;
+  if(!dateEl||!bedEl)return;
   var d=dateEl.value||todayStr();
-  var bed=bedEl.value;var wake=wakeEl.value;
-  if(!bed||!wake){
-    if(msgEl){msgEl.textContent='Enter both times.';msgEl.style.color='#cc5566';msgEl.style.display='';}
+  var bed=bedEl.value;var wake=(wakeEl||{}).value||'';
+  if(!bed){
+    if(msgEl){msgEl.textContent='Enter bedtime.';msgEl.style.color='#cc5566';msgEl.style.display='';}
     return;
   }
-  var wokeDT=new Date(d+'T'+wake+':00');
   var sleptDT=new Date(d+'T'+bed+':00');
-  if(sleptDT>=wokeDT)sleptDT.setDate(sleptDT.getDate()-1);
-  var dur=wokeDT-sleptDT;
-  var hrs=Math.floor(dur/3600000);var mins=Math.floor((dur%3600000)/60000);
-  if(hrs<0||hrs>20){
-    if(msgEl){msgEl.textContent='Times look off — check them.';msgEl.style.color='#cc5566';msgEl.style.display='';}
-    return;
+  var entry;
+  if(wake){
+    var wokeDT=new Date(d+'T'+wake+':00');
+    if(sleptDT>=wokeDT)sleptDT.setDate(sleptDT.getDate()-1);
+    var dur=wokeDT-sleptDT;
+    var hrs=Math.floor(dur/3600000);var mins=Math.floor((dur%3600000)/60000);
+    if(hrs<0||hrs>20){
+      if(msgEl){msgEl.textContent='Times look off — check them.';msgEl.style.color='#cc5566';msgEl.style.display='';}
+      return;
+    }
+    entry={id:'sl-'+Date.now(),slept:sleptDT.toISOString(),woke:wokeDT.toISOString(),durH:hrs,durM:mins,date:d};
+    if(msgEl){msgEl.textContent=hrs+'h '+mins+'m logged ✓';msgEl.style.color='var(--sage)';msgEl.style.display='';}
+    showToast(hrs+'h '+mins+'m sleep logged!');
+  } else {
+    entry={id:'sl-'+Date.now(),slept:sleptDT.toISOString(),woke:null,durH:null,durM:null,date:d,bedOnly:true};
+    if(msgEl){msgEl.textContent='Bedtime saved ✓';msgEl.style.color='var(--sage)';msgEl.style.display='';}
+    showToast('Bedtime logged!');
   }
-  var entry={id:'sl-'+Date.now(),slept:sleptDT.toISOString(),woke:wokeDT.toISOString(),durH:hrs,durM:mins,date:d};
   MILLIE.sleepLog=(MILLIE.sleepLog||[]).concat([entry]).slice(-30);
   saveMillie();
   fbSave('sleeplog','log',{entries:MILLIE.sleepLog,updated:new Date().toISOString()});
-  if(msgEl){msgEl.textContent=hrs+'h '+mins+'m logged ✓';msgEl.style.color='var(--sage)';msgEl.style.display='';}
   renderTodayStatsBars();
-  showToast(hrs+'h '+mins+'m sleep logged!');
   setTimeout(function(){
     closeM('todaySleepModal');
     if(msgEl)msgEl.style.display='none';
-    dateEl.value='';bedEl.value='';wakeEl.value='';
+    dateEl.value='';bedEl.value='';if(wakeEl)wakeEl.value='';
   },1200);
 }
 
@@ -8150,7 +8161,8 @@ var TOGGLEABLE_TABS=[
   {id:'helm',label:'⚓ The Helm'},{id:'conservatory',label:'🌿 Conservatory'},
   {id:'hearthside',label:'🏡 Hearthside'},{id:'workshop',label:'🔨 Workshop'},
   {id:'lighthouse',label:'🕊️ Lighthouse'},{id:'estate',label:'🏛️ The Estate'},
-  {id:'emporium',label:'🏪 Emporium'},{id:'archives',label:'📚 Archives'},
+  {id:'emporium',label:'🏪 Emporium'},{id:'archives',label:'📚 Research Library'},
+  {id:'settings',label:'⚙️ Settings'},
 ];
 
 var _tabDragFrom=null;
@@ -8222,7 +8234,6 @@ function renderSettings(){
   if(!S.pin){tpl.innerHTML='<div style="font-size:12px;color:var(--textl);padding:8px 0">Set a PIN first to enable per-tab protection.</div>';}
   else{tpl.innerHTML=TOGGLEABLE_TABS.map(function(t){return'<div class="set-row"><div class="set-lbl">'+t.label+'</div><button class="tog'+(S.protTabs[t.id]?' on':'')+'" onclick="togTabProt(\''+t.id+'\',this)"></button></div>';}).join('');}
   renderCatList();
-  renderTmplList();
   renderHiddenRoutines();
   renderThemesList();
   renderTabOrderList();
@@ -11065,6 +11076,18 @@ var GUIDE_SECTIONS=[
   {title:'⚡ Quick Dopamine Boosts',items:['☕ Tea or coffee','🛏️ Make the bed','🕺 Dance to one song','🧹 Organize one thing','🌬️ 5 deep breaths','📝 Make a list','🌟 Text someone you love']},
 ];
 
+function openAppIndexInGuide(){
+  var body=document.getElementById('rlIndexBody');
+  if(body){body.style.display='';var arr=document.getElementById('rlIndexArr');if(arr)arr.textContent='▾';}
+  var el=document.getElementById('rlIndexHeader');if(el)el.scrollIntoView({behavior:'smooth',block:'start'});
+  renderAppIndex();
+}
+function openTemplatesInGuide(){
+  var body=document.getElementById('rlTemplatesBody');
+  if(body){body.style.display='';var arr=document.getElementById('rlTemplatesArr');if(arr)arr.textContent='▾';}
+  var el=document.getElementById('rlTemplatesHeader');if(el)el.scrollIntoView({behavior:'smooth',block:'start'});
+  renderTmplList();
+}
 function renderGuide(){
   var el=document.getElementById('guideContent');
   if(!el)return;
@@ -15720,8 +15743,6 @@ function renderBadgeBoard(){
 function showBadgeInfo(id){var def=BADGE_DEFS.find(function(b){return b.id===id;});if(!def)return;showToast(def.emoji+' '+def.label+' — '+def.section);}
 
 function renderCalInArchives(){
-  var el=document.getElementById('archivesCalSvg');
-  if(el&&!el.querySelector('svg'))el.innerHTML=calDrawSVG(40);
   var bl=document.getElementById('tutorialBadgeLine');
   if(bl){
     var earnedCount=Object.keys(BADGES).filter(function(k){return k!=='world_visited';}).length;
@@ -18611,7 +18632,7 @@ function delProjInc(id){
     <div style="font-size:12px;color:var(--textl);text-align:center;margin-bottom:14px">Enter the night you fell asleep</div>
     <div class="fg"><label class="fl">Date (night you fell asleep)</label><input class="fi" type="date" id="tdSlDate"></div>
     <div class="fg"><label class="fl">Bedtime</label><input class="fi" type="time" id="tdSlBed"></div>
-    <div class="fg"><label class="fl">Wake time</label><input class="fi" type="time" id="tdSlWake"></div>
+    <div class="fg"><label class="fl">Wake time <span style="font-weight:400;color:var(--textl)">(optional)</span></label><input class="fi" type="time" id="tdSlWake"></div>
     <div id="tdSlMsg" style="display:none;font-size:12px;text-align:center;margin-bottom:8px"></div>
     <button class="ok-btn" onclick="logSleepToday()">Save Sleep</button>
     <button class="cn-btn" onclick="closeM('todaySleepModal')">Cancel</button>
