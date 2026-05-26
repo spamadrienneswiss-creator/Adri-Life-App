@@ -1538,7 +1538,9 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
   </div>
   <div id="wplanList"></div>
   <div class="card" style="margin-top:14px">
-    <div class="pt"><span class="pn">🔥 Calories today</span><span class="pm2" id="fCD">0/1900</span></div><div class="pb"><div class="pf pf-cal" id="fCB" style="width:0%"></div></div>
+    <div class="pt"><span class="pn">🔥 Calories In</span><span class="pm2" id="fCD">0/1900</span></div><div class="pb"><div class="pf pf-cal" id="fCB" style="width:0%"></div></div>
+    <div class="pt" style="margin-top:6px"><span class="pn">🏃 Calories Burned</span><span class="pm2" id="fCalBurned">0</span></div>
+    <div class="pt" style="margin-top:4px"><span class="pn">⚡ Net Calories</span><span class="pm2" id="fCalNet">0</span></div>
     <div class="pt" style="margin-top:8px"><span class="pn">💪 Protein</span><span class="pm2" id="fPD">0g/120g</span></div><div class="pb"><div class="pf pf-pro" id="fPB" style="width:0%"></div></div>
     <div style="margin-top:8px"><button class="btn sec" style="width:100%;font-size:12px" onclick="goTab('meals',null)">🥗 Go to Eat for full nutrition →</button></div>
   </div>
@@ -3027,6 +3029,35 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
       </div>
     </div>
   </div>
+  <div class="card">
+    <div class="set-sec-t" onclick="togSetSec('sc-extypes',this);renderExTypeSettings()">🏋️ Exercise Types <span class="sst-arr">▶</span></div>
+    <div id="sc-extypes" style="display:none">
+      <div style="font-size:12px;color:var(--textl);margin-bottom:10px">Customize exercise types used in the Movement Appendix.</div>
+      <div id="exTypeList" style="margin-bottom:8px"></div>
+      <div style="display:flex;gap:8px">
+        <input class="fi" id="newExTypeInput" placeholder="New type..." style="flex:1;padding:8px 10px">
+        <button onclick="addExType()" style="padding:8px 14px;border-radius:9px;border:none;background:var(--sage);color:white;font-family:'Quicksand',sans-serif;font-size:13px;font-weight:700;cursor:pointer">Add</button>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="set-sec-t" onclick="togSetSec('sc-future',this)">📦 Future / Unused Features <span class="sst-arr">▶</span></div>
+    <div id="sc-future" style="display:none">
+      <div style="font-size:12px;color:var(--textl);margin-bottom:12px">Shelved features — not currently active in the app but saved here so you can implement or remove them later.</div>
+      <div class="set-row" style="flex-direction:column;align-items:flex-start;gap:4px;border-bottom:1px solid var(--bdr);padding-bottom:10px;margin-bottom:10px">
+        <div style="font-size:13px;font-weight:700;color:var(--textd)">🏆 App Tour Badges</div>
+        <div style="font-size:12px;color:var(--textl)">Achievement badge system shown during app onboarding. Was part of the original app tour flow. Code is preserved in the archive for future gamification features.</div>
+      </div>
+      <div class="set-row" style="flex-direction:column;align-items:flex-start;gap:4px;border-bottom:1px solid var(--bdr);padding-bottom:10px;margin-bottom:10px">
+        <div style="font-size:13px;font-weight:700;color:var(--textd)">✨ Character Animations</div>
+        <div style="font-size:12px;color:var(--textl)">Animated avatar/character system that was explored early on. Shelved in favor of the Millie pet widget. Could be revived for a more personalized experience.</div>
+      </div>
+      <div class="set-row" style="flex-direction:column;align-items:flex-start;gap:4px">
+        <div style="font-size:13px;font-weight:700;color:var(--textd)">🎨 Color Mix Game</div>
+        <div style="font-size:12px;color:var(--textl)">A fun color mixing mini-game that was removed. Functions are stubbed out (renderColorMix etc.) to prevent reference errors — can be re-implemented in Workshop.</div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- FOOD DB MODAL -->
@@ -4169,6 +4200,8 @@ var ARCHIVE_YEARS = JSON.parse(localStorage.getItem('aArchiveYears')||'{}');
 var _archiveYear = new Date().getFullYear();
 var WORKOUT_PLANS = JSON.parse(localStorage.getItem('aWplans')||'[]');
 var WORKOUT_LOG2 = JSON.parse(localStorage.getItem('aWlog2')||'[]');
+var MOVEMENTS = JSON.parse(localStorage.getItem('aMovements')||'[]');
+var EXERCISE_TYPES = JSON.parse(localStorage.getItem('aExTypes')||'null')||['Strength','Cardio','Flexibility','HIIT','Yoga','Sports','Other'];
 var fcActiveDeckId = '';
 var fcStudyDeckId = '';
 var _fcStudyQueue = [];
@@ -6783,6 +6816,12 @@ function updM(){
   renderTodayStatsBars();
   el=document.getElementById('fCD');if(el)el.textContent=Math.round(t.cal)+'/'+S.gCal;
   el=document.getElementById('fCB');if(el)el.style.width=pct(t.cal,S.gCal);
+  var burned=getDayCalBurned(getTK());
+  var net=Math.max(0,Math.round(t.cal)-burned);
+  var bEl=document.getElementById('fCalBurned');
+  var nEl=document.getElementById('fCalNet');
+  if(bEl)bEl.textContent=burned+' cal';
+  if(nEl)nEl.textContent=net+' cal';
   el=document.getElementById('fPD');if(el)el.textContent=Math.round(t.pro)+'g/'+S.gPro+'g';
   el=document.getElementById('fPB');if(el)el.style.width=pct(t.pro,S.gPro);
   el=document.getElementById('fFD');if(el)el.textContent=Math.round(t.fib)+'g/'+S.gFib+'g';
@@ -9741,6 +9780,7 @@ function renderExLog(){
     return'<div class="ex-item">'+
       '<div class="ex-name">'+e.name+'</div>'+
       '<span class="ex-dur">'+e.dur+' '+e.unit+'</span>'+
+      (e.calBurned&&e.calBurned>0?'<span style="font-size:11px;color:#c97c3a;margin-left:4px">🔥 '+e.calBurned+' cal</span>':'')+
       (e.note?'<span style="font-size:11px;color:var(--textl);margin-left:4px">'+e.note+'</span>':'')+
       '<button onclick="delEx(\''+k+'\','+i+')" style="background:none;border:none;color:var(--textl);cursor:pointer;font-size:13px;margin-left:4px">✕</button>'+
     '</div>';
@@ -9748,26 +9788,189 @@ function renderExLog(){
   updExWeek();
 }
 
+function getDayCalBurned(dateStr){
+  var entries=EX_LOG[dateStr]||[];
+  return entries.reduce(function(sum,e){return sum+(e.calBurned||0);},0);
+}
+
 function openAddEx(){
   var sel=document.getElementById('exSel');
-  if(sel)sel.innerHTML=EX_DB.map(function(e){return'<option value="'+e.id+'">'+e.name+'</option>';}).join('');
+  if(sel){
+    var combined=MOVEMENTS.length>0?MOVEMENTS:EX_DB;
+    sel.innerHTML='<option value="">-- Select exercise --</option>'+combined.map(function(e){
+      var cal=e.calPerMin?(' ('+e.calPerMin+' cal/min)'):'';
+      return'<option value="'+e.id+'">'+e.name+cal+'</option>';
+    }).join('');
+  }
   document.getElementById('exDur').value='';
   document.getElementById('exNote').value='';
   document.getElementById('exModal').classList.add('show');
 }
 
 function saveEx(){
-  var selEl=document.getElementById('exSel');
-  var exId=selEl?selEl.value:'';
-  var ex=EX_DB.find(function(e){return e.id===exId;})||{id:exId,name:exId};
-  var dur=document.getElementById('exDur').value||'30';
+  var k=getTK();
+  var exId=document.getElementById('exSel').value;
+  var dur=parseFloat(document.getElementById('exDur').value)||0;
   var unit=document.getElementById('exDurUnit').value||'min';
   var note=document.getElementById('exNote').value.trim();
-  var k=getTK();
+  var mov=MOVEMENTS.find(function(m){return m.id===exId;})||EX_DB.find(function(e){return e.id===exId;});
+  var name=mov?mov.name:exId;
+  var calPerMin=(mov&&mov.calPerMin)?parseFloat(mov.calPerMin):0;
+  var calBurned=(unit==='min'&&calPerMin>0)?Math.round(calPerMin*dur):0;
   if(!EX_LOG[k])EX_LOG[k]=[];
-  EX_LOG[k].push({id:Date.now().toString(),name:ex.name,dur:dur,unit:unit,note:note});
+  EX_LOG[k].push({id:Date.now().toString(),name:name,dur:dur,unit:unit,note:note,calBurned:calBurned});
   localStorage.setItem('aExLog',JSON.stringify(EX_LOG));
+  fbSave('exLog_'+k,k,{entries:EX_LOG[k]});
   closeM('exModal');renderExLog();
+}
+
+var _movBodyFilter=[];
+function renderMovements(){
+  var search=(document.getElementById('movSearch')||{value:''}).value.toLowerCase();
+  var arr=MOVEMENTS.slice();
+  if(search)arr=arr.filter(function(m){
+    return m.name.toLowerCase().indexOf(search)>-1||(m.bodyParts||[]).join(' ').toLowerCase().indexOf(search)>-1||(m.type||'').toLowerCase().indexOf(search)>-1;
+  });
+  // Body part filter chips
+  var bfEl=document.getElementById('movBodyFilter');
+  if(bfEl){
+    var allParts=[];
+    MOVEMENTS.forEach(function(m){(m.bodyParts||[]).forEach(function(p){if(allParts.indexOf(p)<0)allParts.push(p);});});
+    bfEl.innerHTML=allParts.map(function(p){
+      var on=(_movBodyFilter||[]).indexOf(p)>-1;
+      return'<button class="fchip'+(on?' on':'')+'" onclick="togMovBody(\''+p+'\',this)" style="font-size:11px;padding:3px 10px">'+p+'</button>';
+    }).join('');
+  }
+  if((_movBodyFilter||[]).length>0)arr=arr.filter(function(m){return (_movBodyFilter||[]).some(function(p){return(m.bodyParts||[]).indexOf(p)>-1;});});
+  var el=document.getElementById('movList');
+  if(!el)return;
+  if(!arr.length){el.innerHTML='<div class="empty"><div class="emj">🏋️</div><p>No movements yet. Add some!</p></div>';return;}
+  el.innerHTML=arr.map(function(m){
+    var parts=(m.bodyParts||[]).map(function(p){return'<span style="background:#f0ebe6;border-radius:20px;padding:2px 8px;font-size:10px;color:var(--textl)">'+p+'</span>';}).join(' ');
+    var calStr=m.calPerMin?'<span style="font-size:11px;color:var(--textl)">🔥 '+m.calPerMin+' cal/min</span>':'';
+    var vidBtn=m.videoLink?'<a href="'+m.videoLink+'" target="_blank" style="font-size:11px;color:var(--sage);text-decoration:none">▶ Video</a>':'';
+    var imgHtml='';
+    if(m.photo1)imgHtml+='<img src="'+m.photo1+'" style="width:80px;height:60px;object-fit:cover;border-radius:8px;margin-right:6px" alt="">';
+    if(m.photo2)imgHtml+='<img src="'+m.photo2+'" style="width:80px;height:60px;object-fit:cover;border-radius:8px" alt="">';
+    return'<div class="card" style="margin-bottom:8px;padding:12px">'
+      +'<div style="display:flex;align-items:flex-start;gap:10px">'
+      +(imgHtml?'<div style="flex-shrink:0">'+imgHtml+'</div>':'')
+      +'<div style="flex:1">'
+      +'<div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">'
+      +'<span style="font-size:14px;font-weight:700;color:var(--textd)">'+m.name+'</span>'
+      +(m.type?'<span style="background:var(--sage-light);border-radius:20px;padding:2px 8px;font-size:10px;color:#5a7a56">'+m.type+'</span>':'')
+      +'</div>'
+      +(parts?'<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:4px">'+parts+'</div>':'')
+      +(m.description?'<div style="font-size:12px;color:var(--textl);margin-bottom:4px">'+m.description+'</div>':'')
+      +'<div style="display:flex;gap:10px;align-items:center">'+calStr+' '+vidBtn+'</div>'
+      +'</div>'
+      +'<div style="display:flex;flex-direction:column;gap:4px;flex-shrink:0">'
+      +'<button class="btn sec" style="font-size:11px;padding:3px 8px" onclick="openAddMovement(\''+m.id+'\')">✏️</button>'
+      +'<button class="btn sec" style="font-size:11px;padding:3px 8px;color:#c9a0a0" onclick="delMovement(\''+m.id+'\')">✕</button>'
+      +'</div>'
+      +'</div>'
+      +'</div>';
+  }).join('');
+}
+function togMovBody(p,btn){
+  var idx=_movBodyFilter.indexOf(p);
+  if(idx>-1)_movBodyFilter.splice(idx,1);else _movBodyFilter.push(p);
+  if(btn)btn.classList.toggle('on',_movBodyFilter.indexOf(p)>-1);
+  renderMovements();
+}
+function delMovement(id){
+  if(!confirm('Delete this movement?'))return;
+  MOVEMENTS=MOVEMENTS.filter(function(m){return m.id!==id;});
+  localStorage.setItem('aMovements',JSON.stringify(MOVEMENTS));
+  fbDelete('movements',id);
+  renderMovements();
+}
+function openAddMovement(id){
+  var m=id?MOVEMENTS.find(function(x){return x.id===id;}):null;
+  document.getElementById('ovMovId').value=m?m.id:'';
+  document.getElementById('ovMovName').value=m?m.name:'';
+  document.getElementById('ovMovDesc').value=m?m.description:'';
+  document.getElementById('ovMovVideo').value=m?m.videoLink:'';
+  document.getElementById('ovMovCalMin').value=m?m.calPerMin:'';
+  // body parts chips
+  var allParts=['Chest','Back','Shoulders','Arms','Core','Legs','Glutes','Full Body','Cardio'];
+  var selected=m?m.bodyParts||[]:[];
+  document.getElementById('ovMovBodyChips').innerHTML=allParts.map(function(p){
+    return'<button type="button" class="fchip'+(selected.indexOf(p)>-1?' on':'')+'" onclick="this.classList.toggle(\'on\')" data-part="'+p+'">'+p+'</button>';
+  }).join('');
+  // photos
+  document.getElementById('ovMovPhoto1Data').value=m?m.photo1||'':'';
+  document.getElementById('ovMovPhoto1Prev').style.display=m&&m.photo1?'block':'none';
+  if(m&&m.photo1)document.getElementById('ovMovPhoto1Prev').src=m.photo1;
+  document.getElementById('ovMovPhoto2Data').value=m?m.photo2||'':'';
+  document.getElementById('ovMovPhoto2Prev').style.display=m&&m.photo2?'block':'none';
+  if(m&&m.photo2)document.getElementById('ovMovPhoto2Prev').src=m.photo2;
+  // update type dropdown
+  var typesel=document.getElementById('ovMovType');
+  typesel.innerHTML=EXERCISE_TYPES.map(function(t){return'<option value="'+t+'">'+t+'</option>';}).join('');
+  typesel.value=m?m.type||'':'';
+  showOv('ovMovModal');
+}
+function saveMovement(){
+  var id=document.getElementById('ovMovId').value||('mov-'+Date.now());
+  var bodyParts=[];
+  document.querySelectorAll('#ovMovBodyChips .fchip.on').forEach(function(b){bodyParts.push(b.dataset.part);});
+  var mov={
+    id:id,
+    name:document.getElementById('ovMovName').value.trim(),
+    type:document.getElementById('ovMovType').value,
+    description:document.getElementById('ovMovDesc').value.trim(),
+    videoLink:document.getElementById('ovMovVideo').value.trim(),
+    calPerMin:parseFloat(document.getElementById('ovMovCalMin').value)||0,
+    bodyParts:bodyParts,
+    photo1:document.getElementById('ovMovPhoto1Data').value||'',
+    photo2:document.getElementById('ovMovPhoto2Data').value||''
+  };
+  if(!mov.name){showToast('Name required');return;}
+  var idx=MOVEMENTS.findIndex(function(m){return m.id===id;});
+  if(idx>-1)MOVEMENTS[idx]=mov;else MOVEMENTS.push(mov);
+  localStorage.setItem('aMovements',JSON.stringify(MOVEMENTS));
+  fbSave('movements',id,mov);
+  closeOv('ovMovModal');
+  renderMovements();
+  showToast('Movement saved ✅');
+}
+function loadMovPhoto(n){
+  var inp=document.getElementById('ovMovPhoto'+n+'File');
+  if(!inp||!inp.files||!inp.files[0])return;
+  var r=new FileReader();
+  r.onload=function(ev){
+    document.getElementById('ovMovPhoto'+n+'Data').value=ev.target.result;
+    var prev=document.getElementById('ovMovPhoto'+n+'Prev');
+    prev.src=ev.target.result;
+    prev.style.display='block';
+  };
+  r.readAsDataURL(inp.files[0]);
+}
+function renderExTypeSettings(){
+  var el=document.getElementById('exTypeList');
+  if(!el)return;
+  if(!EXERCISE_TYPES.length){el.innerHTML='<div style="font-size:12px;color:var(--textl)">No types yet.</div>';return;}
+  el.innerHTML=EXERCISE_TYPES.map(function(t,i){
+    return'<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--bdr)">'
+      +'<span style="flex:1;font-size:13px;color:var(--textd)">'+t+'</span>'
+      +'<button onclick="delExType('+i+')" style="border:none;background:none;color:#c9a0a0;font-size:16px;cursor:pointer;padding:2px 6px">✕</button>'
+      +'</div>';
+  }).join('');
+}
+function addExType(){
+  var val=(document.getElementById('newExTypeInput').value||'').trim();
+  if(!val)return;
+  if(EXERCISE_TYPES.indexOf(val)>-1){showToast('Already exists');return;}
+  EXERCISE_TYPES.push(val);
+  localStorage.setItem('aExTypes',JSON.stringify(EXERCISE_TYPES));
+  document.getElementById('newExTypeInput').value='';
+  renderExTypeSettings();
+}
+function delExType(idx){
+  EXERCISE_TYPES.splice(idx,1);
+  localStorage.setItem('aExTypes',JSON.stringify(EXERCISE_TYPES));
+  renderExTypeSettings();
 }
 
 function delEx(day,idx){
@@ -9972,7 +10175,7 @@ function openSubpage(id){
   document.querySelectorAll('.subpage').forEach(function(p){p.classList.remove('active');});
   var el=document.getElementById(id);
   if(el){el.classList.add('active');}
-  if(id==='sp-workouts'){renderWplanList2();syncExLog2();}
+  if(id==='sp-workouts'){renderWplanList2();syncExLog2();renderMovements();}
   if(id==='sp-mood'){renderMoodSub();}
   if(id==='sp-macros'){renderMacroSub();}
   if(id==='sp-nutrition'){syncFoodLog2();}
@@ -18345,6 +18548,36 @@ function delProjInc(id){
     <button class="cn-btn" onclick="closeOv('ovEditWplanEx')">Cancel</button>
   </div>
 </div>
+<!-- MOVEMENT APPENDIX MODAL -->
+<div class="ov" id="ovMovModal" onclick="closeOv('ovMovModal')">
+  <div class="mod" style="max-height:88vh;overflow-y:auto" onclick="event.stopPropagation()">
+    <div class="mh"><span class="mt">🏋️ Movement</span><button class="mc" onclick="closeOv('ovMovModal')">✕</button></div>
+    <input type="hidden" id="ovMovId">
+    <div class="fg"><label class="fl">Name *</label><input class="fi" id="ovMovName" placeholder="e.g. Push-up"></div>
+    <div class="fg"><label class="fl">Type</label><select class="fi" id="ovMovType"></select></div>
+    <div class="fg">
+      <label class="fl">Body Parts</label>
+      <div id="ovMovBodyChips" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:4px"></div>
+    </div>
+    <div class="fg"><label class="fl">Description / How-To</label><textarea class="fi" id="ovMovDesc" rows="3" placeholder="Form cues, tips..."></textarea></div>
+    <div class="fg"><label class="fl">🔥 Cal/min estimate</label><input class="fi" id="ovMovCalMin" type="number" step="0.1" placeholder="e.g. 5"></div>
+    <div class="fg"><label class="fl">▶ Video Link (YouTube etc.)</label><input class="fi" id="ovMovVideo" placeholder="https://..."></div>
+    <div class="fg">
+      <label class="fl">Photo 1</label>
+      <input type="file" id="ovMovPhoto1File" accept="image/*" style="font-size:12px;margin-bottom:4px" onchange="loadMovPhoto(1)">
+      <img id="ovMovPhoto1Prev" style="display:none;width:100%;max-height:140px;object-fit:cover;border-radius:10px;margin-bottom:4px" alt="">
+      <input type="hidden" id="ovMovPhoto1Data">
+    </div>
+    <div class="fg">
+      <label class="fl">Photo 2</label>
+      <input type="file" id="ovMovPhoto2File" accept="image/*" style="font-size:12px;margin-bottom:4px" onchange="loadMovPhoto(2)">
+      <img id="ovMovPhoto2Prev" style="display:none;width:100%;max-height:140px;object-fit:cover;border-radius:10px;margin-bottom:4px" alt="">
+      <input type="hidden" id="ovMovPhoto2Data">
+    </div>
+    <button class="ok-btn" onclick="saveMovement()">Save Movement ✅</button>
+    <button class="cn-btn" onclick="closeOv('ovMovModal')">Cancel</button>
+  </div>
+</div>
 <!-- HABIT ADD MODAL -->
 <div class="ov" id="ovAddHabit" onclick="closeOv('ovAddHabit')">
   <div class="mod" onclick="event.stopPropagation()">
@@ -18418,6 +18651,13 @@ function delProjInc(id){
     <button onclick="openAddEx()" style="background:var(--sage-light);border:none;border-radius:9px;padding:6px 12px;font-family:'Quicksand',sans-serif;font-size:12px;font-weight:700;color:#5a7a56;cursor:pointer">+ Log</button>
   </div>
   <div id="exLog2"></div>
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;margin-top:14px">
+    <span style="font-size:13px;font-weight:700;color:var(--textd)">📚 Movement Appendix</span>
+    <button onclick="openAddMovement(null)" style="background:var(--sage-light);border:none;border-radius:9px;padding:5px 11px;font-family:'Quicksand',sans-serif;font-size:12px;font-weight:700;color:#5a7a56;cursor:pointer">+ Add</button>
+  </div>
+  <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px" id="movBodyFilter"></div>
+  <div class="fsw" style="margin-bottom:8px"><span class="fsic">🔍</span><input class="fsi" id="movSearch" placeholder="Search by name or body part..." oninput="renderMovements()"></div>
+  <div id="movList"></div>
   <div style="margin-top:14px">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
       <span style="font-size:13px;font-weight:700;color:var(--textd)">Workout Plans</span>
