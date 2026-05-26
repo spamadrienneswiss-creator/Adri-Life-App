@@ -12835,7 +12835,7 @@ function addMealLogItem(){
   var nl=name.toLowerCase();
   var dbItem=FOOD_DB.find(function(x){return (x.name||'').toLowerCase()===nl;});
   if(dbItem){dbItem.useCount=(dbItem.useCount||0)+1;saveFoodDbData();}
-  else{FOOD_DB.unshift({id:'fd-'+Date.now(),name:name,tags:[],useCount:1,staple:false,store:'',price:0,calories:0,protein:0,carbs:0,fat:0,notes:'',created:todayStr()});saveFoodDbData();}
+  else{FOOD_DB.unshift({id:'fd-'+Date.now(),name:name,tags:[],useCount:1,staple:false,store:'',price:0,cal:0,pro:0,carb:0,fat:0,notes:'',created:todayStr()});saveFoodDbData();}
   autoFlagStaples();
   document.getElementById('mealLogName').value='';
   document.getElementById('mealLogDay').value='';
@@ -13092,7 +13092,13 @@ function renderRecipes(){
     }
     var tags=(r.tags||[]).map(function(t){return '<span class="recipe-macro-tag">'+escHtml(t)+'</span>';}).join('');
     var mtChips=mts.map(function(t){var ic=MEAL_TYPE_ICONS[t]||'';return '<span class="recipe-macro-tag" style="background:rgba(0,0,0,0.08)">'+(ic?ic+' ':'')+escHtml(t)+'</span>';}).join('');
-    var ingHtml=(r.ingredients&&r.ingredients.length)?r.ingredients.map(function(i){return '<span style="font-size:11px;color:var(--textl)">'+escHtml(i.qty)+' '+escHtml(i.unit)+' '+escHtml(i.name)+'</span>';}).join('<br>'):'';
+    var ingHtml=(r.ingredients&&r.ingredients.length)?r.ingredients.map(function(i){
+      var dbi=i.dbItemId?FOOD_DB.find(function(x){return x.id===i.dbItemId;}):null;
+      if(!dbi)dbi=FOOD_DB.find(function(x){return x.name.toLowerCase()===(i.name||'').toLowerCase();});
+      var dbBit=dbi?((dbi.cal?' <span style="color:#b09070">🔥'+dbi.cal+'</span>':'')+(dbi.pro?' <span style="color:#8090b0">'+dbi.pro+'g pro</span>':'')+(dbi.store?' <span style="color:#7a9a7a">🏪'+escHtml(dbi.store)+'</span>':'')):' <span style="font-size:10px;color:#ccc;font-style:italic">not in DB</span>';
+      return '<span style="font-size:11px;color:var(--textl)">'+escHtml(i.qty)+' '+escHtml(i.unit)+' <strong>'+escHtml(i.name)+'</strong>'+dbBit+'</span>';
+    }).join('<br>'):'';
+
     var thumbHtml=r.photo1?'<img src="'+r.photo1+'" alt="" style="width:52px;height:52px;object-fit:cover;border-radius:8px;flex-shrink:0;margin-right:4px">':'';
     return '<div class="recipe-card" style="background:'+mtColor+';position:relative">'
       +'<div style="display:flex;align-items:flex-start;gap:8px">'
@@ -13147,6 +13153,11 @@ function openRecipeModal(id){
   if(prepEl)prepEl.value=rec?rec.prepTime||'':'';
   if(cookEl)cookEl.value=rec?rec.cookTime||'':'';
   renderRecipeIngList();
+  // Populate ingredient name datalist from FOOD_DB
+  var dl=document.getElementById('recIngDbSuggest');
+  if(dl)dl.innerHTML=FOOD_DB.map(function(x){return '<option value="'+escHtml(x.name)+'">';}).join('');
+  var prev=document.getElementById('recIngDbPreview');
+  if(prev){prev.style.display='none';prev.innerHTML='';}
   // Populate photos
   var p1Prev=document.getElementById('recPhoto1Preview');
   var p2Prev=document.getElementById('recPhoto2Preview');
@@ -13168,11 +13179,34 @@ function renderRecipeIngList(){
   if(!el)return;
   if(!MEAL_EDIT_INGS.length){el.innerHTML='<p style="color:var(--textl);font-size:12px;text-align:center;padding:8px">No ingredients added</p>';return;}
   el.innerHTML=MEAL_EDIT_INGS.map(function(ing,i){
-    return '<div class="recipe-ing-row">'
-      +'<span style="flex:1;font-size:13px">'+ing.qty+' '+ing.unit+' '+ing.name+'</span>'
+    var dbi=ing.dbItemId?FOOD_DB.find(function(x){return x.id===ing.dbItemId;}):null;
+    if(!dbi)dbi=FOOD_DB.find(function(x){return x.name.toLowerCase()===(ing.name||'').toLowerCase();});
+    var dbLine='';
+    if(dbi){var f=[];if(dbi.cal)f.push('🔥'+dbi.cal);if(dbi.pro)f.push('💪'+dbi.pro+'g');if(dbi.store)f.push('🏪'+escHtml(dbi.store));if(f.length)dbLine='<div style="font-size:10px;color:var(--textl)">'+f.join(' ')+'</div>';}
+    return '<div class="recipe-ing-row" style="align-items:flex-start">'
+      +'<div style="flex:1"><div style="font-size:13px">'+escHtml(ing.qty)+' '+escHtml(ing.unit)+' '+escHtml(ing.name)+'</div>'+dbLine+'</div>'
       +'<button class="btn sec" style="font-size:11px;padding:2px 7px" onclick="delRecipeIng('+i+')">✕</button>'
       +'</div>';
   }).join('');
+}
+
+function previewRecIngDb(val){
+  var prev=document.getElementById('recIngDbPreview');
+  if(!prev)return;
+  var v=(val||'').trim().toLowerCase();
+  if(!v){prev.style.display='none';prev.innerHTML='';return;}
+  var dbItem=FOOD_DB.find(function(x){return x.name.toLowerCase()===v;});
+  if(!dbItem){prev.style.display='none';prev.innerHTML='';return;}
+  var facts=[];
+  if(dbItem.cal)facts.push('🔥 '+dbItem.cal+' cal');
+  if(dbItem.pro)facts.push('💪 '+dbItem.pro+'g pro');
+  if(dbItem.carb)facts.push('🌾 '+dbItem.carb+'g carb');
+  if(dbItem.fat)facts.push('🫙 '+dbItem.fat+'g fat');
+  if(dbItem.store)facts.push('🏪 '+escHtml(dbItem.store));
+  if(dbItem.price)facts.push('💵 $'+parseFloat(dbItem.price).toFixed(2));
+  if(dbItem.serving){facts.push('📏 '+escHtml(dbItem.serving));var unitEl=document.getElementById('recIngUnit');if(unitEl&&!unitEl.value)unitEl.value=dbItem.serving;}
+  prev.innerHTML='<strong>📦 DB match:</strong> '+(facts.length?facts.join(' · '):'No macros set yet — <a style="color:var(--blue);cursor:pointer" onclick="closeOv(\'recipeModal\');openFoodDbModal(\''+dbItem.id+'\')">Edit in DB →</a>');
+  prev.style.display='';
 }
 
 function addRecipeIng(){
@@ -13180,10 +13214,14 @@ function addRecipeIng(){
   var qty=document.getElementById('recIngQty').value.trim();
   var unit=document.getElementById('recIngUnit').value.trim();
   if(!name)return;
-  MEAL_EDIT_INGS.push({name:name,qty:qty||'1',unit:unit||''});
+  var dbItem=FOOD_DB.find(function(x){return x.name.toLowerCase()===name.toLowerCase();});
+  if(dbItem&&!unit&&dbItem.serving)unit=dbItem.serving;
+  MEAL_EDIT_INGS.push({name:name,qty:qty||'1',unit:unit||'',dbItemId:dbItem?dbItem.id:''});
   document.getElementById('recIngName').value='';
   document.getElementById('recIngQty').value='';
   document.getElementById('recIngUnit').value='';
+  var prev=document.getElementById('recIngDbPreview');
+  if(prev){prev.style.display='none';prev.innerHTML='';}
   renderRecipeIngList();
 }
 
@@ -13231,7 +13269,7 @@ function saveRecipe(){
     if(!ing.name)return;
     var n=ing.name.toLowerCase();
     var exists=FOOD_DB.find(function(x){return (x.name||'').toLowerCase()===n;});
-    if(!exists){FOOD_DB.unshift({id:'fd-'+Date.now()+'-'+Math.random().toString(36).slice(2,6),name:ing.name,tags:[],useCount:0,staple:false,store:'',price:0,calories:0,protein:0,carbs:0,fat:0,notes:'',created:todayStr()});_dbChanged=true;}
+    if(!exists){FOOD_DB.unshift({id:'fd-'+Date.now()+'-'+Math.random().toString(36).slice(2,6),name:ing.name,tags:[],useCount:0,staple:false,store:'',price:0,cal:0,pro:0,carb:0,fat:0,notes:'',created:todayStr()});_dbChanged=true;}
   });
   if(_dbChanged)saveFoodDbData();
   closeOv('recipeModal');
@@ -13428,7 +13466,7 @@ function addGroceryManual(){
   // Auto-create FOOD_DB entry if new
   var nl=name.toLowerCase();
   if(!FOOD_DB.find(function(x){return (x.name||'').toLowerCase()===nl;})){
-    FOOD_DB.unshift({id:'fd-'+Date.now(),name:name,tags:[],useCount:0,staple:false,store:store||'',price:0,calories:0,protein:0,carbs:0,fat:0,notes:'',created:todayStr()});
+    FOOD_DB.unshift({id:'fd-'+Date.now(),name:name,tags:[],useCount:0,staple:false,store:store||'',price:0,cal:0,pro:0,carb:0,fat:0,notes:'',created:todayStr()});
     saveFoodDbData();
   }
   document.getElementById('groceryAddName').value='';
@@ -14999,9 +15037,28 @@ function renderIngredients(){
     return;
   }
   el.innerHTML=list.map(function(ing){
-    // Linked DB item nutrition
+    // Find DB item — by explicit link OR by name match
     var dbItem=ing.dbItemId?FOOD_DB.find(function(x){return x.id===ing.dbItemId;}):null;
-    var nutHtml=dbItem?(dbItem.cal||dbItem.pro?'<span style="font-size:11px;color:var(--textl)">'+(dbItem.cal?'🔥 '+dbItem.cal+'cal ':'')+( dbItem.pro?'💪 '+dbItem.pro+'g pro':'')+'</span>':''):'';
+    if(!dbItem)dbItem=FOOD_DB.find(function(x){return x.name.toLowerCase()===(ing.name||'').toLowerCase();});
+    // Build DB info panel
+    var dbPanel='';
+    if(dbItem){
+      var facts=[];
+      if(dbItem.cal)facts.push('🔥 '+dbItem.cal+' cal');
+      if(dbItem.pro)facts.push('💪 '+dbItem.pro+'g pro');
+      if(dbItem.carb)facts.push('🌾 '+dbItem.carb+'g carb');
+      if(dbItem.fat)facts.push('🫙 '+dbItem.fat+'g fat');
+      if(dbItem.store)facts.push('🏪 '+escHtml(dbItem.store));
+      if(dbItem.price)facts.push('💵 $'+parseFloat(dbItem.price).toFixed(2));
+      if(dbItem.serving)facts.push('📏 '+escHtml(dbItem.serving));
+      dbPanel='<div style="margin-top:7px;background:#f5f0ec;border-radius:8px;padding:7px 10px">'
+        +'<div style="font-size:10px;font-weight:700;color:var(--textl);margin-bottom:4px;letter-spacing:.3px;display:flex;align-items:center;justify-content:space-between">'
+        +'<span>📦 DB: '+escHtml(dbItem.name)+'</span>'
+        +'<button onclick="event.stopPropagation();openFoodDbModal(\''+dbItem.id+'\')" style="background:none;border:none;font-size:10px;color:var(--blue);cursor:pointer;padding:0">Edit →</button>'
+        +'</div>'
+        +(facts.length?'<div style="display:flex;gap:8px;flex-wrap:wrap">'+facts.map(function(f){return '<span style="font-size:11px;color:var(--textd)">'+f+'</span>';}).join('')+'</div>':'<div style="font-size:11px;color:var(--textl);font-style:italic">No macros/price set yet</div>')
+        +'</div>';
+    }
     // Linked ingredients chips
     var linkedIngChips=(ing.linkedIngIds||[]).map(function(lid){
       var li=INGREDIENTS.find(function(x){return x.id===lid;});
@@ -15015,10 +15072,10 @@ function renderIngredients(){
     return '<div style="background:#fff;border-radius:12px;padding:12px 14px;margin-bottom:8px;box-shadow:0 1px 4px rgba(0,0,0,.06)">'
       +'<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px">'
       +'<div style="flex:1;min-width:0">'
-      +'<div style="font-size:13px;font-weight:700;color:var(--textd)">🧩 '+escHtml(ing.name)+(dbItem?' <span style="font-size:11px;font-weight:400;color:var(--textl)">· '+escHtml(dbItem.name)+'</span>':'')+'</div>'
-      +(nutHtml?'<div style="margin-top:3px">'+nutHtml+'</div>':'')
+      +'<div style="font-size:13px;font-weight:700;color:var(--textd)">🧩 '+escHtml(ing.name)+(dbItem&&dbItem.name.toLowerCase()!==(ing.name||'').toLowerCase()?' <span style="font-size:11px;font-weight:400;color:var(--textl)">· '+escHtml(dbItem.name)+'</span>':'')+'</div>'
       +((linkedIngChips||linkedRecChips)?'<div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:5px">'+linkedIngChips+linkedRecChips+'</div>':'')
       +(ing.notes?'<div style="font-size:11px;color:var(--textl);margin-top:4px">'+escHtml(ing.notes)+'</div>':'')
+      +dbPanel
       +'</div>'
       +'<div style="display:flex;flex-direction:column;gap:4px;flex-shrink:0">'
       +'<button class="btn sec" style="font-size:11px;padding:3px 8px" onclick="openIngModal(\''+ing.id+'\')">✏️</button>'
@@ -15052,10 +15109,17 @@ function openIngModal(id){
   filterIngRecipeSuggest('');
   populateIngDatalist();
   document.getElementById('ingModal').classList.add('show');
+  // Auto-detect DB match by ingredient name if no link set
+  if(!ing||!ing.dbItemId){
+    var autoMatch=FOOD_DB.find(function(x){return x.name.toLowerCase()===(ing?ing.name:'').toLowerCase();});
+    if(autoMatch&&ing){
+      document.getElementById('ingDbLink').value=autoMatch.name;
+      document.getElementById('ingDbItemId').value=autoMatch.id;
+    }
+  }
   // Wire up datalist selection
   var dbLinkInput=document.getElementById('ingDbLink');
   dbLinkInput.oninput=function(){
-    // Try to find matching FOOD_DB item by name
     var val=dbLinkInput.value.trim();
     var found=FOOD_DB.find(function(x){return x.name.toLowerCase()===val.toLowerCase();});
     document.getElementById('ingDbItemId').value=found?found.id:'';
@@ -15134,13 +15198,18 @@ function saveIngredient(){
   if(!name){showToast('Enter a name');return;}
   var id=document.getElementById('ingId').value||('ing-'+Date.now());
   var dbItemId=document.getElementById('ingDbItemId').value||'';
-  // If dbItemId not set but name matches, try to find by name
+  // If dbItemId not set but ingDbLink matches, try by link value
   if(!dbItemId){
     var dbLinkVal=(document.getElementById('ingDbLink').value||'').trim();
     if(dbLinkVal){
       var found=FOOD_DB.find(function(x){return x.name.toLowerCase()===dbLinkVal.toLowerCase();});
       if(found)dbItemId=found.id;
     }
+  }
+  // Still no link — try matching by ingredient name directly
+  if(!dbItemId){
+    var nameMatch=FOOD_DB.find(function(x){return x.name.toLowerCase()===name.toLowerCase();});
+    if(nameMatch)dbItemId=nameMatch.id;
   }
   var ing={
     id:id,
@@ -17687,8 +17756,10 @@ function delProjInc(id){
   </div>
   <div style="font-size:12px;font-weight:700;color:var(--textl);margin-bottom:6px">INGREDIENTS</div>
   <div id="recIngList" style="margin-bottom:8px"></div>
+  <div id="recIngDbPreview" style="display:none;background:#f5f0ec;border-radius:8px;padding:6px 10px;margin-bottom:6px;font-size:11px;color:var(--textd)"></div>
   <div style="display:flex;gap:6px;margin-bottom:12px">
-    <input id="recIngName" type="text" placeholder="Ingredient" style="flex:2;padding:7px 9px;border-radius:8px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:12px">
+    <input id="recIngName" type="text" placeholder="Ingredient" list="recIngDbSuggest" style="flex:2;padding:7px 9px;border-radius:8px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:12px" oninput="previewRecIngDb(this.value)">
+    <datalist id="recIngDbSuggest"></datalist>
     <input id="recIngQty" type="text" placeholder="Qty" style="width:50px;padding:7px 9px;border-radius:8px;border:1.5px solid #e8e0d8;font-size:12px">
     <input id="recIngUnit" type="text" placeholder="Unit" style="width:60px;padding:7px 9px;border-radius:8px;border:1.5px solid #e8e0d8;font-size:12px">
     <button class="btn" onclick="addRecipeIng()" style="padding:7px 10px;font-size:12px">Add</button>
