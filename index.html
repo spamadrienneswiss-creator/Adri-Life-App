@@ -817,6 +817,7 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
       <button class="btn sec" style="font-size:11px;padding:3px 10px;margin-top:6px;width:100%" onclick="goTab('tasks',null);setTimeout(function(){togHelmSec('hs-dump',true)},200)">See All Dumps →</button>
     </div>
     <div class="hub-card span2" onclick="goTab('focus-session',null)" style="background:linear-gradient(135deg,#eee8f8,#f8e8e8);border-color:#c8b8e8"><div class="hub-card-ic">🎯</div><div class="hub-card-name">Focus Session</div><div class="hub-card-sub" id="hub-focus-session-sub">Timer + task queue</div></div>
+    <div class="hub-card span2" onclick="goTab('grocery',null)" style="background:linear-gradient(135deg,#eaf5ea,#f5f0e8);border-color:#b8d8b8"><div class="hub-card-ic">🛒</div><div class="hub-card-name">Grocery</div><div class="hub-card-sub" id="hub-grocery-sub">Shopping list by store</div></div>
   </div>
 </div>
 
@@ -836,12 +837,28 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
 <!-- HEARTHSIDE -->
 <div class="view" id="v-hearthside">
   <div class="hub-banner" style="background:linear-gradient(135deg,rgba(181,64,32,.1),rgba(212,160,100,.08))">
-    <div class="hub-info"><h2>Health &amp; Wellness</h2><p>Nutrition, meals, sleep, movement, and mood tracking.</p></div>
+    <div class="hub-info"><h2>Health &amp; Wellness</h2><p>Move, eat well, and take care of your whole self.</p></div>
+  </div>
+  <!-- Quick recap inline on hub -->
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px">
+    <div style="background:#fff;border-radius:12px;padding:10px;text-align:center;box-shadow:0 1px 4px rgba(0,0,0,.06)">
+      <div style="font-size:20px;font-weight:700;color:var(--rose)" id="hwHub-tasks">—</div>
+      <div style="font-size:10px;color:var(--textl);margin-top:2px">Tasks done</div>
+    </div>
+    <div style="background:#fff;border-radius:12px;padding:10px;text-align:center;box-shadow:0 1px 4px rgba(0,0,0,.06)">
+      <div style="font-size:20px;font-weight:700;color:var(--blue)" id="hwHub-water">—</div>
+      <div style="font-size:10px;color:var(--textl);margin-top:2px">Water oz</div>
+    </div>
+    <div style="background:#fff;border-radius:12px;padding:10px;text-align:center;box-shadow:0 1px 4px rgba(0,0,0,.06)">
+      <div style="font-size:20px;font-weight:700;color:var(--sage)" id="hwHub-mood">—</div>
+      <div style="font-size:10px;color:var(--textl);margin-top:2px">Today's mood</div>
+    </div>
   </div>
   <div class="hub-grid">
-    <div class="hub-card" onclick="goTab('food',null)"><div class="hub-card-ic">💚</div><div class="hub-card-name">Health</div><div class="hub-card-sub" id="hub-health-sub">Sleep, workouts &amp; wellness</div></div>
-    <div class="hub-card" onclick="goTab('meals',null)"><div class="hub-card-ic">🍽️</div><div class="hub-card-name">Meals</div><div class="hub-card-sub" id="hub-meals-sub">Loading…</div></div>
-    <div class="hub-card span2" onclick="goTab('recap',null)"><div class="hub-card-ic">📊</div><div class="hub-card-name">Recap</div><div class="hub-card-sub">Mood, symptoms &amp; reflections</div></div>
+    <div class="hub-card" onclick="goTab('food',null)"><div class="hub-card-ic">🏃</div><div class="hub-card-name">Move</div><div class="hub-card-sub" id="hub-health-sub">Workouts &amp; movement</div></div>
+    <div class="hub-card" onclick="goTab('meals',null)"><div class="hub-card-ic">🥗</div><div class="hub-card-name">Eat</div><div class="hub-card-sub" id="hub-meals-sub">Nutrition &amp; meals</div></div>
+    <div class="hub-card span2" onclick="goTab('wellness',null)"><div class="hub-card-ic">💆</div><div class="hub-card-name">Wellness</div><div class="hub-card-sub">Mood, sleep, symptoms &amp; meds</div></div>
+    <div class="hub-card span2" onclick="goTab('recap',null)"><div class="hub-card-ic">📊</div><div class="hub-card-name">Recap</div><div class="hub-card-sub">Stats &amp; year in review</div></div>
   </div>
 </div>
 
@@ -977,6 +994,7 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     <button class="qa" onclick="openM('expModal')" style="background:linear-gradient(135deg,#f5e8d8,#fdf6ee)"><div class="qa-ic">💸</div><div class="qa-lb">Expense</div></button>
     <button class="qa" onclick="openM('fwModal')" style="background:linear-gradient(135deg,#e8f0e8,#fdf6ee)"><div class="qa-ic">🍽️</div><div class="qa-lb">Food</div></button>
     <button class="qa" onclick="openM('stepModal')" style="background:linear-gradient(135deg,#e8eef8,#fdf6ee)"><div class="qa-ic">👟</div><div class="qa-lb">Move</div></button>
+    <button class="qa" onclick="openGroceryQuick()" style="background:linear-gradient(135deg,#e8f4e8,#fdf6ee)"><div class="qa-ic">🛒</div><div class="qa-lb">Grocery</div></button>
   </div>
   <!-- Quick Stats (collapsible) -->
   <div class="card" style="padding:0;margin-bottom:10px">
@@ -1332,69 +1350,43 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
   </div>
 </div>
 
+<!-- GROCERY (Tasks section) -->
+<div class="view" id="v-grocery">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+    <div style="font-size:16px;font-weight:800;color:var(--textd)">🛒 Grocery List</div>
+    <button class="btn sec" style="font-size:12px;padding:5px 10px" onclick="clearCheckedGrocery();renderGroceryList()">Clear checked</button>
+  </div>
+  <div class="card" style="margin-bottom:12px;padding:12px">
+    <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
+      <input id="grocTaskAddName" type="text" list="grocTaskFoodSuggest" placeholder="Item name" style="flex:2;min-width:120px;padding:8px 11px;border-radius:10px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px" oninput="grocTaskAutoStore(this.value)">
+      <datalist id="grocTaskFoodSuggest"></datalist>
+      <input id="grocTaskAddStore" type="text" placeholder="Store (optional)" style="flex:1;min-width:90px;padding:8px 11px;border-radius:10px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px">
+      <button class="btn" onclick="grocTaskAddItem()" style="padding:8px 16px">Add</button>
+    </div>
+  </div>
+  <div id="grocTaskListEl"></div>
+</div>
+
 <!-- FOOD -->
 <div class="view" id="v-food">
-  <!-- Health Dashboard -->
+  <!-- MOVE — Workouts & Movement -->
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
-    <button class="health-section-btn" onclick="openSubpage('sp-nutrition')">
-      <span class="health-section-icon">🥗</span>
-      <div class="health-section-info"><div class="health-section-name">Nutrition</div><div class="health-section-sub" id="hd-food-sub">Log food & water</div></div>
-      <span style="color:var(--textl);font-size:14px">›</span>
-    </button>
-    <button class="health-section-btn" onclick="openSubpage('sp-macros')">
-      <span class="health-section-icon">📊</span>
-      <div class="health-section-info"><div class="health-section-name">Macros</div><div class="health-section-sub" id="hd-macro-sub">Today's goals</div></div>
-      <span style="color:var(--textl);font-size:14px">›</span>
-    </button>
     <button class="health-section-btn" onclick="openSubpage('sp-workouts')">
       <span class="health-section-icon">💪</span>
-      <div class="health-section-info"><div class="health-section-name">Workouts</div><div class="health-section-sub" id="hd-workout-sub">Plans & log</div></div>
+      <div class="health-section-info"><div class="health-section-name">Workouts</div><div class="health-section-sub" id="hd-workout-sub">Plans &amp; log</div></div>
       <span style="color:var(--textl);font-size:14px">›</span>
     </button>
-    <button class="health-section-btn" onclick="openSubpage('sp-mood')">
-      <span class="health-section-icon">😊</span>
-      <div class="health-section-info"><div class="health-section-name">Mood & Meds</div><div class="health-section-sub" id="hd-mood-sub">Wellness check-in</div></div>
+    <button class="health-section-btn" onclick="openSubpage('sp-nutrition')">
+      <span class="health-section-icon">🥗</span>
+      <div class="health-section-info"><div class="health-section-name">Nutrition</div><div class="health-section-sub">Log food &amp; macros</div></div>
       <span style="color:var(--textl);font-size:14px">›</span>
     </button>
   </div>
+  <div class="sh" style="display:flex;align-items:center;justify-content:space-between">
+    <span>🏋️ Today's Exercise</span>
+    <button onclick="openAddEx()" style="background:var(--sage-light);border:none;border-radius:9px;padding:5px 11px;font-family:'Quicksand',sans-serif;font-size:12px;font-weight:700;color:#5a7a56;cursor:pointer">+ Log</button>
+  </div>
   <div class="card">
-    <div class="ct">🎯 Today's Macros</div>
-    <div class="pr"><div class="pt"><span class="pn">🔥 Calories</span><span class="pm2" id="fCD">0/1900</span></div><div class="pb"><div class="pf pf-cal" id="fCB" style="width:0%"></div></div></div>
-    <div class="pr"><div class="pt"><span class="pn">💪 Protein</span><span class="pm2" id="fPD">0g/120g</span></div><div class="pb"><div class="pf pf-pro" id="fPB" style="width:0%"></div></div></div>
-    <div class="pr"><div class="pt"><span class="pn">🌿 Fiber</span><span class="pm2" id="fFD">0g/75g</span></div><div class="pb"><div class="pf pf-fib" id="fFB" style="width:0%"></div></div></div>
-    <div class="pr"><div class="pt"><span class="pn">🍞 Carbs</span><span class="pm2" id="fRD">0g/150g</span></div><div class="pb"><div class="pf pf-crb" id="fRB" style="width:0%"></div></div></div>
-    <div class="pr"><div class="pt"><span class="pn">🥑 Fat</span><span class="pm2" id="fAD">0g/65g</span></div><div class="pb"><div class="pf pf-fat" id="fAB" style="width:0%"></div></div></div>
-    <div class="pr"><div class="pt"><span class="pn">💧 Water</span><span class="pm2" id="fWD">0/8</span></div><div class="pb"><div class="pf pf-wat" id="fWB" style="width:0%"></div></div></div>
-  </div>
-  <div class="card" style="margin-top:0;padding:12px 14px">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-      <span style="font-size:13px;font-weight:700;color:var(--textd)">😴 Sleep — Last 7 Nights</span>
-      <span id="sleepAvgLabel" style="font-size:11px;color:var(--textl)">avg —</span>
-    </div>
-    <div id="sleepGraphBars" style="display:flex;align-items:flex-end;gap:3px;height:56px;margin-bottom:6px"></div>
-    <div style="display:flex;gap:10px;font-size:10px;color:var(--textl)">
-      <span style="color:var(--sage)">● ≥8h great</span>
-      <span style="color:#f0a020">● ≥6h ok</span>
-      <span style="color:#d94040">● &lt;6h short</span>
-    </div>
-  </div>
-  <div class="sh sect-toggle" onclick="togSect('weeklyNut','weeklyArrow')">📊 Weekly Nutrition <span id="weeklyArrow">▸</span></div>
-  <div id="weeklyNut" style="display:none">
-    <div class="card" id="weeklyCard"><div style="text-align:center;padding:12px;font-size:13px;color:var(--textl)">Loading weekly data...</div></div>
-  </div>
-  <div class="sh">🥗 Meal Combos</div>
-  <div class="combo-row" id="combosRow"></div>
-  <div class="sh">🔍 Add Food</div>
-  <div class="fsw"><span class="fsic">🔍</span><input class="fsi" id="foodSrch" placeholder="Type to search your foods..." oninput="srchFood(this.value)"></div>
-  <div class="fsugs" id="foodSugs"></div>
-  <div class="sh">📋 Today's Log</div>
-  <div id="foodLog"><div class="empty"><div class="emj">🍽️</div><p>No food logged yet.</p></div></div>
-  <div class="sh">💪 Exercise</div>
-  <div class="card">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-      <div style="font-size:13px;font-weight:600;color:var(--text)">Today's Workouts</div>
-      <button onclick="openAddEx()" style="background:var(--sage-light);border:none;border-radius:9px;padding:6px 12px;font-family:'Quicksand',sans-serif;font-size:12px;font-weight:700;color:#5a7a56;cursor:pointer">+ Log</button>
-    </div>
     <div id="exLog"></div>
     <div style="margin-top:10px;padding-top:10px;border-top:1px solid #f0ebe6">
       <div style="font-size:11px;font-weight:700;color:var(--textl);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px">This Week</div>
@@ -1403,10 +1395,9 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     </div>
   </div>
   <div class="sh" style="display:flex;align-items:center;justify-content:space-between">
-    <span>🏋️ Workout Plans</span>
+    <span>📋 Workout Plans</span>
     <button onclick="openAddWplan()" style="background:var(--sage-light);border:none;border-radius:9px;padding:5px 11px;font-family:'Quicksand',sans-serif;font-size:12px;font-weight:700;color:#5a7a56;cursor:pointer">+ Plan</button>
   </div>
-  <!-- Active workout session -->
   <div id="wplanActiveWrap" style="display:none">
     <div class="wplan-active">
       <div style="display:flex;align-items:center;margin-bottom:10px">
@@ -1418,45 +1409,11 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     </div>
   </div>
   <div id="wplanList"></div>
-  <div class="sh" style="display:flex;align-items:center;justify-content:space-between">
-    <span>💊 Meds &amp; Supplements</span>
-    <button onclick="openAddMed()" style="background:var(--lav-light);border:none;border-radius:9px;padding:5px 11px;font-family:'Quicksand',sans-serif;font-size:12px;font-weight:700;color:#5a4a9b;cursor:pointer">+ Add</button>
+  <div class="card" style="margin-top:14px">
+    <div class="pt"><span class="pn">🔥 Calories today</span><span class="pm2" id="fCD">0/1900</span></div><div class="pb"><div class="pf pf-cal" id="fCB" style="width:0%"></div></div>
+    <div class="pt" style="margin-top:8px"><span class="pn">💪 Protein</span><span class="pm2" id="fPD">0g/120g</span></div><div class="pb"><div class="pf pf-pro" id="fPB" style="width:0%"></div></div>
+    <div style="margin-top:8px"><button class="btn sec" style="width:100%;font-size:12px" onclick="goTab('meals',null)">🥗 Go to Eat for full nutrition →</button></div>
   </div>
-  <div class="card" id="medCard">
-    <div id="medList"><p style="color:var(--textl);font-size:13px;text-align:center;padding:8px">No meds added yet. Tap "+ Add" above.</p></div>
-  </div>
-  <div class="sh">😊 Mood</div>
-  <div class="card">
-    <div style="font-size:12px;color:var(--textl);margin-bottom:8px">How are you feeling today?</div>
-    <div class="mood-row" id="moodBtns">
-      <button class="mood-btn" data-m="1" onclick="logMood(1)">😔</button>
-      <button class="mood-btn" data-m="2" onclick="logMood(2)">😕</button>
-      <button class="mood-btn" data-m="3" onclick="logMood(3)">😐</button>
-      <button class="mood-btn" data-m="4" onclick="logMood(4)">🙂</button>
-      <button class="mood-btn" data-m="5" onclick="logMood(5)">😊</button>
-    </div>
-    <div style="font-size:11px;color:var(--textl);margin-top:6px;margin-bottom:4px">Last 7 days</div>
-    <div class="hist-row" id="moodHist"></div>
-  </div>
-  <div class="sh">🩺 Symptoms</div>
-  <div class="card" id="symCard"><div style="font-size:13px;color:var(--textl)">Loading...</div></div>
-  <div class="sh">🩸 Period Tracker</div>
-  <div class="card">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-      <div>
-        <div style="font-size:13px;font-weight:600;color:var(--text)">Period Log</div>
-        <div style="font-size:11px;color:var(--textl)" id="ptAvg">Log at least 2 cycles to see average</div>
-      </div>
-      <button onclick="logPeriodToday()" style="background:var(--rose-light);border:none;border-radius:9px;padding:6px 12px;font-family:'Quicksand',sans-serif;font-size:12px;font-weight:700;color:var(--rose);cursor:pointer">+ Log Today</button>
-    </div>
-    <div style="margin-bottom:6px">
-      <input type="date" id="ptDateIn" class="fi" style="padding:7px 10px;font-size:13px;margin-bottom:6px">
-      <input class="fi" id="ptNoteIn" placeholder="Note (optional)..." style="padding:7px 10px;font-size:13px;margin-bottom:6px">
-      <button onclick="logPeriodDate()" style="padding:7px 14px;border-radius:9px;border:none;background:var(--rose-light);color:var(--rose);font-family:'Quicksand',sans-serif;font-size:12px;font-weight:700;cursor:pointer">Log This Date</button>
-    </div>
-    <div id="ptList"></div>
-  </div>
-  <div style="margin-bottom:14px;text-align:center"><a href="#" onclick="goTabDirect('export',document.querySelector('[data-tab=\'export\']'));return false;" style="font-size:13px;color:var(--blue);font-weight:700;text-decoration:none">📤 Go to Export tab →</a></div>
 </div>
 
 <!-- WIGS -->
@@ -1923,7 +1880,8 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
       <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end">
         <div style="flex:2;min-width:130px">
           <label style="font-size:11px;color:var(--textl);display:block;margin-bottom:3px">What did you eat/drink?</label>
-          <input id="mealLogName" type="text" placeholder="e.g. Oatmeal, Latte, Apple…" style="width:100%;padding:8px 11px;border-radius:10px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px;box-sizing:border-box">
+          <input id="mealLogName" type="text" list="foodDbSuggestList" placeholder="e.g. Oatmeal, Latte, Apple…" style="width:100%;padding:8px 11px;border-radius:10px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px;box-sizing:border-box" oninput="onMealLogNameInput(this.value)">
+          <datalist id="foodDbSuggestList"></datalist>
         </div>
         <div style="flex:1;min-width:110px">
           <label style="font-size:11px;color:var(--textl);display:block;margin-bottom:3px">Category</label>
@@ -1971,11 +1929,19 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
   <!-- FOOD DATABASE section -->
   <div id="ms-database" style="display:none">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-      <span style="font-size:13px;font-weight:700;color:var(--textd)">🍲 Ember's Pantry</span>
+      <span style="font-size:13px;font-weight:700;color:var(--textd)">🍲 Food Database</span>
       <button class="btn" onclick="openFoodDbModal()">+ Add Food</button>
     </div>
     <div id="foodDbKitchen" style="margin-bottom:10px"></div>
-    <input class="fi" id="foodDbSearch" placeholder="Search foods…" oninput="renderFoodDb()" style="margin-bottom:10px">
+    <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px">
+      <input class="fi" id="foodDbSearch" placeholder="Search foods…" oninput="renderFoodDb()" style="flex:1;margin-bottom:0">
+      <select onchange="setFoodDbSort(this.value)" style="padding:8px 10px;border-radius:10px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:12px;background:#fff;color:var(--textd)">
+        <option value="fav">⭐ Favorites First</option>
+        <option value="az">A–Z</option>
+        <option value="store">By Store</option>
+        <option value="cat">By Category</option>
+      </select>
+    </div>
     <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px" id="foodDbCatFilter">
       <button class="fchip on" onclick="setFoodDbCat('',this)">All</button>
       <button class="fchip" onclick="setFoodDbCat('protein',this)">🥩 Protein</button>
@@ -2131,18 +2097,92 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
       <div class="sr"><span>Routine Items</span><span class="sv" id="sRout">0/0</span></div>
       <div class="sr"><span>Water</span><span class="sv" id="sWat">0/8</span></div>
     </div>
-    <div class="recap-c"><div class="recap-t">💡 When Overwhelmed</div>
-      <div style="font-size:13px;color:var(--textl);line-height:2">🙏 Pray first<br>📝 Brain dump on paper<br>🎧 Headphones + LoFi<br>⏱️ Timer — 10 minutes<br>🐱 One task at a time<br>💧 Drink water<br>🌸 Done is better than perfect</div>
-    </div>
-    <div class="recap-c"><div class="recap-t">⚡ Quick Dopamine</div>
-      <div style="font-size:13px;color:var(--textl);line-height:2">☕ Tea or coffee<br>🛏️ Make the bed<br>🕺 Dance to one song<br>🧹 Organize one thing<br>🌬️ 5 deep breaths<br>📝 Make a list</div>
-    </div>
   </div>
   <!-- YEARLY REFLECTION -->
   <div id="rs-yearly" style="display:none">
     <div style="font-family:'Playfair Display',serif;font-size:18px;color:var(--text);margin-bottom:4px">📅 Year in Review</div>
     <div style="font-size:12px;color:var(--textl);margin-bottom:14px">A look back at what you've built this year.</div>
     <div id="yearlyStats"></div>
+  </div>
+</div>
+
+<!-- WELLNESS -->
+<div class="view" id="v-wellness">
+  <div class="pill-nav" style="margin-bottom:12px">
+    <button class="pn-btn on" onclick="showWellnessSec('mood',this)">😊 Mood</button>
+    <button class="pn-btn" onclick="showWellnessSec('sleep',this)">😴 Sleep</button>
+    <button class="pn-btn" onclick="showWellnessSec('symptoms',this)">🩺 Symptoms</button>
+    <button class="pn-btn" onclick="showWellnessSec('period',this)">🩸 Period</button>
+    <button class="pn-btn" onclick="showWellnessSec('meds',this)">💊 Meds</button>
+  </div>
+
+  <!-- MOOD -->
+  <div id="ws-mood">
+    <div class="card">
+      <div class="ct">😊 Mood Check-in</div>
+      <div style="font-size:12px;color:var(--textl);margin-bottom:8px">How are you feeling today?</div>
+      <div class="mood-row" id="moodBtns">
+        <button class="mood-btn" data-m="1" onclick="logMood(1)">😔</button>
+        <button class="mood-btn" data-m="2" onclick="logMood(2)">😕</button>
+        <button class="mood-btn" data-m="3" onclick="logMood(3)">😐</button>
+        <button class="mood-btn" data-m="4" onclick="logMood(4)">🙂</button>
+        <button class="mood-btn" data-m="5" onclick="logMood(5)">😊</button>
+      </div>
+      <div style="font-size:11px;color:var(--textl);margin-top:8px;margin-bottom:4px">Last 7 days</div>
+      <div class="hist-row" id="moodHist"></div>
+    </div>
+  </div>
+
+  <!-- SLEEP -->
+  <div id="ws-sleep" style="display:none">
+    <div class="card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+        <span style="font-size:13px;font-weight:700;color:var(--textd)">😴 Sleep — Last 7 Nights</span>
+        <span id="sleepAvgLabel" style="font-size:11px;color:var(--textl)">avg —</span>
+      </div>
+      <div id="sleepGraphBars" style="display:flex;align-items:flex-end;gap:3px;height:56px;margin-bottom:6px"></div>
+      <div style="display:flex;gap:10px;font-size:10px;color:var(--textl)">
+        <span style="color:var(--sage)">● ≥8h great</span>
+        <span style="color:#f0a020">● ≥6h ok</span>
+        <span style="color:#d94040">● &lt;6h short</span>
+      </div>
+    </div>
+    <button class="add-btn" onclick="openM('todaySleepModal')" style="margin-bottom:14px">+ Log Sleep</button>
+  </div>
+
+  <!-- SYMPTOMS -->
+  <div id="ws-symptoms" style="display:none">
+    <div class="card" id="symCard"><div style="font-size:13px;color:var(--textl)">Loading...</div></div>
+  </div>
+
+  <!-- PERIOD -->
+  <div id="ws-period" style="display:none">
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <div>
+          <div style="font-size:13px;font-weight:600;color:var(--text)">Period Log</div>
+          <div style="font-size:11px;color:var(--textl)" id="ptAvg">Log at least 2 cycles to see average</div>
+        </div>
+        <button onclick="logPeriodToday()" style="background:var(--rose-light);border:none;border-radius:9px;padding:6px 12px;font-family:'Quicksand',sans-serif;font-size:12px;font-weight:700;color:var(--rose);cursor:pointer">+ Log Today</button>
+      </div>
+      <div style="margin-bottom:6px">
+        <input type="date" id="ptDateIn" class="fi" style="padding:7px 10px;font-size:13px;margin-bottom:6px">
+        <input class="fi" id="ptNoteIn" placeholder="Note (optional)..." style="padding:7px 10px;font-size:13px;margin-bottom:6px">
+        <button onclick="logPeriodDate()" style="padding:7px 14px;border-radius:9px;border:none;background:var(--rose-light);color:var(--rose);font-family:'Quicksand',sans-serif;font-size:12px;font-weight:700;cursor:pointer">Log This Date</button>
+      </div>
+      <div id="ptList"></div>
+    </div>
+  </div>
+
+  <!-- MEDS -->
+  <div id="ws-meds" style="display:none">
+    <div class="sh" style="display:flex;align-items:center;justify-content:space-between">
+      <span>💊 Meds &amp; Supplements</span>
+      <button onclick="openAddMed()" style="background:var(--lav-light);border:none;border-radius:9px;padding:5px 11px;font-family:'Quicksand',sans-serif;font-size:12px;font-weight:700;color:#5a4a9b;cursor:pointer">+ Add</button>
+    </div>
+    <div class="card" id="medCard">
+      <div id="medList"><p style="color:var(--textl);font-size:13px;text-align:center;padding:8px">No meds added yet. Tap "+ Add" above.</p></div>
+    </div>
   </div>
 </div>
 
@@ -3611,9 +3651,9 @@ var MEAL_COMBOS = JSON.parse(localStorage.getItem('aMC')||'null')||[
 ];
 
 var DEFAULT_TAB_ORDER=['today','plan','helm','lighthouse','conservatory','hearthside','workshop','estate','emporium','archives','archive'];
-var TAB_LABELS={today:'Today',plan:'Plan',helm:'Tasks & Projects',conservatory:'Personal Growth',hearthside:'Health & Wellness',workshop:'Workshop',lighthouse:'Spiritual',estate:'Money & Home',emporium:'Work',archives:'Research Library',archive:'Archive',stories:'Stories',mixtape:'Mixtape','focus-session':'Focus Session'};
+var TAB_LABELS={today:'Today',plan:'Plan',helm:'Tasks & Projects',conservatory:'Personal Growth',hearthside:'Health & Wellness',workshop:'Workshop',lighthouse:'Spiritual',estate:'Money & Home',emporium:'Work',archives:'Research Library',archive:'Archive',stories:'Stories',mixtape:'Mixtape','focus-session':'Focus Session',grocery:'Grocery List'};
 var TAB_ORDER=(function(){var o=JSON.parse(localStorage.getItem('aTabOrder')||'null');if(!o)return DEFAULT_TAB_ORDER.slice();var full=DEFAULT_TAB_ORDER.slice();o=o.filter(function(t){return full.indexOf(t)>-1;});full.forEach(function(t){if(o.indexOf(t)<0)o.push(t);});return o;})();
-var SECTION_VIEWS={today:['today'],plan:['plan'],helm:['tasks','projects','lists','focus-session'],conservatory:['goals','routines','learn','focus'],hearthside:['food','meals','recap'],workshop:['board','faves','stories','mixtape'],lighthouse:['spirit'],estate:['money'],emporium:['wigs'],archives:['guide','export','settings'],archive:['archive']};
+var SECTION_VIEWS={today:['today'],plan:['plan'],helm:['tasks','projects','lists','focus-session','grocery'],conservatory:['goals','routines','learn','focus'],hearthside:['food','meals','wellness','recap'],workshop:['board','faves','stories','mixtape'],lighthouse:['spirit'],estate:['money'],emporium:['wigs'],archives:['guide','export','settings'],archive:['archive']};
 var SECTION_LABELS={today:'Today',plan:'Plan',helm:'Tasks & Projects',conservatory:'Personal Growth',hearthside:'Health & Wellness',workshop:'Workshop',lighthouse:'Spiritual',estate:'Money & Home',emporium:'Work',archives:'Research Library',archive:'Archive'};
 var VIEW_SECTION=(function(){var m={};Object.keys(SECTION_VIEWS).forEach(function(s){SECTION_VIEWS[s].forEach(function(v){m[v]=s;});});return m;})();
 
@@ -3885,10 +3925,12 @@ function goTabDirect(tab,btn){
   if(tab==='mixtape')renderMixtape();
   if(SECTION_VIEWS[tab]||tab==='emporium')renderHubPreviews(tab);
   if(tab==='today'){ tickSpiritRun(); renderWaterBottle(); renderTodayStatsBars(); renderWeekStats(); renderTodayMoodBtns(); renderTodayPlanBar(); }
+  if(tab==='hearthside'){ renderHWHubStats(); }
   if(tab==='lighthouse'){ updateLighthouseSpiritStatus(); }
   if(tab==='tasks'){ updateHelmBadges(); }
   if(tab==='focus-session'){ renderFocusSession(); }
   if(tab==='plan'){ renderPlan(); }
+  if(tab==='grocery'){ renderGroceryList(); populateGrocTaskDatalist(); }
 }
 
 function renderHubPreviews(section){
@@ -3903,6 +3945,8 @@ function renderHubPreviews(section){
     el=document.getElementById('hub-lists-sub');if(el)el.textContent=(LISTS||[]).length+' list'+((LISTS||[]).length!==1?'s':'')+' saved';
     var fssQ=FOCUS_QUEUE.tasks.length;
     el=document.getElementById('hub-focus-session-sub');if(el)el.textContent=fssQ?fssQ+' task'+(fssQ!==1?'s':'')+' in queue':'Timer + task queue';
+    var grocCount=GROCERY_LIST.filter(function(g){return !g.checked;}).length;
+    el=document.getElementById('hub-grocery-sub');if(el)el.textContent=grocCount?grocCount+' item'+(grocCount!==1?'s':'')+' to buy':'Shopping list by store';
     renderHelmDumpPreview();
   }else if(section==='conservatory'){
     renderConservatoryMilestone();
@@ -3917,7 +3961,7 @@ function renderHubPreviews(section){
     var lastSl=MILLIE.sleepLog&&MILLIE.sleepLog.length?MILLIE.sleepLog[MILLIE.sleepLog.length-1]:null;
     if(el)el.textContent=lastSl?'Last sleep: '+((new Date(lastSl.wake)-new Date(lastSl.bed))/3600000).toFixed(1)+'h':'Log sleep, workouts & wellness';
     el=document.getElementById('hub-meals-sub');
-    if(el)el.textContent='Meal planning · '+(FOOD_DB.length?FOOD_DB.length+' pantry items':'Stock Ember\'s pantry');
+    if(el)el.textContent='Meal planning · '+(FOOD_DB.length?FOOD_DB.length+' foods in database':'Add foods to your database');
   }else if(section==='workshop'){
     el=document.getElementById('hub-board-sub');if(el)el.textContent=(VB_ITEMS||[]).length+' item'+((VB_ITEMS||[]).length!==1?'s':'');
     el=document.getElementById('hub-faves-sub');if(el)el.textContent=(FAVES||[]).length+' saved fave'+((FAVES||[]).length!==1?'s':'');
@@ -3961,6 +4005,18 @@ function renderHubPreviews(section){
     if(incSub){var incLen=(INCOME||[]).length;incSub.textContent=incLen+' income entr'+(incLen!==1?'ies':'y');}
   }
   updateCharMoods(section);
+}
+
+function renderHWHubStats(){
+  var today=getTK();
+  var tasksDone=(TASKS||[]).filter(function(t){return t.done&&t.doneDate===todayStr();}).length;
+  var waterOz=WATER_OZ_LOG?WATER_OZ_LOG[today]||0:0;
+  var moodVal=MOOD?MOOD[today]:null;
+  var moodEmoji=['','😔','😕','😐','🙂','😊'];
+  var td=document.getElementById('hwHub-tasks');var tw=document.getElementById('hwHub-water');var tm=document.getElementById('hwHub-mood');
+  if(td)td.textContent=tasksDone;
+  if(tw)tw.textContent=waterOz+'oz';
+  if(tm)tm.textContent=moodVal?moodEmoji[moodVal]||'—':'—';
 }
 
 // ── Character condition (mood) system ──────────
@@ -9080,6 +9136,19 @@ function renderYearlyReflection(){
 }
 
 // ── Recap Sections ────────────────────────────────
+function showWellnessSec(sec,btn){
+  ['mood','sleep','symptoms','period','meds'].forEach(function(s){
+    var el=document.getElementById('ws-'+s);if(el)el.style.display=s===sec?'':'none';
+  });
+  document.querySelectorAll('#v-wellness .pn-btn').forEach(function(b){b.classList.remove('on');});
+  if(btn)btn.classList.add('on');
+  if(sec==='mood'){var m=document.getElementById('moodBtns');if(m)renderMoodBtns();}
+  if(sec==='sleep'){renderSleepGraph();}
+  if(sec==='symptoms'){renderSymptoms();}
+  if(sec==='period'){renderPeriodList();}
+  if(sec==='meds'){renderMedList();}
+}
+
 function showRecapSec(sec,btn){
   ['stats','yearly'].forEach(function(s){
     var el=document.getElementById('rs-'+s);
@@ -9345,6 +9414,8 @@ var GUIDE_SECTIONS=[
   {title:'🧠 Focus',items:['🍅 Pomodoro Timer — 25/5 work/break cycles, customizable, audio ping','🧠 Brain Dump — capture thoughts instantly, convert to tasks','🎲 What Now? — app picks a random task for you (no more paralysis)','🎯 Daily Intentions — choose 1–3 focus items, shown on home screen']},
   {title:'📚 Learn',items:['🃏 Flashcards — create decks, add cards, swipe to study (right=✓, left=↩)','Cards move through New → Learning → Mastered','🔬 Research — save topics with URL, notes, and status (Want/Learning/Done)']},
   {title:'⚙️ Settings',items:['Change your name and greeting quote','Banner: color (hex/gradient) or upload an image','Theme Colors — customize all 6 accent colors live','💾 Backup & Restore — download/upload all your data as JSON','Tab visibility and PIN protection per tab']},
+  {title:'💡 When Overwhelmed',items:['🙏 Pray first','📝 Brain dump on paper','🎧 Headphones + LoFi','⏱️ Timer — 10 minutes','🐱 One task at a time','💧 Drink water','🌸 Done is better than perfect']},
+  {title:'⚡ Quick Dopamine Boosts',items:['☕ Tea or coffee','🛏️ Make the bed','🕺 Dance to one song','🧹 Organize one thing','🌬️ 5 deep breaths','📝 Make a list','🌟 Text someone you love']},
 ];
 
 function renderGuide(){
@@ -10832,6 +10903,11 @@ function addMealLogItem(){
   var day=(document.getElementById('mealLogDay')||{}).value||'';
   MEAL_LOG_ITEMS.unshift({id:'ml-'+Date.now(),name:name,category:cat,day:day,date:todayStr()});
   localStorage.setItem('aMealLogItems',JSON.stringify(MEAL_LOG_ITEMS));
+  // Track useCount on matching FOOD_DB item
+  var nl=name.toLowerCase();
+  var dbItem=FOOD_DB.find(function(x){return (x.name||'').toLowerCase()===nl;});
+  if(dbItem){dbItem.useCount=(dbItem.useCount||0)+1;saveFoodDbData();}
+  autoFlagStaples();
   document.getElementById('mealLogName').value='';
   document.getElementById('mealLogDay').value='';
   checkQuestAutoComplete('meal');
@@ -11084,7 +11160,11 @@ function renderRecipes(){
     }
     var tags=(r.tags||[]).map(function(t){return '<span class="recipe-macro-tag">'+t+'</span>';}).join('');
     var ingHtml=(r.ingredients&&r.ingredients.length)?r.ingredients.map(function(i){return '<span style="font-size:11px;color:var(--textl)">'+i.qty+' '+i.unit+' '+i.name+'</span>';}).join('<br>'):'';
+    var thumbHtml=r.photo1?'<img src="'+r.photo1+'" alt="" style="width:52px;height:52px;object-fit:cover;border-radius:8px;flex-shrink:0;margin-right:4px">':'';
     return '<div class="recipe-card" style="background:'+mtColor+';position:relative">'
+      +'<div style="display:flex;align-items:flex-start;gap:8px">'
+      +(thumbHtml?'<div style="flex-shrink:0">'+thumbHtml+'</div>':'')
+      +'<div style="flex:1;min-width:0">'
       +'<div style="display:flex;align-items:center;justify-content:space-between">'
       +'<span class="recipe-card-name">'+r.name+'</span>'
       +'<div style="display:flex;gap:4px;flex-shrink:0">'
@@ -11105,6 +11185,8 @@ function renderRecipes(){
       +tags
       +'</div>'
       +(ingHtml?'<details style="margin-top:6px"><summary style="font-size:11px;color:var(--textl);cursor:pointer;font-weight:700">'+r.ingredients.length+' ingredient'+(r.ingredients.length>1?'s':'')+'</summary><div style="margin-top:4px;line-height:1.8">'+ingHtml+'</div></details>':'')
+      +'</div>'  // close flex:1
+      +'</div>'  // close outer flex row
       +'</div>';
   }).join('');
 }
@@ -11130,6 +11212,19 @@ function openRecipeModal(id){
   if(prepEl)prepEl.value=rec?rec.prepTime||'':'';
   if(cookEl)cookEl.value=rec?rec.cookTime||'':'';
   renderRecipeIngList();
+  // Populate photos
+  var p1Prev=document.getElementById('recPhoto1Preview');
+  var p2Prev=document.getElementById('recPhoto2Preview');
+  var p1Dat=document.getElementById('recPhoto1Data');
+  var p2Dat=document.getElementById('recPhoto2Data');
+  var p1Inp=document.getElementById('recPhoto1Input');
+  var p2Inp=document.getElementById('recPhoto2Input');
+  if(p1Inp)p1Inp.value='';
+  if(p2Inp)p2Inp.value='';
+  if(p1Prev){p1Prev.src=rec&&rec.photo1?rec.photo1:'';p1Prev.style.display=rec&&rec.photo1?'block':'none';}
+  if(p2Prev){p2Prev.src=rec&&rec.photo2?rec.photo2:'';p2Prev.style.display=rec&&rec.photo2?'block':'none';}
+  if(p1Dat)p1Dat.value=rec&&rec.photo1?rec.photo1:'';
+  if(p2Dat)p2Dat.value=rec&&rec.photo2?rec.photo2:'';
   showOv('recipeModal');
 }
 
@@ -11184,7 +11279,9 @@ function saveRecipe(){
     },
     tags:(document.getElementById('recTags').value||'').split(',').map(function(t){return t.trim();}).filter(Boolean),
     ingredients:MEAL_EDIT_INGS,
-    notes:document.getElementById('recNotes').value.trim()
+    notes:document.getElementById('recNotes').value.trim(),
+    photo1:(document.getElementById('recPhoto1Data')||{}).value||'',
+    photo2:(document.getElementById('recPhoto2Data')||{}).value||''
   };
   var idx=RECIPES.findIndex(function(r){return r.id===id;});
   if(idx>=0)RECIPES[idx]=rec;
@@ -11369,6 +11466,8 @@ function clearCheckedGrocery(){
   GROCERY_LIST=GROCERY_LIST.filter(function(g){return !g.checked;});
   localStorage.setItem('aGroceryList',JSON.stringify(GROCERY_LIST));
   renderGrocery();
+  renderGroceryList();
+  renderGroceryQuick();
 }
 
 function addGroceryManual(){
@@ -11424,6 +11523,141 @@ function expGrocery(){
   document.execCommand('copy');
   document.body.removeChild(ta);
   alert('Grocery list copied to clipboard!');
+}
+
+// ── Grocery List (Tasks page) ──────────────────
+
+function saveGroceryList(){
+  localStorage.setItem('aGroceryList',JSON.stringify(GROCERY_LIST));
+}
+
+function addGroceryItem(name, store){
+  name=(name||'').trim();
+  if(!name)return;
+  // Auto-fill store from FOOD_DB if not provided
+  if(!store){
+    var dbItem=FOOD_DB.find(function(x){return (x.name||'').toLowerCase()===name.toLowerCase();});
+    if(dbItem&&dbItem.store)store=dbItem.store;
+  }
+  var exists=GROCERY_LIST.some(function(g){return g.name.toLowerCase()===name.toLowerCase();});
+  if(!exists){
+    GROCERY_LIST.push({id:'gr-'+Date.now(),name:name,store:store||'',qty:'1',unit:'',category:'Other',checked:false,added:todayStr()});
+    saveGroceryList();
+    showToast(name+' added to grocery list 🛒');
+  } else {
+    showToast(name+' is already on the list!');
+  }
+}
+
+function populateGrocTaskDatalist(){
+  var dl=document.getElementById('grocTaskFoodSuggest');
+  if(!dl)return;
+  dl.innerHTML=FOOD_DB.map(function(item){return '<option value="'+escHtml(item.name)+'">';}).join('');
+}
+
+function grocTaskAutoStore(val){
+  var storeEl=document.getElementById('grocTaskAddStore');
+  if(!storeEl)return;
+  if(storeEl.value)return; // don't overwrite if user typed
+  var v=(val||'').trim().toLowerCase();
+  if(!v)return;
+  var dbItem=FOOD_DB.find(function(x){return (x.name||'').toLowerCase()===v;});
+  if(dbItem&&dbItem.store)storeEl.value=dbItem.store;
+}
+
+function grocTaskAddItem(){
+  var nameEl=document.getElementById('grocTaskAddName');
+  var storeEl=document.getElementById('grocTaskAddStore');
+  var name=(nameEl?nameEl.value:'').trim();
+  var store=(storeEl?storeEl.value:'').trim();
+  if(!name)return;
+  // Auto-fill store from FOOD_DB if blank
+  if(!store){
+    var dbItem=FOOD_DB.find(function(x){return (x.name||'').toLowerCase()===name.toLowerCase();});
+    if(dbItem&&dbItem.store)store=dbItem.store;
+  }
+  var exists=GROCERY_LIST.some(function(g){return g.name.toLowerCase()===name.toLowerCase();});
+  if(exists){showToast(name+' is already on the list!');return;}
+  GROCERY_LIST.push({id:'gr-'+Date.now(),name:name,store:store||'',qty:'1',unit:'',category:'Other',checked:false,added:todayStr()});
+  saveGroceryList();
+  if(nameEl)nameEl.value='';
+  if(storeEl)storeEl.value='';
+  renderGroceryList();
+  showToast(name+' added 🛒');
+}
+
+function renderGroceryList(){
+  var el=document.getElementById('grocTaskListEl');
+  if(!el)return;
+  if(!GROCERY_LIST.length){
+    el.innerHTML='<div style="text-align:center;padding:30px 0;color:var(--textl)"><div style="font-size:32px;margin-bottom:8px">🛒</div><div style="font-size:14px">List is empty. Add items above.</div></div>';
+    return;
+  }
+  // Group by store; items with no store → "General"
+  var stores={};
+  GROCERY_LIST.forEach(function(item,i){
+    var s=item.store&&item.store.trim()?item.store.trim():'General';
+    if(!stores[s])stores[s]=[];
+    stores[s].push({item:item,idx:i});
+  });
+  // Sort stores alphabetically, "General" last
+  var storeKeys=Object.keys(stores).sort(function(a,b){
+    if(a==='General'&&b!=='General')return 1;
+    if(b==='General'&&a!=='General')return -1;
+    return a.localeCompare(b);
+  });
+  var html='';
+  storeKeys.forEach(function(store){
+    var entries=stores[store].slice().sort(function(a,b){return a.item.name.localeCompare(b.item.name);});
+    var total=entries.length;
+    var done=entries.filter(function(e){return e.item.checked;}).length;
+    html+='<div style="margin-bottom:14px">'
+      +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;padding:6px 10px;background:linear-gradient(135deg,rgba(90,138,90,.1),rgba(212,170,96,.07));border-radius:10px">'
+      +'<span style="font-size:13px;font-weight:800;color:var(--textd);flex:1">🏪 '+escHtml(store)+'</span>'
+      +'<span style="font-size:11px;color:var(--textl);font-weight:600">'+done+'/'+total+'</span>'
+      +'</div>';
+    entries.forEach(function(entry){
+      var item=entry.item;
+      var i=entry.idx;
+      html+='<div style="display:flex;align-items:center;gap:10px;padding:8px 10px;background:#fff;border-radius:10px;margin-bottom:4px;border:1.5px solid '+(item.checked?'#d0e8d0':'#ede8e3')+';">'
+        +'<input type="checkbox" '+(item.checked?'checked':'')+' onchange="grocTaskToggle('+i+',this.checked)" style="width:18px;height:18px;cursor:pointer;flex-shrink:0">'
+        +'<span style="flex:1;font-size:13px;font-weight:600;'+(item.checked?'text-decoration:line-through;color:var(--textl)':'color:var(--textd)')+'">'+escHtml(item.name)+'</span>'
+        +(item.store?'<span style="font-size:10px;font-weight:700;background:var(--sage-light);color:#4a7a46;border-radius:6px;padding:2px 7px;flex-shrink:0">'+escHtml(item.store)+'</span>':'')
+        +'<button onclick="grocTaskDelete('+i+')" style="background:none;border:none;font-size:16px;cursor:pointer;color:var(--textl);flex-shrink:0;padding:2px 4px;line-height:1">🗑️</button>'
+        +'</div>';
+    });
+    html+='</div>';
+  });
+  el.innerHTML=html;
+}
+
+function grocTaskToggle(i, checked){
+  if(!GROCERY_LIST[i])return;
+  GROCERY_LIST[i].checked=checked;
+  saveGroceryList();
+  if(checked){
+    // Move to inventory
+    var item=GROCERY_LIST[i];
+    var exists=INVENTORY.find(function(inv){return inv.name.toLowerCase()===item.name.toLowerCase();});
+    if(!exists){
+      INVENTORY.push({id:Date.now().toString(),name:item.name,qty:item.qty||'1',unit:item.unit||'',addedDate:todayStr()});
+      localStorage.setItem('aInventory',JSON.stringify(INVENTORY));
+    }
+    // Remove from list after short delay for visual feedback
+    setTimeout(function(){
+      GROCERY_LIST.splice(i,1);
+      saveGroceryList();
+      renderGroceryList();
+    },400);
+    return;
+  }
+  renderGroceryList();
+}
+
+function grocTaskDelete(i){
+  GROCERY_LIST.splice(i,1);
+  saveGroceryList();
+  renderGroceryList();
 }
 
 // ── Price log ─────────────────────────────────
@@ -12475,8 +12709,60 @@ function endColorMix(){
 // FOOD DATABASE 🍲
 // ═══════════════════════════════════════════════
 var FOOD_DB = JSON.parse(localStorage.getItem('aFoodDb')||'[]');
+// Ensure legacy items have required flags
+FOOD_DB.forEach(function(item){
+  if(item.favorite===undefined)item.favorite=false;
+  if(item.staple===undefined)item.staple=false;
+  if(item.useCount===undefined)item.useCount=0;
+});
 var _foodDbCat = '';
-function saveFoodDbData(){ localStorage.setItem('aFoodDb', JSON.stringify(FOOD_DB)); }
+var _foodDbSort = 'fav'; // 'fav','az','store','cat'
+// Populate meal log DB suggestion datalist on startup
+setTimeout(function(){populateFoodDbDatalist();},0);
+function saveFoodDbData(){ localStorage.setItem('aFoodDb', JSON.stringify(FOOD_DB)); populateFoodDbDatalist(); }
+
+function toggleFoodFav(id){
+  var item=FOOD_DB.find(function(x){return x.id===id;});
+  if(!item)return;
+  item.favorite=!item.favorite;
+  saveFoodDbData();
+  renderFoodDb();
+}
+
+function autoFlagStaples(){
+  var sevenDaysAgo=new Date();sevenDaysAgo.setDate(sevenDaysAgo.getDate()-7);
+  var cutoff=sevenDaysAgo.toISOString().slice(0,10);
+  var counts={};
+  MEAL_LOG_ITEMS.forEach(function(m){
+    if((m.date||'')>=cutoff){
+      var n=(m.name||'').toLowerCase().trim();
+      if(n)counts[n]=(counts[n]||0)+1;
+    }
+  });
+  FOOD_DB.forEach(function(item){
+    var n=(item.name||'').toLowerCase().trim();
+    if(!item.staple&&(counts[n]||0)>=3){item.staple=true;}
+  });
+  saveFoodDbData();
+}
+
+function toggleFoodStaple(id){
+  var item=FOOD_DB.find(function(x){return x.id===id;});
+  if(!item)return;
+  item.staple=!item.staple;
+  saveFoodDbData();
+  renderFoodDb();
+}
+
+function addDbItemToGrocery(id){
+  var item=FOOD_DB.find(function(x){return x.id===id;});
+  if(!item)return;
+  var exists=GROCERY_LIST.some(function(g){return g.name.toLowerCase()===item.name.toLowerCase();});
+  if(exists){showToast(item.name+' is already on your grocery list!');return;}
+  GROCERY_LIST.push({id:'gr-'+Date.now(),name:item.name,qty:'1',unit:item.serving||'',category:item.cat||'Other',store:item.store||'',checked:false});
+  localStorage.setItem('aGroceryList',JSON.stringify(GROCERY_LIST));
+  showToast(item.name+' added to grocery list 🛒');
+}
 
 var FOOD_CAT_EMOJI = {protein:'🥩',vegetable:'🥦',grain:'🌾',dairy:'🥛',fruit:'🍎',snack:'🍿',other:'📦'};
 
@@ -12501,6 +12787,8 @@ function saveFoodDb(){
   var name=(document.getElementById('fdbName').value||'').trim();
   if(!name)return alert('Enter a food name');
   var id=document.getElementById('fdbId').value||('fd-'+Date.now());
+  var isNew=!document.getElementById('fdbId').value;
+  var existingItem=FOOD_DB.find(function(x){return x.id===id;});
   var item={
     id:id, name:name,
     cat:(document.getElementById('fdbCat').value||'other'),
@@ -12512,15 +12800,27 @@ function saveFoodDb(){
     store:(document.getElementById('fdbStore').value||'').trim(),
     recipe:(document.getElementById('fdbRecipe').value||'').trim(),
     serving:(document.getElementById('fdbServing').value||'').trim(),
-    added:todayStr()
+    added:todayStr(),
+    favorite:existingItem?existingItem.favorite:false,
+    staple:existingItem?existingItem.staple:false,
+    useCount:existingItem?existingItem.useCount:0
   };
   var existing = FOOD_DB.findIndex(function(x){return x.id===id;});
   if(existing>=0) FOOD_DB[existing]=item; else FOOD_DB.unshift(item);
   saveFoodDbData();
   closeM('foodDbModal');
+  if(isNew){
+    var alreadyInGrocery=GROCERY_LIST.some(function(g){return g.name.toLowerCase()===name.toLowerCase();});
+    if(!alreadyInGrocery){
+      GROCERY_LIST.push({id:'gr-'+Date.now(),name:name,qty:'1',unit:item.serving||'',category:item.cat||'Other',store:item.store||'',checked:false});
+      localStorage.setItem('aGroceryList',JSON.stringify(GROCERY_LIST));
+      showToast('Added to grocery — tap 🛒 to view');
+    }
+  }
   renderFoodDb();
   renderFoodDbKitchen();
   renderHubPreviews('hearthside');
+  renderHWHubStats();
 }
 
 function delFoodDb(){
@@ -12543,7 +12843,7 @@ function renderFoodDbKitchen(){
   var el=document.getElementById('foodDbKitchen');
   if(!el)return;
   var count=FOOD_DB.length;
-  var levels=['🍽️ Empty pantry — add your first food!','🥄 A few basics on the shelf','🧂 The pantry is taking shape','🍳 A well-stocked kitchen!','👩‍🍳 Ember\'s kitchen is thriving!','🌟 Full Brindleport feast!'];
+  var levels=['🍽️ Empty database — add your first food!','🥄 A few basics logged','🧂 Food database taking shape','🍳 A well-stocked food database!','👩‍🍳 Great food variety!','🌟 Full nutrition database!'];
   var idx=Math.min(Math.floor(count/8), levels.length-1);
   var pct=Math.min(100, Math.round(count/40*100));
   el.innerHTML='<div style="background:linear-gradient(135deg,#fff8f0,#fff0e8);border-radius:10px;padding:10px 12px">'
@@ -12556,6 +12856,11 @@ function renderFoodDbKitchen(){
     +'</div></div>';
 }
 
+function setFoodDbSort(val){
+  _foodDbSort=val;
+  renderFoodDb();
+}
+
 function renderFoodDb(){
   var el=document.getElementById('foodDbList');
   if(!el)return;
@@ -12566,16 +12871,30 @@ function renderFoodDb(){
     if(q&&!item.name.toLowerCase().includes(q)&&!(item.store||'').toLowerCase().includes(q))return false;
     return true;
   });
+  // Sort
+  var sort=_foodDbSort||'fav';
+  if(sort==='fav'){
+    list=list.slice().sort(function(a,b){return (b.favorite?1:0)-(a.favorite?1:0)||(a.name||'').localeCompare(b.name||'');});
+  } else if(sort==='az'){
+    list=list.slice().sort(function(a,b){return (a.name||'').localeCompare(b.name||'');});
+  } else if(sort==='store'){
+    list=list.slice().sort(function(a,b){return (a.store||'').localeCompare(b.store||'')||(a.name||'').localeCompare(b.name||'');});
+  } else if(sort==='cat'){
+    list=list.slice().sort(function(a,b){return (a.cat||'').localeCompare(b.cat||'')||(a.name||'').localeCompare(b.name||'');});
+  }
   if(!list.length){
-    el.innerHTML='<div class="empty"><div class="emj">🍲</div><p>'+(FOOD_DB.length?'No items match.':'Ember\'s pantry is empty! Add your first food item.')+'</p></div>';return;
+    el.innerHTML='<div class="empty"><div class="emj">🍲</div><p>'+(FOOD_DB.length?'No items match.':'Food database is empty! Add your first food item.')+'</p></div>';return;
   }
   el.innerHTML=list.map(function(item){
     var emoji=FOOD_CAT_EMOJI[item.cat]||'📦';
+    var favBtn='<button title="Favorite" onclick="toggleFoodFav(\''+item.id+'\')" style="background:none;border:none;font-size:16px;cursor:pointer;line-height:1;padding:2px">'+(item.favorite?'⭐':'☆')+'</button>';
+    var stapleBtn=item.staple?'<button title="Unflag staple" onclick="toggleFoodStaple(\''+item.id+'\')" style="background:none;border:none;font-size:13px;cursor:pointer;line-height:1;padding:2px">🏷️</button>':'';
+    var grocBtn='<button title="Add to Grocery" onclick="addDbItemToGrocery(\''+item.id+'\')" style="background:none;border:none;font-size:15px;cursor:pointer;line-height:1;padding:2px">🛒</button>';
     return'<div style="background:#fff;border-radius:12px;padding:12px 14px;margin-bottom:8px;box-shadow:0 1px 4px rgba(0,0,0,.06)">'
       +'<div style="display:flex;align-items:flex-start;gap:10px">'
       +'<span style="font-size:20px;flex-shrink:0;margin-top:1px">'+emoji+'</span>'
       +'<div style="flex:1;min-width:0">'
-      +'<div style="font-size:13px;font-weight:700;color:var(--textd)">'+escHtml(item.name)+(item.serving?'<span style="font-weight:400;color:var(--textl);font-size:11px"> · '+escHtml(item.serving)+'</span>':'')+'</div>'
+      +'<div style="font-size:13px;font-weight:700;color:var(--textd)">'+escHtml(item.name)+(item.serving?'<span style="font-weight:400;color:var(--textl);font-size:11px"> · '+escHtml(item.serving)+'</span>':'')+(item.staple?' <span style="font-size:10px;background:#fff0d0;border-radius:6px;padding:1px 5px;color:#a07020">staple</span>':'')+'</div>'
       +(item.cal||item.pro?'<div style="font-size:11px;color:var(--textl);margin-top:3px">'
         +(item.cal?'<span style="margin-right:8px">🔥 '+item.cal+'cal</span>':'')
         +(item.pro?'<span style="margin-right:8px">💪 '+item.pro+'g pro</span>':'')
@@ -12588,7 +12907,8 @@ function renderFoodDb(){
         +'</div>':'')
       +(item.recipe?'<div style="font-size:11px;color:var(--lav);margin-top:2px">📖 '+escHtml(item.recipe)+'</div>':'')
       +'</div>'
-      +'<div style="display:flex;flex-direction:column;gap:5px;flex-shrink:0">'
+      +'<div style="display:flex;flex-direction:column;gap:3px;flex-shrink:0;align-items:flex-end">'
+      +'<div style="display:flex;gap:2px">'+favBtn+stapleBtn+grocBtn+'</div>'
       +'<button class="btn sec" style="font-size:11px;padding:4px 9px" onclick="foodDbAddToLog(\''+escHtml(item.name)+'\','+item.cal+','+item.pro+','+item.carb+','+item.fat+')">+ Log</button>'
       +'<button class="btn sec" style="font-size:11px;padding:4px 9px" onclick="openFoodDbModal(\''+item.id+'\')">Edit</button>'
       +'</div></div></div>';
@@ -12602,6 +12922,110 @@ function foodDbAddToLog(name, cal, pro, carb, fat){
   localStorage.setItem('aFL',JSON.stringify(FL));
   updM();
   showToast(name+' added to today\'s log 🍽️');
+}
+
+// ─── Grocery Quick Modal ────────────────────────
+function openGroceryQuick(){
+  renderGroceryQuick();
+  openM('groceryQuickModal');
+}
+function renderGroceryQuick(){
+  var el=document.getElementById('gqmList');if(!el)return;
+  if(!GROCERY_LIST.length){el.innerHTML='<p style="color:var(--textl);text-align:center;padding:20px">List is empty.</p>';return;}
+  // Group by store; items with no store → "General"
+  var stores={};
+  GROCERY_LIST.forEach(function(item,i){
+    var s=item.store&&item.store.trim()?item.store.trim():'General';
+    if(!stores[s])stores[s]=[];
+    stores[s].push({item:item,idx:i});
+  });
+  // Sort stores alphabetically, "General" last
+  var storeKeys=Object.keys(stores).sort(function(a,b){
+    if(a==='General'&&b!=='General')return 1;
+    if(b==='General'&&a!=='General')return -1;
+    return a.localeCompare(b);
+  });
+  var html='';
+  storeKeys.forEach(function(store){
+    var entries=stores[store].slice().sort(function(a,b){return a.item.name.localeCompare(b.item.name);});
+    var total=entries.length;
+    var done=entries.filter(function(e){return e.item.checked;}).length;
+    html+='<div style="margin-bottom:10px">'
+      +'<div style="font-size:11px;font-weight:800;color:var(--textl);text-transform:uppercase;letter-spacing:.5px;padding:4px 0 5px;border-bottom:1px solid #f0ebe6;margin-bottom:4px">🏪 '+escHtml(store)
+      +' <span style="font-weight:500">('+done+'/'+total+')</span></div>';
+    entries.forEach(function(entry){
+      var item=entry.item;
+      var i=entry.idx;
+      html+='<div style="display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid #f8f5f2">'
+        +'<input type="checkbox" '+(item.checked?'checked':'')
+        +' onchange="gqmToggle('+i+',this.checked)" style="width:18px;height:18px;cursor:pointer">'
+        +'<span style="flex:1;font-size:13px;'+(item.checked?'text-decoration:line-through;color:var(--textl)':'color:var(--textd)')+'">'+escHtml(item.name)+(item.qty&&item.qty!=='1'?' <span style="color:var(--textl);font-size:11px">('+escHtml(item.qty)+')</span>':'')+'</span>'
+        +'<button onclick="gqmRemove('+i+')" style="background:none;border:none;font-size:16px;cursor:pointer;color:var(--textl);padding:2px 4px;line-height:1">✕</button>'
+        +'</div>';
+    });
+    html+='</div>';
+  });
+  el.innerHTML=html;
+}
+function gqmToggle(i,checked){
+  if(!GROCERY_LIST[i])return;
+  GROCERY_LIST[i].checked=checked;
+  localStorage.setItem('aGroceryList',JSON.stringify(GROCERY_LIST));
+  if(checked){
+    GROCERY_LIST.splice(i,1);
+    localStorage.setItem('aGroceryList',JSON.stringify(GROCERY_LIST));
+  }
+  renderGroceryQuick();
+}
+function gqmRemove(i){
+  GROCERY_LIST.splice(i,1);
+  localStorage.setItem('aGroceryList',JSON.stringify(GROCERY_LIST));
+  renderGroceryQuick();
+}
+function addGroceryQuick(){
+  var inp=document.getElementById('gqmAddName');
+  var name=(inp.value||'').trim();
+  if(!name)return;
+  var exists=GROCERY_LIST.some(function(g){return g.name.toLowerCase()===name.toLowerCase();});
+  if(!exists){
+    // Auto-fill store from FOOD_DB if available
+    var dbItem=FOOD_DB.find(function(x){return (x.name||'').toLowerCase()===name.toLowerCase();});
+    var store=dbItem&&dbItem.store?dbItem.store:'';
+    GROCERY_LIST.push({id:'gr-'+Date.now(),name:name,qty:'1',unit:'',category:'Other',store:store,checked:false,added:todayStr()});
+    saveGroceryList();
+    showToast(name+' added 🛒');
+  } else {
+    showToast(name+' is already on the list!');
+  }
+  inp.value='';
+  renderGroceryQuick();
+  renderGroceryList();
+}
+
+// ─── Meal log DB suggestions ────────────────────
+function populateFoodDbDatalist(){
+  var dl=document.getElementById('foodDbSuggestList');
+  if(!dl)return;
+  dl.innerHTML=FOOD_DB.map(function(item){return '<option value="'+escHtml(item.name)+'">';}).join('');
+}
+function onMealLogNameInput(val){
+  // datalist filters automatically; just ensure it's populated
+  populateFoodDbDatalist();
+}
+
+// ─── Recipe photos ──────────────────────────────
+function loadRecipePhoto(input,previewId,dataId){
+  var file=input.files&&input.files[0];
+  if(!file)return;
+  var reader=new FileReader();
+  reader.onload=function(e){
+    var b64=e.target.result;
+    var prev=document.getElementById(previewId);
+    var dat=document.getElementById(dataId);
+    if(prev){prev.src=b64;prev.style.display='block';}
+    if(dat)dat.value=b64;
+  };
+  reader.readAsDataURL(file);
 }
 
 // ═══════════════════════════════════════════════
@@ -12627,7 +13051,7 @@ var BADGE_DEFS = [
     });
     return goalsDone&&rtnDone;
   }},
-  {id:'hearthside',label:"Ember's Kin",emoji:'🏡',color:'linear-gradient(135deg,#e07840,#b04820)',section:'Hearthside',task:"Log a meal, log sleep, and add 3 foods to Ember's pantry",detect:function(){
+  {id:'hearthside',label:"Ember's Kin",emoji:'🏡',color:'linear-gradient(135deg,#e07840,#b04820)',section:'Hearthside',task:"log a workout or meal",detect:function(){
     var hasMeal=(FL[getTK()]||[]).length>0||MEAL_LOG_ITEMS.length>0;
     var hasSleep=(MILLIE.sleepLog||[]).length>0;
     var hasPantry=FOOD_DB.length>=3;
@@ -12653,7 +13077,7 @@ var TUTORIAL_STEPS = [
   {id:'today',title:'☀️ Today — Your Daily Anchor',speech:"The Today tab is your morning launchpad. Set your intentions, track water, check your routines, and see what's urgent. Let's get it set up!",section:'today',badge:'today',actionLabel:'Go to Today →',actionFn:function(){goTabDirect('today',null);},task:'Set 3 intentions (Focus Tools) or log your first glass of water — then come back here.'},
   {id:'helm',title:'⚓ The Helm — Command Center',speech:"Reid keeps you on course here. Tasks, projects, brain dump — this is where you load the cargo. Add a few tasks and kick off your first project!",section:'helm',badge:'helm',actionLabel:'Go to The Helm →',actionFn:function(){goTabDirect('helm',null);},task:'Add at least 3 tasks and create 1 project. Then come back!'},
   {id:'conservatory',title:'🌿 The Conservatory — Growth Space',speech:"Tessa tends to this calm corner. Goals, routines, learning, focus. The greenhouse unlocks when this section is thriving — let's give it life!",section:'conservatory',badge:'conservatory',actionLabel:'Go to Conservatory →',actionFn:function(){goTabDirect('conservatory',null);},task:'Set 2 goals (any horizon) and complete at least 1 full routine today.'},
-  {id:'hearthside',title:'🏡 Hearthside — Hearth & Home',speech:"Ember keeps the hearth warm. Log your meals, stock her pantry with your go-to foods, and record a sleep session. A warm hearth feeds everyone!",section:'hearthside',badge:'hearthside',actionLabel:'Go to Hearthside →',actionFn:function(){goTabDirect('hearthside',null);},task:"Log a meal, record sleep for Millie, and add 3+ foods to Ember's Pantry."},
+  {id:'hearthside',title:'🏡 Hearthside — Hearth & Home',speech:"Ember keeps the hearth warm. Log your meals, track your workouts, and take care of your whole self. A warm hearth feeds everyone!",section:'hearthside',badge:'hearthside',actionLabel:'Go to Hearthside →',actionFn:function(){goTabDirect('hearthside',null);},task:"Log a meal, log a workout, and check in on your wellness."},
   {id:'workshop',title:'🔨 The Workshop — Creative Studio',speech:"Clara and Astrid's creative space! Add something to your vision board, save a favorite link, and drop a song on your mixtape. Make it yours!",section:'workshop',badge:'workshop',actionLabel:'Go to Workshop →',actionFn:function(){goTabDirect('workshop',null);},task:'Add 1 vision board item, 1 favorite, and 1 song to your mixtape.'},
   {id:'lighthouse',title:'✨ Lighthouse — Spiritual Life',speech:"This one matters most to you, Adri. Log a prayer, record ministry time, and write what you're grateful for. The Jungle on Today tracks your daily light.",section:'lighthouse',badge:'lighthouse',actionLabel:'Go to Lighthouse →',actionFn:function(){goTabDirect('lighthouse',null);},task:'Add 1 prayer, log at least 1 hour of ministry, and write 1 gratitude entry.'},
   {id:'estate',title:'🏛️ The Estate — The Books',speech:"Elias runs a tight ship! Log your recurring bills, enter some expenses, and Budget Blitz unlocks when you've logged 50. Better late than overdrawn!",section:'estate',badge:'estate',actionLabel:'Go to The Estate →',actionFn:function(){goTabDirect('estate',null);},task:'Add your bills and log at least 5 expenses.'},
@@ -12706,7 +13130,7 @@ var TUTORIAL_STEPS = [
   {title:'Welcome to Brindleport! 🌊',text:'Hi Adri! I\'m Cal, your guide. This tour will walk you through the whole app and help you get set up. Each section has its own character and purpose. Ready to explore?',btn:'Let\'s go! 🗺️',action:null},
   {title:'⚓ The Helm',text:'This is your command center. Reid keeps you on course. Add tasks, manage projects, and do a quick brain dump here. Try adding your first task to get started!',btn:'Add a task →',action:"closeM('tutorialModal');openM('taskModal')"},
   {title:'🌿 The Conservatory',text:'Tessa\'s quiet space for growth. Set goals, build routines, track learning, and use focus tools. The greenhouse unlocks when your Conservatory is thriving.',btn:'Visit Conservatory →',action:"closeM('tutorialModal');goTab('conservatory',null)"},
-  {title:'🏡 Hearthside',text:'Ember keeps the hearth warm. Log your meals, track sleep, plan workouts, and fill her pantry with your food database. A well-fed household is a happy one.',btn:'Visit Hearthside →',action:"closeM('tutorialModal');goTab('hearthside',null)"},
+  {title:'🏡 Hearthside',text:'Ember keeps the hearth warm. Log your meals, track workouts, and take care of your whole self. Move, eat well, and check in on your wellness daily.',btn:'Visit Hearthside →',action:"closeM('tutorialModal');goTab('hearthside',null)"},
   {title:'🔨 The Workshop',text:'Clara & Astrid\'s creative studio. Build your vision board, collect favorites, write stories, and add songs to your mixtape. Creative output keeps them inspired!',btn:'Visit Workshop →',action:"closeM('tutorialModal');goTab('workshop',null)"},
   {title:'✨ The Lighthouse',text:'The most important section! Spiritual life lives here. Log prayers, track Bible reading, record ministry time, add scripture cards, and study them. The Spirit Runner on your Today page tracks your daily effort.',btn:'Visit Lighthouse →',action:"closeM('tutorialModal');goTab('lighthouse',null)"},
   {title:'🏛️ The Estate',text:'Your financial foundation. Track expenses, pay bills, log income, and play Budget Blitz once you\'ve entered 50 real transactions. A healthy Estate unlocks a new building in Brindleport.',btn:'Visit Estate →',action:"closeM('tutorialModal');goTab('estate',null)"},
@@ -14543,6 +14967,21 @@ function startReidRunner(){
   </div>
   <label style="font-size:12px;color:var(--textl)">Notes</label>
   <textarea id="recNotes" placeholder="Instructions, tips…" rows="2" style="width:100%;padding:8px 11px;border-radius:10px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px;resize:vertical;box-sizing:border-box;margin-bottom:12px"></textarea>
+  <div style="font-size:12px;font-weight:700;color:var(--textl);margin-bottom:6px">PHOTOS</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
+    <div>
+      <label style="font-size:11px;color:var(--textl)">Photo 1</label>
+      <input id="recPhoto1Input" type="file" accept="image/*" style="width:100%;font-size:11px;margin-bottom:4px" onchange="loadRecipePhoto(this,'recPhoto1Preview','recPhoto1Data')">
+      <img id="recPhoto1Preview" src="" alt="" style="display:none;width:100%;max-height:80px;object-fit:cover;border-radius:8px">
+      <input type="hidden" id="recPhoto1Data">
+    </div>
+    <div>
+      <label style="font-size:11px;color:var(--textl)">Photo 2</label>
+      <input id="recPhoto2Input" type="file" accept="image/*" style="width:100%;font-size:11px;margin-bottom:4px" onchange="loadRecipePhoto(this,'recPhoto2Preview','recPhoto2Data')">
+      <img id="recPhoto2Preview" src="" alt="" style="display:none;width:100%;max-height:80px;object-fit:cover;border-radius:8px">
+      <input type="hidden" id="recPhoto2Data">
+    </div>
+  </div>
   <div style="display:flex;gap:8px">
     <button class="btn" style="flex:1" onclick="saveRecipe()">Save Recipe</button>
     <button class="btn sec" style="flex:1" onclick="closeOv('recipeModal')">Cancel</button>
@@ -15074,6 +15513,20 @@ function startReidRunner(){
     <input type="text" id="fssPickerSearch" placeholder="Search tasks..." class="fi" style="margin-bottom:10px" oninput="renderFssPicker()">
     <div id="fssPickerList" style="flex:1;overflow-y:auto;max-height:55vh"></div>
     <button class="cn-btn" onclick="closeM('fssPickerModal')">Close</button>
+  </div>
+</div>
+
+<!-- GROCERY QUICK MODAL -->
+<div class="ov" id="groceryQuickModal" onclick="if(event.target===this)closeM('groceryQuickModal')">
+  <div class="mod" style="max-height:80vh;display:flex;flex-direction:column">
+    <div class="mh"></div>
+    <div class="mtit">🛒 Grocery List</div>
+    <div style="display:flex;gap:6px;margin-bottom:10px">
+      <input id="gqmAddName" type="text" placeholder="Add item…" class="fi" style="flex:1;margin-bottom:0" onkeydown="if(event.key==='Enter')addGroceryQuick()">
+      <button class="btn" onclick="addGroceryQuick()">Add</button>
+    </div>
+    <div id="gqmList" style="flex:1;overflow-y:auto;max-height:50vh"></div>
+    <button class="cn-btn" style="margin-top:10px" onclick="closeM('groceryQuickModal')">Close</button>
   </div>
 </div>
 </body>
