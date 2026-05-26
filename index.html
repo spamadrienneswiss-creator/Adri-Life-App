@@ -804,7 +804,6 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     <button class="ok-btn" style="flex:1;margin:0;padding:10px 8px;font-size:13px;background:linear-gradient(135deg,var(--lav),var(--blue))" onclick="goTab('projects',null);setTimeout(openNewProj,200)">📁 New Project</button>
   </div>
   <div class="hub-grid">
-    <div id="helmMilestonePanel"></div>
     <div class="hub-card" onclick="goTab('tasks',null)"><div class="hub-card-ic">📋</div><div class="hub-card-name">Tasks</div><div class="hub-card-sub" id="hub-tasks-sub">Loading…</div></div>
     <div class="hub-card" onclick="goTab('projects',null)"><div class="hub-card-ic">📁</div><div class="hub-card-name">Projects</div><div class="hub-card-sub" id="hub-projects-sub">Loading…</div></div>
     <div class="hub-card span2" onclick="goTab('lists',null)"><div class="hub-card-ic">📝</div><div class="hub-card-name">Lists</div><div class="hub-card-sub" id="hub-lists-sub">Active working lists</div></div>
@@ -818,7 +817,6 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
       <button class="btn sec" style="font-size:11px;padding:3px 10px;margin-top:6px;width:100%" onclick="goTab('tasks',null);setTimeout(function(){togHelmSec('hs-dump',true)},200)">See All Dumps →</button>
     </div>
     <div class="hub-card span2" onclick="goTab('focus-session',null)" style="background:linear-gradient(135deg,#eee8f8,#f8e8e8);border-color:#c8b8e8"><div class="hub-card-ic">🎯</div><div class="hub-card-name">Focus Session</div><div class="hub-card-sub" id="hub-focus-session-sub">Timer + task queue</div></div>
-    <div class="hub-card span2" onclick="openCrateSprint()" style="background:linear-gradient(135deg,#e8f0f8,#d8e8f4);border-color:#b0c8e0"><div class="hub-card-ic">📦</div><div class="hub-card-name">Crate Sprint</div><div class="hub-card-sub">Focus mini-game — log tasks as fast as you can</div></div>
   </div>
 </div>
 
@@ -828,12 +826,10 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     <div class="hub-info"><h2>Personal Growth</h2><p>Goals, routines, learning, and focus tools.</p></div>
   </div>
   <div class="hub-grid">
-    <div id="conservatoryMilestonePanel"></div>
     <div class="hub-card" onclick="goTab('goals',null)"><div class="hub-card-ic">🎯</div><div class="hub-card-name">Goals</div><div class="hub-card-sub" id="hub-goals-sub">Loading…</div></div>
     <div class="hub-card" onclick="goTab('routines',null)"><div class="hub-card-ic">🔄</div><div class="hub-card-name">Routines</div><div class="hub-card-sub" id="hub-routines-sub">Loading…</div></div>
     <div class="hub-card" onclick="goTab('learn',null)"><div class="hub-card-ic">📚</div><div class="hub-card-name">Learning</div><div class="hub-card-sub">Research &amp; study</div></div>
     <div class="hub-card" onclick="goTab('focus',null)"><div class="hub-card-ic">🧠</div><div class="hub-card-name">Focus Tools</div><div class="hub-card-sub">Intentions &amp; ADHD aids</div></div>
-    <div class="hub-card span2" onclick="openMemoryPalace()" style="background:linear-gradient(135deg,#f0eaf8,#e6ddf0);border-color:#c4b0dc"><div class="hub-card-ic">🃏</div><div class="hub-card-name">Memory Palace</div><div class="hub-card-sub">Match your goals — memory mini-game</div></div>
   </div>
 </div>
 
@@ -958,11 +954,11 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     <p id="gQuote">The plans of the diligent lead to success. — Prov 21:5</p>
   </div>
   <!-- Intentions widget -->
-  <div id="intentionsHomeWrap" style="display:none;margin-bottom:10px">
+  <div id="intentionsHomeWrap" style="margin-bottom:10px">
     <div style="background:#fff;border-radius:14px;padding:12px 14px;box-shadow:0 1px 4px rgba(0,0,0,.06)">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
         <span style="font-size:11px;font-weight:700;color:var(--textl);letter-spacing:.5px;text-transform:uppercase">🎯 Today's Focus</span>
-        <button class="btn sec" style="font-size:11px;padding:2px 9px" onclick="goTab('focus',document.querySelector('[data-tab=\'focus\']'))">Edit</button>
+        <button class="btn sec" style="font-size:11px;padding:2px 9px" onclick="showFocusSec('intentions',null);goTab('focus',document.querySelector('[data-tab=\'focus\']'))">+ Set</button>
       </div>
       <div id="intentionsHomeList"></div>
     </div>
@@ -2494,6 +2490,7 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
       <input class="fi" id="gmUnit" placeholder="hours / days / lbs / ..." style="flex:1">
     </div>
   </div>
+  <div class="fg"><label class="fl">Target Date (optional)</label><input class="fi" type="date" id="gmDue"></div>
   <div class="fg"><label class="fl">Notes</label><textarea class="fi" id="gmNotes" placeholder="Why this goal matters..."></textarea></div>
   <button class="ok-btn" style="background:linear-gradient(135deg,var(--sage),var(--teal))" onclick="saveGoal()">Save Goal 🎯</button>
   <button class="del-btn" id="gmDel" onclick="delGoalEdit()" style="display:none">🗑️ Delete Goal</button>
@@ -4393,7 +4390,8 @@ function renderRtnGroups(){
         '<div class="rchk">'+(isDoneItem?'✓':'')+'</div>'+
         '<div class="rlb">'+item+'</div>'+
         '<button class="rtn-send-task" onclick="event.stopPropagation();sendRtnToTask(\''+eItem+'\')" title="Send to Tasks">→📋</button>'+
-        '<button class="rhi" onclick="hideRI(event,\''+g.id+'\',\''+eItem+'\')" title="Hide">✕</button>'+
+        '<button class="rhi" onclick="hideRI(event,\''+g.id+'\',\''+eItem+'\')" title="Hide item temporarily">👁️</button>'+
+        '<button class="rhi" onclick="delRtnItem(event,\''+g.id+'\',\''+eItem+'\')" title="Delete item" style="color:var(--ured)">✕</button>'+
       '</div>';
     };
 
@@ -4421,15 +4419,12 @@ function renderRtnGroups(){
 }
 
 function sendRtnToTask(text){
-  var t={id:'t'+Date.now(),text:text,done:false,cat:'',priority:'',due:'',notes:'',repeat:false,subtasks:[]};
+  var t={id:'t-'+Date.now(),title:text,cat:'mis',urgency:'',etime:'',due:'',notes:'',done:false,repeat:'',repeatDays:0,subs:[],created:new Date().toISOString(),meaningful:false};
   TASKS.push(t);
+  localStorage.setItem('aTasks',JSON.stringify(TASKS));
   fbSave('tasks',t.id,t);
-  renderTasks();
-  var flash=document.createElement('div');
-  flash.style.cssText='position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:var(--sage);color:white;padding:8px 16px;border-radius:12px;font-size:13px;font-weight:700;z-index:9999;pointer-events:none';
-  flash.textContent='→ Added to Tasks!';
-  document.body.appendChild(flash);
-  setTimeout(function(){flash.remove();},1800);
+  updateHelmBadges();
+  showToast('→ Added to Tasks!');
 }
 
 function togRtnDone(id){
@@ -4683,6 +4678,7 @@ function catTag(id){var c=catMap[id]||catMap.mis;return'<span class="ttag" style
 function renderT(f){
   f=f||CF;
   var list=document.getElementById('taskList');
+  if(!list)return;
   var arr;
   if(f==='done') arr=TASKS.filter(function(t){return t.done;});
   else if(f==='all') arr=TASKS.filter(function(t){return !t.done;});
@@ -5504,7 +5500,7 @@ function renderPlan(){
       html+='<div style="font-size:20px;font-weight:800;color:'+(isToday?'var(--rose)':isPast?'#bbb':'var(--textd)')+'">'+dayDate.getDate()+'</div>';
       html+='</div>';
       // Block chips preview + due tasks badge
-      var dueCnt=(TASKS||[]).filter(function(t){return !t.done&&t.due===dStr;}).length;
+      var dueCnt=(TASKS||[]).filter(function(t){return !t.done&&t.due===dStr;}).length+((GOALS||[]).filter(function(g){return !g.done&&g.due===dStr;}).length);
       html+='<div style="flex:1;display:flex;flex-wrap:wrap;gap:4px;align-items:center;min-width:0;overflow:hidden">';
       if(dueCnt>0)html+='<span style="font-size:10px;font-weight:800;padding:2px 7px;border-radius:6px;background:rgba(210,140,140,.15);color:var(--rose);white-space:nowrap;flex-shrink:0">📌 '+dueCnt+' due</span>';
       if(blocks.length){
@@ -5543,8 +5539,23 @@ function renderPlanHoursHTML(dStr,blocks){
   });
   // Tasks due on this day
   var dueTasks=(TASKS||[]).filter(function(t){return !t.done&&t.due===dStr;});
+  var dueGoals=(GOALS||[]).filter(function(g){return !g.done&&g.due===dStr;});
   var urgLabels={'urgent-important':'🔴 Do Now','important-not-urgent':'🟡 Schedule','urgent-not-important':'🔵 Quick Win','not-urgent':'⚪ Someday'};
   var html='<div style="background:#fafaf8">';
+  if(dueGoals.length){
+    var gc2=GCATMAP||{};
+    html+='<div style="padding:8px 12px;border-bottom:2px solid rgba(120,180,140,.2);background:rgba(120,180,140,.04)">';
+    html+='<div style="font-size:10px;font-weight:800;color:var(--sage);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px">🎯 Goals Due</div>';
+    html+='<div style="display:flex;flex-direction:column;gap:4px">';
+    dueGoals.forEach(function(g){
+      var gc=gc2[g.gcat]||{c:'var(--sage)',bg:'rgba(120,180,140,.1)',n:g.gcat||'Goal'};
+      html+='<div style="display:flex;align-items:center;gap:7px;padding:4px 8px;border-radius:8px;background:#fff;border:1.5px solid rgba(120,180,140,.25)">';
+      html+='<div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:700;color:var(--textd);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+escHtml(g.title)+'</div>';
+      if(g.target)html+='<div style="font-size:10px;color:var(--textl)">'+(g.current||0)+'/'+g.target+(g.unit?' '+g.unit:'')+'</div>';
+      html+='</div></div>';
+    });
+    html+='</div></div>';
+  }
   if(dueTasks.length){
     html+='<div style="padding:8px 12px;border-bottom:2px solid rgba(210,140,140,.18);background:rgba(210,140,140,.04)">';
     html+='<div style="font-size:10px;font-weight:800;color:var(--rose);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px">📌 Due Today</div>';
@@ -6342,6 +6353,7 @@ function goalHTML(g){
     return'<div class="sub-item'+(s.done?' done':'')+'">'+
       '<div class="rchk" onclick="togGoalStep(\''+g.id+'\',\''+sid+'\')">'+  (s.done?'✓':'')+'</div>'+
       '<div class="rlb">'+s.title+'</div>'+
+      (!s.done?'<button onclick="event.stopPropagation();goalStepToTask(\''+g.id+'\',\''+sid+'\')" class="sub-del" title="Add to tasks" style="color:var(--blue)">📋</button>':'')+
       '<button onclick="delGoalStep(\''+g.id+'\',\''+sid+'\')" class="sub-del">✕</button>'+
     '</div>';
   }).join('');
@@ -6354,6 +6366,7 @@ function goalHTML(g){
         '<span class="ttag" style="background:'+gc.bg+';color:'+gc.c+'">'+gc.n+'</span>'+
         '<span class="ttag" style="background:#f5f0ff;color:#7c5cbf;margin-left:4px">'+hBadge+' '+(g.horizon||'ongoing')+'</span>'+
         (g.target?'<span class="ttime" style="margin-left:5px">'+(g.current||0)+' / '+g.target+(g.unit?' '+g.unit:'')+'</span>':'')+
+        (g.due?'<span class="ttime" style="margin-left:5px;cursor:pointer;color:var(--rose)" onclick="event.stopPropagation();viewGoalInPlan(\''+g.due+'\')">📅 '+g.due+'</span>':'')+
       '</div>'+
       '<div style="display:flex;gap:2px;flex-shrink:0">'+
         '<button class="pin-btn'+(g.pinned?' on':'')+'" onclick="togGoalPin(\''+g.id+'\')">📌</button>'+
@@ -6425,6 +6438,7 @@ function openNewGoal(horizon){
   document.getElementById('gmTarget').value='';
   document.getElementById('gmUnit').value='';
   document.getElementById('gmNotes').value='';
+  document.getElementById('gmDue').value='';
   document.getElementById('gmDel').style.display='none';
   document.getElementById('goalModal').classList.add('show');
 }
@@ -6439,6 +6453,7 @@ function editGoal(id){
   document.getElementById('gmTarget').value=g.target||'';
   document.getElementById('gmUnit').value=g.unit||'';
   document.getElementById('gmNotes').value=g.notes||'';
+  document.getElementById('gmDue').value=g.due||'';
   document.getElementById('gmDel').style.display='block';
   setTimeout(function(){
     document.querySelectorAll('[data-g="gcat"]').forEach(function(b){if(b.dataset.v===g.gcat){b.classList.add('on');SBV.gcat=g.gcat;}});
@@ -6460,6 +6475,7 @@ function saveGoal(){
     target:tgt||0,unit:document.getElementById('gmUnit').value.trim(),
     current:existing?existing.current||0:0,
     notes:document.getElementById('gmNotes').value.trim(),
+    due:document.getElementById('gmDue').value||'',
     pinned:existing?existing.pinned:false,
     steps:existing?existing.steps||[]:[],
     created:existing?existing.created:new Date().toISOString()};
@@ -6499,6 +6515,35 @@ function delGoalStep(goalId,stepId){
   var g=GOALS.find(function(g){return g.id===goalId;});if(!g||!g.steps)return;
   g.steps=g.steps.filter(function(s){return s.id!==stepId;});
   fbSave('goals',goalId,g);
+}
+
+function goalStepToTask(goalId,stepId){
+  var g=GOALS.find(function(g){return g.id===goalId;});if(!g)return;
+  var s=(g.steps||[]).find(function(s){return s.id===stepId;});if(!s)return;
+  var tTit=document.getElementById('tTit');var tDue=document.getElementById('tDue');var tNotes=document.getElementById('tNotes');var tModTit=document.getElementById('tModTit');var editTId=document.getElementById('editTId');var delTBtn=document.getElementById('delTBtn');
+  if(!tTit)return;
+  if(tModTit)tModTit.textContent='New Task from Goal Step';
+  if(editTId)editTId.value='';
+  tTit.value=s.title;
+  if(tDue)tDue.value=g.due||'';
+  if(tNotes)tNotes.value='Goal: '+g.title;
+  if(delTBtn)delTBtn.style.display='none';
+  _taskMeaningful=false;
+  SBV={urg:'important-not-urgent'};
+  document.querySelectorAll('[data-g]').forEach(function(b){b.classList.remove('on');});
+  setTimeout(function(){document.querySelectorAll('[data-g="urg"]').forEach(function(b){if(b.dataset.v==='important-not-urgent')b.classList.add('on');});},50);
+  openM('taskModal');
+}
+
+function viewGoalInPlan(dueDate){
+  if(!dueDate)return;
+  var d=new Date(dueDate+'T12:00:00');
+  _planYear=d.getFullYear();_planMonth=d.getMonth();
+  _planExpanded={};
+  var dStr=dueDate;_planExpanded[dStr]=true;
+  var wi=Math.floor((d.getDate()-1)/7);_planExpanded['_wk'+wi]=true;
+  goTabDirect('plan',null);
+  setTimeout(function(){var el=document.getElementById('phours-'+dStr);if(el)el.scrollIntoView({behavior:'smooth',block:'center'});},300);
 }
 
 function updGoalProgress(id){
@@ -6614,6 +6659,14 @@ function hideRI(event,key,item){
   if(!RH[key])RH[key]={};
   RH[key][item]=true;
   localStorage.setItem('aRH',JSON.stringify(RH));
+  renderAllR();
+}
+
+function delRtnItem(event,key,item){
+  event.stopPropagation();
+  if(!confirm('Remove "'+item+'" from this routine?'))return;
+  if(RTNS[key])RTNS[key]=RTNS[key].filter(function(i){return i!==item;});
+  localStorage.setItem('aRtns',JSON.stringify(RTNS));
   renderAllR();
 }
 
@@ -9137,14 +9190,13 @@ function renderIntentionsHome(){
   var list=document.getElementById('intentionsHomeList');
   if(!wrap||!list)return;
   var items=todayIntentions();
-  if(!items.length){wrap.style.display='none';return;}
   wrap.style.display='';
-  list.innerHTML=items.map(function(it,i){
+  list.innerHTML=items.length?items.map(function(it,i){
     return '<div style="display:flex;align-items:center;gap:8px;padding:4px 0;'+(i<items.length-1?'border-bottom:1px solid #f5f0eb':'')+'">'
       +'<span style="font-size:14px">'+(it.done?'✅':'⬜')+'</span>'
       +'<span style="font-size:13px;font-weight:600;color:var(--textd)'+(it.done?';text-decoration:line-through;color:var(--textl)':'')+'">'+(i+1)+'. '+it.text+'</span>'
       +'</div>';
-  }).join('');
+  }).join(''):'<div style="font-size:12px;color:var(--textl);font-style:italic;padding:4px 0">No intentions set yet — tap + Set to add up to 3</div>';
 }
 
 function renderMinistryHome(){
