@@ -1185,26 +1185,6 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     <span style="font-size:12px;color:var(--textl)">Timer + task queue →</span>
   </button>
 
-  <!-- What Now? -->
-  <div class="card" style="margin-bottom:10px">
-    <div class="helm-sec-hdr" onclick="togHelmSec('hs-whatnow')">
-      <span style="font-size:13px;font-weight:700;color:var(--textd)">🎲 What Now?</span>
-      <span id="ha-whatnow" style="color:var(--textl);font-size:12px">▸</span>
-    </div>
-    <div id="hs-whatnow" style="display:none;margin-top:12px">
-      <div style="font-size:12px;color:var(--textl);margin-bottom:12px">Can't decide? Let the app pick for you.</div>
-      <div class="whatnow-card" id="whatnowCard">
-        <div class="whatnow-task" id="whatnowTask" style="color:var(--textl)">Tap below to get a task picked for you!</div>
-      </div>
-      <div style="display:flex;gap:8px;margin-bottom:12px" id="whatnowActions">
-        <button class="btn sec" style="flex:1;display:none" id="whatnowSkipBtn" onclick="pickWhatNow()">↩ Pick another</button>
-        <button class="btn" style="flex:1;background:var(--sage);display:none" id="whatnowDoneBtn" onclick="whatnowDone()">✓ Done!</button>
-      </div>
-      <button class="btn" style="width:100%;font-size:15px;padding:12px" onclick="pickWhatNow()">🎲 Pick for me!</button>
-      <div style="font-size:11px;color:var(--textl);text-align:center;margin-top:8px" id="whatnowStats"></div>
-    </div>
-  </div>
-
   <!-- Brain Dump -->
   <div class="card" style="margin-bottom:10px">
     <div class="helm-sec-hdr" onclick="togHelmSec('hs-dump')">
@@ -1270,14 +1250,15 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
         <div class="uli b"><div class="uln">🔵 Quick Win</div><div class="uls">Urgent, not important</div></div>
         <div class="uli g"><div class="uln">⚪ Someday</div><div class="uls">Not urgent</div></div>
       </div>
-      <div class="fbar" id="taskFbar">
-        <button class="fchip on" onclick="fT('all',this)">All</button>
-        <button class="fchip" onclick="fT('urgent-important',this)">🔴 Now</button>
-        <button class="fchip" onclick="fT('important-not-urgent',this)">🟡 Soon</button>
-        <button class="fchip" onclick="fT('urgent-not-important',this)">🔵 Quick</button>
-        <button class="fchip" onclick="fT('unassigned',this)">📥 Unsorted</button>
-        <button class="fchip" id="doneChip" onclick="fT('done',this)">✅ Done</button>
-      </div>
+      <select id="taskFilterSel" onchange="fT(this.value)" style="width:100%;padding:9px 12px;border-radius:10px;border:1.5px solid var(--bdr);font-family:'Quicksand',sans-serif;font-size:13px;font-weight:700;color:var(--textd);background:#fff;margin-bottom:10px;cursor:pointer">
+        <option value="all">All Tasks</option>
+        <option value="urgent-important">🔴 Do Now — Urgent + Important</option>
+        <option value="important-not-urgent">🟡 Schedule — Important, not urgent</option>
+        <option value="urgent-not-important">🔵 Quick Win — Urgent, not important</option>
+        <option value="not-urgent">⚪ Someday — Not urgent</option>
+        <option value="unassigned">📥 Unsorted</option>
+        <option value="done">✅ Done</option>
+      </select>
       <div id="taskList"></div>
     </div>
   </div>
@@ -4868,12 +4849,13 @@ function saveTask(){
   fbSave('tasks',id,t);
   updHelmBadge();
   closeM('taskModal');
+  if(document.getElementById('v-plan')&&document.getElementById('v-plan').classList.contains('on'))renderPlan();
 }
 
-function fT(f,btn){
+function fT(f){
   CF=f;
-  document.querySelectorAll('.fchip').forEach(function(b){b.classList.remove('on');});
-  btn.classList.add('on');
+  var sel=document.getElementById('taskFilterSel');
+  if(sel&&sel.value!==f)sel.value=f;
   renderT(f);
 }
 
@@ -5521,14 +5503,16 @@ function renderPlan(){
       html+='<div style="font-size:9px;font-weight:800;color:'+(isToday?'var(--rose)':isPast?'var(--textl)':'var(--textl)')+';text-transform:uppercase;letter-spacing:.5px">'+dName+'</div>';
       html+='<div style="font-size:20px;font-weight:800;color:'+(isToday?'var(--rose)':isPast?'#bbb':'var(--textd)')+'">'+dayDate.getDate()+'</div>';
       html+='</div>';
-      // Block chips preview
+      // Block chips preview + due tasks badge
+      var dueCnt=(TASKS||[]).filter(function(t){return !t.done&&t.due===dStr;}).length;
       html+='<div style="flex:1;display:flex;flex-wrap:wrap;gap:4px;align-items:center;min-width:0;overflow:hidden">';
+      if(dueCnt>0)html+='<span style="font-size:10px;font-weight:800;padding:2px 7px;border-radius:6px;background:rgba(210,140,140,.15);color:var(--rose);white-space:nowrap;flex-shrink:0">📌 '+dueCnt+' due</span>';
       if(blocks.length){
         blocks.slice(0,3).forEach(function(b){
           html+='<span style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:6px;background:'+planBlockBg(b.color)+';color:var(--textd);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:110px">'+planFmtTime(b.time)+' '+escHtml(b.title)+'</span>';
         });
         if(blocks.length>3)html+='<span style="font-size:10px;color:var(--textl)">+' +(blocks.length-3)+' more</span>';
-      } else {
+      } else if(!dueCnt){
         html+='<span style="font-size:11px;color:'+(isPast?'#ccc':'var(--textl)')+';font-style:italic">'+( isPast?'—':'No blocks')+'</span>';
       }
       html+='</div>';
@@ -5557,7 +5541,24 @@ function renderPlanHoursHTML(dStr,blocks){
     if(!blocksByHour[h])blocksByHour[h]=[];
     blocksByHour[h].push(b);
   });
+  // Tasks due on this day
+  var dueTasks=(TASKS||[]).filter(function(t){return !t.done&&t.due===dStr;});
+  var urgLabels={'urgent-important':'🔴 Do Now','important-not-urgent':'🟡 Schedule','urgent-not-important':'🔵 Quick Win','not-urgent':'⚪ Someday'};
   var html='<div style="background:#fafaf8">';
+  if(dueTasks.length){
+    html+='<div style="padding:8px 12px;border-bottom:2px solid rgba(210,140,140,.18);background:rgba(210,140,140,.04)">';
+    html+='<div style="font-size:10px;font-weight:800;color:var(--rose);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px">📌 Due Today</div>';
+    html+='<div style="display:flex;flex-direction:column;gap:4px">';
+    dueTasks.forEach(function(t){
+      html+='<div style="display:flex;align-items:center;gap:7px;padding:4px 8px;border-radius:8px;background:#fff;border:1.5px solid rgba(210,140,140,.2)">';
+      html+='<div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:700;color:var(--textd);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+escHtml(t.title)+'</div>';
+      if(t.urgency)html+='<div style="font-size:10px;color:var(--textl)">'+(urgLabels[t.urgency]||'')+'</div>';
+      html+='</div>';
+      html+='<button onclick="event.stopPropagation();fssAddFromTask(\''+t.id+'\')" title="Add to Focus Queue" style="background:none;border:none;cursor:pointer;font-size:13px;padding:0 2px">🎯</button>';
+      html+='</div>';
+    });
+    html+='</div></div>';
+  }
   for(var h=5;h<=23;h++){
     var label=h<12?(h+' AM'):h===12?'12 PM':(h-12)+' PM';
     var hBlocks=blocksByHour[h]||[];
@@ -5623,14 +5624,53 @@ function nextPlanMonth(){
 
 var _planEditId=null,_planEditDate=null;
 
+// Temp task list for the block modal (array of {id,title,urgency})
+var _pbTasks=[];
+
+function pbSetDate(dStr){
+  var dateEl=document.getElementById('pbDate');
+  if(dateEl){var d=new Date(dStr+'T12:00:00');dateEl.textContent=d.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'});}
+}
+
+function pbDurChange(sel){
+  var wrap=document.getElementById('pbCustomDurWrap');
+  if(wrap)wrap.style.display=sel.value==='custom'?'':'none';
+}
+
+function pbGetDuration(){
+  var sel=document.getElementById('pbDur');
+  if(!sel)return 60;
+  if(sel.value==='custom'){
+    var c=parseInt((document.getElementById('pbCustomDur')||{}).value)||60;
+    return c;
+  }
+  return parseInt(sel.value)||60;
+}
+
+function pbSetDuration(dur){
+  var sel=document.getElementById('pbDur');
+  if(!sel)return;
+  var std=['10','30','60'];
+  if(std.indexOf(String(dur))>-1){sel.value=String(dur);}
+  else{sel.value='custom';var c=document.getElementById('pbCustomDur');if(c)c.value=dur;var w=document.getElementById('pbCustomDurWrap');if(w)w.style.display='';}
+}
+
+function _pbResetModal(){
+  _pbTasks=[];
+  var w=document.getElementById('pbCustomDurWrap');if(w)w.style.display='none';
+  var pp=document.getElementById('pbTaskPickerWrap');if(pp)pp.style.display='none';
+  var ps=document.getElementById('pbTaskSearch');if(ps)ps.value='';
+  renderPbTaskList();
+}
+
 function openPlanModal(dStr,time){
   _planEditDate=dStr;_planEditId=null;
+  _pbResetModal();
   var titEl=document.getElementById('pbTitle');if(titEl)titEl.value='';
   var tEl=document.getElementById('pbTime');if(tEl)tEl.value=time||'';
   var durEl=document.getElementById('pbDur');if(durEl)durEl.value='60';
   var notEl=document.getElementById('pbNotes');if(notEl)notEl.value='';
-  var dateEl=document.getElementById('pbDate');
-  if(dateEl){var d=new Date(dStr+'T12:00:00');dateEl.textContent=d.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'});}
+  pbSetDate(dStr);
   document.getElementById('pbModalTitle').textContent='Add Block';
   document.getElementById('pbDelete').style.display='none';
   document.querySelectorAll('.pb-color-btn').forEach(function(b){b.style.outline=b.dataset.c==='lav'?'2.5px solid #7060b0':'none';b.classList.toggle('on',b.dataset.c==='lav');});
@@ -5641,16 +5681,19 @@ function editPlanBlock(dStr,blockId){
   var block=(PLAN_BLOCKS[dStr]||[]).find(function(b){return b.id===blockId;});
   if(!block)return;
   _planEditDate=dStr;_planEditId=blockId;
+  _pbResetModal();
+  // Load block's tasks into _pbTasks
+  _pbTasks=(block.tasks||[]).map(function(t){return Object.assign({},t);});
   var titEl=document.getElementById('pbTitle');if(titEl)titEl.value=block.title||'';
   var tEl=document.getElementById('pbTime');if(tEl)tEl.value=block.time||'';
-  var durEl=document.getElementById('pbDur');if(durEl)durEl.value=String(block.duration||60);
+  pbSetDuration(block.duration||60);
   var notEl=document.getElementById('pbNotes');if(notEl)notEl.value=block.notes||'';
-  var dateEl=document.getElementById('pbDate');
-  if(dateEl){var d=new Date(dStr+'T12:00:00');dateEl.textContent=d.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'});}
+  pbSetDate(dStr);
   document.getElementById('pbModalTitle').textContent='Edit Block';
   document.getElementById('pbDelete').style.display='';
   var c=block.color||'lav';
   document.querySelectorAll('.pb-color-btn').forEach(function(b){b.style.outline=b.dataset.c===c?'2.5px solid #7060b0':'none';b.classList.toggle('on',b.dataset.c===c);});
+  renderPbTaskList();
   openM('planBlockModal');
 }
 
@@ -5663,17 +5706,19 @@ function savePlanBlock(){
   var dStr=_planEditDate;if(!dStr)return;
   var title=((document.getElementById('pbTitle')||{}).value||'').trim();
   var time=(document.getElementById('pbTime')||{}).value||'';
-  var duration=parseInt((document.getElementById('pbDur')||{}).value)||60;
+  var duration=pbGetDuration();
   var notes=((document.getElementById('pbNotes')||{}).value||'').trim();
   var colorBtn=document.querySelector('.pb-color-btn.on');
   var color=colorBtn?colorBtn.dataset.c:'lav';
   if(!title){showToast('Add a title first');return;}
   if(!PLAN_BLOCKS[dStr])PLAN_BLOCKS[dStr]=[];
+  var blockData={id:_planEditId||'pb-'+Date.now(),time:time,title:title,duration:duration,color:color,notes:notes,tasks:_pbTasks.slice()};
   if(_planEditId){
     var idx=PLAN_BLOCKS[dStr].findIndex(function(b){return b.id===_planEditId;});
-    if(idx>-1)PLAN_BLOCKS[dStr][idx]={id:_planEditId,time:time,title:title,duration:duration,color:color,notes:notes};
+    if(idx>-1)PLAN_BLOCKS[dStr][idx]=blockData;
+    else PLAN_BLOCKS[dStr].push(blockData);
   } else {
-    PLAN_BLOCKS[dStr].push({id:'pb-'+Date.now(),time:time,title:title,duration:duration,color:color,notes:notes});
+    PLAN_BLOCKS[dStr].push(blockData);
   }
   PLAN_BLOCKS[dStr].sort(function(a,b){return (a.time||'')>(b.time||'')?1:-1;});
   savePlanBlocks();
@@ -5693,6 +5738,73 @@ function deletePlanBlockFromModal(){
   if(!_planEditDate||!_planEditId)return;
   deletePlanBlock(_planEditDate,_planEditId);
   closeM('planBlockModal');
+}
+
+// ── Block task list management ─────────────────
+function renderPbTaskList(){
+  var el=document.getElementById('pbTaskList');
+  if(!el)return;
+  if(!_pbTasks.length){el.innerHTML='<div style="font-size:12px;color:var(--textl);font-style:italic;padding:4px 0">No tasks assigned yet</div>';return;}
+  var urgColors={'urgent-important':'var(--rose)','important-not-urgent':'#c8a820','urgent-not-important':'var(--blue)','not-urgent':'var(--textl)','':'var(--textl)'};
+  el.innerHTML=_pbTasks.map(function(t,i){
+    return '<div style="display:flex;align-items:center;gap:6px;padding:6px 8px;border-radius:8px;background:#f8f4f0;margin-bottom:3px">'
+      +'<span style="width:7px;height:7px;border-radius:50%;background:'+(urgColors[t.urgency]||'var(--textl)')+';flex-shrink:0"></span>'
+      +'<span style="flex:1;font-size:12px;font-weight:600;color:var(--textd);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+escHtml(t.title)+'</span>'
+      +'<button onclick="pbMoveTask('+i+',-1)" style="background:none;border:none;cursor:pointer;color:var(--textl);font-size:12px;padding:0 3px" title="Move up">↑</button>'
+      +'<button onclick="pbMoveTask('+i+',1)" style="background:none;border:none;cursor:pointer;color:var(--textl);font-size:12px;padding:0 3px" title="Move down">↓</button>'
+      +'<button onclick="pbRemoveTask('+i+')" style="background:none;border:none;cursor:pointer;color:var(--textl);font-size:13px;padding:0 2px">✕</button>'
+      +'</div>';
+  }).join('');
+}
+
+function pbMoveTask(i,dir){
+  var j=i+dir;
+  if(j<0||j>=_pbTasks.length)return;
+  var tmp=_pbTasks[i];_pbTasks[i]=_pbTasks[j];_pbTasks[j]=tmp;
+  renderPbTaskList();
+}
+
+function pbRemoveTask(i){
+  _pbTasks.splice(i,1);renderPbTaskList();renderPbTaskPicker();
+}
+
+function openPbTaskPicker(){
+  var wrap=document.getElementById('pbTaskPickerWrap');
+  if(wrap)wrap.style.display=wrap.style.display==='none'?'':'none';
+  if(wrap&&wrap.style.display!=='none')renderPbTaskPicker();
+}
+
+function renderPbTaskPicker(){
+  var el=document.getElementById('pbTaskPickerList');
+  if(!el)return;
+  var q=((document.getElementById('pbTaskSearch')||{}).value||'').toLowerCase();
+  var inBlock=_pbTasks.map(function(t){return t.id;});
+  var urgLabels={'urgent-important':'🔴 Do Now','important-not-urgent':'🟡 Schedule','urgent-not-important':'🔵 Quick Win','not-urgent':'⚪ Someday','':'📥 Unsorted'};
+  var order={'urgent-important':0,'important-not-urgent':1,'urgent-not-important':2,'not-urgent':3,'':4};
+  var pool=TASKS.filter(function(t){return !t.done&&(!q||t.title.toLowerCase().indexOf(q)>-1);});
+  pool.sort(function(a,b){return (order[a.urgency]!==undefined?order[a.urgency]:4)-(order[b.urgency]!==undefined?order[b.urgency]:4);});
+  if(!pool.length){el.innerHTML='<div style="text-align:center;padding:10px;font-size:12px;color:var(--textl)">'+(q?'No tasks match':'No open tasks')+'</div>';return;}
+  el.innerHTML=pool.map(function(t){
+    var added=inBlock.indexOf(t.id)>-1;
+    return '<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--bdr)">'
+      +'<div style="flex:1;font-size:12px;color:var(--textd);min-width:0"><div style="font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+escHtml(t.title)+'</div>'
+      +'<div style="font-size:10px;color:var(--textl)">'+(urgLabels[t.urgency]||'')+(t.due?' · due '+t.due:'')+'</div></div>'
+      +(added
+        ?'<button onclick="pbPickerRemove(\''+t.id+'\')" style="flex-shrink:0;padding:3px 9px;border-radius:7px;border:1.5px solid var(--sage);background:var(--sage);color:white;font-family:\'Quicksand\',sans-serif;font-size:11px;font-weight:700;cursor:pointer">✓</button>'
+        :'<button onclick="pbPickerAdd(\''+t.id+'\',\''+escHtml(t.title)+'\',\''+t.urgency+'\')" style="flex-shrink:0;padding:3px 9px;border-radius:7px;border:1.5px solid var(--bdr);background:none;font-family:\'Quicksand\',sans-serif;font-size:11px;font-weight:700;cursor:pointer">+ Add</button>')
+      +'</div>';
+  }).join('');
+}
+
+function pbPickerAdd(id,title,urgency){
+  if(_pbTasks.find(function(t){return t.id===id;}))return;
+  _pbTasks.push({id:id,title:title,urgency:urgency||''});
+  renderPbTaskList();renderPbTaskPicker();
+}
+
+function pbPickerRemove(id){
+  _pbTasks=_pbTasks.filter(function(t){return t.id!==id;});
+  renderPbTaskList();renderPbTaskPicker();
 }
 
 function renderTodayPlanBar(){
@@ -14817,39 +14929,56 @@ function startReidRunner(){
 
 <!-- PLAN BLOCK MODAL -->
 <div class="ov" id="planBlockModal">
-  <div class="mod">
+  <div class="mod" style="max-height:90vh;display:flex;flex-direction:column">
     <div class="mh"></div>
     <div class="mtit" id="pbModalTitle">Add Block</div>
     <div id="pbDate" style="text-align:center;font-size:12px;color:var(--textl);margin-bottom:14px;font-weight:600"></div>
-    <div class="fg"><label class="fl">Title</label><input class="fi" id="pbTitle" placeholder="e.g. Morning Routine, Doctor Appt"></div>
-    <div style="display:flex;gap:10px;margin-bottom:10px">
-      <div class="fg" style="flex:1;margin:0"><label class="fl">Time</label><input class="fi" type="time" id="pbTime"></div>
-      <div class="fg" style="flex:1;margin:0">
-        <label class="fl">Duration</label>
-        <select class="fi" id="pbDur" style="padding:10px 12px">
-          <option value="15">15 min</option>
-          <option value="30">30 min</option>
-          <option value="60" selected>1 hour</option>
-          <option value="90">1.5 hours</option>
-          <option value="120">2 hours</option>
-          <option value="180">3 hours</option>
-          <option value="240">4 hours</option>
-          <option value="480">All day (8h)</option>
-        </select>
+    <div style="overflow-y:auto;flex:1">
+      <div class="fg"><label class="fl">Block Title</label><input class="fi" id="pbTitle" placeholder="e.g. Errands, Deep Work, Appointments"></div>
+      <div style="display:flex;gap:10px;margin-bottom:10px">
+        <div class="fg" style="flex:1;margin:0"><label class="fl">Start Time</label><input class="fi" type="time" id="pbTime"></div>
+        <div class="fg" style="flex:1;margin:0">
+          <label class="fl">Duration</label>
+          <select class="fi" id="pbDur" style="padding:10px 12px" onchange="pbDurChange(this)">
+            <option value="10">Under 10 min</option>
+            <option value="30">30 mins or less</option>
+            <option value="60" selected>1 hour or less</option>
+            <option value="custom">Custom…</option>
+          </select>
+        </div>
+      </div>
+      <div id="pbCustomDurWrap" style="display:none;margin-bottom:10px">
+        <label class="fl">Custom duration (minutes)</label>
+        <input class="fi" type="number" id="pbCustomDur" placeholder="e.g. 90" min="1" max="960">
+      </div>
+      <div class="fg">
+        <label class="fl">Color</label>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="pb-color-btn on" data-c="lav" onclick="selPlanColor(this)" style="width:34px;height:34px;border-radius:9px;background:rgba(170,150,220,.45);border:2.5px solid rgba(120,100,180,.6);cursor:pointer"></button>
+          <button class="pb-color-btn" data-c="rose" onclick="selPlanColor(this)" style="width:34px;height:34px;border-radius:9px;background:rgba(210,140,140,.45);border:2.5px solid transparent;cursor:pointer"></button>
+          <button class="pb-color-btn" data-c="sage" onclick="selPlanColor(this)" style="width:34px;height:34px;border-radius:9px;background:rgba(120,180,140,.45);border:2.5px solid transparent;cursor:pointer"></button>
+          <button class="pb-color-btn" data-c="peach" onclick="selPlanColor(this)" style="width:34px;height:34px;border-radius:9px;background:rgba(220,170,120,.45);border:2.5px solid transparent;cursor:pointer"></button>
+          <button class="pb-color-btn" data-c="blue" onclick="selPlanColor(this)" style="width:34px;height:34px;border-radius:9px;background:rgba(100,150,220,.45);border:2.5px solid transparent;cursor:pointer"></button>
+          <button class="pb-color-btn" data-c="gold" onclick="selPlanColor(this)" style="width:34px;height:34px;border-radius:9px;background:rgba(210,190,100,.45);border:2.5px solid transparent;cursor:pointer"></button>
+        </div>
+      </div>
+      <div class="fg"><label class="fl">Notes (optional)</label><input class="fi" id="pbNotes" placeholder="Any details..."></div>
+      <!-- Tasks in this block -->
+      <div style="margin-bottom:12px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+          <label class="fl" style="margin:0">Tasks in this block</label>
+          <button onclick="openPbTaskPicker()" style="font-size:11px;padding:4px 10px;border-radius:8px;border:1.5px solid var(--bdr);background:none;font-family:'Quicksand',sans-serif;font-weight:700;cursor:pointer;color:var(--textd)">+ Add tasks</button>
+        </div>
+        <div id="pbTaskList" style="display:flex;flex-direction:column;gap:4px;min-height:20px">
+          <div style="font-size:12px;color:var(--textl);font-style:italic;padding:4px 0">No tasks assigned yet</div>
+        </div>
+      </div>
+      <!-- Task picker (inline, shown/hidden) -->
+      <div id="pbTaskPickerWrap" style="display:none;border:1.5px solid var(--bdr);border-radius:12px;padding:10px;margin-bottom:12px;background:#fafaf8">
+        <input type="text" id="pbTaskSearch" placeholder="Search tasks…" class="fi" style="margin-bottom:8px" oninput="renderPbTaskPicker()">
+        <div id="pbTaskPickerList" style="max-height:200px;overflow-y:auto"></div>
       </div>
     </div>
-    <div class="fg">
-      <label class="fl">Color</label>
-      <div style="display:flex;gap:8px;flex-wrap:wrap">
-        <button class="pb-color-btn on" data-c="lav" onclick="selPlanColor(this)" style="width:34px;height:34px;border-radius:9px;background:rgba(170,150,220,.45);border:2.5px solid rgba(120,100,180,.6);cursor:pointer"></button>
-        <button class="pb-color-btn" data-c="rose" onclick="selPlanColor(this)" style="width:34px;height:34px;border-radius:9px;background:rgba(210,140,140,.45);border:2.5px solid transparent;cursor:pointer"></button>
-        <button class="pb-color-btn" data-c="sage" onclick="selPlanColor(this)" style="width:34px;height:34px;border-radius:9px;background:rgba(120,180,140,.45);border:2.5px solid transparent;cursor:pointer"></button>
-        <button class="pb-color-btn" data-c="peach" onclick="selPlanColor(this)" style="width:34px;height:34px;border-radius:9px;background:rgba(220,170,120,.45);border:2.5px solid transparent;cursor:pointer"></button>
-        <button class="pb-color-btn" data-c="blue" onclick="selPlanColor(this)" style="width:34px;height:34px;border-radius:9px;background:rgba(100,150,220,.45);border:2.5px solid transparent;cursor:pointer"></button>
-        <button class="pb-color-btn" data-c="gold" onclick="selPlanColor(this)" style="width:34px;height:34px;border-radius:9px;background:rgba(210,190,100,.45);border:2.5px solid transparent;cursor:pointer"></button>
-      </div>
-    </div>
-    <div class="fg"><label class="fl">Notes (optional)</label><input class="fi" id="pbNotes" placeholder="Any details..."></div>
     <button class="ok-btn" onclick="savePlanBlock()">Save Block</button>
     <button class="del-btn" id="pbDelete" onclick="deletePlanBlockFromModal()" style="display:none">Remove Block</button>
     <button class="cn-btn" onclick="closeM('planBlockModal')">Cancel</button>
