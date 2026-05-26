@@ -897,7 +897,6 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     <div class="hub-card" onclick="goTab('stories',null)"><div class="hub-card-ic">📖</div><div class="hub-card-name">Stories</div><div class="hub-card-sub" id="hub-stories-sub">Your creative worlds</div></div>
     <div class="hub-card span2" onclick="goTab('mixtape',null)"><div class="hub-card-ic">🎵</div><div class="hub-card-name">Mixtape</div><div class="hub-card-sub">Songs &amp; musical memories</div></div>
     <div class="hub-card span2" onclick="openColorMix()" style="background:linear-gradient(135deg,#fdf0f8,#f0e8fc);border-color:#d8b8e8"><div class="hub-card-ic">🎨</div><div class="hub-card-name">Color Mix</div><div class="hub-card-sub">Color matching mini-game</div></div>
-    <div class="hub-card" onclick="goTab('winedrinks',null)" style="background:linear-gradient(135deg,#f8f0f4,#f4e8f0);border-color:#d8b0c8"><div class="hub-card-ic">🍷</div><div class="hub-card-name">Wine &amp; Drinks</div><div class="hub-card-sub">Wine, cocktails &amp; coffee log</div></div>
     <div class="hub-card" onclick="goTab('places',null)" style="background:linear-gradient(135deg,#f0f4f8,#e8f0f8);border-color:#b0c8d8"><div class="hub-card-ic">📍</div><div class="hub-card-name">Places</div><div class="hub-card-sub">Restaurants, cafes &amp; spots</div></div>
   </div>
   <div class="learn-widget" id="lw-workshop">
@@ -906,23 +905,7 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
   </div>
 </div>
 
-<!-- WINE & DRINKS -->
-<div class="view" id="v-winedrinks">
-  <div style="font-family:'Playfair Display',serif;font-size:20px;color:var(--textd);margin-bottom:10px">🍷 Wine &amp; Drinks</div>
-  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-    <div class="pill-nav" style="margin-bottom:0">
-      <button class="pn-btn on" onclick="showWDSec('wine',this)">🍷 Wine</button>
-      <button class="pn-btn" onclick="showWDSec('drinks',this)">🍸 Drinks</button>
-      <button class="pn-btn" onclick="showWDSec('coffee',this)">☕ Coffee</button>
-    </div>
-    <button class="ok-btn" style="margin:0;padding:8px 14px" onclick="openWdModal(window._wdCurrentType||'wine',null)">+ Add</button>
-  </div>
-  <div id="wd-wine"></div>
-  <div id="wd-drinks" style="display:none"></div>
-  <div id="wd-coffee" style="display:none"></div>
-</div>
-
-<!-- Wine & Drinks Modal -->
+<!-- Wine Review Modal -->
 <div class="modal" id="wdModal">
   <div class="modal-box" style="max-width:420px">
     <div class="modal-title" id="wdModalTitle">🍷 Add Wine</div>
@@ -2157,6 +2140,7 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     <button class="pn-btn on" onclick="showMealSec('meals',this)">🍽️ Meals</button>
     <button class="pn-btn" onclick="showMealSec('inventory',this)">📦 Inventory</button>
     <button class="pn-btn" onclick="showMealSec('recipes',this)">📖 Recipes</button>
+    <button class="pn-btn" onclick="showMealSec('wine',this)">🍷 Wine</button>
     <button class="pn-btn" onclick="showMealSec('ingredients',this)">🧩 Ingredients</button>
     <button class="pn-btn" onclick="showMealSec('prices',this)">💰 Prices</button>
     <button class="pn-btn" onclick="showMealSec('database',this)">🍲 Database</button>
@@ -2286,6 +2270,21 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
       <button class="ok-btn" style="margin:0;padding:8px 14px" onclick="openIngModal(null)">+ Add</button>
     </div>
     <div id="ingList"></div>
+  </div>
+
+  <!-- WINE REVIEWS section -->
+  <div id="ms-wine" style="display:none">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <div style="font-family:'Playfair Display',serif;font-size:18px;color:var(--textd)">🍷 Wine Reviews</div>
+      <button class="ok-btn" style="margin:0;padding:8px 14px" onclick="openWineReviewModal(null)">+ Add Review</button>
+    </div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px" id="wineFilterRow">
+      <button class="fchip on" onclick="setWineFilter('',this)">All</button>
+      <button class="fchip" onclick="setWineFilter('5',this)">⭐⭐⭐⭐⭐</button>
+      <button class="fchip" onclick="setWineFilter('4',this)">⭐⭐⭐⭐</button>
+      <button class="fchip" onclick="setWineFilter('fav',this)">❤️ Favorites</button>
+    </div>
+    <div id="wineReviewList"></div>
   </div>
 
   <!-- PRICES section -->
@@ -4169,7 +4168,7 @@ var MEAL_COMBOS = JSON.parse(localStorage.getItem('aMC')||'null')||[
 var DEFAULT_TAB_ORDER=['today','plan','helm','lighthouse','conservatory','hearthside','workshop','estate','emporium','archives','archive'];
 var TAB_LABELS={today:'Today',plan:'Plan',helm:'Tasks & Projects',conservatory:'Personal Growth',hearthside:'Health & Wellness',workshop:'Workshop',lighthouse:'Spiritual',estate:'Money & Home',emporium:'Work',archives:'Research Library',archive:'Archive',stories:'Stories',mixtape:'Mixtape','focus-session':'Focus Session',grocery:'Grocery List'};
 var TAB_ORDER=(function(){var o=JSON.parse(localStorage.getItem('aTabOrder')||'null');if(!o)return DEFAULT_TAB_ORDER.slice();var full=DEFAULT_TAB_ORDER.slice();o=o.filter(function(t){return full.indexOf(t)>-1;});full.forEach(function(t){if(o.indexOf(t)<0)o.push(t);});return o;})();
-var SECTION_VIEWS={today:['today'],plan:['plan'],helm:['tasks','projects','lists','focus-session','grocery'],conservatory:['goals','routines','learn','focus'],hearthside:['food','meals','wellness','recap'],workshop:['board','faves','stories','mixtape','winedrinks','places'],lighthouse:['spirit'],estate:['money','accounts','home-items','money-projects'],emporium:['wigs','work-projects'],archives:['guide','export','settings'],archive:['archive']};
+var SECTION_VIEWS={today:['today'],plan:['plan'],helm:['tasks','projects','lists','focus-session','grocery'],conservatory:['goals','routines','learn','focus'],hearthside:['food','meals','wellness','recap'],workshop:['board','faves','stories','mixtape','places'],lighthouse:['spirit'],estate:['money','accounts','home-items','money-projects'],emporium:['wigs','work-projects'],archives:['guide','export','settings'],archive:['archive']};
 var SECTION_LABELS={today:'Today',plan:'Plan',helm:'Tasks & Projects',conservatory:'Personal Growth',hearthside:'Health & Wellness',workshop:'Workshop',lighthouse:'Spiritual',estate:'Money & Home',emporium:'Work',archives:'Research Library',archive:'Archive'};
 var VIEW_SECTION=(function(){var m={};Object.keys(SECTION_VIEWS).forEach(function(s){SECTION_VIEWS[s].forEach(function(v){m[v]=s;});});return m;})();
 
@@ -4463,7 +4462,6 @@ function goTabDirect(tab,btn){
   if(tab==='archive')renderArchive();
   if(tab==='stories')renderStoriesList();
   if(tab==='mixtape')renderMixtape();
-  if(tab==='winedrinks'){ window._wdCurrentType=window._wdCurrentType||'wine'; renderWineDrinks(window._wdCurrentType); }
   if(tab==='places')renderPlaces();
   if(SECTION_VIEWS[tab]||tab==='emporium')renderHubPreviews(tab);
   if(tab==='today'){ tickSpiritRun(); renderWaterBottle(); renderTodayStatsBars(); renderWeekStats(); renderTodayMoodBtns(); renderTodayPlanBar(); }
@@ -10758,6 +10756,94 @@ function toggleWdFav(id){
   renderWineDrinks(it.type);
 }
 
+// ─── Wine Reviews (in Eat section) ───────────────
+var _wineFilter='';
+
+function setWineFilter(val,btn){
+  _wineFilter=val;
+  document.querySelectorAll('#wineFilterRow .fchip').forEach(function(b){b.classList.remove('on');});
+  if(btn)btn.classList.add('on');
+  renderWineReviews();
+}
+
+function renderWineReviews(){
+  var items=WINE_DRINKS.filter(function(i){return i.type==='wine';});
+  if(_wineFilter==='fav')items=items.filter(function(i){return i.favorite;});
+  else if(_wineFilter)items=items.filter(function(i){return String(i.rating)===_wineFilter;});
+  items.sort(function(a,b){
+    if(a.favorite&&!b.favorite)return -1;
+    if(!a.favorite&&b.favorite)return 1;
+    return (b.rating||0)-(a.rating||0);
+  });
+  var el=document.getElementById('wineReviewList');
+  if(!el)return;
+  if(!items.length){
+    el.innerHTML='<div style="text-align:center;padding:24px;color:var(--textl);font-size:13px">No wine reviews yet. Tap + Add Review to log one.</div>';
+    return;
+  }
+  function stars(n){var s='';for(var i=1;i<=5;i++)s+='<span style="color:'+(i<=n?'#d4a800':'#ddd')+'">★</span>';return s;}
+  el.innerHTML=items.map(function(it){
+    return '<div class="card" style="margin-bottom:8px">'
+      +'<div style="display:flex;align-items:flex-start;gap:10px">'
+      +'<div style="font-size:28px;flex-shrink:0">🍷</div>'
+      +'<div style="flex:1;min-width:0">'
+      +'<div style="display:flex;align-items:center;gap:6px;margin-bottom:2px">'
+      +'<span style="font-size:14px;font-weight:700;color:var(--textd)">'+escHtml(it.name||'')+'</span>'
+      +'<button onclick="toggleWdFav(\''+it.id+'\')" style="background:none;border:none;cursor:pointer;font-size:14px;padding:0">'+( it.favorite?'❤️':'🤍')+'</button>'
+      +'</div>'
+      +'<div style="font-size:14px;margin-bottom:4px">'+stars(it.rating||0)+'</div>'
+      +(it.notes?'<div style="font-size:12px;color:var(--textl);margin-bottom:4px">'+escHtml(it.notes)+'</div>':'')
+      +'<div style="display:flex;gap:10px;font-size:11px;color:var(--textl);flex-wrap:wrap">'
+      +(it.date?'<span>📅 '+it.date+'</span>':'')
+      +(it.price?'<span>💰 '+escHtml(it.price)+'</span>':'')
+      +(it.location?'<span>📍 '+escHtml(it.location)+'</span>':'')
+      +'</div>'
+      +'</div>'
+      +'<button onclick="openWineReviewModal(\''+it.id+'\')" style="background:none;border:none;cursor:pointer;font-size:13px;color:var(--textl);padding:2px;flex-shrink:0">✏️</button>'
+      +'</div></div>';
+  }).join('');
+}
+
+function openWineReviewModal(id){
+  var it=id?WINE_DRINKS.find(function(i){return i.id===id;}):null;
+  document.getElementById('wdModalTitle').textContent=id?'Edit Wine Review':'🍷 Add Wine Review';
+  document.getElementById('wdId').value=id||'';
+  document.getElementById('wdType').value='wine';
+  document.getElementById('wdName').value=it?it.name||'':'';
+  document.getElementById('wdRating').value=it?String(it.rating||5):'5';
+  document.getElementById('wdNotes').value=it?it.notes||'':'';
+  document.getElementById('wdDate').value=it?it.date||todayStr():todayStr();
+  document.getElementById('wdPrice').value=it?it.price||'':'';
+  document.getElementById('wdLocation').value=it?it.location||'':'';
+  document.getElementById('wdFav').checked=!!(it&&it.favorite);
+  document.getElementById('wdDelBtn').style.display=id?'inline-block':'none';
+  document.getElementById('wdModal').classList.add('show');
+}
+
+// Override saveWdItem to re-render wine reviews when type is wine
+var _origSaveWdItem=window.saveWdItem;
+window.saveWdItem=function(){
+  // Read type before saving
+  var type=document.getElementById('wdType').value||'wine';
+  // Call original save logic inline (can't call _origSaveWdItem since it was defined before this wrapper)
+  var id=document.getElementById('wdId').value;
+  var name=document.getElementById('wdName').value.trim();
+  if(!name){showToast('Please enter a name.');return;}
+  var rating=parseInt(document.getElementById('wdRating').value)||5;
+  var notes=document.getElementById('wdNotes').value.trim();
+  var date=document.getElementById('wdDate').value;
+  var price=document.getElementById('wdPrice').value.trim();
+  var location=document.getElementById('wdLocation').value.trim();
+  var favorite=document.getElementById('wdFav').checked;
+  var it={id:id||('wd-'+Date.now()),type:type,name:name,rating:rating,notes:notes,date:date,price:price,location:location,favorite:favorite};
+  if(id){var idx=WINE_DRINKS.findIndex(function(i){return i.id===id;});if(idx>-1)WINE_DRINKS[idx]=it;else WINE_DRINKS.push(it);}
+  else WINE_DRINKS.push(it);
+  saveWineDrinks();
+  document.getElementById('wdModal').classList.remove('show');
+  if(type==='wine')renderWineReviews();
+  showToast('Saved!');
+};
+
 // ═══════════════════════════════════════════════
 // PLACES
 // ═══════════════════════════════════════════════
@@ -12568,7 +12654,7 @@ var GROCERY_CATS = ['Produce','Dairy','Meat & Fish','Bakery','Pantry','Frozen','
 function showMealSec(sec,btn){
   // 'plan' is an alias for 'meals' (backward compat)
   if(sec==='plan')sec='meals';
-  ['meals','recipes','database','grocery','prices','inventory','ingredients'].forEach(function(s){
+  ['meals','recipes','database','grocery','prices','inventory','ingredients','wine'].forEach(function(s){
     var el=document.getElementById('ms-'+s);
     if(el)el.style.display=(s===sec)?'':'none';
   });
@@ -12581,6 +12667,7 @@ function showMealSec(sec,btn){
   if(sec==='inventory')renderInventory();
   if(sec==='prices')renderPriceLog();
   if(sec==='ingredients'){renderIngredients();populateIngDatalist();}
+  if(sec==='wine')renderWineReviews();
 }
 
 // ── Meal Log (category-based) ─────────────────
