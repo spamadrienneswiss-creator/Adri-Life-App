@@ -745,6 +745,18 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
 .batch-urg-btn:active{transform:scale(.95)}
 .qcap-bar{background:linear-gradient(135deg,var(--lav-light),var(--rose-light));border-radius:16px;padding:12px 14px;margin-bottom:12px}
 .cal-archives-badges-row{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;min-height:28px}
+.learn-widget{margin-top:16px;border-top:1px solid var(--border);padding-top:10px}
+.learn-widget-toggle{background:none;border:none;color:var(--accent);font-size:13px;cursor:pointer;padding:4px 0;font-weight:700;font-family:'Quicksand',sans-serif;display:block}
+.lw-item{background:var(--card);border-radius:8px;padding:8px 10px;margin:6px 0;cursor:pointer}
+.lw-item-title{font-weight:700;font-size:13px;color:var(--textd)}
+.lw-item-tags{font-size:11px;color:var(--textl);margin-top:2px}
+.rl-card{background:var(--card);border-radius:12px;padding:12px 14px;margin-bottom:8px}
+.rl-card-title{font-weight:700;font-size:14px;color:var(--textd);margin-bottom:4px}
+.rl-card-preview{font-size:12px;color:var(--textl);margin-bottom:6px;line-height:1.4}
+.rl-card-chips{display:flex;flex-wrap:wrap;gap:4px}
+.rl-chip{padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700}
+.rl-chip-sec{background:var(--blue-light);color:var(--blue)}
+.rl-chip-tag{background:var(--rose-light,#fce8ec);color:var(--rose)}
 </style>
 </head>
 <body>
@@ -819,6 +831,10 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     <div class="hub-card span2" onclick="goTab('focus-session',null)" style="background:linear-gradient(135deg,#eee8f8,#f8e8e8);border-color:#c8b8e8"><div class="hub-card-ic">🎯</div><div class="hub-card-name">Focus Session</div><div class="hub-card-sub" id="hub-focus-session-sub">Timer + task queue</div></div>
     <div class="hub-card span2" onclick="goTab('grocery',null)" style="background:linear-gradient(135deg,#eaf5ea,#f5f0e8);border-color:#b8d8b8"><div class="hub-card-ic">🛒</div><div class="hub-card-name">Grocery</div><div class="hub-card-sub" id="hub-grocery-sub">Shopping list by store</div></div>
   </div>
+  <div class="learn-widget" id="lw-tasks">
+    <button class="learn-widget-toggle" onclick="toggleLearnWidget('tasks')">📚 Learning <span id="lw-tasks-count"></span></button>
+    <div id="lw-tasks-body" style="display:none"></div>
+  </div>
 </div>
 
 <!-- THE CONSERVATORY -->
@@ -831,6 +847,10 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     <div class="hub-card" onclick="goTab('routines',null)"><div class="hub-card-ic">🔄</div><div class="hub-card-name">Routines</div><div class="hub-card-sub" id="hub-routines-sub">Loading…</div></div>
     <div class="hub-card" onclick="goTab('learn',null)"><div class="hub-card-ic">📚</div><div class="hub-card-name">Learning</div><div class="hub-card-sub">Research &amp; study</div></div>
     <div class="hub-card" onclick="goTab('focus',null)"><div class="hub-card-ic">🧠</div><div class="hub-card-name">Focus Tools</div><div class="hub-card-sub">Intentions &amp; ADHD aids</div></div>
+  </div>
+  <div class="learn-widget" id="lw-goals">
+    <button class="learn-widget-toggle" onclick="toggleLearnWidget('goals')">📚 Learning <span id="lw-goals-count"></span></button>
+    <div id="lw-goals-body" style="display:none"></div>
   </div>
 </div>
 
@@ -860,6 +880,10 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     <div class="hub-card span2" onclick="goTab('wellness',null)"><div class="hub-card-ic">💆</div><div class="hub-card-name">Wellness</div><div class="hub-card-sub">Mood, sleep, symptoms &amp; meds</div></div>
     <div class="hub-card span2" onclick="goTab('recap',null)"><div class="hub-card-ic">📊</div><div class="hub-card-name">Recap</div><div class="hub-card-sub">Stats &amp; year in review</div></div>
   </div>
+  <div class="learn-widget" id="lw-health">
+    <button class="learn-widget-toggle" onclick="toggleLearnWidget('health')">📚 Learning <span id="lw-health-count"></span></button>
+    <div id="lw-health-body" style="display:none"></div>
+  </div>
 </div>
 
 <!-- THE WORKSHOP -->
@@ -873,6 +897,10 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     <div class="hub-card" onclick="goTab('stories',null)"><div class="hub-card-ic">📖</div><div class="hub-card-name">Stories</div><div class="hub-card-sub" id="hub-stories-sub">Your creative worlds</div></div>
     <div class="hub-card span2" onclick="goTab('mixtape',null)"><div class="hub-card-ic">🎵</div><div class="hub-card-name">Mixtape</div><div class="hub-card-sub">Songs &amp; musical memories</div></div>
     <div class="hub-card span2" onclick="openColorMix()" style="background:linear-gradient(135deg,#fdf0f8,#f0e8fc);border-color:#d8b8e8"><div class="hub-card-ic">🎨</div><div class="hub-card-name">Color Mix</div><div class="hub-card-sub">Color matching mini-game</div></div>
+  </div>
+  <div class="learn-widget" id="lw-workshop">
+    <button class="learn-widget-toggle" onclick="toggleLearnWidget('workshop')">📚 Learning <span id="lw-workshop-count"></span></button>
+    <div id="lw-workshop-body" style="display:none"></div>
   </div>
 </div>
 
@@ -902,6 +930,10 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     <div class="hub-card span2" onclick="goTab('spirit',null);setTimeout(function(){showSpiritSec('notes',document.querySelector('#v-spirit .pn-btn:nth-child(7)'))},200)"><div class="hub-card-ic">📓</div><div class="hub-card-name">Meeting Notes</div><div class="hub-card-sub" id="hub-meet-notes-sub">Study notes &amp; meeting insights</div></div>
     <div class="hub-card" onclick="goTab('projects',null)"><div class="hub-card-ic">📁</div><div class="hub-card-name">Spirit Projects</div><div class="hub-card-sub" id="hub-spirit-proj-sub">Active spiritual goals</div></div>
   </div>
+  <div class="learn-widget" id="lw-spirit">
+    <button class="learn-widget-toggle" onclick="toggleLearnWidget('spirit')">📚 Learning <span id="lw-spirit-count"></span></button>
+    <div id="lw-spirit-body" style="display:none"></div>
+  </div>
 </div>
 
 <!-- THE ESTATE -->
@@ -912,6 +944,10 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
   <div class="hub-grid">
     <div class="hub-card span2" onclick="goTab('money',null)"><div class="hub-card-ic">💰</div><div class="hub-card-name">Money</div><div class="hub-card-sub" id="hub-money-sub">Bills, budget &amp; expenses</div></div>
     <div class="hub-card span2" onclick="openBudgetBlitz()" style="background:linear-gradient(135deg,#f8f4e8,#f4ecda);border-color:#d4c8a0"><div class="hub-card-ic">🧩</div><div class="hub-card-name">Budget Blitz</div><div class="hub-card-sub">Sort expenses by category</div></div>
+  </div>
+  <div class="learn-widget" id="lw-money">
+    <button class="learn-widget-toggle" onclick="toggleLearnWidget('money')">📚 Learning <span id="lw-money-count"></span></button>
+    <div id="lw-money-body" style="display:none"></div>
   </div>
 </div>
 
@@ -958,7 +994,8 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
         <button onclick="event.stopPropagation();openBadgeBoard()" style="background:rgba(169,159,201,.2);border:1.5px solid rgba(169,159,201,.4);border-radius:10px;padding:6px 10px;font-size:11px;font-weight:700;color:#6a5a90;cursor:pointer;flex-shrink:0;font-family:'Quicksand',sans-serif">🏅 Badges</button>
       </div>
     </div>
-    <div class="hub-card" onclick="goTab('guide',null)"><div class="hub-card-ic">📖</div><div class="hub-card-name">Guide</div><div class="hub-card-sub">App help &amp; tips</div></div>
+    <div class="hub-card" onclick="goTab('guide',null)"><div class="hub-card-ic">📚</div><div class="hub-card-name">Research Library</div><div class="hub-card-sub">Notes, guides &amp; learning</div></div>
+    <div class="hub-card" onclick="goTab('archive',null)"><div class="hub-card-ic">📁</div><div class="hub-card-name">Year Archive</div><div class="hub-card-sub" id="hub-archive-sub">Year-by-year history</div></div>
     <div class="hub-card" onclick="goTab('export',null)"><div class="hub-card-ic">📤</div><div class="hub-card-name">Export</div><div class="hub-card-sub">Backup your data</div></div>
     <div class="hub-card span2" onclick="goTab('settings',null)"><div class="hub-card-ic">⚙️</div><div class="hub-card-name">Settings</div><div class="hub-card-sub">Themes, PIN, preferences</div></div>
   </div>
@@ -1862,6 +1899,10 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     </div>
     <div id="studyNotesList"></div>
   </div>
+  <div class="learn-widget" id="lw-food">
+    <button class="learn-widget-toggle" onclick="toggleLearnWidget('food')">📚 Learning <span id="lw-food-count"></span></button>
+    <div id="lw-food-body" style="display:none"></div>
+  </div>
 </div>
 <div class="view" id="v-meals">
   <div class="pill-nav" style="margin-bottom:12px">
@@ -2018,14 +2059,27 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     </div>
     <div id="inventoryListEl"></div>
   </div>
-
+  <div class="learn-widget" id="lw-food-eat">
+    <button class="learn-widget-toggle" onclick="toggleLearnWidget('food-eat')">📚 Learning <span id="lw-food-eat-count"></span></button>
+    <div id="lw-food-eat-body" style="display:none"></div>
+  </div>
 </div>
 
 <!-- GUIDE VIEW -->
 <div class="view" id="v-guide">
-  <div style="font-family:'Playfair Display',serif;font-size:20px;color:var(--textd);margin-bottom:4px">📖 App Guide</div>
-  <p style="font-size:12px;color:var(--textl);margin-bottom:14px">Everything your app can do — tap a section to expand.</p>
-  <div id="guideContent"></div>
+  <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+    <div style="font-family:'Playfair Display',serif;font-size:20px;color:var(--textd);flex:1">📚 Research Library</div>
+    <button class="btn sec" style="font-size:11px;padding:5px 10px" onclick="openManageTopics()">⚙️ Topics</button>
+    <button class="ok-btn" style="margin:0;padding:7px 14px;font-size:13px" onclick="openNewResearchItem()">＋ New</button>
+  </div>
+  <input id="rlSearchInput" class="fi" placeholder="Search items…" oninput="_rlSearch=this.value;renderResearchLib()" style="margin-bottom:8px;padding:8px 12px;font-size:13px">
+  <div id="rlSectionChips" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px"></div>
+  <div id="rlTopicChips" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px"></div>
+  <div id="rlList"></div>
+  <div style="margin-top:20px;border-top:1px solid var(--border);padding-top:14px">
+    <div style="font-weight:700;font-size:13px;color:var(--textl);margin-bottom:8px">📖 App Guide</div>
+    <div id="guideContent"></div>
+  </div>
 </div>
 
 <!-- EXPORT -->
@@ -2183,6 +2237,10 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     <div class="card" id="medCard">
       <div id="medList"><p style="color:var(--textl);font-size:13px;text-align:center;padding:8px">No meds added yet. Tap "+ Add" above.</p></div>
     </div>
+  </div>
+  <div class="learn-widget" id="lw-wellness">
+    <button class="learn-widget-toggle" onclick="toggleLearnWidget('wellness')">📚 Learning <span id="lw-wellness-count"></span></button>
+    <div id="lw-wellness-body" style="display:none"></div>
   </div>
 </div>
 
@@ -3485,19 +3543,148 @@ function delEmberSkill(idx){
   saveEmber();renderEmberModal();renderEmberSkillBars();
 }
 
+function saveArchiveYears(){ localStorage.setItem('aArchiveYears',JSON.stringify(ARCHIVE_YEARS)); }
+
+function addArchiveYear(){
+  var yr=prompt('Enter year to add (e.g. 2025):',''+new Date().getFullYear());
+  if(!yr||isNaN(+yr))return;
+  yr=+yr;
+  if(!ARCHIVE_YEARS[yr])ARCHIVE_YEARS[yr]={tasks:[],goals:[],notes:'',created:new Date().toISOString()};
+  saveArchiveYears();
+  _archiveYear=yr;
+  renderArchive();
+}
+
+function selectArchiveYear(yr){
+  _archiveYear=yr;
+  renderArchive();
+}
+
 function renderArchive(){
-  var el=document.getElementById('archiveDoneList');
-  if(!el)return;
-  var done=TASKS.filter(function(t){return t.done;});
-  if(!done.length){el.innerHTML='<p style="color:var(--textl);text-align:center;padding:16px">No completed tasks yet.</p>';return;}
-  el.innerHTML=done.map(function(t){
-    return '<div style="padding:10px 0;border-bottom:1px solid #f0ebe6;display:flex;align-items:center;gap:10px">'
-      +'<span style="color:var(--sage);font-size:16px">✓</span>'
-      +'<div style="flex:1"><div style="font-size:13px;color:var(--textd);text-decoration:line-through">'+escHtml(t.title)+'</div>'
-      +(t.due?'<div style="font-size:11px;color:var(--textl)">Due: '+t.due+'</div>':'')+'</div>'
-      +'<button style="background:none;border:none;color:var(--textl);cursor:pointer;font-size:12px;padding:2px 6px" onclick="restoreTask(\''+t.id+'\')">Restore</button>'
-      +'</div>';
+  var curYear=new Date().getFullYear();
+  // Ensure current year exists
+  if(!ARCHIVE_YEARS[curYear])ARCHIVE_YEARS[curYear]={tasks:[],goals:[],notes:'',created:new Date().toISOString()};
+
+  // Snapshot done tasks/goals into the correct year folder
+  snapshotToArchiveYear();
+
+  var tabs=document.getElementById('archiveYearTabs');
+  var content=document.getElementById('archiveYearContent');
+  if(!tabs||!content)return;
+
+  var years=Object.keys(ARCHIVE_YEARS).map(Number).sort(function(a,b){return b-a;});
+  if(!years.length){content.innerHTML='<p style="color:var(--textl);text-align:center;padding:24px">No years yet. Tap ＋ Year to add one.</p>';return;}
+  if(years.indexOf(_archiveYear)<0)_archiveYear=years[0];
+
+  tabs.innerHTML=years.map(function(y){
+    return '<button class="fchip'+(y===_archiveYear?' on':'')+'" onclick="selectArchiveYear('+y+')">'+y+'</button>';
   }).join('');
+
+  renderArchiveYear(_archiveYear);
+}
+
+function snapshotToArchiveYear(){
+  var now=new Date();
+  // Snapshot completed tasks into their done year
+  (TASKS||[]).filter(function(t){return t.done;}).forEach(function(t){
+    var yr=t.doneDate?+t.doneDate.substring(0,4):now.getFullYear();
+    if(!ARCHIVE_YEARS[yr])ARCHIVE_YEARS[yr]={tasks:[],goals:[],notes:'',created:new Date().toISOString()};
+    var already=ARCHIVE_YEARS[yr].tasks.find(function(x){return x.id===t.id;});
+    if(!already)ARCHIVE_YEARS[yr].tasks.push({id:t.id,title:t.title,cat:t.cat,doneDate:t.doneDate||'',due:t.due||''});
+  });
+  // Snapshot completed goals
+  (GOALS||[]).filter(function(g){return g.done;}).forEach(function(g){
+    var yr=g.doneDate?+g.doneDate.substring(0,4):now.getFullYear();
+    if(!ARCHIVE_YEARS[yr])ARCHIVE_YEARS[yr]={tasks:[],goals:[],notes:'',created:new Date().toISOString()};
+    var already=(ARCHIVE_YEARS[yr].goals||[]).find(function(x){return x.id===g.id;});
+    if(!already){if(!ARCHIVE_YEARS[yr].goals)ARCHIVE_YEARS[yr].goals=[];ARCHIVE_YEARS[yr].goals.push({id:g.id,title:g.title,due:g.due||'',doneDate:g.doneDate||''});}
+  });
+  saveArchiveYears();
+}
+
+function renderArchiveYear(yr){
+  var content=document.getElementById('archiveYearContent');
+  if(!content)return;
+  var ydata=ARCHIVE_YEARS[yr]||{tasks:[],goals:[],notes:''};
+  var tasks=ydata.tasks||[];
+  var goals=ydata.goals||[];
+
+  // Food trends for this year from MEAL_LOG_ITEMS
+  var yearStr=''+yr;
+  var meals=(MEAL_LOG_ITEMS||[]).filter(function(m){return m.date&&m.date.startsWith(yearStr);});
+  var foodCount={};
+  meals.forEach(function(m){
+    var name=(m.name||'').trim().toLowerCase();
+    if(name)foodCount[name]=(foodCount[name]||0)+1;
+  });
+  var topFoods=Object.keys(foodCount).sort(function(a,b){return foodCount[b]-foodCount[a];}).slice(0,10);
+
+  // Mood trend for this year
+  var moodEntries=Object.keys(MOOD||{}).filter(function(k){return k.startsWith(yearStr);});
+  var moodSum=0,moodCount=0;
+  moodEntries.forEach(function(k){var v=MOOD[k];if(v){moodSum+=v;moodCount++;}});
+  var avgMood=moodCount?Math.round(moodSum/moodCount*10)/10:null;
+  var moodEmoji=['','😔','😕','😐','🙂','😊'];
+
+  content.innerHTML=
+    // Stats strip
+    '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px">'
+      +'<div class="card" style="text-align:center;padding:10px"><div style="font-size:22px;font-weight:700;color:var(--rose)">'+tasks.length+'</div><div style="font-size:10px;color:var(--textl)">Tasks done</div></div>'
+      +'<div class="card" style="text-align:center;padding:10px"><div style="font-size:22px;font-weight:700;color:var(--sage)">'+goals.length+'</div><div style="font-size:10px;color:var(--textl)">Goals achieved</div></div>'
+      +'<div class="card" style="text-align:center;padding:10px"><div style="font-size:22px;font-weight:700;color:var(--blue)">'+(avgMood?moodEmoji[Math.round(avgMood)]||avgMood:'—')+'</div><div style="font-size:10px;color:var(--textl)">Avg mood</div></div>'
+    +'</div>'
+
+    // Notes
+    +'<div class="card" style="margin-bottom:10px">'
+      +'<div style="font-size:13px;font-weight:700;color:var(--textd);margin-bottom:8px">📝 Year Notes</div>'
+      +'<textarea id="archiveYearNotes" rows="3" style="width:100%;padding:8px 11px;border-radius:9px;border:1.5px solid #e8e0d8;font-family:\'Quicksand\',sans-serif;font-size:13px;resize:vertical;box-sizing:border-box" placeholder="Reflections, highlights, lessons from '+yr+'…" onchange="saveArchiveYearNotes('+yr+',this.value)">'+escHtml(ydata.notes||'')+'</textarea>'
+    +'</div>'
+
+    // Food trends
+    +(topFoods.length?
+      '<div class="card" style="margin-bottom:10px">'
+        +'<div style="font-size:13px;font-weight:700;color:var(--textd);margin-bottom:8px">🍽️ Most Eaten in '+yr+'</div>'
+        +topFoods.map(function(f,i){
+          return '<div style="display:flex;align-items:center;gap:8px;padding:4px 0;border-bottom:1px solid var(--border)">'
+            +'<span style="font-size:11px;font-weight:700;color:var(--textl);width:16px">'+(i+1)+'.</span>'
+            +'<span style="flex:1;font-size:13px;text-transform:capitalize">'+escHtml(f)+'</span>'
+            +'<span style="font-size:11px;color:var(--textl)">×'+foodCount[f]+'</span>'
+            +'</div>';
+        }).join('')
+      +'</div>'
+    :'')
+
+    // Goals achieved
+    +(goals.length?
+      '<div class="card" style="margin-bottom:10px">'
+        +'<div style="font-size:13px;font-weight:700;color:var(--textd);margin-bottom:8px">🎯 Goals Achieved</div>'
+        +goals.map(function(g){
+          return '<div style="padding:6px 0;border-bottom:1px solid var(--border);font-size:13px;color:var(--textd)">✓ '+escHtml(g.title)+(g.doneDate?'<span style="font-size:11px;color:var(--textl);margin-left:6px">'+g.doneDate+'</span>':'')+'</div>';
+        }).join('')
+      +'</div>'
+    :'')
+
+    // Completed tasks
+    +'<div class="card">'
+      +'<div style="font-size:13px;font-weight:700;color:var(--textd);margin-bottom:8px">✅ Completed Tasks ('+tasks.length+')</div>'
+      +(tasks.length?
+        tasks.map(function(t){
+          return '<div style="padding:7px 0;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px">'
+            +'<span style="color:var(--sage)">✓</span>'
+            +'<div style="flex:1"><div style="font-size:12px;color:var(--textd);text-decoration:line-through">'+escHtml(t.title)+'</div>'
+            +(t.doneDate?'<div style="font-size:10px;color:var(--textl)">'+t.doneDate+'</div>':'')
+            +'</div>'
+            +(yr===new Date().getFullYear()?'<button style="background:none;border:none;color:var(--blue);font-size:11px;cursor:pointer" onclick="restoreTask(\''+t.id+'\')">Restore</button>':'')
+            +'</div>';
+        }).join('')
+      :'<p style="color:var(--textl);font-size:12px;text-align:center;padding:12px">No completed tasks for '+yr+'.</p>')
+    +'</div>';
+}
+
+function saveArchiveYearNotes(yr,val){
+  if(!ARCHIVE_YEARS[yr])ARCHIVE_YEARS[yr]={tasks:[],goals:[],notes:'',created:new Date().toISOString()};
+  ARCHIVE_YEARS[yr].notes=val;
+  saveArchiveYears();
 }
 
 function restoreTask(id){
@@ -3506,6 +3693,11 @@ function restoreTask(id){
   t.done=false;
   localStorage.setItem('aTasks',JSON.stringify(TASKS));
   fbSave('tasks',t.id,t);
+  // Remove from archive year snapshot
+  Object.keys(ARCHIVE_YEARS).forEach(function(yr){
+    if(ARCHIVE_YEARS[yr].tasks)ARCHIVE_YEARS[yr].tasks=ARCHIVE_YEARS[yr].tasks.filter(function(x){return x.id!==id;});
+  });
+  saveArchiveYears();
   renderT();
   renderArchive();
   showToast('Task restored!');
@@ -3534,6 +3726,11 @@ var _whatnowTaskId = '';
 var FC_DECKS = JSON.parse(localStorage.getItem('aFcDecks')||'[]');
 var FC_CARDS = JSON.parse(localStorage.getItem('aFcCards')||'[]');
 var RESEARCH = JSON.parse(localStorage.getItem('aResearch')||'[]');
+var RESEARCH_ITEMS = JSON.parse(localStorage.getItem('aResearchItems')||'[]');
+var RESEARCH_TOPICS = JSON.parse(localStorage.getItem('aResearchTopics')||'["ADHD","Wellness","Productivity","Nutrition","Fitness","Mindfulness","Finance","Organization"]');
+var _rlSearch='',_rlSections=[],_rlTopics=[];
+var ARCHIVE_YEARS = JSON.parse(localStorage.getItem('aArchiveYears')||'{}');
+var _archiveYear = new Date().getFullYear();
 var WORKOUT_PLANS = JSON.parse(localStorage.getItem('aWplans')||'[]');
 var WORKOUT_LOG2 = JSON.parse(localStorage.getItem('aWlog2')||'[]');
 var fcActiveDeckId = '';
@@ -3931,6 +4128,8 @@ function goTabDirect(tab,btn){
   if(tab==='focus-session'){ renderFocusSession(); }
   if(tab==='plan'){ renderPlan(); }
   if(tab==='grocery'){ renderGroceryList(); populateGrocTaskDatalist(); }
+  if(tab==='guide'){ renderResearchLib(); renderGuide(); }
+  if(tab==='helm'||tab==='conservatory'||tab==='hearthside'||tab==='lighthouse'||tab==='estate'||tab==='workshop'||tab==='food'||tab==='meals'||tab==='wellness'){ renderAllLearnWidgets(); }
 }
 
 function renderHubPreviews(section){
@@ -9445,6 +9644,241 @@ function togGuide(id){
 }
 
 // ═══════════════════════════════════════════════
+// RESEARCH LIBRARY
+// ═══════════════════════════════════════════════
+
+var _RL_SEC_LABELS={general:'🌐 General',tasks:'📋 Tasks',goals:'🎯 Goals & Routines',health:'🏃 Health',food:'🍽️ Food & Eat',wellness:'💆 Wellness',spirit:'✨ Spirit',money:'💰 Money',workshop:'🎨 Workshop',plan:'📅 Plan'};
+
+function saveResearchItems(){ localStorage.setItem('aResearchItems',JSON.stringify(RESEARCH_ITEMS)); }
+function saveResearchTopics(){ localStorage.setItem('aResearchTopics',JSON.stringify(RESEARCH_TOPICS)); }
+
+function renderResearchLib(){
+  var search=(_rlSearch||'').toLowerCase();
+  // Section filter chips
+  var secWrap=document.getElementById('rlSectionChips');
+  if(secWrap){
+    var secs=Object.keys(_RL_SEC_LABELS);
+    secWrap.innerHTML='<span style="font-size:11px;font-weight:700;color:var(--textl);align-self:center;flex-shrink:0">Section:</span>'+
+      secs.map(function(s){
+        var on=_rlSections.indexOf(s)>-1;
+        return '<button class="fchip'+(on?' on':'')+'" onclick="toggleRlSection(\''+s+'\')">'+_RL_SEC_LABELS[s]+'</button>';
+      }).join('');
+  }
+  // Topic filter chips
+  var topWrap=document.getElementById('rlTopicChips');
+  if(topWrap){
+    topWrap.innerHTML='<span style="font-size:11px;font-weight:700;color:var(--textl);align-self:center;flex-shrink:0">Tag:</span>'+
+      (RESEARCH_TOPICS||[]).map(function(t){
+        var on=_rlTopics.indexOf(t)>-1;
+        return '<button class="fchip'+(on?' on':'')+'" onclick="toggleRlTopic(\''+escHtml(t)+'\')">'+escHtml(t)+'</button>';
+      }).join('');
+  }
+  // Filter items
+  var items=(RESEARCH_ITEMS||[]).filter(function(r){
+    if(search&&r.title.toLowerCase().indexOf(search)<0&&r.content.toLowerCase().indexOf(search)<0)return false;
+    if(_rlSections.length&&!_rlSections.some(function(s){return (r.sections||[]).indexOf(s)>-1;}))return false;
+    if(_rlTopics.length&&!_rlTopics.some(function(t){return (r.tags||[]).indexOf(t)>-1;}))return false;
+    return true;
+  });
+  var list=document.getElementById('rlList');
+  if(!list)return;
+  if(!items.length){
+    list.innerHTML='<div style="text-align:center;color:var(--textl);padding:24px;font-size:13px">'+(RESEARCH_ITEMS.length?'No items match your filters.':'No items yet — tap ＋ New to add your first.')+'</div>';
+    return;
+  }
+  list.innerHTML=items.map(function(r){
+    var secChips=(r.sections||[]).map(function(s){return '<span class="rl-chip rl-chip-sec">'+(_RL_SEC_LABELS[s]||s)+'</span>';}).join('');
+    var tagChips=(r.tags||[]).map(function(t){return '<span class="rl-chip rl-chip-tag">'+escHtml(t)+'</span>';}).join('');
+    var preview=r.content?r.content.substring(0,120)+(r.content.length>120?'…':''):'';
+    return '<div class="rl-card">'
+      +'<div style="display:flex;align-items:flex-start;gap:8px">'
+      +'<div style="flex:1"><div class="rl-card-title">'+escHtml(r.title||'Untitled')+'<span style="font-size:10px;color:var(--textl);font-weight:400;margin-left:6px">'+r.type+'</span></div>'
+      +(preview?'<div class="rl-card-preview">'+escHtml(preview)+'</div>':'')
+      +'<div class="rl-card-chips">'+secChips+tagChips+'</div></div>'
+      +'<div style="display:flex;gap:4px;flex-shrink:0">'
+      +'<button class="btn sec" style="font-size:11px;padding:3px 8px" onclick="openResearchItem(\''+r.id+'\')">Edit</button>'
+      +'<button class="btn" style="font-size:11px;padding:3px 8px;background:var(--ured);color:#fff;border:none" onclick="deleteResearchItem(\''+r.id+'\')">✕</button>'
+      +'</div></div></div>';
+  }).join('');
+}
+
+function toggleRlSection(s){
+  var i=_rlSections.indexOf(s);
+  if(i>-1)_rlSections.splice(i,1);else _rlSections.push(s);
+  renderResearchLib();
+}
+function toggleRlTopic(t){
+  var i=_rlTopics.indexOf(t);
+  if(i>-1)_rlTopics.splice(i,1);else _rlTopics.push(t);
+  renderResearchLib();
+}
+
+function openNewResearchItem(){
+  document.getElementById('riModalTitle').textContent='New Research Item';
+  document.getElementById('riId').value='';
+  document.getElementById('riTitle').value='';
+  document.getElementById('riContent').value='';
+  document.getElementById('riUrl').value='';
+  document.getElementById('riUrlWrap').style.display='none';
+  document.querySelectorAll('[data-g="riType"]').forEach(function(b){b.classList.toggle('on',b.dataset.v==='note');});
+  document.querySelectorAll('[data-ris]').forEach(function(b){b.classList.remove('on');});
+  renderRiTopicChips([]);
+  openM('researchItemModal');
+}
+
+function openResearchItem(id){
+  var r=RESEARCH_ITEMS.find(function(x){return x.id===id;});
+  if(!r)return;
+  document.getElementById('riModalTitle').textContent='Edit Item';
+  document.getElementById('riId').value=r.id;
+  document.getElementById('riTitle').value=r.title||'';
+  document.getElementById('riContent').value=r.content||'';
+  document.getElementById('riUrl').value=r.url||'';
+  document.getElementById('riUrlWrap').style.display=r.type==='link'?'':'none';
+  document.querySelectorAll('[data-g="riType"]').forEach(function(b){b.classList.toggle('on',b.dataset.v===r.type);});
+  document.querySelectorAll('[data-ris]').forEach(function(b){b.classList.toggle('on',(r.sections||[]).indexOf(b.dataset.ris)>-1);});
+  renderRiTopicChips(r.tags||[]);
+  openM('researchItemModal');
+}
+
+function renderRiTopicChips(selectedTags){
+  var wrap=document.getElementById('riTopicChips');
+  if(!wrap)return;
+  wrap.innerHTML=(RESEARCH_TOPICS||[]).map(function(t){
+    var on=selectedTags.indexOf(t)>-1;
+    return '<button class="fchip'+(on?' on':'')+'" onclick="this.classList.toggle(\'on\')">'+escHtml(t)+'</button>';
+  }).join('');
+}
+
+function addRiTag(){
+  var inp=document.getElementById('riNewTag');
+  var val=(inp.value||'').trim();
+  if(!val)return;
+  if(RESEARCH_TOPICS.indexOf(val)<0){RESEARCH_TOPICS.push(val);saveResearchTopics();}
+  inp.value='';
+  // Add chip as selected
+  var wrap=document.getElementById('riTopicChips');
+  if(wrap){
+    var chip=document.createElement('button');
+    chip.className='fchip on';
+    chip.textContent=val;
+    chip.onclick=function(){this.classList.toggle('on');};
+    wrap.appendChild(chip);
+  }
+}
+
+function saveResearchItem(){
+  var id=document.getElementById('riId').value;
+  var title=document.getElementById('riTitle').value.trim();
+  if(!title){showToast('Please enter a title.');return;}
+  var type=document.querySelector('[data-g="riType"].on');
+  var sections=[];
+  document.querySelectorAll('[data-ris].on').forEach(function(b){sections.push(b.dataset.ris);});
+  var tags=[];
+  document.querySelectorAll('#riTopicChips .fchip.on').forEach(function(b){tags.push(b.textContent.trim());});
+  var now=new Date().toISOString();
+  if(id){
+    var r=RESEARCH_ITEMS.find(function(x){return x.id===id;});
+    if(r){
+      r.title=title;r.type=type?type.dataset.v:'note';r.content=document.getElementById('riContent').value;
+      r.url=document.getElementById('riUrl').value;r.sections=sections;r.tags=tags;r.updated=now;
+    }
+  }else{
+    RESEARCH_ITEMS.push({id:'ri-'+Date.now(),title:title,type:type?type.dataset.v:'note',content:document.getElementById('riContent').value,url:document.getElementById('riUrl').value,sections:sections,tags:tags,created:now,updated:now});
+  }
+  saveResearchItems();
+  closeM('researchItemModal');
+  renderResearchLib();
+  renderAllLearnWidgets();
+  showToast('Saved!');
+}
+
+function deleteResearchItem(id){
+  if(!confirm('Delete this research item?'))return;
+  RESEARCH_ITEMS=RESEARCH_ITEMS.filter(function(r){return r.id!==id;});
+  saveResearchItems();
+  renderResearchLib();
+  renderAllLearnWidgets();
+  showToast('Deleted.');
+}
+
+function toggleRiChip(btn){btn.classList.toggle('on');}
+
+document.addEventListener('change',function(e){
+  var sel=e.target.closest('[data-g="riType"]');
+  if(sel){document.getElementById('riUrlWrap').style.display=sel.dataset.v==='link'?'':'none';}
+});
+
+// riType chip handler for url field
+function riTypeChange(btn){
+  pSB(btn);
+  document.getElementById('riUrlWrap').style.display=btn.dataset.v==='link'?'':'none';
+}
+
+function openManageTopics(){
+  renderTopicsModal();
+  openM('researchTopicsModal');
+}
+
+function renderTopicsModal(){
+  var list=document.getElementById('rtList');
+  if(!list)return;
+  list.innerHTML=(RESEARCH_TOPICS||[]).map(function(t){
+    return '<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border)">'
+      +'<span style="flex:1;font-size:13px">'+escHtml(t)+'</span>'
+      +'<button onclick="deleteResearchTopic(\''+escHtml(t)+'\')" style="background:none;border:none;color:var(--ured);font-size:16px;cursor:pointer;padding:2px 6px">×</button>'
+      +'</div>';
+  }).join('')||'<div style="color:var(--textl);font-size:12px;padding:8px">No topics yet.</div>';
+}
+
+function addResearchTopic(){
+  var inp=document.getElementById('rtNewTopic');
+  var val=(inp.value||'').trim();
+  if(!val)return;
+  if(RESEARCH_TOPICS.indexOf(val)<0){RESEARCH_TOPICS.push(val);saveResearchTopics();}
+  inp.value='';
+  renderTopicsModal();
+  showToast('Topic added!');
+}
+
+function deleteResearchTopic(name){
+  if(!confirm('Remove topic "'+name+'"?'))return;
+  RESEARCH_TOPICS=RESEARCH_TOPICS.filter(function(t){return t!==name;});
+  saveResearchTopics();
+  renderTopicsModal();
+}
+
+// ─── Per-section learning widgets ───
+
+function toggleLearnWidget(sec){
+  var body=document.getElementById('lw-'+sec+'-body');
+  if(body)body.style.display=body.style.display==='none'?'':'none';
+}
+
+function renderLearnWidget(sec){
+  var lookupSec=sec==='food-eat'?'food':sec;
+  var items=(RESEARCH_ITEMS||[]).filter(function(r){return (r.sections||[]).indexOf(lookupSec)>-1;});
+  var countEl=document.getElementById('lw-'+sec+'-count');
+  if(countEl)countEl.textContent=items.length?'('+items.length+')':'';
+  var body=document.getElementById('lw-'+sec+'-body');
+  if(!body)return;
+  if(!items.length){
+    body.innerHTML='<div style="color:var(--textl);font-size:12px;padding:6px 0">No items tagged for this section yet. <button onclick="openNewResearchItem()" style="background:none;border:none;color:var(--accent);font-size:12px;font-weight:700;cursor:pointer;padding:0">Add one →</button></div>';
+    return;
+  }
+  body.innerHTML=items.map(function(r){
+    return '<div class="lw-item" onclick="openResearchItem(\''+r.id+'\')">'
+      +'<div class="lw-item-title">'+escHtml(r.title)+'</div>'
+      +'<div class="lw-item-tags">'+((r.tags||[]).join(' · ')||'')+'</div>'
+      +'</div>';
+  }).join('');
+}
+
+function renderAllLearnWidgets(){
+  ['tasks','goals','health','food','food-eat','wellness','spirit','money','workshop'].forEach(renderLearnWidget);
+}
+
+// ═══════════════════════════════════════════════
 // LEARN TAB
 // ═══════════════════════════════════════════════
 
@@ -14009,6 +14443,7 @@ function startApp(){
   renderMeds();
   renderMinistryHome();
   renderGuide();
+  renderAllLearnWidgets();
   applyAppTitle();
   applyTabOrder();
   tickMillie();
@@ -15212,16 +15647,12 @@ function startReidRunner(){
 </div>
 
 <div class="view" id="v-archive">
-  <div style="font-size:16px;font-weight:700;color:var(--textd);margin-bottom:4px">Archive</div>
-  <div style="font-size:12px;color:var(--textl);margin-bottom:14px">Completed tasks and past entries. Read-only history.</div>
-  <div class="card" style="margin-bottom:10px">
-    <div style="font-size:13px;font-weight:700;color:var(--textd);margin-bottom:10px">Completed Tasks</div>
-    <div id="archiveDoneList"></div>
+  <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+    <div style="font-family:'Playfair Display',serif;font-size:20px;color:var(--textd);flex:1">📁 Archive</div>
+    <button class="btn sec" style="font-size:11px;padding:5px 10px" onclick="addArchiveYear()">＋ Year</button>
   </div>
-  <div class="card">
-    <div style="font-size:13px;font-weight:700;color:var(--textd);margin-bottom:6px">Yearly Archive</div>
-    <div style="font-size:12px;color:var(--textl)">Year-by-year records coming soon. Completed tasks are saved here automatically.</div>
-  </div>
+  <div id="archiveYearTabs" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px"></div>
+  <div id="archiveYearContent"></div>
 </div>
 
 <!-- COLOR MIX MODAL -->
@@ -15529,5 +15960,66 @@ function startReidRunner(){
     <button class="cn-btn" style="margin-top:10px" onclick="closeM('groceryQuickModal')">Close</button>
   </div>
 </div>
+<!-- RESEARCH ITEM MODAL -->
+<div class="ov" id="researchItemModal" onclick="if(event.target===this)closeM('researchItemModal')">
+  <div class="mod" style="max-height:90vh;overflow-y:auto">
+    <div class="mh"></div>
+    <div class="mtit" id="riModalTitle">New Research Item</div>
+    <input type="hidden" id="riId">
+    <label class="fl">Title</label>
+    <input id="riTitle" class="fi" placeholder="Item title…">
+    <label class="fl" style="margin-top:8px">Type</label>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px">
+      <button class="fchip on" data-g="riType" data-v="note" onclick="riTypeChange(this)">📝 Note</button>
+      <button class="fchip" data-g="riType" data-v="guide" onclick="riTypeChange(this)">📖 Guide</button>
+      <button class="fchip" data-g="riType" data-v="list" onclick="riTypeChange(this)">📋 List</button>
+      <button class="fchip" data-g="riType" data-v="link" onclick="riTypeChange(this)">🔗 Link</button>
+    </div>
+    <div id="riUrlWrap" style="display:none;margin-bottom:8px">
+      <label class="fl">URL</label>
+      <input id="riUrl" class="fi" placeholder="https://…">
+    </div>
+    <label class="fl">Content / Notes</label>
+    <textarea id="riContent" class="fi" style="height:110px;resize:vertical" placeholder="Write your notes, lists, or guide content here…"></textarea>
+    <label class="fl" style="margin-top:8px">Sections (select all that apply)</label>
+    <div id="riSectionChips" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px">
+      <button class="fchip" data-ris="general" onclick="toggleRiChip(this)">🌐 General</button>
+      <button class="fchip" data-ris="tasks" onclick="toggleRiChip(this)">📋 Tasks</button>
+      <button class="fchip" data-ris="goals" onclick="toggleRiChip(this)">🎯 Goals &amp; Routines</button>
+      <button class="fchip" data-ris="health" onclick="toggleRiChip(this)">🏃 Health</button>
+      <button class="fchip" data-ris="food" onclick="toggleRiChip(this)">🥗 Food &amp; Eat</button>
+      <button class="fchip" data-ris="wellness" onclick="toggleRiChip(this)">💆 Wellness</button>
+      <button class="fchip" data-ris="spirit" onclick="toggleRiChip(this)">✨ Spirit</button>
+      <button class="fchip" data-ris="money" onclick="toggleRiChip(this)">💰 Money</button>
+      <button class="fchip" data-ris="workshop" onclick="toggleRiChip(this)">🎨 Workshop</button>
+      <button class="fchip" data-ris="plan" onclick="toggleRiChip(this)">📅 Plan</button>
+    </div>
+    <label class="fl">Tags (select or type new)</label>
+    <div id="riTopicChips" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px"></div>
+    <div style="display:flex;gap:6px;margin-bottom:10px">
+      <input id="riNewTag" class="fi" style="flex:1;margin-bottom:0" placeholder="New tag…" onkeydown="if(event.key==='Enter'){addRiTag();event.preventDefault();}">
+      <button class="btn sec" onclick="addRiTag()">Add</button>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:4px">
+      <button class="ok-btn" style="flex:1;margin:0" onclick="saveResearchItem()">Save</button>
+      <button class="cn-btn" style="flex:1;margin:0" onclick="closeM('researchItemModal')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- RESEARCH TOPICS MODAL -->
+<div class="ov" id="researchTopicsModal" onclick="if(event.target===this)closeM('researchTopicsModal')">
+  <div class="mod">
+    <div class="mh"></div>
+    <div class="mtit">⚙️ Manage Topics</div>
+    <div style="display:flex;gap:6px;margin-bottom:10px">
+      <input id="rtNewTopic" class="fi" style="flex:1;margin-bottom:0" placeholder="New topic name…" onkeydown="if(event.key==='Enter')addResearchTopic()">
+      <button class="btn" onclick="addResearchTopic()">Add</button>
+    </div>
+    <div id="rtList" style="max-height:50vh;overflow-y:auto"></div>
+    <button class="cn-btn" style="margin-top:12px;width:100%" onclick="closeM('researchTopicsModal')">Close</button>
+  </div>
+</div>
+
 </body>
 </html>
