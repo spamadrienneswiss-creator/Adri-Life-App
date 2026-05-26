@@ -897,10 +897,108 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     <div class="hub-card" onclick="goTab('stories',null)"><div class="hub-card-ic">📖</div><div class="hub-card-name">Stories</div><div class="hub-card-sub" id="hub-stories-sub">Your creative worlds</div></div>
     <div class="hub-card span2" onclick="goTab('mixtape',null)"><div class="hub-card-ic">🎵</div><div class="hub-card-name">Mixtape</div><div class="hub-card-sub">Songs &amp; musical memories</div></div>
     <div class="hub-card span2" onclick="openColorMix()" style="background:linear-gradient(135deg,#fdf0f8,#f0e8fc);border-color:#d8b8e8"><div class="hub-card-ic">🎨</div><div class="hub-card-name">Color Mix</div><div class="hub-card-sub">Color matching mini-game</div></div>
+    <div class="hub-card" onclick="goTab('winedrinks',null)" style="background:linear-gradient(135deg,#f8f0f4,#f4e8f0);border-color:#d8b0c8"><div class="hub-card-ic">🍷</div><div class="hub-card-name">Wine &amp; Drinks</div><div class="hub-card-sub">Wine, cocktails &amp; coffee log</div></div>
+    <div class="hub-card" onclick="goTab('places',null)" style="background:linear-gradient(135deg,#f0f4f8,#e8f0f8);border-color:#b0c8d8"><div class="hub-card-ic">📍</div><div class="hub-card-name">Places</div><div class="hub-card-sub">Restaurants, cafes &amp; spots</div></div>
   </div>
   <div class="learn-widget" id="lw-workshop">
     <button class="learn-widget-toggle" onclick="toggleLearnWidget('workshop')">📚 Learning <span id="lw-workshop-count"></span></button>
     <div id="lw-workshop-body" style="display:none"></div>
+  </div>
+</div>
+
+<!-- WINE & DRINKS -->
+<div class="view" id="v-winedrinks">
+  <div style="font-family:'Playfair Display',serif;font-size:20px;color:var(--textd);margin-bottom:10px">🍷 Wine &amp; Drinks</div>
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+    <div class="pill-nav" style="margin-bottom:0">
+      <button class="pn-btn on" onclick="showWDSec('wine',this)">🍷 Wine</button>
+      <button class="pn-btn" onclick="showWDSec('drinks',this)">🍸 Drinks</button>
+      <button class="pn-btn" onclick="showWDSec('coffee',this)">☕ Coffee</button>
+    </div>
+    <button class="ok-btn" style="margin:0;padding:8px 14px" onclick="openWdModal(window._wdCurrentType||'wine',null)">+ Add</button>
+  </div>
+  <div id="wd-wine"></div>
+  <div id="wd-drinks" style="display:none"></div>
+  <div id="wd-coffee" style="display:none"></div>
+</div>
+
+<!-- Wine & Drinks Modal -->
+<div class="modal" id="wdModal">
+  <div class="modal-box" style="max-width:420px">
+    <div class="modal-title" id="wdModalTitle">🍷 Add Wine</div>
+    <input type="hidden" id="wdId">
+    <input type="hidden" id="wdType">
+    <div class="fi-row"><label class="fi-label">Name</label><input class="fi" id="wdName" placeholder="e.g. Malbec, Espresso Martini…"></div>
+    <div class="fi-row"><label class="fi-label">Rating</label>
+      <div style="display:flex;gap:6px;align-items:center">
+        <select class="fi" id="wdRating" style="width:80px">
+          <option value="1">1 ⭐</option><option value="2">2 ⭐</option><option value="3">3 ⭐</option><option value="4">4 ⭐</option><option value="5" selected>5 ⭐</option>
+        </select>
+        <span style="font-size:12px;color:var(--textl)">stars</span>
+      </div>
+    </div>
+    <div class="fi-row"><label class="fi-label">Notes</label><textarea class="fi" id="wdNotes" rows="3" placeholder="Tasting notes, impressions…" style="resize:vertical"></textarea></div>
+    <div class="fi-row"><label class="fi-label">Date</label><input class="fi" id="wdDate" type="date"></div>
+    <div class="fi-row"><label class="fi-label">Price (optional)</label><input class="fi" id="wdPrice" placeholder="e.g. $15, €22…"></div>
+    <div class="fi-row"><label class="fi-label">Location (optional)</label><input class="fi" id="wdLocation" placeholder="Restaurant, winery, store…"></div>
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+      <input type="checkbox" id="wdFav" style="width:16px;height:16px">
+      <label for="wdFav" style="font-size:13px;color:var(--textd)">⭐ Mark as Favorite</label>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="ok-btn" onclick="saveWdItem()">Save</button>
+      <button class="btn" onclick="closeM('wdModal')">Cancel</button>
+      <button class="btn sec" id="wdDelBtn" onclick="deleteWdItem(document.getElementById('wdId').value)" style="margin-left:auto;color:var(--ured)">Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- PLACES -->
+<div class="view" id="v-places">
+  <div style="font-family:'Playfair Display',serif;font-size:20px;color:var(--textd);margin-bottom:10px">📍 Places</div>
+  <div style="display:flex;gap:8px;margin-bottom:12px">
+    <input id="placesSearch" class="fi" placeholder="Search places…" oninput="renderPlaces()" style="flex:1;margin-bottom:0">
+    <button class="ok-btn" style="margin:0;padding:8px 14px" onclick="openPlaceModal(null)">+ Add</button>
+  </div>
+  <div id="placesList"></div>
+</div>
+
+<!-- Places Modal -->
+<div class="modal" id="placesModal">
+  <div class="modal-box" style="max-width:420px">
+    <div class="modal-title" id="placeModalTitle">📍 Add Place</div>
+    <input type="hidden" id="placeId">
+    <div class="fi-row"><label class="fi-label">Name</label><input class="fi" id="placeName" placeholder="Place name…"></div>
+    <div class="fi-row"><label class="fi-label">Type</label>
+      <select class="fi" id="placeType">
+        <option value="restaurant">🍽️ Restaurant</option>
+        <option value="cafe">☕ Café</option>
+        <option value="bar">🍸 Bar</option>
+        <option value="attraction">🏛️ Attraction</option>
+        <option value="shop">🛍️ Shop</option>
+        <option value="other">📍 Other</option>
+      </select>
+    </div>
+    <div class="fi-row"><label class="fi-label">Rating</label>
+      <select class="fi" id="placeRating" style="width:80px">
+        <option value="1">1 ★</option><option value="2">2 ★</option><option value="3">3 ★</option><option value="4">4 ★</option><option value="5" selected>5 ★</option>
+      </select>
+    </div>
+    <div class="fi-row"><label class="fi-label">Address (optional)</label><input class="fi" id="placeAddress" placeholder="Address or area…"></div>
+    <div class="fi-row"><label class="fi-label">Notes</label><textarea class="fi" id="placeNotes" rows="3" placeholder="What you liked, recommendations…" style="resize:vertical"></textarea></div>
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+      <input type="checkbox" id="placeVisited">
+      <label for="placeVisited" style="font-size:13px;color:var(--textd)">✅ Visited</label>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+      <input type="checkbox" id="placeFav">
+      <label for="placeFav" style="font-size:13px;color:var(--textd)">⭐ Favorite</label>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="ok-btn" onclick="savePlace()">Save</button>
+      <button class="btn" onclick="closeM('placesModal')">Cancel</button>
+      <button class="btn sec" id="placeDelBtn" onclick="deletePlace(document.getElementById('placeId').value)" style="margin-left:auto;color:var(--ured)">Delete</button>
+    </div>
   </div>
 </div>
 
@@ -1032,6 +1130,8 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     <button class="qa" onclick="openM('fwModal')" style="background:linear-gradient(135deg,#e8f0e8,#fdf6ee)"><div class="qa-ic">🍽️</div><div class="qa-lb">Food</div></button>
     <button class="qa" onclick="openM('stepModal')" style="background:linear-gradient(135deg,#e8eef8,#fdf6ee)"><div class="qa-ic">👟</div><div class="qa-lb">Move</div></button>
     <button class="qa" onclick="openGroceryQuick()" style="background:linear-gradient(135deg,#e8f4e8,#fdf6ee)"><div class="qa-ic">🛒</div><div class="qa-lb">Grocery</div></button>
+    <button class="qa" onclick="goTab('focus-session',null)" style="background:linear-gradient(135deg,#eee8f8,#f8e8e8)"><div class="qa-ic">🎯</div><div class="qa-lb">Focus</div></button>
+    <button class="qa" onclick="goTab('spirit',null);setTimeout(function(){showSpiritSec('bible',document.querySelector('#v-spirit .pn-btn:nth-child(2)'))},200)" style="background:linear-gradient(135deg,#e8f0f8,#dce8f4)"><div class="qa-ic">📖</div><div class="qa-lb">Bible</div></button>
   </div>
   <!-- Quick Stats (collapsible) -->
   <div class="card" style="padding:0;margin-bottom:10px">
@@ -3850,7 +3950,7 @@ var MEAL_COMBOS = JSON.parse(localStorage.getItem('aMC')||'null')||[
 var DEFAULT_TAB_ORDER=['today','plan','helm','lighthouse','conservatory','hearthside','workshop','estate','emporium','archives','archive'];
 var TAB_LABELS={today:'Today',plan:'Plan',helm:'Tasks & Projects',conservatory:'Personal Growth',hearthside:'Health & Wellness',workshop:'Workshop',lighthouse:'Spiritual',estate:'Money & Home',emporium:'Work',archives:'Research Library',archive:'Archive',stories:'Stories',mixtape:'Mixtape','focus-session':'Focus Session',grocery:'Grocery List'};
 var TAB_ORDER=(function(){var o=JSON.parse(localStorage.getItem('aTabOrder')||'null');if(!o)return DEFAULT_TAB_ORDER.slice();var full=DEFAULT_TAB_ORDER.slice();o=o.filter(function(t){return full.indexOf(t)>-1;});full.forEach(function(t){if(o.indexOf(t)<0)o.push(t);});return o;})();
-var SECTION_VIEWS={today:['today'],plan:['plan'],helm:['tasks','projects','lists','focus-session','grocery'],conservatory:['goals','routines','learn','focus'],hearthside:['food','meals','wellness','recap'],workshop:['board','faves','stories','mixtape'],lighthouse:['spirit'],estate:['money'],emporium:['wigs'],archives:['guide','export','settings'],archive:['archive']};
+var SECTION_VIEWS={today:['today'],plan:['plan'],helm:['tasks','projects','lists','focus-session','grocery'],conservatory:['goals','routines','learn','focus'],hearthside:['food','meals','wellness','recap'],workshop:['board','faves','stories','mixtape','winedrinks','places'],lighthouse:['spirit'],estate:['money'],emporium:['wigs'],archives:['guide','export','settings'],archive:['archive']};
 var SECTION_LABELS={today:'Today',plan:'Plan',helm:'Tasks & Projects',conservatory:'Personal Growth',hearthside:'Health & Wellness',workshop:'Workshop',lighthouse:'Spiritual',estate:'Money & Home',emporium:'Work',archives:'Research Library',archive:'Archive'};
 var VIEW_SECTION=(function(){var m={};Object.keys(SECTION_VIEWS).forEach(function(s){SECTION_VIEWS[s].forEach(function(v){m[v]=s;});});return m;})();
 
@@ -4031,6 +4131,30 @@ function initFirebase(){
       if(document.getElementById('planMonthBody')&&document.getElementById('v-plan').classList.contains('on'))renderPlan();
     }
   });
+
+  // Listen to settings/appearance
+  window.fsOnSnapshot(window.fsDoc(window.db,'settings','appearance'), function(snap){
+    if(!snap.exists())return;
+    var d=snap.data();
+    if(d.name&&d.name!==S.name){S.name=d.name;localStorage.setItem('aSName',S.name);updGreet();}
+    if(d.quote&&d.quote!==S.quote){S.quote=d.quote;localStorage.setItem('aSQuote',S.quote);var qEl=document.getElementById('gQuote');if(qEl)qEl.textContent=S.quote;}
+    if(d.banner&&d.banner!==S.banner){S.banner=d.banner;localStorage.setItem('aSBanner',S.banner);}
+    if(d.bannerImg&&d.bannerImg!==BANNER_IMG){BANNER_IMG=d.bannerImg;localStorage.setItem('aBannerImg',BANNER_IMG);applyBannerImg();}
+    if(d.appTitle&&d.appTitle!==S.appTitle){S.appTitle=d.appTitle;localStorage.setItem('aSAppTitle',S.appTitle);applyAppTitle();}
+    if(d.customColors){CUSTOM_COLORS=d.customColors;localStorage.setItem('aCustomColors',JSON.stringify(CUSTOM_COLORS));}
+  });
+
+  // Listen to settings/goals
+  window.fsOnSnapshot(window.fsDoc(window.db,'settings','goals'), function(snap){
+    if(!snap.exists())return;
+    var d=snap.data();
+    if(d.gCal)S.gCal=d.gCal;if(d.gPro)S.gPro=d.gPro;if(d.gFib)S.gFib=d.gFib;
+    if(d.gCrb)S.gCrb=d.gCrb;if(d.gFat)S.gFat=d.gFat;if(d.gWat)S.gWat=d.gWat;if(d.gEx)S.gEx=d.gEx;
+    localStorage.setItem('aGCal',S.gCal);localStorage.setItem('aGPro',S.gPro);
+    localStorage.setItem('aGFib',S.gFib);localStorage.setItem('aGCrb',S.gCrb);
+    localStorage.setItem('aGFat',S.gFat);localStorage.setItem('aGWat',S.gWat);
+    localStorage.setItem('aGEx',S.gEx);
+  });
 }
 
 // Save to Firebase
@@ -4120,6 +4244,8 @@ function goTabDirect(tab,btn){
   if(tab==='archive')renderArchive();
   if(tab==='stories')renderStoriesList();
   if(tab==='mixtape')renderMixtape();
+  if(tab==='winedrinks'){ window._wdCurrentType=window._wdCurrentType||'wine'; renderWineDrinks(window._wdCurrentType); }
+  if(tab==='places')renderPlaces();
   if(SECTION_VIEWS[tab]||tab==='emporium')renderHubPreviews(tab);
   if(tab==='today'){ tickSpiritRun(); renderWaterBottle(); renderTodayStatsBars(); renderWeekStats(); renderTodayMoodBtns(); renderTodayPlanBar(); }
   if(tab==='hearthside'){ renderHWHubStats(); }
@@ -5036,6 +5162,11 @@ function toggleTaskDone(id,done){
 function editT(id){
   var t=TASKS.find(function(t){return t.id===id;});
   if(!t)return;
+  closeFAB();
+  // Reset form fields without clearing editTId (openM would wipe it)
+  SBV={};
+  document.querySelectorAll('[data-g]').forEach(function(b){b.classList.remove('on');});
+  ['tTit','tDue','tNotes'].forEach(function(f){var el=document.getElementById(f);if(el)el.value='';});
   document.getElementById('tModTit').textContent='Edit Task ✏️';
   document.getElementById('editTId').value=id;
   document.getElementById('tTit').value=t.title;
@@ -5045,15 +5176,13 @@ function editT(id){
   _taskMeaningful=!!(t.meaningful);
   var _mb=document.getElementById('tMeaningfulBtn');
   if(_mb){_mb.classList.toggle('on',_taskMeaningful);_mb.textContent=_taskMeaningful?'⭐ Meaningful goal — will celebrate! 🎉':'⭐ Mark as meaningful goal';}
-  SBV={};
-  document.querySelectorAll('[data-g]').forEach(function(b){b.classList.remove('on');});
   setTimeout(function(){
     document.querySelectorAll('[data-g="cat"]').forEach(function(b){if(b.dataset.v===t.cat){b.classList.add('on');SBV.cat=t.cat;}});
     document.querySelectorAll('[data-g="urg"]').forEach(function(b){if(b.dataset.v===t.urgency){b.classList.add('on');SBV.urg=t.urgency;}});
     document.querySelectorAll('[data-g="etm"]').forEach(function(b){if(b.dataset.v===t.etime){b.classList.add('on');SBV.etm=t.etime;}});
     document.querySelectorAll('[data-g="rep"]').forEach(function(b){if(b.dataset.v===(t.repeat||'')){b.classList.add('on');SBV.rep=t.repeat||'';}});
   },50);
-  openM('taskModal');
+  document.getElementById('taskModal').classList.add('show');
 }
 
 function delTask(id){
@@ -5768,7 +5897,7 @@ function renderPlan(){
         wkTasks.forEach(function(t){
           html+='<div style="display:flex;align-items:center;gap:7px;padding:3px 6px;border-radius:7px;background:#fff">';
           html+='<input type="checkbox" style="flex-shrink:0" onchange="toggleTaskDone(\''+t.id+'\',this.checked);renderPlan()">';
-          html+='<span style="flex:1;font-size:12px;color:var(--textd)">'+escHtml(t.title)+'</span>';
+          html+='<span onclick="editT(\''+t.id+'\')" style="flex:1;font-size:12px;color:var(--textd);cursor:pointer">'+escHtml(t.title)+'</span>';
           if(t.due)html+='<span style="font-size:10px;color:var(--textl);flex-shrink:0">'+t.due+'</span>';
           html+='</div>';
         });
@@ -5859,7 +5988,7 @@ function renderPlanHoursHTML(dStr,blocks){
     html+='<div style="font-size:10px;font-weight:800;color:var(--rose);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px">📌 Due Today</div>';
     html+='<div style="display:flex;flex-direction:column;gap:4px">';
     dueTasks.forEach(function(t){
-      html+='<div style="display:flex;align-items:center;gap:7px;padding:4px 8px;border-radius:8px;background:#fff;border:1.5px solid rgba(210,140,140,.2)">';
+      html+='<div onclick="event.stopPropagation();editT(\''+t.id+'\')" style="display:flex;align-items:center;gap:7px;padding:4px 8px;border-radius:8px;background:#fff;border:1.5px solid rgba(210,140,140,.2);cursor:pointer">';
       html+='<div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:700;color:var(--textd);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+escHtml(t.title)+'</div>';
       if(t.urgency)html+='<div style="font-size:10px;color:var(--textl)">'+(urgLabels[t.urgency]||'')+'</div>';
       html+='</div>';
@@ -7843,6 +7972,7 @@ function saveAppearance(){
   if(!BANNER_IMG)document.getElementById('mainHdr').style.background='linear-gradient('+S.banner+')';
   document.getElementById('gQuote').textContent=S.quote;
   updGreet();
+  fbSave('settings','appearance',{name:S.name,quote:S.quote,banner:S.banner,bannerImg:BANNER_IMG||'',appTitle:S.appTitle,customColors:CUSTOM_COLORS,updated:new Date().toISOString()});
   alert('✅ Appearance saved!');
 }
 
@@ -7858,6 +7988,7 @@ function saveGoals(){
   localStorage.setItem('aGFib',S.gFib);localStorage.setItem('aGCrb',S.gCrb);
   localStorage.setItem('aGFat',S.gFat);localStorage.setItem('aGWat',S.gWat);
   localStorage.setItem('aGEx',S.gEx);
+  fbSave('settings','goals',{gCal:S.gCal,gPro:S.gPro,gFib:S.gFib,gCrb:S.gCrb,gFat:S.gFat,gWat:S.gWat,gEx:S.gEx,updated:new Date().toISOString()});
   updM();updExWeek();alert('✅ Goals saved!');
 }
 
@@ -9658,10 +9789,217 @@ function delMed(id){
 }
 
 // ═══════════════════════════════════════════════
+// WINE & DRINKS
+// ═══════════════════════════════════════════════
+var WINE_DRINKS = JSON.parse(localStorage.getItem('aWineDrinks')||'[]');
+window._wdCurrentType = 'wine';
+
+function saveWineDrinks(){ localStorage.setItem('aWineDrinks', JSON.stringify(WINE_DRINKS)); }
+
+function showWDSec(type, btn){
+  window._wdCurrentType = type;
+  ['wine','drinks','coffee'].forEach(function(t){
+    var el=document.getElementById('wd-'+t);
+    if(el) el.style.display = t===type ? '' : 'none';
+  });
+  var nav=document.querySelector('#v-winedrinks .pill-nav');
+  if(nav) nav.querySelectorAll('.pn-btn').forEach(function(b){ b.classList.toggle('on', b===btn); });
+  renderWineDrinks(type);
+}
+
+function renderWineDrinks(type){
+  var el=document.getElementById('wd-'+type);
+  if(!el) return;
+  var items=WINE_DRINKS.filter(function(i){ return i.type===type; });
+  items.sort(function(a,b){ return (b.favorite?1:0)-(a.favorite?1:0)||(b.date||'').localeCompare(a.date||''); });
+  if(!items.length){
+    el.innerHTML='<div style="text-align:center;padding:30px 0;color:var(--textl);font-size:13px">No '+type+' entries yet. Tap + Add!</div>';
+    return;
+  }
+  var stars=function(r){ var s=''; for(var i=1;i<=5;i++) s+=(i<=r?'⭐':'☆'); return s; };
+  el.innerHTML=items.map(function(it){
+    return '<div style="background:#fff;border-radius:12px;padding:12px 14px;margin-bottom:8px;border:1.5px solid var(--border,#e8e4de);box-shadow:0 1px 4px rgba(0,0,0,.05)">'
+      +'<div style="display:flex;align-items:flex-start;gap:8px">'
+      +'<div style="flex:1;min-width:0">'
+      +'<div style="font-size:14px;font-weight:700;color:var(--textd)">'+(it.favorite?'⭐ ':'')+escHtml(it.name)+'</div>'
+      +'<div style="font-size:12px;color:var(--textl);margin-top:2px">'+stars(it.rating||0)+(it.date?' · '+it.date:'')+(it.location?' · '+escHtml(it.location):'')+(it.price?' · '+escHtml(it.price):'')+'</div>'
+      +(it.notes?'<div style="font-size:12px;color:var(--textl);margin-top:4px;white-space:pre-line">'+escHtml(it.notes)+'</div>':'')
+      +'</div>'
+      +'<div style="display:flex;gap:6px;flex-shrink:0">'
+      +'<button onclick="toggleWdFav(\''+it.id+'\')" title="Toggle Favorite" style="background:none;border:none;cursor:pointer;font-size:16px;padding:2px">'+(it.favorite?'⭐':'☆')+'</button>'
+      +'<button onclick="openWdModal(\''+it.type+'\',\''+it.id+'\')" style="background:none;border:none;cursor:pointer;font-size:13px;color:var(--textl);padding:2px">✏️</button>'
+      +'</div>'
+      +'</div>'
+      +'</div>';
+  }).join('');
+}
+
+function openWdModal(type, id){
+  window._wdCurrentType = type||'wine';
+  var typeLabels={wine:'🍷 Wine',drinks:'🍸 Drink',coffee:'☕ Coffee'};
+  document.getElementById('wdModalTitle').textContent=(id?'Edit ':'Add ')+typeLabels[type]||type;
+  document.getElementById('wdId').value = id||'';
+  document.getElementById('wdType').value = type||'wine';
+  document.getElementById('wdDelBtn').style.display = id ? '' : 'none';
+  var it = id ? WINE_DRINKS.find(function(i){ return i.id===id; }) : null;
+  document.getElementById('wdName').value = it ? it.name : '';
+  document.getElementById('wdRating').value = it ? (it.rating||5) : 5;
+  document.getElementById('wdNotes').value = it ? (it.notes||'') : '';
+  document.getElementById('wdDate').value = it ? (it.date||todayStr()) : todayStr();
+  document.getElementById('wdPrice').value = it ? (it.price||'') : '';
+  document.getElementById('wdLocation').value = it ? (it.location||'') : '';
+  document.getElementById('wdFav').checked = it ? !!it.favorite : false;
+  openM('wdModal');
+}
+
+function saveWdItem(){
+  var id=document.getElementById('wdId').value;
+  var type=document.getElementById('wdType').value||'wine';
+  var name=document.getElementById('wdName').value.trim();
+  if(!name){ showToast('Please enter a name'); return; }
+  var it={
+    id: id || 'wd_'+Date.now(),
+    type: type,
+    name: name,
+    rating: parseInt(document.getElementById('wdRating').value)||5,
+    notes: document.getElementById('wdNotes').value.trim(),
+    date: document.getElementById('wdDate').value||todayStr(),
+    price: document.getElementById('wdPrice').value.trim(),
+    location: document.getElementById('wdLocation').value.trim(),
+    favorite: document.getElementById('wdFav').checked
+  };
+  if(id){ var idx=WINE_DRINKS.findIndex(function(i){ return i.id===id; }); if(idx>-1) WINE_DRINKS[idx]=it; else WINE_DRINKS.push(it); }
+  else WINE_DRINKS.push(it);
+  saveWineDrinks();
+  closeM('wdModal');
+  renderWineDrinks(type);
+  showToast('Saved!');
+}
+
+function deleteWdItem(id){
+  if(!id)return;
+  if(!confirm('Delete this entry?'))return;
+  var it=WINE_DRINKS.find(function(i){ return i.id===id; });
+  var type=it?it.type:'wine';
+  WINE_DRINKS=WINE_DRINKS.filter(function(i){ return i.id!==id; });
+  saveWineDrinks();
+  closeM('wdModal');
+  renderWineDrinks(type);
+  showToast('Deleted');
+}
+
+function toggleWdFav(id){
+  var it=WINE_DRINKS.find(function(i){ return i.id===id; });
+  if(!it)return;
+  it.favorite=!it.favorite;
+  saveWineDrinks();
+  renderWineDrinks(it.type);
+}
+
+// ═══════════════════════════════════════════════
+// PLACES
+// ═══════════════════════════════════════════════
+var PLACES = JSON.parse(localStorage.getItem('aPlaces')||'[]');
+
+function savePlaces(){ localStorage.setItem('aPlaces', JSON.stringify(PLACES)); }
+
+var PLACE_TYPE_ICONS={restaurant:'🍽️',cafe:'☕',bar:'🍸',attraction:'🏛️',shop:'🛍️',other:'📍'};
+
+function renderPlaces(){
+  var el=document.getElementById('placesList');
+  if(!el)return;
+  var search=(document.getElementById('placesSearch')&&document.getElementById('placesSearch').value||'').toLowerCase();
+  var items=PLACES.filter(function(p){
+    if(search && p.name.toLowerCase().indexOf(search)<0 && (p.notes||'').toLowerCase().indexOf(search)<0) return false;
+    return true;
+  });
+  items.sort(function(a,b){ return (b.favorite?1:0)-(a.favorite?1:0)||(a.name||'').localeCompare(b.name||''); });
+  if(!items.length){
+    el.innerHTML='<div style="text-align:center;padding:30px 0;color:var(--textl);font-size:13px">No places yet. Tap + Add!</div>';
+    return;
+  }
+  var stars=function(r){ var s=''; for(var i=1;i<=5;i++) s+=(i<=r?'★':'☆'); return s; };
+  el.innerHTML=items.map(function(p){
+    var icon=PLACE_TYPE_ICONS[p.type]||'📍';
+    return '<div style="background:#fff;border-radius:12px;padding:12px 14px;margin-bottom:8px;border:1.5px solid var(--border,#e8e4de);box-shadow:0 1px 4px rgba(0,0,0,.05)">'
+      +'<div style="display:flex;align-items:flex-start;gap:8px">'
+      +'<div style="font-size:22px;flex-shrink:0">'+icon+'</div>'
+      +'<div style="flex:1;min-width:0">'
+      +'<div style="font-size:14px;font-weight:700;color:var(--textd)">'+(p.favorite?'⭐ ':'')+escHtml(p.name)+(p.visited?' <span style="font-size:10px;background:rgba(100,180,100,.15);color:var(--sage);padding:1px 6px;border-radius:6px">✓ visited</span>':'')+'</div>'
+      +'<div style="font-size:12px;color:var(--textl);margin-top:2px">'+stars(p.rating||0)+(p.address?' · '+escHtml(p.address):'')+'</div>'
+      +(p.notes?'<div style="font-size:12px;color:var(--textl);margin-top:4px;white-space:pre-line">'+escHtml(p.notes)+'</div>':'')
+      +'</div>'
+      +'<div style="display:flex;gap:6px;flex-shrink:0">'
+      +'<button onclick="togglePlaceFav(\''+p.id+'\')" title="Toggle Favorite" style="background:none;border:none;cursor:pointer;font-size:16px;padding:2px">'+(p.favorite?'⭐':'☆')+'</button>'
+      +'<button onclick="openPlaceModal(\''+p.id+'\')" style="background:none;border:none;cursor:pointer;font-size:13px;color:var(--textl);padding:2px">✏️</button>'
+      +'</div>'
+      +'</div>'
+      +'</div>';
+  }).join('');
+}
+
+function openPlaceModal(id){
+  document.getElementById('placeModalTitle').textContent = id ? '📍 Edit Place' : '📍 Add Place';
+  document.getElementById('placeId').value = id||'';
+  document.getElementById('placeDelBtn').style.display = id ? '' : 'none';
+  var p = id ? PLACES.find(function(x){ return x.id===id; }) : null;
+  document.getElementById('placeName').value = p ? p.name : '';
+  document.getElementById('placeType').value = p ? (p.type||'restaurant') : 'restaurant';
+  document.getElementById('placeRating').value = p ? (p.rating||5) : 5;
+  document.getElementById('placeAddress').value = p ? (p.address||'') : '';
+  document.getElementById('placeNotes').value = p ? (p.notes||'') : '';
+  document.getElementById('placeVisited').checked = p ? !!p.visited : false;
+  document.getElementById('placeFav').checked = p ? !!p.favorite : false;
+  openM('placesModal');
+}
+
+function savePlace(){
+  var id=document.getElementById('placeId').value;
+  var name=document.getElementById('placeName').value.trim();
+  if(!name){ showToast('Please enter a name'); return; }
+  var p={
+    id: id || 'pl_'+Date.now(),
+    name: name,
+    type: document.getElementById('placeType').value||'restaurant',
+    rating: parseInt(document.getElementById('placeRating').value)||5,
+    address: document.getElementById('placeAddress').value.trim(),
+    notes: document.getElementById('placeNotes').value.trim(),
+    visited: document.getElementById('placeVisited').checked,
+    favorite: document.getElementById('placeFav').checked,
+    tags: []
+  };
+  if(id){ var idx=PLACES.findIndex(function(x){ return x.id===id; }); if(idx>-1) PLACES[idx]=p; else PLACES.push(p); }
+  else PLACES.push(p);
+  savePlaces();
+  closeM('placesModal');
+  renderPlaces();
+  showToast('Saved!');
+}
+
+function deletePlace(id){
+  if(!id)return;
+  if(!confirm('Delete this place?'))return;
+  PLACES=PLACES.filter(function(p){ return p.id!==id; });
+  savePlaces();
+  closeM('placesModal');
+  renderPlaces();
+  showToast('Deleted');
+}
+
+function togglePlaceFav(id){
+  var p=PLACES.find(function(x){ return x.id===id; });
+  if(!p)return;
+  p.favorite=!p.favorite;
+  savePlaces();
+  renderPlaces();
+}
+
+// ═══════════════════════════════════════════════
 // GUIDE TAB
 // ═══════════════════════════════════════════════
 
 var GUIDE_SECTIONS=[
+  {title:'✅ Daily Checklist — Full App Day',items:['🌅 Morning: Log energy level (1-5)','💧 Log water intake throughout the day','🍽️ Log all meals in Eat → Nutrition','📋 Check off your Task list','🔄 Complete morning and evening Routines','🎯 Set 1-3 Daily Intentions','😊 Log your Mood (1-5)','💊 Check off Meds & Supplements (AM + PM)','📖 Bible Reading — log your chapter','🙏 Pray — add a prayer or check in','🌸 Write a Gratitude entry','⏱️ Log Ministry hours (if applicable)','💪 Log a Workout if you exercised','😴 Log Sleep before bed','📊 Check Recap for your day summary']},
   {title:'🏠 Home / Today',items:['⚡ Log your energy level each morning (😴→🔥)','🎯 Set 1–3 daily intentions — shown as a focus strip','⏳ Kingdom Events countdown (assembly, convention, etc.)','📊 Quick stats: water, tasks, macros','⏱️ Ministry hours this month']},
   {title:'📋 Tasks',items:['Add tasks with urgency, category, due date, time estimate','⏸️ Resume note — jot where you left off on any task','Subtasks — expand a task to add sub-items','Tap checkbox → completes task (🎉 confetti!)','Filter by category or urgency','Move tasks to Today / mark as intentions']},
   {title:'🔄 Routines',items:['Daily routines reset each day','View and edit all routines','Completed routines collapse into a Done section','(Coming soon) Monthly/yearly routines with assigned dates']},
