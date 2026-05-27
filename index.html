@@ -3437,10 +3437,22 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
       <div style="font-size:12px;font-weight:700;color:var(--textd);margin-bottom:8px">⚡ Shock Challenges</div>
       <div style="font-size:11px;color:var(--textl);margin-bottom:8px">Physical only. 60-second timer fires on deploy.</div>
       <div id="hatchShocksList"></div>
-      <div style="display:flex;gap:6px;margin-top:8px">
+      <div style="display:flex;gap:6px;margin-top:8px;margin-bottom:18px">
         <input class="fi" id="hatchShocksInput" placeholder="Add a shock challenge…" style="flex:1;padding:7px 10px;font-size:13px">
         <button onclick="addHatchItem('hatchShocksInput','aHatchShocks','hatchShocksList',HATCH_DEFAULTS.shocks)" style="padding:7px 14px;border-radius:9px;border:none;background:var(--rose);color:white;font-family:'Quicksand',sans-serif;font-size:13px;font-weight:700;cursor:pointer">Add</button>
       </div>
+
+      <div style="font-size:12px;font-weight:700;color:var(--textd);margin-bottom:8px">📓 Dispatch Questions</div>
+      <div style="font-size:11px;color:var(--textl);margin-bottom:8px">Reflection questions. Personal, specific, unexpected — write them yourself or generate a batch with Claude.</div>
+      <div id="hatchDispatchList"></div>
+      <div style="display:flex;gap:6px;margin-top:8px;margin-bottom:18px">
+        <input class="fi" id="hatchDispatchInput" placeholder="Add a question…" style="flex:1;padding:7px 10px;font-size:13px">
+        <button onclick="addHatchItem('hatchDispatchInput','aHatchDispatch','hatchDispatchList',HATCH_DEFAULTS.dispatch)" style="padding:7px 14px;border-radius:9px;border:none;background:var(--rose);color:white;font-family:'Quicksand',sans-serif;font-size:13px;font-weight:700;cursor:pointer">Add</button>
+      </div>
+
+      <div style="font-size:12px;font-weight:700;color:var(--textd);margin-bottom:8px">💬 Spark Prompts</div>
+      <div style="font-size:11px;color:var(--textl);margin-bottom:10px">Conversation starters by category. Add new categories and prompts, or delete ones that don't fit.</div>
+      <div id="sparkSettingsList"></div>
     </div>
   </div>
 </div>
@@ -7222,6 +7234,7 @@ function renderPlan(){
     var wkEnd=allReal[allReal.length-1].toISOString().slice(0,10);
     var wkTasks=(TASKS||[]).filter(function(t){
       if(t.done)return false;
+      if(t.source==='routine')return false;
       if(t.due&&t.due>=wkStart&&t.due<=wkEnd)return true;
       if(!t.due&&t.repeat&&(t.repeat==='weekly'||t.repeat==='daily'))return true;
       return false;
@@ -7263,7 +7276,7 @@ function renderPlan(){
       html+='<div style="font-size:20px;font-weight:800;color:'+(isToday?'var(--rose)':isPast?'#bbb':'var(--textd)')+'">'+dayDate.getDate()+'</div>';
       html+='</div>';
       // Block chips preview + due tasks badge
-      var dueCnt=(TASKS||[]).filter(function(t){return !t.done&&t.due===dStr;}).length+((GOALS||[]).filter(function(g){return !g.done&&g.due===dStr;}).length);
+      var dueCnt=(TASKS||[]).filter(function(t){return !t.done&&t.source!=='routine'&&t.due===dStr;}).length+((GOALS||[]).filter(function(g){return !g.done&&g.due===dStr;}).length);
       var mealCnt=MEAL_SLOTS.filter(function(s){return (MEAL_PLAN[dStr]||{})[s];}).length;
       html+='<div style="flex:1;display:flex;flex-wrap:wrap;gap:4px;align-items:center;min-width:0;overflow:hidden">';
       if(dueCnt>0)html+='<span style="font-size:10px;font-weight:800;padding:2px 7px;border-radius:6px;background:rgba(210,140,140,.15);color:var(--rose);white-space:nowrap;flex-shrink:0">📌 '+dueCnt+' due</span>';
@@ -7303,7 +7316,7 @@ function renderPlanHoursHTML(dStr,blocks){
     blocksByHour[h].push(b);
   });
   // Tasks due on this day
-  var dueTasks=(TASKS||[]).filter(function(t){return !t.done&&t.due===dStr;});
+  var dueTasks=(TASKS||[]).filter(function(t){return !t.done&&t.source!=='routine'&&t.due===dStr;});
   var dueGoals=(GOALS||[]).filter(function(g){return !g.done&&g.due===dStr;});
   // Meals planned for this day
   var dayMeals=MEAL_PLAN[dStr]||{};
@@ -7640,14 +7653,35 @@ var HATCH_DEFAULTS={
     "Go outside, stand there for 90 seconds",
     "Shake your body out for 30 seconds — arms, legs, everything",
     "10 push-ups or 10 squats, right now"
+  ],
+  dispatch:[
+    "What's something you made or did recently that you're actually proud of?",
+    "What are you tolerating right now that you shouldn't be?",
+    "What would you do differently about this week?",
+    "What's something Nick does that still makes you laugh?",
+    "What's the last thing that surprised you about yourself?",
+    "What's a worry you've been carrying that you haven't said out loud yet?",
+    "What's one thing you want to remember about right now?",
+    "If you could tell your past self one thing from this season, what would it be?",
+    "What's something you've been putting off that would actually take under 20 minutes?",
+    "What does 'doing well' actually look like for you right now?"
   ]
+};
+var SPARK_DEFAULTS={
+  Deep:["Ask someone what they're most looking forward to this year","What's something you've changed your mind about recently?","Ask: what's the last thing that genuinely moved you?","What does 'doing well' actually look like for you right now?"],
+  Fun:["Tell someone the most chaotic thing that happened to you recently","What's something weird you believed as a kid?","What's the last thing that made you laugh so hard you cried?","What's a hill you will die on, no matter how small?"],
+  Marriage:["Ask Nick: what's something you've been wanting to tell me but haven't found the moment?","When did Nick do something recently that made you feel really loved?","Ask Nick what he's most looking forward to this week","Tell Nick one specific thing you noticed him doing that meant a lot to you"],
+  Friends:["Ask: what's been taking up the most space in your head lately?","Tell a friend one specific thing you appreciate about them","Ask: what's something you're proud of yourself for this month?","What's something good that's happened recently that you haven't celebrated yet?"],
+  Ministry:["Ask: what does hope look like for you right now?","Start with: 'I've been thinking about something and I wanted to ask you…'","Ask: is there anything weighing on you lately?","What's a question that's been sitting with you that you haven't had anyone to ask?"],
+  Strangers:["Ask about something you genuinely notice about where they are or what they're doing","Ask: what's something good that happened this week?","Find something real to compliment — not appearance, something they chose","Ask: have you lived here long? What do you love about it?"]
 };
 function _hd(){
   return{
     missions:JSON.parse(localStorage.getItem('aHatchMissions')||'null')||HATCH_DEFAULTS.missions.slice(),
     chaos:JSON.parse(localStorage.getItem('aHatchChaos')||'null')||HATCH_DEFAULTS.chaos.map(function(c){return{name:c.name,actions:c.actions.slice()};}),
     transmissions:JSON.parse(localStorage.getItem('aHatchTransmissions')||'null')||HATCH_DEFAULTS.transmissions.slice(),
-    shocks:JSON.parse(localStorage.getItem('aHatchShocks')||'null')||HATCH_DEFAULTS.shocks.slice()
+    shocks:JSON.parse(localStorage.getItem('aHatchShocks')||'null')||HATCH_DEFAULTS.shocks.slice(),
+    dispatch:JSON.parse(localStorage.getItem('aHatchDispatch')||'null')||HATCH_DEFAULTS.dispatch.slice()
   };
 }
 var _hatchTimerInt=null,_hatchTimerBreath=null;
@@ -7666,7 +7700,7 @@ function closeHatch(){
 }
 function hatchMode(mode){
   _clearHatchTimers();
-  ['Selector','Mission','Chaos','Transmission','Shock','Spa'].forEach(function(p){
+  ['Selector','Mission','Chaos','Transmission','Shock','Dispatch','Spa'].forEach(function(p){
     var el=document.getElementById('hPanel'+p);if(el)el.style.display='none';
   });
   var target=document.getElementById('hPanel'+mode.charAt(0).toUpperCase()+mode.slice(1));
@@ -7675,6 +7709,7 @@ function hatchMode(mode){
   else if(mode==='chaos')hatchChaosRoll();
   else if(mode==='transmission')_hatchTxShow();
   else if(mode==='shock')_hatchShockShow();
+  else if(mode==='dispatch')_hatchDispatchShow();
 }
 
 // ─── MISSION ───────────────────────────────────
@@ -7820,7 +7855,9 @@ function renderHatchSettings(){
   renderHatchList('hatchMissionsList','aHatchMissions',HATCH_DEFAULTS.missions);
   renderHatchList('hatchTransmissionsList','aHatchTransmissions',HATCH_DEFAULTS.transmissions);
   renderHatchList('hatchShocksList','aHatchShocks',HATCH_DEFAULTS.shocks);
+  renderHatchList('hatchDispatchList','aHatchDispatch',HATCH_DEFAULTS.dispatch);
   renderHatchChaosSettings();
+  renderSparkSettings();
 }
 function renderHatchList(elId,key,defaults){
   var el=document.getElementById(elId);if(!el)return;
@@ -7899,6 +7936,173 @@ function delHatchCategoryAction(ci,ai){
   cats[ci].actions.splice(ai,1);
   localStorage.setItem('aHatchChaos',JSON.stringify(cats));
   renderHatchChaosSettings();
+}
+
+// ─── DISPATCH MODE ─────────────────────────────
+var _lastDispatchIdx=-1;
+function _hatchDispatchShow(){
+  var d=_hd();var questions=d.dispatch||HATCH_DEFAULTS.dispatch.slice();
+  var el=document.getElementById('hDispatchQuestion');
+  var writeArea=document.getElementById('hDispatchWriteArea');
+  if(writeArea)writeArea.style.display='none';
+  if(!el)return;
+  var idx;do{idx=Math.floor(Math.random()*questions.length);}while(questions.length>1&&idx===_lastDispatchIdx);
+  _lastDispatchIdx=idx;
+  el.textContent=questions[idx];
+}
+function dispatchWrite(){
+  var area=document.getElementById('hDispatchWriteArea');
+  if(area)area.style.display='block';
+  var ta=document.getElementById('hDispatchTA');
+  if(ta){ta.value='';setTimeout(function(){ta.focus();},100);}
+}
+function dispatchSave(){
+  var q=document.getElementById('hDispatchQuestion');
+  var ta=document.getElementById('hDispatchTA');
+  if(!q||!ta)return;
+  var resp=ta.value.trim();
+  if(!resp){showToast('Write something first 💜');return;}
+  var journal=JSON.parse(localStorage.getItem('aDispatchJournal')||'[]');
+  journal.unshift({id:Date.now().toString(),question:q.textContent,response:resp,date:todayStr(),ts:new Date().toISOString()});
+  localStorage.setItem('aDispatchJournal',JSON.stringify(journal));
+  showToast('Saved to Dispatch Journal ✓');
+  var area=document.getElementById('hDispatchWriteArea');if(area)area.style.display='none';
+  ta.value='';
+}
+function dispatchSit(){
+  showToast('Letting it sit. 💜');
+  closeHatch();
+}
+function dispatchClaude(){
+  var q=document.getElementById('hDispatchQuestion');
+  if(!q)return;
+  var text=q.textContent;
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(function(){showToast('Question copied — paste it into Claude 💬');});
+  }else{
+    showToast('Question: "'+text.slice(0,60)+'…"');
+  }
+  closeHatch();
+}
+function openDispatchJournal(){
+  renderDispatchJournal();
+  showOv('ovDispatchJournal');
+}
+function renderDispatchJournal(){
+  var el=document.getElementById('dispatchJournalList');if(!el)return;
+  var journal=JSON.parse(localStorage.getItem('aDispatchJournal')||'[]');
+  if(!journal.length){el.innerHTML='<div style="font-size:14px;color:var(--textl);text-align:center;padding:24px 16px;font-family:\'Quicksand\',sans-serif">No entries yet. Answer a Dispatch question to start. 📓</div>';return;}
+  el.innerHTML=journal.map(function(e){
+    var d=new Date(e.ts);var dLabel=d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+    return'<div style="margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid var(--bdr)">'+
+      '<div style="font-size:10px;color:var(--textl);font-family:\'Quicksand\',sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px">'+dLabel+'</div>'+
+      '<div style="font-size:13px;font-weight:700;color:var(--textd);font-family:\'Quicksand\',sans-serif;margin-bottom:7px;font-style:italic;line-height:1.4">"'+escHtml(e.question)+'"</div>'+
+      '<div style="font-size:14px;color:var(--textd);font-family:\'Quicksand\',sans-serif;line-height:1.6;white-space:pre-wrap">'+escHtml(e.response)+'</div>'+
+    '</div>';
+  }).join('');
+}
+
+// ─── SPARK ─────────────────────────────────────
+var _sparkSavedIdx=null;
+function openSpark(){
+  sparkNew();
+  showOv('ovSpark');
+}
+function sparkNew(){
+  var prompts=JSON.parse(localStorage.getItem('aSparkPrompts')||'null')||SPARK_DEFAULTS;
+  var cats=Object.keys(prompts);
+  if(!cats.length)return;
+  var cat=cats[Math.floor(Math.random()*cats.length)];
+  var pool=prompts[cat];
+  if(!pool||!pool.length)return;
+  var prompt=pool[Math.floor(Math.random()*pool.length)];
+  var catEl=document.getElementById('sparkCategory');
+  var textEl=document.getElementById('sparkText');
+  if(catEl)catEl.textContent=cat;
+  if(textEl)textEl.textContent=prompt;
+  _sparkSavedIdx=null;
+}
+function sparkSave(){
+  var cat=document.getElementById('sparkCategory');
+  var text=document.getElementById('sparkText');
+  if(!cat||!text)return;
+  var saved=JSON.parse(localStorage.getItem('aSparkSaved')||'[]');
+  var entry={id:Date.now().toString(),category:cat.textContent,prompt:text.textContent,date:todayStr()};
+  saved.unshift(entry);
+  localStorage.setItem('aSparkSaved',JSON.stringify(saved));
+  showToast('Saved to pocket ✓');
+}
+function openSavedSparks(){
+  renderSavedSparks();
+  showOv('ovSavedSparks');
+}
+function renderSavedSparks(){
+  var el=document.getElementById('savedSparksList');if(!el)return;
+  var saved=JSON.parse(localStorage.getItem('aSparkSaved')||'[]');
+  if(!saved.length){el.innerHTML='<div style="font-size:14px;color:var(--textl);text-align:center;padding:20px;font-family:\'Quicksand\',sans-serif">No saved sparks yet.</div>';return;}
+  el.innerHTML=saved.map(function(e,i){
+    return'<div style="padding:11px 14px;border-radius:12px;background:#fff;box-shadow:0 1px 6px rgba(0,0,0,.06);margin-bottom:8px;position:relative">'+
+      '<div style="font-size:10px;font-weight:700;color:var(--rose);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">'+escHtml(e.category)+'</div>'+
+      '<div style="font-size:14px;color:var(--textd);font-family:\'Quicksand\',sans-serif;line-height:1.5">'+escHtml(e.prompt)+'</div>'+
+      '<button onclick="delSavedSpark('+i+')" style="position:absolute;top:8px;right:8px;background:none;border:none;color:var(--textl);cursor:pointer;font-size:14px;padding:2px">✕</button>'+
+    '</div>';
+  }).join('');
+}
+function delSavedSpark(i){
+  var saved=JSON.parse(localStorage.getItem('aSparkSaved')||'[]');
+  saved.splice(i,1);
+  localStorage.setItem('aSparkSaved',JSON.stringify(saved));
+  renderSavedSparks();
+}
+function renderSparkSettings(){
+  var el=document.getElementById('sparkSettingsList');if(!el)return;
+  var prompts=JSON.parse(localStorage.getItem('aSparkPrompts')||'null')||SPARK_DEFAULTS;
+  var cats=Object.keys(prompts);
+  el.innerHTML=cats.map(function(cat,ci){
+    var items=prompts[cat]||[];
+    return'<div style="margin-bottom:12px;background:#faf8f5;border-radius:12px;padding:10px 12px">'+
+      '<div style="font-size:13px;font-weight:700;color:var(--textd);margin-bottom:6px">'+escHtml(cat)+'</div>'+
+      items.map(function(item,ii){
+        return'<div style="display:flex;align-items:flex-start;gap:6px;padding:4px 0">'+
+          '<div style="flex:1;font-size:12px;color:var(--textd);line-height:1.4">• '+escHtml(item)+'</div>'+
+          '<button onclick="delSparkPrompt(\''+escHtml(cat)+'\','+ii+')" style="background:none;border:none;color:var(--textl);cursor:pointer;font-size:13px;padding:0;flex-shrink:0">✕</button>'+
+        '</div>';
+      }).join('')+
+      '<div style="display:flex;gap:6px;margin-top:8px">'+
+        '<input class="fi" id="sparkInp'+ci+'" placeholder="Add prompt..." style="flex:1;padding:6px 8px;font-size:12px">'+
+        '<button onclick="addSparkPrompt(\''+escHtml(cat)+'\','+ci+')" style="padding:6px 10px;border-radius:8px;border:none;background:var(--rose);color:white;font-family:\'Quicksand\',sans-serif;font-size:12px;font-weight:700;cursor:pointer">Add</button>'+
+      '</div>'+
+    '</div>';
+  }).join('')+
+  '<div style="display:flex;gap:6px;margin-top:4px">'+
+    '<input class="fi" id="sparkNewCatInp" placeholder="New category..." style="flex:1;padding:7px 10px;font-size:13px">'+
+    '<button onclick="addSparkCategory()" style="padding:7px 12px;border-radius:9px;border:none;background:var(--lav);color:white;font-family:\'Quicksand\',sans-serif;font-size:13px;font-weight:700;cursor:pointer">Add</button>'+
+  '</div>';
+}
+function addSparkPrompt(cat,ci){
+  var inp=document.getElementById('sparkInp'+ci);if(!inp)return;
+  var val=inp.value.trim();if(!val){showToast('Enter a prompt');return;}
+  var prompts=JSON.parse(localStorage.getItem('aSparkPrompts')||'null')||JSON.parse(JSON.stringify(SPARK_DEFAULTS));
+  if(!prompts[cat])prompts[cat]=[];
+  prompts[cat].push(val);
+  localStorage.setItem('aSparkPrompts',JSON.stringify(prompts));
+  inp.value='';renderSparkSettings();showToast('Added ✓');
+}
+function delSparkPrompt(cat,ii){
+  var prompts=JSON.parse(localStorage.getItem('aSparkPrompts')||'null')||JSON.parse(JSON.stringify(SPARK_DEFAULTS));
+  if(!prompts[cat])return;
+  prompts[cat].splice(ii,1);
+  localStorage.setItem('aSparkPrompts',JSON.stringify(prompts));
+  renderSparkSettings();
+}
+function addSparkCategory(){
+  var inp=document.getElementById('sparkNewCatInp');if(!inp)return;
+  var val=inp.value.trim();if(!val){showToast('Enter a category name');return;}
+  var prompts=JSON.parse(localStorage.getItem('aSparkPrompts')||'null')||JSON.parse(JSON.stringify(SPARK_DEFAULTS));
+  if(prompts[val]){showToast('Category already exists');return;}
+  prompts[val]=[];
+  localStorage.setItem('aSparkPrompts',JSON.stringify(prompts));
+  inp.value='';renderSparkSettings();showToast('Category added ✓');
 }
 
 // ═══════════════════════════════════════════════
@@ -22059,6 +22263,7 @@ function delProjInc(id){
 <!-- HATCH FAB — Today only -->
 <div id="hatchFab" style="position:fixed;bottom:28px;left:50%;transform:translateX(-50%);z-index:300;display:none;flex-direction:row;gap:10px;align-items:center">
   <button onclick="openHatch()" style="display:flex;align-items:center;gap:8px;padding:11px 18px;border-radius:50px;border:none;background:linear-gradient(135deg,var(--rose),var(--lav));color:#fff;font-family:'Quicksand',sans-serif;font-size:13px;font-weight:700;cursor:pointer;box-shadow:0 4px 18px rgba(201,160,160,.5);white-space:nowrap">🚪 Hatch</button>
+  <button onclick="openSpark()" style="display:flex;align-items:center;gap:7px;padding:11px 16px;border-radius:50px;border:none;background:#fff;color:var(--textd);font-family:'Quicksand',sans-serif;font-size:13px;font-weight:700;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.1);white-space:nowrap">💬 Spark</button>
   <button onclick="openDayWrapUp()" style="display:flex;align-items:center;gap:7px;padding:11px 16px;border-radius:50px;border:none;background:#fff;color:var(--textd);font-family:'Quicksand',sans-serif;font-size:13px;font-weight:700;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.1);white-space:nowrap">🌙 Wrap Up</button>
 </div>
 
@@ -22089,6 +22294,10 @@ function delProjInc(id){
         <button class="hatch-mode-btn" onclick="hatchMode('shock')">
           <span class="hatch-mode-icon">⚡</span>
           <span><span class="hatch-mode-label">Shock the System</span><span class="hatch-mode-sub">60 seconds. Physical only. Go.</span></span>
+        </button>
+        <button class="hatch-mode-btn" onclick="hatchMode('dispatch')">
+          <span class="hatch-mode-icon">📓</span>
+          <span><span class="hatch-mode-label">Dispatch</span><span class="hatch-mode-sub">One question. Write back or just sit with it.</span></span>
         </button>
         <button class="hatch-spa-pill" onclick="hatchMode('spa')">🛁 Need to land first?</button>
       </div>
@@ -22161,6 +22370,30 @@ function delProjInc(id){
         </div>
       </div>
 
+      <!-- DISPATCH -->
+      <div id="hPanelDispatch" style="display:none">
+        <div class="hatch-header">
+          <button class="hatch-back-btn" onclick="hatchMode('selector')">← Back</button>
+          <button class="hatch-close-btn" onclick="closeHatch()">✕</button>
+        </div>
+        <div class="hatch-card">
+          <div class="hatch-label">📓 Dispatch — Someone sent you a question</div>
+          <div class="hatch-big-text" id="hDispatchQuestion" style="font-size:18px;line-height:1.5"></div>
+          <div id="hDispatchWriteArea" style="display:none;margin-top:14px">
+            <textarea id="hDispatchTA" class="fi" placeholder="Write your response here…" style="width:100%;min-height:100px;padding:10px;font-size:14px;line-height:1.6;resize:vertical;border-radius:12px;box-sizing:border-box"></textarea>
+            <button class="hatch-key hatch-key-exec" onclick="dispatchSave()" style="margin-top:8px;width:100%">Save to journal ✓</button>
+          </div>
+        </div>
+        <div class="hatch-keys" id="hDispatchKeys">
+          <button class="hatch-key hatch-key-skip" onclick="dispatchSit()">Just sit with it</button>
+          <button class="hatch-key hatch-key-park" onclick="dispatchWrite()">Write a response ✍️</button>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:10px">
+          <button onclick="dispatchClaude()" style="flex:1;background:none;border:1.5px solid rgba(201,160,160,.3);border-radius:12px;font-family:'Quicksand',sans-serif;font-size:12px;font-weight:700;color:var(--textl);cursor:pointer;padding:10px 8px">Talk to Claude 💬</button>
+          <button onclick="openDispatchJournal()" style="flex:1;background:none;border:1.5px solid rgba(201,160,160,.3);border-radius:12px;font-family:'Quicksand',sans-serif;font-size:12px;font-weight:700;color:var(--textl);cursor:pointer;padding:10px 8px">View journal 📔</button>
+        </div>
+      </div>
+
       <!-- SPA -->
       <div id="hPanelSpa" style="display:none">
         <div class="hatch-header">
@@ -22176,6 +22409,44 @@ function delProjInc(id){
       </div>
 
     </div>
+  </div>
+</div>
+
+<!-- SPARK OVERLAY -->
+<div class="ov" id="ovSpark" onclick="closeOv('ovSpark')" style="align-items:flex-end;padding:0">
+  <div onclick="event.stopPropagation()" style="width:100%;max-width:480px;background:linear-gradient(180deg,#fff8f4,#fff);border-radius:24px 24px 0 0;padding:24px 20px 40px;box-shadow:0 -8px 32px rgba(0,0,0,.12)">
+    <div style="width:36px;height:4px;background:#f0dce8;border-radius:2px;margin:0 auto 20px"></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+      <div style="font-size:10px;font-weight:700;color:var(--rose);text-transform:uppercase;letter-spacing:.8px;font-family:'Quicksand',sans-serif" id="sparkCategory">—</div>
+      <button onclick="openSavedSparks()" style="background:none;border:none;font-family:'Quicksand',sans-serif;font-size:12px;font-weight:700;color:var(--textl);cursor:pointer;padding:0">Saved →</button>
+    </div>
+    <div style="font-family:'Quicksand',sans-serif;font-size:17px;font-weight:700;color:var(--textd);line-height:1.55;margin-bottom:22px;min-height:60px" id="sparkText"></div>
+    <div style="display:flex;gap:10px;margin-bottom:14px">
+      <button onclick="sparkNew()" style="flex:1;padding:13px;border-radius:14px;border:none;background:linear-gradient(135deg,var(--rose),var(--lav));color:#fff;font-family:'Quicksand',sans-serif;font-size:14px;font-weight:700;cursor:pointer">🔀 New Spark</button>
+      <button onclick="sparkSave()" style="padding:13px 16px;border-radius:14px;border:1.5px solid rgba(201,160,160,.3);background:#fff;font-family:'Quicksand',sans-serif;font-size:14px;font-weight:700;color:var(--textl);cursor:pointer">Save ✦</button>
+    </div>
+    <button onclick="closeOv('ovSpark')" style="width:100%;background:none;border:none;font-family:'Quicksand',sans-serif;font-size:13px;font-weight:700;color:var(--textl);cursor:pointer;padding:6px">Got it, thanks</button>
+  </div>
+</div>
+
+<!-- SAVED SPARKS -->
+<div class="ov" id="ovSavedSparks" onclick="closeOv('ovSavedSparks')" style="align-items:flex-end;padding:0">
+  <div onclick="event.stopPropagation()" style="width:100%;max-width:480px;background:#fff;border-radius:24px 24px 0 0;padding:20px 20px 40px;box-shadow:0 -8px 32px rgba(0,0,0,.12);max-height:70vh;overflow-y:auto">
+    <div style="width:36px;height:4px;background:#f0dce8;border-radius:2px;margin:0 auto 18px"></div>
+    <div style="font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:var(--textd);margin-bottom:16px">✦ Saved Sparks</div>
+    <div id="savedSparksList"></div>
+    <button onclick="closeOv('ovSavedSparks')" style="width:100%;margin-top:10px;background:none;border:none;font-family:'Quicksand',sans-serif;font-size:13px;font-weight:700;color:var(--textl);cursor:pointer;padding:8px">Close</button>
+  </div>
+</div>
+
+<!-- DISPATCH JOURNAL -->
+<div class="ov" id="ovDispatchJournal" onclick="closeOv('ovDispatchJournal')" style="align-items:flex-end;padding:0">
+  <div onclick="event.stopPropagation()" style="width:100%;max-width:480px;background:#fff;border-radius:24px 24px 0 0;padding:20px 20px 40px;box-shadow:0 -8px 32px rgba(0,0,0,.12);max-height:80vh;overflow-y:auto">
+    <div style="width:36px;height:4px;background:#f0dce8;border-radius:2px;margin:0 auto 18px"></div>
+    <div style="font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:var(--textd);margin-bottom:6px">📓 Dispatch Journal</div>
+    <div style="font-size:12px;color:var(--textl);font-family:'Quicksand',sans-serif;margin-bottom:18px">Your answers, saved and waiting.</div>
+    <div id="dispatchJournalList"></div>
+    <button onclick="closeOv('ovDispatchJournal')" style="width:100%;margin-top:10px;background:none;border:none;font-family:'Quicksand',sans-serif;font-size:13px;font-weight:700;color:var(--textl);cursor:pointer;padding:8px">Close</button>
   </div>
 </div>
 
