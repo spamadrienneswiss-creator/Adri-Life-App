@@ -7759,28 +7759,57 @@ function _clearHatchTimers(){
 }
 // ─── ONE THING MODE ────────────────────────────
 var _otPool=[],_otIdx=0;
+var _otShuffle=localStorage.getItem('aOTMode')==='shuffle';
+
+function _otApplyOrder(){
+  if(_otShuffle){
+    for(var i=_otPool.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var tmp=_otPool[i];_otPool[i]=_otPool[j];_otPool[j]=tmp;}
+  }else{
+    _otPool.sort(function(a,b){
+      var ord={'important-urgent':0,'important-not-urgent':1,'':2,'not-important-urgent':3,'not-important-not-urgent':4};
+      var ao=ord[a.urgency||'']!==undefined?ord[a.urgency||'']:2;
+      var bo=ord[b.urgency||'']!==undefined?ord[b.urgency||'']:2;
+      if(ao!==bo)return ao-bo;
+      if(a.due&&!b.due)return -1;if(!a.due&&b.due)return 1;
+      return 0;
+    });
+  }
+}
+
+function _renderOTModeToggle(){
+  var el=document.getElementById('otModeToggle');if(!el)return;
+  el.textContent=_otShuffle?'🔀 Shuffle':'📋 In Order';
+  el.style.background=_otShuffle?'linear-gradient(135deg,var(--lav),var(--rose))':'#f0ece8';
+  el.style.color=_otShuffle?'#fff':'var(--textl)';
+}
+
+function togOTMode(){
+  _otShuffle=!_otShuffle;
+  localStorage.setItem('aOTMode',_otShuffle?'shuffle':'order');
+  _otApplyOrder();
+  _otIdx=0;
+  _renderOTModeToggle();
+  _renderOTCard();
+}
+
 function openOneThingMode(){
   buildCatMap();
   var today=todayStr();
   _otPool=TASKS.filter(function(t){
     return !t.done&&!t.parked&&(t.urgency==='important-urgent'||t.urgency==='important-not-urgent'||t.due===today||!t.urgency);
-  }).sort(function(a,b){
-    var ord={'important-urgent':0,'important-not-urgent':1,'':2,'not-important-urgent':3,'not-important-not-urgent':4};
-    var ao=ord[a.urgency||'']!==undefined?ord[a.urgency||'']:2;
-    var bo=ord[b.urgency||'']!==undefined?ord[b.urgency||'']:2;
-    if(ao!==bo)return ao-bo;
-    if(a.due&&!b.due)return -1;if(!a.due&&b.due)return 1;
-    return 0;
   });
+  _otApplyOrder();
   var ov=document.getElementById('ovOneThing');
   if(!_otPool.length){
     if(ov)ov.style.display='flex';
     var body=document.getElementById('otBody');
     if(body)body.innerHTML='<div class="hatch-empty">✨ No active tasks!<br>You\'re clear to go.<br><br>💜 Great work.</div>';
+    _renderOTModeToggle();
     return;
   }
   _otIdx=0;
   if(ov)ov.style.display='flex';
+  _renderOTModeToggle();
   _renderOTCard();
 }
 function closeOneThing(){
@@ -13249,8 +13278,9 @@ function renderIntentionsHome(){
   }
   listEl.innerHTML=items.map(function(it,i){
     return '<div style="display:flex;align-items:center;gap:8px;padding:4px 0;'+(i<items.length-1?'border-bottom:1px solid #f5f0eb':'')+'">'
-      +'<span style="font-size:14px">'+(it.done?'✅':'⬜')+'</span>'
-      +'<span style="font-size:13px;font-weight:600;color:var(--textd)'+(it.done?';text-decoration:line-through;color:var(--textl)':'')+'">'+(i+1)+'. '+escHtml(it.text)+'</span>'
+      +'<span onclick="togIntention('+i+')" style="font-size:14px;cursor:pointer">'+(it.done?'✅':'⬜')+'</span>'
+      +'<span style="flex:1;font-size:13px;font-weight:600;color:var(--textd)'+(it.done?';text-decoration:line-through;color:var(--textl)':'')+'">'+(i+1)+'. '+escHtml(it.text)+'</span>'
+      +'<button onclick="delIntention('+i+')" style="background:none;border:none;font-size:12px;cursor:pointer;color:var(--textl);padding:2px 4px;flex-shrink:0">✕</button>'
       +'</div>';
   }).join('');
 }
@@ -22690,7 +22720,10 @@ function delProjInc(id){
     <div class="hatch-inner">
       <div class="hatch-header">
         <div class="hatch-logo">🚪 Just One Thing</div>
-        <div id="otCounter" style="font-family:'Quicksand',sans-serif;font-size:11px;color:var(--textl);font-weight:600"></div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <button id="otModeToggle" onclick="togOTMode()" style="font-family:'Quicksand',sans-serif;font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px;border:none;cursor:pointer;transition:all .2s">📋 In Order</button>
+          <div id="otCounter" style="font-family:'Quicksand',sans-serif;font-size:11px;color:var(--textl);font-weight:600"></div>
+        </div>
       </div>
       <div class="hatch-card" id="otBody">
         <div class="hatch-label">Focus on this right now</div>
