@@ -1106,7 +1106,7 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     </div>
     <div class="hub-card span2" onclick="goTab('wigs',null)"><div class="hub-card-ic">🪄</div><div class="hub-card-name">Wigs</div><div class="hub-card-sub" id="hub-wigs-sub">Loading…</div></div>
     <div class="hub-card span2" onclick="goTab('work-projects',null)"><div class="hub-card-ic">📁</div><div class="hub-card-name">Work Projects</div><div class="hub-card-sub" id="hub-work-proj-sub">Wig projects &amp; tasks</div></div>
-    <div class="hub-card span2" onclick="goTab('loreal',null)" style="background:linear-gradient(135deg,#fff0f4,#fce8f0)"><div class="hub-card-ic">💄</div><div class="hub-card-name">L'Oréal</div><div class="hub-card-sub">Reference &amp; resources</div></div>
+    <div class="hub-card span2" onclick="goTab('loreal',null)" style="background:linear-gradient(135deg,#fff0f4,#fce8f0)"><div class="hub-card-ic">💄</div><div class="hub-card-name">Fragrance &amp; Beauty</div><div class="hub-card-sub">YSL · Prada · Miu Miu</div></div>
   </div>
 </div>
 
@@ -1158,6 +1158,11 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     </div>
     <div class="kevents-strip" id="keventsStrip"></div>
   </div>
+  <!-- ADHD escape hatch -->
+  <div style="display:flex;gap:8px;margin-bottom:10px">
+    <button onclick="openOneThingMode()" style="flex:1;padding:11px 14px;border-radius:13px;border:none;background:linear-gradient(135deg,#e8e0f8,#d8d0f0);font-family:'Quicksand',sans-serif;font-size:13px;font-weight:700;color:#5a4a80;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 2px 8px rgba(100,80,160,.15)">😵 Just One Thing</button>
+    <button onclick="openDayWrapUp()" style="flex:1;padding:11px 14px;border-radius:13px;border:none;background:linear-gradient(135deg,#f8f0d8,#f0e8c8);font-family:'Quicksand',sans-serif;font-size:13px;font-weight:700;color:#7a6020;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 2px 8px rgba(160,140,40,.12)">🌙 Wrap Up</button>
+  </div>
   <!-- Quick Add -->
   <div class="quick-add">
     <button class="qa" onclick="openM('taskModal')" style="background:linear-gradient(135deg,#f2dede,#fdf6ee)"><div class="qa-ic">➕</div><div class="qa-lb">Task</div></button>
@@ -1168,7 +1173,6 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     <button class="qa" onclick="goTab('focus-session',null)" style="background:linear-gradient(135deg,#eee8f8,#f8e8e8)"><div class="qa-ic">🎯</div><div class="qa-lb">Focus</div></button>
     <button class="qa" onclick="goTab('spirit',null);setTimeout(function(){showSpiritSec('bible',document.querySelector('#v-spirit .pn-btn:nth-child(2)'))},200)" style="background:linear-gradient(135deg,#e8f0f8,#dce8f4)"><div class="qa-ic">📖</div><div class="qa-lb">Bible</div></button>
     <button class="qa" onclick="goTab('wigs',null)" style="background:linear-gradient(135deg,#f0e8f8,#fdf0f8)"><div class="qa-ic">✂️</div><div class="qa-lb">Wigs</div></button>
-    <button class="qa" onclick="goTab('loreal',null)" style="background:linear-gradient(135deg,#fff0f4,#fce8f0)"><div class="qa-ic">💄</div><div class="qa-lb">L'Oréal</div></button>
   </div>
   <!-- Quick Stats (collapsible) -->
   <div class="card" style="padding:0;margin-bottom:10px">
@@ -1300,6 +1304,9 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
       <div id="todayPM-wrap" style="display:none"><div class="rc pm" id="todayPM"><div class="rt">🌙 PM Routine</div></div></div>
     </div>
   </div>
+
+  <!-- Work & Bills glance -->
+  <div id="todayWorkGlance" style="display:none;margin-bottom:10px"></div>
 
   <div id="todayNonDaily"></div>
   <div id="pinnedSection" style="display:none">
@@ -1631,18 +1638,14 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
   <div style="background:linear-gradient(135deg,#fff0f4,#fce8f0);border-radius:16px;padding:14px 16px;margin-bottom:14px;display:flex;align-items:center;gap:12px">
     <span style="font-size:28px">💄</span>
     <div>
-      <div style="font-family:'Playfair Display',serif;font-size:18px;color:var(--textd);font-weight:700">L'Oréal</div>
-      <div style="font-size:11px;color:var(--textl);margin-top:1px">Reference &amp; Resources</div>
+      <div style="font-family:'Playfair Display',serif;font-size:18px;color:var(--textd);font-weight:700">Fragrance &amp; Beauty</div>
+      <div style="font-size:11px;color:var(--textl);margin-top:1px">YSL · Prada · Miu Miu — Macy's &amp; Nordstrom</div>
     </div>
   </div>
-  <!-- Quick Links -->
-  <div style="font-size:11px;font-weight:700;color:var(--textl);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px">Quick Links</div>
-  <div id="lorealLinks" style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px"></div>
-  <button onclick="openLorealLinkModal(null)" style="width:100%;padding:9px;border-radius:10px;border:1.5px dashed var(--bdr);background:none;font-family:'Quicksand',sans-serif;font-size:12px;font-weight:700;cursor:pointer;color:var(--textl);margin-bottom:16px">＋ Add Link</button>
-  <!-- Reference Notes -->
+  <!-- Notes -->
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-    <span style="font-size:11px;font-weight:700;color:var(--textl);text-transform:uppercase;letter-spacing:.8px">Reference Notes</span>
-    <button onclick="openLorealNoteModal(null)" style="padding:3px 10px;border-radius:8px;border:1.5px solid var(--bdr);background:none;font-family:'Quicksand',sans-serif;font-size:11px;font-weight:700;cursor:pointer;color:var(--textd)">＋ Add Section</button>
+    <span style="font-size:11px;font-weight:700;color:var(--textl);text-transform:uppercase;letter-spacing:.8px">Notes</span>
+    <button onclick="openLorealNoteModal(null)" style="padding:3px 10px;border-radius:8px;border:1.5px solid var(--bdr);background:none;font-family:'Quicksand',sans-serif;font-size:11px;font-weight:700;cursor:pointer;color:var(--textd)">＋ Add</button>
   </div>
   <div id="lorealNotes" style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px"></div>
 </div>
@@ -4923,8 +4926,8 @@ function saveWigPrices(){ localStorage.setItem('aWigPrices',JSON.stringify(WIG_P
 var WIG_ORDERS = JSON.parse(localStorage.getItem('aWigOrders')||'[]');
 function saveWigOrders(){ localStorage.setItem('aWigOrders',JSON.stringify(WIG_ORDERS)); }
 var WIG_STEP_DEFS = [
-  {id:'s1',label:'Initial contact received',action:'form',actionLabel:'Open Questionnaire Form',actionUrl:'https://docs.google.com/forms/d/1FerTNIXIl55sxmoAHzbqQZ_U5K-IekXNVBGAADBhj8k/edit?usp=drivesdk'},
-  {id:'s2',label:'Questionnaire reviewed & pricing confirmed',action:'sheet',actionLabel:'Open Client Sheet',actionUrl:'https://docs.google.com/'},
+  {id:'s1',label:'Initial contact received',action:'form',actionLabel:'Open Questionnaire Form',actionUrl:''},
+  {id:'s2',label:'Questionnaire reviewed & pricing confirmed',action:'sheet',actionLabel:'Open Client Sheet',actionUrl:''},
   {id:'s3',label:'Accepted — down payment requested ($25)',action:'msg',actionLabel:'Copy Acceptance Message',msg:'accept'},
   {id:'s4',label:'Wig purchased / tracking confirmed',action:'msg',actionLabel:'Copy Ship-to-Me Message',msg:'shipto'},
   {id:'s5',label:'Styling in progress',action:'focus',actionLabel:'Go to Focus Session'},
@@ -5286,7 +5289,7 @@ function goTabDirect(tab,btn){
   if(tab==='mixtape')renderMixtape();
   if(tab==='places')renderPlaces();
   if(SECTION_VIEWS[tab]||tab==='emporium')renderHubPreviews(tab);
-  if(tab==='today'){ syncRoutinesToTasks(); tickSpiritRun(); renderWaterBottle(); renderTodayStatsBars(); renderWeekStats(); renderTodayMoodBtns(); renderTodayPlanBar(); }
+  if(tab==='today'){ syncRoutinesToTasks(); tickSpiritRun(); renderWaterBottle(); renderTodayStatsBars(); renderWeekStats(); renderTodayMoodBtns(); renderTodayPlanBar(); renderTodayWorkGlance(); }
   if(tab==='routines'){ syncRoutinesToTasks(); renderRtnGroups(); }
   if(tab==='hearthside'){ renderHWHubStats(); }
   if(tab==='lighthouse'){ updateLighthouseSpiritStatus(); }
@@ -6196,7 +6199,9 @@ function renderT(){
   var cats=TASK_FILTERS.cats;
   var showDone=urgs.indexOf('done')>-1;
   var urgFilter=urgs.filter(function(u){return u!=='done';});
+  var parkedCount=TASKS.filter(function(t){return t.parked&&!t.done;}).length;
   var arr=TASKS.filter(function(t){
+    if(t.parked&&!t.done)return false;
     if(showDone&&t.done)return true;
     if(t.done&&!showDone)return false;
     var urgMatch=urgFilter.length===0||urgFilter.indexOf(t.urgency||'')>-1;
@@ -6204,7 +6209,8 @@ function renderT(){
     return urgMatch&&catMatch;
   });
   arr=sortTaskArr(arr);
-  list.innerHTML=arr.length?arr.map(tHTML).join(''):'<div class="empty"><div class="emj">✨</div><p>No tasks match this filter.</p></div>';
+  var parkedBanner=parkedCount?'<div onclick="unparkAllTasks()" style="text-align:center;padding:8px;font-size:12px;color:var(--textl);cursor:pointer;border-bottom:1px solid var(--border)">🅿️ '+parkedCount+' task'+(parkedCount!==1?'s':'')+' parked — tap to restore</div>':'';
+  list.innerHTML=parkedBanner+(arr.length?arr.map(tHTML).join(''):'<div class="empty"><div class="emj">✨</div><p>No tasks match this filter.</p></div>');
   restorePanels(list);
   renderTdTasks();
   updStats();
@@ -6277,10 +6283,18 @@ function togT(id){
   var t=TASKS.find(function(t){return t.id===id;});
   if(!t)return;
   t.done=!t.done;
-  if(t.done) t.doneDate=todayStr(); else delete t.doneDate;
+  if(t.done){t.doneDate=todayStr();t.parked=false;}else delete t.doneDate;
   fbSave('tasks',id,t);
-  if(t.done){if(t.meaningful)celebrate();millieTaskTreat();if(t.repeat)setTimeout(function(){createRepeat(t);},600);checkQuestTaskCompletion(id);}
+  if(t.done){
+    if(navigator.vibrate)navigator.vibrate(50);
+    if(t.meaningful)celebrate();millieTaskTreat();if(t.repeat)setTimeout(function(){createRepeat(t);},600);checkQuestTaskCompletion(id);
+  }
   updHelmBadge();
+  renderThisWeek();
+}
+function unparkAllTasks(){
+  TASKS.forEach(function(t){if(t.parked){t.parked=false;fbSave('tasks',t.id,t);}});
+  showToast('All parked tasks restored ✓');
   renderThisWeek();
 }
 
@@ -7498,6 +7512,169 @@ function pbPickerAdd(id,title,urgency){
 function pbPickerRemove(id){
   _pbTasks=_pbTasks.filter(function(t){return t.id!==id;});
   renderPbTaskList();renderPbTaskPicker();
+}
+
+// ═══════════════════════════════════════════════
+// ONE THING MODE (escape hatch)
+// ═══════════════════════════════════════════════
+var _oneThingPool=[], _oneThingIdx=0;
+function openOneThingMode(){
+  buildCatMap();
+  var today=todayStr();
+  _oneThingPool=TASKS.filter(function(t){
+    return !t.done && !t.parked && (t.urgency==='important-urgent'||t.urgency==='important-not-urgent'||t.due===today||!t.urgency);
+  }).sort(function(a,b){
+    var order={'important-urgent':0,'important-not-urgent':1,'':2,'not-important-urgent':3,'not-important-not-urgent':4};
+    var ao=order[a.urgency||'']!==undefined?order[a.urgency||'']:2;
+    var bo=order[b.urgency||'']!==undefined?order[b.urgency||'']:2;
+    if(ao!==bo)return ao-bo;
+    if(a.due&&!b.due)return -1;if(!a.due&&b.due)return 1;
+    return 0;
+  });
+  if(!_oneThingPool.length){showToast('No active tasks — you\'re clear! 🎉');return;}
+  _oneThingIdx=0;
+  showOv('ovOneThing');
+  renderOneThingCard();
+}
+function renderOneThingCard(){
+  var t=_oneThingPool[_oneThingIdx];
+  if(!t){closeOv('ovOneThing');showToast('You\'ve seen them all! 🎉');return;}
+  var cat=catMap[t.cat]||{n:'✨ Misc',c:'var(--lav)'};
+  var etm={'<10min':'⚡ Under 10 min','<1hr':'🕐 Under an hour','half-day':'📅 Half day','full-day':'🗓️ Full day'};
+  var urgLabel={'important-urgent':'🔥 Do this now','important-not-urgent':'📌 Important','not-important-urgent':'⏰ Time-sensitive','not-important-not-urgent':'📋 When you can'}[t.urgency]||'';
+  var meta=[urgLabel,etm[t.etime]||t.etime,t.due?'Due '+t.due:''].filter(Boolean).join(' · ');
+  document.getElementById('oneThingCat').textContent=cat.n;
+  document.getElementById('oneThingTitle').textContent=t.title;
+  document.getElementById('oneThingMeta').textContent=meta;
+  document.getElementById('oneThingCounter').textContent=(_oneThingIdx+1)+' of '+_oneThingPool.length;
+  if(t.notes)document.getElementById('oneThingMeta').textContent+=t.notes?' — '+t.notes:'';
+}
+function oneThingDone(){
+  var t=_oneThingPool[_oneThingIdx];if(!t)return;
+  if(navigator.vibrate)navigator.vibrate([40,20,40]);
+  togT(t.id);
+  _oneThingPool.splice(_oneThingIdx,1);
+  if(_oneThingIdx>=_oneThingPool.length)_oneThingIdx=0;
+  if(!_oneThingPool.length){closeOv('ovOneThing');showToast('All done! 🎉');renderTodayWorkGlance();return;}
+  renderOneThingCard();
+  showToast('Done! ✓');
+  renderTodayWorkGlance();
+}
+function oneThingPark(){
+  var t=_oneThingPool[_oneThingIdx];if(!t)return;
+  t.parked=true;
+  fbSave('tasks',t.id,t);
+  _oneThingPool.splice(_oneThingIdx,1);
+  if(_oneThingIdx>=_oneThingPool.length)_oneThingIdx=0;
+  if(!_oneThingPool.length){closeOv('ovOneThing');showToast('All parked — rest up 💜');return;}
+  renderOneThingCard();
+  showToast('Parked — not lost, just resting 🅿️');
+}
+function oneThingSkip(){
+  _oneThingIdx=(_oneThingIdx+1)%_oneThingPool.length;
+  renderOneThingCard();
+}
+
+// ═══════════════════════════════════════════════
+// DAY WRAP-UP
+// ═══════════════════════════════════════════════
+function openDayWrapUp(){
+  var today=todayStr();
+  var doneTasks=TASKS.filter(function(t){return t.done&&t.doneDate===today;});
+  var totalOpen=TASKS.filter(function(t){return!t.done&&!t.parked;}).length;
+  var parked=TASKS.filter(function(t){return t.parked;}).length;
+  var monInc=INCOME.filter(function(i){return(i.created||'').startsWith(today);}).reduce(function(s,i){return s+i.amt;},0);
+  var monExp=EXPENSES.filter(function(e){return(e.created||'').startsWith(today);}).reduce(function(s,e){return s+e.amt;},0);
+  var stats=[
+    {label:'Tasks done',val:doneTasks.length,ico:'✅'},
+    {label:'Still open',val:totalOpen,ico:'📋'},
+    {label:'Income today',val:'$'+monInc.toFixed(0),ico:'💰'},
+    {label:'Spent today',val:'$'+monExp.toFixed(0),ico:'💸'},
+  ];
+  if(parked)stats.push({label:'Parked tasks',val:parked,ico:'🅿️'});
+  var msgs=['You showed up today. That\'s everything. 💜',
+    'Rest is productive. You\'ve earned it. ✨',
+    'One day at a time. Today was yours. 🌙',
+    'You did more than you think. 💜',
+    'Progress over perfection. Always. ✨'];
+  var msg=doneTasks.length>=5?'You crushed it today. Seriously. 🔥':msgs[Math.floor(Math.random()*msgs.length)];
+  var d=new Date();var days=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  document.getElementById('wrapUpDate').textContent=days[d.getDay()]+', '+today;
+  document.getElementById('wrapUpStats').innerHTML=stats.map(function(s){
+    return'<div style="background:#fff;border-radius:12px;padding:12px;text-align:center;box-shadow:0 1px 4px rgba(0,0,0,.06)">'
+      +'<div style="font-size:20px;margin-bottom:4px">'+s.ico+'</div>'
+      +'<div style="font-size:18px;font-weight:700;color:var(--textd)">'+s.val+'</div>'
+      +'<div style="font-size:10px;color:var(--textl);text-transform:uppercase;letter-spacing:.5px">'+s.label+'</div>'
+    +'</div>';
+  }).join('');
+  document.getElementById('wrapUpMsg').textContent=msg;
+  showOv('ovDayWrapUp');
+}
+
+function renderTodayWorkGlance(){
+  var el=document.getElementById('todayWorkGlance');if(!el)return;
+  var parts=[];
+  // Wig orders needing attention
+  var activeWigs=(WIG_ORDERS||[]).filter(function(o){return o.status!=='complete'&&o.status!=='archived';});
+  if(activeWigs.length){
+    var stepsTotal=activeWigs.length*9;
+    var stepsDone=activeWigs.reduce(function(s,o){return s+(o.steps||[]).filter(function(st){return st.done;}).length;},0);
+    var remaining=stepsTotal-stepsDone;
+    parts.push({
+      icon:'✂️',
+      label:activeWigs.length+' wig order'+(activeWigs.length!==1?'s':'')+' active',
+      sub:remaining+' step'+(remaining!==1?'s':'')+' remaining',
+      action:"goTab('wigs',null)",
+      color:'var(--lav)'
+    });
+  }
+  // Bills due within 7 days
+  var today=todayStr();
+  var in7=new Date();in7.setDate(in7.getDate()+7);
+  var in7str=in7.toISOString().slice(0,10);
+  var mon=getMonStr();
+  var paid=BILL_PAY[mon]||{};
+  var dueSoon=(BILLS||[]).filter(function(b){
+    if(!b.due)return false;
+    var s=paid[b.id]||'';
+    if(s==='posted'||s==='paid')return false;
+    return b.due>=today&&b.due<=in7str;
+  });
+  var overdue=(BILLS||[]).filter(function(b){
+    if(!b.due)return false;
+    var s=paid[b.id]||'';
+    if(s==='posted'||s==='paid')return false;
+    return b.due<today;
+  });
+  if(overdue.length){
+    parts.push({
+      icon:'🚨',
+      label:overdue.length+' bill'+(overdue.length!==1?'s':'')+' overdue',
+      sub:overdue.map(function(b){return b.name;}).join(', '),
+      action:"goTab('money',null);setTimeout(function(){showMoneySec('bills',document.querySelector('#v-money .pn-btn[data-sec=bills]'))},200)",
+      color:'var(--ured)'
+    });
+  } else if(dueSoon.length){
+    parts.push({
+      icon:'🏦',
+      label:dueSoon.length+' bill'+(dueSoon.length!==1?'s':'')+' due soon',
+      sub:dueSoon.map(function(b){return b.name+(b.due?' ('+b.due.slice(5)+')':'');}).join(', '),
+      action:"goTab('money',null);setTimeout(function(){showMoneySec('bills',document.querySelector('#v-money .pn-btn[data-sec=bills]'))},200)",
+      color:'var(--accent)'
+    });
+  }
+  if(!parts.length){el.style.display='none';return;}
+  el.style.display='';
+  el.innerHTML=parts.map(function(p){
+    return'<div onclick="'+p.action+'" style="display:flex;align-items:center;gap:12px;background:#fff;border-radius:13px;padding:11px 14px;box-shadow:0 1px 4px rgba(0,0,0,.06);cursor:pointer;border-left:4px solid '+p.color+';margin-bottom:8px">'
+      +'<span style="font-size:20px;flex-shrink:0">'+p.icon+'</span>'
+      +'<div style="flex:1;min-width:0">'
+        +'<div style="font-size:13px;font-weight:700;color:var(--textd)">'+p.label+'</div>'
+        +'<div style="font-size:11px;color:var(--textl);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+p.sub+'</div>'
+      +'</div>'
+      +'<span style="font-size:12px;color:var(--textl);flex-shrink:0">→</span>'
+    +'</div>';
+  }).join('');
 }
 
 function renderTodayPlanBar(){
@@ -19649,8 +19826,12 @@ function openWigOrderDetail(id){
       +'<div style="font-size:13px;font-weight:'+(isActive?'700':'500')+';color:'+(step.done?'var(--textl)':'var(--textd)')+';'+(step.done?'text-decoration:line-through':'')+'">'+(i+1)+'. '+escHtml(def.label)+'</div>';
     if(!step.done&&def.action){
       var btnStyle='margin-top:5px;padding:4px 10px;border-radius:7px;border:1.5px solid;background:none;font-size:11px;font-weight:700;cursor:pointer;font-family:\'Quicksand\',sans-serif;';
-      if(def.action==='form'||def.action==='sheet'){
-        html+='<button onclick="window.open(\''+def.actionUrl+'\',\'_blank\')" style="'+btnStyle+'border-color:var(--lav);color:var(--lav)">🔗 '+escHtml(def.actionLabel)+'</button>';
+      if(def.action==='form'){
+        html+='<button onclick="openWigFormUrl()" style="'+btnStyle+'border-color:var(--lav);color:var(--lav)">🔗 '+escHtml(def.actionLabel)+'</button>'
+          +'<button onclick="editWigFormUrl()" style="'+btnStyle+'border-color:var(--bdr);color:var(--textl);margin-left:4px">✏️ Edit URL</button>';
+      } else if(def.action==='sheet'){
+        html+='<button onclick="openWigClientSheet()" style="'+btnStyle+'border-color:var(--lav);color:var(--lav)">🔗 '+escHtml(def.actionLabel)+'</button>'
+          +'<button onclick="editWigSheetUrl()" style="'+btnStyle+'border-color:var(--bdr);color:var(--textl);margin-left:4px">✏️ Edit URL</button>';
       } else if(def.action==='msg'){
         html+='<button onclick="copyWigMsg(\''+def.msg+'\',\''+id+'\')" style="'+btnStyle+'border-color:var(--sage);color:#3a6a3a">📋 '+escHtml(def.actionLabel)+'</button>';
       } else if(def.action==='income'){
@@ -19778,6 +19959,38 @@ function copyWigInvoice(orderId){
     showToast('Invoice copied 📄');
   }
 }
+function openWigFormUrl(){
+  var url=localStorage.getItem('aWigFormUrl')||'';
+  if(!url){
+    url=prompt('Paste your Questionnaire Form URL:','');
+    if(!url)return;
+    localStorage.setItem('aWigFormUrl',url.trim());
+  }
+  window.open(url,'_blank');
+}
+function editWigFormUrl(){
+  var cur=localStorage.getItem('aWigFormUrl')||'';
+  var url=prompt('Questionnaire Form URL:',cur);
+  if(url===null)return;
+  localStorage.setItem('aWigFormUrl',url.trim());
+  showToast('Form URL saved ✓');
+}
+function openWigClientSheet(){
+  var url=localStorage.getItem('aWigSheetUrl')||'';
+  if(!url){
+    url=prompt('Paste your Google Sheet URL:','');
+    if(!url)return;
+    localStorage.setItem('aWigSheetUrl',url.trim());
+  }
+  window.open(url,'_blank');
+}
+function editWigSheetUrl(){
+  var cur=localStorage.getItem('aWigSheetUrl')||'';
+  var url=prompt('Client Sheet URL (your Google Drive sheet):',cur);
+  if(url===null)return;
+  localStorage.setItem('aWigSheetUrl',url.trim());
+  showToast('Sheet URL saved ✓');
+}
 function archiveWigOrder(id){
   var order=WIG_ORDERS.find(function(o){return o.id===id;});if(!order)return;
   order.status='archived';saveWigOrders();
@@ -19830,37 +20043,18 @@ function addWigToList(){
 // ═══════════════════════════════════════════════
 // L'OREAL REFERENCE PAGE
 // ═══════════════════════════════════════════════
-var LOREAL_LINKS = JSON.parse(localStorage.getItem('aLorealLinks')||'null')||[
-  {id:'ll1',label:'L\'Oréal Pro Portal',url:'https://www.lorealpartner.com',icon:'🌐'},
-  {id:'ll2',label:'SalonCentric',url:'https://www.saloncentric.com',icon:'🏪'},
-  {id:'ll3',label:'L\'Oréal Access (Training)',url:'https://www.lorealprofessionnel-usa.com',icon:'🎓'},
-  {id:'ll4',label:'Color Zap / Shade Chart',url:'https://www.lorealpartner.com',icon:'🎨'}
-];
-function saveLorealLinks(){ localStorage.setItem('aLorealLinks',JSON.stringify(LOREAL_LINKS)); }
-
 var LOREAL_NOTES = JSON.parse(localStorage.getItem('aLorealNotes')||'null')||[
-  {id:'ln1',title:'Color Notes',body:'Add your go-to formulas, ratios, and color tips here.'},
-  {id:'ln2',title:'Service Menu',body:'List your services and pricing for quick reference.'},
-  {id:'ln3',title:'Product Faves',body:'Note your must-have products and why you love them.'}
+  {id:'ln1',title:'YSL Fragrances',body:'Black Opium, Libre, Mon Paris, Myself, Y…\nAdd your notes on top sellers, scent profiles, and who to recommend them to.'},
+  {id:'ln2',title:'YSL Makeup',body:'Rouge Pur Couture, Touche Éclat, All Hours…\nAdd your product knowledge, application tips, and best sellers.'},
+  {id:'ln3',title:'Prada Fragrances',body:'Paradoxe, Candy, Luna Rossa, L\'Homme…\nAdd your notes on the line, scent families, and layering suggestions.'},
+  {id:'ln4',title:'Miu Miu Fragrances',body:'Miu Miu EDP, L\'Eau Rosée, Twist…\nAdd notes on the collection and client pairings.'},
+  {id:'ln5',title:'Macy\'s Notes',body:'Counter info, events, goals, and anything specific to this location.'},
+  {id:'ln6',title:'Nordstrom Notes',body:'Counter info, events, goals, and anything specific to this location.'}
 ];
 function saveLorealNotes(){ localStorage.setItem('aLorealNotes',JSON.stringify(LOREAL_NOTES)); }
 
 function renderLorealPage(){
-  renderLorealLinks();
   renderLorealNotes();
-}
-
-function renderLorealLinks(){
-  var el=document.getElementById('lorealLinks');if(!el)return;
-  if(!LOREAL_LINKS.length){el.innerHTML='<div style="color:var(--textl);font-size:13px;padding:4px 0">No links yet — add one below.</div>';return;}
-  el.innerHTML=LOREAL_LINKS.map(function(lk){
-    return'<div style="display:flex;align-items:center;gap:10px;background:#fff;border-radius:12px;padding:10px 14px;border:1.5px solid var(--bdr);box-shadow:0 1px 3px rgba(0,0,0,.04)">'
-      +'<span style="font-size:18px;flex-shrink:0">'+(lk.icon||'🔗')+'</span>'
-      +'<a href="'+escHtml(lk.url)+'" target="_blank" rel="noopener" style="flex:1;font-size:13px;font-weight:700;color:var(--textd);text-decoration:none">'+escHtml(lk.label)+'</a>'
-      +'<button onclick="openLorealLinkModal(\''+lk.id+'\')" style="background:none;border:none;font-size:13px;cursor:pointer;color:var(--textl);padding:3px 6px">✏️</button>'
-      +'<button onclick="delLorealLink(\''+lk.id+'\')" style="background:none;border:none;font-size:13px;cursor:pointer;color:var(--textl);padding:3px 6px">🗑️</button>'
-    +'</div>';
-  }).join('');
 }
 
 function renderLorealNotes(){
@@ -19878,40 +20072,6 @@ function renderLorealNotes(){
       +'<div style="padding:10px 14px;font-size:13px;color:var(--textd);white-space:pre-wrap;line-height:1.5">'+escHtml(n.body)+'</div>'
     +'</div>';
   }).join('');
-}
-
-function openLorealLinkModal(id){
-  var lk=id?LOREAL_LINKS.find(function(l){return l.id===id;}):null;
-  showOv('ovLorealLink');
-  document.getElementById('lorealLinkId').value=id||'';
-  document.getElementById('lorealLinkIcon').value=lk?lk.icon||'🔗':'🔗';
-  document.getElementById('lorealLinkLabel').value=lk?lk.label:'';
-  document.getElementById('lorealLinkUrl').value=lk?lk.url:'https://';
-}
-
-function saveLorealLink(){
-  var id=document.getElementById('lorealLinkId').value;
-  var icon=document.getElementById('lorealLinkIcon').value.trim()||'🔗';
-  var label=document.getElementById('lorealLinkLabel').value.trim();
-  var url=document.getElementById('lorealLinkUrl').value.trim();
-  if(!label||!url){showToast('Label and URL are required');return;}
-  if(id){
-    var lk=LOREAL_LINKS.find(function(l){return l.id===id;});
-    if(lk){lk.icon=icon;lk.label=label;lk.url=url;}
-  } else {
-    LOREAL_LINKS.push({id:'ll'+Date.now(),icon:icon,label:label,url:url});
-  }
-  saveLorealLinks();
-  closeOv('ovLorealLink');
-  renderLorealLinks();
-  showToast('Link saved 💄');
-}
-
-function delLorealLink(id){
-  if(!confirm('Delete this link?'))return;
-  LOREAL_LINKS=LOREAL_LINKS.filter(function(l){return l.id!==id;});
-  saveLorealLinks();
-  renderLorealLinks();
 }
 
 function openLorealNoteModal(id){
@@ -21514,26 +21674,7 @@ function delProjInc(id){
   </div>
 </div>
 
-<!-- L'Oreal Link Editor -->
-<div class="ov" id="ovLorealLink" onclick="closeOv('ovLorealLink')">
-  <div class="ov-box" onclick="event.stopPropagation()">
-    <div class="mh"><span class="mt">💄 Edit Link</span><button class="mc" onclick="closeOv('ovLorealLink')">✕</button></div>
-    <input type="hidden" id="lorealLinkId">
-    <div style="display:grid;grid-template-columns:56px 1fr;gap:8px;margin-bottom:10px">
-      <div>
-        <div style="font-size:11px;font-weight:700;color:var(--textl);margin-bottom:4px">Icon</div>
-        <input id="lorealLinkIcon" class="fi" style="width:100%;text-align:center;font-size:18px;padding:8px 4px;margin-bottom:0" maxlength="4" placeholder="🔗">
-      </div>
-      <div>
-        <div style="font-size:11px;font-weight:700;color:var(--textl);margin-bottom:4px">Label</div>
-        <input id="lorealLinkLabel" class="fi" placeholder="e.g. SalonCentric" style="margin-bottom:0">
-      </div>
-    </div>
-    <div style="font-size:11px;font-weight:700;color:var(--textl);margin-bottom:4px">URL</div>
-    <input id="lorealLinkUrl" class="fi" type="url" placeholder="https://..." style="margin-bottom:14px">
-    <button class="ok-btn" style="width:100%;margin:0" onclick="saveLorealLink()">Save Link</button>
-  </div>
-</div>
+
 
 <!-- L'Oreal Note Editor -->
 <div class="ov" id="ovLorealNote" onclick="closeOv('ovLorealNote')">
@@ -21541,10 +21682,47 @@ function delProjInc(id){
     <div class="mh"><span class="mt">💄 Note Section</span><button class="mc" onclick="closeOv('ovLorealNote')">✕</button></div>
     <input type="hidden" id="lorealNoteId">
     <div style="font-size:11px;font-weight:700;color:var(--textl);margin-bottom:4px">Title</div>
-    <input id="lorealNoteTitle" class="fi" placeholder="e.g. Color Notes" style="margin-bottom:10px">
+    <input id="lorealNoteTitle" class="fi" placeholder="e.g. YSL Fragrances" style="margin-bottom:10px">
     <div style="font-size:11px;font-weight:700;color:var(--textl);margin-bottom:4px">Notes</div>
     <textarea id="lorealNoteBody" class="fi" rows="7" placeholder="Write your reference notes here…" style="width:100%;resize:vertical;box-sizing:border-box;margin-bottom:14px"></textarea>
     <button class="ok-btn" style="width:100%;margin:0" onclick="saveLorealNote()">Save</button>
+  </div>
+</div>
+
+<!-- ONE THING MODE -->
+<div class="ov" id="ovOneThing" onclick="closeOv('ovOneThing')" style="align-items:flex-end;padding:0">
+  <div onclick="event.stopPropagation()" style="width:100%;max-width:480px;background:#fff;border-radius:24px 24px 0 0;padding:24px 20px 32px;box-shadow:0 -8px 32px rgba(0,0,0,.12)">
+    <div style="text-align:center;margin-bottom:6px">
+      <div style="width:36px;height:4px;background:#e0d8f0;border-radius:2px;margin:0 auto 18px"></div>
+      <div style="font-size:11px;font-weight:700;color:var(--textl);text-transform:uppercase;letter-spacing:.8px;margin-bottom:4px">Just focus on this</div>
+      <div id="oneThingCounter" style="font-size:10px;color:var(--textl)"></div>
+    </div>
+    <div id="oneThingCard" style="background:linear-gradient(135deg,#f0ecf8,#e8e4f4);border-radius:18px;padding:20px;margin-bottom:20px;min-height:100px;display:flex;flex-direction:column;justify-content:center">
+      <div id="oneThingCat" style="font-size:11px;font-weight:700;color:var(--lav);margin-bottom:8px"></div>
+      <div id="oneThingTitle" style="font-size:20px;font-weight:700;color:var(--textd);line-height:1.3;margin-bottom:10px"></div>
+      <div id="oneThingMeta" style="font-size:12px;color:var(--textl)"></div>
+    </div>
+    <div style="display:flex;gap:10px;margin-bottom:12px">
+      <button onclick="oneThingDone()" style="flex:1;padding:14px;border-radius:14px;border:none;background:linear-gradient(135deg,var(--sage),var(--teal));font-family:'Quicksand',sans-serif;font-size:14px;font-weight:700;color:#fff;cursor:pointer">✓ Done</button>
+      <button onclick="oneThingPark()" style="padding:14px 16px;border-radius:14px;border:1.5px solid var(--bdr);background:#fff;font-family:'Quicksand',sans-serif;font-size:13px;font-weight:700;color:var(--textl);cursor:pointer" title="Park it — snooze for later">🅿️</button>
+      <button onclick="oneThingSkip()" style="padding:14px 16px;border-radius:14px;border:1.5px solid var(--bdr);background:#fff;font-family:'Quicksand',sans-serif;font-size:20px;cursor:pointer" title="Show me another one">→</button>
+    </div>
+    <button onclick="closeOv('ovOneThing')" style="width:100%;padding:11px;border-radius:12px;border:1.5px solid var(--bdr);background:none;font-family:'Quicksand',sans-serif;font-size:13px;font-weight:700;color:var(--textl);cursor:pointer">I need a break 💜</button>
+  </div>
+</div>
+
+<!-- DAY WRAP-UP -->
+<div class="ov" id="ovDayWrapUp" onclick="closeOv('ovDayWrapUp')" style="align-items:flex-end;padding:0">
+  <div onclick="event.stopPropagation()" style="width:100%;max-width:480px;background:linear-gradient(180deg,#fff8e8,#fff);border-radius:24px 24px 0 0;padding:24px 20px 32px;box-shadow:0 -8px 32px rgba(0,0,0,.12)">
+    <div style="text-align:center;margin-bottom:20px">
+      <div style="width:36px;height:4px;background:#f0e0a0;border-radius:2px;margin:0 auto 18px"></div>
+      <div style="font-size:28px;margin-bottom:6px">🌙</div>
+      <div style="font-family:'Playfair Display',serif;font-size:20px;color:var(--textd);font-weight:700;margin-bottom:4px">Day Wrap-Up</div>
+      <div id="wrapUpDate" style="font-size:12px;color:var(--textl)"></div>
+    </div>
+    <div id="wrapUpStats" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px"></div>
+    <div id="wrapUpMsg" style="background:linear-gradient(135deg,#fff8e8,#fef4dc);border-radius:14px;padding:14px 16px;font-size:14px;color:var(--textd);line-height:1.5;text-align:center;margin-bottom:18px;font-style:italic"></div>
+    <button onclick="closeOv('ovDayWrapUp')" style="width:100%;padding:13px;border-radius:14px;border:none;background:linear-gradient(135deg,#f0c840,#d4a820);font-family:'Quicksand',sans-serif;font-size:14px;font-weight:700;color:#fff;cursor:pointer">✨ Good work today</button>
   </div>
 </div>
 
