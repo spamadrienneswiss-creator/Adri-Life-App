@@ -1161,7 +1161,7 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
   <div class="quick-add">
     <button class="qa" onclick="openM('taskModal')" style="background:linear-gradient(135deg,#f2dede,#fdf6ee)"><div class="qa-ic">➕</div><div class="qa-lb">Task</div></button>
     <button class="qa" onclick="openM('expModal')" style="background:linear-gradient(135deg,#f5e8d8,#fdf6ee)"><div class="qa-ic">💸</div><div class="qa-lb">Expense</div></button>
-    <button class="qa" onclick="openFoodLibPick()" style="background:linear-gradient(135deg,#e8f0e8,#fdf6ee)"><div class="qa-ic">🍽️</div><div class="qa-lb">Food</div></button>
+    <button class="qa" onclick="openM('fwModal')" style="background:linear-gradient(135deg,#e8f0e8,#fdf6ee)"><div class="qa-ic">🍽️</div><div class="qa-lb">Food</div></button>
     <button class="qa" onclick="openM('stepModal')" style="background:linear-gradient(135deg,#e8eef8,#fdf6ee)"><div class="qa-ic">👟</div><div class="qa-lb">Move</div></button>
     <button class="qa" onclick="openGroceryQuick()" style="background:linear-gradient(135deg,#e8f4e8,#fdf6ee)"><div class="qa-ic">🛒</div><div class="qa-lb">Grocery</div></button>
     <button class="qa" onclick="goTab('focus-session',null)" style="background:linear-gradient(135deg,#eee8f8,#f8e8e8)"><div class="qa-ic">🎯</div><div class="qa-lb">Focus</div></button>
@@ -7422,9 +7422,24 @@ function srchFood(q){
 function srchFW(q){
   var s=document.getElementById('fwSugs');
   if(!q){s.style.display='none';return;}
-  var m=FDB.filter(function(f){return f.name.toLowerCase().indexOf(q.toLowerCase())>-1;});
+  var ql=q.toLowerCase();
+  var m=FDB.filter(function(f){return f.name.toLowerCase().indexOf(ql)>-1;});
+  // Also search FOOD_DB (ingredient library) — show items not already in FDB results
+  var fdbIds=m.map(function(f){return f.id;});
+  var libMatches=(FOOD_DB||[]).filter(function(f){
+    return f.name.toLowerCase().indexOf(ql)>-1 && fdbIds.indexOf(f.id)<0;
+  });
+  var fdbRows=m.map(function(f){return'<div class="fsug" onclick="addFL(\''+f.id+'\');closeM(\'fwModal\')"><div class="fsn">'+escHtml(f.name)+'</div><div class="fsm">'+(f.sv||'1 srv')+' · '+f.cal+' cal</div></div>';}).join('');
+  var libRows=libMatches.map(function(f){
+    var svGrams=(f.servings&&f.servings.length)?f.servings[0].grams:100;
+    var svLabel=(f.servings&&f.servings.length)?f.servings[0].label:'100g';
+    var cal=f.per100&&f.per100.cal!=null?Math.round(f.per100.cal*svGrams/100):(f.cal||0);
+    return'<div class="fsug" onclick="addFLFromLib(\''+f.id+'\');closeM(\'fwModal\')"><div class="fsn">'+escHtml(f.name)+(f.brand?'<span style=\"font-size:10px;color:var(--textl)\"> · '+escHtml(f.brand)+'</span>':'')+'</div><div class="fsm">'+escHtml(svLabel)+' · '+cal+' cal <span style=\"color:var(--sage);font-size:10px\">📚 library</span></div></div>';
+  }).join('');
   s.style.display='block';
-  s.innerHTML=m.map(function(f){return'<div class="fsug" onclick="addFL(\''+f.id+'\');closeM(\'fwModal\')"><div class="fsn">'+f.name+'</div><div class="fsm">'+(f.sv||'1 srv')+' • '+f.cal+' cal</div></div>';}).join('')+'<div class="f-anew" onclick="openM(\'nfModal\')">➕ Add new food</div>';
+  s.innerHTML=fdbRows+libRows
+    +'<div class="f-anew" onclick="logFoodManual(\''+escHtml(q)+'\')">📝 Log "'+escHtml(q)+'" manually</div>'
+    +'<div class="f-anew" onclick="openM(\'nfModal\')">➕ Add new food to database</div>';
 }
 
 function addFL(id){
@@ -7437,6 +7452,56 @@ function addFL(id){
   document.getElementById('foodSrch').value='';
   document.getElementById('foodSugs').style.display='none';
   renderFL();updM();
+}
+function addFLFromLib(id){
+  // Log a FOOD_DB library item using its first serving size / myUsual defaults
+  var item=(FOOD_DB||[]).find(function(f){return f.id===id;});
+  if(!item)return;
+  var sv=(item.servings&&item.servings.length)?item.servings[0]:{id:'100g',label:'100g',grams:100};
+  if(item.myUsual&&item.myUsual.svId){
+    var ms=(item.servings||[]).find(function(s){return s.id===item.myUsual.svId;});
+    if(ms)sv=ms;
+  }
+  var qty=(item.myUsual&&item.myUsual.qty)?parseFloat(item.myUsual.qty):1;
+  var n=calcNutFromLib(item,sv.grams,qty);
+  addFoodFromLib(item.name,n.cal,n.pro,n.carb,n.fat);
+  showToast(item.name+' logged ✨');
+  renderTodayStatsBars();
+}
+function logFoodManual(prefill){
+  // Inline manual log form — shown below search box
+  var sec=document.getElementById('foodSec');
+  if(!sec)return;
+  var existing=document.getElementById('fwManualForm');
+  if(existing){existing.remove();return;}
+  var form=document.createElement('div');
+  form.id='fwManualForm';
+  form.style.cssText='border:1.5px solid var(--bdr);border-radius:12px;padding:10px 12px;margin-top:8px';
+  form.innerHTML='<div style="font-size:11px;font-weight:700;color:var(--textl);margin-bottom:8px">📝 Log manually</div>'
+    +'<input class="fi" id="fwManName" placeholder="Food name" value="'+escHtml(prefill||'')+'" style="margin-bottom:6px">'
+    +'<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:6px;margin-bottom:8px">'
+    +'<input class="fi" id="fwManCal" type="number" placeholder="Cal" min="0">'
+    +'<input class="fi" id="fwManPro" type="number" placeholder="Pro g" min="0">'
+    +'<input class="fi" id="fwManCarb" type="number" placeholder="Carb g" min="0">'
+    +'<input class="fi" id="fwManFat" type="number" placeholder="Fat g" min="0">'
+    +'</div>'
+    +'<button class="ok-btn" style="width:100%;margin:0" onclick="saveManualFoodLog()">Log It ✨</button>';
+  sec.appendChild(form);
+}
+function saveManualFoodLog(){
+  var name=((document.getElementById('fwManName')||{}).value||'').trim();
+  if(!name){showToast('Enter a food name');return;}
+  var cal=parseFloat((document.getElementById('fwManCal')||{}).value)||0;
+  var pro=parseFloat((document.getElementById('fwManPro')||{}).value)||0;
+  var carb=parseFloat((document.getElementById('fwManCarb')||{}).value)||0;
+  var fat=parseFloat((document.getElementById('fwManFat')||{}).value)||0;
+  var k=getTK();
+  if(!FL[k])FL[k]=[];
+  FL[k].push({lid:Date.now().toString(),name:name,cal:cal,pro:pro,crb:carb,fat:fat,fib:0,sv:'1 serving'});
+  localStorage.setItem('aFL',JSON.stringify(FL));
+  closeM('fwModal');
+  renderFL();updM();renderTodayStatsBars();
+  showToast(name+' logged ✨');
 }
 
 function delFL(lid){
