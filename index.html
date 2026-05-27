@@ -1153,7 +1153,7 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
   <div class="quick-add">
     <button class="qa" onclick="openM('taskModal')" style="background:linear-gradient(135deg,#f2dede,#fdf6ee)"><div class="qa-ic">➕</div><div class="qa-lb">Task</div></button>
     <button class="qa" onclick="openM('expModal')" style="background:linear-gradient(135deg,#f5e8d8,#fdf6ee)"><div class="qa-ic">💸</div><div class="qa-lb">Expense</div></button>
-    <button class="qa" onclick="openM('fwModal')" style="background:linear-gradient(135deg,#e8f0e8,#fdf6ee)"><div class="qa-ic">🍽️</div><div class="qa-lb">Food</div></button>
+    <button class="qa" onclick="openFoodLibPick()" style="background:linear-gradient(135deg,#e8f0e8,#fdf6ee)"><div class="qa-ic">🍽️</div><div class="qa-lb">Food</div></button>
     <button class="qa" onclick="openM('stepModal')" style="background:linear-gradient(135deg,#e8eef8,#fdf6ee)"><div class="qa-ic">👟</div><div class="qa-lb">Move</div></button>
     <button class="qa" onclick="openGroceryQuick()" style="background:linear-gradient(135deg,#e8f4e8,#fdf6ee)"><div class="qa-ic">🛒</div><div class="qa-lb">Grocery</div></button>
     <button class="qa" onclick="goTab('focus-session',null)" style="background:linear-gradient(135deg,#eee8f8,#f8e8e8)"><div class="qa-ic">🎯</div><div class="qa-lb">Focus</div></button>
@@ -6272,7 +6272,15 @@ function updStats(){
 // ═══════════════════════════════════════════════
 function getTK(){return new Date().toDateString();}
 function getTL(){return FL[getTK()]||[];}
-function getTot(){return getTL().reduce(function(a,i){a.cal+=i.cal||0;a.pro+=i.pro||0;a.fib+=i.fib||0;a.crb+=i.crb||0;a.fat+=i.fat||0;return a;},{cal:0,pro:0,fib:0,crb:0,fat:0});}
+function getTot(){
+  var base=getTL().reduce(function(a,i){a.cal+=i.cal||0;a.pro+=i.pro||0;a.fib+=i.fib||0;a.crb+=i.crb||0;a.fat+=i.fat||0;return a;},{cal:0,pro:0,fib:0,crb:0,fat:0});
+  // Also include today's meal log items (Phase 5 library-logged entries)
+  var td=todayStr();
+  (MEAL_LOG_ITEMS||[]).filter(function(m){return m.date===td&&(m.cal||m.pro||m.carb||m.fat);}).forEach(function(m){
+    base.cal+=m.cal||0; base.pro+=m.pro||0; base.fib+=m.fiber||0; base.crb+=m.carb||0; base.fat+=m.fat||0;
+  });
+  return base;
+}
 function getW(){return WL[getTK()]||0;}
 
 function logWat(){
@@ -6375,7 +6383,7 @@ function renderTodayStatsBars(){
       var sleptDate=lastSleep.slept?new Date(lastSleep.slept).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'}):'';
       el.textContent=h+'h '+(m<10?'0':'')+m+'m'+(sleptDate?' · '+sleptDate:'');
       var sleepEl=document.getElementById('tSleepB');
-      if(sleepEl)sleepEl.style.width=pct(h+(m/60),9); // 9h ideal
+      if(sleepEl)sleepEl.style.width=pct(h+(m/60),(S&&S.gSleep)||7);
     } else { el.textContent='No sleep logged'; }
   }
   // ministry this month
@@ -6416,9 +6424,15 @@ function renderWeekStats(){
   // Ministry this week
   var minHrs=MINISTRY_LOG.filter(function(m){return weekIso.indexOf(m.date)>-1;}).reduce(function(s,m){return s+(m.hours||0);},0);
 
-  // Food averages over days with any data
+  // Food averages over days with any data (FL old log + MEAL_LOG_ITEMS new log)
   function foodAvg(key){
-    var vals=days.map(function(d){var items=FL[d]||[];return items.reduce(function(s,f){return s+(f[key]||0);},0);});
+    var mlKey={cal:'cal',pro:'pro',fib:'fiber',crb:'carb',fat:'fat'}[key]||key;
+    var vals=weekIso.map(function(iso){
+      var d=new Date(iso).toDateString();
+      var flTotal=(FL[d]||[]).reduce(function(s,f){return s+(f[key]||0);},0);
+      var mlTotal=(MEAL_LOG_ITEMS||[]).filter(function(m){return m.date===iso;}).reduce(function(s,m){return s+(m[mlKey]||0);},0);
+      return flTotal+mlTotal;
+    });
     var nz=vals.filter(function(v){return v>0;});
     return nz.length?Math.round(nz.reduce(function(s,v){return s+v;},0)/nz.length):0;
   }
