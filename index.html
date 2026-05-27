@@ -812,7 +812,10 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
 
 /* ── BUNKER OVERRIDE — Lost/DHARMA aesthetic scoped to #ovHatch ── */
 #ovHatch{background:#070d07}
-#ovHatch::after{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.12) 2px,rgba(0,0,0,.12) 4px);pointer-events:none;z-index:10001}
+/* Scanlines — thin, slightly more visible */
+#ovHatch::after{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 1px,rgba(0,0,0,.18) 1px,rgba(0,0,0,.18) 2px);pointer-events:none;z-index:10001}
+/* CRT vignette — dark at all edges, lighter in center */
+#ovHatch::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 85% 85% at 50% 50%,transparent 60%,rgba(0,0,0,.55) 100%);pointer-events:none;z-index:10001}
 #ovHatch .hatch-wrap{position:relative;z-index:10002}
 #ovHatch .hatch-logo{font-family:'Courier New',monospace;font-size:11px;letter-spacing:2.5px;text-transform:uppercase;color:#3fc820;text-shadow:0 0 10px rgba(63,200,32,.6);font-weight:400}
 #ovHatch .hatch-close-btn,#ovHatch .hatch-back-btn{color:#1a6a10;font-family:'Courier New',monospace;font-size:12px}
@@ -842,7 +845,14 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
 #ovHatch .hatch-spa-item{background:#0c140c;color:#3fc820;font-family:'Courier New',monospace;border:1px solid #142814;box-shadow:none;border-radius:4px}
 #ovHatch .hatch-breathe-ring{border-color:#3fc820;color:#3fc820;font-family:'Courier New',monospace}
 #ovHatch .hatch-breathe-ring.inhale{background:rgba(63,200,32,.07);border-color:#5fd840}
-#ovHatch .hatch-cursor{background:#3fc820}
+/* Chunky block cursor — Commodore/Apple II style */
+#ovHatch .hatch-cursor{background:#3fc820;width:9px;height:16px;display:inline-block;vertical-align:middle;margin-left:3px;border-radius:0;animation:crt-blink 1.1s step-end infinite;box-shadow:0 0 6px rgba(63,200,32,.7)}
+@keyframes crt-blink{0%,49%{opacity:1}50%,100%{opacity:0}}
+/* Boot sequence */
+#hBootSeq{position:absolute;inset:0;z-index:10003;display:flex;flex-direction:column;justify-content:center;padding:32px 24px;pointer-events:none}
+#hBootLines{font-family:'Courier New',monospace;font-size:12px;color:#3fc820;line-height:2;letter-spacing:.5px;text-shadow:0 0 5px rgba(63,200,32,.4)}
+#hBootLines .boot-line{display:block;overflow:hidden;white-space:nowrap}
+#hBootLines .boot-dim{color:#1a5010}
 #ovHatch textarea,.fi-bunker{background:#0c140c!important;color:#3fc820!important;border-color:#142814!important;font-family:'Courier New',monospace!important;border-radius:4px!important}
 /* Cast card — amber instead of green for variety */
 #ovHatch .cast-card{background:#100e06;border:1px solid #2a2406;border-radius:6px;padding:22px 20px;margin-bottom:14px;box-shadow:inset 0 0 16px rgba(0,0,0,.4),0 0 8px rgba(200,160,32,.03)}
@@ -7815,7 +7825,47 @@ function otSkip(){_otIdx=(_otIdx+1)%_otPool.length;_renderOTCard();}
 
 function openHatch(){
   var h=document.getElementById('ovHatch');if(h)h.classList.add('open');
-  hatchMode('selector');
+  var bootEl=document.getElementById('hBootSeq');
+  var linesEl=document.getElementById('hBootLines');
+  var wrap=document.getElementById('hatch-panels-wrap');
+  if(!bootEl||!linesEl){hatchMode('selector');return;}
+  // Hide panels, show boot
+  if(wrap)wrap.style.visibility='hidden';
+  bootEl.style.display='flex';linesEl.innerHTML='';
+  var lines=[
+    {t:'DHARMA INITIATIVE — STATION SWAN',d:0},
+    {t:'&nbsp;',d:120},
+    {t:'SYSTEM CHECK.............. OK',d:200},
+    {t:'ELECTROMAGNETIC CONTAINMENT... NOMINAL',d:380},
+    {t:'LOADING TACTICAL PROTOCOLS......',d:560},
+    {t:'ACCESSING CHARACTER ARCHIVE... OK',d:740},
+    {t:'COUNTDOWN RESET CONFIRMED',d:900},
+    {t:'&nbsp;',d:1020},
+    {t:'<span class="boot-dim">// DHARMA_SYSTEM v4.8.15.16.23.42</span>',d:1060},
+    {t:'ALL STATIONS ONLINE.',d:1180},
+    {t:'&nbsp;',d:1300},
+    {t:'READY<span class="hatch-cursor"></span>',d:1380}
+  ];
+  lines.forEach(function(l){
+    setTimeout(function(){
+      var span=document.createElement('span');
+      span.className='boot-line';
+      span.innerHTML=l.t;
+      linesEl.appendChild(span);
+      linesEl.scrollTop=linesEl.scrollHeight;
+    },l.d);
+  });
+  setTimeout(function(){
+    bootEl.style.transition='opacity .35s';
+    bootEl.style.opacity='0';
+    setTimeout(function(){
+      bootEl.style.display='none';
+      bootEl.style.opacity='1';
+      bootEl.style.transition='';
+      if(wrap)wrap.style.visibility='visible';
+      hatchMode('selector');
+    },360);
+  },1750);
 }
 function closeHatch(){
   _clearHatchTimers();
@@ -22547,7 +22597,13 @@ function delProjInc(id){
 
 <!-- HATCH SCREEN -->
 <canvas id="hatchCanvas"></canvas>
-<div id="ovHatch">
+<div id="ovHatch" style="position:relative">
+  <!-- Boot sequence overlay -->
+  <div id="hBootSeq" style="display:none">
+    <div id="hBootLines"></div>
+  </div>
+  <!-- All mode panels -->
+  <div id="hatch-panels-wrap">
   <div class="hatch-wrap">
     <div class="hatch-inner">
 
@@ -22713,6 +22769,7 @@ function delProjInc(id){
 
     </div>
   </div>
+  </div><!-- /hatch-panels-wrap -->
 </div>
 
 <!-- SPARK OVERLAY -->
