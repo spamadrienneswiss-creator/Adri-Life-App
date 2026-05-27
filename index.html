@@ -287,6 +287,13 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
 .list-item:last-child{border-bottom:none}
 .list-item.done .rlb{text-decoration:line-through;color:var(--textl)}
 .list-add{display:flex;gap:6px;margin-top:10px}
+/* RUN MODE */
+.run-item{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:white;border:none;border-left:4px solid var(--rose);border-radius:12px;padding:14px 12px;margin-bottom:8px;cursor:pointer;font-family:'Quicksand',sans-serif;font-size:15px;font-weight:600;color:var(--textd);box-shadow:0 1px 4px rgba(0,0,0,.06);transition:opacity .15s,background .15s}
+.run-item:active{opacity:.7}
+.run-item-done{background:#f5faf5;opacity:.65}
+.run-item-done .run-lbl{text-decoration:line-through;color:var(--textl)}
+.run-chk{width:28px;height:28px;border-radius:50%;border:2px solid var(--rose);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;flex-shrink:0}
+.run-lbl{flex:1;line-height:1.3}
 /* SETTINGS COLLAPSIBLE */
 .set-sec-t{cursor:pointer;display:flex;justify-content:space-between;align-items:center;user-select:none}
 .set-sec-t .sst-arr{font-size:12px;color:var(--textl);transition:transform .2s;flex-shrink:0}
@@ -788,6 +795,7 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
   <button class="tab-btn on" data-tab="today" onclick="goTab('today',this)">Today</button>
   <button class="tab-btn" data-tab="plan" onclick="goTab('plan',this)">Plan</button>
   <button class="tab-btn" data-tab="helm" onclick="goTab('helm',this)">Tasks &amp; Projects</button>
+  <button class="tab-btn" data-tab="lists" onclick="goTab('lists',this)">📋 Lists</button>
   <button class="tab-btn" data-tab="lighthouse" onclick="goTab('lighthouse',this)">Spiritual</button>
   <button class="tab-btn" data-tab="conservatory" onclick="goTab('conservatory',this)">Personal Growth</button>
   <button class="tab-btn" data-tab="hearthside" onclick="goTab('hearthside',this)">Health &amp; Wellness</button>
@@ -4851,9 +4859,9 @@ var MEAL_COMBOS = JSON.parse(localStorage.getItem('aMC')||'null')||[
 ];
 
 var DEFAULT_TAB_ORDER=['today','plan','helm','lighthouse','conservatory','hearthside','workshop','estate','emporium','archives','archive','settings'];
-var TAB_LABELS={today:'Today',plan:'Plan',helm:'Tasks & Projects',conservatory:'Personal Growth',hearthside:'Health & Wellness',workshop:'Workshop',lighthouse:'Spiritual',estate:'Money & Home',emporium:'Work',archives:'Research Library',archive:'Archive',settings:'Settings',stories:'Stories',mixtape:'Mixtape','focus-session':'Focus Session',grocery:'Grocery List',export:'Export',routines:'Routines'};
+var TAB_LABELS={today:'Today',plan:'Plan',helm:'Tasks & Projects',conservatory:'Personal Growth',hearthside:'Health & Wellness',workshop:'Workshop',lighthouse:'Spiritual',estate:'Money & Home',emporium:'Work',archives:'Research Library',archive:'Archive',settings:'Settings',stories:'Stories',mixtape:'Mixtape','focus-session':'Focus Session',grocery:'Grocery List',export:'Export',routines:'Routines',lists:'Lists'};
 var TAB_ORDER=(function(){var o=JSON.parse(localStorage.getItem('aTabOrder')||'null');if(!o)return DEFAULT_TAB_ORDER.slice();var full=DEFAULT_TAB_ORDER.slice();o=o.filter(function(t){return full.indexOf(t)>-1;});full.forEach(function(t){if(o.indexOf(t)<0)o.push(t);});return o;})();
-var SECTION_VIEWS={today:['today'],plan:['plan'],helm:['tasks','projects','lists','focus-session','grocery'],conservatory:['goals','learn','focus'],hearthside:['food','meals','wellness','recap'],workshop:['board','faves','stories','mixtape','places'],lighthouse:['spirit'],estate:['money','accounts','home-items','money-projects'],emporium:['wigs','work-projects'],archives:['guide','routines'],settings:['settings','export'],archive:['archive']};
+var SECTION_VIEWS={today:['today'],plan:['plan'],helm:['tasks','projects','focus-session','grocery'],lists:['lists'],conservatory:['goals','learn','focus'],hearthside:['food','meals','wellness','recap'],workshop:['board','faves','stories','mixtape','places'],lighthouse:['spirit'],estate:['money','accounts','home-items','money-projects'],emporium:['wigs','work-projects'],archives:['guide','routines'],settings:['settings','export'],archive:['archive']};
 var SECTION_LABELS={today:'Today',plan:'Plan',helm:'Tasks & Projects',conservatory:'Personal Growth',hearthside:'Health & Wellness',workshop:'Workshop',lighthouse:'Spiritual',estate:'Money & Home',emporium:'Work',archives:'Research Library',archive:'Archive',settings:'Settings'};
 var VIEW_SECTION=(function(){var m={};Object.keys(SECTION_VIEWS).forEach(function(s){SECTION_VIEWS[s].forEach(function(v){m[v]=s;});});return m;})();
 
@@ -5153,6 +5161,7 @@ function goTabDirect(tab,btn){
   if(tab==='lighthouse'){ updateLighthouseSpiritStatus(); }
   if(tab==='tasks'){ updateHelmBadges(); }
   if(tab==='focus-session'){ renderFocusSession(); }
+  if(tab==='lists'){ renderListQBar(); renderLists(); }
   if(tab==='plan'){ renderPlan(); }
   if(tab==='grocery'){ renderGroceryList(); populateGrocTaskDatalist(); }
   if(tab==='guide'){ renderResearchLib(); renderGuide(); renderTmplList(); renderAppIndex(); }
@@ -9232,20 +9241,26 @@ function setLF(f,btn){
 function listHTML(lst){
   var col=LIST_COLORS[lst.col]||'var(--rose)';
   var items=lst.items||[];
-  var done=items.filter(function(i){return i.done;}).length;
-  var pct=items.length?Math.round(done/items.length*100):0;
+  var done=items.filter(function(i){return i.done&&i.type!=='header';}).length;
+  var checkable=items.filter(function(i){return i.type!=='header';}).length;
+  var pct=checkable?Math.round(done/checkable*100):0;
   var lid=lst.id.replace(/'/g,"\\'");
+  var isRoutine=(lst.tags||[]).indexOf('routine')>-1;
+  // run state progress
+  var runState=lst.runState||{};
+  var runDone=isRoutine?checkable?Object.keys(runState).filter(function(k){return runState[k];}).length:0:0;
+  var runPct=isRoutine&&checkable?Math.round(runDone/checkable*100):0;
   var itemsHTML=items.map(function(item){
     var iid=item.id.replace(/'/g,"\\'");
     if(item.type==='header'){
       return'<div class="list-hdr-item">'+
-        '<span class="list-hdr-lbl">'+item.text+'</span>'+
+        '<span class="list-hdr-lbl">'+escHtml(item.text)+'</span>'+
         '<button class="sub-del" onclick="delLI(\''+lid+'\',\''+iid+'\')">✕</button>'+
       '</div>';
     }
     return'<div class="list-item'+(item.done?' done':'')+'">'+
       '<div class="rchk" onclick="togLI(\''+lid+'\',\''+iid+'\')" style="'+(item.done?'background:'+col+';border-color:'+col+';color:white':'')+'">'+  (item.done?'✓':'')+'</div>'+
-      '<div class="rlb">'+item.text+'</div>'+
+      '<div class="rlb">'+escHtml(item.text)+'</div>'+
       '<button class="sub-del" onclick="delLI(\''+lid+'\',\''+iid+'\')">✕</button>'+
     '</div>';
   }).join('');
@@ -9253,20 +9268,22 @@ function listHTML(lst){
     '<div class="list-hd">'+
       '<div style="display:flex;align-items:center;gap:8px">'+
         '<span style="font-size:20px">'+lst.emoji+'</span>'+
-        '<div><div class="list-title">'+lst.name+'</div>'+
-          (items.length?'<div style="font-size:11px;color:var(--textl)">'+done+'/'+items.length+' done</div>':'')
-          +((lst.tags&&lst.tags.length)?'<div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:3px">'+lst.tags.map(function(t){return'<span style="font-size:10px;padding:1px 6px;border-radius:8px;background:'+col+'22;color:'+col+';font-weight:600">'+t+'</span>';}).join('')+'</div>':'')
+        '<div><div class="list-title">'+escHtml(lst.name)+'</div>'+
+          (checkable?'<div style="font-size:11px;color:var(--textl)">'+done+'/'+checkable+' done</div>':'')
+          +((lst.tags&&lst.tags.length)?'<div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:3px">'+lst.tags.map(function(t){return'<span style="font-size:10px;padding:1px 6px;border-radius:8px;background:'+col+'22;color:'+col+';font-weight:600">'+escHtml(t)+'</span>';}).join('')+'</div>':'')
+          +(isRoutine&&checkable?'<div style="font-size:11px;color:var(--textl);margin-top:2px">▶ Today: '+runPct+'% done</div>':'')
           +'</div>'+
       '</div>'+
-      '<div style="display:flex;gap:2px;align-items:center">'+
-        (items.length?'<span class="list-prog" style="background:'+col+'22;color:'+col+'">'+pct+'%</span>':'')+
+      '<div style="display:flex;gap:2px;align-items:center;flex-wrap:wrap;justify-content:flex-end">'+
+        (isRoutine&&checkable?'<button class="btn" style="font-size:11px;padding:4px 10px;margin-right:2px" onclick="openRunMode(\''+lid+'\')">▶ Run</button>':'')+
+        (checkable?'<span class="list-prog" style="background:'+col+'22;color:'+col+'">'+pct+'%</span>':'')+
         '<button class="tact" onclick="editList(\''+lid+'\')">✏️</button>'+
         (done>0?'<button class="tact" onclick="clearListDone(\''+lid+'\')" title="Clear checked">🧹</button>':'')+
         '<button class="tact" onclick="togListArchive(\''+lid+'\')" title="'+(lst.archived?'Unarchive':'Archive')+'">'+(lst.archived?'📤':'📦')+'</button>'+
         '<button class="tact" onclick="delListConf(\''+lid+'\')">🗑️</button>'+
       '</div>'+
     '</div>'+
-    (items.length?'<div style="margin:2px 0 8px"><div class="pb"><div class="pf" style="width:'+pct+'%;background:'+col+'"></div></div></div>':'')+
+    (checkable?'<div style="margin:2px 0 8px"><div class="pb"><div class="pf" style="width:'+pct+'%;background:'+col+'"></div></div></div>':'')+
     itemsHTML+
     '<div class="list-add">'+
       '<input class="sub-inp" id="lai-'+lst.id+'" placeholder="Add item..." onkeydown="if(event.key===\'Enter\')addLI(\''+lid+'\')">'+
@@ -9392,6 +9409,92 @@ function addLISection(listId){
   if(!lst.items)lst.items=[];
   lst.items.push({id:'li'+Date.now()+Math.random().toString(36).slice(2,5),text:name.trim(),type:'header',done:false});
   localStorage.setItem('aLists',JSON.stringify(LISTS));renderLists();
+}
+
+// ═══════════════════════════════════════════════
+// LISTS — RUN MODE
+// ═══════════════════════════════════════════════
+var _runModeListId=null;
+
+function openRunMode(listId){
+  var lst=LISTS.find(function(l){return l.id===listId;});
+  if(!lst)return;
+  _runModeListId=listId;
+  // initialize runState if missing
+  if(!lst.runState)lst.runState={};
+  renderRunMode(listId);
+  showOv('ovRunMode');
+}
+
+function renderRunMode(listId){
+  var lst=LISTS.find(function(l){return l.id===listId;});
+  if(!lst)return;
+  var col=LIST_COLORS[lst.col]||'var(--rose)';
+  var items=(lst.items||[]).filter(function(i){return i.type!=='header';});
+  var runState=lst.runState||{};
+  var doneCount=items.filter(function(i){return runState[i.id];}).length;
+  var total=items.length;
+  var pct=total?Math.round(doneCount/total*100):0;
+  var hdr=document.getElementById('runModeTitle');
+  if(hdr)hdr.textContent=(lst.emoji||'▶')+' '+lst.name;
+  var bar=document.getElementById('runModeBar');
+  if(bar){
+    bar.style.width=pct+'%';
+    bar.style.background=col;
+  }
+  var pctEl=document.getElementById('runModePct');
+  if(pctEl)pctEl.textContent=pct+'%';
+  var el=document.getElementById('runModeItems');
+  if(!el)return;
+  if(!total){
+    el.innerHTML='<div style="text-align:center;padding:30px 0;color:var(--textl)"><div style="font-size:32px;margin-bottom:8px">📋</div><p>No items in this list yet.<br>Close this and add some items first.</p></div>';
+    return;
+  }
+  var lid=listId.replace(/'/g,"\\'");
+  el.innerHTML=items.map(function(item){
+    var iid=item.id.replace(/'/g,"\\'");
+    var checked=!!runState[item.id];
+    return'<button class="run-item'+(checked?' run-item-done':'')+'" onclick="toggleRunItem(\''+lid+'\',\''+iid+'\')" style="border-left-color:'+col+'">'+
+      '<div class="run-chk" style="'+(checked?'background:'+col+';border-color:'+col+';color:white;':'border-color:'+col)+'">'+(checked?'✓':'')+'</div>'+
+      '<div class="run-lbl">'+escHtml(item.text)+'</div>'+
+    '</button>';
+  }).join('');
+  // update done button
+  var doneBtn=document.getElementById('runModeDoneBtn');
+  if(doneBtn){
+    if(doneCount===total&&total>0){
+      doneBtn.style.display='block';
+    }else{
+      doneBtn.style.display='none';
+    }
+  }
+}
+
+function toggleRunItem(listId,itemId){
+  var lst=LISTS.find(function(l){return l.id===listId;});
+  if(!lst)return;
+  if(!lst.runState)lst.runState={};
+  lst.runState[itemId]=!lst.runState[itemId];
+  localStorage.setItem('aLists',JSON.stringify(LISTS));
+  renderRunMode(listId);
+  renderLists();
+}
+
+function resetRunMode(listId){
+  var lid=listId||_runModeListId;
+  var lst=LISTS.find(function(l){return l.id===lid;});
+  if(!lst)return;
+  lst.runState={};
+  localStorage.setItem('aLists',JSON.stringify(LISTS));
+  renderRunMode(lid);
+  renderLists();
+  showToast('Run reset — all items unchecked');
+}
+
+function closeRunMode(){
+  closeOv('ovRunMode');
+  _runModeListId=null;
+  renderLists();
 }
 
 // ═══════════════════════════════════════════════
@@ -19882,6 +19985,34 @@ function delProjInc(id){
   <button class="del-btn" id="listDelBtn" onclick="delListEdit()" style="display:none">🗑️ Delete List</button>
   <button class="cn-btn" onclick="closeM('listModal')">Cancel</button>
 </div></div>
+
+<!-- RUN MODE MODAL -->
+<div class="ov" id="ovRunMode" onclick="if(event.target===this)closeRunMode()">
+  <div class="mod" style="max-width:480px;max-height:92vh;display:flex;flex-direction:column;padding:0;overflow:hidden">
+    <!-- Header -->
+    <div style="padding:16px 16px 10px;border-bottom:1px solid var(--bdr);flex-shrink:0">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+        <div id="runModeTitle" style="font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:var(--textd)">Run Mode</div>
+        <button class="mc" onclick="closeRunMode()">✕</button>
+      </div>
+      <!-- Progress bar -->
+      <div style="display:flex;align-items:center;gap:8px">
+        <div style="flex:1;height:8px;background:#f0ebe6;border-radius:8px;overflow:hidden">
+          <div id="runModeBar" style="height:100%;border-radius:8px;transition:width .3s;width:0%"></div>
+        </div>
+        <span id="runModePct" style="font-size:12px;font-weight:700;color:var(--textl);min-width:32px;text-align:right">0%</span>
+      </div>
+    </div>
+    <!-- Items -->
+    <div id="runModeItems" style="flex:1;overflow-y:auto;padding:12px 14px"></div>
+    <!-- Footer -->
+    <div style="padding:10px 14px;border-top:1px solid var(--bdr);flex-shrink:0;display:flex;gap:8px">
+      <button class="btn sec" style="flex:1" onclick="resetRunMode(_runModeListId)">↺ Reset</button>
+      <button id="runModeDoneBtn" class="ok-btn" style="flex:1;margin:0;display:none" onclick="closeRunMode()">Done ✨</button>
+      <button class="btn sec" style="flex:1" onclick="closeRunMode()">Close</button>
+    </div>
+  </div>
+</div>
 
 <!-- TEMPLATE MODAL -->
 <div class="ov" id="tmplModal"><div class="mod">
