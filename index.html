@@ -957,6 +957,7 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     <div class="hub-card" onclick="goTab('goals',null)"><div class="hub-card-ic">🎯</div><div class="hub-card-name">Goals</div><div class="hub-card-sub" id="hub-goals-sub">Loading…</div></div>
     <div class="hub-card" onclick="goTab('learn',null)"><div class="hub-card-ic">📚</div><div class="hub-card-name">Learning</div><div class="hub-card-sub">Research &amp; study</div></div>
     <div class="hub-card" onclick="goTab('focus',null)"><div class="hub-card-ic">🧠</div><div class="hub-card-name">Focus Tools</div><div class="hub-card-sub">Intentions &amp; ADHD aids</div></div>
+    <div class="hub-card" onclick="goTab('spark',null)"><div class="hub-card-ic">💬</div><div class="hub-card-name">Spark</div><div class="hub-card-sub">Questions &amp; reflection</div></div>
   </div>
   <div class="learn-widget" id="lw-goals">
     <button class="learn-widget-toggle" onclick="toggleLearnWidget('goals')">📚 Learning <span id="lw-goals-count"></span></button>
@@ -2011,6 +2012,15 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     </div>
     <div id="intentionList"></div>
   </div>
+</div>
+<div class="view" id="v-spark">
+  <div class="pill-nav" style="margin-bottom:14px">
+    <button class="pn-btn on" id="sparkTab-spiritual" onclick="showSparkMode('Spiritual',this)">🌱 Spiritual</button>
+    <button class="pn-btn" id="sparkTab-connect" onclick="showSparkMode('Connect',this)">🌿 Connect</button>
+    <button class="pn-btn" id="sparkTab-curious" onclick="showSparkMode('Curious',this)">🌊 Curious</button>
+    <button class="pn-btn" id="sparkTab-reflect" onclick="showSparkMode('Reflect',this)">💬 Reflect</button>
+  </div>
+  <div id="sparkModeBody"></div>
 </div>
 <div class="view" id="v-learn">
   <div class="pill-nav" style="margin-bottom:12px">
@@ -3505,20 +3515,12 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
         <button onclick="addHatchItem('hatchShocksInput','aHatchShocks','hatchShocksList',HATCH_DEFAULTS.shocks)" style="padding:7px 14px;border-radius:9px;border:none;background:var(--rose);color:white;font-family:'Quicksand',sans-serif;font-size:13px;font-weight:700;cursor:pointer">Add</button>
       </div>
 
-      <div style="font-size:12px;font-weight:700;color:var(--textd);margin-bottom:8px">📓 Dispatch Questions</div>
-      <div style="font-size:11px;color:var(--textl);margin-bottom:8px">Reflection questions. Personal, specific, unexpected — write them yourself or generate a batch with Claude.</div>
-      <div id="hatchDispatchList"></div>
-      <div style="display:flex;gap:6px;margin-top:8px;margin-bottom:18px">
-        <input class="fi" id="hatchDispatchInput" placeholder="Add a question…" style="flex:1;padding:7px 10px;font-size:13px">
-        <button onclick="addHatchItem('hatchDispatchInput','aHatchDispatch','hatchDispatchList',HATCH_DEFAULTS.dispatch)" style="padding:7px 14px;border-radius:9px;border:none;background:var(--rose);color:white;font-family:'Quicksand',sans-serif;font-size:13px;font-weight:700;cursor:pointer">Add</button>
-      </div>
-
       <div style="font-size:12px;font-weight:700;color:var(--textd);margin-bottom:8px">🎭 The Cast — Characters</div>
       <div style="font-size:11px;color:var(--textl);margin-bottom:10px">Build your cast. Each character gets their own pool of scene prompts. The Hatch will pull from them.</div>
       <div id="hatchCastSettings"></div>
 
       <div style="font-size:12px;font-weight:700;color:var(--textd);margin-bottom:8px;margin-top:6px">💬 Spark Prompts</div>
-      <div style="font-size:11px;color:var(--textl);margin-bottom:10px">Conversation starters by category. Add new categories and prompts, or delete ones that don't fit.</div>
+      <div style="font-size:11px;color:var(--textl);margin-bottom:10px">Four modes: Spiritual, Connect, Curious, Reflect. Add or remove prompts from each.</div>
       <div id="sparkSettingsList"></div>
     </div>
   </div>
@@ -5156,7 +5158,7 @@ var MEAL_COMBOS = JSON.parse(localStorage.getItem('aMC')||'null')||[
 var DEFAULT_TAB_ORDER=['today','plan','helm','lighthouse','conservatory','hearthside','workshop','estate','emporium','archives','archive','settings'];
 var TAB_LABELS={today:'Today',plan:'Plan',helm:'Tasks & Projects',conservatory:'Personal Growth',hearthside:'Health & Wellness',workshop:'Workshop',lighthouse:'Spiritual',estate:'Money & Home',emporium:'Work',archives:'Research Library',archive:'Archive',settings:'Settings',stories:'Stories',mixtape:'Mixtape','focus-session':'Focus Session',grocery:'Grocery List',export:'Export',routines:'Routines',lists:'Lists'};
 var TAB_ORDER=(function(){var o=JSON.parse(localStorage.getItem('aTabOrder')||'null');if(!o)return DEFAULT_TAB_ORDER.slice();var full=DEFAULT_TAB_ORDER.slice();o=o.filter(function(t){return full.indexOf(t)>-1;});full.forEach(function(t){if(o.indexOf(t)<0)o.push(t);});return o;})();
-var SECTION_VIEWS={today:['today'],plan:['plan'],helm:['tasks','projects','focus-session','grocery'],lists:['lists'],conservatory:['goals','learn','focus'],hearthside:['food','meals','wellness','recap'],workshop:['board','faves','stories','mixtape','places'],lighthouse:['spirit'],estate:['money','accounts','home-items','money-projects'],emporium:['wigs','work-projects','loreal'],archives:['guide','routines'],settings:['settings','export'],archive:['archive']};
+var SECTION_VIEWS={today:['today'],plan:['plan'],helm:['tasks','projects','focus-session','grocery'],lists:['lists'],conservatory:['goals','learn','focus','spark'],hearthside:['food','meals','wellness','recap'],workshop:['board','faves','stories','mixtape','places'],lighthouse:['spirit'],estate:['money','accounts','home-items','money-projects'],emporium:['wigs','work-projects','loreal'],archives:['guide','routines'],settings:['settings','export'],archive:['archive']};
 var SECTION_LABELS={today:'Today',plan:'Plan',helm:'Tasks & Projects',conservatory:'Personal Growth',hearthside:'Health & Wellness',workshop:'Workshop',lighthouse:'Spiritual',estate:'Money & Home',emporium:'Work',archives:'Research Library',archive:'Archive',settings:'Settings'};
 var VIEW_SECTION=(function(){var m={};Object.keys(SECTION_VIEWS).forEach(function(s){SECTION_VIEWS[s].forEach(function(v){m[v]=s;});});return m;})();
 
@@ -5450,7 +5452,7 @@ function goTabDirect(tab,btn){
   if(tab==='mixtape')renderMixtape();
   if(tab==='places')renderPlaces();
   if(SECTION_VIEWS[tab]||tab==='emporium')renderHubPreviews(tab);
-  var hFab=document.getElementById('hatchFab');if(hFab){hFab.style.display=(tab==='today')?'flex':'none';if(tab==='today'){hFab.style.opacity='1';hFab.style.transform='translateX(-50%) translateY(0)';hFab.style.pointerEvents='auto';_fabHidden=false;_fabScrollLast=window.scrollY||window.pageYOffset;}}
+  var hFab=document.getElementById('hatchFab');if(hFab){hFab.style.display=(tab==='today')?'flex':'none';if(tab==='today'){hFab.style.opacity='1';hFab.style.transform='translateX(-50%) translateY(0)';hFab.style.pointerEvents='auto';_fabHidden=false;_fabScrollLast=window.scrollY||window.pageYOffset;renderFabPills();}}
   if(tab==='today'){ tickSpiritRun(); renderWaterBottle(); renderTodayStatsBars(); renderWeekStats(); renderTodayMoodBtns(); renderTodayPlanBar(); renderTodayWorkGlance(); }
   if(tab==='routines'){ renderRtnGroups(); }
   if(tab==='hearthside'){ renderHWHubStats(); }
@@ -7736,20 +7738,23 @@ var HATCH_DEFAULTS={
   ]
 };
 var SPARK_DEFAULTS={
-  Deep:["Ask someone what they're most looking forward to this year","What's something you've changed your mind about recently?","Ask: what's the last thing that genuinely moved you?","What does 'doing well' actually look like for you right now?"],
-  Fun:["Tell someone the most chaotic thing that happened to you recently","What's something weird you believed as a kid?","What's the last thing that made you laugh so hard you cried?","What's a hill you will die on, no matter how small?"],
-  Marriage:["Ask Nick: what's something you've been wanting to tell me but haven't found the moment?","When did Nick do something recently that made you feel really loved?","Ask Nick what he's most looking forward to this week","Tell Nick one specific thing you noticed him doing that meant a lot to you"],
-  Friends:["Ask: what's been taking up the most space in your head lately?","Tell a friend one specific thing you appreciate about them","Ask: what's something you're proud of yourself for this month?","What's something good that's happened recently that you haven't celebrated yet?"],
-  Ministry:["Ask: what does hope look like for you right now?","Start with: 'I've been thinking about something and I wanted to ask you…'","Ask: is there anything weighing on you lately?","What's a question that's been sitting with you that you haven't had anyone to ask?"],
-  Strangers:["Ask about something you genuinely notice about where they are or what they're doing","Ask: what's something good that happened this week?","Find something real to compliment — not appearance, something they chose","Ask: have you lived here long? What do you love about it?"]
+  Spiritual:["What is God trying to grow in you right now?","What does it look like to trust God with this specific thing?","Where have you seen Him at work this week, even quietly?","What's a scripture that's been sitting with you lately?","Where do you feel closest to God right now?","What's the hardest thing to surrender right now?","Ask: what would it look like to fully trust Him with this?"],
+  Connect:["Ask Nick: what's something you've been wanting to tell me but haven't found the moment?","Ask a friend: what's been taking up the most space in your head lately?","Tell someone one specific thing you appreciate about them","Ask: what's something you're proud of yourself for this month?","What's something good that's happened recently that you haven't celebrated yet?","When did someone recently do something that made you feel really loved?","Ask Nick what he's most looking forward to this week"],
+  Curious:["What's something weird you believed as a kid?","What's the last thing that made you laugh so hard you cried?","Tell someone the most chaotic thing that happened to you recently","What's a hill you will die on, no matter how small?","Ask a new person: have you lived here long? What do you love about it?","Ask: what's something good that happened this week?","What's something you want to learn but haven't started yet?"],
+  Reflect:["What are you most afraid to admit about this season?","What's something you've been avoiding that you already know the answer to?","What does 'doing well' actually look like for you right now?","What would you do differently if you weren't afraid of getting it wrong?","What needs to be said — to yourself or someone else — that you've been holding back?","Where are you growing and where are you shrinking?","What's something God has been asking you to lay down?"]
 };
+(function(){
+  var sp=JSON.parse(localStorage.getItem('aSparkPrompts')||'null');
+  if(sp&&(sp.Deep!==undefined||sp.Fun!==undefined||sp.Ministry!==undefined)){
+    localStorage.removeItem('aSparkPrompts');
+  }
+})();
 function _hd(){
   return{
     missions:JSON.parse(localStorage.getItem('aHatchMissions')||'null')||HATCH_DEFAULTS.missions.slice(),
     chaos:JSON.parse(localStorage.getItem('aHatchChaos')||'null')||HATCH_DEFAULTS.chaos.map(function(c){return{name:c.name,actions:c.actions.slice()};}),
     transmissions:JSON.parse(localStorage.getItem('aHatchTransmissions')||'null')||HATCH_DEFAULTS.transmissions.slice(),
-    shocks:JSON.parse(localStorage.getItem('aHatchShocks')||'null')||HATCH_DEFAULTS.shocks.slice(),
-    dispatch:JSON.parse(localStorage.getItem('aHatchDispatch')||'null')||HATCH_DEFAULTS.dispatch.slice()
+    shocks:JSON.parse(localStorage.getItem('aHatchShocks')||'null')||HATCH_DEFAULTS.shocks.slice()
   };
 }
 var _hatchTimerInt=null,_hatchTimerBreath=null;
@@ -7903,7 +7908,7 @@ function closeHatch(){
 }
 function hatchMode(mode){
   _clearHatchTimers();
-  ['Selector','Mission','Chaos','Transmission','Shock','Dispatch','Cast','Spa'].forEach(function(p){
+  ['Selector','Mission','Chaos','Transmission','Shock','Cast','Spa'].forEach(function(p){
     var el=document.getElementById('hPanel'+p);if(el)el.style.display='none';
   });
   var target=document.getElementById('hPanel'+mode.charAt(0).toUpperCase()+mode.slice(1));
@@ -7912,7 +7917,6 @@ function hatchMode(mode){
   else if(mode==='chaos')hatchChaosRoll();
   else if(mode==='transmission')_hatchTxShow();
   else if(mode==='shock')_hatchShockShow();
-  else if(mode==='dispatch')_hatchDispatchShow();
   else if(mode==='cast')_hatchCastShow();
 }
 
@@ -8059,7 +8063,6 @@ function renderHatchSettings(){
   renderHatchList('hatchMissionsList','aHatchMissions',HATCH_DEFAULTS.missions);
   renderHatchList('hatchTransmissionsList','aHatchTransmissions',HATCH_DEFAULTS.transmissions);
   renderHatchList('hatchShocksList','aHatchShocks',HATCH_DEFAULTS.shocks);
-  renderHatchList('hatchDispatchList','aHatchDispatch',HATCH_DEFAULTS.dispatch);
   renderHatchChaosSettings();
   renderCastSettings();
   renderSparkSettings();
@@ -8315,52 +8318,86 @@ function delCastPrompt(ci,pi){
 }
 
 // ─── SPARK ─────────────────────────────────────
-var _sparkSavedIdx=null,_sparkCat=null;
+var _sparkMode='Spiritual';
 function openSpark(){
-  _sparkCat=null;
-  renderSparkCatRow();
-  sparkNew();
-  showOv('ovSpark');
+  goTab('spark',document.querySelector('[data-tab="conservatory"]'));
+  renderSparkMode();
 }
-function renderSparkCatRow(){
-  var el=document.getElementById('sparkCatRow');if(!el)return;
-  var prompts=JSON.parse(localStorage.getItem('aSparkPrompts')||'null')||SPARK_DEFAULTS;
-  var cats=Object.keys(prompts);
-  el.innerHTML=['All'].concat(cats).map(function(cat){
-    var active=(cat==='All'&&!_sparkCat)||cat===_sparkCat;
-    return'<button onclick="setSparkCat('+(cat==='All'?'null':"'"+cat+"'")+');event.stopPropagation()" style="padding:5px 12px;border-radius:50px;border:1.5px solid '+(active?'var(--rose)':'rgba(201,160,160,.25)')+';background:'+(active?'var(--rose)':'#fff')+';color:'+(active?'#fff':'var(--textl)')+';font-family:\'Quicksand\',sans-serif;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap">'+escHtml(cat)+'</button>';
-  }).join('');
+function showSparkMode(mode,btn){
+  _sparkMode=mode;
+  document.querySelectorAll('#v-spark .pn-btn').forEach(function(b){b.classList.remove('on');});
+  if(btn)btn.classList.add('on');
+  renderSparkMode();
 }
-function setSparkCat(cat){_sparkCat=cat;renderSparkCatRow();sparkNew();}
-function sparkNew(){
+function _getSparkPool(mode){
   var prompts=JSON.parse(localStorage.getItem('aSparkPrompts')||'null')||SPARK_DEFAULTS;
-  var cats=Object.keys(prompts);
-  if(!cats.length)return;
-  var cat;
-  if(_sparkCat&&prompts[_sparkCat]&&prompts[_sparkCat].length){
-    cat=_sparkCat;
-  }else{
-    var filled=cats.filter(function(c){return prompts[c]&&prompts[c].length;});
-    if(!filled.length)return;
-    cat=filled[Math.floor(Math.random()*filled.length)];
+  return(prompts[mode]||[]).slice();
+}
+var _sparkCurrentPrompt='';
+function renderSparkMode(){
+  var el=document.getElementById('sparkModeBody');if(!el)return;
+  var pool=_getSparkPool(_sparkMode);
+  _sparkCurrentPrompt=pool.length?pool[Math.floor(Math.random()*pool.length)]:'';
+  var modeEmoji={'Spiritual':'🌱','Connect':'🌿','Curious':'🌊','Reflect':'💬'}[_sparkMode]||'💬';
+  var modeColor={'Spiritual':'var(--sage)','Connect':'var(--teal)','Curious':'var(--blue)','Reflect':'var(--lav)'}[_sparkMode]||'var(--rose)';
+  var html='<div class="card" style="margin-bottom:14px">'
+    +'<div style="font-size:10px;font-weight:700;color:'+modeColor+';text-transform:uppercase;letter-spacing:.8px;font-family:\'Quicksand\',sans-serif;margin-bottom:8px">'+modeEmoji+' '+_sparkMode+'</div>'
+    +'<div style="font-size:17px;font-weight:700;color:var(--textd);line-height:1.55;margin-bottom:18px;min-height:52px;font-family:\'Quicksand\',sans-serif" id="sparkPromptText">'+escHtml(_sparkCurrentPrompt||'No prompts yet. Add some in Settings → Spark.')+'</div>'
+    +'<div style="display:flex;gap:10px">'
+    +'<button onclick="newSparkPrompt()" class="btn" style="flex:1">🔀 New</button>'
+    +'<button onclick="saveSparkPrompt()" class="btn sec">Save ✦</button>'
+    +'</div></div>';
+  if(_sparkMode==='Reflect'){
+    html+='<div class="card" style="margin-bottom:14px">'
+      +'<div style="font-weight:700;font-size:14px;color:var(--textd);font-family:\'Quicksand\',sans-serif;margin-bottom:8px">Write a response</div>'
+      +'<textarea id="reflectTA" class="fi" placeholder="What comes up for you?" style="width:100%;min-height:80px;resize:vertical;box-sizing:border-box;margin-bottom:8px;padding:10px;font-family:\'Quicksand\',sans-serif;font-size:14px;line-height:1.6;border-radius:12px"></textarea>'
+      +'<button onclick="saveReflectEntry()" class="btn" style="width:100%">Save to journal ✓</button>'
+      +'</div>';
+    html+='<div id="reflectJournalPreview"></div>';
   }
-  var pool=prompts[cat];
-  var prompt=pool[Math.floor(Math.random()*pool.length)];
-  var catEl=document.getElementById('sparkCategory');
-  var textEl=document.getElementById('sparkText');
-  if(catEl)catEl.textContent=cat;
-  if(textEl)textEl.textContent=prompt;
-  _sparkSavedIdx=null;
+  el.innerHTML=html;
+  if(_sparkMode==='Reflect')renderReflectJournal();
 }
-function sparkSave(){
-  var cat=document.getElementById('sparkCategory');
-  var text=document.getElementById('sparkText');
-  if(!cat||!text)return;
+function newSparkPrompt(){
+  var pool=_getSparkPool(_sparkMode);
+  if(!pool.length){showToast('No prompts in this mode yet');return;}
+  var prev=_sparkCurrentPrompt;
+  var tries=0;
+  do{_sparkCurrentPrompt=pool[Math.floor(Math.random()*pool.length)];tries++;}while(_sparkCurrentPrompt===prev&&pool.length>1&&tries<8);
+  var el=document.getElementById('sparkPromptText');if(el)el.textContent=_sparkCurrentPrompt;
+}
+function saveSparkPrompt(){
+  if(!_sparkCurrentPrompt){showToast('No prompt to save');return;}
   var saved=JSON.parse(localStorage.getItem('aSparkSaved')||'[]');
-  var entry={id:Date.now().toString(),category:cat.textContent,prompt:text.textContent,date:todayStr()};
-  saved.unshift(entry);
+  saved.unshift({id:Date.now().toString(),category:_sparkMode,prompt:_sparkCurrentPrompt,date:todayStr()});
   localStorage.setItem('aSparkSaved',JSON.stringify(saved));
-  showToast('Saved to pocket ✓');
+  showToast('Saved ✦');
+}
+function saveReflectEntry(){
+  var ta=document.getElementById('reflectTA');
+  var resp=ta&&ta.value.trim();
+  if(!resp){showToast('Write something first 💜');return;}
+  var prompt=_sparkCurrentPrompt||(document.getElementById('sparkPromptText')&&document.getElementById('sparkPromptText').textContent)||'';
+  var journal=JSON.parse(localStorage.getItem('aDispatchJournal')||'[]');
+  journal.unshift({id:Date.now().toString(),question:prompt,response:resp,date:todayStr(),ts:new Date().toISOString()});
+  localStorage.setItem('aDispatchJournal',JSON.stringify(journal));
+  showToast('Saved to Reflect journal ✓');
+  if(ta)ta.value='';
+  renderReflectJournal();
+}
+function renderReflectJournal(){
+  var el=document.getElementById('reflectJournalPreview');if(!el)return;
+  var journal=JSON.parse(localStorage.getItem('aDispatchJournal')||'[]');
+  if(!journal.length){el.innerHTML='<div style="font-size:12px;color:var(--textl);font-family:\'Quicksand\',sans-serif;text-align:center;padding:16px">No journal entries yet.</div>';return;}
+  el.innerHTML='<div style="font-size:11px;font-weight:700;color:var(--textl);text-transform:uppercase;letter-spacing:.5px;font-family:\'Quicksand\',sans-serif;margin-bottom:10px">Recent Entries</div>'
+    +journal.slice(0,5).map(function(e){
+      var d=new Date(e.ts||e.date);var dLabel=d.toLocaleDateString('en-US',{month:'short',day:'numeric'});
+      return'<div style="margin-bottom:10px;padding:12px 14px;background:#fff;border-radius:12px;box-shadow:0 1px 4px rgba(0,0,0,.06)">'
+        +'<div style="font-size:10px;color:var(--textl);font-family:\'Quicksand\',sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">'+dLabel+'</div>'
+        +(e.question?'<div style="font-size:12px;font-style:italic;color:var(--textl);font-family:\'Quicksand\',sans-serif;margin-bottom:5px;line-height:1.4">"'+escHtml(e.question)+'"</div>':'')
+        +'<div style="font-size:13px;color:var(--textd);font-family:\'Quicksand\',sans-serif;line-height:1.5;white-space:pre-wrap">'+escHtml(e.response)+'</div>'
+      +'</div>';
+    }).join('');
 }
 function openSavedSparks(){
   renderSavedSparks();
@@ -8371,11 +8408,11 @@ function renderSavedSparks(){
   var saved=JSON.parse(localStorage.getItem('aSparkSaved')||'[]');
   if(!saved.length){el.innerHTML='<div style="font-size:14px;color:var(--textl);text-align:center;padding:20px;font-family:\'Quicksand\',sans-serif">No saved sparks yet.</div>';return;}
   el.innerHTML=saved.map(function(e,i){
-    return'<div style="padding:11px 14px;border-radius:12px;background:#fff;box-shadow:0 1px 6px rgba(0,0,0,.06);margin-bottom:8px;position:relative">'+
-      '<div style="font-size:10px;font-weight:700;color:var(--rose);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">'+escHtml(e.category)+'</div>'+
-      '<div style="font-size:14px;color:var(--textd);font-family:\'Quicksand\',sans-serif;line-height:1.5">'+escHtml(e.prompt)+'</div>'+
-      '<button onclick="delSavedSpark('+i+')" style="position:absolute;top:8px;right:8px;background:none;border:none;color:var(--textl);cursor:pointer;font-size:14px;padding:2px">✕</button>'+
-    '</div>';
+    return'<div style="padding:11px 14px;border-radius:12px;background:#fff;box-shadow:0 1px 6px rgba(0,0,0,.06);margin-bottom:8px;position:relative">'
+      +'<div style="font-size:10px;font-weight:700;color:var(--rose);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">'+escHtml(e.category||'')+'</div>'
+      +'<div style="font-size:14px;color:var(--textd);font-family:\'Quicksand\',sans-serif;line-height:1.5">'+escHtml(e.prompt)+'</div>'
+      +'<button onclick="delSavedSpark('+i+')" style="position:absolute;top:8px;right:8px;background:none;border:none;color:var(--textl);cursor:pointer;font-size:14px;padding:2px">✕</button>'
+    +'</div>';
   }).join('');
 }
 function delSavedSpark(i){
@@ -8388,51 +8425,40 @@ function renderSparkSettings(){
   var el=document.getElementById('sparkSettingsList');if(!el)return;
   var prompts=JSON.parse(localStorage.getItem('aSparkPrompts')||'null')||SPARK_DEFAULTS;
   var cats=Object.keys(prompts);
+  var modeEmoji={'Spiritual':'🌱','Connect':'🌿','Curious':'🌊','Reflect':'💬'};
   el.innerHTML=cats.map(function(cat,ci){
     var items=prompts[cat]||[];
-    return'<div style="margin-bottom:12px;background:#faf8f5;border-radius:12px;padding:10px 12px">'+
-      '<div style="font-size:13px;font-weight:700;color:var(--textd);margin-bottom:6px">'+escHtml(cat)+'</div>'+
-      items.map(function(item,ii){
-        return'<div style="display:flex;align-items:flex-start;gap:6px;padding:4px 0">'+
-          '<div style="flex:1;font-size:12px;color:var(--textd);line-height:1.4">• '+escHtml(item)+'</div>'+
-          '<button onclick="delSparkPrompt(\''+escHtml(cat)+'\','+ii+')" style="background:none;border:none;color:var(--textl);cursor:pointer;font-size:13px;padding:0;flex-shrink:0">✕</button>'+
-        '</div>';
-      }).join('')+
-      '<div style="display:flex;gap:6px;margin-top:8px">'+
-        '<input class="fi" id="sparkInp'+ci+'" placeholder="Add prompt..." style="flex:1;padding:6px 8px;font-size:12px">'+
-        '<button onclick="addSparkPrompt(\''+escHtml(cat)+'\','+ci+')" style="padding:6px 10px;border-radius:8px;border:none;background:var(--rose);color:white;font-family:\'Quicksand\',sans-serif;font-size:12px;font-weight:700;cursor:pointer">Add</button>'+
-      '</div>'+
-    '</div>';
-  }).join('')+
-  '<div style="display:flex;gap:6px;margin-top:4px">'+
-    '<input class="fi" id="sparkNewCatInp" placeholder="New category..." style="flex:1;padding:7px 10px;font-size:13px">'+
-    '<button onclick="addSparkCategory()" style="padding:7px 12px;border-radius:9px;border:none;background:var(--lav);color:white;font-family:\'Quicksand\',sans-serif;font-size:13px;font-weight:700;cursor:pointer">Add</button>'+
-  '</div>';
+    return'<div style="margin-bottom:12px;background:#faf8f5;border-radius:12px;padding:10px 12px">'
+      +'<div style="font-size:13px;font-weight:700;color:var(--textd);margin-bottom:6px">'+(modeEmoji[cat]||'💬')+' '+escHtml(cat)+'</div>'
+      +items.map(function(item,ii){
+        return'<div style="display:flex;align-items:flex-start;gap:6px;padding:4px 0">'
+          +'<div style="flex:1;font-size:12px;color:var(--textd);line-height:1.4">• '+escHtml(item)+'</div>'
+          +'<button onclick="delSparkPrompt(\''+cat.replace(/'/g,"\\'")+'\',' +ii+')" style="background:none;border:none;color:var(--textl);font-size:12px;cursor:pointer;padding:0 3px;flex-shrink:0">✕</button>'
+        +'</div>';
+      }).join('')
+      +'<div style="display:flex;gap:6px;margin-top:6px">'
+      +'<input class="fi" id="sparkAddInp_'+ci+'" placeholder="Add a prompt…" style="flex:1;padding:6px 9px;font-size:12px">'
+      +'<button onclick="addSparkPromptTocat(\''+cat.replace(/'/g,"\\'")+'\',' +ci+')" style="padding:5px 10px;border-radius:8px;border:none;background:var(--rose);color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">Add</button>'
+      +'</div>'
+    +'</div>';
+  }).join('');
 }
-function addSparkPrompt(cat,ci){
-  var inp=document.getElementById('sparkInp'+ci);if(!inp)return;
-  var val=inp.value.trim();if(!val){showToast('Enter a prompt');return;}
+function addSparkPromptTocat(cat,ci){
+  var inp=document.getElementById('sparkAddInp_'+ci);
+  var text=inp&&inp.value.trim();
+  if(!text)return;
   var prompts=JSON.parse(localStorage.getItem('aSparkPrompts')||'null')||JSON.parse(JSON.stringify(SPARK_DEFAULTS));
   if(!prompts[cat])prompts[cat]=[];
-  prompts[cat].push(val);
+  prompts[cat].push(text);
   localStorage.setItem('aSparkPrompts',JSON.stringify(prompts));
-  inp.value='';renderSparkSettings();showToast('Added ✓');
-}
-function delSparkPrompt(cat,ii){
-  var prompts=JSON.parse(localStorage.getItem('aSparkPrompts')||'null')||JSON.parse(JSON.stringify(SPARK_DEFAULTS));
-  if(!prompts[cat])return;
-  prompts[cat].splice(ii,1);
-  localStorage.setItem('aSparkPrompts',JSON.stringify(prompts));
+  inp.value='';
   renderSparkSettings();
 }
-function addSparkCategory(){
-  var inp=document.getElementById('sparkNewCatInp');if(!inp)return;
-  var val=inp.value.trim();if(!val){showToast('Enter a category name');return;}
+function delSparkPrompt(cat,idx){
   var prompts=JSON.parse(localStorage.getItem('aSparkPrompts')||'null')||JSON.parse(JSON.stringify(SPARK_DEFAULTS));
-  if(prompts[val]){showToast('Category already exists');return;}
-  prompts[val]=[];
+  if(prompts[cat])prompts[cat].splice(idx,1);
   localStorage.setItem('aSparkPrompts',JSON.stringify(prompts));
-  inp.value='';renderSparkSettings();showToast('Category added ✓');
+  renderSparkSettings();
 }
 
 // ═══════════════════════════════════════════════
@@ -19857,6 +19883,7 @@ function startApp(){
   renderAppIndex();
   renderTodayWorkGlance();
   var hFab=document.getElementById('hatchFab');if(hFab)hFab.style.display='flex';
+  renderFabPills();
   initFabScroll();
   initFabModalHide();
 }
@@ -19903,6 +19930,62 @@ function initFabModalHide(){
   document.querySelectorAll('.ov,.cal-modal-bg,.badge-board-bg').forEach(function(el){
     obs.observe(el,{attributes:true,attributeFilter:['class']});
   });
+}
+function openOpeningShift(){
+  renderOpeningShift();
+  showOv('ovOpeningShift');
+}
+function openingShiftTog(idx){
+  if(!RS.am)RS.am={};
+  RS.am[idx]=RS.am[idx]?0:1;
+  localStorage.setItem('aRS',JSON.stringify(RS));
+  renderOpeningShift();
+}
+function renderOpeningShift(){
+  var el=document.getElementById('openingShiftList');if(!el)return;
+  var items=RTNS.am||[];
+  if(!items.length){el.innerHTML='<div style="font-size:13px;color:var(--textl);text-align:center;padding:20px;font-family:\'Quicksand\',sans-serif">No AM routine set up yet.<br>Add items in Archives → Routines → AM Routine.</div>';return;}
+  var state=RS.am||{};
+  var hidden=RH.am||{};
+  var visible=items.filter(function(item){return !hidden[item];});
+  var done=visible.filter(function(item){var realIdx=items.indexOf(item);return !!state[realIdx];}).length;
+  var total=visible.length;
+  el.innerHTML='<div style="font-size:11px;color:var(--textl);font-family:\'Quicksand\',sans-serif;font-weight:700;margin-bottom:12px;text-transform:uppercase;letter-spacing:.5px">'+done+' of '+total+' done</div>'
+    +visible.map(function(item){
+      var realIdx=items.indexOf(item);
+      var isDone=!!state[realIdx];
+      return'<div onclick="openingShiftTog('+realIdx+')" style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid #f5f0eb;cursor:pointer">'
+        +'<div style="width:22px;height:22px;border-radius:6px;border:2px solid '+(isDone?'var(--sage)':'#ddd')+';background:'+(isDone?'var(--sage)':'#fff')+';display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;color:#fff;transition:all .15s">'+(isDone?'✓':'')+'</div>'
+        +'<span style="font-size:14px;font-weight:600;font-family:\'Quicksand\',sans-serif;color:'+(isDone?'var(--textl)':'var(--textd)')+(isDone?';text-decoration:line-through':'')+'">'
+        +escHtml(item)+'</span>'
+      +'</div>';
+    }).join('');
+}
+function renderFabPills(){
+  var fab=document.getElementById('hatchFab');if(!fab)return;
+  var h=new Date().getHours();
+  var pills;
+  if(h<12){
+    pills=[
+      {label:'🌅 Opening Shift',fn:'openOpeningShift()',grad:'linear-gradient(135deg,#f5d06a,#e09030)',color:'#fff',shadow:'rgba(229,160,48,.45)'},
+      {label:'🚪 One Thing',fn:'openOneThingMode()',grad:'linear-gradient(135deg,var(--rose),var(--lav))',color:'#fff',shadow:'rgba(201,160,160,.5)'},
+      {label:'⚡ Hatch',fn:'openHatch()',grad:'#fff',color:'var(--textd)',shadow:'rgba(0,0,0,.1)'}
+    ];
+  }else if(h<17){
+    pills=[
+      {label:'🚪 One Thing',fn:'openOneThingMode()',grad:'linear-gradient(135deg,var(--rose),var(--lav))',color:'#fff',shadow:'rgba(201,160,160,.5)'},
+      {label:'⚡ Hatch',fn:'openHatch()',grad:'#fff',color:'var(--textd)',shadow:'rgba(0,0,0,.1)'}
+    ];
+  }else{
+    pills=[
+      {label:'🌙 Wrap Up',fn:'openDayWrapUp()',grad:'linear-gradient(135deg,#5a3a8a,#3a2a6a)',color:'#fff',shadow:'rgba(90,58,138,.4)'},
+      {label:'🚪 One Thing',fn:'openOneThingMode()',grad:'linear-gradient(135deg,var(--rose),var(--lav))',color:'#fff',shadow:'rgba(201,160,160,.5)'},
+      {label:'⚡ Hatch',fn:'openHatch()',grad:'#fff',color:'var(--textd)',shadow:'rgba(0,0,0,.1)'}
+    ];
+  }
+  fab.innerHTML=pills.map(function(p){
+    return'<button onclick="'+p.fn+'" style="display:flex;align-items:center;gap:7px;padding:11px 16px;border-radius:50px;border:none;background:'+p.grad+';color:'+p.color+';font-family:\'Quicksand\',sans-serif;font-size:13px;font-weight:700;cursor:pointer;box-shadow:0 4px 14px '+p.shadow+';white-space:nowrap">'+p.label+'</button>';
+  }).join('');
 }
 
 // Wait for Firebase then start
@@ -22728,11 +22811,22 @@ function delProjInc(id){
 </div>
 
 <!-- HATCH FAB — Today only -->
-<div id="hatchFab" style="position:fixed;bottom:28px;left:50%;transform:translateX(-50%);z-index:300;display:none;flex-direction:row;gap:10px;align-items:center;transition:opacity .3s,transform .3s">
-  <button onclick="openOneThingMode()" style="display:flex;align-items:center;gap:8px;padding:11px 18px;border-radius:50px;border:none;background:linear-gradient(135deg,var(--rose),var(--lav));color:#fff;font-family:'Quicksand',sans-serif;font-size:13px;font-weight:700;cursor:pointer;box-shadow:0 4px 18px rgba(201,160,160,.5);white-space:nowrap">🚪 One Thing</button>
-  <button onclick="openHatch()" style="display:flex;align-items:center;gap:7px;padding:11px 16px;border-radius:50px;border:none;background:#fff;color:var(--textd);font-family:'Quicksand',sans-serif;font-size:13px;font-weight:700;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.1);white-space:nowrap">⚡ Hatch</button>
-  <button onclick="openSpark()" style="display:flex;align-items:center;gap:7px;padding:11px 16px;border-radius:50px;border:none;background:#fff;color:var(--textd);font-family:'Quicksand',sans-serif;font-size:13px;font-weight:700;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.1);white-space:nowrap">💬 Spark</button>
-  <button onclick="openDayWrapUp()" style="display:flex;align-items:center;gap:7px;padding:11px 16px;border-radius:50px;border:none;background:#fff;color:var(--textd);font-family:'Quicksand',sans-serif;font-size:13px;font-weight:700;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.1);white-space:nowrap">🌙 Wrap Up</button>
+<div id="hatchFab" style="position:fixed;bottom:28px;left:50%;transform:translateX(-50%);z-index:300;display:none;flex-direction:row;gap:10px;align-items:center;transition:opacity .3s,transform .3s"></div>
+
+<!-- OPENING SHIFT -->
+<div class="ov" id="ovOpeningShift" onclick="closeOv('ovOpeningShift')" style="align-items:flex-end;padding:0">
+  <div onclick="event.stopPropagation()" style="width:100%;max-width:480px;background:linear-gradient(180deg,#fffbf0,#fff);border-radius:24px 24px 0 0;padding:24px 20px 40px;box-shadow:0 -8px 32px rgba(0,0,0,.12);max-height:80vh;overflow-y:auto">
+    <div style="width:36px;height:4px;background:#f0e0a0;border-radius:2px;margin:0 auto 16px"></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+      <div>
+        <div style="font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:var(--textd)">🌅 Opening Shift</div>
+        <div style="font-size:12px;color:var(--textl);font-family:'Quicksand',sans-serif;margin-top:2px">Morning routine</div>
+      </div>
+      <button onclick="closeOv('ovOpeningShift')" style="background:none;border:none;font-size:18px;cursor:pointer;color:var(--textl);padding:4px">✕</button>
+    </div>
+    <div id="openingShiftList"></div>
+    <button onclick="closeOv('ovOpeningShift')" style="width:100%;margin-top:16px;padding:13px;border-radius:14px;border:none;background:linear-gradient(135deg,#f5d06a,#e09030);color:#fff;font-family:'Quicksand',sans-serif;font-size:14px;font-weight:700;cursor:pointer">Done for now ☀️</button>
+  </div>
 </div>
 
 <!-- ONE THING MODE -->
@@ -22800,10 +22894,6 @@ function delProjInc(id){
         <button class="hatch-mode-btn" onclick="hatchMode('shock')">
           <span class="hatch-mode-icon">⚡</span>
           <span><span class="hatch-mode-label">&gt; SHOCK SEQUENCE</span><span class="hatch-mode-sub">60 seconds. Physical only. Go.</span></span>
-        </button>
-        <button class="hatch-mode-btn" onclick="hatchMode('dispatch')">
-          <span class="hatch-mode-icon">📓</span>
-          <span><span class="hatch-mode-label">&gt; DISPATCH LOG</span><span class="hatch-mode-sub">One question. Write back or just sit with it.</span></span>
         </button>
         <button class="hatch-mode-btn" onclick="hatchMode('cast')">
           <span class="hatch-mode-icon">🎭</span>
@@ -22877,30 +22967,6 @@ function delProjInc(id){
         <div class="hatch-keys" id="hShockKeys">
           <button class="hatch-key hatch-key-skip" onclick="hatchMode('selector')">not today</button>
           <button class="hatch-key hatch-key-fire" onclick="hatchShockDeploy()">Deploy ⚡</button>
-        </div>
-      </div>
-
-      <!-- DISPATCH -->
-      <div id="hPanelDispatch" style="display:none">
-        <div class="hatch-header">
-          <button class="hatch-back-btn" onclick="hatchMode('selector')">← Back</button>
-          <button class="hatch-close-btn" onclick="closeHatch()">✕</button>
-        </div>
-        <div class="hatch-card">
-          <div class="hatch-label">📓 Dispatch — Someone sent you a question</div>
-          <div class="hatch-big-text" id="hDispatchQuestion" style="font-size:18px;line-height:1.5"></div>
-          <div id="hDispatchWriteArea" style="display:none;margin-top:14px">
-            <textarea id="hDispatchTA" class="fi" placeholder="Write your response here…" style="width:100%;min-height:100px;padding:10px;font-size:14px;line-height:1.6;resize:vertical;border-radius:12px;box-sizing:border-box"></textarea>
-            <button class="hatch-key hatch-key-exec" onclick="dispatchSave()" style="margin-top:8px;width:100%">Save to journal ✓</button>
-          </div>
-        </div>
-        <div class="hatch-keys" id="hDispatchKeys">
-          <button class="hatch-key hatch-key-skip" onclick="dispatchSit()">Just sit with it</button>
-          <button class="hatch-key hatch-key-park" onclick="dispatchWrite()">Write a response ✍️</button>
-        </div>
-        <div style="display:flex;gap:10px;margin-top:10px">
-          <button onclick="dispatchClaude()" style="flex:1;background:none;border:1.5px solid rgba(201,160,160,.3);border-radius:12px;font-family:'Quicksand',sans-serif;font-size:12px;font-weight:700;color:var(--textl);cursor:pointer;padding:10px 8px">Talk to Claude 💬</button>
-          <button onclick="openDispatchJournal()" style="flex:1;background:none;border:1.5px solid rgba(201,160,160,.3);border-radius:12px;font-family:'Quicksand',sans-serif;font-size:12px;font-weight:700;color:var(--textl);cursor:pointer;padding:10px 8px">View journal 📔</button>
         </div>
       </div>
 
