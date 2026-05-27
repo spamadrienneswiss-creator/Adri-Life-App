@@ -5444,7 +5444,7 @@ function goTabDirect(tab,btn){
   if(tab==='mixtape')renderMixtape();
   if(tab==='places')renderPlaces();
   if(SECTION_VIEWS[tab]||tab==='emporium')renderHubPreviews(tab);
-  var hFab=document.getElementById('hatchFab');if(hFab)hFab.style.display=(tab==='today')?'flex':'none';
+  var hFab=document.getElementById('hatchFab');if(hFab){hFab.style.display=(tab==='today')?'flex':'none';if(tab==='today'){hFab.style.opacity='1';hFab.style.transform='translateX(-50%) translateY(0)';hFab.style.pointerEvents='auto';_fabHidden=false;_fabScrollLast=window.scrollY||window.pageYOffset;}}
   if(tab==='today'){ tickSpiritRun(); renderWaterBottle(); renderTodayStatsBars(); renderWeekStats(); renderTodayMoodBtns(); renderTodayPlanBar(); renderTodayWorkGlance(); }
   if(tab==='routines'){ renderRtnGroups(); }
   if(tab==='hearthside'){ renderHWHubStats(); }
@@ -19741,6 +19741,31 @@ function startApp(){
   renderAppIndex();
   renderTodayWorkGlance();
   var hFab=document.getElementById('hatchFab');if(hFab)hFab.style.display='flex';
+  initFabScroll();
+}
+
+var _fabScrollLast=0,_fabScrollTimer=null,_fabHidden=false;
+function _setFabVisible(vis){
+  var fab=document.getElementById('hatchFab');if(!fab)return;
+  if(vis){
+    fab.style.opacity='1';fab.style.transform='translateX(-50%) translateY(0)';fab.style.pointerEvents='auto';
+    _fabHidden=false;
+  }else{
+    fab.style.opacity='0';fab.style.transform='translateX(-50%) translateY(12px)';fab.style.pointerEvents='none';
+    _fabHidden=true;
+  }
+}
+function initFabScroll(){
+  window.addEventListener('scroll',function(){
+    var cur=window.scrollY||window.pageYOffset;
+    var vt=document.getElementById('v-today');var onToday=vt&&vt.classList.contains('on');
+    if(!onToday){_setFabVisible(true);_fabScrollLast=cur;return;}
+    if(cur>_fabScrollLast+4)_setFabVisible(false);
+    else if(cur<_fabScrollLast-4)_setFabVisible(true);
+    _fabScrollLast=cur;
+    if(_fabScrollTimer)clearTimeout(_fabScrollTimer);
+    _fabScrollTimer=setTimeout(function(){_setFabVisible(true);},800);
+  },{passive:true});
 }
 
 // Wait for Firebase then start
@@ -22564,7 +22589,7 @@ function delProjInc(id){
 </div>
 
 <!-- HATCH FAB — Today only -->
-<div id="hatchFab" style="position:fixed;bottom:28px;left:50%;transform:translateX(-50%);z-index:300;display:none;flex-direction:row;gap:10px;align-items:center">
+<div id="hatchFab" style="position:fixed;bottom:28px;left:50%;transform:translateX(-50%);z-index:300;display:none;flex-direction:row;gap:10px;align-items:center;transition:opacity .3s,transform .3s">
   <button onclick="openOneThingMode()" style="display:flex;align-items:center;gap:8px;padding:11px 18px;border-radius:50px;border:none;background:linear-gradient(135deg,var(--rose),var(--lav));color:#fff;font-family:'Quicksand',sans-serif;font-size:13px;font-weight:700;cursor:pointer;box-shadow:0 4px 18px rgba(201,160,160,.5);white-space:nowrap">🚪 One Thing</button>
   <button onclick="openHatch()" style="display:flex;align-items:center;gap:7px;padding:11px 16px;border-radius:50px;border:none;background:#fff;color:var(--textd);font-family:'Quicksand',sans-serif;font-size:13px;font-weight:700;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.1);white-space:nowrap">⚡ Hatch</button>
   <button onclick="openSpark()" style="display:flex;align-items:center;gap:7px;padding:11px 16px;border-radius:50px;border:none;background:#fff;color:var(--textd);font-family:'Quicksand',sans-serif;font-size:13px;font-weight:700;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.1);white-space:nowrap">💬 Spark</button>
