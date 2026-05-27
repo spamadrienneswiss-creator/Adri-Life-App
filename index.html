@@ -70,14 +70,17 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
 /* TASK */
 .tc{background:white;border-radius:var(--r2);padding:12px 14px;margin-bottom:8px;box-shadow:var(--sh2);display:flex;align-items:flex-start;gap:10px;border-left:3px solid transparent;position:relative;transition:transform .15s}
 .tc:active{transform:scale(.98)}.tc.done{opacity:.55}.tc.done .tt{text-decoration:line-through}
-.tc[data-u="urgent-important"]{border-left-color:var(--ured)}.tc[data-u="important-not-urgent"]{border-left-color:var(--uyel)}.tc[data-u="urgent-not-important"]{border-left-color:var(--ublu)}.tc[data-u="not-urgent"]{border-left-color:var(--una)}
+.tc[data-u="urgent-important"]{border-left:4px solid var(--ured);background:linear-gradient(90deg,#fff5f5 0%,#fff 60%)}
+.tc[data-u="urgent-important"] .tt{font-weight:700}
+.tc[data-u="important-not-urgent"]{border-left-color:var(--uyel)}.tc[data-u="urgent-not-important"]{border-left-color:var(--ublu)}.tc[data-u="not-urgent"]{border-left-color:var(--una)}
 .tchk{width:22px;height:22px;border-radius:50%;border:2px solid #ddd;flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center;font-size:12px;cursor:pointer;transition:all .2s}
 .tc.done .tchk{background:var(--sage);border-color:var(--sage);color:white}
-.tb{flex:1;cursor:pointer}.tt{font-size:14px;font-weight:600;color:var(--text);line-height:1.3}
+.tb{flex:1;cursor:pointer;min-width:0}.tt{font-size:14px;font-weight:600;color:var(--text);line-height:1.3}
 .tm{display:flex;gap:5px;margin-top:5px;flex-wrap:wrap;align-items:center}
 .ttag{font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;text-transform:uppercase}
 .tnote{font-size:11px;color:var(--textl)}.ttime{font-size:10px;color:var(--textl);background:#f5f0eb;padding:1px 6px;border-radius:8px;font-weight:600}
-.tacts{display:flex;gap:4px;flex-shrink:0}
+.tacts{display:flex;gap:4px;flex-shrink:0;opacity:0;transition:opacity .15s;pointer-events:none}
+.tc.acts-open .tacts,.tc:hover .tacts{opacity:1;pointer-events:auto}
 .tact{background:none;border:none;font-size:14px;cursor:pointer;padding:4px;color:var(--textl);border-radius:6px}
 
 /* FILTER */
@@ -762,26 +765,49 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
 .rl-chip-tag{background:var(--rose-light,#fce8ec);color:var(--rose)}
 
 /* ── HATCH SCREEN ── */
-#ovHatch{position:fixed;inset:0;z-index:10000;display:none;flex-direction:column;background:linear-gradient(160deg,#fdf8f4 0%,#f8f0f4 50%,#f4f0fc 100%)}
+#ovHatch{position:fixed;inset:0;z-index:10000;display:none;flex-direction:column;background:linear-gradient(160deg,#fdf8f4 0%,#f8f0f4 50%,#f4f0fc 100%);overflow-y:auto}
 #ovHatch.open{display:flex}
-.hatch-terminal-wrap{flex:1;display:flex;align-items:center;justify-content:center;padding:20px 16px;overflow-y:auto}
-.hatch-terminal{width:100%;max-width:420px}
-.hatch-terminal-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;padding:0 2px}
-.hatch-terminal-title{font-family:'Quicksand',sans-serif;font-size:11px;font-weight:700;color:var(--textl);text-transform:uppercase;letter-spacing:.8px}
-.hatch-screen{background:#fff;border-radius:20px;padding:24px 20px 20px;box-shadow:0 4px 24px rgba(201,160,160,.15),0 1px 4px rgba(0,0,0,.06);border:1.5px solid rgba(201,160,160,.2);min-height:180px;display:flex;flex-direction:column;justify-content:center;margin-bottom:14px}
-.hatch-prompt{font-size:10px;font-weight:700;color:var(--textl);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px;font-family:'Quicksand',sans-serif}
-.hatch-counter{font-size:11px;color:var(--textl);margin-bottom:12px;font-family:'Quicksand',sans-serif}
-.hatch-task-title{font-family:'Quicksand',sans-serif;font-size:22px;font-weight:700;color:var(--textd);line-height:1.35;margin-bottom:12px}
-.hatch-task-meta{font-family:'Quicksand',sans-serif;font-size:12px;color:var(--textl);margin-bottom:4px;font-weight:600}
-.hatch-cursor{display:inline-block;width:2px;height:20px;background:var(--rose);animation:blink .9s step-end infinite;vertical-align:middle;margin-left:4px;border-radius:1px}
-@keyframes blink{50%{opacity:0}}
-.hatch-keys{display:flex;gap:10px}
+.hatch-wrap{flex:1;display:flex;align-items:flex-start;justify-content:center;padding:32px 16px 48px;min-height:100%}
+.hatch-inner{width:100%;max-width:400px}
+.hatch-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px}
+.hatch-logo{font-family:'Quicksand',sans-serif;font-size:20px;font-weight:700;color:var(--textd)}
+.hatch-close-btn{background:none;border:none;font-size:20px;color:var(--textl);cursor:pointer;padding:4px 8px;border-radius:8px;line-height:1;font-family:'Quicksand',sans-serif}
+.hatch-back-btn{background:none;border:none;font-size:13px;font-family:'Quicksand',sans-serif;font-weight:700;color:var(--textl);cursor:pointer;padding:4px 0}
+.hatch-mode-btn{width:100%;padding:16px 18px;border-radius:16px;border:none;background:#fff;box-shadow:0 2px 12px rgba(0,0,0,.07);margin-bottom:10px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:transform .12s;text-align:left;font-family:'Quicksand',sans-serif}
+.hatch-mode-btn:active{transform:scale(.98)}
+.hatch-mode-icon{font-size:24px;flex-shrink:0;line-height:1}
+.hatch-mode-label{font-size:15px;font-weight:700;color:var(--textd);display:block;line-height:1.3}
+.hatch-mode-sub{font-size:11px;color:var(--textl);display:block;margin-top:2px}
+.hatch-spa-pill{width:100%;padding:11px 16px;border-radius:50px;border:1.5px solid rgba(201,160,160,.3);background:rgba(255,255,255,.5);font-family:'Quicksand',sans-serif;font-size:13px;font-weight:600;color:var(--textl);cursor:pointer;margin-top:8px}
+.hatch-card{background:#fff;border-radius:20px;padding:22px 20px;box-shadow:0 4px 20px rgba(201,160,160,.14),0 1px 4px rgba(0,0,0,.05);border:1.5px solid rgba(201,160,160,.18);margin-bottom:14px}
+.hatch-label{font-size:10px;font-weight:700;color:var(--textl);text-transform:uppercase;letter-spacing:.9px;margin-bottom:12px;font-family:'Quicksand',sans-serif}
+.hatch-big-text{font-family:'Quicksand',sans-serif;font-size:20px;font-weight:700;color:var(--textd);line-height:1.5}
+.hatch-keys{display:flex;gap:10px;margin-top:4px}
 .hatch-key{flex:1;padding:14px 8px;border-radius:14px;font-family:'Quicksand',sans-serif;font-size:13px;font-weight:700;cursor:pointer;border:none;transition:transform .1s,opacity .1s}
 .hatch-key:active{transform:scale(.97);opacity:.85}
 .hatch-key-skip{background:#f5f0eb;color:var(--textl)}
 .hatch-key-park{background:#f0eafa;color:var(--lav)}
 .hatch-key-exec{background:linear-gradient(135deg,var(--rose),var(--lav));color:#fff;box-shadow:0 4px 14px rgba(201,160,160,.4)}
-.hatch-empty{font-family:'Quicksand',sans-serif;font-size:15px;color:var(--textl);text-align:center;padding:30px 20px;line-height:1.9;font-weight:600}
+.hatch-key-fire{background:linear-gradient(135deg,#e06060,#c84040);color:#fff;box-shadow:0 4px 14px rgba(200,80,80,.35)}
+.hatch-transmission-card{background:linear-gradient(135deg,#fdf8f0,#faf4e8);border-radius:20px;padding:24px 20px;box-shadow:0 4px 20px rgba(180,140,60,.1);border:1.5px solid rgba(200,160,80,.18);margin-bottom:14px}
+.hatch-signal-row{display:flex;align-items:center;gap:8px;font-family:'Quicksand',sans-serif;font-size:10px;font-weight:700;color:#b08840;text-transform:uppercase;letter-spacing:1px;margin-bottom:14px}
+.hatch-signal-dot{width:7px;height:7px;border-radius:50%;background:#b08840;animation:tpulse 1.3s ease-in-out infinite;flex-shrink:0}
+@keyframes tpulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.35;transform:scale(.65)}}
+.hatch-tx-text{font-family:'Quicksand',sans-serif;font-size:16px;color:#6b5020;line-height:1.65;font-style:italic}
+.hatch-slot-card{background:linear-gradient(140deg,#f6f0fc,#efe8fa);border-radius:20px;padding:24px 20px;margin-bottom:14px;text-align:center;box-shadow:0 4px 18px rgba(140,100,200,.1)}
+.hatch-slot-cat{font-family:'Quicksand',sans-serif;font-size:12px;font-weight:700;color:var(--lav);text-transform:uppercase;letter-spacing:.9px;margin-bottom:10px}
+.hatch-slot-action{font-family:'Quicksand',sans-serif;font-size:18px;font-weight:700;color:var(--textd);line-height:1.45;transition:opacity .12s}
+.hatch-slot-action.rolling{opacity:.25}
+.hatch-timer-lg{font-size:54px;font-family:'Quicksand',sans-serif;font-weight:700;color:var(--rose);text-align:center;padding:8px 0 4px;line-height:1}
+.hatch-timer-lg.urgent{color:#d94040;animation:htpulse .65s ease-in-out infinite}
+@keyframes htpulse{50%{transform:scale(1.06)}}
+.hatch-spa-item{padding:14px 16px;border-radius:14px;border:none;background:#fff;box-shadow:0 2px 10px rgba(0,0,0,.07);margin-bottom:8px;width:100%;display:flex;align-items:center;gap:10px;cursor:pointer;font-family:'Quicksand',sans-serif;font-size:14px;font-weight:700;color:var(--textd);text-align:left;transition:transform .1s}
+.hatch-spa-item:active{transform:scale(.98)}
+.hatch-breathe-ring{width:110px;height:110px;border-radius:50%;border:3px solid var(--lav);margin:18px auto;display:flex;align-items:center;justify-content:center;font-family:'Quicksand',sans-serif;font-size:13px;font-weight:700;color:var(--lav);transition:all 4s ease-in-out}
+.hatch-breathe-ring.inhale{transform:scale(1.5);background:rgba(160,130,200,.12);border-color:var(--rose)}
+.hatch-cursor{display:inline-block;width:2px;height:20px;background:var(--rose);animation:blink .9s step-end infinite;vertical-align:middle;margin-left:4px;border-radius:1px}
+@keyframes blink{50%{opacity:0}}
+.hatch-empty{font-family:'Quicksand',sans-serif;font-size:15px;color:var(--textl);text-align:center;padding:28px 16px;line-height:1.9;font-weight:600}
 #hatchCanvas{position:fixed;inset:0;z-index:10001;pointer-events:none;display:none}
 </style>
 </head>
@@ -3377,6 +3403,44 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
       <div class="set-row" style="flex-direction:column;align-items:flex-start;gap:4px"><div class="set-lbl">Health Notes</div><textarea class="fi" id="amHealthNotes" rows="3" placeholder="Conditions, important info, doctor info…" style="width:100%;resize:vertical"></textarea></div>
       <button class="btn sec" style="width:100%;margin-bottom:8px;font-size:12px" onclick="goTab('wellness',null);setTimeout(function(){showWellnessSec('body',document.querySelector('#v-wellness .pn-btn:nth-child(6)'));renderMeasurements();},200)">📏 Go to Body Measurements →</button>
       <button class="ok-btn" style="margin-top:10px" onclick="saveAboutMe()">Save ✨</button>
+    </div>
+  </div>
+  <div class="card">
+    <div class="set-sec-t" onclick="togSetSec('sc-hatch',this);renderHatchSettings()">🚪 The Hatch <span class="sst-arr">▶</span></div>
+    <div id="sc-hatch" style="display:none">
+      <div style="font-size:12px;color:var(--textl);margin-bottom:14px">Program all the prompts for each Hatch mode. Use AI to refresh them whenever you want.</div>
+
+      <div style="font-size:12px;font-weight:700;color:var(--textd);margin-bottom:8px">🎯 Missions</div>
+      <div style="font-size:11px;color:var(--textl);margin-bottom:8px">Short, specific challenges. You accept or skip.</div>
+      <div id="hatchMissionsList"></div>
+      <div style="display:flex;gap:6px;margin-top:8px;margin-bottom:18px">
+        <input class="fi" id="hatchMissionsInput" placeholder="Add a mission…" style="flex:1;padding:7px 10px;font-size:13px">
+        <button onclick="addHatchItem('hatchMissionsInput','aHatchMissions','hatchMissionsList',HATCH_DEFAULTS.missions)" style="padding:7px 14px;border-radius:9px;border:none;background:var(--rose);color:white;font-family:'Quicksand',sans-serif;font-size:13px;font-weight:700;cursor:pointer">Add</button>
+      </div>
+
+      <div style="font-size:12px;font-weight:700;color:var(--textd);margin-bottom:8px">🎲 Chaos Categories &amp; Actions</div>
+      <div style="font-size:11px;color:var(--textl);margin-bottom:10px">Each category has a pool of actions. The wheel spins and lands on one randomly.</div>
+      <div id="hatchChaosSettings"></div>
+      <div style="display:flex;gap:6px;margin-top:4px;margin-bottom:18px">
+        <input class="fi" id="hatchCatNameInput" placeholder="New category name…" style="flex:1;padding:7px 10px;font-size:13px">
+        <button onclick="addHatchCategory()" style="padding:7px 14px;border-radius:9px;border:none;background:var(--lav);color:white;font-family:'Quicksand',sans-serif;font-size:13px;font-weight:700;cursor:pointer">Add</button>
+      </div>
+
+      <div style="font-size:12px;font-weight:700;color:var(--textd);margin-bottom:8px">📻 Transmissions</div>
+      <div style="font-size:11px;color:var(--textl);margin-bottom:8px">Fiction-flavored nudges from Brindleport. Write them yourself — or get Claude to write a batch.</div>
+      <div id="hatchTransmissionsList"></div>
+      <div style="display:flex;gap:6px;margin-top:8px;margin-bottom:18px">
+        <input class="fi" id="hatchTransmissionsInput" placeholder="Add a transmission…" style="flex:1;padding:7px 10px;font-size:13px">
+        <button onclick="addHatchItem('hatchTransmissionsInput','aHatchTransmissions','hatchTransmissionsList',HATCH_DEFAULTS.transmissions)" style="padding:7px 14px;border-radius:9px;border:none;background:var(--rose);color:white;font-family:'Quicksand',sans-serif;font-size:13px;font-weight:700;cursor:pointer">Add</button>
+      </div>
+
+      <div style="font-size:12px;font-weight:700;color:var(--textd);margin-bottom:8px">⚡ Shock Challenges</div>
+      <div style="font-size:11px;color:var(--textl);margin-bottom:8px">Physical only. 60-second timer fires on deploy.</div>
+      <div id="hatchShocksList"></div>
+      <div style="display:flex;gap:6px;margin-top:8px">
+        <input class="fi" id="hatchShocksInput" placeholder="Add a shock challenge…" style="flex:1;padding:7px 10px;font-size:13px">
+        <button onclick="addHatchItem('hatchShocksInput','aHatchShocks','hatchShocksList',HATCH_DEFAULTS.shocks)" style="padding:7px 14px;border-radius:9px;border:none;background:var(--rose);color:white;font-family:'Quicksand',sans-serif;font-size:13px;font-weight:700;cursor:pointer">Add</button>
+      </div>
     </div>
   </div>
 </div>
@@ -6252,9 +6316,9 @@ function tHTML(t){
     '</div>';
   }).join('');
   return'<div class="tc-wrap">'+
-    '<div class="tc '+(t.done?'done':'')+'" data-u="'+t.urgency+'" id="tc-'+t.id+'">'+
-      '<div class="tchk" onclick="togT(\''+t.id+'\')">'+(t.done?'✓':'')+'</div>'+
-      '<div class="tb" onclick="editT(\''+t.id+'\')">'+
+    '<div class="tc '+(t.done?'done':'')+'" data-u="'+t.urgency+'" id="tc-'+t.id+'" onclick="revealTActs(event,\''+t.id+'\')">'+
+      '<div class="tchk" onclick="event.stopPropagation();togT(\''+t.id+'\')">'+(t.done?'✓':'')+'</div>'+
+      '<div class="tb" onclick="event.stopPropagation();editT(\''+t.id+'\')">'+
         '<div class="tt">'+t.title+(t.repeat?'<span class="rep-badge">'+repIco[t.repeat]+'</span>':'')+'</div>'+
         '<div class="tm">'+catTag(t.cat)+
           (t.etime?'<span class="ttime">'+etm[t.etime]+'</span>':'')+
@@ -6298,6 +6362,15 @@ function togMeaningful(btn){
   btn.textContent=_taskMeaningful?'⭐ Meaningful goal — will celebrate! 🎉':'⭐ Mark as meaningful goal';
 }
 
+function revealTActs(event,id){
+  var tc=document.getElementById('tc-'+id);if(!tc)return;
+  var isOpen=tc.classList.contains('acts-open');
+  document.querySelectorAll('.tc.acts-open').forEach(function(el){el.classList.remove('acts-open');});
+  if(!isOpen)tc.classList.add('acts-open');
+}
+document.addEventListener('click',function(e){
+  if(!e.target.closest('.tc'))document.querySelectorAll('.tc.acts-open').forEach(function(el){el.classList.remove('acts-open');});
+});
 function togT(id){
   var t=TASKS.find(function(t){return t.id===id;});
   if(!t)return;
@@ -7534,86 +7607,298 @@ function pbPickerRemove(id){
 }
 
 // ═══════════════════════════════════════════════
-// HATCH — ESCAPE HATCH / ONE THING MODE
+// HATCH — FIVE-MODE CONSOLE
 // ═══════════════════════════════════════════════
-var _oneThingPool=[], _oneThingIdx=0;
-function openOneThingMode(){
-  buildCatMap();
-  var today=todayStr();
-  _oneThingPool=TASKS.filter(function(t){
-    return !t.done&&!t.parked&&(t.urgency==='important-urgent'||t.urgency==='important-not-urgent'||t.due===today||!t.urgency);
-  }).sort(function(a,b){
-    var order={'important-urgent':0,'important-not-urgent':1,'':2,'not-important-urgent':3,'not-important-not-urgent':4};
-    var ao=order[a.urgency||'']!==undefined?order[a.urgency||'']:2;
-    var bo=order[b.urgency||'']!==undefined?order[b.urgency||'']:2;
-    if(ao!==bo)return ao-bo;
-    if(a.due&&!b.due)return -1;if(!a.due&&b.due)return 1;
-    return 0;
-  });
-  var hatch=document.getElementById('ovHatch');
-  if(!_oneThingPool.length){
-    if(hatch)hatch.classList.add('open');
-    var body=document.getElementById('hatchBody');
-    var body=document.getElementById('hatchBody');
-    if(body)body.innerHTML='<div class="hatch-empty">✨ No active tasks!<br>You\'re clear to go.<br><br>💜 Great work.</div>';
-    return;
-  }
-  _oneThingIdx=0;
-  if(hatch)hatch.classList.add('open');
-  renderOneThingCard();
+var HATCH_DEFAULTS={
+  missions:[
+    "Answer that message you've been putting off",
+    "Do one wig task you've been avoiding this week",
+    "Spend 10 focused minutes on a goal that matters",
+    "Clear one small thing from your physical space",
+    "Make one decision you've been sitting on",
+    "Do something kind for yourself in the next 5 minutes",
+    "Write down 3 things you're genuinely grateful for right now"
+  ],
+  chaos:[
+    {name:'Wigs',actions:["Post one wig update or photo","Follow up with a client you've been avoiding","Research one new technique for 10 minutes","Send one WWOW message you've been putting off"]},
+    {name:'Health',actions:["Drink a full glass of water — right now","Go outside for 90 seconds, just stand there","Do 5 minutes of movement — anything counts","Stretch for 5 minutes"]},
+    {name:'Home',actions:["Clear one surface — any surface","Put away 5 things that don't belong","Light a candle and tidy for 10 minutes","Do one thing from your home list"]},
+    {name:'Spiritual',actions:["Sit in silence for 3 minutes — no phone","Write one thing you're releasing today","Pray or meditate for 5 minutes","Read one page of something meaningful"]},
+    {name:'Creative',actions:["Write one sentence of your story","Make something small just for you","Sketch one idea you've been holding","Play music and do nothing else for 5 minutes"]}
+  ],
+  transmissions:[
+    "Signal received from Brindleport. Ember says the archive needs updating — she's been waiting. Start where you left off.",
+    "Transmission from Cal's coordinates: Reid wants you to know that rest is part of the work. You haven't fallen behind. You're exactly where you should be.",
+    "Message intercepted mid-frequency: the thing you keep putting off? It's smaller than it feels. You can start in the next ten minutes.",
+    "Incoming signal, timestamp unclear: someone in Brindleport wrote something true today. You could too.",
+    "Signal from the lighthouse: Adri — you've already done hard things. This is just the next one."
+  ],
+  shocks:[
+    "Splash cold water on your face right now",
+    "Do 20 jumping jacks",
+    "Scream into a pillow — one good one",
+    "Go outside, stand there for 90 seconds",
+    "Shake your body out for 30 seconds — arms, legs, everything",
+    "10 push-ups or 10 squats, right now"
+  ]
+};
+function _hd(){
+  return{
+    missions:JSON.parse(localStorage.getItem('aHatchMissions')||'null')||HATCH_DEFAULTS.missions.slice(),
+    chaos:JSON.parse(localStorage.getItem('aHatchChaos')||'null')||HATCH_DEFAULTS.chaos.map(function(c){return{name:c.name,actions:c.actions.slice()};}),
+    transmissions:JSON.parse(localStorage.getItem('aHatchTransmissions')||'null')||HATCH_DEFAULTS.transmissions.slice(),
+    shocks:JSON.parse(localStorage.getItem('aHatchShocks')||'null')||HATCH_DEFAULTS.shocks.slice()
+  };
+}
+var _hatchTimerInt=null,_hatchTimerBreath=null;
+function _clearHatchTimers(){
+  if(_hatchTimerInt){clearInterval(_hatchTimerInt);_hatchTimerInt=null;}
+  if(_hatchTimerBreath){clearInterval(_hatchTimerBreath);_hatchTimerBreath=null;}
+}
+function openHatch(){
+  var h=document.getElementById('ovHatch');if(h)h.classList.add('open');
+  hatchMode('selector');
 }
 function closeHatch(){
+  _clearHatchTimers();
   var h=document.getElementById('ovHatch');if(h)h.classList.remove('open');
   renderTodayWorkGlance();
 }
-function renderOneThingCard(){
-  var t=_oneThingPool[_oneThingIdx];
-  if(!t){closeHatch();return;}
-  var cat=catMap[t.cat]||{n:'MISC',c:'#4a8a4a'};
-  var etm={'<10min':'⚡ Under 10 min','<1hr':'🕐 Under an hour','half-day':'📅 Half day','full-day':'🗓️ Full day'};
-  var urgLabel={'important-urgent':'🔥 Do this now','important-not-urgent':'📌 Important','not-important-urgent':'⏰ Time-sensitive','not-important-not-urgent':'📋 When you can'}[t.urgency]||'';
-  var counter=document.getElementById('oneThingCounter');
-  var counterSub=document.getElementById('hatchCounterSub');
-  var titleEl=document.getElementById('oneThingTitle');
-  var metaEl=document.getElementById('oneThingMeta');
-  var catEl=document.getElementById('oneThingCat');
-  if(counter)counter.textContent=(_oneThingIdx+1)+' of '+_oneThingPool.length;
-  if(counterSub)counterSub.textContent='';
-  if(titleEl)titleEl.innerHTML=escHtml(t.title)+'<span class="hatch-cursor"></span>';
-  if(metaEl)metaEl.textContent=[urgLabel,t.etime&&etm[t.etime]||'',t.due?'Due '+t.due:''].filter(Boolean).join('  ·  ');
-  if(catEl)catEl.textContent=cat.n+(t.notes?'  ·  '+t.notes:'');
+function hatchMode(mode){
+  _clearHatchTimers();
+  ['Selector','Mission','Chaos','Transmission','Shock','Spa'].forEach(function(p){
+    var el=document.getElementById('hPanel'+p);if(el)el.style.display='none';
+  });
+  var target=document.getElementById('hPanel'+mode.charAt(0).toUpperCase()+mode.slice(1));
+  if(target)target.style.display='block';
+  if(mode==='mission')_hatchMissionShow();
+  else if(mode==='chaos')hatchChaosRoll();
+  else if(mode==='transmission')_hatchTxShow();
+  else if(mode==='shock')_hatchShockShow();
 }
-function oneThingDone(){
-  var t=_oneThingPool[_oneThingIdx];if(!t)return;
+
+// ─── MISSION ───────────────────────────────────
+function _hatchMissionShow(){
+  var d=_hd();
+  var el=document.getElementById('hMissionText');if(!el)return;
+  if(!d.missions.length){el.textContent='No missions yet — add some in Settings → The Hatch.';return;}
+  el.textContent=d.missions[Math.floor(Math.random()*d.missions.length)];
+}
+function hatchMissionSkip(){_hatchMissionShow();}
+function hatchMissionAccept(){
   if(navigator.vibrate)navigator.vibrate([40,20,40]);
-  togT(t.id);
-  launchPixelFireworks();
-  _oneThingPool.splice(_oneThingIdx,1);
-  if(_oneThingIdx>=_oneThingPool.length)_oneThingIdx=0;
-  if(!_oneThingPool.length){
-    setTimeout(function(){
-      var body=document.getElementById('hatchBody');
-      if(body)body.innerHTML='<div class="hatch-empty">🎉 All done!<br>Every single one.<br><br>You showed up. 💜</div>';
-    },400);
-    return;
-  }
-  setTimeout(renderOneThingCard,350);
+  showToast('Mission accepted. Go. 🫡');
+  closeHatch();
 }
-function oneThingPark(){
-  var t=_oneThingPool[_oneThingIdx];if(!t)return;
-  t.parked=true;fbSave('tasks',t.id,t);
-  _oneThingPool.splice(_oneThingIdx,1);
-  if(_oneThingIdx>=_oneThingPool.length)_oneThingIdx=0;
-  if(!_oneThingPool.length){
-    var body=document.getElementById('hatchBody');
-    if(body)body.innerHTML='<div class="hatch-empty">🅿️ All parked.<br>They\'ll be here when you\'re ready.<br><br>Rest is okay. 💜</div>';
-    return;
-  }
-  renderOneThingCard();
+
+// ─── CHAOS ROLL ────────────────────────────────
+var _chaosResult=null;
+function hatchChaosRoll(){
+  var d=_hd();var cats=d.chaos;
+  var catEl=document.getElementById('hChaosCategory');
+  var actEl=document.getElementById('hChaosAction');
+  var keysEl=document.getElementById('hChaosKeys');
+  var timerLinkEl=document.getElementById('hChaosTimerLink');
+  if(keysEl)keysEl.innerHTML='<button class="hatch-key hatch-key-skip" onclick="hatchChaosRoll()">🎲 Reroll</button><button class="hatch-key hatch-key-exec" onclick="hatchChaosAccept(false)">Go for it ⚡</button>';
+  if(timerLinkEl)timerLinkEl.style.display='block';
+  if(!cats.length){if(catEl)catEl.textContent='No categories';if(actEl)actEl.textContent='Add some in Settings → The Hatch';return;}
+  if(actEl)actEl.classList.add('rolling');
+  var ticks=0,maxTicks=14;
+  var roll=setInterval(function(){
+    var rc=cats[Math.floor(Math.random()*cats.length)];
+    if(catEl)catEl.textContent=rc.name;
+    ticks++;
+    if(ticks>=maxTicks){
+      clearInterval(roll);
+      var fc=cats[Math.floor(Math.random()*cats.length)];
+      var fa=fc.actions.length?fc.actions[Math.floor(Math.random()*fc.actions.length)]:'Add actions in Settings → The Hatch';
+      _chaosResult={cat:fc.name,action:fa};
+      if(catEl)catEl.textContent=fc.name;
+      if(actEl){actEl.classList.remove('rolling');actEl.textContent=fa;}
+    }
+  },80);
 }
-function oneThingSkip(){
-  _oneThingIdx=(_oneThingIdx+1)%_oneThingPool.length;
-  renderOneThingCard();
+function hatchChaosAccept(withTimer){
+  if(!_chaosResult)return;
+  if(navigator.vibrate)navigator.vibrate(50);
+  if(withTimer){
+    var timerLinkEl=document.getElementById('hChaosTimerLink');if(timerLinkEl)timerLinkEl.style.display='none';
+    var keysEl=document.getElementById('hChaosKeys');
+    if(keysEl)keysEl.innerHTML='<div class="hatch-timer-lg" id="hChaosCountdown">10:00</div>';
+    var secs=600;
+    function upd(){var m=Math.floor(secs/60);var s=secs%60;var el=document.getElementById('hChaosCountdown');if(el){el.textContent=m+':'+(s<10?'0':'')+s;el.classList.toggle('urgent',secs<=60);}}
+    upd();
+    _hatchTimerInt=setInterval(function(){secs--;upd();if(secs<=0){_clearHatchTimers();if(navigator.vibrate)navigator.vibrate([200,100,200]);var el=document.getElementById('hChaosCountdown');if(el)el.textContent='⏰ Time!';}},1000);
+  }else{
+    showToast('Go for it! 🎲 '+_chaosResult.cat);
+    closeHatch();
+  }
+}
+
+// ─── TRANSMISSION ──────────────────────────────
+var _lastTxIdx=-1;
+function _hatchTxShow(){
+  var d=_hd();var list=d.transmissions;
+  var el=document.getElementById('hTransmissionText');if(!el)return;
+  if(!list.length){el.textContent='No transmissions yet — add some in Settings → The Hatch.';return;}
+  var idx;do{idx=Math.floor(Math.random()*list.length);}while(list.length>1&&idx===_lastTxIdx);
+  _lastTxIdx=idx;
+  el.textContent=list[idx];
+}
+
+// ─── SHOCK ─────────────────────────────────────
+var _shockDeployed=false;
+function _hatchShockShow(){
+  _shockDeployed=false;
+  var d=_hd();var shocks=d.shocks;
+  var s=shocks.length?shocks[Math.floor(Math.random()*shocks.length)]:'No shocks yet — add some in Settings → The Hatch.';
+  var el=document.getElementById('hShockText');if(el)el.textContent=s;
+  var timerEl=document.getElementById('hShockTimer');if(timerEl)timerEl.style.display='none';
+  var keysEl=document.getElementById('hShockKeys');
+  if(keysEl)keysEl.innerHTML='<button class="hatch-key hatch-key-skip" onclick="hatchMode(\'selector\')">not today</button><button class="hatch-key hatch-key-fire" onclick="hatchShockDeploy()">Deploy ⚡</button>';
+}
+function hatchShockDeploy(){
+  if(_shockDeployed)return;_shockDeployed=true;
+  if(navigator.vibrate)navigator.vibrate([100,50,100]);
+  var timerEl=document.getElementById('hShockTimer');if(timerEl)timerEl.style.display='block';
+  var keysEl=document.getElementById('hShockKeys');
+  if(keysEl)keysEl.innerHTML='<button class="hatch-key hatch-key-exec" onclick="hatchShockDone()">Done ✓</button>';
+  var secs=60;if(timerEl)timerEl.textContent=secs;
+  _hatchTimerInt=setInterval(function(){
+    secs--;
+    if(timerEl){timerEl.textContent=secs;timerEl.classList.toggle('urgent',secs<=10);}
+    if(secs<=0){_clearHatchTimers();if(navigator.vibrate)navigator.vibrate([100,50,100,50,100]);if(timerEl)timerEl.textContent='✓';if(keysEl)keysEl.innerHTML='<button class="hatch-key hatch-key-exec" onclick="hatchShockDone()">Nice work ✓</button>';}
+  },1000);
+}
+function hatchShockDone(){_clearHatchTimers();if(navigator.vibrate)navigator.vibrate([40,20,40]);showToast('System shocked ⚡💜');closeHatch();}
+
+// ─── SPA ───────────────────────────────────────
+function hatchSpaWalk(){
+  var el=document.getElementById('hSpaContent');if(!el)return;
+  _clearHatchTimers();
+  el.innerHTML='<div class="hatch-card" style="text-align:center"><div class="hatch-label">🚶 Walk Timer</div><div class="hatch-timer-lg" id="hSpaTimer">10:00</div><button class="hatch-key hatch-key-skip" onclick="stopHatchSpa()" style="margin-top:10px;max-width:160px">Done</button></div>';
+  var secs=600;
+  _hatchTimerInt=setInterval(function(){
+    secs--;
+    var m=Math.floor(secs/60);var s=secs%60;
+    var el2=document.getElementById('hSpaTimer');
+    if(el2)el2.textContent=m+':'+(s<10?'0':'')+s;
+    if(secs<=0){_clearHatchTimers();if(navigator.vibrate)navigator.vibrate([200,100,200]);if(el2)el2.textContent='✓ Done!';}
+  },1000);
+}
+function hatchSpaGround(){
+  var el=document.getElementById('hSpaContent');if(!el)return;
+  _clearHatchTimers();
+  el.innerHTML='<div class="hatch-card"><div class="hatch-label">🌿 5-4-3-2-1 Grounding</div>'+
+    ['👀 5 things you can SEE','🤚 4 things you can TOUCH','👂 3 things you can HEAR','👃 2 things you can SMELL','👅 1 thing you can TASTE'].map(function(s){
+      return'<div style="font-family:\'Quicksand\',sans-serif;font-size:14px;font-weight:700;color:var(--textd);padding:9px 0;border-bottom:1px solid rgba(0,0,0,.05)">'+escHtml(s)+'</div>';
+    }).join('')+'</div>';
+}
+function hatchSpaBreathe(){
+  var el=document.getElementById('hSpaContent');if(!el)return;
+  _clearHatchTimers();
+  el.innerHTML='<div class="hatch-card" style="text-align:center"><div class="hatch-label">🌬️ 60-sec Breathing</div><div class="hatch-breathe-ring" id="hBreatheRing" style="transition:none">Inhale</div><div style="font-family:\'Quicksand\',sans-serif;font-size:12px;color:var(--textl);margin-top:6px" id="hBreatheLabel">Breathe in…</div><button onclick="stopHatchSpa()" style="margin-top:14px;background:none;border:none;font-family:\'Quicksand\',sans-serif;font-size:13px;color:var(--textl);font-weight:700;cursor:pointer">Stop</button></div>';
+  var elapsed=0,total=60;
+  setTimeout(function(){var r=document.getElementById('hBreatheRing');if(r)r.style.transition='all 4s ease-in-out';},50);
+  function updateBreath(){
+    var r=document.getElementById('hBreatheRing');var lb=document.getElementById('hBreatheLabel');if(!r)return;
+    var phase=Math.floor(elapsed/4)%2;
+    if(phase===0){r.className='hatch-breathe-ring inhale';r.textContent='Inhale';if(lb)lb.textContent='Breathe in…';}
+    else{r.className='hatch-breathe-ring';r.textContent='Exhale';if(lb)lb.textContent='Let it out…';}
+  }
+  updateBreath();
+  _hatchTimerBreath=setInterval(function(){
+    elapsed++;
+    if(elapsed>=total){_clearHatchTimers();var r=document.getElementById('hBreatheRing');var lb=document.getElementById('hBreatheLabel');if(r){r.className='hatch-breathe-ring';r.textContent='💜';}if(lb)lb.textContent='Done. Well done. 💜';return;}
+    if(elapsed%4===0)updateBreath();
+  },1000);
+}
+function stopHatchSpa(){_clearHatchTimers();var el=document.getElementById('hSpaContent');if(el)el.innerHTML='';}
+
+// ─── HATCH SETTINGS ────────────────────────────
+function renderHatchSettings(){
+  renderHatchList('hatchMissionsList','aHatchMissions',HATCH_DEFAULTS.missions);
+  renderHatchList('hatchTransmissionsList','aHatchTransmissions',HATCH_DEFAULTS.transmissions);
+  renderHatchList('hatchShocksList','aHatchShocks',HATCH_DEFAULTS.shocks);
+  renderHatchChaosSettings();
+}
+function renderHatchList(elId,key,defaults){
+  var el=document.getElementById(elId);if(!el)return;
+  var items=JSON.parse(localStorage.getItem(key)||'null')||defaults.slice();
+  el.innerHTML=items.map(function(item,i){
+    return'<div style="display:flex;align-items:flex-start;gap:8px;padding:7px 0;border-bottom:1px solid rgba(0,0,0,.05)">'+
+      '<div style="flex:1;font-family:\'Quicksand\',sans-serif;font-size:13px;color:var(--textd);line-height:1.4">'+escHtml(item)+'</div>'+
+      '<button onclick="delHatchItem(\''+key+'\','+i+',\''+elId+'\','+JSON.stringify(defaults)+')" style="background:none;border:none;color:var(--textl);cursor:pointer;font-size:15px;padding:0 2px;flex-shrink:0;line-height:1">✕</button>'+
+    '</div>';
+  }).join('')+(items.length?'':'<div style="font-size:12px;color:var(--textl);padding:6px 0">None yet. Add one below.</div>');
+}
+function delHatchItem(key,idx,elId,defaults){
+  var items=JSON.parse(localStorage.getItem(key)||'null')||defaults.slice();
+  items.splice(idx,1);
+  localStorage.setItem(key,JSON.stringify(items));
+  renderHatchList(elId,key,defaults);
+}
+function addHatchItem(inputId,key,elId,defaults){
+  var inp=document.getElementById(inputId);if(!inp)return;
+  var val=inp.value.trim();if(!val){showToast('Enter some text first');return;}
+  var items=JSON.parse(localStorage.getItem(key)||'null')||defaults.slice();
+  items.push(val);
+  localStorage.setItem(key,JSON.stringify(items));
+  inp.value='';
+  renderHatchList(elId,key,defaults);
+  showToast('Added ✓');
+}
+function renderHatchChaosSettings(){
+  var el=document.getElementById('hatchChaosSettings');if(!el)return;
+  var cats=JSON.parse(localStorage.getItem('aHatchChaos')||'null')||HATCH_DEFAULTS.chaos.map(function(c){return{name:c.name,actions:c.actions.slice()};});
+  el.innerHTML=cats.map(function(cat,ci){
+    return'<div style="margin-bottom:12px;background:#faf8f5;border-radius:12px;padding:10px 12px">'+
+      '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">'+
+        '<div style="font-size:13px;font-weight:700;color:var(--textd);flex:1">'+escHtml(cat.name)+'</div>'+
+        '<button onclick="delHatchCategory('+ci+')" style="background:none;border:none;color:var(--textl);cursor:pointer;font-size:13px;padding:0">Remove</button>'+
+      '</div>'+
+      cat.actions.map(function(a,ai){
+        return'<div style="display:flex;align-items:flex-start;gap:6px;padding:4px 0">'+
+          '<div style="flex:1;font-size:12px;color:var(--textd);line-height:1.4">• '+escHtml(a)+'</div>'+
+          '<button onclick="delHatchCategoryAction('+ci+','+ai+')" style="background:none;border:none;color:var(--textl);cursor:pointer;font-size:13px;padding:0;flex-shrink:0">✕</button>'+
+        '</div>';
+      }).join('')+
+      '<div style="display:flex;gap:6px;margin-top:8px">'+
+        '<input class="fi" id="hatchActInp'+ci+'" placeholder="Add action..." style="flex:1;padding:6px 8px;font-size:12px">'+
+        '<button onclick="addHatchCategoryAction('+ci+')" style="padding:6px 10px;border-radius:8px;border:none;background:var(--rose);color:white;font-family:\'Quicksand\',sans-serif;font-size:12px;font-weight:700;cursor:pointer">Add</button>'+
+      '</div>'+
+    '</div>';
+  }).join('');
+}
+function delHatchCategory(ci){
+  var cats=JSON.parse(localStorage.getItem('aHatchChaos')||'null')||HATCH_DEFAULTS.chaos.map(function(c){return{name:c.name,actions:c.actions.slice()};});
+  cats.splice(ci,1);
+  localStorage.setItem('aHatchChaos',JSON.stringify(cats));
+  renderHatchChaosSettings();
+}
+function addHatchCategory(){
+  var inp=document.getElementById('hatchCatNameInput');if(!inp)return;
+  var val=inp.value.trim();if(!val){showToast('Enter a category name');return;}
+  var cats=JSON.parse(localStorage.getItem('aHatchChaos')||'null')||HATCH_DEFAULTS.chaos.map(function(c){return{name:c.name,actions:c.actions.slice()};});
+  cats.push({name:val,actions:[]});
+  localStorage.setItem('aHatchChaos',JSON.stringify(cats));
+  inp.value='';renderHatchChaosSettings();showToast('Category added ✓');
+}
+function addHatchCategoryAction(ci){
+  var inp=document.getElementById('hatchActInp'+ci);if(!inp)return;
+  var val=inp.value.trim();if(!val){showToast('Enter an action');return;}
+  var cats=JSON.parse(localStorage.getItem('aHatchChaos')||'null')||HATCH_DEFAULTS.chaos.map(function(c){return{name:c.name,actions:c.actions.slice()};});
+  if(!cats[ci])return;
+  cats[ci].actions.push(val);
+  localStorage.setItem('aHatchChaos',JSON.stringify(cats));
+  inp.value='';renderHatchChaosSettings();showToast('Action added ✓');
+}
+function delHatchCategoryAction(ci,ai){
+  var cats=JSON.parse(localStorage.getItem('aHatchChaos')||'null')||HATCH_DEFAULTS.chaos.map(function(c){return{name:c.name,actions:c.actions.slice()};});
+  if(!cats[ci])return;
+  cats[ci].actions.splice(ai,1);
+  localStorage.setItem('aHatchChaos',JSON.stringify(cats));
+  renderHatchChaosSettings();
 }
 
 // ═══════════════════════════════════════════════
@@ -9516,6 +9801,7 @@ function renderSettings(){
   document.getElementById('sWatLbl').textContent='💧 Water Goal ('+(S.wUnit==='oz'?'oz/day':'glasses/day')+')';
   renderSymSettings();
   renderColorPickers();
+  renderHatchSettings();
 }
 
 function selBanner(id){
@@ -21770,35 +22056,124 @@ function delProjInc(id){
 
 <!-- HATCH FAB — Today only -->
 <div id="hatchFab" style="position:fixed;bottom:28px;left:50%;transform:translateX(-50%);z-index:300;display:none;flex-direction:row;gap:10px;align-items:center">
-  <button onclick="openOneThingMode()" style="display:flex;align-items:center;gap:8px;padding:11px 18px;border-radius:50px;border:none;background:linear-gradient(135deg,var(--rose),var(--lav));color:#fff;font-family:'Quicksand',sans-serif;font-size:13px;font-weight:700;cursor:pointer;box-shadow:0 4px 18px rgba(201,160,160,.5);white-space:nowrap">🚪 One Thing</button>
+  <button onclick="openHatch()" style="display:flex;align-items:center;gap:8px;padding:11px 18px;border-radius:50px;border:none;background:linear-gradient(135deg,var(--rose),var(--lav));color:#fff;font-family:'Quicksand',sans-serif;font-size:13px;font-weight:700;cursor:pointer;box-shadow:0 4px 18px rgba(201,160,160,.5);white-space:nowrap">🚪 Hatch</button>
   <button onclick="openDayWrapUp()" style="display:flex;align-items:center;gap:7px;padding:11px 16px;border-radius:50px;border:none;background:#fff;color:var(--textd);font-family:'Quicksand',sans-serif;font-size:13px;font-weight:700;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.1);white-space:nowrap">🌙 Wrap Up</button>
 </div>
 
 <!-- HATCH SCREEN -->
 <canvas id="hatchCanvas"></canvas>
 <div id="ovHatch">
-  <div class="hatch-terminal-wrap">
-    <div class="hatch-terminal">
-      <div class="hatch-terminal-top">
-        <div class="hatch-terminal-title">Just One Thing 🚪</div>
-        <div id="oneThingCounter" style="font-family:'Quicksand',sans-serif;font-size:11px;color:var(--textl);font-weight:600"></div>
+  <div class="hatch-wrap">
+    <div class="hatch-inner">
+
+      <!-- MODE SELECTOR -->
+      <div id="hPanelSelector">
+        <div class="hatch-header">
+          <div class="hatch-logo">🚪 The Hatch</div>
+          <button class="hatch-close-btn" onclick="closeHatch()">✕</button>
+        </div>
+        <button class="hatch-mode-btn" onclick="hatchMode('mission')">
+          <span class="hatch-mode-icon">🎯</span>
+          <span><span class="hatch-mode-label">Mission Briefing</span><span class="hatch-mode-sub">Random challenge — accept or skip</span></span>
+        </button>
+        <button class="hatch-mode-btn" onclick="hatchMode('chaos')">
+          <span class="hatch-mode-icon">🎲</span>
+          <span><span class="hatch-mode-label">Chaos Roll</span><span class="hatch-mode-sub">Spin the wheel — lands on a life area</span></span>
+        </button>
+        <button class="hatch-mode-btn" onclick="hatchMode('transmission')">
+          <span class="hatch-mode-icon">📻</span>
+          <span><span class="hatch-mode-label">Transmission</span><span class="hatch-mode-sub">Signal received from Brindleport…</span></span>
+        </button>
+        <button class="hatch-mode-btn" onclick="hatchMode('shock')">
+          <span class="hatch-mode-icon">⚡</span>
+          <span><span class="hatch-mode-label">Shock the System</span><span class="hatch-mode-sub">60 seconds. Physical only. Go.</span></span>
+        </button>
+        <button class="hatch-spa-pill" onclick="hatchMode('spa')">🛁 Need to land first?</button>
       </div>
-      <div class="hatch-screen" id="hatchBody">
-        <div class="hatch-prompt">Focus on this right now</div>
-        <div class="hatch-counter" id="hatchCounterSub"></div>
-        <div class="hatch-task-title" id="oneThingTitle"><span class="hatch-cursor"></span></div>
-        <div class="hatch-task-meta" id="oneThingMeta"></div>
-        <div class="hatch-task-meta" id="oneThingCat"></div>
+
+      <!-- MISSION -->
+      <div id="hPanelMission" style="display:none">
+        <div class="hatch-header">
+          <button class="hatch-back-btn" onclick="hatchMode('selector')">← Back</button>
+          <button class="hatch-close-btn" onclick="closeHatch()">✕</button>
+        </div>
+        <div class="hatch-card">
+          <div class="hatch-label">🎯 Mission Briefing</div>
+          <div class="hatch-big-text" id="hMissionText"></div>
+        </div>
+        <div class="hatch-keys">
+          <button class="hatch-key hatch-key-skip" onclick="hatchMissionSkip()">Skip →</button>
+          <button class="hatch-key hatch-key-exec" onclick="hatchMissionAccept()">Accept 🫡</button>
+        </div>
       </div>
-      <div class="hatch-keys">
-        <button class="hatch-key hatch-key-skip" onclick="oneThingSkip()">Skip →</button>
-        <button class="hatch-key hatch-key-park" onclick="oneThingPark()">🅿️ Park</button>
-        <button class="hatch-key hatch-key-exec" onclick="oneThingDone()">✓ Done</button>
+
+      <!-- CHAOS ROLL -->
+      <div id="hPanelChaos" style="display:none">
+        <div class="hatch-header">
+          <button class="hatch-back-btn" onclick="hatchMode('selector')">← Back</button>
+          <button class="hatch-close-btn" onclick="closeHatch()">✕</button>
+        </div>
+        <div class="hatch-slot-card">
+          <div class="hatch-slot-cat" id="hChaosCategory">Rolling…</div>
+          <div class="hatch-slot-action" id="hChaosAction">Spin to find out</div>
+        </div>
+        <div class="hatch-keys" id="hChaosKeys">
+          <button class="hatch-key hatch-key-skip" onclick="hatchChaosRoll()">🎲 Reroll</button>
+          <button class="hatch-key hatch-key-exec" onclick="hatchChaosAccept(false)">Go for it ⚡</button>
+        </div>
+        <div style="text-align:center;margin-top:10px" id="hChaosTimerLink">
+          <button onclick="hatchChaosAccept(true)" style="background:none;border:none;font-family:'Quicksand',sans-serif;font-size:12px;font-weight:700;color:var(--textl);cursor:pointer">+ Add a 10-min timer</button>
+        </div>
       </div>
+
+      <!-- TRANSMISSION -->
+      <div id="hPanelTransmission" style="display:none">
+        <div class="hatch-header">
+          <button class="hatch-back-btn" onclick="hatchMode('selector')">← Back</button>
+          <button class="hatch-close-btn" onclick="closeHatch()">✕</button>
+        </div>
+        <div class="hatch-transmission-card">
+          <div class="hatch-signal-row"><span class="hatch-signal-dot"></span>Signal received from Brindleport…</div>
+          <div class="hatch-tx-text" id="hTransmissionText"></div>
+        </div>
+        <div class="hatch-keys">
+          <button class="hatch-key hatch-key-skip" onclick="_hatchTxShow()">Next →</button>
+          <button class="hatch-key hatch-key-exec" onclick="hatchMode('selector')">Received 📖</button>
+        </div>
+      </div>
+
+      <!-- SHOCK -->
+      <div id="hPanelShock" style="display:none">
+        <div class="hatch-header">
+          <button class="hatch-back-btn" onclick="hatchMode('selector')">← Back</button>
+          <button class="hatch-close-btn" onclick="closeHatch()">✕</button>
+        </div>
+        <div class="hatch-card" style="text-align:center">
+          <div class="hatch-label">⚡ Shock the System</div>
+          <div class="hatch-big-text" id="hShockText" style="text-align:left"></div>
+          <div id="hShockTimer" class="hatch-timer-lg" style="display:none">60</div>
+        </div>
+        <div class="hatch-keys" id="hShockKeys">
+          <button class="hatch-key hatch-key-skip" onclick="hatchMode('selector')">not today</button>
+          <button class="hatch-key hatch-key-fire" onclick="hatchShockDeploy()">Deploy ⚡</button>
+        </div>
+      </div>
+
+      <!-- SPA -->
+      <div id="hPanelSpa" style="display:none">
+        <div class="hatch-header">
+          <button class="hatch-back-btn" onclick="hatchMode('selector')">← Back</button>
+          <button class="hatch-close-btn" onclick="closeHatch()">✕</button>
+        </div>
+        <div style="font-family:'Quicksand',sans-serif;font-size:17px;font-weight:700;color:var(--textd);margin-bottom:4px">Let's slow it down. 💜</div>
+        <div style="font-family:'Quicksand',sans-serif;font-size:12px;color:var(--textl);margin-bottom:18px">Pick what you need.</div>
+        <button class="hatch-spa-item" onclick="hatchSpaWalk()"><span style="font-size:20px">🚶</span><span style="flex:1">Walk timer</span><span style="font-size:11px;color:var(--textl);font-weight:400">10 min</span></button>
+        <button class="hatch-spa-item" onclick="hatchSpaGround()"><span style="font-size:20px">🌿</span>5-4-3-2-1 Grounding</button>
+        <button class="hatch-spa-item" onclick="hatchSpaBreathe()"><span style="font-size:20px">🌬️</span>60-sec breathing</button>
+        <div id="hSpaContent" style="margin-top:12px"></div>
+      </div>
+
     </div>
-  </div>
-  <div style="padding:0 16px 32px;display:flex;justify-content:center">
-    <button onclick="closeHatch()" style="font-family:'Quicksand',sans-serif;font-size:13px;font-weight:700;color:var(--textl);background:none;border:none;padding:10px 24px;cursor:pointer">I need a break 💜</button>
   </div>
 </div>
 
