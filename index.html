@@ -1106,6 +1106,7 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     </div>
     <div class="hub-card span2" onclick="goTab('wigs',null)"><div class="hub-card-ic">🪄</div><div class="hub-card-name">Wigs</div><div class="hub-card-sub" id="hub-wigs-sub">Loading…</div></div>
     <div class="hub-card span2" onclick="goTab('work-projects',null)"><div class="hub-card-ic">📁</div><div class="hub-card-name">Work Projects</div><div class="hub-card-sub" id="hub-work-proj-sub">Wig projects &amp; tasks</div></div>
+    <div class="hub-card span2" onclick="goTab('loreal',null)" style="background:linear-gradient(135deg,#fff0f4,#fce8f0)"><div class="hub-card-ic">💄</div><div class="hub-card-name">L'Oréal</div><div class="hub-card-sub">Reference &amp; resources</div></div>
   </div>
 </div>
 
@@ -1167,6 +1168,7 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     <button class="qa" onclick="goTab('focus-session',null)" style="background:linear-gradient(135deg,#eee8f8,#f8e8e8)"><div class="qa-ic">🎯</div><div class="qa-lb">Focus</div></button>
     <button class="qa" onclick="goTab('spirit',null);setTimeout(function(){showSpiritSec('bible',document.querySelector('#v-spirit .pn-btn:nth-child(2)'))},200)" style="background:linear-gradient(135deg,#e8f0f8,#dce8f4)"><div class="qa-ic">📖</div><div class="qa-lb">Bible</div></button>
     <button class="qa" onclick="goTab('wigs',null)" style="background:linear-gradient(135deg,#f0e8f8,#fdf0f8)"><div class="qa-ic">✂️</div><div class="qa-lb">Wigs</div></button>
+    <button class="qa" onclick="goTab('loreal',null)" style="background:linear-gradient(135deg,#fff0f4,#fce8f0)"><div class="qa-ic">💄</div><div class="qa-lb">L'Oréal</div></button>
   </div>
   <!-- Quick Stats (collapsible) -->
   <div class="card" style="padding:0;margin-bottom:10px">
@@ -1624,6 +1626,27 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
   <div id="wigOrderList"></div>
 </div>
 
+<div class="view" id="v-loreal">
+  <!-- Header -->
+  <div style="background:linear-gradient(135deg,#fff0f4,#fce8f0);border-radius:16px;padding:14px 16px;margin-bottom:14px;display:flex;align-items:center;gap:12px">
+    <span style="font-size:28px">💄</span>
+    <div>
+      <div style="font-family:'Playfair Display',serif;font-size:18px;color:var(--textd);font-weight:700">L'Oréal</div>
+      <div style="font-size:11px;color:var(--textl);margin-top:1px">Reference &amp; Resources</div>
+    </div>
+  </div>
+  <!-- Quick Links -->
+  <div style="font-size:11px;font-weight:700;color:var(--textl);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px">Quick Links</div>
+  <div id="lorealLinks" style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px"></div>
+  <button onclick="openLorealLinkModal(null)" style="width:100%;padding:9px;border-radius:10px;border:1.5px dashed var(--bdr);background:none;font-family:'Quicksand',sans-serif;font-size:12px;font-weight:700;cursor:pointer;color:var(--textl);margin-bottom:16px">＋ Add Link</button>
+  <!-- Reference Notes -->
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+    <span style="font-size:11px;font-weight:700;color:var(--textl);text-transform:uppercase;letter-spacing:.8px">Reference Notes</span>
+    <button onclick="openLorealNoteModal(null)" style="padding:3px 10px;border-radius:8px;border:1.5px solid var(--bdr);background:none;font-family:'Quicksand',sans-serif;font-size:11px;font-weight:700;cursor:pointer;color:var(--textd)">＋ Add Section</button>
+  </div>
+  <div id="lorealNotes" style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px"></div>
+</div>
+
 <div class="view" id="v-work-projects">
   <div style="font-family:'Playfair Display',serif;font-size:20px;color:var(--textd);margin-bottom:10px">📁 Work Projects</div>
   <div style="display:flex;gap:8px;margin-bottom:12px">
@@ -1647,11 +1670,41 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
   </div>
   <!-- Overview -->
   <div id="ms-overview" class="money-sec">
+    <!-- Quick actions -->
+    <div style="display:flex;gap:8px;margin-bottom:12px">
+      <button class="ok-btn" style="flex:1;margin:0;padding:9px;font-size:12px;background:linear-gradient(135deg,var(--sage),var(--teal))" onclick="openM('incModal')">💰 Log Income</button>
+      <button class="ok-btn" style="flex:1;margin:0;padding:9px;font-size:12px;background:linear-gradient(135deg,#e07a5f,#c05a3f)" onclick="openM('expModal')">💸 Log Expense</button>
+    </div>
+    <!-- Income goal bar -->
+    <div class="card" style="margin-bottom:12px;padding:10px 14px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+        <span style="font-size:12px;font-weight:700;color:var(--textd)">🎯 Monthly Income Goal</span>
+        <button onclick="setMonthlyIncGoal()" style="font-size:10px;padding:2px 8px;border-radius:6px;border:1.5px solid var(--bdr);background:none;font-family:'Quicksand',sans-serif;font-weight:700;cursor:pointer;color:var(--textd)">Set</button>
+      </div>
+      <div style="height:7px;background:#f0ebe6;border-radius:4px;overflow:hidden;margin-bottom:5px">
+        <div id="ovGoalFill" style="height:100%;background:linear-gradient(90deg,var(--sage),var(--teal));transition:width .6s;width:0%"></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--textl)">
+        <span id="ovGoalAmt">$0 this month</span>
+        <span id="ovGoalTarget">No goal set</span>
+      </div>
+    </div>
+    <!-- P&L stat tiles -->
     <div class="mny-g">
       <div class="mny-c"><div class="mny-l">Month Income</div><div class="mny-n" id="mThisInc">$0</div></div>
       <div class="mny-c"><div class="mny-l">Month Expenses</div><div class="mny-n" id="mThisExp">$0</div></div>
       <div class="mny-c"><div class="mny-l">Net</div><div class="mny-n" id="mNet" style="font-size:20px">$0</div></div>
-      <div class="mny-c"><div class="mny-l">WWOW Income</div><div class="mny-n" id="mInc">$0</div></div>
+      <div class="mny-c"><div class="mny-l">WWOW This Month</div><div class="mny-n" id="mInc">$0</div></div>
+    </div>
+    <!-- WWOW Business P&L card -->
+    <div class="card" style="padding:0;margin-bottom:8px">
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;cursor:pointer" onclick="togOvSec('ov-biz')">
+        <span style="font-size:13px;font-weight:700;color:var(--textd)">✂️ WWOW Business P&amp;L</span>
+        <span style="display:flex;align-items:center;gap:8px"><span style="font-size:15px;font-weight:700;color:var(--sage)" id="ovBizNet">$0</span><span id="ovBizArr">▸</span></span>
+      </div>
+      <div id="ov-biz" style="display:none;padding:0 14px 12px">
+        <div id="ovBizDetail" style="font-size:13px;color:var(--textd)"></div>
+      </div>
     </div>
     <!-- Collapsible overview sections -->
     <div class="card" style="padding:0;margin-bottom:8px">
@@ -4939,7 +4992,7 @@ var MEAL_COMBOS = JSON.parse(localStorage.getItem('aMC')||'null')||[
 var DEFAULT_TAB_ORDER=['today','plan','helm','lighthouse','conservatory','hearthside','workshop','estate','emporium','archives','archive','settings'];
 var TAB_LABELS={today:'Today',plan:'Plan',helm:'Tasks & Projects',conservatory:'Personal Growth',hearthside:'Health & Wellness',workshop:'Workshop',lighthouse:'Spiritual',estate:'Money & Home',emporium:'Work',archives:'Research Library',archive:'Archive',settings:'Settings',stories:'Stories',mixtape:'Mixtape','focus-session':'Focus Session',grocery:'Grocery List',export:'Export',routines:'Routines',lists:'Lists'};
 var TAB_ORDER=(function(){var o=JSON.parse(localStorage.getItem('aTabOrder')||'null');if(!o)return DEFAULT_TAB_ORDER.slice();var full=DEFAULT_TAB_ORDER.slice();o=o.filter(function(t){return full.indexOf(t)>-1;});full.forEach(function(t){if(o.indexOf(t)<0)o.push(t);});return o;})();
-var SECTION_VIEWS={today:['today'],plan:['plan'],helm:['tasks','projects','focus-session','grocery'],lists:['lists'],conservatory:['goals','learn','focus'],hearthside:['food','meals','wellness','recap'],workshop:['board','faves','stories','mixtape','places'],lighthouse:['spirit'],estate:['money','accounts','home-items','money-projects'],emporium:['wigs','work-projects'],archives:['guide','routines'],settings:['settings','export'],archive:['archive']};
+var SECTION_VIEWS={today:['today'],plan:['plan'],helm:['tasks','projects','focus-session','grocery'],lists:['lists'],conservatory:['goals','learn','focus'],hearthside:['food','meals','wellness','recap'],workshop:['board','faves','stories','mixtape','places'],lighthouse:['spirit'],estate:['money','accounts','home-items','money-projects'],emporium:['wigs','work-projects','loreal'],archives:['guide','routines'],settings:['settings','export'],archive:['archive']};
 var SECTION_LABELS={today:'Today',plan:'Plan',helm:'Tasks & Projects',conservatory:'Personal Growth',hearthside:'Health & Wellness',workshop:'Workshop',lighthouse:'Spiritual',estate:'Money & Home',emporium:'Work',archives:'Research Library',archive:'Archive',settings:'Settings'};
 var VIEW_SECTION=(function(){var m={};Object.keys(SECTION_VIEWS).forEach(function(s){SECTION_VIEWS[s].forEach(function(v){m[v]=s;});});return m;})();
 
@@ -5241,6 +5294,7 @@ function goTabDirect(tab,btn){
   if(tab==='focus-session'){ renderFocusSession(); }
   if(tab==='lists'){ renderListQBar(); renderLists(); }
   if(tab==='wigs'){ renderWigOrders(); }
+  if(tab==='loreal'){ renderLorealPage(); }
   if(tab==='plan'){ renderPlan(); }
   if(tab==='grocery'){ renderGroceryList(); populateGrocTaskDatalist(); }
   if(tab==='guide'){ renderResearchLib(); renderGuide(); renderTmplList(); renderAppIndex(); }
@@ -7677,7 +7731,7 @@ function renderE(){
   var thisMonExpAmt=confirmedExp.reduce(function(s,e){return s+e.amt;},0);
   var pendingAmt=pendingExp.reduce(function(s,e){return s+e.amt;},0);
   var thisMonIncAmt=INCOME.filter(function(i){return(i.created||'').startsWith(mon);}).reduce(function(s,i){return s+i.amt;},0);
-  var wigInc=WIGS.reduce(function(s,w){return s+(parseFloat(w.price)||0);},0);
+  var wigInc=INCOME.filter(function(i){return(i.created||'').startsWith(mon)&&i.cat==='Wig Commission';}).reduce(function(s,i){return s+i.amt;},0);
   var net=thisMonIncAmt-thisMonExpAmt;
   var e1=document.getElementById('mThisInc');if(e1)e1.textContent='$'+thisMonIncAmt.toFixed(0);
   var e2=document.getElementById('mThisExp');if(e2)e2.textContent='$'+thisMonExpAmt.toFixed(0)+(pendingAmt?'+⏳$'+pendingAmt.toFixed(0):'');
@@ -9827,7 +9881,7 @@ function togOvSec(id){
   var el=document.getElementById(id);if(!el)return;
   var arrId=id.replace('ov-','ovArr').replace(/-([a-z])/g,function(m,c){return c.toUpperCase();});
   // map section id to arrow id
-  var arrowMap={'ov-cash':'ovCashArr','ov-credit':'ovCreditArr','ov-bills':'ovBillsArr','ov-spending':'ovSpendArr','ov-income':'ovIncomeArr','ov-projects':'ovProjectsArr'};
+  var arrowMap={'ov-cash':'ovCashArr','ov-credit':'ovCreditArr','ov-bills':'ovBillsArr','ov-spending':'ovSpendArr','ov-income':'ovIncomeArr','ov-projects':'ovProjectsArr','ov-biz':'ovBizArr'};
   var arr=document.getElementById(arrowMap[id]);
   var open=el.style.display==='none';
   el.style.display=open?'':'none';
@@ -9838,6 +9892,7 @@ function togOvSec(id){
     if(id==='ov-bills'){renderOvBills();}
     if(id==='ov-income'){renderOvIncome();}
     if(id==='ov-projects'){renderOvProjects();}
+    if(id==='ov-biz'){renderOvWigBiz();}
   }
 }
 
@@ -9847,18 +9902,70 @@ function renderMoneyOverview(){
   var confirmedExp=thisMonExp.filter(function(e){return!e.pending;});
   var thisMonExpAmt=confirmedExp.reduce(function(s,e){return s+e.amt;},0);
   var thisMonIncAmt=INCOME.filter(function(i){return(i.created||'').startsWith(mon);}).reduce(function(s,i){return s+i.amt;},0);
+  var wigMonInc=INCOME.filter(function(i){return(i.created||'').startsWith(mon)&&i.cat==='Wig Commission';}).reduce(function(s,i){return s+i.amt;},0);
   var cash=ACCOUNTS.filter(function(a){return!a.isCredit;}).reduce(function(s,a){return s+(parseFloat(a.amount)||0);},0);
   var credit=ACCOUNTS.filter(function(a){return a.isCredit;}).reduce(function(s,a){return s+(parseFloat(a.amount)||0);},0);
   var projSaved=MONEY_PROJECTS.reduce(function(s,p){return s+(parseFloat(p.saved)||0);},0);
   var billsTotal=BILLS.reduce(function(s,b){return s+(parseFloat(b.amt)||0);},0);
+  var net=thisMonIncAmt-thisMonExpAmt;
+  // top tiles
+  var t1=document.getElementById('mThisInc');if(t1)t1.textContent='$'+thisMonIncAmt.toFixed(0);
+  var t2=document.getElementById('mThisExp');if(t2)t2.textContent='$'+thisMonExpAmt.toFixed(0);
+  var t3=document.getElementById('mNet');if(t3){t3.textContent=(net>=0?'+':'-')+'$'+Math.abs(net).toFixed(0);t3.style.color=net>=0?'var(--sage)':'var(--ured)';}
+  var t4=document.getElementById('mInc');if(t4)t4.textContent='$'+wigMonInc.toFixed(0);
+  // collapsible totals
   var e1=document.getElementById('ovCashTotal');if(e1)e1.textContent='$'+cash.toFixed(0);
   var e2=document.getElementById('ovCreditTotal');if(e2)e2.textContent='$'+credit.toFixed(0);
   var e3=document.getElementById('ovBillsTotal');if(e3)e3.textContent='$'+billsTotal.toFixed(0);
   var e4=document.getElementById('ovSpendTotal');if(e4)e4.textContent='$'+thisMonExpAmt.toFixed(0);
   var e5=document.getElementById('ovIncomeTotal');if(e5)e5.textContent='$'+thisMonIncAmt.toFixed(0);
   var e6=document.getElementById('ovProjectsTotal');if(e6)e6.textContent='$'+projSaved.toFixed(0);
-  // update estate strip too
+  // WWOW biz net label
+  var wigExp=EXPENSES.filter(function(e){return(e.created||'').startsWith(mon)&&e.cat==='wig-supplies';}).reduce(function(s,e){return s+e.amt;},0);
+  var bizNet=wigMonInc-wigExp;
+  var eb=document.getElementById('ovBizNet');if(eb){eb.textContent=(bizNet>=0?'+':'-')+'$'+Math.abs(bizNet).toFixed(0);eb.style.color=bizNet>=0?'var(--sage)':'var(--ured)';}
+  // income goal bar
+  var goal=S.monthlyIncGoal||parseFloat(localStorage.getItem('aMonIncGoal')||'0');
+  var gFill=document.getElementById('ovGoalFill');
+  var gAmt=document.getElementById('ovGoalAmt');
+  var gTgt=document.getElementById('ovGoalTarget');
+  if(gFill)gFill.style.width=(goal>0?Math.min(100,Math.round(thisMonIncAmt/goal*100)):0)+'%';
+  if(gFill&&goal>0&&thisMonIncAmt>=goal)gFill.style.background='linear-gradient(90deg,#3aaa3a,#2a8a2a)';
+  if(gAmt)gAmt.textContent='$'+thisMonIncAmt.toFixed(0)+' this month';
+  if(gTgt)gTgt.textContent=goal>0?'Goal: $'+goal.toFixed(0)+(thisMonIncAmt>=goal?' ✅':''):'No goal set';
   updateEstateStrip();
+}
+
+function renderOvWigBiz(){
+  var el=document.getElementById('ovBizDetail');if(!el)return;
+  var mon=getMonStr();
+  var wigInc=INCOME.filter(function(i){return(i.created||'').startsWith(mon)&&i.cat==='Wig Commission';}).reduce(function(s,i){return s+i.amt;},0);
+  var wigExp=EXPENSES.filter(function(e){return(e.created||'').startsWith(mon)&&e.cat==='wig-supplies';}).reduce(function(s,e){return s+e.amt;},0);
+  var bizNet=wigInc-wigExp;
+  var activeOrders=(WIG_ORDERS||[]).filter(function(o){return o.status!=='complete'&&o.status!=='archived';});
+  var pendingFinal=activeOrders.filter(function(o){return!o.finalPaid;}).reduce(function(s,o){return s+(o.finalAmt||o.stylingFee||0);},0);
+  var pendingDown=activeOrders.filter(function(o){return!o.downPaid;}).reduce(function(s,o){return s+(o.downAmt||25);},0);
+  var rows=[
+    {label:'Commission income this month',val:'$'+wigInc.toFixed(0),color:'var(--sage)'},
+    {label:'Wig purchase costs this month',val:'-$'+wigExp.toFixed(0),color:'var(--ured)'},
+    {label:'Net profit',val:(bizNet>=0?'+':'-')+'$'+Math.abs(bizNet).toFixed(0),color:bizNet>=0?'var(--sage)':'var(--ured)',bold:true},
+  ];
+  var html=rows.map(function(r){
+    return'<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border)">'+
+      '<span style="'+(r.bold?'font-weight:700':'')+'">'+(r.label)+'</span>'+
+      '<span style="font-weight:700;color:'+r.color+'">'+r.val+'</span></div>';
+  }).join('');
+  if(activeOrders.length){
+    html+='<div style="margin-top:10px;font-size:11px;font-weight:700;color:var(--textl);text-transform:uppercase;letter-spacing:.7px">Active Orders ('+activeOrders.length+')</div>';
+    if(pendingDown>0)html+='<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border);font-size:12px"><span>⏳ Down payments outstanding</span><span style="font-weight:700;color:var(--accent)">$'+pendingDown.toFixed(0)+'</span></div>';
+    if(pendingFinal>0)html+='<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border);font-size:12px"><span>⏳ Final payments outstanding</span><span style="font-weight:700;color:var(--accent)">$'+pendingFinal.toFixed(0)+'</span></div>';
+    var totalPending=pendingDown+pendingFinal;
+    if(totalPending>0)html+='<div style="display:flex;justify-content:space-between;padding:6px 0;font-size:13px"><span style="font-weight:700">Expected still to collect</span><span style="font-weight:700;color:var(--teal)">$'+totalPending.toFixed(0)+'</span></div>';
+    html+='<button onclick="goTab(\'wigs\',null);closeOv&&closeOv()" style="width:100%;margin-top:8px;padding:7px;border-radius:8px;border:1.5px solid var(--bdr);background:none;font-family:\'Quicksand\',sans-serif;font-size:12px;font-weight:700;cursor:pointer;color:var(--textd)">✂️ View Wig Orders</button>';
+  } else {
+    html+='<div style="color:var(--textl);font-size:12px;padding:8px 0">No active wig orders.</div>';
+  }
+  el.innerHTML=html;
 }
 
 function renderOvAccounts(){
@@ -19517,15 +19624,17 @@ function openWigOrderDetail(id){
     +'<div><div style="font-size:18px;font-weight:700;color:var(--peach)">$'+totalCost+'</div><div style="font-size:10px;color:var(--textl)">spent</div></div>'
     +'<div><div style="font-size:18px;font-weight:700;color:'+(net>=0?'var(--sage)':'#e74c3c')+'">$'+net+'</div><div style="font-size:10px;color:var(--textl)">net profit</div></div>'
     +'</div>'
-    +'<label style="display:flex;align-items:center;gap:8px;padding:6px 0;border-top:1px solid var(--bdr);cursor:pointer">'
-    +'<input type="checkbox" id="woDownCheck" '+(order.downPaid?'checked':'')+' onchange="toggleWigPayment(\''+id+'\',\'down\')" style="width:16px;height:16px">'
-    +'<span style="font-size:12px;color:var(--textd)">$25 down payment received</span>'
-    +(order.downPaid?'<span style="font-size:10px;color:var(--sage);margin-left:auto">✅ logged to income</span>':'')
-    +'</label>'
     +'<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-top:1px solid var(--bdr)">'
-    +'<input type="checkbox" id="woFinalCheck" '+(order.finalPaid?'checked':'')+' onchange="toggleWigPayment(\''+id+'\',\'final\')" style="width:16px;height:16px;flex-shrink:0">'
-    +'<span style="font-size:12px;color:var(--textd)">Final payment received</span>'
-    +'<input type="number" id="woFinalAmt" value="'+(order.finalAmt||order.stylingFee||0)+'" min="0" style="width:65px;padding:3px 6px;border-radius:6px;border:1.5px solid var(--bdr);font-family:\'Quicksand\',sans-serif;font-size:12px;margin-left:auto" placeholder="$">'
+    +'<input type="checkbox" id="woDownCheck" '+(order.downPaid?'checked':'')+' onchange="toggleWigPayment(\''+id+'\',\'down\')" style="width:16px;height:16px;flex-shrink:0;cursor:pointer">'
+    +'<span style="font-size:12px;color:var(--textd)">Down payment</span>'
+    +'<input type="number" id="woDownAmt" value="'+(order.downAmt||25)+'" min="0" style="width:60px;padding:3px 6px;border-radius:6px;border:1.5px solid var(--bdr);font-family:\'Quicksand\',sans-serif;font-size:12px;margin-left:auto" placeholder="$">'
+    +(order.downPaid?'<button onclick="updateWigPaymentAmt(\''+id+'\',\'down\')" style="padding:3px 8px;border-radius:6px;border:1.5px solid var(--sage);background:none;font-size:10px;font-weight:700;color:var(--sage);cursor:pointer;font-family:\'Quicksand\',sans-serif;flex-shrink:0">Update</button>':'')
+    +'</div>'
+    +'<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-top:1px solid var(--bdr)">'
+    +'<input type="checkbox" id="woFinalCheck" '+(order.finalPaid?'checked':'')+' onchange="toggleWigPayment(\''+id+'\',\'final\')" style="width:16px;height:16px;flex-shrink:0;cursor:pointer">'
+    +'<span style="font-size:12px;color:var(--textd)">Final payment</span>'
+    +'<input type="number" id="woFinalAmt" value="'+(order.finalAmt||order.stylingFee||0)+'" min="0" style="width:60px;padding:3px 6px;border-radius:6px;border:1.5px solid var(--bdr);font-family:\'Quicksand\',sans-serif;font-size:12px;margin-left:auto" placeholder="$">'
+    +(order.finalPaid?'<button onclick="updateWigPaymentAmt(\''+id+'\',\'final\')" style="padding:3px 8px;border-radius:6px;border:1.5px solid var(--sage);background:none;font-size:10px;font-weight:700;color:var(--sage);cursor:pointer;font-family:\'Quicksand\',sans-serif;flex-shrink:0">Update</button>':'')
     +'</div>'
     +(order.method==='premium'?'<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-top:1px solid var(--bdr)"><span style="font-size:12px;color:var(--textl)">Wig cost:</span><input type="number" id="woWigCost" value="'+(order.wigCost||0)+'" min="0" onchange="updateWigCost(\''+id+'\')" style="width:65px;padding:3px 6px;border-radius:6px;border:1.5px solid var(--bdr);font-family:\'Quicksand\',sans-serif;font-size:12px"><button onclick="logWigExpense(\''+id+'\')" style="margin-left:auto;padding:4px 10px;border-radius:7px;border:1.5px solid var(--peach);background:none;font-size:11px;font-weight:700;color:var(--peach);cursor:pointer;font-family:\'Quicksand\',sans-serif">→ Log Expense</button></div>':'')
     +'</div>';
@@ -19592,6 +19701,20 @@ function toggleWigPayment(orderId,type){
     }
   }
   saveWigOrders();
+  openWigOrderDetail(orderId);
+}
+function updateWigPaymentAmt(orderId,type){
+  var order=WIG_ORDERS.find(function(o){return o.id===orderId;});if(!order)return;
+  var inputId=type==='down'?'woDownAmt':'woFinalAmt';
+  var newAmt=parseFloat((document.getElementById(inputId)||{}).value)||0;
+  if(newAmt<=0){showToast('Enter a valid amount');return;}
+  var descPrefix=type==='down'?'Down payment':'Final payment';
+  if(type==='down'){order.downAmt=newAmt;}else{order.finalAmt=newAmt;}
+  var entry=INCOME.find(function(i){return i.projectId===orderId&&i.desc&&i.desc.indexOf(descPrefix)===0;});
+  if(entry){entry.amt=newAmt;}
+  localStorage.setItem('aIncome',JSON.stringify(INCOME));
+  saveWigOrders();
+  showToast('Amount updated to $'+newAmt+' ✨');
   openWigOrderDetail(orderId);
 }
 function updateWigCost(orderId){
@@ -19661,18 +19784,168 @@ function archiveWigOrder(id){
   closeOv('ovWigOrderDetail');renderWigOrders();showToast('Order archived');
 }
 function openWigPriceList(){
+  renderWigPriceListModal();
+  showOv('ovWigPriceList');
+}
+function renderWigPriceListModal(){
   var el=document.getElementById('wigPriceListBody');if(!el)return;
-  el.innerHTML='<div style="font-size:11px;color:var(--textl);margin-bottom:10px">⭐ Free US Shipping · $15 off International</div>'
+  el.innerHTML='<div style="font-size:11px;color:var(--textl);margin-bottom:10px">⭐ Free US Shipping · $15 off International · Tap a price to edit</div>'
     +'<table style="width:100%;border-collapse:collapse;font-size:13px">'
     +'<tr style="border-bottom:2px solid var(--bdr)"><th style="text-align:left;padding:7px 4px;color:var(--textl);font-weight:700">Wig</th><th style="text-align:right;padding:7px 4px;color:var(--textl);font-weight:700">Premium</th><th style="text-align:right;padding:7px 4px;color:var(--textl);font-weight:700">Ship & Style</th></tr>'
     +WIG_PRICE_LIST.map(function(w){
-      return'<tr style="border-bottom:1px solid var(--bdr)"><td style="padding:8px 4px;color:var(--textd);font-weight:600">'+escHtml(w.name)+'</td><td style="text-align:right;padding:8px 4px;color:var(--textd)">$'+w.premium+'</td><td style="text-align:right;padding:8px 4px;color:var(--textl)">$'+w.shipStyle+'</td></tr>';
+      return '<tr style="border-bottom:1px solid var(--bdr)">'
+        +'<td style="padding:8px 4px;color:var(--textd);font-weight:600">'+escHtml(w.name)+'</td>'
+        +'<td style="text-align:right;padding:4px"><input type="number" value="'+w.premium+'" min="0" onchange="saveWigPrice(\''+w.id+'\',\'premium\',this.value)" style="width:64px;padding:4px 6px;border-radius:6px;border:1.5px solid var(--bdr);font-family:\'Quicksand\',sans-serif;font-size:12px;text-align:right"></td>'
+        +'<td style="text-align:right;padding:4px"><input type="number" value="'+w.shipStyle+'" min="0" onchange="saveWigPrice(\''+w.id+'\',\'shipStyle\',this.value)" style="width:64px;padding:4px 6px;border-radius:6px;border:1.5px solid var(--bdr);font-family:\'Quicksand\',sans-serif;font-size:12px;text-align:right"></td>'
+        +'</tr>';
     }).join('')
-    +'</table>';
-  showOv('ovWigPriceList');
+    +'</table>'
+    +'<div style="margin-top:12px;padding-top:10px;border-top:1px solid var(--bdr)">'
+    +'<div style="font-size:11px;font-weight:700;color:var(--textl);margin-bottom:6px">Add a wig</div>'
+    +'<div style="display:flex;gap:6px;flex-wrap:wrap">'
+    +'<input class="fi" id="newWigName" placeholder="Wig name" style="flex:2;min-width:120px">'
+    +'<input class="fi" id="newWigPrem" type="number" placeholder="Premium $" style="flex:1;min-width:70px">'
+    +'<input class="fi" id="newWigSS" type="number" placeholder="Ship&Style $" style="flex:1;min-width:70px">'
+    +'<button class="ok-btn" style="margin:0;padding:8px 12px" onclick="addWigToList()">Add</button>'
+    +'</div></div>';
+}
+function saveWigPrice(id,field,val){
+  var w=WIG_PRICE_LIST.find(function(x){return x.id===id;});
+  if(!w)return;
+  w[field]=parseFloat(val)||0;
+  saveWigPrices();
+  showToast('Price updated ✨');
+}
+function addWigToList(){
+  var name=((document.getElementById('newWigName')||{}).value||'').trim();
+  var prem=parseFloat((document.getElementById('newWigPrem')||{}).value)||0;
+  var ss=parseFloat((document.getElementById('newWigSS')||{}).value)||0;
+  if(!name){showToast('Enter a wig name');return;}
+  WIG_PRICE_LIST.push({id:'w-'+Date.now(),name:name,premium:prem,shipStyle:ss});
+  saveWigPrices();
+  renderWigPriceListModal();
+  showToast(name+' added ✨');
 }
 
 // ═══════════════════════════════════════════════
+// L'OREAL REFERENCE PAGE
+// ═══════════════════════════════════════════════
+var LOREAL_LINKS = JSON.parse(localStorage.getItem('aLorealLinks')||'null')||[
+  {id:'ll1',label:'L\'Oréal Pro Portal',url:'https://www.lorealpartner.com',icon:'🌐'},
+  {id:'ll2',label:'SalonCentric',url:'https://www.saloncentric.com',icon:'🏪'},
+  {id:'ll3',label:'L\'Oréal Access (Training)',url:'https://www.lorealprofessionnel-usa.com',icon:'🎓'},
+  {id:'ll4',label:'Color Zap / Shade Chart',url:'https://www.lorealpartner.com',icon:'🎨'}
+];
+function saveLorealLinks(){ localStorage.setItem('aLorealLinks',JSON.stringify(LOREAL_LINKS)); }
+
+var LOREAL_NOTES = JSON.parse(localStorage.getItem('aLorealNotes')||'null')||[
+  {id:'ln1',title:'Color Notes',body:'Add your go-to formulas, ratios, and color tips here.'},
+  {id:'ln2',title:'Service Menu',body:'List your services and pricing for quick reference.'},
+  {id:'ln3',title:'Product Faves',body:'Note your must-have products and why you love them.'}
+];
+function saveLorealNotes(){ localStorage.setItem('aLorealNotes',JSON.stringify(LOREAL_NOTES)); }
+
+function renderLorealPage(){
+  renderLorealLinks();
+  renderLorealNotes();
+}
+
+function renderLorealLinks(){
+  var el=document.getElementById('lorealLinks');if(!el)return;
+  if(!LOREAL_LINKS.length){el.innerHTML='<div style="color:var(--textl);font-size:13px;padding:4px 0">No links yet — add one below.</div>';return;}
+  el.innerHTML=LOREAL_LINKS.map(function(lk){
+    return'<div style="display:flex;align-items:center;gap:10px;background:#fff;border-radius:12px;padding:10px 14px;border:1.5px solid var(--bdr);box-shadow:0 1px 3px rgba(0,0,0,.04)">'
+      +'<span style="font-size:18px;flex-shrink:0">'+(lk.icon||'🔗')+'</span>'
+      +'<a href="'+escHtml(lk.url)+'" target="_blank" rel="noopener" style="flex:1;font-size:13px;font-weight:700;color:var(--textd);text-decoration:none">'+escHtml(lk.label)+'</a>'
+      +'<button onclick="openLorealLinkModal(\''+lk.id+'\')" style="background:none;border:none;font-size:13px;cursor:pointer;color:var(--textl);padding:3px 6px">✏️</button>'
+      +'<button onclick="delLorealLink(\''+lk.id+'\')" style="background:none;border:none;font-size:13px;cursor:pointer;color:var(--textl);padding:3px 6px">🗑️</button>'
+    +'</div>';
+  }).join('');
+}
+
+function renderLorealNotes(){
+  var el=document.getElementById('lorealNotes');if(!el)return;
+  if(!LOREAL_NOTES.length){el.innerHTML='<div style="color:var(--textl);font-size:13px;padding:4px 0">No notes yet.</div>';return;}
+  el.innerHTML=LOREAL_NOTES.map(function(n){
+    return'<div style="background:#fff;border-radius:14px;border:1.5px solid var(--bdr);overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.04)">'
+      +'<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-bottom:1px solid var(--border)">'
+        +'<span style="font-size:13px;font-weight:700;color:var(--textd)">'+escHtml(n.title)+'</span>'
+        +'<div style="display:flex;gap:4px">'
+          +'<button onclick="openLorealNoteModal(\''+n.id+'\')" style="background:none;border:none;font-size:12px;cursor:pointer;color:var(--textl);padding:3px 6px">✏️</button>'
+          +'<button onclick="delLorealNote(\''+n.id+'\')" style="background:none;border:none;font-size:12px;cursor:pointer;color:var(--textl);padding:3px 6px">🗑️</button>'
+        +'</div>'
+      +'</div>'
+      +'<div style="padding:10px 14px;font-size:13px;color:var(--textd);white-space:pre-wrap;line-height:1.5">'+escHtml(n.body)+'</div>'
+    +'</div>';
+  }).join('');
+}
+
+function openLorealLinkModal(id){
+  var lk=id?LOREAL_LINKS.find(function(l){return l.id===id;}):null;
+  showOv('ovLorealLink');
+  document.getElementById('lorealLinkId').value=id||'';
+  document.getElementById('lorealLinkIcon').value=lk?lk.icon||'🔗':'🔗';
+  document.getElementById('lorealLinkLabel').value=lk?lk.label:'';
+  document.getElementById('lorealLinkUrl').value=lk?lk.url:'https://';
+}
+
+function saveLorealLink(){
+  var id=document.getElementById('lorealLinkId').value;
+  var icon=document.getElementById('lorealLinkIcon').value.trim()||'🔗';
+  var label=document.getElementById('lorealLinkLabel').value.trim();
+  var url=document.getElementById('lorealLinkUrl').value.trim();
+  if(!label||!url){showToast('Label and URL are required');return;}
+  if(id){
+    var lk=LOREAL_LINKS.find(function(l){return l.id===id;});
+    if(lk){lk.icon=icon;lk.label=label;lk.url=url;}
+  } else {
+    LOREAL_LINKS.push({id:'ll'+Date.now(),icon:icon,label:label,url:url});
+  }
+  saveLorealLinks();
+  closeOv('ovLorealLink');
+  renderLorealLinks();
+  showToast('Link saved 💄');
+}
+
+function delLorealLink(id){
+  if(!confirm('Delete this link?'))return;
+  LOREAL_LINKS=LOREAL_LINKS.filter(function(l){return l.id!==id;});
+  saveLorealLinks();
+  renderLorealLinks();
+}
+
+function openLorealNoteModal(id){
+  var n=id?LOREAL_NOTES.find(function(x){return x.id===id;}):null;
+  showOv('ovLorealNote');
+  document.getElementById('lorealNoteId').value=id||'';
+  document.getElementById('lorealNoteTitle').value=n?n.title:'';
+  document.getElementById('lorealNoteBody').value=n?n.body:'';
+}
+
+function saveLorealNote(){
+  var id=document.getElementById('lorealNoteId').value;
+  var title=document.getElementById('lorealNoteTitle').value.trim();
+  var body=document.getElementById('lorealNoteBody').value.trim();
+  if(!title){showToast('Add a title');return;}
+  if(id){
+    var n=LOREAL_NOTES.find(function(x){return x.id===id;});
+    if(n){n.title=title;n.body=body;}
+  } else {
+    LOREAL_NOTES.push({id:'ln'+Date.now(),title:title,body:body});
+  }
+  saveLorealNotes();
+  closeOv('ovLorealNote');
+  renderLorealNotes();
+  showToast('Note saved 💄');
+}
+
+function delLorealNote(id){
+  if(!confirm('Delete this note section?'))return;
+  LOREAL_NOTES=LOREAL_NOTES.filter(function(n){return n.id!==id;});
+  saveLorealNotes();
+  renderLorealNotes();
+}
+
 // WORK PROJECTS
 // ═══════════════════════════════════════════════
 function renderWorkProjects(){
@@ -21238,6 +21511,40 @@ function delProjInc(id){
   <div class="mod" style="max-height:88vh;overflow-y:auto" onclick="event.stopPropagation()">
     <div class="mh"><span class="mt">💰 Price List</span><button class="mc" onclick="closeOv('ovWigPriceList')">✕</button></div>
     <div id="wigPriceListBody"></div>
+  </div>
+</div>
+
+<!-- L'Oreal Link Editor -->
+<div class="ov" id="ovLorealLink" onclick="closeOv('ovLorealLink')">
+  <div class="ov-box" onclick="event.stopPropagation()">
+    <div class="mh"><span class="mt">💄 Edit Link</span><button class="mc" onclick="closeOv('ovLorealLink')">✕</button></div>
+    <input type="hidden" id="lorealLinkId">
+    <div style="display:grid;grid-template-columns:56px 1fr;gap:8px;margin-bottom:10px">
+      <div>
+        <div style="font-size:11px;font-weight:700;color:var(--textl);margin-bottom:4px">Icon</div>
+        <input id="lorealLinkIcon" class="fi" style="width:100%;text-align:center;font-size:18px;padding:8px 4px;margin-bottom:0" maxlength="4" placeholder="🔗">
+      </div>
+      <div>
+        <div style="font-size:11px;font-weight:700;color:var(--textl);margin-bottom:4px">Label</div>
+        <input id="lorealLinkLabel" class="fi" placeholder="e.g. SalonCentric" style="margin-bottom:0">
+      </div>
+    </div>
+    <div style="font-size:11px;font-weight:700;color:var(--textl);margin-bottom:4px">URL</div>
+    <input id="lorealLinkUrl" class="fi" type="url" placeholder="https://..." style="margin-bottom:14px">
+    <button class="ok-btn" style="width:100%;margin:0" onclick="saveLorealLink()">Save Link</button>
+  </div>
+</div>
+
+<!-- L'Oreal Note Editor -->
+<div class="ov" id="ovLorealNote" onclick="closeOv('ovLorealNote')">
+  <div class="ov-box" onclick="event.stopPropagation()">
+    <div class="mh"><span class="mt">💄 Note Section</span><button class="mc" onclick="closeOv('ovLorealNote')">✕</button></div>
+    <input type="hidden" id="lorealNoteId">
+    <div style="font-size:11px;font-weight:700;color:var(--textl);margin-bottom:4px">Title</div>
+    <input id="lorealNoteTitle" class="fi" placeholder="e.g. Color Notes" style="margin-bottom:10px">
+    <div style="font-size:11px;font-weight:700;color:var(--textl);margin-bottom:4px">Notes</div>
+    <textarea id="lorealNoteBody" class="fi" rows="7" placeholder="Write your reference notes here…" style="width:100%;resize:vertical;box-sizing:border-box;margin-bottom:14px"></textarea>
+    <button class="ok-btn" style="width:100%;margin:0" onclick="saveLorealNote()">Save</button>
   </div>
 </div>
 
