@@ -1166,6 +1166,7 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     <button class="qa" onclick="openGroceryQuick()" style="background:linear-gradient(135deg,#e8f4e8,#fdf6ee)"><div class="qa-ic">🛒</div><div class="qa-lb">Grocery</div></button>
     <button class="qa" onclick="goTab('focus-session',null)" style="background:linear-gradient(135deg,#eee8f8,#f8e8e8)"><div class="qa-ic">🎯</div><div class="qa-lb">Focus</div></button>
     <button class="qa" onclick="goTab('spirit',null);setTimeout(function(){showSpiritSec('bible',document.querySelector('#v-spirit .pn-btn:nth-child(2)'))},200)" style="background:linear-gradient(135deg,#e8f0f8,#dce8f4)"><div class="qa-ic">📖</div><div class="qa-lb">Bible</div></button>
+    <button class="qa" onclick="goTab('wigs',null)" style="background:linear-gradient(135deg,#f0e8f8,#fdf0f8)"><div class="qa-ic">✂️</div><div class="qa-lb">Wigs</div></button>
   </div>
   <!-- Quick Stats (collapsible) -->
   <div class="card" style="padding:0;margin-bottom:10px">
@@ -1596,8 +1597,31 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
 
 <!-- WIGS -->
 <div class="view" id="v-wigs">
-  <div class="sh">🪄 Active Orders</div>
-  <div id="wigList"><div class="empty"><div class="emj">🪄</div><p>No wig orders yet.</p></div></div>
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+    <div style="font-family:'Playfair Display',serif;font-size:20px;color:var(--textd)">✂️ Wigs</div>
+    <div style="display:flex;gap:6px">
+      <button class="btn sec" style="font-size:11px;padding:4px 10px" onclick="openWigPriceList()">💰 Prices</button>
+      <button class="ok-btn" style="margin:0;padding:7px 14px;font-size:13px" onclick="openNewWigOrder()">＋ New Order</button>
+    </div>
+  </div>
+  <!-- Quick links -->
+  <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;padding:10px 12px;background:var(--bg2);border-radius:12px">
+    <span style="font-size:11px;font-weight:700;color:var(--textl);width:100%;margin-bottom:2px">🔗 Quick Links</span>
+    <button onclick="window.open('https://docs.google.com/forms/d/1FerTNIXIl55sxmoAHzbqQZ_U5K-IekXNVBGAADBhj8k/edit?usp=drivesdk','_blank')" style="padding:5px 10px;border-radius:8px;border:1.5px solid var(--bdr);background:#fff;font-family:'Quicksand',sans-serif;font-size:11px;font-weight:700;cursor:pointer;color:var(--textd)">📋 Questionnaire</button>
+    <button onclick="window.open('https://docs.google.com/','_blank')" style="padding:5px 10px;border-radius:8px;border:1.5px solid var(--bdr);background:#fff;font-family:'Quicksand',sans-serif;font-size:11px;font-weight:700;cursor:pointer;color:var(--textd)">📊 Client Sheet</button>
+    <button onclick="goTab('money',null);setTimeout(function(){showMoneySec('income',document.querySelector('#v-money .pn-btn[data-sec=income]'))},200)" style="padding:5px 10px;border-radius:8px;border:1.5px solid var(--bdr);background:#fff;font-family:'Quicksand',sans-serif;font-size:11px;font-weight:700;cursor:pointer;color:var(--textd)">💰 Log Income</button>
+    <button onclick="goTab('money',null);setTimeout(function(){showMoneySec('expenses',document.querySelector('#v-money .pn-btn[data-sec=expenses]'))},200)" style="padding:5px 10px;border-radius:8px;border:1.5px solid var(--bdr);background:#fff;font-family:'Quicksand',sans-serif;font-size:11px;font-weight:700;cursor:pointer;color:var(--textd)">💸 Log Expense</button>
+    <button onclick="goTab('focus-session',null)" style="padding:5px 10px;border-radius:8px;border:1.5px solid var(--bdr);background:#fff;font-family:'Quicksand',sans-serif;font-size:11px;font-weight:700;cursor:pointer;color:var(--textd)">🎯 Focus Session</button>
+    <button onclick="goTab('tasks',null)" style="padding:5px 10px;border-radius:8px;border:1.5px solid var(--bdr);background:#fff;font-family:'Quicksand',sans-serif;font-size:11px;font-weight:700;cursor:pointer;color:var(--textd)">✅ My Tasks</button>
+  </div>
+  <!-- Filter chips -->
+  <div style="display:flex;gap:6px;margin-bottom:10px">
+    <button class="fchip on" onclick="setWigFilter('active',this)">Active</button>
+    <button class="fchip" onclick="setWigFilter('complete',this)">Complete</button>
+    <button class="fchip" onclick="setWigFilter('archived',this)">Archived</button>
+    <button class="fchip" onclick="setWigFilter('all',this)">All</button>
+  </div>
+  <div id="wigOrderList"></div>
 </div>
 
 <div class="view" id="v-work-projects">
@@ -4822,6 +4846,60 @@ var TAX_LOG = JSON.parse(localStorage.getItem('aTaxLog')||'[]');
 // {id, type:'paid'|'owed'|'set-aside', amount, description, date, notes}
 var WORK_PROJECTS = JSON.parse(localStorage.getItem('aWorkProjects')||'[]');
 // {id, name, wigId:'', status:'active'|'complete'|'pending', notes:'', budget:0, actualIncome:0, projectedIncome:0, expenses:[], tasks:[], created:''}
+var WIG_PRICE_LIST = JSON.parse(localStorage.getItem('aWigPrices')||'null')||[
+  {id:'w1',name:'Alice-Meg',premium:275,shipStyle:165},
+  {id:'w2',name:'Anna (Frozen 2) / Emma',premium:299,shipStyle:200},
+  {id:'w3',name:'Ariel-Scarlett',premium:350,shipStyle:250},
+  {id:'w4',name:'Aurora-Rose',premium:350,shipStyle:250},
+  {id:'w5',name:'Bell Ball-Clara',premium:399,shipStyle:285},
+  {id:'w6',name:'Belle Village-Penny',premium:385,shipStyle:285},
+  {id:'w7',name:'Cinderella-Elle',premium:399,shipStyle:300},
+  {id:'w8',name:'Esmerelda',premium:450,shipStyle:350},
+  {id:'w9',name:'Jane',premium:350,shipStyle:250},
+  {id:'w10',name:'Jasmine-Zahra',premium:575,shipStyle:450},
+  {id:'w11',name:'Mary Poppins-Robin',premium:350,shipStyle:250},
+  {id:'w12',name:'Merida-Ginger',premium:450,shipStyle:350},
+  {id:'w13',name:'Periwinkle',premium:299,shipStyle:200},
+  {id:'w14',name:'Rosetta',premium:299,shipStyle:200},
+  {id:'w15',name:'Snow White-Lulu',premium:350,shipStyle:250},
+  {id:'w16',name:'Tiana',premium:399,shipStyle:285},
+  {id:'w17',name:'Tinkerbell-Pixie Belle',premium:325,shipStyle:230},
+  {id:'w18',name:'Wendy-Jane',premium:350,shipStyle:250}
+];
+function saveWigPrices(){ localStorage.setItem('aWigPrices',JSON.stringify(WIG_PRICE_LIST)); }
+var WIG_ORDERS = JSON.parse(localStorage.getItem('aWigOrders')||'[]');
+function saveWigOrders(){ localStorage.setItem('aWigOrders',JSON.stringify(WIG_ORDERS)); }
+var WIG_STEP_DEFS = [
+  {id:'s1',label:'Initial contact received',action:'form',actionLabel:'Open Questionnaire Form',actionUrl:'https://docs.google.com/forms/d/1FerTNIXIl55sxmoAHzbqQZ_U5K-IekXNVBGAADBhj8k/edit?usp=drivesdk'},
+  {id:'s2',label:'Questionnaire reviewed & pricing confirmed',action:'sheet',actionLabel:'Open Client Sheet',actionUrl:'https://docs.google.com/'},
+  {id:'s3',label:'Accepted — down payment requested ($25)',action:'msg',actionLabel:'Copy Acceptance Message',msg:'accept'},
+  {id:'s4',label:'Wig purchased / tracking confirmed',action:'msg',actionLabel:'Copy Ship-to-Me Message',msg:'shipto'},
+  {id:'s5',label:'Styling in progress',action:'focus',actionLabel:'Go to Focus Session'},
+  {id:'s6',label:'Approval photos sent',action:null,actionLabel:null},
+  {id:'s7',label:'Final payment received',action:'income',actionLabel:'Log Final Payment'},
+  {id:'s8',label:'Shipped to client',action:'msg',actionLabel:'Copy Thank You Message',msg:'thankyou'},
+  {id:'s9',label:'Follow-up complete',action:null,actionLabel:null}
+];
+function wigMsg(type,order){
+  var wig=WIG_PRICE_LIST.find(function(w){return w.id===order.wigId;})||{name:'[Wig Style]'};
+  var method=order.method||'';
+  var price=method==='premium'?wig.premium:method==='shipstyle'?wig.shipStyle:0;
+  var msgs={
+    accept:'Hi [Client Name]! 💕 Thank you so much for filling out the form—I\'m so excited to work on this project with you!! Here\'s a quick summary of what I have:\n\n'
+      +'● Style/Character: '+wig.name+'\n'
+      +'● Method: '+(method==='premium'?'Premium':method==='shipstyle'?'Ship & Style':'Restyle')+'\n'
+      +'● Base Wig: '+(order.baseWig||'[Base Wig]')+'\n'
+      +'● Special Requests: '+(order.specialReqs||'None')+'\n'
+      +'● Price: $'+(price||'[Total]')+(method==='premium'?' (includes styling + shipping + wig)':method==='shipstyle'?' (styling + shipping)':'')+'\n'
+      +'● Down Payment: $25 (to get started)\n\n'
+      +'Payment Methods: Zelle (preferred), PayPal, or Venmo. Just let me know which you\'d like to use and I\'ll send over the info! 💕\n\n'
+      +'Turnaround Time: Between [Insert Timeline], though it may be sooner! ✨ (Accessories not included.)\n\n'
+      +'Does everything look correct? Once you confirm, we\'ll get started! Thank you again for being wonderful—I\'m so excited to make something beautiful for you!! 😆💕',
+    shipto:'Let\'s pick out a wig! Let me send you some options of what I\'ve used before. If you like it, you will pay for it and just have it shipped directly to me.\n\nHave it shipped to this address:\nAdrienne Swisshelm\nThe Whimsical World of Wigs\n10304 Bogardus Ave.\nWhittier, CA 90603\n\nFor the $25 deposit, how would you like to pay?',
+    thankyou:'Thank you so much for choosing to work with me! I can\'t wait to make you something beautiful!! Please verify all the information is correct. And let me know if you have any questions!'
+  };
+  return msgs[type]||'';
+}
 var PROJ_INCOME = JSON.parse(localStorage.getItem('aProjIncome')||'[]');
 // {id, description, amount, expectedDate:'', source:'wig'|'loreal'|'nick-window'|'other', wigProjectId:'', actual:0, status:'projected'|'received', notes:''}
 var EXPENSE_CATS = JSON.parse(localStorage.getItem('aExpCats')||JSON.stringify([
@@ -5162,6 +5240,7 @@ function goTabDirect(tab,btn){
   if(tab==='tasks'){ updateHelmBadges(); }
   if(tab==='focus-session'){ renderFocusSession(); }
   if(tab==='lists'){ renderListQBar(); renderLists(); }
+  if(tab==='wigs'){ renderWigOrders(); }
   if(tab==='plan'){ renderPlan(); }
   if(tab==='grocery'){ renderGroceryList(); populateGrocTaskDatalist(); }
   if(tab==='guide'){ renderResearchLib(); renderGuide(); renderTmplList(); renderAppIndex(); }
@@ -19334,6 +19413,266 @@ function startReidRunner(){
 }
 
 // ═══════════════════════════════════════════════
+// WIG ORDERS
+// ═══════════════════════════════════════════════
+var _wigFilter='active';
+function setWigFilter(f,btn){
+  _wigFilter=f;
+  document.querySelectorAll('#v-wigs .fchip').forEach(function(b){b.classList.remove('on');});
+  if(btn)btn.classList.add('on');
+  renderWigOrders();
+}
+function openNewWigOrder(){
+  var sel=document.getElementById('woWig');
+  if(sel){
+    sel.innerHTML='<option value="">— Select wig —</option>'
+      +WIG_PRICE_LIST.map(function(w){return'<option value="'+w.id+'">'+escHtml(w.name)+'</option>';}).join('');
+  }
+  ['woRef','woBaseWig','woSpecialReqs','woDeadline'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});
+  document.querySelectorAll('input[name="woMethod"]').forEach(function(r){r.checked=false;});
+  var prev=document.getElementById('woPricePreview');if(prev)prev.style.display='none';
+  showOv('ovNewWigOrder');
+}
+function updateWigOrderPrice(){
+  var wigId=((document.getElementById('woWig')||{}).value||'');
+  var methodEl=document.querySelector('input[name="woMethod"]:checked');
+  var prev=document.getElementById('woPricePreview');if(!prev)return;
+  if(!wigId||!methodEl){prev.style.display='none';return;}
+  var wig=WIG_PRICE_LIST.find(function(w){return w.id===wigId;});
+  if(!wig){prev.style.display='none';return;}
+  var price=methodEl.value==='premium'?wig.premium:methodEl.value==='shipstyle'?wig.shipStyle:null;
+  prev.style.display='block';
+  prev.innerHTML=price?'<strong>$'+price+'</strong> — '+escHtml(wig.name)+' ('+(methodEl.value==='premium'?'Premium':'Ship & Style')+')':'Restyle — price set after consultation';
+}
+function saveNewWigOrder(){
+  var ref=((document.getElementById('woRef')||{}).value||'').trim();
+  var wigId=((document.getElementById('woWig')||{}).value||'');
+  var methodEl=document.querySelector('input[name="woMethod"]:checked');
+  if(!ref){showToast('Add an internal reference name');return;}
+  if(!wigId){showToast('Select a wig style');return;}
+  if(!methodEl){showToast('Select a method');return;}
+  var method=methodEl.value;
+  var wig=WIG_PRICE_LIST.find(function(w){return w.id===wigId;})||{};
+  var price=method==='premium'?wig.premium:method==='shipstyle'?wig.shipStyle:0;
+  var deadline=((document.getElementById('woDeadline')||{}).value||'');
+  var orderId='wo-'+Date.now();
+  var steps=WIG_STEP_DEFS.map(function(s,i){
+    var taskId='wt-'+Date.now()+'-'+s.id;
+    TASKS.push({id:taskId,text:s.label,done:false,projectId:orderId,projectType:'wig',projectRef:ref,due:i===0?todayStr():(deadline||''),priority:'normal',created:todayStr()});
+    return {id:s.id,done:false,taskId:taskId};
+  });
+  localStorage.setItem('aTasks',JSON.stringify(TASKS));
+  WIG_ORDERS.unshift({id:orderId,ref:ref,wigId:wigId,method:method,
+    baseWig:((document.getElementById('woBaseWig')||{}).value||'').trim(),
+    specialReqs:((document.getElementById('woSpecialReqs')||{}).value||'').trim(),
+    deadline:deadline,notes:'',stylingFee:price,downPaid:false,downAmt:25,
+    wigCost:0,shippingFee:0,discount:0,finalPaid:false,finalAmt:0,
+    steps:steps,created:todayStr(),status:'active'});
+  saveWigOrders();
+  closeOv('ovNewWigOrder');
+  renderWigOrders();
+  showToast('Order created — 9 tasks added to your task list ✨');
+}
+function renderWigOrders(){
+  var el=document.getElementById('wigOrderList');if(!el)return;
+  var list=WIG_ORDERS.filter(function(o){return _wigFilter==='all'||o.status===_wigFilter;});
+  if(!list.length){
+    el.innerHTML='<p style="color:var(--textl);text-align:center;padding:24px 12px">No '+(_wigFilter==='all'?'':_wigFilter+' ')+'orders yet.<br>Tap <strong>+ New Order</strong> to create one.</p>';
+    return;
+  }
+  el.innerHTML=list.map(function(order){
+    var wig=WIG_PRICE_LIST.find(function(w){return w.id===order.wigId;})||{name:'Custom'};
+    var doneSteps=order.steps.filter(function(s){return s.done;}).length;
+    var pct=Math.round(doneSteps/order.steps.length*100);
+    var methodLabel=order.method==='premium'?'Premium':order.method==='shipstyle'?'Ship & Style':'Restyle';
+    var nextStep=WIG_STEP_DEFS[doneSteps];
+    var earned=(order.downPaid?order.downAmt:0)+(order.finalPaid?order.finalAmt:0);
+    return'<div class="card" style="margin-bottom:10px;cursor:pointer" onclick="openWigOrderDetail(\''+order.id+'\')">'
+      +'<div style="display:flex;align-items:flex-start;gap:10px">'
+      +'<div style="flex:1;min-width:0">'
+      +'<div style="font-size:14px;font-weight:700;color:var(--textd)">'+escHtml(order.ref)+'</div>'
+      +'<div style="font-size:11px;color:var(--textl);margin-bottom:5px">'+escHtml(wig.name)+' · '+methodLabel+(order.deadline?' · Due '+order.deadline:'')+'</div>'
+      +(nextStep?'<div style="font-size:11px;color:var(--lav);font-weight:600;margin-bottom:5px">▶ Step '+(doneSteps+1)+': '+escHtml(nextStep.label)+'</div>':'<div style="font-size:11px;color:var(--sage);font-weight:700;margin-bottom:5px">✅ Complete!</div>')
+      +'<div style="background:var(--bdr);border-radius:4px;height:5px"><div style="background:var(--sage);height:5px;border-radius:4px;width:'+pct+'%;transition:width .3s"></div></div>'
+      +'</div>'
+      +'<div style="text-align:right;flex-shrink:0;padding-top:2px">'
+      +'<div style="font-size:14px;font-weight:700;color:var(--sage)">$'+earned+'</div>'
+      +'<div style="font-size:10px;color:var(--textl)">of $'+(order.stylingFee||0)+'</div>'
+      +'<div style="font-size:11px;font-weight:700;color:var(--lav);margin-top:4px">'+pct+'%</div>'
+      +'</div></div></div>';
+  }).join('');
+}
+function openWigOrderDetail(id){
+  var order=WIG_ORDERS.find(function(o){return o.id===id;});if(!order)return;
+  var wig=WIG_PRICE_LIST.find(function(w){return w.id===order.wigId;})||{name:'Custom'};
+  var titleEl=document.getElementById('wigDetailTitle');if(titleEl)titleEl.textContent=order.ref;
+  var el=document.getElementById('wigDetailBody');if(!el)return;
+  var totalReceived=(order.downPaid?order.downAmt:0)+(order.finalPaid?order.finalAmt:0);
+  var totalCost=(order.wigCost||0)+(order.shippingFee||0);
+  var net=totalReceived-totalCost;
+  var html='<div style="background:var(--bg2);border-radius:12px;padding:10px 12px;margin-bottom:14px">'
+    +'<div style="font-size:11px;font-weight:700;color:var(--textl);letter-spacing:.5px;text-transform:uppercase;margin-bottom:8px">💰 Financials</div>'
+    +'<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;text-align:center;margin-bottom:10px">'
+    +'<div><div style="font-size:18px;font-weight:700;color:var(--sage)">$'+totalReceived+'</div><div style="font-size:10px;color:var(--textl)">received</div></div>'
+    +'<div><div style="font-size:18px;font-weight:700;color:var(--peach)">$'+totalCost+'</div><div style="font-size:10px;color:var(--textl)">spent</div></div>'
+    +'<div><div style="font-size:18px;font-weight:700;color:'+(net>=0?'var(--sage)':'#e74c3c')+'">$'+net+'</div><div style="font-size:10px;color:var(--textl)">net profit</div></div>'
+    +'</div>'
+    +'<label style="display:flex;align-items:center;gap:8px;padding:6px 0;border-top:1px solid var(--bdr);cursor:pointer">'
+    +'<input type="checkbox" id="woDownCheck" '+(order.downPaid?'checked':'')+' onchange="toggleWigPayment(\''+id+'\',\'down\')" style="width:16px;height:16px">'
+    +'<span style="font-size:12px;color:var(--textd)">$25 down payment received</span>'
+    +(order.downPaid?'<span style="font-size:10px;color:var(--sage);margin-left:auto">✅ logged to income</span>':'')
+    +'</label>'
+    +'<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-top:1px solid var(--bdr)">'
+    +'<input type="checkbox" id="woFinalCheck" '+(order.finalPaid?'checked':'')+' onchange="toggleWigPayment(\''+id+'\',\'final\')" style="width:16px;height:16px;flex-shrink:0">'
+    +'<span style="font-size:12px;color:var(--textd)">Final payment received</span>'
+    +'<input type="number" id="woFinalAmt" value="'+(order.finalAmt||order.stylingFee||0)+'" min="0" style="width:65px;padding:3px 6px;border-radius:6px;border:1.5px solid var(--bdr);font-family:\'Quicksand\',sans-serif;font-size:12px;margin-left:auto" placeholder="$">'
+    +'</div>'
+    +(order.method==='premium'?'<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-top:1px solid var(--bdr)"><span style="font-size:12px;color:var(--textl)">Wig cost:</span><input type="number" id="woWigCost" value="'+(order.wigCost||0)+'" min="0" onchange="updateWigCost(\''+id+'\')" style="width:65px;padding:3px 6px;border-radius:6px;border:1.5px solid var(--bdr);font-family:\'Quicksand\',sans-serif;font-size:12px"><button onclick="logWigExpense(\''+id+'\')" style="margin-left:auto;padding:4px 10px;border-radius:7px;border:1.5px solid var(--peach);background:none;font-size:11px;font-weight:700;color:var(--peach);cursor:pointer;font-family:\'Quicksand\',sans-serif">→ Log Expense</button></div>':'')
+    +'</div>';
+  // Workflow steps
+  html+='<div style="font-size:11px;font-weight:700;color:var(--textl);letter-spacing:.5px;text-transform:uppercase;margin-bottom:8px">📋 Workflow</div>';
+  order.steps.forEach(function(step,i){
+    var def=WIG_STEP_DEFS.find(function(d){return d.id===step.id;})||{label:'Step '+(i+1)};
+    var isActive=!step.done&&(i===0||order.steps[i-1].done);
+    html+='<div style="display:flex;align-items:flex-start;gap:8px;padding:8px 0;border-bottom:1px solid var(--bdr)'+(isActive?';background:linear-gradient(90deg,rgba(169,159,201,.07),transparent);margin:0 -2px;padding:8px 2px;border-radius:8px':'')+'">'
+      +'<input type="checkbox" '+(step.done?'checked':'')+' onchange="toggleWigStep(\''+id+'\',\''+step.id+'\')" style="width:17px;height:17px;margin-top:2px;flex-shrink:0;cursor:pointer">'
+      +'<div style="flex:1;min-width:0">'
+      +'<div style="font-size:13px;font-weight:'+(isActive?'700':'500')+';color:'+(step.done?'var(--textl)':'var(--textd)')+';'+(step.done?'text-decoration:line-through':'')+'">'+(i+1)+'. '+escHtml(def.label)+'</div>';
+    if(!step.done&&def.action){
+      var btnStyle='margin-top:5px;padding:4px 10px;border-radius:7px;border:1.5px solid;background:none;font-size:11px;font-weight:700;cursor:pointer;font-family:\'Quicksand\',sans-serif;';
+      if(def.action==='form'||def.action==='sheet'){
+        html+='<button onclick="window.open(\''+def.actionUrl+'\',\'_blank\')" style="'+btnStyle+'border-color:var(--lav);color:var(--lav)">🔗 '+escHtml(def.actionLabel)+'</button>';
+      } else if(def.action==='msg'){
+        html+='<button onclick="copyWigMsg(\''+def.msg+'\',\''+id+'\')" style="'+btnStyle+'border-color:var(--sage);color:#3a6a3a">📋 '+escHtml(def.actionLabel)+'</button>';
+      } else if(def.action==='income'){
+        html+='<button onclick="goTab(\'money\',null);setTimeout(function(){showMoneySec(\'income\',document.querySelector(\'#v-money .pn-btn[data-sec=income]\'))},200);closeOv(\'ovWigOrderDetail\')" style="'+btnStyle+'border-color:var(--sage);color:#3a6a3a">💰 '+escHtml(def.actionLabel)+'</button>';
+      } else if(def.action==='focus'){
+        html+='<button onclick="goTab(\'focus-session\',null);closeOv(\'ovWigOrderDetail\')" style="'+btnStyle+'border-color:var(--lav);color:var(--lav)">🎯 '+escHtml(def.actionLabel)+'</button>';
+      }
+    }
+    html+='</div></div>';
+  });
+  html+='<div style="display:flex;gap:8px;margin-top:14px">'
+    +'<button onclick="copyWigInvoice(\''+id+'\')" style="flex:1;padding:9px;border-radius:10px;border:1.5px solid var(--lav);background:none;font-family:\'Quicksand\',sans-serif;font-size:12px;font-weight:700;color:var(--lav);cursor:pointer">📄 Copy Invoice</button>'
+    +'<button onclick="archiveWigOrder(\''+id+'\')" style="padding:9px 12px;border-radius:10px;border:1.5px solid var(--bdr);background:none;font-family:\'Quicksand\',sans-serif;font-size:11px;cursor:pointer;color:var(--textl)">Archive</button>'
+    +'</div>';
+  el.innerHTML=html;
+  showOv('ovWigOrderDetail');
+}
+function toggleWigStep(orderId,stepId){
+  var order=WIG_ORDERS.find(function(o){return o.id===orderId;});if(!order)return;
+  var step=order.steps.find(function(s){return s.id===stepId;});if(!step)return;
+  step.done=!step.done;
+  if(step.taskId){
+    var task=TASKS.find(function(t){return t.id===step.taskId;});
+    if(task){task.done=step.done;if(step.done)task.doneDate=todayStr();else delete task.doneDate;}
+    localStorage.setItem('aTasks',JSON.stringify(TASKS));
+  }
+  if(order.steps.every(function(s){return s.done;}))order.status='complete';
+  else if(order.status==='complete')order.status='active';
+  saveWigOrders();
+  openWigOrderDetail(orderId);
+}
+function toggleWigPayment(orderId,type){
+  var order=WIG_ORDERS.find(function(o){return o.id===orderId;});if(!order)return;
+  if(type==='down'){
+    order.downPaid=!order.downPaid;
+    if(order.downPaid){
+      INCOME.push({id:'inc-'+Date.now(),amt:order.downAmt,desc:'Down payment — '+order.ref,cat:'Wig Commission',source:'WWOW',date:todayStr(),created:todayStr(),projectId:orderId});
+      localStorage.setItem('aIncome',JSON.stringify(INCOME));
+      showToast('$'+order.downAmt+' logged to income ✨');
+    }
+  } else {
+    var amt=parseFloat((document.getElementById('woFinalAmt')||{}).value)||order.stylingFee||0;
+    order.finalPaid=!order.finalPaid;order.finalAmt=amt;
+    if(order.finalPaid){
+      INCOME.push({id:'inc-'+Date.now(),amt:amt,desc:'Final payment — '+order.ref,cat:'Wig Commission',source:'WWOW',date:todayStr(),created:todayStr(),projectId:orderId});
+      localStorage.setItem('aIncome',JSON.stringify(INCOME));
+      showToast('$'+amt+' logged to income ✨');
+    }
+  }
+  saveWigOrders();
+  openWigOrderDetail(orderId);
+}
+function updateWigCost(orderId){
+  var order=WIG_ORDERS.find(function(o){return o.id===orderId;});if(!order)return;
+  order.wigCost=parseFloat((document.getElementById('woWigCost')||{}).value)||0;
+  saveWigOrders();
+}
+function logWigExpense(orderId){
+  var order=WIG_ORDERS.find(function(o){return o.id===orderId;});if(!order)return;
+  var amt=parseFloat((document.getElementById('woWigCost')||{}).value)||order.wigCost||0;
+  order.wigCost=amt;saveWigOrders();
+  EXPENSES.push({id:'exp-'+Date.now(),amt:amt,desc:'Base wig — '+order.ref,ty:'business',cat:'Work-Adrienne',date:todayStr(),created:todayStr(),projectId:orderId,pending:false});
+  localStorage.setItem('aExpenses',JSON.stringify(EXPENSES));
+  showToast('$'+amt+' logged to expenses ✨');
+  openWigOrderDetail(orderId);
+}
+function copyWigMsg(type,orderId){
+  var order=WIG_ORDERS.find(function(o){return o.id===orderId;});if(!order)return;
+  var text=wigMsg(type,order);
+  if(navigator.clipboard){
+    navigator.clipboard.writeText(text).then(function(){showToast('Message copied — paste into Instagram/email 💕');});
+  } else {
+    var ta=document.createElement('textarea');ta.value=text;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);
+    showToast('Message copied 💕');
+  }
+}
+function copyWigInvoice(orderId){
+  var order=WIG_ORDERS.find(function(o){return o.id===orderId;});if(!order)return;
+  var wig=WIG_PRICE_LIST.find(function(w){return w.id===order.wigId;})||{name:'Custom'};
+  var method=order.method==='premium'?'Premium':order.method==='shipstyle'?'Ship & Style':'Restyle';
+  var total=(order.stylingFee||0)+(order.shippingFee||0)+(order.wigCost&&order.method==='premium'?order.wigCost:0)-(order.discount||0);
+  var paid=(order.downPaid?order.downAmt:0)+(order.finalPaid?order.finalAmt:0);
+  var balance=Math.max(0,total-paid);
+  var text='THE WHIMSICAL WORLD OF WIGS — INVOICE\n'
+    +'Date: '+todayStr()+'\n\n'
+    +'ORDER DETAILS\n'
+    +'Wig Style / Character: '+wig.name+'\n'
+    +'Method: '+method+'\n'
+    +'Base Wig: '+(order.baseWig||'—')+'\n'
+    +'Special Requests: '+(order.specialReqs||'None')+'\n\n'
+    +'PRICING BREAKDOWN\n'
+    +'Down Payment: $'+(order.downAmt||25)+' ('+(order.downPaid?'PAID':'DUE')+')\n'
+    +(order.method==='premium'&&order.wigCost?'Wig: $'+order.wigCost+'\n':'')
+    +'Styling Fee: $'+(order.stylingFee||0)+'\n'
+    +(order.shippingFee?'Shipping: $'+order.shippingFee+'\n':'')
+    +(order.discount?'Discount: -$'+order.discount+'\n':'')
+    +'TOTAL: $'+total+'\n'
+    +'Balance Due: $'+balance+'\n\n'
+    +'PAYMENT\nZelle (preferred), PayPal, Venmo\n\n'
+    +'POLICIES\n'
+    +'• No returns, exchanges, or refunds. I want every experience to be wonderful and will do my best to resolve any concerns.\n'
+    +'• I cannot guarantee specific delivery dates.\n'
+    +'• Shipping responsibility transfers once the wig leaves my possession.\n'
+    +'• Base wig availability may affect timing — I\'ll confirm before purchasing.\n'
+    +'• Accessories not included.\n\n'
+    +'Thank you so much for choosing Whimsical World of Wigs!\nI\'m so excited to help you create some beautiful memories! 💕\nPlease keep this invoice for your records.';
+  if(navigator.clipboard){
+    navigator.clipboard.writeText(text).then(function(){showToast('Invoice copied — paste into email or Google Doc 📄');});
+  } else {
+    var ta=document.createElement('textarea');ta.value=text;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);
+    showToast('Invoice copied 📄');
+  }
+}
+function archiveWigOrder(id){
+  var order=WIG_ORDERS.find(function(o){return o.id===id;});if(!order)return;
+  order.status='archived';saveWigOrders();
+  closeOv('ovWigOrderDetail');renderWigOrders();showToast('Order archived');
+}
+function openWigPriceList(){
+  var el=document.getElementById('wigPriceListBody');if(!el)return;
+  el.innerHTML='<div style="font-size:11px;color:var(--textl);margin-bottom:10px">⭐ Free US Shipping · $15 off International</div>'
+    +'<table style="width:100%;border-collapse:collapse;font-size:13px">'
+    +'<tr style="border-bottom:2px solid var(--bdr)"><th style="text-align:left;padding:7px 4px;color:var(--textl);font-weight:700">Wig</th><th style="text-align:right;padding:7px 4px;color:var(--textl);font-weight:700">Premium</th><th style="text-align:right;padding:7px 4px;color:var(--textl);font-weight:700">Ship & Style</th></tr>'
+    +WIG_PRICE_LIST.map(function(w){
+      return'<tr style="border-bottom:1px solid var(--bdr)"><td style="padding:8px 4px;color:var(--textd);font-weight:600">'+escHtml(w.name)+'</td><td style="text-align:right;padding:8px 4px;color:var(--textd)">$'+w.premium+'</td><td style="text-align:right;padding:8px 4px;color:var(--textl)">$'+w.shipStyle+'</td></tr>';
+    }).join('')
+    +'</table>';
+  showOv('ovWigPriceList');
+}
+
+// ═══════════════════════════════════════════════
 // WORK PROJECTS
 // ═══════════════════════════════════════════════
 function renderWorkProjects(){
@@ -20853,6 +21192,52 @@ function delProjInc(id){
       <div id="flpCalcPreview" style="background:var(--bg2);border-radius:10px;padding:8px 12px;font-size:12px;color:var(--textl);margin-bottom:10px"></div>
       <button class="ok-btn" style="width:100%" onclick="logFromLibrary()">Log It ✨</button>
     </div>
+  </div>
+</div>
+
+<!-- NEW WIG ORDER MODAL -->
+<div class="ov" id="ovNewWigOrder" onclick="closeOv('ovNewWigOrder')">
+  <div class="mod" style="max-height:90vh;overflow-y:auto" onclick="event.stopPropagation()">
+    <div class="mh"><span class="mt">✂️ New Wig Order</span><button class="mc" onclick="closeOv('ovNewWigOrder')">✕</button></div>
+    <div class="fg"><label class="fl">Internal reference (e.g. "Ariel - June")</label>
+      <input class="fi" id="woRef" placeholder="e.g. Ariel order June"></div>
+    <div class="fg"><label class="fl">Wig Style</label>
+      <select class="fi" id="woWig" style="padding:8px 10px" onchange="updateWigOrderPrice()">
+        <option value="">— Select wig —</option>
+      </select></div>
+    <div class="fg"><label class="fl">Method</label>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        <label style="flex:1;min-width:80px;display:flex;align-items:center;gap:6px;padding:8px 10px;border:1.5px solid var(--bdr);border-radius:10px;cursor:pointer;font-size:13px">
+          <input type="radio" name="woMethod" value="premium" onchange="updateWigOrderPrice()"> Premium</label>
+        <label style="flex:1;min-width:80px;display:flex;align-items:center;gap:6px;padding:8px 10px;border:1.5px solid var(--bdr);border-radius:10px;cursor:pointer;font-size:13px">
+          <input type="radio" name="woMethod" value="shipstyle" onchange="updateWigOrderPrice()"> Ship &amp; Style</label>
+        <label style="flex:1;min-width:80px;display:flex;align-items:center;gap:6px;padding:8px 10px;border:1.5px solid var(--bdr);border-radius:10px;cursor:pointer;font-size:13px">
+          <input type="radio" name="woMethod" value="restyle" onchange="updateWigOrderPrice()"> Restyle</label>
+      </div></div>
+    <div id="woPricePreview" style="background:var(--bg2);border-radius:10px;padding:8px 12px;font-size:12px;color:var(--textl);margin-bottom:8px;display:none"></div>
+    <div class="fg"><label class="fl">Base wig / notes</label>
+      <input class="fi" id="woBaseWig" placeholder="e.g. Scarlett base from Epiccosplay"></div>
+    <div class="fg"><label class="fl">Special requests</label>
+      <input class="fi" id="woSpecialReqs" placeholder="e.g. extra curly, specific shade of red"></div>
+    <div class="fg"><label class="fl">Deadline (optional)</label>
+      <input class="fi" id="woDeadline" type="date"></div>
+    <button class="ok-btn" style="width:100%" onclick="saveNewWigOrder()">Create Order + Add Tasks ✨</button>
+  </div>
+</div>
+
+<!-- WIG ORDER DETAIL MODAL -->
+<div class="ov" id="ovWigOrderDetail" onclick="closeOv('ovWigOrderDetail')">
+  <div class="mod" style="max-height:92vh;overflow-y:auto" onclick="event.stopPropagation()">
+    <div class="mh"><span class="mt" id="wigDetailTitle">Order</span><button class="mc" onclick="closeOv('ovWigOrderDetail')">✕</button></div>
+    <div id="wigDetailBody"></div>
+  </div>
+</div>
+
+<!-- WIG PRICE LIST MODAL -->
+<div class="ov" id="ovWigPriceList" onclick="closeOv('ovWigPriceList')">
+  <div class="mod" style="max-height:88vh;overflow-y:auto" onclick="event.stopPropagation()">
+    <div class="mh"><span class="mt">💰 Price List</span><button class="mc" onclick="closeOv('ovWigPriceList')">✕</button></div>
+    <div id="wigPriceListBody"></div>
   </div>
 </div>
 
