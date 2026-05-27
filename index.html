@@ -1251,7 +1251,10 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     <div style="background:#fff;border-radius:14px;padding:12px 14px;box-shadow:0 1px 4px rgba(0,0,0,.06)">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
         <span style="font-size:11px;font-weight:700;color:var(--textl);letter-spacing:.5px;text-transform:uppercase">🎯 Today's Focus</span>
-        <button class="btn sec" style="font-size:11px;padding:2px 9px" onclick="showFocusSec('intentions',null);goTab('focus',document.querySelector('[data-tab=\'focus\']'))">+ Set</button>
+        <div style="display:flex;gap:6px">
+          <button class="btn sec" style="font-size:11px;padding:2px 9px" onclick="autoFillIntentions();renderIntentionsHome()">✨ Auto</button>
+          <button class="btn sec" style="font-size:11px;padding:2px 9px" onclick="showFocusSec('intentions',null);goTab('focus',document.querySelector('[data-tab=\'focus\']'))">+ Set</button>
+        </div>
       </div>
       <div id="intentionsHomeList"></div>
     </div>
@@ -1993,14 +1996,17 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
   </div>
   <!-- INTENTIONS -->
   <div id="fs-intentions" style="display:none">
-    <div style="font-weight:700;font-size:14px;color:var(--textd);margin-bottom:6px">🎯 Today's Intentions</div>
-    <div style="font-size:12px;color:var(--textl);margin-bottom:12px">Choose 1–3 things to focus on today. Less is more.</div>
+    <div style="font-weight:700;font-size:14px;color:var(--textd);margin-bottom:4px">🎯 Today's Intentions</div>
+    <div style="font-size:12px;color:var(--textl);margin-bottom:12px">Pick up to 3. Mix tasks, pins, or freeform — whatever matters most today.</div>
     <div class="card" style="margin-bottom:12px">
-      <div style="display:flex;gap:8px;margin-bottom:8px">
-        <input id="intentionInput" type="text" placeholder="What's one important thing today?" style="flex:1;padding:9px 12px;border-radius:10px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px" onkeydown="if(event.key==='Enter')addIntention()">
+      <div style="display:flex;gap:8px;margin-bottom:10px">
+        <input id="intentionInput" type="text" placeholder="Type anything — a task, a theme, a goal…" style="flex:1;padding:9px 12px;border-radius:10px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px" onkeydown="if(event.key==='Enter')addIntention()">
         <button class="btn" onclick="addIntention()">Add</button>
       </div>
-      <div style="font-size:11px;color:var(--textl);margin-bottom:6px">Or pick from your tasks:</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+        <span style="font-size:11px;color:var(--textl)">Or pick from your tasks:</span>
+        <button onclick="autoFillIntentions()" style="background:linear-gradient(135deg,var(--lav),var(--rose));border:none;border-radius:20px;color:#fff;font-family:'Quicksand',sans-serif;font-size:11px;font-weight:700;padding:4px 12px;cursor:pointer">✨ Smart Fill</button>
+      </div>
       <div id="intentionTaskPicks" style="display:flex;gap:6px;flex-wrap:wrap"></div>
     </div>
     <div id="intentionList"></div>
@@ -13095,51 +13101,91 @@ function todayIntentions(){
   return INTENTIONS[todayStr()]||[];
 }
 
+function _saveIntentions(list){
+  INTENTIONS[todayStr()]=list;
+  localStorage.setItem('aIntentions',JSON.stringify(INTENTIONS));
+}
+
+function _urgentTasks(){
+  var today=todayStr();
+  var active=TASKS.filter(function(t){return !t.done&&t.source!=='routine';});
+  active.sort(function(a,b){
+    function score(t){
+      var s=0;
+      if(t.due===today)s+=100;
+      else if(t.due&&t.due<today)s+=80;
+      if(t.priority==='Do Now')s+=40;
+      else if(t.priority==='Do Next')s+=20;
+      if(t.due&&t.due>today)s+=10;
+      return s;
+    }
+    return score(b)-score(a);
+  });
+  return active;
+}
+
+function autoFillIntentions(){
+  var list=todayIntentions();
+  if(list.length>=3){showToast('Already have 3 focus items — clear one first');return;}
+  var existing=list.map(function(it){return it.text.toLowerCase();});
+  var candidates=_urgentTasks().filter(function(t){return existing.indexOf(t.title.toLowerCase())<0;});
+  var added=0;
+  for(var i=0;i<candidates.length&&list.length<3;i++){
+    list.push({text:candidates[i].title,done:false,taskId:candidates[i].id});
+    added++;
+  }
+  if(!added){showToast('No new tasks to suggest');return;}
+  _saveIntentions(list);
+  renderIntentionList();renderIntentionsHome();renderIntentionTaskPicks();
+  showToast('✨ Added '+added+' focus item'+(added>1?'s':''));
+}
+
 function addIntention(){
   var el=document.getElementById('intentionInput');
   var text=(el&&el.value||'').trim();
   if(!text)return;
   var list=todayIntentions();
-  if(list.length>=3)return alert('Keep it to 3 max — focus!');
+  if(list.length>=3){showToast('Keep it to 3 max — focus!');return;}
   list.push({text:text,done:false});
-  INTENTIONS[todayStr()]=list;
-  localStorage.setItem('aIntentions',JSON.stringify(INTENTIONS));
+  _saveIntentions(list);
   el.value='';
   renderIntentionList();renderIntentionsHome();
 }
 
-function addIntentionFromTask(title){
+function addIntentionFromTask(title,taskId){
   var list=todayIntentions();
-  if(list.length>=3)return alert('Keep it to 3 max — focus!');
-  list.push({text:title,done:false});
-  INTENTIONS[todayStr()]=list;
-  localStorage.setItem('aIntentions',JSON.stringify(INTENTIONS));
+  if(list.length>=3){showToast('Keep it to 3 max — focus!');return;}
+  var alreadyIn=list.some(function(it){return it.text.toLowerCase()===title.toLowerCase();});
+  if(alreadyIn){showToast('Already in your focus list');return;}
+  list.push({text:title,done:false,taskId:taskId||null});
+  _saveIntentions(list);
   renderIntentionList();renderIntentionsHome();renderIntentionTaskPicks();
 }
 
 function togIntention(idx){
   var list=todayIntentions();
   if(list[idx])list[idx].done=!list[idx].done;
-  INTENTIONS[todayStr()]=list;
-  localStorage.setItem('aIntentions',JSON.stringify(INTENTIONS));
+  _saveIntentions(list);
   renderIntentionList();renderIntentionsHome();
 }
 
 function delIntention(idx){
   var list=todayIntentions();list.splice(idx,1);
-  INTENTIONS[todayStr()]=list;
-  localStorage.setItem('aIntentions',JSON.stringify(INTENTIONS));
+  _saveIntentions(list);
   renderIntentionList();renderIntentionsHome();renderIntentionTaskPicks();
 }
 
 function renderIntentionList(){
   var el=document.getElementById('intentionList');if(!el)return;
   var list=todayIntentions();
-  if(!list.length){el.innerHTML='<p style="color:var(--textl);text-align:center;padding:14px;font-size:13px">No intentions set yet. What\'s the ONE thing that matters today?</p>';return;}
+  if(!list.length){
+    el.innerHTML='<p style="color:var(--textl);text-align:center;padding:14px;font-size:13px">Nothing set yet — type above, pick a task, or hit ✨ Smart Fill.</p>';
+    return;
+  }
   el.innerHTML='<div class="card">'+list.map(function(it,i){
     return '<div class="intention-row">'
       +'<div class="intention-chk'+(it.done?' done':'')+'" onclick="togIntention('+i+')">'+(it.done?'✓':'')+'</div>'
-      +'<span style="flex:1;font-size:14px;font-weight:600;color:var(--textd)'+(it.done?';text-decoration:line-through;color:var(--textl)':'')+'">'+(i+1)+'. '+it.text+'</span>'
+      +'<span style="flex:1;font-size:14px;font-weight:600;color:var(--textd)'+(it.done?';text-decoration:line-through;color:var(--textl)':'')+'">'+(i+1)+'. '+escHtml(it.text)+'</span>'
       +'<button onclick="delIntention('+i+')" style="background:none;border:none;font-size:13px;cursor:pointer;color:var(--textl);padding:2px 5px">✕</button>'
       +'</div>';
   }).join('')+'</div>';
@@ -13147,26 +13193,54 @@ function renderIntentionList(){
 
 function renderIntentionTaskPicks(){
   var el=document.getElementById('intentionTaskPicks');if(!el)return;
-  var active=TASKS.filter(function(t){return !t.done;}).slice(0,8);
-  if(!active.length){el.innerHTML='<span style="font-size:12px;color:var(--textl)">No active tasks yet</span>';return;}
-  el.innerHTML=active.map(function(t){
-    return '<button class="btn sec" style="font-size:11px;padding:3px 10px" onclick="addIntentionFromTask(\''+t.title.replace(/'/g,"\\'")+'\')">'
-      +t.title.slice(0,30)+(t.title.length>30?'…':'')+'</button>';
+  var list=todayIntentions();
+  var existing=list.map(function(it){return it.text.toLowerCase();});
+  var candidates=_urgentTasks().filter(function(t){return existing.indexOf(t.title.toLowerCase())<0;}).slice(0,10);
+  if(!candidates.length){
+    el.innerHTML=list.length?'<span style="font-size:12px;color:var(--textl)">All urgent tasks already added</span>':'<span style="font-size:12px;color:var(--textl)">No active tasks yet</span>';
+    return;
+  }
+  el.innerHTML=candidates.map(function(t){
+    var label=t.title.slice(0,32)+(t.title.length>32?'…':'');
+    var isToday=t.due===todayStr();
+    var isOverdue=t.due&&t.due<todayStr();
+    var badge=isOverdue?'<span style="font-size:9px;color:#c06060;font-weight:700"> !</span>':isToday?'<span style="font-size:9px;color:var(--rose);font-weight:700"> ★</span>':'';
+    return '<button class="btn sec" style="font-size:11px;padding:3px 10px" onclick="addIntentionFromTask('+JSON.stringify(t.title)+','+JSON.stringify(t.id)+')">'
+      +escHtml(label)+badge+'</button>';
   }).join('');
 }
 
 function renderIntentionsHome(){
   var wrap=document.getElementById('intentionsHomeWrap');
-  var list=document.getElementById('intentionsHomeList');
-  if(!wrap||!list)return;
+  var listEl=document.getElementById('intentionsHomeList');
+  if(!wrap||!listEl)return;
   var items=todayIntentions();
   wrap.style.display='';
-  list.innerHTML=items.length?items.map(function(it,i){
+  if(!items.length){
+    var suggestions=_urgentTasks().slice(0,3);
+    if(suggestions.length){
+      listEl.innerHTML='<div style="font-size:11px;color:var(--textl);font-style:italic;margin-bottom:6px">Nothing set — here\'s what\'s urgent:</div>'
+        +suggestions.map(function(t){
+          var isToday=t.due===todayStr();
+          var isOverdue=t.due&&t.due<todayStr();
+          var badge=isOverdue?'<span style="color:#c06060;font-size:10px"> overdue</span>':isToday?'<span style="color:var(--rose);font-size:10px"> today</span>':'';
+          return '<div style="display:flex;align-items:center;gap:8px;padding:3px 0;border-bottom:1px solid #f5f0eb">'
+            +'<span style="font-size:13px;color:var(--textl)">○</span>'
+            +'<span style="font-size:13px;color:var(--textl);flex:1">'+escHtml(t.title.slice(0,40))+badge+'</span>'
+            +'</div>';
+        }).join('')
+        +'<button onclick="autoFillIntentions();renderIntentionsHome()" style="margin-top:8px;width:100%;padding:6px;background:linear-gradient(135deg,var(--lav),var(--rose));border:none;border-radius:10px;color:#fff;font-family:\'Quicksand\',sans-serif;font-size:12px;font-weight:700;cursor:pointer">✨ Set these as my focus</button>';
+    }else{
+      listEl.innerHTML='<div style="font-size:12px;color:var(--textl);font-style:italic;padding:4px 0">No intentions set — tap ✨ Auto or + Set to add</div>';
+    }
+    return;
+  }
+  listEl.innerHTML=items.map(function(it,i){
     return '<div style="display:flex;align-items:center;gap:8px;padding:4px 0;'+(i<items.length-1?'border-bottom:1px solid #f5f0eb':'')+'">'
       +'<span style="font-size:14px">'+(it.done?'✅':'⬜')+'</span>'
-      +'<span style="font-size:13px;font-weight:600;color:var(--textd)'+(it.done?';text-decoration:line-through;color:var(--textl)':'')+'">'+(i+1)+'. '+it.text+'</span>'
+      +'<span style="font-size:13px;font-weight:600;color:var(--textd)'+(it.done?';text-decoration:line-through;color:var(--textl)':'')+'">'+(i+1)+'. '+escHtml(it.text)+'</span>'
       +'</div>';
-  }).join(''):'<div style="font-size:12px;color:var(--textl);font-style:italic;padding:4px 0">No intentions set yet — tap + Set to add up to 3</div>';
+  }).join('');
 }
 
 function renderMinistryHome(){
