@@ -809,6 +809,53 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
 @keyframes blink{50%{opacity:0}}
 .hatch-empty{font-family:'Quicksand',sans-serif;font-size:15px;color:var(--textl);text-align:center;padding:28px 16px;line-height:1.9;font-weight:600}
 #hatchCanvas{position:fixed;inset:0;z-index:10001;pointer-events:none;display:none}
+
+/* ── BUNKER OVERRIDE — Lost/DHARMA aesthetic scoped to #ovHatch ── */
+#ovHatch{background:#070d07}
+#ovHatch::after{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.12) 2px,rgba(0,0,0,.12) 4px);pointer-events:none;z-index:10001}
+#ovHatch .hatch-wrap{position:relative;z-index:10002}
+#ovHatch .hatch-logo{font-family:'Courier New',monospace;font-size:11px;letter-spacing:2.5px;text-transform:uppercase;color:#3fc820;text-shadow:0 0 10px rgba(63,200,32,.6);font-weight:400}
+#ovHatch .hatch-close-btn,#ovHatch .hatch-back-btn{color:#1a6a10;font-family:'Courier New',monospace;font-size:12px}
+#ovHatch .hatch-mode-btn{background:transparent;border:1px solid #142814;color:#3fc820;font-family:'Courier New',monospace;box-shadow:none;border-radius:4px}
+#ovHatch .hatch-mode-btn:hover,#ovHatch .hatch-mode-btn:active{background:rgba(63,200,32,.06)}
+#ovHatch .hatch-mode-icon{font-size:16px;line-height:1}
+#ovHatch .hatch-mode-label{color:#3fc820;font-family:'Courier New',monospace;font-size:13px;letter-spacing:.5px;text-shadow:0 0 6px rgba(63,200,32,.3)}
+#ovHatch .hatch-mode-sub{color:#1a5010;font-family:'Courier New',monospace;font-size:10px}
+#ovHatch .hatch-spa-pill{background:transparent;border:1px solid #0d200d;color:#1a5010;font-family:'Courier New',monospace;border-radius:4px}
+#ovHatch .hatch-card{background:#0c140c;border:1px solid #142814;box-shadow:inset 0 0 20px rgba(0,0,0,.5),0 0 12px rgba(63,200,32,.04);border-radius:6px}
+#ovHatch .hatch-label{color:#1a5010;font-family:'Courier New',monospace;letter-spacing:1.8px;font-size:9px}
+#ovHatch .hatch-big-text{color:#3fc820;font-family:'Courier New',monospace;font-size:15px;line-height:1.7;text-shadow:0 0 5px rgba(63,200,32,.25)}
+#ovHatch .hatch-keys{gap:8px}
+#ovHatch .hatch-key{font-family:'Courier New',monospace;font-size:12px;letter-spacing:.5px;border-radius:3px;text-transform:uppercase}
+#ovHatch .hatch-key-skip{background:#0c140c;color:#1a5010;border:1px solid #142814}
+#ovHatch .hatch-key-park{background:#0c140c;color:#1a4a30;border:1px solid #0d2a1a}
+#ovHatch .hatch-key-exec{background:linear-gradient(135deg,#0f2a06,#081a0a);color:#3fc820;border:1px solid #1a5010;box-shadow:0 0 10px rgba(63,200,32,.12);text-shadow:0 0 4px rgba(63,200,32,.4)}
+#ovHatch .hatch-key-fire{background:linear-gradient(135deg,#2a0606,#180404);color:#cc4040;border:1px solid #4a1010;box-shadow:0 0 8px rgba(200,60,60,.12)}
+#ovHatch .hatch-transmission-card{background:#0a100a;border:1px solid #1a2810;border-radius:6px;box-shadow:inset 0 0 12px rgba(0,0,0,.4)}
+#ovHatch .hatch-signal-row{color:#7ab030;font-family:'Courier New',monospace}
+#ovHatch .hatch-signal-dot{background:#7ab030}
+#ovHatch .hatch-tx-text{color:#7ab030;font-family:'Courier New',monospace;font-style:normal;font-size:14px;line-height:1.7;text-shadow:0 0 4px rgba(120,176,48,.2)}
+#ovHatch .hatch-slot-card{background:#0a0f14;border:1px solid #141e2a;border-radius:6px;box-shadow:inset 0 0 12px rgba(0,0,0,.4)}
+#ovHatch .hatch-slot-cat{color:#4080c0;font-family:'Courier New',monospace;letter-spacing:1.5px;text-shadow:0 0 5px rgba(64,128,192,.3)}
+#ovHatch .hatch-slot-action{color:#60a0d8;font-family:'Courier New',monospace;font-size:15px;text-shadow:0 0 4px rgba(96,160,216,.2)}
+#ovHatch .hatch-timer-lg{color:#c84040;font-family:'Courier New',monospace;text-shadow:0 0 14px rgba(200,64,64,.5)}
+#ovHatch .hatch-spa-item{background:#0c140c;color:#3fc820;font-family:'Courier New',monospace;border:1px solid #142814;box-shadow:none;border-radius:4px}
+#ovHatch .hatch-breathe-ring{border-color:#3fc820;color:#3fc820;font-family:'Courier New',monospace}
+#ovHatch .hatch-breathe-ring.inhale{background:rgba(63,200,32,.07);border-color:#5fd840}
+#ovHatch .hatch-cursor{background:#3fc820}
+#ovHatch textarea,.fi-bunker{background:#0c140c!important;color:#3fc820!important;border-color:#142814!important;font-family:'Courier New',monospace!important;border-radius:4px!important}
+/* Cast card — amber instead of green for variety */
+#ovHatch .cast-card{background:#100e06;border:1px solid #2a2406;border-radius:6px;padding:22px 20px;margin-bottom:14px;box-shadow:inset 0 0 16px rgba(0,0,0,.4),0 0 8px rgba(200,160,32,.03)}
+#ovHatch .cast-name{font-family:'Courier New',monospace;font-size:18px;color:#c8a020;text-shadow:0 0 8px rgba(200,160,32,.4);margin-bottom:4px}
+#ovHatch .cast-world{font-family:'Courier New',monospace;font-size:10px;color:#5a4a10;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:14px}
+#ovHatch .cast-prompt{font-family:'Courier New',monospace;font-size:14px;color:#a08018;line-height:1.7}
+/* Dispatch in bunker */
+#ovHatch #hDispatchWriteArea textarea{background:#0c140c;color:#3fc820;border:1px solid #142814;font-family:'Courier New',monospace;border-radius:4px;padding:10px}
+/* Small link buttons at bottom of panels */
+#ovHatch .hatch-text-btn{background:none;border:none;font-family:'Courier New',monospace;font-size:11px;color:#1a5010;cursor:pointer;letter-spacing:.5px;padding:6px 0;text-transform:uppercase}
+/* Dispatch response buttons */
+#ovHatch .hatch-dispatch-row{display:flex;gap:8px;margin-top:10px}
+#ovHatch .hatch-dispatch-row button{flex:1;background:transparent;border:1px solid #142814;color:#1a5010;font-family:'Courier New',monospace;font-size:11px;cursor:pointer;padding:9px 6px;border-radius:3px;letter-spacing:.3px}
 </style>
 </head>
 <body>
@@ -3450,7 +3497,11 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
         <button onclick="addHatchItem('hatchDispatchInput','aHatchDispatch','hatchDispatchList',HATCH_DEFAULTS.dispatch)" style="padding:7px 14px;border-radius:9px;border:none;background:var(--rose);color:white;font-family:'Quicksand',sans-serif;font-size:13px;font-weight:700;cursor:pointer">Add</button>
       </div>
 
-      <div style="font-size:12px;font-weight:700;color:var(--textd);margin-bottom:8px">💬 Spark Prompts</div>
+      <div style="font-size:12px;font-weight:700;color:var(--textd);margin-bottom:8px">🎭 The Cast — Characters</div>
+      <div style="font-size:11px;color:var(--textl);margin-bottom:10px">Build your cast. Each character gets their own pool of scene prompts. The Hatch will pull from them.</div>
+      <div id="hatchCastSettings"></div>
+
+      <div style="font-size:12px;font-weight:700;color:var(--textd);margin-bottom:8px;margin-top:6px">💬 Spark Prompts</div>
       <div style="font-size:11px;color:var(--textl);margin-bottom:10px">Conversation starters by category. Add new categories and prompts, or delete ones that don't fit.</div>
       <div id="sparkSettingsList"></div>
     </div>
@@ -7665,6 +7716,13 @@ var HATCH_DEFAULTS={
     "If you could tell your past self one thing from this season, what would it be?",
     "What's something you've been putting off that would actually take under 20 minutes?",
     "What does 'doing well' actually look like for you right now?"
+  ],
+  cast:[
+    {name:"Ember",emoji:"🕯️",vibe:"Warm and practical. Gets things done without ceremony.",world:"Brindleport",prompts:["Ember has her sleeves rolled up. She's not waiting for perfect conditions — she's just doing the thing. What's yours?","The kettle is on. Ember says you have exactly that long to finish what you started.","Ember doesn't believe in 'later.' She believes in now, and rest. Which one is this?","Ember is already in the kitchen. She's not asking for help. She's just there, moving, making it warmer. You could join her."]},
+    {name:"Reid",emoji:"⚓",vibe:"Steady, direct. Knows the one move that matters.",world:"Brindleport",prompts:["Reid says: what's the actual next step? Not the whole plan. The one move.","Reid has been watching. He knows you've been circling this. It's time to land.","The compass points somewhere. Reid wants to know where you actually want to go.","Reid doesn't do motivational speeches. He just shows up. What would it look like to just show up right now?"]},
+    {name:"Cal",emoji:"🌊",vibe:"Big vision, uncertain steps. Navigator of things unseen.",world:"Brindleport",prompts:["Cal is charting something new. What uncharted part of your own life are you avoiding?","The sea doesn't wait for perfect weather. Cal goes anyway. What are you waiting for?","Cal says sometimes the destination isn't the point. What would make the journey worth it?","Cal got it wrong last week and tried again this week. What are you allowed to get wrong?"]},
+    {name:"Belle",emoji:"📚",vibe:"Curious. Finds magic in ordinary things. Her library is everywhere.",world:"The Village",prompts:["Belle found something beautiful in something ordinary today. What ordinary thing is worth a second look right now?","She's read this chapter before — in someone else's story. What chapter are you in?","Belle carries a book everywhere, not to escape but to understand. What are you trying to understand right now?","Belle doesn't wait to be asked to dance. What are you waiting to be asked for?"]},
+    {name:"Tessa",emoji:"🌿",vibe:"Quiet and growing. Tends things. Believes in slow work.",world:"The Conservatory",prompts:["Tessa is watering something she planted weeks ago. You don't always see what's growing. What have you been tending that hasn't bloomed yet?","Slow work is still work. Tessa has been at this for a year. What long thing are you in the middle of?","Tessa doesn't rush anything. What are you trying to rush that doesn't want to be rushed?"]}
   ]
 };
 var SPARK_DEFAULTS={
@@ -7766,7 +7824,7 @@ function closeHatch(){
 }
 function hatchMode(mode){
   _clearHatchTimers();
-  ['Selector','Mission','Chaos','Transmission','Shock','Dispatch','Spa'].forEach(function(p){
+  ['Selector','Mission','Chaos','Transmission','Shock','Dispatch','Cast','Spa'].forEach(function(p){
     var el=document.getElementById('hPanel'+p);if(el)el.style.display='none';
   });
   var target=document.getElementById('hPanel'+mode.charAt(0).toUpperCase()+mode.slice(1));
@@ -7776,6 +7834,7 @@ function hatchMode(mode){
   else if(mode==='transmission')_hatchTxShow();
   else if(mode==='shock')_hatchShockShow();
   else if(mode==='dispatch')_hatchDispatchShow();
+  else if(mode==='cast')_hatchCastShow();
 }
 
 // ─── MISSION ───────────────────────────────────
@@ -7923,6 +7982,7 @@ function renderHatchSettings(){
   renderHatchList('hatchShocksList','aHatchShocks',HATCH_DEFAULTS.shocks);
   renderHatchList('hatchDispatchList','aHatchDispatch',HATCH_DEFAULTS.dispatch);
   renderHatchChaosSettings();
+  renderCastSettings();
   renderSparkSettings();
 }
 function renderHatchList(elId,key,defaults){
@@ -8068,19 +8128,144 @@ function renderDispatchJournal(){
   }).join('');
 }
 
+// ─── THE CAST ──────────────────────────────────
+var _castIdx=0;
+function _getCast(){return JSON.parse(localStorage.getItem('aHatchCast')||'null')||HATCH_DEFAULTS.cast.map(function(c){return{name:c.name,emoji:c.emoji,vibe:c.vibe,world:c.world,prompts:c.prompts.slice()};});}
+function _hatchCastShow(idx){
+  var cast=_getCast();
+  if(!cast.length){
+    var el=document.getElementById('hCastBody');
+    if(el)el.innerHTML='<div class="cast-card"><div class="cast-name">NO CHARACTERS</div><div class="cast-prompt">Add some in Settings → The Hatch → The Cast.</div></div>';
+    return;
+  }
+  if(idx===undefined)idx=Math.floor(Math.random()*cast.length);
+  _castIdx=idx;
+  var c=cast[_castIdx];
+  var prompt=c.prompts&&c.prompts.length?c.prompts[Math.floor(Math.random()*c.prompts.length)]:'';
+  var el=document.getElementById('hCastBody');
+  if(!el)return;
+  el.innerHTML=
+    '<div class="cast-card">'+
+      '<div class="cast-name">'+escHtml(c.emoji)+' '+escHtml(c.name)+'</div>'+
+      '<div class="cast-world">[ '+escHtml(c.world||'Unknown')+ ' ]</div>'+
+      '<div style="font-family:\'Courier New\',monospace;font-size:10px;color:#3a3010;margin-bottom:14px;letter-spacing:.3px">'+escHtml(c.vibe)+'</div>'+
+      '<div class="cast-prompt">'+escHtml(prompt)+'</div>'+
+    '</div>'+
+    '<div style="font-family:\'Courier New\',monospace;font-size:10px;color:#1a5010;text-align:center;letter-spacing:1px">'+(_castIdx+1)+' / '+cast.length+'</div>';
+}
+function castNext(){
+  var cast=_getCast();
+  if(!cast.length)return;
+  _hatchCastShow((_castIdx+1)%cast.length);
+}
+function castPrev(){
+  var cast=_getCast();
+  if(!cast.length)return;
+  _hatchCastShow((_castIdx-1+cast.length)%cast.length);
+}
+function castRandom(){_hatchCastShow(Math.floor(Math.random()*_getCast().length));}
+function castTakeIt(){showToast('Carrying it with you. 💜');closeHatch();}
+function renderCastSettings(){
+  var el=document.getElementById('hatchCastSettings');if(!el)return;
+  var cast=_getCast();
+  el.innerHTML=cast.map(function(c,ci){
+    return'<div style="margin-bottom:14px;background:#faf8f5;border-radius:12px;padding:10px 12px">'+
+      '<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">'+
+        '<span style="font-size:18px">'+escHtml(c.emoji||'✦')+'</span>'+
+        '<div style="flex:1">'+
+          '<div style="font-size:13px;font-weight:700;color:var(--textd)">'+escHtml(c.name)+'</div>'+
+          '<div style="font-size:11px;color:var(--textl)">'+escHtml(c.world||'')+'</div>'+
+        '</div>'+
+        '<button onclick="delCastCharacter('+ci+')" style="background:none;border:none;color:var(--textl);cursor:pointer;font-size:13px">Remove</button>'+
+      '</div>'+
+      '<div style="font-size:12px;color:var(--textl);margin-bottom:8px;font-style:italic">'+escHtml(c.vibe||'')+'</div>'+
+      (c.prompts||[]).map(function(p,pi){
+        return'<div style="display:flex;align-items:flex-start;gap:6px;padding:4px 0">'+
+          '<div style="flex:1;font-size:12px;color:var(--textd);line-height:1.4">• '+escHtml(p)+'</div>'+
+          '<button onclick="delCastPrompt('+ci+','+pi+')" style="background:none;border:none;color:var(--textl);cursor:pointer;font-size:13px;flex-shrink:0">✕</button>'+
+        '</div>';
+      }).join('')+
+      '<div style="display:flex;gap:6px;margin-top:8px">'+
+        '<input class="fi" id="castPromptInp'+ci+'" placeholder="Add a prompt for '+escHtml(c.name)+'..." style="flex:1;padding:6px 8px;font-size:12px">'+
+        '<button onclick="addCastPrompt('+ci+')" style="padding:6px 10px;border-radius:8px;border:none;background:var(--rose);color:white;font-family:\'Quicksand\',sans-serif;font-size:12px;font-weight:700;cursor:pointer">Add</button>'+
+      '</div>'+
+    '</div>';
+  }).join('')+
+  '<div style="background:#faf8f5;border-radius:12px;padding:12px;margin-top:6px">'+
+    '<div style="font-size:12px;font-weight:700;color:var(--textd);margin-bottom:8px">Add Character</div>'+
+    '<div style="display:grid;grid-template-columns:44px 1fr;gap:6px;margin-bottom:6px">'+
+      '<input class="fi" id="castNewEmoji" placeholder="✦" style="padding:7px;font-size:18px;text-align:center">'+
+      '<input class="fi" id="castNewName" placeholder="Character name" style="padding:7px 10px">'+
+    '</div>'+
+    '<input class="fi" id="castNewVibe" placeholder="One-line vibe / description" style="width:100%;padding:7px 10px;margin-bottom:6px;box-sizing:border-box">'+
+    '<input class="fi" id="castNewWorld" placeholder="World / place (optional)" style="width:100%;padding:7px 10px;margin-bottom:8px;box-sizing:border-box">'+
+    '<button onclick="addCastCharacter()" style="padding:8px 18px;border-radius:9px;border:none;background:var(--lav);color:white;font-family:\'Quicksand\',sans-serif;font-size:13px;font-weight:700;cursor:pointer">Add Character</button>'+
+  '</div>';
+}
+function addCastCharacter(){
+  var name=(document.getElementById('castNewName')||{}).value||'';
+  var emoji=(document.getElementById('castNewEmoji')||{}).value||'✦';
+  var vibe=(document.getElementById('castNewVibe')||{}).value||'';
+  var world=(document.getElementById('castNewWorld')||{}).value||'';
+  if(!name.trim()){showToast('Enter a name');return;}
+  var cast=_getCast();
+  cast.push({name:name.trim(),emoji:emoji.trim()||'✦',vibe:vibe.trim(),world:world.trim(),prompts:[]});
+  localStorage.setItem('aHatchCast',JSON.stringify(cast));
+  ['castNewName','castNewEmoji','castNewVibe','castNewWorld'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});
+  renderCastSettings();showToast('Character added ✓');
+}
+function delCastCharacter(ci){
+  var cast=_getCast();cast.splice(ci,1);
+  localStorage.setItem('aHatchCast',JSON.stringify(cast));
+  renderCastSettings();
+}
+function addCastPrompt(ci){
+  var inp=document.getElementById('castPromptInp'+ci);if(!inp)return;
+  var val=inp.value.trim();if(!val){showToast('Enter a prompt');return;}
+  var cast=_getCast();if(!cast[ci])return;
+  if(!cast[ci].prompts)cast[ci].prompts=[];
+  cast[ci].prompts.push(val);
+  localStorage.setItem('aHatchCast',JSON.stringify(cast));
+  inp.value='';renderCastSettings();showToast('Prompt added ✓');
+}
+function delCastPrompt(ci,pi){
+  var cast=_getCast();if(!cast[ci])return;
+  cast[ci].prompts.splice(pi,1);
+  localStorage.setItem('aHatchCast',JSON.stringify(cast));
+  renderCastSettings();
+}
+
 // ─── SPARK ─────────────────────────────────────
-var _sparkSavedIdx=null;
+var _sparkSavedIdx=null,_sparkCat=null;
 function openSpark(){
+  _sparkCat=null;
+  renderSparkCatRow();
   sparkNew();
   showOv('ovSpark');
 }
+function renderSparkCatRow(){
+  var el=document.getElementById('sparkCatRow');if(!el)return;
+  var prompts=JSON.parse(localStorage.getItem('aSparkPrompts')||'null')||SPARK_DEFAULTS;
+  var cats=Object.keys(prompts);
+  el.innerHTML=['All'].concat(cats).map(function(cat){
+    var active=(cat==='All'&&!_sparkCat)||cat===_sparkCat;
+    return'<button onclick="setSparkCat('+(cat==='All'?'null':"'"+cat+"'")+');event.stopPropagation()" style="padding:5px 12px;border-radius:50px;border:1.5px solid '+(active?'var(--rose)':'rgba(201,160,160,.25)')+';background:'+(active?'var(--rose)':'#fff')+';color:'+(active?'#fff':'var(--textl)')+';font-family:\'Quicksand\',sans-serif;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap">'+escHtml(cat)+'</button>';
+  }).join('');
+}
+function setSparkCat(cat){_sparkCat=cat;renderSparkCatRow();sparkNew();}
 function sparkNew(){
   var prompts=JSON.parse(localStorage.getItem('aSparkPrompts')||'null')||SPARK_DEFAULTS;
   var cats=Object.keys(prompts);
   if(!cats.length)return;
-  var cat=cats[Math.floor(Math.random()*cats.length)];
+  var cat;
+  if(_sparkCat&&prompts[_sparkCat]&&prompts[_sparkCat].length){
+    cat=_sparkCat;
+  }else{
+    var filled=cats.filter(function(c){return prompts[c]&&prompts[c].length;});
+    if(!filled.length)return;
+    cat=filled[Math.floor(Math.random()*filled.length)];
+  }
   var pool=prompts[cat];
-  if(!pool||!pool.length)return;
   var prompt=pool[Math.floor(Math.random()*pool.length)];
   var catEl=document.getElementById('sparkCategory');
   var textEl=document.getElementById('sparkText');
@@ -22368,31 +22553,38 @@ function delProjInc(id){
 
       <!-- MODE SELECTOR -->
       <div id="hPanelSelector">
-        <div class="hatch-header">
-          <div class="hatch-logo">🚪 The Hatch</div>
-          <button class="hatch-close-btn" onclick="closeHatch()">✕</button>
+        <div class="hatch-header" style="margin-bottom:28px">
+          <div>
+            <div class="hatch-logo">DHARMA_INITIATIVE : SWAN<span class="hatch-cursor"></span></div>
+            <div style="font-family:'Courier New',monospace;font-size:9px;color:#0d3a0d;letter-spacing:1.5px;margin-top:3px">SELECT PROTOCOL // 4.8.15.16.23.42</div>
+          </div>
+          <button class="hatch-close-btn" onclick="closeHatch()">[ X ]</button>
         </div>
         <button class="hatch-mode-btn" onclick="hatchMode('mission')">
           <span class="hatch-mode-icon">🎯</span>
-          <span><span class="hatch-mode-label">Mission Briefing</span><span class="hatch-mode-sub">Random challenge — accept or skip</span></span>
+          <span><span class="hatch-mode-label">&gt; MISSION BRIEFING</span><span class="hatch-mode-sub">Random challenge — accept or skip</span></span>
         </button>
         <button class="hatch-mode-btn" onclick="hatchMode('chaos')">
           <span class="hatch-mode-icon">🎲</span>
-          <span><span class="hatch-mode-label">Chaos Roll</span><span class="hatch-mode-sub">Spin the wheel — lands on a life area</span></span>
+          <span><span class="hatch-mode-label">&gt; CHAOS PROTOCOL</span><span class="hatch-mode-sub">Spin the wheel — lands on a life area</span></span>
         </button>
         <button class="hatch-mode-btn" onclick="hatchMode('transmission')">
           <span class="hatch-mode-icon">📻</span>
-          <span><span class="hatch-mode-label">Transmission</span><span class="hatch-mode-sub">Signal received from Brindleport…</span></span>
+          <span><span class="hatch-mode-label">&gt; INCOMING TRANSMISSION</span><span class="hatch-mode-sub">Signal received from Brindleport…</span></span>
         </button>
         <button class="hatch-mode-btn" onclick="hatchMode('shock')">
           <span class="hatch-mode-icon">⚡</span>
-          <span><span class="hatch-mode-label">Shock the System</span><span class="hatch-mode-sub">60 seconds. Physical only. Go.</span></span>
+          <span><span class="hatch-mode-label">&gt; SHOCK SEQUENCE</span><span class="hatch-mode-sub">60 seconds. Physical only. Go.</span></span>
         </button>
         <button class="hatch-mode-btn" onclick="hatchMode('dispatch')">
           <span class="hatch-mode-icon">📓</span>
-          <span><span class="hatch-mode-label">Dispatch</span><span class="hatch-mode-sub">One question. Write back or just sit with it.</span></span>
+          <span><span class="hatch-mode-label">&gt; DISPATCH LOG</span><span class="hatch-mode-sub">One question. Write back or just sit with it.</span></span>
         </button>
-        <button class="hatch-spa-pill" onclick="hatchMode('spa')">🛁 Need to land first?</button>
+        <button class="hatch-mode-btn" onclick="hatchMode('cast')">
+          <span class="hatch-mode-icon">🎭</span>
+          <span><span class="hatch-mode-label">&gt; THE CAST</span><span class="hatch-mode-sub">Step into a character's world for a moment</span></span>
+        </button>
+        <button class="hatch-spa-pill" onclick="hatchMode('spa')">[ SPA // GROUNDING PROTOCOL ]</button>
       </div>
 
       <!-- MISSION -->
@@ -22488,6 +22680,24 @@ function delProjInc(id){
       </div>
 
       <!-- SPA -->
+      <!-- THE CAST -->
+      <div id="hPanelCast" style="display:none">
+        <div class="hatch-header">
+          <button class="hatch-back-btn" onclick="hatchMode('selector')">[ &lt; BACK ]</button>
+          <button class="hatch-close-btn" onclick="closeHatch()">[ X ]</button>
+        </div>
+        <div id="hCastBody"></div>
+        <div class="hatch-keys">
+          <button class="hatch-key hatch-key-skip" onclick="castPrev()">← Prev</button>
+          <button class="hatch-key hatch-key-skip" onclick="castNext()">Next →</button>
+          <button class="hatch-key hatch-key-exec" onclick="castTakeIt()">Carry it ✦</button>
+        </div>
+        <div style="text-align:center;margin-top:10px">
+          <button onclick="castRandom()" class="hatch-text-btn">// RANDOM CHARACTER</button>
+        </div>
+      </div>
+
+      <!-- SPA -->
       <div id="hPanelSpa" style="display:none">
         <div class="hatch-header">
           <button class="hatch-back-btn" onclick="hatchMode('selector')">← Back</button>
@@ -22508,12 +22718,14 @@ function delProjInc(id){
 <!-- SPARK OVERLAY -->
 <div class="ov" id="ovSpark" onclick="closeOv('ovSpark')" style="align-items:flex-end;padding:0">
   <div onclick="event.stopPropagation()" style="width:100%;max-width:480px;background:linear-gradient(180deg,#fff8f4,#fff);border-radius:24px 24px 0 0;padding:24px 20px 40px;box-shadow:0 -8px 32px rgba(0,0,0,.12)">
-    <div style="width:36px;height:4px;background:#f0dce8;border-radius:2px;margin:0 auto 20px"></div>
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
-      <div style="font-size:10px;font-weight:700;color:var(--rose);text-transform:uppercase;letter-spacing:.8px;font-family:'Quicksand',sans-serif" id="sparkCategory">—</div>
+    <div style="width:36px;height:4px;background:#f0dce8;border-radius:2px;margin:0 auto 16px"></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+      <div style="font-family:'Playfair Display',serif;font-size:17px;font-weight:700;color:var(--textd)">💬 Spark</div>
       <button onclick="openSavedSparks()" style="background:none;border:none;font-family:'Quicksand',sans-serif;font-size:12px;font-weight:700;color:var(--textl);cursor:pointer;padding:0">Saved →</button>
     </div>
-    <div style="font-family:'Quicksand',sans-serif;font-size:17px;font-weight:700;color:var(--textd);line-height:1.55;margin-bottom:22px;min-height:60px" id="sparkText"></div>
+    <div id="sparkCatRow" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px"></div>
+    <div style="font-size:10px;font-weight:700;color:var(--rose);text-transform:uppercase;letter-spacing:.8px;font-family:'Quicksand',sans-serif;margin-bottom:6px" id="sparkCategory">—</div>
+    <div style="font-family:'Quicksand',sans-serif;font-size:17px;font-weight:700;color:var(--textd);line-height:1.55;margin-bottom:22px;min-height:56px" id="sparkText"></div>
     <div style="display:flex;gap:10px;margin-bottom:14px">
       <button onclick="sparkNew()" style="flex:1;padding:13px;border-radius:14px;border:none;background:linear-gradient(135deg,var(--rose),var(--lav));color:#fff;font-family:'Quicksand',sans-serif;font-size:14px;font-weight:700;cursor:pointer">🔀 New Spark</button>
       <button onclick="sparkSave()" style="padding:13px 16px;border-radius:14px;border:1.5px solid rgba(201,160,160,.3);background:#fff;font-family:'Quicksand',sans-serif;font-size:14px;font-weight:700;color:var(--textl);cursor:pointer">Save ✦</button>
