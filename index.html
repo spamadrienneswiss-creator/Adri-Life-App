@@ -5445,8 +5445,8 @@ function goTabDirect(tab,btn){
   if(tab==='places')renderPlaces();
   if(SECTION_VIEWS[tab]||tab==='emporium')renderHubPreviews(tab);
   var hFab=document.getElementById('hatchFab');if(hFab)hFab.style.display=(tab==='today')?'flex':'none';
-  if(tab==='today'){ syncRoutinesToTasks(); tickSpiritRun(); renderWaterBottle(); renderTodayStatsBars(); renderWeekStats(); renderTodayMoodBtns(); renderTodayPlanBar(); renderTodayWorkGlance(); }
-  if(tab==='routines'){ syncRoutinesToTasks(); renderRtnGroups(); }
+  if(tab==='today'){ tickSpiritRun(); renderWaterBottle(); renderTodayStatsBars(); renderWeekStats(); renderTodayMoodBtns(); renderTodayPlanBar(); renderTodayWorkGlance(); }
+  if(tab==='routines'){ renderRtnGroups(); }
   if(tab==='hearthside'){ renderHWHubStats(); }
   if(tab==='lighthouse'){ updateLighthouseSpiritStatus(); }
   if(tab==='tasks'){ updateHelmBadges(); }
@@ -6026,28 +6026,19 @@ function sendRtnToTask(text){
 }
 
 function syncRoutinesToTasks(){
-  var today=todayStr();
-  var changed=false;
-  RTN_GROUPS.forEach(function(g){
-    if(!rtnIsDueToday(g))return;
-    var items=RTNS[g.id]||[];
-    var cs=rtnCompState(g,today);
-    items.forEach(function(item,oi){
-      if(cs[oi])return; // already done, skip
-      var exists=TASKS.find(function(t){
-        return t.source==='routine'&&t.rtnGroupId===g.id&&t.rtnItemIdx===oi&&t.rtnDate===today;
-      });
-      if(exists)return;
-      var tid='t-rtn-'+g.id+'-'+oi+'-'+Date.now();
-      var newT={id:tid,title:item,cat:'mis',urgency:'important-not-urgent',etime:'',due:today,notes:'📅 Routine: '+g.name,done:false,repeat:'',repeatDays:0,subs:[],created:new Date().toISOString(),source:'routine',rtnGroupId:g.id,rtnItemIdx:oi,rtnDate:today,meaningful:false};
-      TASKS.push(newT);
-      changed=true;
-    });
+  // DISABLED — routines are a standalone checklist and must never become tasks.
+  // Purge any routine-sourced tasks that snuck in previously.
+  var before=TASKS.length;
+  TASKS=TASKS.filter(function(t){
+    if(t.source==='routine'){
+      fbDelete('tasks',t.id);
+      return false;
+    }
+    return true;
   });
-  if(changed){
+  if(TASKS.length!==before){
     localStorage.setItem('aTasks',JSON.stringify(TASKS));
-    TASKS.forEach(function(t){if(t.source==='routine'&&t.rtnDate===today)fbSave('tasks',t.id,t);});
-    showToast('Routine tasks synced!');
+    renderThisWeek();
   }
 }
 
@@ -6256,9 +6247,6 @@ function togR(key,idx,el){
   var cs=rtnCompState(g||{id:key,freq:'daily'},today);
   var newVal=!cs[idx];
   rtnSetComp(key,today,idx,newVal);
-  // Sync with tasks: if checking off, mark linked routine task done; if unchecking, mark undone
-  var _rtnTask=TASKS.find(function(t){return t.source==='routine'&&t.rtnGroupId===key&&t.rtnItemIdx===idx&&t.rtnDate===today;});
-  if(_rtnTask){_rtnTask.done=newVal;localStorage.setItem('aTasks',JSON.stringify(TASKS));fbSave('tasks',_rtnTask.id,_rtnTask);}
   el.classList.toggle('done',newVal);
   el.querySelector('.rchk').textContent=newVal?'✓':'';
   updRS();
@@ -19656,8 +19644,22 @@ function renderAppIndex(){
   }).join('');
 }
 
+function purgeRoutineTasks(){
+  var ROUTINE_TITLES=['pray','wash face','brush teeth','sweep','swiffer','everything off floor','quick tidy','magnesium','gummy','what are we eating','warm water','meds','bible reading','movement','walk','eat breakfast','get ready','other vitamins'];
+  var before=TASKS.length;
+  TASKS=TASKS.filter(function(t){
+    if(t.source==='routine'){fbDelete('tasks',t.id);return false;}
+    var tl=(t.title||'').toLowerCase();
+    if(ROUTINE_TITLES.some(function(r){return tl.indexOf(r)>-1;})){
+      if(t.notes&&t.notes.indexOf('📅 Routine:')===0){fbDelete('tasks',t.id);return false;}
+    }
+    return true;
+  });
+  if(TASKS.length!==before)localStorage.setItem('aTasks',JSON.stringify(TASKS));
+}
 function startApp(){
   document.getElementById('loadingScreen').classList.add('hidden');
+  purgeRoutineTasks();
   chkReset();
   updDate();
   updGreet();
