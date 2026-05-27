@@ -6612,31 +6612,37 @@ var WATER_OZ_GOAL = (function(){ var s=S||{}; if(s.wUnit==='oz') return s.gWat||
 
 function addWaterOz(oz){
   var k=getTK();
-  WATER_OZ_LOG[k]=Math.max(0,(WATER_OZ_LOG[k]||0)+oz);
+  var newOz=Math.max(0,(WATER_OZ_LOG[k]||0)+oz);
+  WATER_OZ_LOG[k]=newOz;
   localStorage.setItem('aWaterOzLog',JSON.stringify(WATER_OZ_LOG));
   fbSave('waterlog','log',{data:WATER_OZ_LOG,updated:new Date().toISOString()});
-  renderWaterBottle();
-  renderTodayStatsBars();
-  showToast('+'+oz+' oz');
+  // keep glasses log in sync (1 glass = 8 oz)
+  WL[k]=Math.max(0,Math.round(newOz/8));
+  localStorage.setItem('aWL',JSON.stringify(WL));
+  renderWaterBottle();renderWaterDrops();renderTodayStatsBars();
+  if(oz>0)showToast('+'+oz+' oz');
 }
+
+function getWaterOzGoal(){return (S.wUnit==='oz')?Math.max(1,S.gWat||64):(Math.max(1,S.gWat||8)*8);}
 
 function renderWaterBottle(){
   var oz=WATER_OZ_LOG[getTK()]||0;
-  var pct=Math.min(100,Math.round(oz/WATER_OZ_GOAL*100));
+  var goal=getWaterOzGoal();
+  var pct=Math.min(100,Math.round(oz/goal*100));
   var fill=document.getElementById('bottleFill');
   if(fill)fill.style.height=pct+'%';
   var num=document.getElementById('bottleOzNum');
   if(num)num.textContent=oz;
   var lbl=document.getElementById('bottleOzLabel');
-  if(lbl)lbl.textContent=oz+' / '+WATER_OZ_GOAL+' oz';
+  if(lbl)lbl.textContent=oz+' / '+goal+' oz';
   var note=document.getElementById('bottleNote');
   if(note){
-    var rem=Math.max(0,WATER_OZ_GOAL-oz);
+    var rem=Math.max(0,goal-oz);
     note.textContent=rem>0?rem+' oz to go':'Goal reached! 🎉';
     note.style.color=rem>0?'var(--textl)':'var(--sage)';
   }
   var eatLbl=document.getElementById('eatWaterLabel');
-  if(eatLbl)eatLbl.textContent=oz+' / '+WATER_OZ_GOAL+' oz';
+  if(eatLbl)eatLbl.textContent=oz+' / '+goal+' oz';
 }
 
 // ── Steps ─────────────────────────────────────
@@ -10400,8 +10406,7 @@ function saveGoals(){
   localStorage.setItem('aGFat',S.gFat);localStorage.setItem('aGWat',S.gWat);
   localStorage.setItem('aGEx',S.gEx);localStorage.setItem('aGSleep',S.gSleep);
   fbSave('settings','goals',{gCal:S.gCal,gPro:S.gPro,gFib:S.gFib,gCrb:S.gCrb,gFat:S.gFat,gWat:S.gWat,gEx:S.gEx,gSleep:S.gSleep,updated:new Date().toISOString()});
-  WATER_OZ_GOAL=(S.wUnit==='oz')?S.gWat:(S.gWat*8);
-  renderWaterBottle();updM();updExWeek();alert('✅ Goals saved!');
+  renderWaterBottle();renderWaterDrops();updM();updExWeek();showToast('✅ Goals saved!');
 }
 
 // ═══════════════════════════════════════════════
@@ -11630,12 +11635,19 @@ function renderWatBtns(){
 }
 
 function setWUnit(u){
+  var prev=S.wUnit;
   S.wUnit=u;
   localStorage.setItem('aWUnit',u);
+  // convert goal value when switching units so the number makes sense
+  if(prev!==u){
+    if(u==='oz'&&prev==='glasses')S.gWat=Math.round(S.gWat*8);
+    else if(u==='glasses'&&prev==='oz')S.gWat=Math.max(1,Math.round(S.gWat/8));
+    localStorage.setItem('aGWat',S.gWat);
+    var inp=document.getElementById('sWat');if(inp)inp.value=S.gWat;
+  }
   document.getElementById('wUnitGl').classList.toggle('on',u==='glasses');
   document.getElementById('wUnitOz').classList.toggle('on',u==='oz');
   document.getElementById('sWatLbl').textContent='💧 Water Goal ('+(u==='oz'?'oz/day':'glasses/day')+')';
-  WATER_OZ_GOAL=(u==='oz')?S.gWat:(S.gWat*8);
   renderWaterBottle();
 }
 
@@ -20011,13 +20023,15 @@ function renderWaterDrops(){
 }
 
 function quickAddWater(){
-  var k = getTK();
-  WL[k] = (WL[k]||0) + 1;
-  localStorage.setItem('aWL', JSON.stringify(WL));
-  updM();
-  renderWaterDrops();
-  var w = getW();
-  if(w === (S.gWat||8)) showToast('💧 Water goal reached!');
+  var k=getTK();
+  WL[k]=(WL[k]||0)+1;
+  localStorage.setItem('aWL',JSON.stringify(WL));
+  // keep oz log in sync (1 glass = 8 oz)
+  WATER_OZ_LOG[k]=(WATER_OZ_LOG[k]||0)+8;
+  localStorage.setItem('aWaterOzLog',JSON.stringify(WATER_OZ_LOG));
+  updM();renderWaterDrops();renderWaterBottle();
+  var w=getW();
+  if(w===(S.gWat||8))showToast('💧 Water goal reached!');
 }
 
 // ══════════════════════════════════════════════
