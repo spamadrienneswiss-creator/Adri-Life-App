@@ -19858,6 +19858,7 @@ function startApp(){
   renderTodayWorkGlance();
   var hFab=document.getElementById('hatchFab');if(hFab)hFab.style.display='flex';
   initFabScroll();
+  initFabModalHide();
 }
 
 var _fabScrollLast=0,_fabScrollTimer=null,_fabHidden=false;
@@ -19876,12 +19877,32 @@ function initFabScroll(){
     var cur=window.scrollY||window.pageYOffset;
     var vt=document.getElementById('v-today');var onToday=vt&&vt.classList.contains('on');
     if(!onToday){_setFabVisible(true);_fabScrollLast=cur;return;}
+    if(_fabModalHidden){_fabScrollLast=cur;return;}
     if(cur>_fabScrollLast+4)_setFabVisible(false);
     else if(cur<_fabScrollLast-4)_setFabVisible(true);
     _fabScrollLast=cur;
     if(_fabScrollTimer)clearTimeout(_fabScrollTimer);
     _fabScrollTimer=setTimeout(function(){_setFabVisible(true);},800);
   },{passive:true});
+}
+
+var _fabModalHidden=false;
+function _checkFabForModals(){
+  var anyOpen=!!document.querySelector('.ov.show,.cal-modal-bg.show,.badge-board-bg.show');
+  var fab=document.getElementById('hatchFab');if(!fab)return;
+  if(anyOpen&&!_fabModalHidden){
+    fab.style.opacity='0';fab.style.pointerEvents='none';
+    _fabModalHidden=true;
+  }else if(!anyOpen&&_fabModalHidden){
+    _fabModalHidden=false;
+    if(!_fabHidden){fab.style.opacity='1';fab.style.pointerEvents='auto';}
+  }
+}
+function initFabModalHide(){
+  var obs=new MutationObserver(_checkFabForModals);
+  document.querySelectorAll('.ov,.cal-modal-bg,.badge-board-bg').forEach(function(el){
+    obs.observe(el,{attributes:true,attributeFilter:['class']});
+  });
 }
 
 // Wait for Firebase then start
