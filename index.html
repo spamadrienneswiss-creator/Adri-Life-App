@@ -1321,90 +1321,78 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     </div>
     <div id="todayStatsBody-wrap" style="display:none">
       <div style="padding:0 14px 14px">
-        <!-- Today sub-section -->
-        <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;padding:6px 0 4px" onclick="togTodaySec('statToday')">
-          <span style="font-size:11px;font-weight:700;color:var(--rose);letter-spacing:.4px;text-transform:uppercase">Today</span>
-          <span class="sh-arr" id="sh-arr-statToday">▾</span>
-        </div>
-        <div id="statToday-wrap">
-          <!-- Water bottle inside stats -->
-          <div style="display:flex;align-items:flex-start;gap:14px;margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid #f0ebe6">
-            <div style="flex-shrink:0;display:flex;flex-direction:column;align-items:center">
-              <div style="width:22px;height:8px;background:var(--lav);border-radius:4px 4px 0 0"></div>
-              <div style="width:22px;height:10px;background:#e8f4fd;border:2px solid #a8cceb;border-bottom:none"></div>
-              <div style="width:54px;height:108px;border:2px solid #a8cceb;border-radius:4px 4px 12px 12px;overflow:hidden;position:relative;background:#f0f8ff">
-                <div id="bottleFill" style="position:absolute;bottom:0;left:0;right:0;height:0%;background:linear-gradient(0deg,#3a9cd8,#7cc4f0);transition:height .7s ease;border-radius:0 0 10px 10px"></div>
-                <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:2">
-                  <span id="bottleOzNum" style="font-size:15px;font-weight:800;color:var(--textd);line-height:1.1">0</span>
-                  <span style="font-size:8px;font-weight:700;color:var(--textl)">OZ</span>
-                </div>
+        <!-- Water bottle -->
+        <div style="display:flex;align-items:flex-start;gap:14px;margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid #f0ebe6">
+          <div style="flex-shrink:0;display:flex;flex-direction:column;align-items:center">
+            <div style="width:22px;height:8px;background:var(--lav);border-radius:4px 4px 0 0"></div>
+            <div style="width:22px;height:10px;background:#e8f4fd;border:2px solid #a8cceb;border-bottom:none"></div>
+            <div style="width:54px;height:108px;border:2px solid #a8cceb;border-radius:4px 4px 12px 12px;overflow:hidden;position:relative;background:#f0f8ff">
+              <div id="bottleFill" style="position:absolute;bottom:0;left:0;right:0;height:0%;background:linear-gradient(0deg,#3a9cd8,#7cc4f0);transition:height .7s ease;border-radius:0 0 10px 10px"></div>
+              <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:2">
+                <span id="bottleOzNum" style="font-size:15px;font-weight:800;color:var(--textd);line-height:1.1">0</span>
+                <span style="font-size:8px;font-weight:700;color:var(--textl)">OZ</span>
               </div>
             </div>
-            <div style="flex:1;padding-top:18px">
-              <div style="font-size:11px;font-weight:700;color:var(--textl);letter-spacing:.5px;text-transform:uppercase;margin-bottom:3px">💧 Water</div>
-              <div id="bottleOzLabel" style="font-size:14px;font-weight:700;color:var(--textd);margin-bottom:8px">0 / 115 oz</div>
-              <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px">
-                <button onclick="addWaterOz(-8)" style="padding:6px 11px;border-radius:8px;border:1.5px solid #f0a0a0;background:#fff5f5;font-family:'Quicksand',sans-serif;font-size:12px;font-weight:700;color:#c05050;cursor:pointer">−8 oz</button>
-                <button onclick="addWaterOz(8)" style="padding:6px 11px;border-radius:8px;border:1.5px solid #a8cceb;background:#f0f8ff;font-family:'Quicksand',sans-serif;font-size:12px;font-weight:700;color:#2e88c8;cursor:pointer">+8 oz</button>
-                <button onclick="addWaterOz(16)" style="padding:6px 11px;border-radius:8px;border:1.5px solid #a8cceb;background:#f0f8ff;font-family:'Quicksand',sans-serif;font-size:12px;font-weight:700;color:#2e88c8;cursor:pointer">+16 oz</button>
-                <button onclick="addWaterOz(32)" style="padding:6px 11px;border-radius:8px;border:none;background:linear-gradient(135deg,var(--lav),#5a90d0);font-family:'Quicksand',sans-serif;font-size:11px;font-weight:700;color:white;cursor:pointer">Owala 32oz</button>
-              </div>
-              <div style="display:flex;gap:6px;margin-top:6px;align-items:center">
-                <input type="number" id="waterCustomTodayOz" placeholder="oz" min="1" max="200" style="width:60px;padding:5px 8px;border-radius:8px;border:1.5px solid #a8cceb;font-family:'Quicksand',sans-serif;font-size:12px;text-align:center">
-                <button onclick="(function(){var v=parseInt(document.getElementById('waterCustomTodayOz').value);if(v>0){addWaterOz(v);document.getElementById('waterCustomTodayOz').value='';}})()" style="padding:5px 12px;border-radius:8px;border:1.5px solid #a8cceb;background:#f0f8ff;font-family:'Quicksand',sans-serif;font-size:12px;font-weight:700;color:#2e88c8;cursor:pointer">+ Custom</button>
-              </div>
-              <div style="font-size:10px;color:var(--textl);margin-top:4px" id="bottleNote">115 oz to go</div>
+          </div>
+          <div style="flex:1;padding-top:18px">
+            <div style="font-size:11px;font-weight:700;color:var(--textl);letter-spacing:.5px;text-transform:uppercase;margin-bottom:3px">💧 Water</div>
+            <div id="bottleOzLabel" style="font-size:14px;font-weight:700;color:var(--textd);margin-bottom:8px">0 / 115 oz</div>
+            <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px">
+              <button onclick="addWaterOz(-8)" style="padding:6px 11px;border-radius:8px;border:1.5px solid #f0a0a0;background:#fff5f5;font-family:'Quicksand',sans-serif;font-size:12px;font-weight:700;color:#c05050;cursor:pointer">−8 oz</button>
+              <button onclick="addWaterOz(8)" style="padding:6px 11px;border-radius:8px;border:1.5px solid #a8cceb;background:#f0f8ff;font-family:'Quicksand',sans-serif;font-size:12px;font-weight:700;color:#2e88c8;cursor:pointer">+8 oz</button>
+              <button onclick="addWaterOz(16)" style="padding:6px 11px;border-radius:8px;border:1.5px solid #a8cceb;background:#f0f8ff;font-family:'Quicksand',sans-serif;font-size:12px;font-weight:700;color:#2e88c8;cursor:pointer">+16 oz</button>
+              <button onclick="addWaterOz(32)" style="padding:6px 11px;border-radius:8px;border:none;background:linear-gradient(135deg,var(--lav),#5a90d0);font-family:'Quicksand',sans-serif;font-size:11px;font-weight:700;color:white;cursor:pointer">Owala 32oz</button>
             </div>
-          </div>
-          <!-- Mood -->
-          <div style="margin-bottom:12px">
-            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
-              <div style="font-size:11px;font-weight:700;color:var(--textl);letter-spacing:.4px;text-transform:uppercase">😊 Mood</div>
-              <span id="tMoodD" style="font-size:11px;color:var(--textl);font-weight:600">Not logged yet</span>
+            <div style="display:flex;gap:6px;margin-top:6px;align-items:center">
+              <input type="number" id="waterCustomTodayOz" placeholder="oz" min="1" max="200" style="width:60px;padding:5px 8px;border-radius:8px;border:1.5px solid #a8cceb;font-family:'Quicksand',sans-serif;font-size:12px;text-align:center">
+              <button onclick="(function(){var v=parseInt(document.getElementById('waterCustomTodayOz').value);if(v>0){addWaterOz(v);document.getElementById('waterCustomTodayOz').value=''}})()" style="padding:5px 12px;border-radius:8px;border:1.5px solid #a8cceb;background:#f0f8ff;font-family:'Quicksand',sans-serif;font-size:12px;font-weight:700;color:#2e88c8;cursor:pointer">+ Custom</button>
             </div>
-            <div style="display:flex;gap:6px">
-              <button class="today-mood-btn" data-m="1" onclick="logMoodToday(1)" style="flex:1;padding:7px 4px;border-radius:10px;border:2px solid transparent;background:#f8f4f0;font-size:18px;cursor:pointer;transition:all .15s">😔</button>
-              <button class="today-mood-btn" data-m="2" onclick="logMoodToday(2)" style="flex:1;padding:7px 4px;border-radius:10px;border:2px solid transparent;background:#f8f4f0;font-size:18px;cursor:pointer;transition:all .15s">😕</button>
-              <button class="today-mood-btn" data-m="3" onclick="logMoodToday(3)" style="flex:1;padding:7px 4px;border-radius:10px;border:2px solid transparent;background:#f8f4f0;font-size:18px;cursor:pointer;transition:all .15s">😐</button>
-              <button class="today-mood-btn" data-m="4" onclick="logMoodToday(4)" style="flex:1;padding:7px 4px;border-radius:10px;border:2px solid transparent;background:#f8f4f0;font-size:18px;cursor:pointer;transition:all .15s">🙂</button>
-              <button class="today-mood-btn" data-m="5" onclick="logMoodToday(5)" style="flex:1;padding:7px 4px;border-radius:10px;border:2px solid transparent;background:#f8f4f0;font-size:18px;cursor:pointer;transition:all .15s">😊</button>
-            </div>
-          </div>
-          <!-- Steps (clickable) -->
-          <div class="pr" style="cursor:pointer" onclick="openM('stepModal')">
-            <div class="pt"><span class="pn">👟 Steps</span><span class="pm2" id="tStepD">0 / 8,000</span><span style="font-size:10px;color:var(--blue);margin-left:6px">+ log</span></div>
-            <div class="pb"><div class="pf" id="tStepB" style="width:0%;background:var(--sage)"></div></div>
-          </div>
-          <!-- Sleep (clickable) -->
-          <div class="pr">
-            <div class="pt" style="cursor:pointer" onclick="openM('todaySleepModal')"><span class="pn">😴 Sleep</span><span class="pm2" id="tSleepD">—</span><span style="font-size:10px;color:var(--blue);margin-left:6px">+ log</span><button onclick="event.stopPropagation();goTab('wellness',null);setTimeout(function(){showWellnessSec('sleep',document.querySelector('#v-wellness .pn-btn:nth-child(2)'))},200)" style="margin-left:auto;background:none;border:none;color:var(--lav);font-size:10px;font-weight:700;cursor:pointer;font-family:'Quicksand',sans-serif;flex-shrink:0;padding:0 2px">History →</button></div>
-            <div class="pb"><div class="pf" id="tSleepB" style="width:0%;background:var(--lav)"></div></div>
-          </div>
-          <!-- Ministry (with Log button) -->
-          <div class="pr">
-            <div class="pt" style="align-items:center">
-              <span class="pn">⏱️ Ministry</span>
-              <span class="pm2" id="tMinD">—</span>
-              <button onclick="openM('todayMinModal')" style="margin-left:auto;padding:2px 9px;border-radius:6px;border:1.5px solid var(--bdr);background:none;font-family:'Quicksand',sans-serif;font-size:10px;font-weight:700;cursor:pointer;color:var(--textl);flex-shrink:0">+ log</button>
-            </div>
-            <div class="pb"><div class="pf" id="tMinB" style="width:0%;background:var(--peach)"></div></div>
-          </div>
-          <!-- Calories / Protein / Fiber -->
-          <div class="pr" style="cursor:pointer" onclick="goTab('meals',null)"><div class="pt"><span class="pn">🔥 Calories</span><span class="pm2" id="tcD">0/1900</span><span style="font-size:10px;color:var(--blue);margin-left:auto;flex-shrink:0">Log →</span></div><div class="pb"><div class="pf pf-cal" id="tcB" style="width:0%"></div></div></div>
-          <div class="pr" style="cursor:pointer" onclick="goTab('meals',null)"><div class="pt"><span class="pn">💪 Protein</span><span class="pm2" id="tpD">0g/120g</span></div><div class="pb"><div class="pf pf-pro" id="tpB" style="width:0%"></div></div></div>
-          <div class="pr" style="cursor:pointer" onclick="goTab('meals',null)"><div class="pt"><span class="pn">🌿 Fiber</span><span class="pm2" id="tfD">0g/25g</span></div><div class="pb"><div class="pf pf-fib" id="tfB" style="width:0%"></div></div></div>
-          <div class="pr" style="cursor:pointer" onclick="goTab('wellness',null);setTimeout(function(){showWellnessSec('meds',document.querySelector('#v-wellness .pn-btn:nth-child(5)'))},200)">
-            <div class="pt"><span class="pn">💊 Meds</span><span class="pm2" id="tMedsD">—</span><span style="font-size:10px;color:var(--lav);margin-left:auto;flex-shrink:0">Check off →</span></div>
+            <div style="font-size:10px;color:var(--textl);margin-top:4px" id="bottleNote">115 oz to go</div>
           </div>
         </div>
-        <!-- This Week sub-section -->
-        <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;padding:10px 0 4px;border-top:1px solid #f0ebe6;margin-top:8px" onclick="togTodaySec('statWeek')">
-          <span style="font-size:11px;font-weight:700;color:var(--rose);letter-spacing:.4px;text-transform:uppercase">This Week</span>
-          <span class="sh-arr" id="sh-arr-statWeek">▸</span>
+        <!-- Mood -->
+        <div style="margin-bottom:12px">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+            <div style="font-size:11px;font-weight:700;color:var(--textl);letter-spacing:.4px;text-transform:uppercase">😊 Mood</div>
+            <span id="tMoodD" style="font-size:11px;color:var(--textl);font-weight:600">Not logged yet</span>
+          </div>
+          <div style="display:flex;gap:6px">
+            <button class="today-mood-btn" data-m="1" onclick="logMoodToday(1)" style="flex:1;padding:7px 4px;border-radius:10px;border:2px solid transparent;background:#f8f4f0;font-size:18px;cursor:pointer;transition:all .15s">😔</button>
+            <button class="today-mood-btn" data-m="2" onclick="logMoodToday(2)" style="flex:1;padding:7px 4px;border-radius:10px;border:2px solid transparent;background:#f8f4f0;font-size:18px;cursor:pointer;transition:all .15s">😕</button>
+            <button class="today-mood-btn" data-m="3" onclick="logMoodToday(3)" style="flex:1;padding:7px 4px;border-radius:10px;border:2px solid transparent;background:#f8f4f0;font-size:18px;cursor:pointer;transition:all .15s">😐</button>
+            <button class="today-mood-btn" data-m="4" onclick="logMoodToday(4)" style="flex:1;padding:7px 4px;border-radius:10px;border:2px solid transparent;background:#f8f4f0;font-size:18px;cursor:pointer;transition:all .15s">🙂</button>
+            <button class="today-mood-btn" data-m="5" onclick="logMoodToday(5)" style="flex:1;padding:7px 4px;border-radius:10px;border:2px solid transparent;background:#f8f4f0;font-size:18px;cursor:pointer;transition:all .15s">😊</button>
+          </div>
         </div>
-        <div id="statWeek-wrap" style="display:none">
-          <div id="weekStatsBody"></div>
+        <!-- Steps -->
+        <div class="pr" style="cursor:pointer" onclick="openM('stepModal')">
+          <div class="pt"><span class="pn">👟 Steps</span><span class="pm2" id="tStepD">0 / 8,000</span><span style="font-size:10px;color:var(--blue);margin-left:6px">+ log</span></div>
+          <div class="pb"><div class="pf" id="tStepB" style="width:0%;background:var(--sage)"></div></div>
         </div>
+        <!-- Sleep -->
+        <div class="pr">
+          <div class="pt" style="cursor:pointer" onclick="openM('todaySleepModal')"><span class="pn">😴 Sleep</span><span class="pm2" id="tSleepD">—</span><span style="font-size:10px;color:var(--blue);margin-left:6px">+ log</span><button onclick="event.stopPropagation();goTab('wellness',null);setTimeout(function(){showWellnessSec('sleep',document.querySelector('#v-wellness .pn-btn:nth-child(2)'))},200)" style="margin-left:auto;background:none;border:none;color:var(--lav);font-size:10px;font-weight:700;cursor:pointer;font-family:'Quicksand',sans-serif;flex-shrink:0;padding:0 2px">History →</button></div>
+          <div class="pb"><div class="pf" id="tSleepB" style="width:0%;background:var(--lav)"></div></div>
+        </div>
+        <!-- Ministry -->
+        <div class="pr">
+          <div class="pt" style="align-items:center">
+            <span class="pn">⏱️ Ministry</span>
+            <span class="pm2" id="tMinD">—</span>
+            <button onclick="openM('todayMinModal')" style="margin-left:auto;padding:2px 9px;border-radius:6px;border:1.5px solid var(--bdr);background:none;font-family:'Quicksand',sans-serif;font-size:10px;font-weight:700;cursor:pointer;color:var(--textl);flex-shrink:0">+ log</button>
+          </div>
+          <div class="pb"><div class="pf" id="tMinB" style="width:0%;background:var(--peach)"></div></div>
+        </div>
+        <!-- Calories / Protein / Fiber -->
+        <div class="pr" style="cursor:pointer" onclick="goTab('meals',null)"><div class="pt"><span class="pn">🔥 Calories</span><span class="pm2" id="tcD">0/1900</span><span style="font-size:10px;color:var(--blue);margin-left:auto;flex-shrink:0">Log →</span></div><div class="pb"><div class="pf pf-cal" id="tcB" style="width:0%"></div></div></div>
+        <div class="pr" style="cursor:pointer" onclick="goTab('meals',null)"><div class="pt"><span class="pn">💪 Protein</span><span class="pm2" id="tpD">0g/120g</span></div><div class="pb"><div class="pf pf-pro" id="tpB" style="width:0%"></div></div></div>
+        <div class="pr" style="cursor:pointer" onclick="goTab('meals',null)"><div class="pt"><span class="pn">🌿 Fiber</span><span class="pm2" id="tfD">0g/25g</span></div><div class="pb"><div class="pf pf-fib" id="tfB" style="width:0%"></div></div></div>
+        <div class="pr" style="cursor:pointer" onclick="goTab('wellness',null);setTimeout(function(){showWellnessSec('meds',document.querySelector('#v-wellness .pn-btn:nth-child(5)'))},200)">
+          <div class="pt"><span class="pn">💊 Meds</span><span class="pm2" id="tMedsD">—</span><span style="font-size:10px;color:var(--lav);margin-left:auto;flex-shrink:0">Check off →</span></div>
+        </div>
+        <!-- This Week -->
+        <div style="font-size:11px;font-weight:700;color:var(--rose);letter-spacing:.4px;text-transform:uppercase;padding-top:12px;margin-top:4px;border-top:1px solid #f0ebe6;margin-bottom:8px">This Week</div>
+        <div id="weekStatsBody"></div>
       </div>
     </div>
   </div>
@@ -1629,27 +1617,14 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
   </div>
   <!-- OTHER section -->
   <div id="rtnSecOther" style="display:none">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-      <button onclick="openRtnCleanup()" style="display:flex;align-items:center;gap:6px;padding:8px 14px;border-radius:50px;border:1.5px solid #e8e4e0;background:#fff;color:var(--textl);font-family:'Quicksand',sans-serif;font-size:12px;font-weight:700;cursor:pointer">🧹 Clean up tasks</button>
+    <div style="display:flex;justify-content:flex-end;margin-bottom:12px">
       <button onclick="openNewRtn()" style="display:flex;align-items:center;gap:6px;padding:9px 16px;border-radius:50px;border:none;background:linear-gradient(135deg,var(--rose),var(--lav));color:#fff;font-family:'Quicksand',sans-serif;font-size:13px;font-weight:700;cursor:pointer;box-shadow:0 3px 10px rgba(201,160,160,.4)">➕ New Routine</button>
     </div>
     <div id="otherRtnBody"></div>
   </div>
 </div>
 
-<!-- ROUTINE CLEANUP MODAL -->
-<div class="ov" id="rtnCleanupModal">
-  <div class="mod" style="max-height:92vh;display:flex;flex-direction:column">
-    <div class="mh"></div>
-    <div class="mtit">🧹 Recurring Task Cleanup</div>
-    <div style="font-size:12px;color:var(--textl);text-align:center;margin-bottom:14px">These tasks repeat on a schedule — they may be duplicates of your routines. Select any to delete.</div>
-    <div id="rtnCleanupBody" style="flex:1;overflow-y:auto;min-height:0"></div>
-    <div style="display:flex;gap:8px;margin-top:12px;flex-shrink:0">
-      <button id="rtnCleanupDelBtn" onclick="rtnCleanupDeleteSelected()" style="flex:1;padding:11px;border-radius:12px;border:none;background:linear-gradient(135deg,#cc5566,#aa3344);color:#fff;font-family:'Quicksand',sans-serif;font-size:14px;font-weight:700;cursor:pointer;display:none">🗑️ Delete selected</button>
-      <button class="cn-btn" style="flex:0;margin:0;padding:11px 18px" onclick="closeM('rtnCleanupModal')">Close</button>
-    </div>
-  </div>
-</div>
+
 
 <!-- LISTS -->
 <div class="view" id="v-lists">
@@ -6052,10 +6027,8 @@ function initTodaySecDefaults(){
     localStorage.setItem('aTodaySecC',JSON.stringify(_todaySecC));
   }
   if(_todaySecC['todayStatsBody']===undefined) _todaySecC['todayStatsBody']=true; // stats collapsed by default
-  if(_todaySecC['statToday']===undefined) _todaySecC['statToday']=false; // Today open
-  if(_todaySecC['statWeek']===undefined) _todaySecC['statWeek']=true; // This Week collapsed
   if(_todaySecC['todayTasksSec']===undefined) _todaySecC['todayTasksSec']=false; // Tasks open
-  ['todaySo','todayStatsBody','statToday','statWeek','todayTasksSec'].forEach(applyTodaySecState);
+  ['todaySo','todayStatsBody','todayTasksSec'].forEach(applyTodaySecState);
 }
 
 function togTodaySec(id){
@@ -6568,116 +6541,6 @@ function delRtnGroup(){
   localStorage.setItem('aRTG',JSON.stringify(RTN_GROUPS));
   localStorage.setItem('aRtns',JSON.stringify(RTNS));
   closeM('rtnModal');renderAllR();
-}
-
-// ── Routine Cleanup Tool ────────────────────────
-var _rtnCleanupSelected={};
-
-function openRtnCleanup(){
-  _rtnCleanupSelected={};
-  renderRtnCleanup();
-  openM('rtnCleanupModal');
-}
-
-function renderRtnCleanup(){
-  var el=document.getElementById('rtnCleanupBody');
-  if(!el)return;
-  var freqLabels={daily:'Daily',weekly:'Weekly',monthly:'Monthly',yearly:'Yearly',quarterly:'Quarterly',custom:'Custom'};
-  var freqOrder=['daily','weekly','monthly','quarterly','yearly','custom'];
-  // collect all routine item texts (lower-cased) → group name map
-  var rtnTextMap={};
-  RTN_GROUPS.forEach(function(g){
-    var items=RTNS[g.id]||g.items||[];
-    items.forEach(function(item){
-      var key=(typeof item==='string'?item:item.title||'').toLowerCase().trim();
-      if(key)rtnTextMap[key]=g.name+(g.icon?' ('+g.icon+')':'');
-    });
-  });
-  // collect recurring tasks
-  var recurring=TASKS.filter(function(t){return !t.done&&t.repeat&&t.repeat!=='';});
-  if(!recurring.length){
-    el.innerHTML='<div style="text-align:center;color:var(--textl);padding:30px 20px"><div style="font-size:32px;margin-bottom:10px">✅</div><div style="font-size:14px;font-weight:700;color:var(--textd);margin-bottom:6px">No recurring tasks found</div><div style="font-size:12px">All recurring items are already in routines!</div></div>';
-    var btn=document.getElementById('rtnCleanupDelBtn');if(btn)btn.style.display='none';
-    return;
-  }
-  // group by frequency
-  var byFreq={};
-  recurring.forEach(function(t){
-    var f=t.repeat||'custom';
-    if(!byFreq[f])byFreq[f]=[];
-    byFreq[f].push(t);
-  });
-  var html='';
-  freqOrder.forEach(function(freq){
-    if(!byFreq[freq])return;
-    html+='<div style="margin-bottom:16px">';
-    html+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">';
-    html+='<div style="font-size:11px;font-weight:700;color:var(--textl);letter-spacing:.4px;text-transform:uppercase">'+freqLabels[freq]||freq+'</div>';
-    html+='<button onclick="rtnCleanupSelectAll(\''+freq+'\')" style="font-size:11px;color:var(--lav);background:none;border:none;font-family:\'Quicksand\',sans-serif;font-weight:700;cursor:pointer">Select all</button>';
-    html+='</div>';
-    byFreq[freq].forEach(function(t){
-      var sel=!!_rtnCleanupSelected[t.id];
-      var titleLow=t.title.toLowerCase().trim();
-      var covered='';
-      Object.keys(rtnTextMap).forEach(function(rtnKey){
-        if(!covered&&(titleLow===rtnKey||titleLow.indexOf(rtnKey)>-1||rtnKey.indexOf(titleLow)>-1))covered=rtnTextMap[rtnKey];
-      });
-      html+='<div id="rcc-'+t.id+'" onclick="rtnCleanupToggle(\''+t.id+'\')" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;margin-bottom:6px;border:2px solid '+(sel?'var(--rose)':'#f0ebe6')+';background:'+(sel?'rgba(201,160,160,.1)':'#fff')+';cursor:pointer">';
-      html+='<div style="width:20px;height:20px;border-radius:6px;border:2px solid '+(sel?'var(--rose)':'#d0cbc6')+';background:'+(sel?'var(--rose)':'transparent')+';flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:11px;color:#fff">'+(sel?'✓':'')+'</div>';
-      html+='<div style="flex:1;min-width:0">';
-      html+='<div style="font-size:13px;font-weight:700;color:var(--textd);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+t.title+'</div>';
-      if(covered)html+='<div style="font-size:10px;color:var(--sage);margin-top:2px">✓ Covered by: '+covered+'</div>';
-      else html+='<div style="font-size:10px;color:var(--textl);margin-top:2px">Repeats '+freqLabels[freq].toLowerCase()+(t.due?' · due '+t.due:'')+' </div>';
-      html+='</div>';
-      html+='</div>';
-    });
-    html+='</div>';
-  });
-  el.innerHTML=html;
-  _syncCleanupDelBtn();
-}
-
-function rtnCleanupToggle(id){
-  _rtnCleanupSelected[id]=!_rtnCleanupSelected[id];
-  if(!_rtnCleanupSelected[id])delete _rtnCleanupSelected[id];
-  var row=document.getElementById('rcc-'+id);
-  var sel=!!_rtnCleanupSelected[id];
-  if(row){
-    row.style.borderColor=sel?'var(--rose)':'#f0ebe6';
-    row.style.background=sel?'rgba(201,160,160,.1)':'#fff';
-    var chk=row.querySelector('div');
-    if(chk){chk.style.borderColor=sel?'var(--rose)':'#d0cbc6';chk.style.background=sel?'var(--rose)':'transparent';chk.textContent=sel?'✓':'';}
-  }
-  _syncCleanupDelBtn();
-}
-
-function rtnCleanupSelectAll(freq){
-  TASKS.filter(function(t){return !t.done&&t.repeat===freq;}).forEach(function(t){_rtnCleanupSelected[t.id]=true;});
-  renderRtnCleanup();
-}
-
-function _syncCleanupDelBtn(){
-  var count=Object.keys(_rtnCleanupSelected).filter(function(id){return _rtnCleanupSelected[id];}).length;
-  var btn=document.getElementById('rtnCleanupDelBtn');
-  if(!btn)return;
-  if(count>0){btn.style.display='';btn.textContent='🗑️ Delete '+count+' task'+(count!==1?'s':'');}
-  else btn.style.display='none';
-}
-
-function rtnCleanupDeleteSelected(){
-  var ids=Object.keys(_rtnCleanupSelected).filter(function(id){return _rtnCleanupSelected[id];});
-  if(!ids.length)return;
-  if(!confirm('Delete '+ids.length+' task'+(ids.length!==1?'s':'')+' permanently? This cannot be undone.'))return;
-  ids.forEach(function(id){
-    TASKS=TASKS.filter(function(t){return t.id!==id;});
-    fbDelete('tasks',id);
-  });
-  localStorage.setItem('aTasks',JSON.stringify(TASKS));
-  _rtnCleanupSelected={};
-  showToast(ids.length+' task'+(ids.length!==1?'s':'')+' deleted ✓');
-  renderRtnCleanup();
-  renderAllTasks&&renderAllTasks();
-  updGreet&&updGreet();
 }
 
 function togR(key,idx,el){
