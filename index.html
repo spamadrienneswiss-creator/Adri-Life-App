@@ -14685,11 +14685,13 @@ function showWellnessSec(sec,btn){
   });
   document.querySelectorAll('#v-wellness .pn-btn').forEach(function(b){b.classList.remove('on');});
   if(btn)btn.classList.add('on');
-  if(sec==='mood'){var m=document.getElementById('moodBtns');if(m)renderMoodBtns();}
+  if(sec==='mood'){renderMood();}
   if(sec==='sleep'){renderSleepGraph();}
-  if(sec==='symptoms'){renderSymptoms();}
-  if(sec==='period'){renderPeriodList();}
-  if(sec==='meds'){renderMedList();}
+  if(sec==='symptoms'){renderSymCard();}
+  if(sec==='period'){renderPT();}
+  if(sec==='meds'){renderMeds();}
+  if(sec==='body'){renderMeasurements();}
+  if(sec==='time'){renderTimeTracking();}
 }
 
 // ── Body Measurements ─────────────────────────────────
