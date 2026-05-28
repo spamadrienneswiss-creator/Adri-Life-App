@@ -5457,11 +5457,21 @@ function chkReset(){
   if(!WL[t]){WL[t]=0;localStorage.setItem('aWL',JSON.stringify(WL));}
 }
 
+var _lastDateKey=getTK?getTK():(new Date().toDateString());
 function updDate(){
   var n=new Date();
   var d=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
   var m=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   document.getElementById('dDate').textContent=d[n.getDay()]+', '+m[n.getMonth()]+' '+n.getDate();
+  var k=n.toDateString();
+  if(k!==_lastDateKey){
+    _lastDateKey=k;
+    if(typeof renderTodayStatsBars==='function')renderTodayStatsBars();
+    if(typeof renderTodayMoodBtns==='function')renderTodayMoodBtns();
+    if(typeof renderTodayPlanBar==='function')renderTodayPlanBar();
+    if(typeof renderWeekStats==='function')renderWeekStats();
+    showToast('Good morning! ✨ New day started.');
+  }
 }
 
 function updGreet(){
@@ -6902,11 +6912,6 @@ var STEPS_GOAL = 8000;
 
 function getTodaySteps(){ return STEPS_LOG[getTK()]||0; }
 
-function addStepPreset(n){
-  var inp=document.getElementById('stepInput');
-  if(inp)inp.value=(parseInt(inp.value)||0)+n;
-}
-
 function saveSteps(){
   var n=parseInt((document.getElementById('stepInput')||{}).value)||0;
   STEPS_LOG[getTK()]=n;
@@ -6915,6 +6920,107 @@ function saveSteps(){
   closeM('stepModal');
   renderTodayStatsBars();
   showToast(n.toLocaleString()+' steps logged!');
+}
+
+function renderStepsLog(){
+  var el=document.getElementById('stepsLogBody');
+  if(!el)return;
+  var today=getTK();
+  var days=[];
+  for(var i=0;i<14;i++){var dt=new Date();dt.setDate(dt.getDate()-i);days.push(dt.toDateString());}
+  var ms=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  var ds=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  el.innerHTML=days.map(function(d){
+    var steps=STEPS_LOG[d]||0;
+    var isToday=d===today;
+    var dt2=new Date(d);
+    var label=isToday?'Today — '+ms[dt2.getMonth()]+' '+dt2.getDate():ds[dt2.getDay()]+', '+ms[dt2.getMonth()]+' '+dt2.getDate();
+    var pct=Math.min(100,Math.round(steps/STEPS_GOAL*100));
+    var safeKey=d.replace(/ /g,'_');
+    return '<div style="background:'+(isToday?'linear-gradient(135deg,#fdf0f5,#f5f0fd)':'#fff')+';border-radius:10px;padding:10px 12px;margin-bottom:8px;border:1.5px solid '+(isToday?'rgba(200,160,220,.3)':'#f0ebe6')+'">'+
+      '<div style="font-size:12px;font-weight:700;color:var(--textd);margin-bottom:6px">'+label+'</div>'+
+      '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">'+
+      '<input type="number" placeholder="0 steps" value="'+(steps||'')+'" id="stepInp-'+safeKey+'" style="flex:1;border:1.5px solid #e8e4e0;border-radius:7px;padding:6px 10px;font-family:\'Quicksand\',sans-serif;font-size:16px;font-weight:700;color:var(--textd);background:#fff">'+
+      '<button onclick="saveStepsFor(\''+safeKey+'\')" style="padding:6px 14px;border-radius:7px;background:var(--sage);color:#fff;border:none;font-family:\'Quicksand\',sans-serif;font-size:13px;font-weight:700;cursor:pointer">Save</button>'+
+      '</div>'+
+      '<div style="height:5px;background:#f0ebe6;border-radius:3px"><div style="height:5px;background:'+(isToday?'var(--lav)':'var(--sage)')+';border-radius:3px;width:'+pct+'%;transition:width .3s"></div></div>'+
+      '<div style="font-size:10px;color:var(--textl);margin-top:3px">'+steps.toLocaleString()+' / '+STEPS_GOAL.toLocaleString()+' steps ('+pct+'%)</div>'+
+      '</div>';
+  }).join('');
+}
+
+function saveStepsFor(safeKey){
+  var key=safeKey.replace(/_/g,' ');
+  var inp=document.getElementById('stepInp-'+safeKey);
+  if(!inp)return;
+  var n=parseInt(inp.value)||0;
+  STEPS_LOG[key]=n;
+  localStorage.setItem('aStepsLog',JSON.stringify(STEPS_LOG));
+  fbSave('stepslog','log',{data:STEPS_LOG,updated:new Date().toISOString()});
+  renderTodayStatsBars();
+  showToast(n.toLocaleString()+' steps saved!');
+  renderStepsLog();
+}
+
+function renderSleepLog(){
+  var el=document.getElementById('sleepLogBody');
+  if(!el)return;
+  var entries=(MILLIE.sleepLog||[]).slice().reverse();
+  if(!entries.length){el.innerHTML='<div style="text-align:center;color:var(--textl);padding:20px;font-size:13px">No sleep entries yet.<br>Add one above!</div>';return;}
+  var ms=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  var ds=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  el.innerHTML=entries.map(function(e){
+    var sleptDT=e.slept?new Date(e.slept):null;
+    var wokeDT=e.woke?new Date(e.woke):null;
+    var label=sleptDT?(ds[sleptDT.getDay()]+', '+ms[sleptDT.getMonth()]+' '+sleptDT.getDate()):'';
+    var bedStr=sleptDT?sleptDT.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'}):'—';
+    var wakeStr=wokeDT?wokeDT.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'}):'—';
+    var dur=e.durH!=null?(e.durH+'h '+(e.durM<10?'0':'')+e.durM+'m'):'bed only';
+    return '<div style="background:#fff;border-radius:10px;padding:10px 12px;margin-bottom:8px;border:1.5px solid #f0ebe6">'+
+      '<div style="display:flex;align-items:center;gap:6px">'+
+      '<div style="flex:1">'+
+      '<div style="font-size:12px;font-weight:700;color:var(--textd)">'+label+'</div>'+
+      '<div style="font-size:11px;color:var(--textl);margin-top:2px">'+bedStr+' → '+wakeStr+' &nbsp;·&nbsp; <b style="color:var(--textd)">'+dur+'</b></div>'+
+      '</div>'+
+      '<button onclick="editSleepEntry(\''+e.id+'\')" style="padding:5px 10px;border-radius:7px;background:#f5f0fd;color:var(--lav);border:none;font-family:\'Quicksand\',sans-serif;font-size:11px;font-weight:700;cursor:pointer">Edit</button>'+
+      '<button onclick="deleteSleepEntry(\''+e.id+'\')" style="padding:5px 10px;border-radius:7px;background:#fff0f0;color:#cc5566;border:none;font-family:\'Quicksand\',sans-serif;font-size:11px;font-weight:700;cursor:pointer;margin-left:4px">×</button>'+
+      '</div>'+
+      '</div>';
+  }).join('');
+}
+
+function editSleepEntry(id){
+  var entry=(MILLIE.sleepLog||[]).find(function(e){return e.id===id;});
+  if(!entry)return;
+  var dateEl=document.getElementById('tdSlDate');
+  var bedEl=document.getElementById('tdSlBed');
+  var wakeEl=document.getElementById('tdSlWake');
+  var editIdEl=document.getElementById('tdSlEditId');
+  var titleEl=document.getElementById('sleepFormTitle');
+  if(dateEl)dateEl.value=entry.date||'';
+  if(bedEl&&entry.slept)bedEl.value=new Date(entry.slept).toTimeString().slice(0,5);
+  if(wakeEl)wakeEl.value=entry.woke?new Date(entry.woke).toTimeString().slice(0,5):'';
+  if(editIdEl)editIdEl.value=id;
+  if(titleEl)titleEl.textContent='Editing Entry';
+  var form=document.getElementById('sleepAddForm');
+  if(form)form.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function deleteSleepEntry(id){
+  if(!confirm('Delete this sleep entry?'))return;
+  MILLIE.sleepLog=(MILLIE.sleepLog||[]).filter(function(e){return e.id!==id;});
+  saveMillie();
+  fbSave('sleeplog','log',{entries:MILLIE.sleepLog,updated:new Date().toISOString()});
+  renderSleepLog();
+  renderTodayStatsBars();
+  showToast('Entry deleted');
+}
+
+function clearSleepForm(){
+  var els=['tdSlDate','tdSlBed','tdSlWake','tdSlEditId'];
+  els.forEach(function(id){var e=document.getElementById(id);if(e)e.value='';});
+  var msg=document.getElementById('tdSlMsg');if(msg)msg.style.display='none';
+  var title=document.getElementById('sleepFormTitle');if(title)title.textContent='New Entry';
 }
 
 function renderTodayStatsBars(){
@@ -7119,9 +7225,11 @@ function logSleepToday(){
   var bedEl=document.getElementById('tdSlBed');
   var wakeEl=document.getElementById('tdSlWake');
   var msgEl=document.getElementById('tdSlMsg');
+  var editIdEl=document.getElementById('tdSlEditId');
   if(!dateEl||!bedEl)return;
   var d=dateEl.value||todayStr();
   var bed=bedEl.value;var wake=(wakeEl||{}).value||'';
+  var editId=editIdEl?editIdEl.value:'';
   if(!bed){
     if(msgEl){msgEl.textContent='Enter bedtime.';msgEl.style.color='#cc5566';msgEl.style.display='';}
     return;
@@ -7137,23 +7245,27 @@ function logSleepToday(){
       if(msgEl){msgEl.textContent='Times look off — check them.';msgEl.style.color='#cc5566';msgEl.style.display='';}
       return;
     }
-    entry={id:'sl-'+Date.now(),slept:sleptDT.toISOString(),woke:wokeDT.toISOString(),durH:hrs,durM:mins,date:d};
-    if(msgEl){msgEl.textContent=hrs+'h '+mins+'m logged ✓';msgEl.style.color='var(--sage)';msgEl.style.display='';}
+    entry={id:editId||'sl-'+Date.now(),slept:sleptDT.toISOString(),woke:wokeDT.toISOString(),durH:hrs,durM:mins,date:d};
+    if(msgEl){msgEl.textContent=hrs+'h '+mins+'m saved ✓';msgEl.style.color='var(--sage)';msgEl.style.display='';}
     showToast(hrs+'h '+mins+'m sleep logged!');
   } else {
-    entry={id:'sl-'+Date.now(),slept:sleptDT.toISOString(),woke:null,durH:null,durM:null,date:d,bedOnly:true};
+    entry={id:editId||'sl-'+Date.now(),slept:sleptDT.toISOString(),woke:null,durH:null,durM:null,date:d,bedOnly:true};
     if(msgEl){msgEl.textContent='Bedtime saved ✓';msgEl.style.color='var(--sage)';msgEl.style.display='';}
     showToast('Bedtime logged!');
   }
-  MILLIE.sleepLog=(MILLIE.sleepLog||[]).concat([entry]).slice(-30);
+  if(editId){
+    MILLIE.sleepLog=(MILLIE.sleepLog||[]).map(function(e){return e.id===editId?entry:e;});
+  } else {
+    MILLIE.sleepLog=(MILLIE.sleepLog||[]).concat([entry]).slice(-60);
+  }
   saveMillie();
   fbSave('sleeplog','log',{entries:MILLIE.sleepLog,updated:new Date().toISOString()});
   renderTodayStatsBars();
+  renderSleepLog();
   setTimeout(function(){
-    closeM('todaySleepModal');
+    clearSleepForm();
     if(msgEl)msgEl.style.display='none';
-    dateEl.value='';bedEl.value='';if(wakeEl)wakeEl.value='';
-  },1200);
+  },1000);
 }
 
 function logMinistryToday(){
@@ -9263,13 +9375,13 @@ function openM(id){
     renderWatBtns();
   }
   if(id==='stepModal'){
-    var sInp=document.getElementById('stepInput');
-    if(sInp)sInp.value=getTodaySteps()||'';
+    renderStepsLog();
   }
   if(id==='todaySleepModal'){
     var tdsd=document.getElementById('tdSlDate');
     if(tdsd&&!tdsd.value)tdsd.value=todayStr();
     var msg=document.getElementById('tdSlMsg');if(msg)msg.style.display='none';
+    renderSleepLog();
   }
   if(id==='todayMinModal'){
     var tdmd=document.getElementById('tdMinDate');
@@ -20272,6 +20384,9 @@ setTimeout(function(){
 }, 5000);
 
 setInterval(updDate, 60000);
+document.addEventListener('visibilitychange',function(){
+  if(!document.hidden)updDate();
+});
 
 // ══════════════════════════════════════════════
 // EXPENSE PIE / DONUT CHART
@@ -21866,17 +21981,11 @@ function delProjInc(id){
 }
 </script>
 <!-- STEP MODAL -->
-<div class="ov" id="stepModal"><div class="mod">
-  <div class="mtit">Log Steps 👟</div>
-  <div style="font-size:12px;color:var(--textl);text-align:center;margin-bottom:14px">Today's step count</div>
-  <input class="fi" type="number" id="stepInput" placeholder="e.g. 5000" style="text-align:center;font-size:22px;font-weight:700;padding:12px">
-  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:10px">
-    <button class="btn sec" style="font-size:13px" onclick="addStepPreset(1000)">+1,000</button>
-    <button class="btn sec" style="font-size:13px" onclick="addStepPreset(2500)">+2,500</button>
-    <button class="btn sec" style="font-size:13px" onclick="addStepPreset(5000)">+5,000</button>
-  </div>
-  <button class="ok-btn" style="margin-top:14px" onclick="saveSteps()">Save</button>
-  <button class="cn-btn" onclick="closeM('stepModal')">Cancel</button>
+<div class="ov" id="stepModal"><div class="mod" style="max-height:90vh;display:flex;flex-direction:column">
+  <div class="mh"></div>
+  <div class="mtit">Steps Log 👟</div>
+  <div id="stepsLogBody" style="flex:1;overflow-y:auto;max-height:60vh;margin-bottom:10px"></div>
+  <button class="cn-btn" onclick="closeM('stepModal')">Close</button>
 </div></div>
 
 <!-- INCOME MODAL -->
@@ -22792,18 +22901,26 @@ function delProjInc(id){
   </div>
 </div>
 
-<!-- TODAY SLEEP QUICK LOG MODAL -->
+<!-- TODAY SLEEP LOG MODAL -->
 <div class="ov" id="todaySleepModal">
-  <div class="mod">
+  <div class="mod" style="max-height:90vh;display:flex;flex-direction:column">
     <div class="mh"></div>
-    <div class="mtit">Log Sleep 😴</div>
-    <div style="font-size:12px;color:var(--textl);text-align:center;margin-bottom:14px">Enter the night you fell asleep</div>
-    <div class="fg"><label class="fl">Date (night you fell asleep)</label><input class="fi" type="date" id="tdSlDate"></div>
-    <div class="fg"><label class="fl">Bedtime</label><input class="fi" type="time" id="tdSlBed"></div>
-    <div class="fg"><label class="fl">Wake time <span style="font-weight:400;color:var(--textl)">(optional)</span></label><input class="fi" type="time" id="tdSlWake"></div>
-    <div id="tdSlMsg" style="display:none;font-size:12px;text-align:center;margin-bottom:8px"></div>
-    <button class="ok-btn" onclick="logSleepToday()">Save Sleep</button>
-    <button class="cn-btn" onclick="closeM('todaySleepModal')">Cancel</button>
+    <div class="mtit">Sleep Log 😴</div>
+    <div id="sleepAddForm" style="background:#f8f4f0;border-radius:10px;padding:12px;margin-bottom:12px;flex-shrink:0">
+      <div style="font-size:11px;font-weight:700;color:var(--textl);letter-spacing:.4px;text-transform:uppercase;margin-bottom:10px" id="sleepFormTitle">New Entry</div>
+      <input type="hidden" id="tdSlEditId">
+      <div class="fg"><label class="fl">Date (night you fell asleep)</label><input class="fi" type="date" id="tdSlDate"></div>
+      <div class="fg"><label class="fl">Bedtime</label><input class="fi" type="time" id="tdSlBed"></div>
+      <div class="fg"><label class="fl">Wake time <span style="font-weight:400;color:var(--textl)">(optional)</span></label><input class="fi" type="time" id="tdSlWake"></div>
+      <div id="tdSlMsg" style="display:none;font-size:12px;text-align:center;margin-bottom:8px"></div>
+      <div style="display:flex;gap:8px">
+        <button class="ok-btn" style="flex:1;margin:0" onclick="logSleepToday()">Save</button>
+        <button class="cn-btn" style="flex:0;margin:0;padding:8px 14px" onclick="clearSleepForm()">Clear</button>
+      </div>
+    </div>
+    <div style="font-size:11px;font-weight:700;color:var(--textl);letter-spacing:.4px;text-transform:uppercase;margin-bottom:8px;flex-shrink:0">Past Entries</div>
+    <div id="sleepLogBody" style="flex:1;overflow-y:auto;min-height:0"></div>
+    <button class="cn-btn" style="margin-top:10px;flex-shrink:0" onclick="closeM('todaySleepModal')">Close</button>
   </div>
 </div>
 
