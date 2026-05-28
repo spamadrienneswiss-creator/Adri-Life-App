@@ -7553,21 +7553,23 @@ function renderSleepLog(){
     var bedStr=sleptDT?sleptDT.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'}):'—';
     var wakeStr=wokeDT?wokeDT.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'}):'—';
     var dur=e.durH!=null?(e.durH+'h '+(e.durM<10?'0':'')+e.durM+'m'):'bed only';
+    var eKey=e.id||(e.slept||'');
+    var eKeyEsc="'"+eKey.replace(/\\/g,'\\\\').replace(/'/g,"\\'")+"'";
     return '<div style="background:#fff;border-radius:10px;padding:10px 12px;margin-bottom:8px;border:1.5px solid #f0ebe6">'+
       '<div style="display:flex;align-items:center;gap:6px">'+
       '<div style="flex:1">'+
       '<div style="font-size:12px;font-weight:700;color:var(--textd)">'+label+'</div>'+
       '<div style="font-size:11px;color:var(--textl);margin-top:2px">'+bedStr+' → '+wakeStr+' &nbsp;·&nbsp; <b style="color:var(--textd)">'+dur+'</b></div>'+
       '</div>'+
-      '<button onclick="editSleepEntry(\''+e.id+'\')" style="padding:5px 10px;border-radius:7px;background:#f5f0fd;color:var(--lav);border:none;font-family:\'Quicksand\',sans-serif;font-size:11px;font-weight:700;cursor:pointer">Edit</button>'+
-      '<button onclick="deleteSleepEntry(\''+e.id+'\')" style="padding:5px 10px;border-radius:7px;background:#fff0f0;color:#cc5566;border:none;font-family:\'Quicksand\',sans-serif;font-size:11px;font-weight:700;cursor:pointer;margin-left:4px">×</button>'+
+      '<button onclick="editSleepEntry('+eKeyEsc+')" style="padding:5px 10px;border-radius:7px;background:#f5f0fd;color:var(--lav);border:none;font-family:\'Quicksand\',sans-serif;font-size:11px;font-weight:700;cursor:pointer">Edit</button>'+
+      '<button onclick="deleteSleepEntry('+eKeyEsc+')" style="padding:5px 10px;border-radius:7px;background:#fff0f0;color:#cc5566;border:none;font-family:\'Quicksand\',sans-serif;font-size:11px;font-weight:700;cursor:pointer;margin-left:4px">×</button>'+
       '</div>'+
       '</div>';
   }).join('');
 }
 
-function editSleepEntry(id){
-  var entry=(MILLIE.sleepLog||[]).find(function(e){return e.id===id;});
+function editSleepEntry(key){
+  var entry=(MILLIE.sleepLog||[]).find(function(e){return (e.id||e.slept||'')===key;});
   if(!entry)return;
   var dateEl=document.getElementById('tdSlDate');
   var bedEl=document.getElementById('tdSlBed');
@@ -7583,9 +7585,9 @@ function editSleepEntry(id){
   if(form)form.scrollIntoView({behavior:'smooth',block:'start'});
 }
 
-function deleteSleepEntry(id){
-  var removed=(MILLIE.sleepLog||[]).find(function(e){return e.id===id;});
-  MILLIE.sleepLog=(MILLIE.sleepLog||[]).filter(function(e){return e.id!==id;});
+function deleteSleepEntry(key){
+  var removed=(MILLIE.sleepLog||[]).find(function(e){return (e.id||e.slept||'')===key;});
+  MILLIE.sleepLog=(MILLIE.sleepLog||[]).filter(function(e){return (e.id||e.slept||'')!==key;});
   saveMillie();
   fbSave('sleeplog','log',{entries:MILLIE.sleepLog,updated:new Date().toISOString()});
   renderSleepLog();
@@ -7630,8 +7632,9 @@ function renderTodayStatsBars(){
   // steps
   el=document.getElementById('tStepD');if(el)el.textContent=steps.toLocaleString()+' / '+STEPS_GOAL.toLocaleString();
   el=document.getElementById('tStepB');if(el)el.style.width=pct(steps,STEPS_GOAL);
-  // sleep — most recent entry, date = night they fell asleep
-  var lastSleep=(MILLIE.sleepLog||[]).length?(MILLIE.sleepLog[MILLIE.sleepLog.length-1]):null;
+  // sleep — most recent entry by slept timestamp
+  var _sl=(MILLIE.sleepLog||[]).filter(function(s){return s.slept;}).slice().sort(function(a,b){return a.slept<b.slept?-1:1;});
+  var lastSleep=_sl.length?_sl[_sl.length-1]:null;
   el=document.getElementById('tSleepD');
   if(el){
     if(lastSleep){
