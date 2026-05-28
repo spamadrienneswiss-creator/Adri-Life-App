@@ -3025,10 +3025,18 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
       <div class="ct" style="margin-bottom:4px">📅 This Week</div>
       <div id="tt-week-summary" style="font-size:13px;color:var(--textd)"></div>
     </div>
-    <div class="card">
+    <div class="card" style="margin-bottom:12px">
+      <div id="tt-player-level"></div>
+    </div>
+    <div class="card" style="margin-bottom:12px">
       <div class="ct" style="margin-bottom:4px">🏆 High Score Board</div>
-      <div style="font-size:11px;color:var(--textl);margin-bottom:12px">Tasks where you beat your estimate the most</div>
+      <div style="font-size:11px;color:var(--textl);margin-bottom:10px">Top beats — minutes saved on a single task</div>
       <div id="tt-highscores"><div style="font-size:12px;color:var(--textl);padding:8px 0">Beat an estimate to get on the board!</div></div>
+    </div>
+    <div class="card">
+      <div class="ct" style="margin-bottom:4px">🔁 Recurring Averages</div>
+      <div style="font-size:11px;color:var(--textl);margin-bottom:10px">Your real time for tasks you do repeatedly</div>
+      <div id="tt-recurring"><div style="font-size:12px;color:var(--textl);padding:8px 0">Complete a recurring task with time logged to see averages.</div></div>
     </div>
   </div>
 
@@ -3191,6 +3199,7 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
       <input class="fi" type="number" id="tEstMin" placeholder="e.g. 30" min="1" max="9999" style="width:110px;padding:8px 12px">
       <span style="font-size:12px;color:var(--textl);font-family:'Quicksand',sans-serif">minutes</span>
     </div>
+    <div id="tEstMinSuggest" style="display:none;font-size:11px;color:var(--blue);margin-top:4px;font-family:'Quicksand',sans-serif;font-weight:600"></div>
   </div>
   <div class="fg"><label class="fl">Due Date &amp; Time (optional)</label>
   <div style="display:flex;gap:8px">
@@ -5385,6 +5394,8 @@ var WIG_PRICE_LIST = JSON.parse(localStorage.getItem('aWigPrices')||'null')||[
 function saveWigPrices(){ localStorage.setItem('aWigPrices',JSON.stringify(WIG_PRICE_LIST)); }
 var WIG_ORDERS = JSON.parse(localStorage.getItem('aWigOrders')||'[]');
 function saveWigOrders(){ localStorage.setItem('aWigOrders',JSON.stringify(WIG_ORDERS)); }
+var TASK_TIME_HISTORY = JSON.parse(localStorage.getItem('aTaskTimeHist')||'{}');
+function saveTaskTimeHistory(){ localStorage.setItem('aTaskTimeHist',JSON.stringify(TASK_TIME_HISTORY)); }
 var WIG_STEP_DEFS = [
   {id:'s1',label:'Initial contact received',action:'form',actionLabel:'Open Questionnaire Form',actionUrl:''},
   {id:'s2',label:'Questionnaire reviewed & pricing confirmed',action:'sheet',actionLabel:'Open Client Sheet',actionUrl:''},
@@ -7222,6 +7233,7 @@ function editT(id){
   if(_dueTimeEl)_dueTimeEl.value=_dueParts[1]||'';
   document.getElementById('tNotes').value=t.notes||'';
   var _tEstMinEl=document.getElementById('tEstMin');if(_tEstMinEl)_tEstMinEl.value=t.estimatedMin||'';
+  setTimeout(function(){_showEstSuggestion(t.title,t.repeat);},60);
   document.getElementById('delTBtn').style.display='block';
   _taskMeaningful=!!(t.meaningful);
   var _mb=document.getElementById('tMeaningfulBtn');
@@ -21225,6 +21237,23 @@ function showActualTimePrompt(taskId){
     if(t.estimatedMin){estRow.style.display='';estVal.textContent=t.estimatedMin;}
     else estRow.style.display='none';
   }
+  // Show history hint for recurring tasks
+  var histRow=document.getElementById('atpHistRow');
+  var histAvgEl=document.getElementById('atpHistAvg');
+  var histLastEl=document.getElementById('atpHistLast');
+  if(histRow&&t.repeat){
+    var key=(t.title||'').toLowerCase().trim();
+    var hist=TASK_TIME_HISTORY[key]||[];
+    var recent=hist.slice(-5).filter(function(h){return h.actualMin;});
+    if(recent.length>=2){
+      var avg=Math.round(recent.reduce(function(s,h){return s+h.actualMin;},0)/recent.length);
+      var last=recent[recent.length-1].actualMin;
+      if(histAvgEl)histAvgEl.textContent=avg;
+      if(histLastEl)histLastEl.textContent=last;
+      histRow.style.display='';
+      if(inp&&!t.estimatedMin)inp.value=avg;
+    } else histRow.style.display='none';
+  } else if(histRow)histRow.style.display='none';
   showOv('ovActualTime');
   setTimeout(function(){var inp2=document.getElementById('atpActualInput');if(inp2)inp2.focus();},200);
 }
@@ -21238,13 +21267,26 @@ function saveActualTime(){
       t.actualMin=mins;
       localStorage.setItem('aTasks',JSON.stringify(TASKS));
       fbSave('tasks',t.id,t);
+      // Store in recurring history
+      if(t.repeat){
+        var hKey=(t.title||'').toLowerCase().trim();
+        if(!TASK_TIME_HISTORY[hKey])TASK_TIME_HISTORY[hKey]=[];
+        TASK_TIME_HISTORY[hKey].push({date:todayStr(),actualMin:mins,estimatedMin:t.estimatedMin||null,title:t.title,cat:t.cat||'mis'});
+        if(TASK_TIME_HISTORY[hKey].length>20)TASK_TIME_HISTORY[hKey]=TASK_TIME_HISTORY[hKey].slice(-20);
+        saveTaskTimeHistory();
+      }
+      // Beat/XP feedback
       if(t.estimatedMin&&mins<t.estimatedMin){
         var diff=t.estimatedMin-mins;
         var pct=Math.round((diff/t.estimatedMin)*100);
-        showToast('⚡ Beat your estimate by '+diff+' min ('+pct+'% faster)!');
-        if(diff>=5&&typeof launchConfetti==='function')launchConfetti();
+        var xp=diff;
+        var lvlNow=_ttLevel(_ttXP());
+        var lvlNew=_ttLevel(_ttXP()+xp);
+        var levelUp=lvlNew.level>lvlNow.level;
+        showToast('⚡ Beat by '+diff+'m ('+pct+'% faster!) +'+xp+' XP'+(levelUp?' 🎉 Level up! '+lvlNew.name:''));
+        if(diff>=5||levelUp)launchConfetti();
       } else if(t.estimatedMin&&mins===t.estimatedMin){
-        showToast('🎯 Spot on estimate!');
+        showToast('🎯 Spot on! +1 XP');
       } else {
         showToast('⏱️ Time logged: '+mins+' min');
       }
@@ -21261,9 +21303,11 @@ function skipActualTime(){
 }
 
 function renderTimeTracking(){
+  _renderTTPlayerLevel();
   _renderTTToday();
   _renderTTWeek();
   _renderTTHighScores();
+  _renderTTRecurring();
 }
 
 function _renderTTToday(){
@@ -21313,15 +21357,97 @@ function _renderTTHighScores(){
   var el=document.getElementById('tt-highscores');if(!el)return;
   var candidates=TASKS.filter(function(t){return t.done&&t.estimatedMin&&t.actualMin&&t.actualMin<t.estimatedMin;});
   candidates.sort(function(a,b){return(b.estimatedMin-b.actualMin)-(a.estimatedMin-a.actualMin);});
-  var top=candidates.slice(0,5);
+  var top=candidates.slice(0,7);
   if(!top.length){el.innerHTML='<div style="font-size:12px;color:var(--textl);padding:8px 0">Beat an estimate to get on the board!</div>';return;}
-  var medals=['🥇','🥈','🥉','4️⃣','5️⃣'];
+  var medals=['🥇','🥈','🥉','4️⃣','5️⃣','6️⃣','7️⃣'];
   var html=top.map(function(t,i){
     var diff=t.estimatedMin-t.actualMin;
     var pct=Math.round((diff/t.estimatedMin)*100);
-    return '<div class="tt-score"><div class="tt-score-rank">'+medals[i]+'</div><div class="tt-score-info"><div class="tt-score-name">'+_esc(t.title)+'</div><div class="tt-score-detail">'+t.estimatedMin+'m est → '+t.actualMin+'m actual · '+(t.doneDate||'')+'</div></div><div class="tt-score-diff">-'+diff+'m ('+pct+'%)</div></div>';
+    return '<div class="tt-score"><div class="tt-score-rank">'+medals[i]+'</div><div class="tt-score-info"><div class="tt-score-name">'+_esc(t.title)+'</div><div class="tt-score-detail">'+_fmtMin(t.estimatedMin)+' est → '+_fmtMin(t.actualMin)+' actual'+(t.doneDate?' · '+t.doneDate:'')+' · '+(t.cat?(_CATNAMES[t.cat]||t.cat):'')+'</div></div><div class="tt-score-diff">-'+_fmtMin(diff)+' ('+pct+'%)</div></div>';
   }).join('');
   el.innerHTML=html;
+}
+
+function _ttXP(){
+  return TASKS.filter(function(t){return t.done&&t.estimatedMin&&t.actualMin&&t.actualMin<=t.estimatedMin;})
+    .reduce(function(s,t){return s+(t.estimatedMin-t.actualMin)+(t.actualMin===t.estimatedMin?1:0);},0);
+}
+var _TT_LEVELS=[
+  {level:1,xp:0,name:'Rookie',icon:'🌱',color:'#9a9a9a'},
+  {level:2,xp:30,name:'Time Aware',icon:'⏰',color:'#4a9a9a'},
+  {level:3,xp:100,name:'Fast Worker',icon:'⚡',color:'#4a7a9a'},
+  {level:4,xp:300,name:'Speed Demon',icon:'🚀',color:'#7a4a9a'},
+  {level:5,xp:600,name:'Time Wizard',icon:'🧙',color:'#9a4a4a'},
+  {level:6,xp:1000,name:'Efficiency Master',icon:'🏆',color:'#9a7a20'},
+  {level:7,xp:2000,name:'Legendary',icon:'⭐',color:'var(--sage)'}
+];
+function _ttLevel(xp){
+  var lvl=_TT_LEVELS[0];
+  for(var i=0;i<_TT_LEVELS.length;i++){if(xp>=_TT_LEVELS[i].xp)lvl=_TT_LEVELS[i];}
+  return lvl;
+}
+function _renderTTPlayerLevel(){
+  var el=document.getElementById('tt-player-level');if(!el)return;
+  var xp=_ttXP();
+  var lvl=_ttLevel(xp);
+  var nextLvl=_TT_LEVELS.find(function(l){return l.xp>xp;});
+  var pct=nextLvl?Math.min(100,Math.round(((xp-lvl.xp)/(nextLvl.xp-lvl.xp))*100)):100;
+  var beaten=TASKS.filter(function(t){return t.done&&t.estimatedMin&&t.actualMin&&t.actualMin<t.estimatedMin;}).length;
+  var exact=TASKS.filter(function(t){return t.done&&t.estimatedMin&&t.actualMin&&t.actualMin===t.estimatedMin;}).length;
+  var html='<div style="display:flex;align-items:center;gap:12px">'
+    +'<div style="font-size:36px;line-height:1">'+lvl.icon+'</div>'
+    +'<div style="flex:1">'
+      +'<div style="font-size:16px;font-weight:700;color:var(--textd)">'+lvl.name+'</div>'
+      +'<div style="font-size:11px;color:var(--textl);margin-bottom:6px">Level '+lvl.level+' · '+xp+' XP'+(beaten?' · ⚡'+beaten+' beats':'')+(exact?' · 🎯'+exact+' exact':'')+'</div>'
+      +'<div style="background:var(--bg2);border-radius:6px;height:8px;overflow:hidden">'
+        +'<div style="height:8px;border-radius:6px;background:linear-gradient(90deg,'+lvl.color+','+lvl.color+'aa);width:'+pct+'%;transition:width .5s"></div>'
+      +'</div>'
+      +(nextLvl?'<div style="font-size:10px;color:var(--textl);margin-top:3px">'+xp+' / '+nextLvl.xp+' XP → '+nextLvl.icon+' '+nextLvl.name+'</div>':'<div style="font-size:10px;color:var(--sage);margin-top:3px;font-weight:700">MAX LEVEL 🌟</div>')
+    +'</div>'
+  +'</div>';
+  el.innerHTML=html;
+}
+
+function _renderTTRecurring(){
+  var el=document.getElementById('tt-recurring');if(!el)return;
+  var keys=Object.keys(TASK_TIME_HISTORY);
+  if(!keys.length){el.innerHTML='<div style="font-size:12px;color:var(--textl);padding:8px 0">Complete a recurring task with time logged to see averages.</div>';return;}
+  var rows=keys.map(function(k){
+    var hist=TASK_TIME_HISTORY[k].filter(function(h){return h.actualMin;});
+    if(!hist.length)return null;
+    var recent=hist.slice(-5);
+    var avg=Math.round(recent.reduce(function(s,h){return s+h.actualMin;},0)/recent.length);
+    var last=hist[hist.length-1];
+    var trend=hist.length>=3?hist[hist.length-1].actualMin-hist[hist.length-3].actualMin:0;
+    return {title:last.title||k,cat:last.cat||'mis',count:hist.length,avg:avg,last:last.actualMin,trend:trend,lastDate:last.date||''};
+  }).filter(Boolean);
+  rows.sort(function(a,b){return b.count-a.count;});
+  var html=rows.map(function(r){
+    var trendIcon=r.trend<-2?'📉 getting faster':r.trend>2?'📈 taking longer':'→ consistent';
+    var trendColor=r.trend<-2?'#3a7a3a':r.trend>2?'#c06030':'var(--textl)';
+    return '<div class="tt-score">'
+      +'<div class="tt-score-rank" style="font-size:11px;width:auto;color:var(--textl)">×'+r.count+'</div>'
+      +'<div class="tt-score-info">'
+        +'<div class="tt-score-name">'+_esc(r.title)+'</div>'
+        +'<div class="tt-score-detail">avg '+_fmtMin(r.avg)+' · last '+_fmtMin(r.last)+' ('+r.lastDate+') · <span style="color:'+trendColor+'">'+trendIcon+'</span></div>'
+      +'</div>'
+      +'<div style="font-size:12px;font-weight:700;color:var(--textd)">'+_fmtMin(r.avg)+'</div>'
+    +'</div>';
+  }).join('');
+  el.innerHTML=html;
+}
+
+function _showEstSuggestion(title,repeat){
+  var el=document.getElementById('tEstMinSuggest');if(!el)return;
+  if(!repeat||!title){el.style.display='none';return;}
+  var key=(title||'').toLowerCase().trim();
+  var hist=(TASK_TIME_HISTORY[key]||[]).filter(function(h){return h.actualMin;});
+  if(hist.length<2){el.style.display='none';return;}
+  var recent=hist.slice(-5);
+  var avg=Math.round(recent.reduce(function(s,h){return s+h.actualMin;},0)/recent.length);
+  var trend=hist.length>=3?hist[hist.length-1].actualMin-hist[hist.length-3].actualMin:0;
+  el.textContent='💡 Based on history: usually takes you ~'+avg+'m'+(trend<-2?' (getting faster!)':trend>2?' (taking longer lately)':'');
+  el.style.display='';
 }
 
 function _fmtMin(m){if(!m)return'0m';if(m<60)return m+'m';var h=Math.floor(m/60);var min=m%60;return h+'h'+(min?min+'m':'');}
@@ -24553,8 +24679,11 @@ function delProjInc(id){
     <div style="width:36px;height:4px;background:#e0e0e0;border-radius:2px;margin:0 auto 18px"></div>
     <div style="font-family:'Playfair Display',serif;font-size:17px;font-weight:700;color:var(--textd);margin-bottom:4px">⏱️ How long did that take?</div>
     <div id="atpTaskName" style="font-size:12px;color:var(--textl);font-family:'Quicksand',sans-serif;margin-bottom:16px;font-style:italic"></div>
-    <div id="atpEstRow" style="display:none;font-size:12px;color:var(--textl);background:var(--bg2);border-radius:10px;padding:8px 12px;margin-bottom:14px">
+    <div id="atpEstRow" style="display:none;font-size:12px;color:var(--textl);background:var(--bg2);border-radius:10px;padding:8px 12px;margin-bottom:6px">
       🎯 Your estimate: <strong id="atpEstVal"></strong> min
+    </div>
+    <div id="atpHistRow" style="display:none;font-size:12px;color:var(--textl);background:var(--bg2);border-radius:10px;padding:8px 12px;margin-bottom:14px">
+      📊 History: avg <strong id="atpHistAvg"></strong>m · last time <strong id="atpHistLast"></strong>m
     </div>
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px">
       <input type="number" id="atpActualInput" placeholder="minutes" min="1" max="9999" class="fi" style="width:110px;padding:10px 14px;font-size:16px;font-weight:700">
