@@ -1269,7 +1269,6 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
       </div>
     </div>
     <div class="hub-card" onclick="goTab('guide',null)"><div class="hub-card-ic">📚</div><div class="hub-card-name">Research Library</div><div class="hub-card-sub">Notes, guides &amp; learning</div></div>
-    <div class="hub-card" onclick="goTab('routines',null)"><div class="hub-card-ic">🔄</div><div class="hub-card-name">Routines</div><div class="hub-card-sub" id="hub-routines-sub2">Daily &amp; weekly routines</div></div>
     <div class="hub-card" onclick="goTab('archive',null)"><div class="hub-card-ic">📁</div><div class="hub-card-name">Year Archive</div><div class="hub-card-sub" id="hub-archive-sub">Year-by-year history</div></div>
     <div class="hub-card" onclick="goTab('guide',null);setTimeout(function(){openAppIndexInGuide()},300)"><div class="hub-card-ic">🗂️</div><div class="hub-card-name">App Index</div><div class="hub-card-sub">Navigate all sections</div></div>
     <div class="hub-card span2" onclick="goTab('guide',null);setTimeout(function(){openTemplatesInGuide()},300)"><div class="hub-card-ic">📋</div><div class="hub-card-name">Project Templates</div><div class="hub-card-sub">Load a template to start fast</div></div>
@@ -1307,7 +1306,7 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     <button class="qa" onclick="openM('taskModal')" style="background:linear-gradient(135deg,#f2dede,#fdf6ee)"><div class="qa-ic">➕</div><div class="qa-lb">Task</div></button>
     <button class="qa" onclick="openM('expModal')" style="background:linear-gradient(135deg,#f5e8d8,#fdf6ee)"><div class="qa-ic">💸</div><div class="qa-lb">Expense</div></button>
     <button class="qa" onclick="openM('fwModal')" style="background:linear-gradient(135deg,#e8f0e8,#fdf6ee)"><div class="qa-ic">🍽️</div><div class="qa-lb">Food</div></button>
-    <button class="qa" onclick="openM('stepModal')" style="background:linear-gradient(135deg,#e8eef8,#fdf6ee)"><div class="qa-ic">👟</div><div class="qa-lb">Move</div></button>
+    <button class="qa" onclick="openM('moveModal')" style="background:linear-gradient(135deg,#e8eef8,#fdf6ee)"><div class="qa-ic">👟</div><div class="qa-lb">Move</div></button>
     <button class="qa" onclick="openGroceryQuick()" style="background:linear-gradient(135deg,#e8f4e8,#fdf6ee)"><div class="qa-ic">🛒</div><div class="qa-lb">Grocery</div></button>
     <button class="qa" onclick="goTab('focus-session',null)" style="background:linear-gradient(135deg,#eee8f8,#f8e8e8)"><div class="qa-ic">🎯</div><div class="qa-lb">Focus</div></button>
     <button class="qa" onclick="goTab('spirit',null);setTimeout(function(){showSpiritSec('bible',document.querySelector('#v-spirit .pn-btn:nth-child(2)'))},200)" style="background:linear-gradient(135deg,#e8f0f8,#dce8f4)"><div class="qa-ic">📖</div><div class="qa-lb">Bible</div></button>
@@ -1389,6 +1388,11 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
         <div class="pr" style="cursor:pointer" onclick="goTab('meals',null)"><div class="pt"><span class="pn">🌿 Fiber</span><span class="pm2" id="tfD">0g/25g</span></div><div class="pb"><div class="pf pf-fib" id="tfB" style="width:0%"></div></div></div>
         <div class="pr" style="cursor:pointer" onclick="goTab('wellness',null);setTimeout(function(){showWellnessSec('meds',document.querySelector('#v-wellness .pn-btn:nth-child(5)'))},200)">
           <div class="pt"><span class="pn">💊 Meds</span><span class="pm2" id="tMedsD">—</span><span style="font-size:10px;color:var(--lav);margin-left:auto;flex-shrink:0">Check off →</span></div>
+        </div>
+        <!-- Workouts -->
+        <div class="pr" style="cursor:pointer" onclick="openM('moveModal')">
+          <div class="pt"><span class="pn">💪 Workouts</span><span class="pm2" id="tExD">—</span><span style="font-size:10px;color:var(--blue);margin-left:6px">+ log</span></div>
+          <div class="pb"><div class="pf" id="tExB" style="width:0%;background:var(--peach)"></div></div>
         </div>
         <!-- This Week -->
         <div style="font-size:11px;font-weight:700;color:var(--rose);letter-spacing:.4px;text-transform:uppercase;padding-top:12px;margin-top:4px;border-top:1px solid #f0ebe6;margin-bottom:8px">This Week</div>
@@ -6959,6 +6963,51 @@ function saveSteps(){
   showToast(n.toLocaleString()+' steps logged!');
 }
 
+function renderMoveModal(){
+  var inp=document.getElementById('moveTodaySteps');
+  if(inp)inp.value=getTodaySteps()||'';
+  var el=document.getElementById('moveTodayExList');
+  if(!el)return;
+  var k=getTK();
+  var log=EX_LOG[k]||[];
+  if(!log.length){
+    el.innerHTML='<div style="font-size:12px;color:var(--textl);text-align:center;padding:10px">No workouts logged today</div>';
+    return;
+  }
+  el.innerHTML=log.map(function(e,i){
+    var cal=e.calBurned&&e.calBurned>0?' · 🔥'+e.calBurned+' cal':'';
+    var note=e.note?' · '+e.note:'';
+    return '<div style="display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:10px;background:#fff;border:1.5px solid #f0ebe6;margin-bottom:6px">'+
+      '<div style="flex:1">'+
+        '<div style="font-size:13px;font-weight:700;color:var(--textd)">'+e.name+'</div>'+
+        '<div style="font-size:11px;color:var(--textl)">'+e.dur+' '+e.unit+cal+note+'</div>'+
+      '</div>'+
+      '<button onclick="delExFromMove(\''+k+'\','+i+')" style="background:none;border:none;color:var(--textl);cursor:pointer;font-size:16px;padding:4px">✕</button>'+
+    '</div>';
+  }).join('');
+}
+
+function addMoveStepPreset(n){
+  var inp=document.getElementById('moveTodaySteps');
+  if(inp)inp.value=(parseInt(inp.value)||0)+n;
+}
+
+function saveTodayStepsFromMove(){
+  var inp=document.getElementById('moveTodaySteps');
+  var n=parseInt((inp||{}).value)||0;
+  STEPS_LOG[getTK()]=n;
+  localStorage.setItem('aStepsLog',JSON.stringify(STEPS_LOG));
+  fbSave('stepslog','log',{data:STEPS_LOG,updated:new Date().toISOString()});
+  renderTodayStatsBars();
+  showToast(n.toLocaleString()+' steps saved!');
+}
+
+function delExFromMove(day,idx){
+  delEx(day,idx);
+  renderMoveModal();
+  renderTodayStatsBars();
+}
+
 function renderStepsLog(){
   var el=document.getElementById('stepsLogBody');
   if(!el)return;
@@ -7044,13 +7093,14 @@ function editSleepEntry(id){
 }
 
 function deleteSleepEntry(id){
-  if(!confirm('Delete this sleep entry?'))return;
+  var removed=(MILLIE.sleepLog||[]).find(function(e){return e.id===id;});
   MILLIE.sleepLog=(MILLIE.sleepLog||[]).filter(function(e){return e.id!==id;});
   saveMillie();
   fbSave('sleeplog','log',{entries:MILLIE.sleepLog,updated:new Date().toISOString()});
   renderSleepLog();
   renderTodayStatsBars();
-  showToast('Entry deleted');
+  DELTED={sleepEntry:removed};
+  showUndo('Sleep entry deleted');
 }
 
 function clearSleepForm(){
@@ -7105,7 +7155,22 @@ function renderTodayStatsBars(){
   var mon=todayStr().slice(0,7);
   var monHrs=MINISTRY_LOG.filter(function(m){return(m.date||'').startsWith(mon);}).reduce(function(s,m){return s+(m.hours||0);},0);
   el=document.getElementById('tMinD');if(el)el.textContent=monHrs+' hrs this month';
-  el=document.getElementById('tMinB');if(el)el.style.width=pct(monHrs,20); // 20h monthly goal rough
+  el=document.getElementById('tMinB');if(el)el.style.width=pct(monHrs,20);
+  // workouts
+  var todayEx=EX_LOG[getTK()]||[];
+  var exCount=todayEx.length;
+  var exMins=todayEx.reduce(function(s,e){return s+(e.unit==='min'?parseFloat(e.dur)||0:0);},0);
+  var exCal=todayEx.reduce(function(s,e){return s+(e.calBurned||0);},0);
+  el=document.getElementById('tExD');
+  if(el){
+    if(exCount){
+      var exTxt=exCount+' workout'+(exCount!==1?'s':'');
+      if(exMins)exTxt+=' · '+Math.round(exMins)+'min';
+      if(exCal)exTxt+=' · 🔥'+exCal;
+      el.textContent=exTxt;
+    } else {el.textContent='None today';}
+  }
+  el=document.getElementById('tExB');if(el)el.style.width=pct(exCount,S.gEx||3);
 }
 
 // ── This Week Stats ────────────────────────────
@@ -7278,10 +7343,10 @@ function logSleepToday(){
   var entry;
   if(wake){
     var wokeDT=new Date(d+'T'+wake+':00');
-    if(sleptDT>=wokeDT)sleptDT.setDate(sleptDT.getDate()-1);
+    if(sleptDT>=wokeDT)wokeDT.setDate(wokeDT.getDate()+1);
     var dur=wokeDT-sleptDT;
     var hrs=Math.floor(dur/3600000);var mins=Math.floor((dur%3600000)/60000);
-    if(hrs<0||hrs>20){
+    if(hrs<0||hrs>14){
       if(msgEl){msgEl.textContent='Times look off — check them.';msgEl.style.color='#cc5566';msgEl.style.display='';}
       return;
     }
@@ -9435,6 +9500,9 @@ function openM(id){
     document.querySelector('[data-g="fwt"][data-v="water"]').classList.add('on');
     SBV.fwt='water';
     renderWatBtns();
+  }
+  if(id==='moveModal'){
+    renderMoveModal();
   }
   if(id==='stepModal'){
     renderStepsLog();
@@ -12348,7 +12416,8 @@ function saveEx(){
   EX_LOG[k].push({id:Date.now().toString(),name:name,dur:dur,unit:unit,note:note,calBurned:calBurned});
   localStorage.setItem('aExLog',JSON.stringify(EX_LOG));
   fbSave('exLog_'+k,k,{entries:EX_LOG[k]});
-  closeM('exModal');renderExLog();
+  closeM('exModal');renderExLog();renderTodayStatsBars();
+  var mm=document.getElementById('moveModal');if(mm&&mm.classList.contains('show'))renderMoveModal();
 }
 
 var _movBodyFilter=[];
@@ -22050,6 +22119,30 @@ function delProjInc(id){
 }
 </script>
 <!-- STEP MODAL -->
+<!-- MOVE MODAL (steps + workouts combined) -->
+<div class="ov" id="moveModal"><div class="mod" style="max-height:92vh;display:flex;flex-direction:column">
+  <div class="mh"></div>
+  <div class="mtit">Move 👟💪</div>
+  <!-- Steps today -->
+  <div style="background:#f5f0fd;border-radius:12px;padding:12px 14px;margin-bottom:14px;flex-shrink:0">
+    <div style="font-size:11px;font-weight:700;color:var(--textl);letter-spacing:.4px;text-transform:uppercase;margin-bottom:8px">Today's Steps</div>
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+      <input type="number" id="moveTodaySteps" placeholder="0 steps" style="flex:1;border:1.5px solid #d0c8e8;border-radius:8px;padding:8px 12px;font-family:'Quicksand',sans-serif;font-size:18px;font-weight:700;color:var(--textd);background:#fff">
+      <button onclick="saveTodayStepsFromMove()" style="padding:8px 16px;border-radius:8px;background:var(--lav);color:#fff;border:none;font-family:'Quicksand',sans-serif;font-size:13px;font-weight:700;cursor:pointer">Save</button>
+    </div>
+    <div style="display:flex;gap:6px">
+      <button onclick="addMoveStepPreset(1000)" style="flex:1;padding:5px;border-radius:7px;border:1.5px solid #d0c8e8;background:#fff;font-family:'Quicksand',sans-serif;font-size:12px;font-weight:700;color:var(--textd);cursor:pointer">+1k</button>
+      <button onclick="addMoveStepPreset(2500)" style="flex:1;padding:5px;border-radius:7px;border:1.5px solid #d0c8e8;background:#fff;font-family:'Quicksand',sans-serif;font-size:12px;font-weight:700;color:var(--textd);cursor:pointer">+2.5k</button>
+      <button onclick="addMoveStepPreset(5000)" style="flex:1;padding:5px;border-radius:7px;border:1.5px solid #d0c8e8;background:#fff;font-family:'Quicksand',sans-serif;font-size:12px;font-weight:700;color:var(--textd);cursor:pointer">+5k</button>
+    </div>
+  </div>
+  <!-- Workouts today -->
+  <div style="font-size:11px;font-weight:700;color:var(--textl);letter-spacing:.4px;text-transform:uppercase;margin-bottom:8px;flex-shrink:0">Today's Workouts</div>
+  <div id="moveTodayExList" style="flex:1;overflow-y:auto;min-height:40px;margin-bottom:12px"></div>
+  <button onclick="closeM('moveModal');openAddEx()" style="width:100%;padding:11px;border-radius:12px;border:none;background:linear-gradient(135deg,var(--sage),var(--teal));color:#fff;font-family:'Quicksand',sans-serif;font-size:13px;font-weight:700;cursor:pointer;flex-shrink:0;margin-bottom:8px">+ Log a Workout</button>
+  <button class="cn-btn" style="flex-shrink:0;margin:0" onclick="closeM('moveModal')">Close</button>
+</div></div>
+
 <div class="ov" id="stepModal"><div class="mod" style="max-height:90vh;display:flex;flex-direction:column">
   <div class="mh"></div>
   <div class="mtit">Steps Log 👟</div>
