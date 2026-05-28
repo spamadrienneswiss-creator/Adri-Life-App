@@ -939,6 +939,7 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
       <div id="helmDumpPreview"></div>
       <button class="btn sec" style="font-size:11px;padding:3px 10px;margin-top:6px;width:100%" onclick="goTab('tasks',null);setTimeout(function(){togHelmSec('hs-dump',true)},200)">See All Dumps →</button>
     </div>
+    <div class="hub-card span2" onclick="goTab('routines',null)" style="background:linear-gradient(135deg,#eef5ee,#f5eef8);border-color:#b8d4b8"><div class="hub-card-ic">📅</div><div class="hub-card-name">Routines</div><div class="hub-card-sub" id="hub-routines-sub">Daily &amp; scheduled routines</div></div>
     <div class="hub-card span2" onclick="goTab('focus-session',null)" style="background:linear-gradient(135deg,#eee8f8,#f8e8e8);border-color:#c8b8e8"><div class="hub-card-ic">🎯</div><div class="hub-card-name">Focus Session</div><div class="hub-card-sub" id="hub-focus-session-sub">Timer + task queue</div></div>
     <div class="hub-card span2" onclick="goTab('grocery',null)" style="background:linear-gradient(135deg,#eaf5ea,#f5f0e8);border-color:#b8d8b8"><div class="hub-card-ic">🛒</div><div class="hub-card-name">Grocery</div><div class="hub-card-sub" id="hub-grocery-sub">Shopping list by store</div></div>
   </div>
@@ -2744,7 +2745,7 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
       <div class="sr"><span>Tasks Done</span><span class="sv" id="sDone">0</span></div>
       <div class="sr"><span>Tasks Left</span><span class="sv" id="sLeft">0</span></div>
       <div class="sr"><span>Routine Items</span><span class="sv" id="sRout">0/0</span></div>
-      <div class="sr"><span>Water</span><span class="sv" id="sWat">0/8</span></div>
+      <div class="sr"><span>Water</span><span class="sv" id="sWatDisplay">0/8</span></div>
     </div>
   </div>
   <!-- YEARLY REFLECTION -->
@@ -8850,9 +8851,10 @@ function updM(){
   el=document.getElementById('fRB');if(el)el.style.width=pct(t.crb,S.gCrb);
   el=document.getElementById('fAD');if(el)el.textContent=Math.round(t.fat)+'g/'+S.gFat+'g';
   el=document.getElementById('fAB');if(el)el.style.width=pct(t.fat,S.gFat);
-  el=document.getElementById('fWD');if(el)el.textContent=w+'/'+S.gWat;
-  el=document.getElementById('fWB');if(el)el.style.width=pct(w,S.gWat);
-  el=document.getElementById('sWat');if(el)el.textContent=w+'/'+S.gWat;
+  var watOz=WATER_OZ_LOG[getTK()]||0;var watGoal=getWaterOzGoal();
+  el=document.getElementById('fWD');if(el)el.textContent=watOz+' / '+watGoal+' oz';
+  el=document.getElementById('fWB');if(el)el.style.width=pct(watOz,watGoal);
+  el=document.getElementById('sWatDisplay');if(el)el.textContent=watOz+' / '+watGoal+' oz';
 }
 
 function srchFood(q){
@@ -20331,15 +20333,19 @@ function renderEnergyTrend(){
 function renderWaterDrops(){
   var el = document.getElementById('waterDropRow');
   if(!el) return;
-  var w = getW();
-  var goal = S.gWat || 8;
-  var show = Math.max(goal, w);
+  var isOz = S.wUnit==='oz';
+  var goal = getWaterOzGoal();
+  var currentOz = WATER_OZ_LOG[getTK()]||0;
+  // each drop = 8 oz; number of drops = goal/8 (glasses equiv)
+  var dropGoal = Math.ceil(goal/8);
+  var dropFilled = Math.floor(currentOz/8);
+  var show = Math.max(dropGoal, dropFilled);
   var html = '';
   for(var i=0; i<show; i++){
-    var filled = i < w;
-    html += '<button onclick="quickAddWater()" title="Tap to add a glass" style="background:none;border:none;padding:0;cursor:pointer;font-size:20px;line-height:1;transition:transform .1s" onmousedown="this.style.transform=\'scale(.85)\'" onmouseup="this.style.transform=\'scale(1)\'" ontouchstart="this.style.transform=\'scale(.85)\'" ontouchend="this.style.transform=\'scale(1)\'">'+(filled?'💧':'🫙')+'</button>';
+    var filled = i < dropFilled;
+    html += '<button onclick="quickAddWater()" title="Tap to add water" style="background:none;border:none;padding:0;cursor:pointer;font-size:20px;line-height:1;transition:transform .1s" onmousedown="this.style.transform=\'scale(.85)\'" onmouseup="this.style.transform=\'scale(1)\'" ontouchstart="this.style.transform=\'scale(.85)\'" ontouchend="this.style.transform=\'scale(1)\'">'+(filled?'💧':'🫙')+'</button>';
   }
-  if(w < goal){
+  if(currentOz < goal){
     html += '<span style="font-size:11px;color:var(--textl);align-self:center;margin-left:2px">tap to add</span>';
   } else {
     html += '<span style="font-size:11px;color:var(--sage);align-self:center;margin-left:2px">Goal met! 🎉</span>';
@@ -20349,14 +20355,14 @@ function renderWaterDrops(){
 
 function quickAddWater(){
   var k=getTK();
-  WL[k]=(WL[k]||0)+1;
-  localStorage.setItem('aWL',JSON.stringify(WL));
-  // keep oz log in sync (1 glass = 8 oz)
-  WATER_OZ_LOG[k]=(WATER_OZ_LOG[k]||0)+8;
+  var newOz=(WATER_OZ_LOG[k]||0)+8;
+  WATER_OZ_LOG[k]=newOz;
   localStorage.setItem('aWaterOzLog',JSON.stringify(WATER_OZ_LOG));
+  WL[k]=Math.max(0,Math.round(newOz/8));
+  localStorage.setItem('aWL',JSON.stringify(WL));
   updM();renderWaterDrops();renderWaterBottle();
-  var w=getW();
-  if(w===(S.gWat||8))showToast('💧 Water goal reached!');
+  if(newOz>=getWaterOzGoal())showToast('💧 Water goal reached!');
+  else showToast('+8 oz');
 }
 
 // ══════════════════════════════════════════════
@@ -20384,9 +20390,9 @@ function renderThisWeek(){
   var sleepLog = MILLIE.sleepLog||[];
   var sleepHrs = sleepLog.filter(function(e){ return (e.slept||'').slice(0,10) && daySet.has((e.slept||'').slice(0,10)); }).map(function(e){ return e.durH||0; });
   var sleepAvg = sleepHrs.length ? (sleepHrs.reduce(function(a,b){return a+b;},0)/sleepHrs.length).toFixed(1) : null;
-  // Water average
-  var watDays = days.map(function(d){ return WL[new Date(d+'T12:00:00').toDateString()]||0; }).filter(function(v){ return v>0; });
-  var watAvg = watDays.length ? (watDays.reduce(function(a,b){return a+b;},0)/watDays.length).toFixed(1) : null;
+  // Water average (always in oz)
+  var watDays = days.map(function(d){ return WATER_OZ_LOG[new Date(d+'T12:00:00').toDateString()]||0; }).filter(function(v){ return v>0; });
+  var watAvg = watDays.length ? (watDays.reduce(function(a,b){return a+b;},0)/watDays.length).toFixed(0)+' oz' : null;
 
   function stat(emoji, label, value, goal){
     var color = (goal && value >= goal) ? 'var(--sage)' : 'var(--textd)';
@@ -20399,7 +20405,7 @@ function renderThisWeek(){
     + stat('⏱️','Ministry hrs',minHrs>0?minHrs.toFixed(1)+'h':'—','')
     + stat('🌸','Gratitude entries',gratEntries,'')
     + stat('😴','Avg sleep',sleepAvg?sleepAvg+'h':'—','')
-    + stat('💧','Avg water / day',watAvg?watAvg+' glasses':'—','');
+    + stat('💧','Avg water / day',watAvg||'—','');
 }
 
 // ══════════════════════════════════════════════
