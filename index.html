@@ -3773,9 +3773,9 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
 <div class="ov" id="searchModal"><div class="mod" style="max-height:80vh;display:flex;flex-direction:column">
   <div class="mh"></div>
   <div class="mtit">🔍 Search Everything</div>
-  <div style="display:flex;gap:8px;margin-bottom:12px">
-    <input class="fi" id="searchInput" placeholder="Search tasks, lists, goals, meals..." style="flex:1;margin:0" oninput="runSearch(this.value)" autofocus>
-    <button class="cn-btn" style="margin:0;padding:8px 12px" onclick="closeM('searchModal')">✕</button>
+  <div style="display:flex;gap:8px;margin-bottom:12px;align-items:center">
+    <input class="fi" id="searchInput" placeholder="Search anything…" style="flex:1;margin:0;font-size:15px;padding:11px 13px" oninput="runSearch(this.value)" autofocus>
+    <button style="flex-shrink:0;width:36px;height:36px;border-radius:50%;border:1.5px solid #ede8e3;background:#fff;font-size:16px;color:var(--textl);cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1" onclick="closeM('searchModal')">✕</button>
   </div>
   <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px" id="searchFilterBar">
     <button class="fchip on" onclick="setSearchFilter('all',this)">All</button>
@@ -7579,7 +7579,7 @@ function renderPlan(){
       var blocks=(PLAN_BLOCKS[dStr]||[]).slice().sort(function(a,b){return (a.time||'')>(b.time||'')?1:-1;});
       if(_planExpanded[dStr]===undefined)_planExpanded[dStr]=isToday;
       var dayOpen=_planExpanded[dStr];
-      html+='<div style="margin-bottom:5px;border-radius:12px;overflow:hidden;border:1.5px solid '+(isToday?'var(--rose)':isPast?'#ede8e4':'var(--bdr)')+';">';
+      html+='<div '+(isToday?'id="planDay-today" ':'')+' style="margin-bottom:5px;border-radius:12px;overflow:hidden;border:1.5px solid '+(isToday?'var(--rose)':isPast?'#ede8e4':'var(--bdr)')+';">';
       // Day header row
       html+='<div style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:'+(isToday?'rgba(210,140,140,.06)':isPast?'rgba(0,0,0,.02)':'#fff')+';cursor:pointer" onclick="togPlanDay(\''+dStr+'\')">';
       // Date label
@@ -7744,6 +7744,44 @@ function prevPlanMonth(){
 function nextPlanMonth(){
   _planMonth++;if(_planMonth>11){_planMonth=0;_planYear++;}
   _planExpanded={};renderPlan();
+}
+
+function scrollPlanToToday(){
+  var today=todayStr();
+  var todayDate=new Date();
+  // Navigate to today's month if we're elsewhere
+  if(_planYear!==todayDate.getFullYear()||_planMonth!==todayDate.getMonth()){
+    _planYear=todayDate.getFullYear();_planMonth=todayDate.getMonth();
+    _planExpanded={};renderPlan();
+  }
+  // Find which week index contains today and expand it + expand today
+  var daysInMonth=new Date(_planYear,_planMonth+1,0).getDate();
+  var firstDay=new Date(_planYear,_planMonth,1);
+  var startPad=(firstDay.getDay()+6)%7;
+  var weeks=[],week=[];
+  for(var p=0;p<startPad;p++)week.push(null);
+  for(var d=1;d<=daysInMonth;d++){
+    week.push(new Date(_planYear,_planMonth,d));
+    if(week.length===7){weeks.push(week);week=[];}
+  }
+  if(week.length)weeks.push(week);
+  weeks.forEach(function(wk,wi){
+    var allReal=wk.filter(function(d){return d;});
+    if(allReal.some(function(d){return d.toISOString().slice(0,10)===today;})){
+      _planExpanded['_wk'+wi]=true;
+    }
+  });
+  _planExpanded[today]=true;
+  renderPlan();
+  // Scroll and pulse
+  setTimeout(function(){
+    var el=document.getElementById('planDay-today');
+    if(!el)return;
+    el.scrollIntoView({behavior:'smooth',block:'center'});
+    el.style.transition='box-shadow .3s';
+    el.style.boxShadow='0 0 0 4px rgba(201,100,100,.45)';
+    setTimeout(function(){el.style.boxShadow='0 0 0 0 rgba(201,100,100,0)';setTimeout(function(){el.style.boxShadow='';},400);},900);
+  },120);
 }
 
 var _planEditId=null,_planEditDate=null;
@@ -22484,7 +22522,7 @@ function delProjInc(id){
     <div id="planMonthTitle" style="font-size:20px;font-weight:800;font-family:'Playfair Display',serif;color:var(--textd)"></div>
     <button onclick="nextPlanMonth()" style="padding:8px 16px;border-radius:10px;border:1.5px solid var(--bdr);background:#fff;font-size:18px;font-weight:700;cursor:pointer;color:var(--textd)">›</button>
   </div>
-  <button onclick="goTab('today',null)" style="width:100%;padding:10px;border-radius:12px;border:1.5px solid var(--bdr);background:#fff;font-family:'Quicksand',sans-serif;font-size:13px;font-weight:700;color:var(--textd);cursor:pointer;margin-bottom:12px">📅 Go to Today</button>
+  <button onclick="scrollPlanToToday()" style="width:100%;padding:10px;border-radius:12px;border:1.5px solid var(--rose);background:#fff;font-family:'Quicksand',sans-serif;font-size:13px;font-weight:700;color:var(--rose);cursor:pointer;margin-bottom:12px">📅 Jump to Today</button>
   <!-- Month To-Do List -->
   <div class="card" style="margin-bottom:12px">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
