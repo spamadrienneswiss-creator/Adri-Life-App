@@ -3796,11 +3796,11 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
 </div></div>
 
 <!-- SEARCH OVERLAY -->
-<div class="ov" id="searchModal"><div class="mod" style="max-height:80vh;display:flex;flex-direction:column">
+<div class="ov" id="searchModal" style="align-items:flex-end;justify-content:center"><div class="mod" style="max-height:80vh;display:flex;flex-direction:column;max-width:520px;width:100%">
   <div class="mh"></div>
   <div class="mtit">🔍 Search Everything</div>
   <div style="display:flex;gap:8px;margin-bottom:12px;align-items:center">
-    <input class="fi" id="searchInput" placeholder="Search anything…" style="flex:1;margin:0;font-size:15px;padding:11px 13px" oninput="runSearch(this.value)" autofocus>
+    <input class="fi" id="searchInput" placeholder="Search anything…" style="flex:1;margin:0;font-size:16px;padding:12px 14px" oninput="runSearch(this.value)" autofocus>
     <button style="flex-shrink:0;width:36px;height:36px;border-radius:50%;border:1.5px solid #ede8e3;background:#fff;font-size:16px;color:var(--textl);cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1" onclick="closeM('searchModal')">✕</button>
   </div>
   <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px" id="searchFilterBar">
@@ -6401,7 +6401,6 @@ function togRtnCollapse(gid){
 }
 
 function renderAllR(){
-  renderRL('todayAM','am');renderRL('todayPM','pm');
   initTodaySecDefaults();
   renderNonDailyToday();
   renderRtnGroups();
@@ -8355,7 +8354,7 @@ function renderPlan(){
       // Right actions
       html+='<div style="display:flex;align-items:center;gap:5px;flex-shrink:0">';
       if(isToday)html+='<button onclick="event.stopPropagation();goTab(\'today\',document.querySelector(\'[data-tab=&quot;today&quot;]\'))" style="font-size:10px;padding:3px 7px;border-radius:6px;border:1.5px solid var(--rose);background:none;color:var(--rose);font-family:\'Quicksand\',sans-serif;font-weight:700;cursor:pointer">Today →</button>';
-      html+='<button onclick="event.stopPropagation();openPlanModal(\''+dStr+'\',\'\')" style="font-size:12px;padding:3px 9px;border-radius:7px;border:1.5px solid var(--bdr);background:none;font-family:\'Quicksand\',sans-serif;font-weight:700;cursor:pointer;color:var(--textl)">+</button>';
+      html+='<button onclick="event.stopPropagation();openTaskFromPlan(\''+dStr+'\')" style="font-size:12px;padding:3px 9px;border-radius:7px;border:1.5px solid var(--bdr);background:none;font-family:\'Quicksand\',sans-serif;font-weight:700;cursor:pointer;color:var(--textl)">+</button>';
       html+='<span id="pda-'+dStr+'" style="color:var(--textl);font-size:12px;min-width:12px">'+(dayOpen?'▾':'▸')+'</span>';
       html+='</div>';
       html+='</div>'; // day header end
@@ -8584,6 +8583,12 @@ function _pbResetModal(){
   var pp=document.getElementById('pbTaskPickerWrap');if(pp)pp.style.display='none';
   var ps=document.getElementById('pbTaskSearch');if(ps)ps.value='';
   renderPbTaskList();
+}
+
+function openTaskFromPlan(dStr){
+  openM('taskModal');
+  var duEl=document.getElementById('tDue');
+  if(duEl)duEl.value=dStr;
 }
 
 function openPlanModal(dStr,time){
@@ -10118,26 +10123,25 @@ function renderE(){
   var el=document.getElementById('expList');
   var mon=getMonStr();
   var thisMonExp=EXPENSES.filter(function(e){return(e.created||'').startsWith(mon);});
-  var confirmedExp=thisMonExp.filter(function(e){return!e.pending;});
-  var pendingExp=thisMonExp.filter(function(e){return e.pending;});
-  var thisMonExpAmt=confirmedExp.reduce(function(s,e){return s+e.amt;},0);
-  var pendingAmt=pendingExp.reduce(function(s,e){return s+e.amt;},0);
+  var thisMonExpAmt=thisMonExp.reduce(function(s,e){return s+e.amt;},0);
+  var reconciledAmt=thisMonExp.filter(function(e){return e.reconciled;}).reduce(function(s,e){return s+e.amt;},0);
   var thisMonIncAmt=INCOME.filter(function(i){return(i.created||'').startsWith(mon);}).reduce(function(s,i){return s+i.amt;},0);
   var wigInc=INCOME.filter(function(i){return(i.created||'').startsWith(mon)&&i.cat==='Wig Commission';}).reduce(function(s,i){return s+i.amt;},0);
   var net=thisMonIncAmt-thisMonExpAmt;
   var e1=document.getElementById('mThisInc');if(e1)e1.textContent='$'+thisMonIncAmt.toFixed(0);
-  var e2=document.getElementById('mThisExp');if(e2)e2.textContent='$'+thisMonExpAmt.toFixed(0)+(pendingAmt?'+⏳$'+pendingAmt.toFixed(0):'');
+  var e2=document.getElementById('mThisExp');if(e2)e2.textContent='$'+thisMonExpAmt.toFixed(0)+(reconciledAmt?'  ✓$'+reconciledAmt.toFixed(0)+' recon':'');
   var e3=document.getElementById('mNet');if(e3){e3.textContent=(net>=0?'+':'-')+'$'+Math.abs(net).toFixed(0);e3.style.color=net>=0?'var(--sage)':'var(--ured)';}
   var e4=document.getElementById('mInc');if(e4)e4.textContent='$'+wigInc.toFixed(0);
   if(!EXPENSES.length){if(el)el.innerHTML='<div class="empty"><div class="emj">💸</div><p>No expenses yet.</p></div>';renderIncome();renderBills();return;}
   if(el)el.innerHTML=EXPENSES.slice(0,40).map(function(e){
-    var isPending=!!e.pending;
-    return'<div class="er'+(isPending?' exp-pending':'')+'">'+
+    var isReconciled=!!(e.reconciled||(e.pending===false&&e.reconciled===undefined?false:undefined));
+    isReconciled=!!e.reconciled;
+    return'<div class="er'+(isReconciled?' exp-reconciled':'')+'">'+
       '<div class="er-l">'+
         '<div class="er-d">'+e.desc+'</div>'+
         '<div class="er-m">'+(e.ty==='business'?'💼':'🏠')+' '+e.cat+' • '+e.date+'</div>'+
       '</div>'+
-      '<button class="exp-pend-btn'+(isPending?' on':'')+'" onclick="toggleExpPending(\''+e.id+'\')" title="'+(isPending?'Mark confirmed':'Mark pending')+'">'+(isPending?'⏳':'✓')+'</button>'+
+      '<button class="exp-pend-btn'+(isReconciled?' on':'')+'" onclick="toggleExpReconciled(\''+e.id+'\')" title="'+(isReconciled?'Mark unreconciled':'Mark reconciled')+'" style="font-size:11px;font-weight:700">'+(isReconciled?'✓ R':'○ R')+'</button>'+
       '<div class="er-a '+(e.ty==='business'?'biz':'')+'">$'+e.amt.toFixed(2)+'</div>'+
       '<button onclick="delExpense(\''+e.id+'\')" style="background:none;border:none;font-size:13px;cursor:pointer;color:var(--textl);padding:4px 6px;flex-shrink:0">🗑️</button>'+
     '</div>';
@@ -10154,10 +10158,10 @@ function delExpense(id){
   renderExpenses();
 }
 
-function toggleExpPending(id){
+function toggleExpReconciled(id){
   var e=EXPENSES.find(function(x){return x.id===id;});
   if(!e)return;
-  e.pending=!e.pending;
+  e.reconciled=!e.reconciled;
   fbSave('expenses',id,e);
   renderE();
 }
