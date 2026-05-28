@@ -22188,7 +22188,7 @@ function renderSleepGraph(){
 
   var dur={};
   log.forEach(function(e){
-    var date=(e.slept||e.woke||'').slice(0,10);
+    var date=e.date||(e.slept||e.woke||'').slice(0,10);
     if(!date)return;
     var h=(e.durH||0)+(e.durM||0)/60;
     if(h>0&&(!dur[date]||h>dur[date]))dur[date]=h;
@@ -22241,12 +22241,13 @@ function renderSleepGraph(){
   // Grid every 2h
   for(var gh=0;gh<=maxH;gh+=2){
     var gy=yp(gh);
-    var isGoal=(gh===goalH);
-    svg+='<line x1="'+padL+'" y1="'+gy.toFixed(1)+'" x2="'+(padL+cW)+'" y2="'+gy.toFixed(1)+'" stroke="'+(isGoal?'#8ab89a':'#e8e4ee')+'" stroke-width="'+(isGoal?'1.2':'0.7')+'" stroke-dasharray="'+(isGoal?'5,3':'')+'" opacity="'+(isGoal?'0.9':'1')+'"/>';
+    svg+='<line x1="'+padL+'" y1="'+gy.toFixed(1)+'" x2="'+(padL+cW)+'" y2="'+gy.toFixed(1)+'" stroke="#e8e4ee" stroke-width="0.7"/>';
     svg+='<text x="'+(padL-4)+'" y="'+(gy+3.5).toFixed(1)+'" text-anchor="end" font-size="8" fill="#c0b8c8">'+gh+'</text>';
   }
-  // Goal label on right
-  svg+='<text x="'+(padL+cW+4)+'" y="'+(yp(goalH)+3.5).toFixed(1)+'" font-size="8" fill="#5a9a6a" font-weight="700">goal</text>';
+  // Goal line — drawn separately so it always shows regardless of grid step
+  var goalY=yp(goalH);
+  svg+='<line x1="'+padL+'" y1="'+goalY.toFixed(1)+'" x2="'+(padL+cW)+'" y2="'+goalY.toFixed(1)+'" stroke="#5a9a6a" stroke-width="1.5" stroke-dasharray="5,3" opacity="0.9"/>';
+  svg+='<text x="'+(padL+cW+4)+'" y="'+(goalY+3.5).toFixed(1)+'" font-size="8" fill="#5a9a6a" font-weight="700">goal</text>';
 
   if(areaPath)svg+='<path d="'+areaPath+'" fill="url(#'+uid+'g)"/>';
   if(linePath)svg+='<path d="'+linePath+'" fill="none" stroke="#b0a0cc" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>';
