@@ -6344,7 +6344,7 @@ function renderNonDailyToday(){
       var resolved=visible.filter(function(item){var oi=items.indexOf(item);var s=rtnStateStr(cs[oi]);return s==='done'||s==='skip'||s==='task';});
       var allDone=visible.length>0&&resolved.length===visible.length;
       var prog=visible.length?resolved.length+'/'+visible.length:'';
-      var gId=JSON.stringify(g.id);
+      var gId="'"+g.id+"'";
       return'<div class="rc" style="border-left-color:'+g.color+'">'+
         '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">'+
           '<div class="rt" style="display:inline">'+g.icon+' '+escHtml(g.name)+'</div>'+
@@ -6355,7 +6355,7 @@ function renderNonDailyToday(){
           var state=rtnStateStr(cs[oi]);
           var chkTxt=state==='done'?'✓':state==='skip'?'⏭':state==='task'?'📋':'';
           var stateClass=state?' '+state:'';
-          var eItem=JSON.stringify(item);
+          var eItem="'"+item.replace(/\\/g,'\\\\').replace(/'/g,"\\'")+"'";
           return'<div class="ri'+stateClass+'" onclick="togR('+gId+','+oi+',this)" oncontextmenu="showRtnCtxMenu('+gId+','+oi+',this,null,event)" ontouchstart="_rtnTouchStart(event,'+gId+','+oi+',this,null)" ontouchend="_rtnTouchEnd()" ontouchmove="_rtnTouchEnd()">'+
             '<div class="rchk">'+chkTxt+'</div>'+
             '<div class="rlb">'+escHtml(item)+'</div>'+
@@ -6451,8 +6451,8 @@ function renderDailyRtn(key){
   var progTxt=visible.length?'('+resolved.length+'/'+visible.length+')':'';
   var mkRow=function(o,isHidden){
     var state=rtnStateStr(cs[o.i]);
-    var eItem=JSON.stringify(o.item);
-    var eKey=JSON.stringify(key);
+    var eKey="'"+key+"'";
+    var eItem="'"+o.item.replace(/\\/g,'\\\\').replace(/'/g,"\\'")+"'";
     var chkTxt=state==='done'?'✓':state==='skip'?'⏭':state==='task'?'📋':(isHidden?'–':'');
     var stateClass=state?' '+state:'';
     var clickH=isHidden?'':('togR('+eKey+','+o.i+',this)');
@@ -6470,7 +6470,7 @@ function renderDailyRtn(key){
   };
   var activeToggle='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">'+
     '<span style="font-size:12px;font-weight:700;color:var(--textl)">'+progTxt+'</span>'+
-    '<button class="rtn-active-tog'+(isActive?' on':'')+'" onclick="togRtnActive('+JSON.stringify(key)+',event)">'+
+    '<button class="rtn-active-tog'+(isActive?' on':'')+'" onclick="togRtnActive(\''+key+'\',event)">'+
       (isActive?'● Active':'○ Paused')+
     '</button>'+
   '</div>';
@@ -6539,11 +6539,11 @@ function renderOtherRtns(){
     var duePill=isDue?'<span style="font-size:10px;background:var(--rose-light);color:var(--rose);border-radius:6px;padding:2px 7px;font-weight:700">Due today</span>':
       (freq!=='asneeded'&&freq!=='daily'?'<span style="font-size:10px;background:#fff0e8;color:#8a5a30;border-radius:6px;padding:2px 7px">next: '+(rtnNextOccurrence(g,null)||'?')+'</span>':'');
     var isCollapsed=!!_rtnCollapsed[g.id];
-    var gId=JSON.stringify(g.id);
+    var gId="'"+g.id+"'";
     var mkRow=function(item){
       var oi=items.indexOf(item);
       var state=rtnStateStr(cs[oi]);
-      var eItem=JSON.stringify(item);
+      var eItem="'"+item.replace(/\\/g,'\\\\').replace(/'/g,"\\'")+"'";
       var chkTxt=state==='done'?'✓':state==='skip'?'⏭':state==='task'?'📋':'';
       var stateClass=state?' '+state:'';
       return'<div class="ri'+stateClass+'" onclick="togR('+gId+','+oi+',this)" oncontextmenu="showRtnCtxMenu('+gId+','+oi+',this,null,event)" ontouchstart="_rtnTouchStart(event,'+gId+','+oi+',this,null)" ontouchend="_rtnTouchEnd()" ontouchmove="_rtnTouchEnd()">'+
@@ -6847,7 +6847,7 @@ function saveRtn(){
 function delRtnGroup(){
   var key=document.getElementById('rtnEditKey').value;
   var builtIn=['am','md','pm','da','we','cl'];
-  if(builtIn.indexOf(key)>-1){alert('Cannot delete built-in routine groups.');return;}
+  if(builtIn.indexOf(key)>-1){alert('This is a built-in routine (connected to Opening Shift / Midday / Wrap Up). It can\'t be deleted, but you can:\n• Pause it with the Active/Paused toggle\n• Add, hide, or remove individual items\n• Rename it or change the icon');return;}
   if(!confirm('Delete this routine group?'))return;
   RTN_GROUPS=RTN_GROUPS.filter(function(g){return g.id!==key;});
   delete RTNS[key];
@@ -21202,7 +21202,7 @@ function _renderShiftOverlay(key,elId){
       var chkTxt=isDone?'✓':isSkip?'⏭':isTask?'📋':'';
       var chkBg=isDone?'var(--sage)':isSkip?'#f0c030':isTask?'var(--blue)':'#fff';
       var chkBdr=resolved?chkBg:'#ddd';
-      var eKey=JSON.stringify(key);
+      var eKey="'"+key+"'";
       return'<div onclick="shiftTog('+eKey+','+oi+',\''+today+'\')" oncontextmenu="showRtnCtxMenu('+eKey+','+oi+',null,\''+today+'\',event)" ontouchstart="_rtnTouchStart(event,'+eKey+','+oi+',null,\''+today+'\')" ontouchend="_rtnTouchEnd()" ontouchmove="_rtnTouchEnd()" style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid #f5f0eb;cursor:pointer">'
         +'<div style="width:22px;height:22px;border-radius:6px;border:2px solid '+chkBdr+';background:'+chkBg+';display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;color:#fff;transition:all .15s">'+chkTxt+'</div>'
         +'<span style="font-size:14px;font-weight:600;font-family:\'Quicksand\',sans-serif;color:'+(resolved?'var(--textl)':'var(--textd)')+(resolved?';text-decoration:line-through':'')+'">'
