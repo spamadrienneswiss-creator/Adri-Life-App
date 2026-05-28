@@ -8676,6 +8676,44 @@ function _pbRelevance(blockTitle, text){
   return words.reduce(function(s,w){return s+(t.indexOf(w)>-1?1:0);},0);
 }
 
+// Score a task object — title text match + category match
+function _pbTaskScore(blockTitle, task){
+  if(!blockTitle||!task)return 0;
+  var score=_pbRelevance(blockTitle, task.title||'');
+  // Boost by category: check if any CATS entry matches the block title words
+  var cat=(task.cat||'').toLowerCase();
+  if(cat){
+    var bt=blockTitle.toLowerCase();
+    var match=false;
+    (CATS||[]).forEach(function(c){
+      if(c.id===task.cat){
+        var name=(c.name||'').toLowerCase();
+        if(bt.indexOf(name)>-1||name.indexOf(bt)>-1)match=true;
+        // Also check each word of the block title against category name
+        bt.split(/[\s\-_]+/).forEach(function(w){if(w.length>2&&name.indexOf(w)>-1)match=true;});
+      }
+    });
+    if(match)score+=3;
+  }
+  return score;
+}
+
+// Detect the best-matching category id from a block title
+function _pbDetectCat(blockTitle){
+  if(!blockTitle)return '';
+  var bt=blockTitle.toLowerCase();
+  var best='',bestScore=0;
+  (CATS||[]).forEach(function(c){
+    var name=(c.name||'').toLowerCase();
+    var score=0;
+    if(bt===name)score=10;
+    else if(bt.indexOf(name)>-1||name.indexOf(bt)>-1)score=5;
+    else{bt.split(/[\s\-_]+/).forEach(function(w){if(w.length>2&&name.indexOf(w)>-1)score+=2;});}
+    if(score>bestScore){bestScore=score;best=c.id;}
+  });
+  return best;
+}
+
 function _renderPlanBlockTasksHtml(block,dStr){
   var blockTasks=block.tasks||[];
   var urgColors={'urgent-important':'var(--rose)','important-not-urgent':'#c8a820','urgent-not-important':'var(--blue)','not-urgent':'var(--textl)','':'var(--textl)'};
@@ -8746,7 +8784,9 @@ function _pbBlockDoneCount(block,dStr){
 function planBlockQuickAdd(blockId,dStr){
   var inp=document.getElementById('pbadd-'+blockId);
   var val=inp&&inp.value.trim();if(!val)return;
-  var newTask={id:'t'+Date.now(),title:val,urgency:'',cat:'',done:false,subs:[],created:new Date().toISOString(),tags:[]};
+  var block2=(PLAN_BLOCKS[dStr]||[]).find(function(b){return b.id===blockId;});
+  var autoCat=block2?_pbDetectCat(block2.title||''):'';
+  var newTask={id:'t'+Date.now(),title:val,urgency:'',cat:autoCat,done:false,subs:[],created:new Date().toISOString(),tags:[]};
   TASKS.push(newTask);
   localStorage.setItem('aTasks',JSON.stringify(TASKS));
   if(typeof fbSave==='function')fbSave('tasks',newTask.id,newTask);
@@ -8844,6 +8884,33 @@ function pbRemoveTask(i){
   _pbTasks.splice(i,1);renderPbTaskList();renderPbTaskPicker();
 }
 
+function pbUpdateNewTaskHint(){
+  var hint=document.getElementById('pbNewTaskHint');if(!hint)return;
+  var blockTitle=((document.getElementById('pbTitle')||{}).value||'');
+  var cat=_pbDetectCat(blockTitle);
+  var catObj=cat?(CATS||[]).find(function(c){return c.id===cat;}):null;
+  hint.textContent=catObj?'Will tag as: '+catObj.emoji+' '+catObj.name:'';
+}
+
+function pbCreateAndLink(){
+  var inp=document.getElementById('pbNewTaskTitle');
+  var title=(inp&&inp.value.trim())||'';
+  if(!title){showToast('Enter a task title');return;}
+  var blockTitle=((document.getElementById('pbTitle')||{}).value||'');
+  var cat=_pbDetectCat(blockTitle);
+  var newTask={id:'t'+Date.now(),title:title,urgency:'',cat:cat,done:false,subs:[],created:new Date().toISOString(),tags:[]};
+  TASKS.push(newTask);
+  localStorage.setItem('aTasks',JSON.stringify(TASKS));
+  if(typeof fbSave==='function')fbSave('tasks',newTask.id,newTask);
+  _pbTasks.push({id:newTask.id,title:newTask.title,urgency:'',type:'task'});
+  if(inp)inp.value='';
+  var hint=document.getElementById('pbNewTaskHint');if(hint)hint.textContent='';
+  renderPbTaskList();renderPbTaskPicker();
+  if(typeof renderTasks==='function')renderTasks();
+  var catName=cat?(CATS||[]).find(function(c){return c.id===cat;}):'';
+  showToast('Task created'+(catName?' & tagged '+catName.name:'')+' ✓');
+}
+
 function openPbTaskPicker(){
   var wrap=document.getElementById('pbTaskPickerWrap');
   if(wrap)wrap.style.display=wrap.style.display==='none'?'':'none';
@@ -8863,13 +8930,13 @@ function renderPbTaskPicker(){
   // ── Tasks ──────────────────────────────────────
   var pool=TASKS.filter(function(t){return !t.done&&(!q||t.title.toLowerCase().indexOf(q)>-1);});
   pool.sort(function(a,b){
-    var rd=_pbRelevance(blockTitle,b.title)-_pbRelevance(blockTitle,a.title);
+    var rd=_pbTaskScore(blockTitle,b)-_pbTaskScore(blockTitle,a);
     if(rd!==0)return rd;
     return (order[a.urgency]!==undefined?order[a.urgency]:4)-(order[b.urgency]!==undefined?order[b.urgency]:4);
   });
   if(pool.length){
-    var relevant=blockTitle?pool.filter(function(t){return _pbRelevance(blockTitle,t.title)>0;}):[];
-    var others=blockTitle?pool.filter(function(t){return _pbRelevance(blockTitle,t.title)===0;}):pool;
+    var relevant=blockTitle?pool.filter(function(t){return _pbTaskScore(blockTitle,t)>0;}):[];
+    var others=blockTitle?pool.filter(function(t){return _pbTaskScore(blockTitle,t)===0;}):pool;
     if(relevant.length){
       html+='<div style="font-size:10px;font-weight:700;color:var(--textl);text-transform:uppercase;letter-spacing:.4px;padding:4px 0 2px">✨ Relevant Tasks</div>';
       html+=relevant.map(function(t){return _pbPickerRow(t.id,t.title,'<span style="font-size:10px;color:var(--textl)">'+(urgLabels[t.urgency]||'')+(t.due?' · due '+t.due:'')+'</span>',inBlock.indexOf(t.id)>-1,'pbPickerAdd(\''+t.id+'\','+JSON.stringify(t.title)+',\''+t.urgency+'\')');}).join('');
@@ -24606,7 +24673,13 @@ function delProjInc(id){
       </div>
       <!-- Task picker (inline, shown/hidden) -->
       <div id="pbTaskPickerWrap" style="display:none;border:1.5px solid var(--bdr);border-radius:12px;padding:10px;margin-bottom:12px;background:#fafaf8">
-        <input type="text" id="pbTaskSearch" placeholder="Search tasks…" class="fi" style="margin-bottom:8px" oninput="renderPbTaskPicker()">
+        <!-- Create + link a new task -->
+        <div style="display:flex;gap:6px;margin-bottom:10px">
+          <input class="fi" id="pbNewTaskTitle" placeholder="New task title — press Enter or tap +" style="flex:1;margin:0;font-size:13px;padding:9px 11px" onkeydown="if(event.key==='Enter'){event.preventDefault();pbCreateAndLink();}" oninput="pbUpdateNewTaskHint()">
+          <button onclick="pbCreateAndLink()" style="flex-shrink:0;padding:8px 12px;border-radius:9px;border:none;background:var(--rose);color:#fff;font-family:'Quicksand',sans-serif;font-size:13px;font-weight:700;cursor:pointer">+</button>
+        </div>
+        <div id="pbNewTaskHint" style="font-size:10px;color:var(--textl);margin-bottom:8px"></div>
+        <input type="text" id="pbTaskSearch" placeholder="Search existing tasks…" class="fi" style="margin-bottom:8px" oninput="renderPbTaskPicker()">
         <div id="pbTaskPickerList" style="max-height:200px;overflow-y:auto"></div>
       </div>
     </div>
