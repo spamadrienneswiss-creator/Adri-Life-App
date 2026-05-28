@@ -65,6 +65,23 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
 .rchk{width:22px;height:22px;border-radius:50%;border:2px solid #ddd;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:11px;transition:all .2s}
 .ri.done .rchk{background:var(--sage);border-color:var(--sage);color:white}
 .ri.done .rlb{text-decoration:line-through;color:var(--textl)}
+.ri.skip .rchk{background:#f0c030;border-color:#f0c030;color:white}
+.ri.skip .rlb{text-decoration:line-through;color:var(--textl)}
+.ri.task .rchk{background:var(--blue);border-color:var(--blue);color:white}
+.ri.task .rlb{color:var(--blue);font-style:italic}
+.rtn-ctx-menu{position:fixed;background:white;border-radius:14px;box-shadow:0 8px 32px rgba(0,0,0,.22);padding:6px;min-width:168px;z-index:9999;display:none}
+.rtn-ctx-menu.show{display:block;animation:fadeInScale .15s ease}
+.rtn-ctx-btn{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:10px;border:none;background:none;width:100%;text-align:left;font-family:'Quicksand',sans-serif;font-size:13px;font-weight:700;cursor:pointer;color:var(--textd)}
+.rtn-ctx-btn:hover,.rtn-ctx-btn:active{background:var(--bg2)}
+.rtn-active-tog{padding:3px 9px;border:1.5px solid #ddd;border-radius:20px;font-size:10px;font-weight:700;cursor:pointer;background:white;color:var(--textl);font-family:'Quicksand',sans-serif}
+.rtn-active-tog.on{background:var(--sage-light);border-color:var(--sage);color:#5a7a56}
+.rtn-inactive-card{opacity:.45}
+.rtn-prog{font-size:11px;font-weight:700;background:var(--bg2);border-radius:8px;padding:1px 7px;color:var(--textl)}
+.rtn-prog.done{background:var(--sage-light);color:#5a7a56}
+.rtn-type-h{font-size:10px;background:#e8f4e8;color:#4a7a4a;border-radius:6px;padding:2px 7px;font-weight:700}
+.rtn-type-b{font-size:10px;background:var(--lav-light);color:#6a5a9a;border-radius:6px;padding:2px 7px;font-weight:700}
+@keyframes confettiFall{0%{transform:translateY(0) rotate(0deg);opacity:1}100%{transform:translateY(110vh) rotate(720deg);opacity:0}}
+@keyframes fadeInScale{from{opacity:0;transform:scale(.92)}to{opacity:1;transform:scale(1)}}
 .rlb{font-size:13px;color:var(--text);flex:1}
 
 /* TASK */
@@ -1605,10 +1622,16 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     <button onclick="openOpeningShift()" style="flex:1;display:flex;align-items:center;justify-content:center;gap:8px;padding:11px 14px;border-radius:14px;border:none;background:linear-gradient(135deg,#f5d06a,#e09030);color:#fff;font-family:'Quicksand',sans-serif;font-size:13px;font-weight:700;cursor:pointer;box-shadow:0 3px 12px rgba(224,144,48,.35)">🌅 Opening Shift</button>
     <button onclick="openDayWrapUp()" style="flex:1;display:flex;align-items:center;justify-content:center;gap:8px;padding:11px 14px;border-radius:14px;border:none;background:linear-gradient(135deg,#5a3a8a,#3a2a6a);color:#fff;font-family:'Quicksand',sans-serif;font-size:13px;font-weight:700;cursor:pointer;box-shadow:0 3px 12px rgba(90,58,138,.35)">🌙 Wrap Up</button>
   </div>
+  <!-- Interaction hint -->
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
+    <span style="font-size:10px;background:#f5f0fd;color:#7a5a9a;border-radius:8px;padding:3px 8px;font-family:'Quicksand',sans-serif;font-weight:600">Tap = done ✅</span>
+    <span style="font-size:10px;background:#f0f8e8;color:#5a7a56;border-radius:8px;padding:3px 8px;font-family:'Quicksand',sans-serif;font-weight:600">Long-press / right-click = menu ⋯</span>
+    <span style="font-size:10px;background:#fff8e8;color:#8a6030;border-radius:8px;padding:3px 8px;font-family:'Quicksand',sans-serif;font-weight:600">🔵 Habits = daily · 🟣 Blocks = scheduled</span>
+  </div>
   <!-- Section tabs -->
   <div class="pill-nav" style="margin-bottom:14px">
-    <button class="pn-btn on" id="rtnSecBtn-daily" onclick="showRtnSection('daily',this)">☀️ Daily</button>
-    <button class="pn-btn" id="rtnSecBtn-other" onclick="showRtnSection('other',this)">📅 Other</button>
+    <button class="pn-btn on" id="rtnSecBtn-daily" onclick="showRtnSection('daily',this)">🔵 Daily Habits</button>
+    <button class="pn-btn" id="rtnSecBtn-other" onclick="showRtnSection('other',this)">🟣 Routine Blocks</button>
   </div>
   <!-- DAILY section -->
   <div id="rtnSecDaily">
@@ -1619,10 +1642,10 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     </div>
     <div id="dailyRtnBody"></div>
   </div>
-  <!-- OTHER section -->
+  <!-- OTHER (Blocks) section -->
   <div id="rtnSecOther" style="display:none">
     <div style="display:flex;justify-content:flex-end;margin-bottom:12px">
-      <button onclick="openNewRtn()" style="display:flex;align-items:center;gap:6px;padding:9px 16px;border-radius:50px;border:none;background:linear-gradient(135deg,var(--rose),var(--lav));color:#fff;font-family:'Quicksand',sans-serif;font-size:13px;font-weight:700;cursor:pointer;box-shadow:0 3px 10px rgba(201,160,160,.4)">➕ New Routine</button>
+      <button onclick="openNewRtn()" style="display:flex;align-items:center;gap:6px;padding:9px 16px;border-radius:50px;border:none;background:linear-gradient(135deg,var(--rose),var(--lav));color:#fff;font-family:'Quicksand',sans-serif;font-size:13px;font-weight:700;cursor:pointer;box-shadow:0 3px 10px rgba(201,160,160,.4)">➕ New Routine Block</button>
     </div>
     <div id="otherRtnBody"></div>
   </div>
@@ -6072,22 +6095,34 @@ function renderAllR(){
 function renderNonDailyToday(){
   var el=document.getElementById('todayNonDaily');if(!el)return;
   var today=todayStr();
-  var dueGroups=RTN_GROUPS.filter(function(g){return rtnFreq(g)!=='daily'&&rtnIsDueToday(g);});
+  var dueGroups=RTN_GROUPS.filter(function(g){
+    return g.active!==false&&rtnFreq(g)!=='daily'&&rtnIsDueToday(g);
+  });
   if(!dueGroups.length){el.innerHTML='';return;}
-  el.innerHTML='<div class="sh" style="margin-top:12px;margin-bottom:8px">📅 Due Today</div>'+
+  el.innerHTML='<div class="sh" style="margin-top:12px;margin-bottom:8px">📅 Routine Blocks Due Today</div>'+
     dueGroups.map(function(g){
       var items=RTNS[g.id]||[];var rh=RH[g.id]||{};
       var cs=rtnCompState(g,today);
       var visible=items.filter(function(item){return!rh[item];});
+      var resolved=visible.filter(function(item){var oi=items.indexOf(item);var s=rtnStateStr(cs[oi]);return s==='done'||s==='skip'||s==='task';});
+      var allDone=visible.length>0&&resolved.length===visible.length;
+      var prog=visible.length?resolved.length+'/'+visible.length:'';
+      var gId=JSON.stringify(g.id);
       return'<div class="rc" style="border-left-color:'+g.color+'">'+
-        '<div class="rt" style="margin-bottom:8px">'+g.icon+' '+g.name+'</div>'+
-        visible.map(function(item,vi){
-          var oi=items.indexOf(item);var isDone=cs[oi];
-          var eItem=item.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
-          return'<div class="ri '+(isDone?'done':'')+'" onclick="togR(\''+g.id+'\','+oi+',this)">'+
-            '<div class="rchk">'+(isDone?'✓':'')+'</div>'+
-            '<div class="rlb">'+item+'</div>'+
-            '<button class="rhi" onclick="hideRI(event,\''+g.id+'\',\''+eItem+'\')" title="Hide">✕</button>'+
+        '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">'+
+          '<div class="rt" style="display:inline">'+g.icon+' '+escHtml(g.name)+'</div>'+
+          (prog?'<span class="rtn-prog'+(allDone?' done':'')+'">'+prog+'</span>':'')+
+        '</div>'+
+        visible.map(function(item){
+          var oi=items.indexOf(item);
+          var state=rtnStateStr(cs[oi]);
+          var chkTxt=state==='done'?'✓':state==='skip'?'⏭':state==='task'?'📋':'';
+          var stateClass=state?' '+state:'';
+          var eItem=JSON.stringify(item);
+          return'<div class="ri'+stateClass+'" onclick="togR('+gId+','+oi+',this)" oncontextmenu="showRtnCtxMenu('+gId+','+oi+',this,null,event)" ontouchstart="_rtnTouchStart(event,'+gId+','+oi+',this,null)" ontouchend="_rtnTouchEnd()" ontouchmove="_rtnTouchEnd()">'+
+            '<div class="rchk">'+chkTxt+'</div>'+
+            '<div class="rlb">'+escHtml(item)+'</div>'+
+            '<button class="rhi" onclick="event.stopPropagation();hideRI(event,'+gId+','+eItem+')" title="Hide">👁️</button>'+
           '</div>';
         }).join('')+
       '</div>';
@@ -6167,18 +6202,27 @@ function showDailyRtnTab(key,btn){
 
 function renderDailyRtn(key){
   var el=document.getElementById('dailyRtnBody');if(!el)return;
+  var g=RTN_GROUPS.find(function(x){return x.id===key;});
+  var isActive=!g||(g.active!==false);
   var items=RTNS[key]||[];
   var rh=RH[key]||{};
   var cs=RS[key]||{};
   var visible=[],hidden=[];
   items.forEach(function(item,i){if(rh[item])hidden.push({item:item,i:i});else visible.push({item:item,i:i});});
-  var done=visible.filter(function(o){return!!cs[o.i];});
-  var undone=visible.filter(function(o){return!cs[o.i];});
-  var mkRow=function(o,isDone,isHidden){
+  var resolved=visible.filter(function(o){var s=rtnStateStr(cs[o.i]);return s==='done'||s==='skip'||s==='task';});
+  var undone=visible.filter(function(o){return!rtnStateStr(cs[o.i]);});
+  var progTxt=visible.length?'('+resolved.length+'/'+visible.length+')':'';
+  var mkRow=function(o,isHidden){
+    var state=rtnStateStr(cs[o.i]);
     var eItem=JSON.stringify(o.item);
     var eKey=JSON.stringify(key);
-    return'<div class="ri'+(isDone?' done':'')+(isHidden?' style="opacity:.45"':'')+'" onclick="'+(isHidden?'':('togR('+eKey+','+o.i+',this)'))+'">'+
-      '<div class="rchk">'+(isDone?'✓':isHidden?'–':'')+'</div>'+
+    var chkTxt=state==='done'?'✓':state==='skip'?'⏭':state==='task'?'📋':(isHidden?'–':'');
+    var stateClass=state?' '+state:'';
+    var clickH=isHidden?'':('togR('+eKey+','+o.i+',this)');
+    var ctxH=isHidden?'':('showRtnCtxMenu('+eKey+','+o.i+',this,null,event)');
+    var touchStartH=isHidden?'':('_rtnTouchStart(event,'+eKey+','+o.i+',this,null)');
+    return'<div class="ri'+stateClass+'" onclick="'+clickH+'" oncontextmenu="'+ctxH+'" ontouchstart="'+touchStartH+'" ontouchend="_rtnTouchEnd()" ontouchmove="_rtnTouchEnd()"'+(isHidden?' style="opacity:.45"':'')+'>'+
+      '<div class="rchk">'+chkTxt+'</div>'+
       '<div class="rlb" style="flex:1">'+escHtml(o.item)+'</div>'+
       (isHidden
         ?'<button onclick="event.stopPropagation();unhideRI('+eKey+','+eItem+')" class="rhi" title="Show again">👁️</button>'
@@ -6187,14 +6231,23 @@ function renderDailyRtn(key){
       '<button onclick="event.stopPropagation();delRtnItem(event,'+eKey+','+eItem+')" class="rhi" title="Delete" style="color:var(--ured)">✕</button>'+
     '</div>';
   };
-  var html=undone.map(function(o){return mkRow(o,false,false);}).join('');
-  if(done.length){
-    html+='<button class="rtn-done-toggle" onclick="togRtnDone(\'drDone_'+key+'\')" id="btn_drDone_'+key+'">✅ Done ('+done.length+')</button>'+
-      '<div id="drDone_'+key+'" class="rtn-done-section" style="display:none">'+done.map(function(o){return mkRow(o,true,false);}).join('')+'</div>';
-  }
-  if(hidden.length){
-    html+='<div style="margin-top:14px;font-size:11px;font-weight:700;color:var(--textl);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">Hidden</div>'+
-      hidden.map(function(o){return mkRow(o,false,true);}).join('');
+  var activeToggle='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">'+
+    '<span style="font-size:12px;font-weight:700;color:var(--textl)">'+progTxt+'</span>'+
+    '<button class="rtn-active-tog'+(isActive?' on':'')+'" onclick="togRtnActive('+JSON.stringify(key)+',event)">'+
+      (isActive?'● Active':'○ Paused')+
+    '</button>'+
+  '</div>';
+  var html=activeToggle+(isActive?'':('<div style="font-size:12px;color:var(--textl);text-align:center;padding:12px;font-style:italic">This routine is paused</div>'));
+  if(isActive){
+    html+=undone.map(function(o){return mkRow(o,false);}).join('');
+    if(resolved.length){
+      html+='<button class="rtn-done-toggle" onclick="togRtnDone(\'drDone_'+key+'\')" id="btn_drDone_'+key+'">✅ Resolved ('+resolved.length+')</button>'+
+        '<div id="drDone_'+key+'" class="rtn-done-section" style="display:none">'+resolved.map(function(o){return mkRow(o,false);}).join('')+'</div>';
+    }
+    if(hidden.length){
+      html+='<div style="margin-top:14px;font-size:11px;font-weight:700;color:var(--textl);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">Hidden</div>'+
+        hidden.map(function(o){return mkRow(o,true);}).join('');
+    }
   }
   html+='<div style="display:flex;gap:6px;margin-top:14px">'+
     '<input class="sub-inp" id="dailyRtnInp_'+key+'" placeholder="Add item…" style="flex:1" onkeydown="if(event.key===\'Enter\')dailyRtnAdd(\''+key+'\')">'+
@@ -6224,63 +6277,83 @@ function unhideRI(key,item){
 function renderOtherRtns(){
   var el=document.getElementById('otherRtnBody');if(!el)return;
   var dailyIds=['am','md','pm'];
-  var groups=RTN_GROUPS.filter(function(g){return dailyIds.indexOf(g.id)===-1;});
-  if(!groups.length){el.innerHTML='<div style="font-size:13px;color:var(--textl);text-align:center;padding:24px;font-family:\'Quicksand\',sans-serif">No other routines yet.<br>Tap ➕ to create one.</div>';return;}
+  var allGroups=RTN_GROUPS.filter(function(g){return dailyIds.indexOf(g.id)===-1;});
+  if(!allGroups.length){el.innerHTML='<div style="font-size:13px;color:var(--textl);text-align:center;padding:24px;font-family:\'Quicksand\',sans-serif">No other routines yet.<br>Tap ➕ to create one.</div>';return;}
   var today=todayStr();
-  el.innerHTML=groups.map(function(g){
+  var activeGroups=allGroups.filter(function(g){return g.active!==false;});
+  var inactiveGroups=allGroups.filter(function(g){return g.active===false;});
+
+  function mkGroupCard(g){
     var freq=rtnFreq(g);
+    var isActive=g.active!==false;
     var isDue=freq!=='asneeded'&&rtnIsDueToday(g);
     var items=RTNS[g.id]||[];
     var rh=RH[g.id]||{};
     var cs=rtnCompState(g,today);
     var visible=items.filter(function(item){return!rh[item];});
-    var done=visible.filter(function(item){var oi=items.indexOf(item);return!!cs[oi];});
-    var undone=visible.filter(function(item){var oi=items.indexOf(item);return!cs[oi];});
+    var resolved=visible.filter(function(item){var oi=items.indexOf(item);var s=rtnStateStr(cs[oi]);return s==='done'||s==='skip'||s==='task';});
+    var undone=visible.filter(function(item){var oi=items.indexOf(item);return!rtnStateStr(cs[oi]);});
     var freqLabel=rtnFreqLabel(g);
-    var lastDoneData=freq==='asneeded'?JSON.parse(localStorage.getItem('aRtnLast')||'{}')[g.id]:'';
-    var lastDoneTxt=freq==='asneeded'?(lastDoneData?'Last: '+lastDoneData:'Never done'):'';
+    var isBlock=freq!=='daily';
+    var typeBadge=isBlock?'<span class="rtn-type-b">🟣 Block</span>':'<span class="rtn-type-h">🔵 Habit</span>';
+    var progText=visible.length?resolved.length+'/'+visible.length:'';
+    var allDone=visible.length>0&&resolved.length===visible.length;
+    var progBadge=progText?'<span class="rtn-prog'+(allDone?' done':'')+'">'+progText+'</span>':'';
     var duePill=isDue?'<span style="font-size:10px;background:var(--rose-light);color:var(--rose);border-radius:6px;padding:2px 7px;font-weight:700">Due today</span>':
       (freq!=='asneeded'&&freq!=='daily'?'<span style="font-size:10px;background:#fff0e8;color:#8a5a30;border-radius:6px;padding:2px 7px">next: '+(rtnNextOccurrence(g,null)||'?')+'</span>':'');
-    var createTog=freq!=='asneeded'?
-      '<label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--textl);cursor:pointer;font-family:\'Quicksand\',sans-serif">'+
-        '<input type="checkbox" '+(g.createTask?'checked':'')+' onchange="togRtnCreateTask(\''+g.id+'\',this.checked)" style="width:16px;height:16px;accent-color:var(--sage)">'+
-        'Create task when due'+
-      '</label>':
-      '<span style="font-size:11px;color:var(--textl);font-family:\'Quicksand\',sans-serif">'+lastDoneTxt+'</span>';
     var isCollapsed=!!_rtnCollapsed[g.id];
-    var mkRow=function(item,isDone){
+    var gId=JSON.stringify(g.id);
+    var mkRow=function(item){
       var oi=items.indexOf(item);
-      var eItem=JSON.stringify(item);var gId=JSON.stringify(g.id);
-      return'<div class="ri'+(isDone?' done':'')+'" onclick="togR('+gId+','+oi+',this)">'+
-        '<div class="rchk">'+(isDone?'✓':'')+'</div>'+
+      var state=rtnStateStr(cs[oi]);
+      var eItem=JSON.stringify(item);
+      var chkTxt=state==='done'?'✓':state==='skip'?'⏭':state==='task'?'📋':'';
+      var stateClass=state?' '+state:'';
+      return'<div class="ri'+stateClass+'" onclick="togR('+gId+','+oi+',this)" oncontextmenu="showRtnCtxMenu('+gId+','+oi+',this,null,event)" ontouchstart="_rtnTouchStart(event,'+gId+','+oi+',this,null)" ontouchend="_rtnTouchEnd()" ontouchmove="_rtnTouchEnd()">'+
+        '<div class="rchk">'+chkTxt+'</div>'+
         '<div class="rlb">'+escHtml(item)+'</div>'+
         '<button onclick="event.stopPropagation();hideRI(event,'+gId+','+eItem+')" class="rhi" title="Hide">👁️</button>'+
         '<button onclick="event.stopPropagation();delRtnItem(event,'+gId+','+eItem+')" class="rhi" title="Delete" style="color:var(--ured)">✕</button>'+
       '</div>';
     };
     var gKey=g.id.replace(/'/g,"\\'");
-    return'<div class="rc" style="border-left-color:'+g.color+';'+((!isDue&&freq!=='asneeded'&&freq!=='daily')?'opacity:.7':'')+'">'+
+    var cardStyle='border-left-color:'+g.color+(isActive?'':';opacity:.45')+(!isActive||(!isDue&&freq!=='asneeded'&&freq!=='daily')?';opacity:'+(!isActive?.45:.7):'');
+    return'<div class="rc" style="'+cardStyle+'">'+
       '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">'+
-        '<div>'+
+        '<div style="flex:1;min-width:0">'+
           '<div style="font-weight:700;font-size:14px;color:var(--textd);font-family:\'Quicksand\',sans-serif">'+g.icon+' '+escHtml(g.name)+'</div>'+
-          '<div style="display:flex;align-items:center;gap:6px;margin-top:3px">'+
+          '<div style="display:flex;align-items:center;flex-wrap:wrap;gap:5px;margin-top:4px">'+
+            typeBadge+
             '<span style="font-size:10px;background:#f0ece8;color:var(--textl);border-radius:6px;padding:2px 7px;font-weight:700">'+freqLabel+'</span>'+
-            duePill+
+            duePill+progBadge+
           '</div>'+
         '</div>'+
-        '<div style="display:flex;align-items:center;gap:6px">'+
+        '<div style="display:flex;align-items:center;gap:4px;flex-shrink:0">'+
+          '<button class="rtn-active-tog'+(isActive?' on':'')+'" onclick="togRtnActive('+gId+',event)">'+
+            (isActive?'● Active':'○ Paused')+
+          '</button>'+
           '<button onclick="editRtn(\''+gKey+'\')" style="background:none;border:none;font-size:14px;cursor:pointer;color:var(--textl);padding:4px" title="Edit">✏️</button>'+
           '<button onclick="togRtnCollapse(\''+gKey+'\')" style="background:none;border:none;font-size:14px;cursor:pointer;color:var(--textl);padding:4px">'+(isCollapsed?'▸':'▾')+'</button>'+
         '</div>'+
       '</div>'+
-      createTog+
-      '<div id="rc-body-'+g.id+'" style="margin-top:8px;'+(isCollapsed?'display:none':'')+'">'+
-        undone.map(function(item){return mkRow(item,false);}).join('')+
-        (done.length?'<button class="rtn-done-toggle" onclick="togRtnDone(\'orDone_'+g.id+'\')" id="btn_orDone_'+g.id+'">✅ Done ('+done.length+')</button>'+
-          '<div id="orDone_'+g.id+'" class="rtn-done-section" style="display:none">'+done.map(function(item){return mkRow(item,true);}).join('')+'</div>':'')+
+      '<div id="rc-body-'+g.id+'" style="'+(isCollapsed?'display:none':'')+'">'+
+        (isActive
+          ? undone.map(mkRow).join('')+
+            (resolved.length?'<button class="rtn-done-toggle" onclick="togRtnDone(\'orRes_'+g.id+'\')" id="btn_orRes_'+g.id+'">✅ Resolved ('+resolved.length+')</button>'+
+              '<div id="orRes_'+g.id+'" class="rtn-done-section" style="display:none">'+resolved.map(mkRow).join('')+'</div>':'')
+          : '<div style="font-size:12px;color:var(--textl);padding:8px 0;font-style:italic">Routine paused</div>'
+        )+
       '</div>'+
     '</div>';
-  }).join('');
+  }
+
+  var html='';
+  if(activeGroups.length)html+=activeGroups.map(mkGroupCard).join('');
+  if(inactiveGroups.length){
+    html+='<div style="margin-top:16px;font-size:11px;font-weight:700;color:var(--textl);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Inactive</div>'+
+      inactiveGroups.map(mkGroupCard).join('');
+  }
+  el.innerHTML=html;
 }
 
 function togRtnCreateTask(gId,val){
@@ -6300,11 +6373,10 @@ function sendRtnToTask(text){
 }
 
 function syncRoutinesToTasks(){
-  // DISABLED — routines are a standalone checklist and must never become tasks.
-  // Purge any routine-sourced tasks that snuck in previously.
+  // Only purge auto-created routine tasks; user-moved tasks (userMoved:true) stay.
   var before=TASKS.length;
   TASKS=TASKS.filter(function(t){
-    if(t.source==='routine'){
+    if(t.source==='routine'&&!t.userMoved){
       fbDelete('tasks',t.id);
       return false;
     }
@@ -6547,23 +6619,156 @@ function delRtnGroup(){
   closeM('rtnModal');renderAllR();
 }
 
+// ── Routine state helpers ─────────────────────────
+function rtnStateStr(val){
+  if(!val)return null;
+  if(val===true)return'done'; // migrate old booleans
+  return val; // 'done','skip','task'
+}
+
+function _applyRIState(el,state){
+  el.classList.remove('done','skip','task');
+  var chk=el.querySelector('.rchk');if(!chk)return;
+  if(state==='done'){el.classList.add('done');chk.textContent='✓';}
+  else if(state==='skip'){el.classList.add('skip');chk.textContent='⏭';}
+  else if(state==='task'){el.classList.add('task');chk.textContent='📋';}
+  else{chk.textContent='';}
+}
+
 function togR(key,idx,el){
   var g=RTN_GROUPS.find(function(x){return x.id===key;});
-  var freq=g?rtnFreq(g):'daily';
   var today=todayStr();
   var cs=rtnCompState(g||{id:key,freq:'daily'},today);
-  var newVal=!cs[idx];
+  var cur=rtnStateStr(cs[idx]);
+  var newVal=cur==='done'?null:'done';
   rtnSetComp(key,today,idx,newVal);
-  el.classList.toggle('done',newVal);
-  el.querySelector('.rchk').textContent=newVal?'✓':'';
+  _applyRIState(el,newVal);
   updRS();
   if(typeof renderTodayHubSubs==='function')renderTodayHubSubs();
-  if(newVal&&(MILLIE.habits||[]).indexOf(key)>-1){
+  if(newVal==='done'&&(MILLIE.habits||[]).indexOf(key)>-1){
     MILLIE.hunger=Math.min(100,MILLIE.hunger+12);
     MILLIE.happiness=Math.min(100,MILLIE.happiness+10);
     saveMillie();millieTaskTreat();
   }
-  if(newVal)emberHabitCheck(key);
+  if(newVal==='done')emberHabitCheck(key);
+  checkRtnCelebration(key,today);
+}
+
+// ── Routine context menu ──────────────────────────
+var _rtnCtxState={gId:'',idx:0,el:null,dateStr:''};
+var _rtnLongPressTimer=null;
+
+function _rtnTouchStart(event,gId,idx,el,dateStr){
+  _rtnLongPressTimer=setTimeout(function(){
+    _rtnLongPressTimer=null;
+    showRtnCtxMenu(gId,idx,el,dateStr,event.touches?event.touches[0]:event);
+  },500);
+}
+
+function _rtnTouchEnd(){
+  if(_rtnLongPressTimer){clearTimeout(_rtnLongPressTimer);_rtnLongPressTimer=null;}
+}
+
+function showRtnCtxMenu(gId,idx,el,dateStr,event){
+  if(event&&event.preventDefault)event.preventDefault();
+  _rtnCtxState={gId:gId,idx:idx,el:el,dateStr:dateStr||todayStr()};
+  var m=document.getElementById('rtnCtxMenu');if(!m)return;
+  var g=RTN_GROUPS.find(function(x){return x.id===gId;});
+  var cs=rtnCompState(g||{id:gId},_rtnCtxState.dateStr);
+  var cur=rtnStateStr(cs[idx]);
+  document.getElementById('rtnCtxDone').style.display=cur==='done'?'none':'';
+  document.getElementById('rtnCtxSkip').style.display=cur==='skip'?'none':'';
+  document.getElementById('rtnCtxTask').style.display=cur==='task'?'none':'';
+  document.getElementById('rtnCtxUndo').style.display=!cur?'none':'';
+  var x=(event&&event.clientX)||0;
+  var y=(event&&event.clientY)||0;
+  m.style.left=Math.min(x,window.innerWidth-180)+'px';
+  m.style.top=Math.min(y,window.innerHeight-200)+'px';
+  m.classList.add('show');
+  setTimeout(function(){document.addEventListener('click',closeRtnCtxMenu,{once:true});},20);
+}
+
+function closeRtnCtxMenu(){
+  var m=document.getElementById('rtnCtxMenu');if(m)m.classList.remove('show');
+}
+
+function rtnCtxAct(action){
+  var s=_rtnCtxState;
+  closeRtnCtxMenu();
+  if(!s.gId)return;
+  if(action==='task'){
+    rtnMoveToTask(s.gId,s.idx,s.dateStr);
+    return;
+  }
+  var newVal=action==='undo'?null:action;
+  rtnSetComp(s.gId,s.dateStr,s.idx,newVal);
+  if(s.el)_applyRIState(s.el,newVal);
+  updRS();
+  if(typeof renderTodayHubSubs==='function')renderTodayHubSubs();
+  checkRtnCelebration(s.gId,s.dateStr);
+}
+
+function rtnMoveToTask(gId,idx,dateStr){
+  var g=RTN_GROUPS.find(function(x){return x.id===gId;});
+  var items=RTNS[gId]||[];
+  var item=items[idx];
+  if(!item)return;
+  var newTask={id:'t'+Date.now(),title:item,urgency:'soon',cat:'',tags:['routine:'+gId],date:dateStr||todayStr(),done:false,subs:[],created:new Date().toISOString(),source:'routine',userMoved:true};
+  TASKS.push(newTask);
+  localStorage.setItem('aTasks',JSON.stringify(TASKS));
+  if(typeof fbSave==='function')fbSave('tasks','list',{tasks:TASKS});
+  rtnSetComp(gId,dateStr||todayStr(),idx,'task');
+  if(_rtnCtxState.el)_applyRIState(_rtnCtxState.el,'task');
+  updRS();
+  checkRtnCelebration(gId,dateStr||todayStr());
+  showToast('Moved to Tasks 📋');
+  if(typeof renderTasks==='function')renderTasks();
+}
+
+function togRtnActive(gId,event){
+  if(event){event.stopPropagation();}
+  var g=RTN_GROUPS.find(function(x){return x.id===gId;});if(!g)return;
+  g.active=(g.active===false)?true:false;
+  localStorage.setItem('aRTG',JSON.stringify(RTN_GROUPS));
+  renderDailyRtn(_dailyRtnKey);
+  renderOtherRtns();
+  showToast(g.active===false?'Routine paused':'Routine activated ✓');
+}
+
+function checkRtnCelebration(gId,dateStr){
+  var g=RTN_GROUPS.find(function(x){return x.id===gId;});if(!g)return;
+  var items=RTNS[gId]||[];
+  var rh=RH[gId]||{};
+  var visible=items.filter(function(item){return!rh[item];});
+  if(!visible.length)return;
+  var cs=rtnCompState(g,dateStr||todayStr());
+  var allResolved=visible.every(function(item){
+    var oi=items.indexOf(item);
+    var state=rtnStateStr(cs[oi]);
+    return state==='done'||state==='skip'||state==='task';
+  });
+  if(allResolved)launchConfetti();
+}
+
+function launchConfetti(){
+  var container=document.createElement('div');
+  container.style.cssText='position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:9998;overflow:hidden';
+  document.body.appendChild(container);
+  var colors=['#ff6b6b','#ffd93d','#6bcb77','#4d96ff','#c77dff','#ff9a3c','#ff85a1'];
+  for(var i=0;i<70;i++){
+    (function(){
+      var p=document.createElement('div');
+      var color=colors[Math.floor(Math.random()*colors.length)];
+      var x=Math.random()*100;
+      var delay=Math.random()*1.2;
+      var size=5+Math.random()*7;
+      var dur=1.5+Math.random()*0.8;
+      p.style.cssText='position:absolute;left:'+x+'%;top:-10px;width:'+size+'px;height:'+size+'px;background:'+color+';border-radius:'+Math.floor(Math.random()*3)+'px;animation:confettiFall '+dur+'s ease-in forwards;animation-delay:'+delay+'s;transform:rotate('+Math.random()*360+'deg)';
+      container.appendChild(p);
+    })();
+  }
+  setTimeout(function(){if(container.parentNode)container.parentNode.removeChild(container);},3500);
+  showToast('🎉 All done! Amazing!');
 }
 
 function updRS(){
@@ -23621,6 +23826,14 @@ function delProjInc(id){
     <div id="wrapUpMsg" style="background:linear-gradient(135deg,#fff8e8,#fef4dc);border-radius:14px;padding:14px 16px;font-size:14px;color:var(--textd);line-height:1.5;text-align:center;margin-bottom:18px;font-style:italic"></div>
     <button onclick="closeOv('ovDayWrapUp')" style="width:100%;padding:13px;border-radius:14px;border:none;background:linear-gradient(135deg,#f0c840,#d4a820);font-family:'Quicksand',sans-serif;font-size:14px;font-weight:700;color:#fff;cursor:pointer">✨ Good work today</button>
   </div>
+</div>
+
+<!-- Routine context menu -->
+<div id="rtnCtxMenu" class="rtn-ctx-menu">
+  <button class="rtn-ctx-btn" id="rtnCtxDone" onclick="rtnCtxAct('done')">✅ Mark done</button>
+  <button class="rtn-ctx-btn" id="rtnCtxSkip" onclick="rtnCtxAct('skip')">⏭️ Skip</button>
+  <button class="rtn-ctx-btn" id="rtnCtxTask" onclick="rtnCtxAct('task')">📋 Move to task</button>
+  <button class="rtn-ctx-btn" id="rtnCtxUndo" onclick="rtnCtxAct('undo')">↩️ Clear</button>
 </div>
 
 </body>
