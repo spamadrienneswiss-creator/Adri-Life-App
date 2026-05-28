@@ -1823,22 +1823,6 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
   <div id="wigOrderList"></div>
 </div>
 
-<div class="view" id="v-loreal">
-  <!-- Header -->
-  <div style="background:linear-gradient(135deg,#fff0f4,#fce8f0);border-radius:16px;padding:14px 16px;margin-bottom:14px;display:flex;align-items:center;gap:12px">
-    <span style="font-size:28px">💄</span>
-    <div>
-      <div style="font-family:'Playfair Display',serif;font-size:18px;color:var(--textd);font-weight:700">Fragrance &amp; Beauty</div>
-      <div style="font-size:11px;color:var(--textl);margin-top:1px">YSL · Prada · Miu Miu — Macy's &amp; Nordstrom</div>
-    </div>
-  </div>
-  <!-- Notes -->
-  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-    <span style="font-size:11px;font-weight:700;color:var(--textl);text-transform:uppercase;letter-spacing:.8px">Notes</span>
-    <button onclick="openLorealNoteModal(null)" style="padding:3px 10px;border-radius:8px;border:1.5px solid var(--bdr);background:none;font-family:'Quicksand',sans-serif;font-size:11px;font-weight:700;cursor:pointer;color:var(--textd)">＋ Add</button>
-  </div>
-  <div id="lorealNotes" style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px"></div>
-</div>
 
 <div class="view" id="v-content">
   <div style="background:linear-gradient(135deg,#f0f4ff,#e8eeff);border-radius:16px;padding:14px 16px;margin-bottom:14px;display:flex;align-items:center;gap:12px">
@@ -5864,7 +5848,7 @@ function goTabDirect(tab,btn){
   if(tab==='focus-session'){ renderFocusSession(); }
   if(tab==='lists'){ renderListQBar(); renderLists(); }
   if(tab==='wigs'){ renderWigOrders(); }
-  if(tab==='loreal'){ renderLorealPage(); }
+
   if(tab==='content'){ renderContentPage(); }
   if(tab==='plan'){ renderPlan(); }
   if(tab==='grocery'){ renderGroceryList(); populateGrocTaskDatalist(); }
@@ -22298,7 +22282,9 @@ function renderTodaySleepChip(){
   var log = MILLIE.sleepLog || [];
   if(!log.length){ chip.style.display='none'; return; }
   chip.style.display='block';
-  var last = log[log.length-1];
+  var _sorted=(log||[]).filter(function(s){return s.slept;}).slice().sort(function(a,b){return a.slept<b.slept?-1:1;});
+  var last=_sorted.length?_sorted[_sorted.length-1]:null;
+  if(!last){chip.style.display='none';return;}
   var h = last.durH||0;
   var emoji = h>=8?'🌟':h>=7?'😊':h>=6?'😐':'😴';
   var msg = h>=8?'Great sleep! '+h.toFixed(1)+'h':h>=7?'Good sleep · '+h.toFixed(1)+'h':h>=6?'OK sleep · '+h.toFixed(1)+'h':'Short night · '+h.toFixed(1)+'h';
@@ -23221,71 +23207,6 @@ function addWigToList(){
   showToast(name+' added ✨');
 }
 
-// ═══════════════════════════════════════════════
-// L'OREAL REFERENCE PAGE
-// ═══════════════════════════════════════════════
-var LOREAL_NOTES = JSON.parse(localStorage.getItem('aLorealNotes')||'null')||[
-  {id:'ln1',title:'YSL Fragrances',body:'Black Opium, Libre, Mon Paris, Myself, Y…\nAdd your notes on top sellers, scent profiles, and who to recommend them to.'},
-  {id:'ln2',title:'YSL Makeup',body:'Rouge Pur Couture, Touche Éclat, All Hours…\nAdd your product knowledge, application tips, and best sellers.'},
-  {id:'ln3',title:'Prada Fragrances',body:'Paradoxe, Candy, Luna Rossa, L\'Homme…\nAdd your notes on the line, scent families, and layering suggestions.'},
-  {id:'ln4',title:'Miu Miu Fragrances',body:'Miu Miu EDP, L\'Eau Rosée, Twist…\nAdd notes on the collection and client pairings.'},
-  {id:'ln5',title:'Macy\'s Notes',body:'Counter info, events, goals, and anything specific to this location.'},
-  {id:'ln6',title:'Nordstrom Notes',body:'Counter info, events, goals, and anything specific to this location.'}
-];
-function saveLorealNotes(){ localStorage.setItem('aLorealNotes',JSON.stringify(LOREAL_NOTES)); }
-
-function renderLorealPage(){
-  renderLorealNotes();
-}
-
-function renderLorealNotes(){
-  var el=document.getElementById('lorealNotes');if(!el)return;
-  if(!LOREAL_NOTES.length){el.innerHTML='<div style="color:var(--textl);font-size:13px;padding:4px 0">No notes yet.</div>';return;}
-  el.innerHTML=LOREAL_NOTES.map(function(n){
-    return'<div style="background:#fff;border-radius:14px;border:1.5px solid var(--bdr);overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.04)">'
-      +'<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-bottom:1px solid var(--border)">'
-        +'<span style="font-size:13px;font-weight:700;color:var(--textd)">'+escHtml(n.title)+'</span>'
-        +'<div style="display:flex;gap:4px">'
-          +'<button onclick="openLorealNoteModal(\''+n.id+'\')" style="background:none;border:none;font-size:12px;cursor:pointer;color:var(--textl);padding:3px 6px">✏️</button>'
-          +'<button onclick="delLorealNote(\''+n.id+'\')" style="background:none;border:none;font-size:12px;cursor:pointer;color:var(--textl);padding:3px 6px">🗑️</button>'
-        +'</div>'
-      +'</div>'
-      +'<div style="padding:10px 14px;font-size:13px;color:var(--textd);white-space:pre-wrap;line-height:1.5">'+escHtml(n.body)+'</div>'
-    +'</div>';
-  }).join('');
-}
-
-function openLorealNoteModal(id){
-  var n=id?LOREAL_NOTES.find(function(x){return x.id===id;}):null;
-  showOv('ovLorealNote');
-  document.getElementById('lorealNoteId').value=id||'';
-  document.getElementById('lorealNoteTitle').value=n?n.title:'';
-  document.getElementById('lorealNoteBody').value=n?n.body:'';
-}
-
-function saveLorealNote(){
-  var id=document.getElementById('lorealNoteId').value;
-  var title=document.getElementById('lorealNoteTitle').value.trim();
-  var body=document.getElementById('lorealNoteBody').value.trim();
-  if(!title){showToast('Add a title');return;}
-  if(id){
-    var n=LOREAL_NOTES.find(function(x){return x.id===id;});
-    if(n){n.title=title;n.body=body;}
-  } else {
-    LOREAL_NOTES.push({id:'ln'+Date.now(),title:title,body:body});
-  }
-  saveLorealNotes();
-  closeOv('ovLorealNote');
-  renderLorealNotes();
-  showToast('Note saved 💄');
-}
-
-function delLorealNote(id){
-  if(!confirm('Delete this note section?'))return;
-  LOREAL_NOTES=LOREAL_NOTES.filter(function(n){return n.id!==id;});
-  saveLorealNotes();
-  renderLorealNotes();
-}
 
 // ═══════════════════════════════════════════════
 // CONTENT CREATION PAGE
@@ -25010,17 +24931,6 @@ function delProjInc(id){
 
 
 <!-- L'Oreal Note Editor -->
-<div class="ov" id="ovLorealNote" onclick="closeOv('ovLorealNote')">
-  <div class="ov-box" onclick="event.stopPropagation()">
-    <div class="mh"><span class="mt">💄 Note Section</span><button class="mc" onclick="closeOv('ovLorealNote')">✕</button></div>
-    <input type="hidden" id="lorealNoteId">
-    <div style="font-size:11px;font-weight:700;color:var(--textl);margin-bottom:4px">Title</div>
-    <input id="lorealNoteTitle" class="fi" placeholder="e.g. YSL Fragrances" style="margin-bottom:10px">
-    <div style="font-size:11px;font-weight:700;color:var(--textl);margin-bottom:4px">Notes</div>
-    <textarea id="lorealNoteBody" class="fi" rows="7" placeholder="Write your reference notes here…" style="width:100%;resize:vertical;box-sizing:border-box;margin-bottom:14px"></textarea>
-    <button class="ok-btn" style="width:100%;margin:0" onclick="saveLorealNote()">Save</button>
-  </div>
-</div>
 
 <!-- Content Creation Modal -->
 <div class="ov" id="ovContentModal" onclick="closeOv('ovContentModal')">
