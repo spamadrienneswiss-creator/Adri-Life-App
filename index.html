@@ -8115,13 +8115,45 @@ function renderPlanHoursHTML(dStr,blocks){
     if(hBlocks.length){
       hBlocks.forEach(function(b){
         var durLabel=b.duration>=60?(b.duration/60)+'h':b.duration+'m';
-        html+='<div style="display:flex;align-items:center;gap:6px;padding:5px 8px;border-radius:8px;background:'+planBlockBg(b.color)+'">';
+        var blockTasks=b.tasks||[];
+        var expandId='pbx-'+b.id;
+        // resolve live task data for each assigned task
+        var liveTasks=blockTasks.map(function(bt){
+          var live=(TASKS||[]).find(function(t){return t.id===bt.id;});
+          return live||bt; // fall back to stored snapshot if task was deleted
+        });
+        var doneCnt=liveTasks.filter(function(t){return t.done;}).length;
+        var progStr=liveTasks.length?' ('+doneCnt+'/'+liveTasks.length+')':'';
+        var urgColors={'urgent-important':'var(--rose)','important-not-urgent':'#c8a820','urgent-not-important':'var(--blue)','not-urgent':'var(--textl)','':'var(--textl)'};
+        html+='<div style="border-radius:10px;background:'+planBlockBg(b.color)+';margin-bottom:2px;overflow:hidden">';
+        // Header row - tapping toggles task list
+        html+='<div style="display:flex;align-items:center;gap:6px;padding:6px 8px;cursor:pointer" onclick="togPlanBlock(\''+expandId+'\')">';
         html+='<div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:700;color:var(--textd)">'+escHtml(b.title)+'</div>';
         if(b.notes)html+='<div style="font-size:10px;color:var(--textl);margin-top:1px">'+escHtml(b.notes)+'</div>';
         html+='</div>';
         html+='<span style="font-size:10px;color:var(--textl);flex-shrink:0">'+durLabel+'</span>';
+        if(liveTasks.length)html+='<span style="font-size:10px;font-weight:700;color:var(--textl);flex-shrink:0" id="'+expandId+'-prog">'+progStr+'</span>';
+        html+='<span id="'+expandId+'-arr" style="font-size:10px;color:var(--textl);flex-shrink:0">▸</span>';
         html+='<button onclick="event.stopPropagation();editPlanBlock(\''+dStr+'\',\''+b.id+'\')" style="background:none;border:none;cursor:pointer;font-size:12px;color:var(--textl);padding:0 2px;line-height:1">✏️</button>';
         html+='<button onclick="event.stopPropagation();deletePlanBlock(\''+dStr+'\',\''+b.id+'\')" style="background:none;border:none;cursor:pointer;font-size:12px;color:var(--textl);padding:0 2px;line-height:1">✕</button>';
+        html+='</div>';
+        // Task list (collapsed by default)
+        html+='<div id="'+expandId+'" style="display:none;background:rgba(255,255,255,.6);border-top:1px solid rgba(0,0,0,.06);padding:4px 8px 6px">';
+        if(liveTasks.length){
+          html+='<div style="max-height:200px;overflow-y:auto">';
+          liveTasks.forEach(function(t){
+            var isDone=!!t.done;
+            html+='<div onclick="event.stopPropagation();togPlanBlockTask(\''+b.id+'\',\''+t.id+'\',\''+dStr+'\')" style="display:flex;align-items:center;gap:7px;padding:5px 4px;border-bottom:1px solid rgba(0,0,0,.05);cursor:pointer">';
+            html+='<div style="width:16px;height:16px;border-radius:50%;border:2px solid '+(isDone?'var(--sage)':urgColors[t.urgency]||'#ccc')+';background:'+(isDone?'var(--sage)':'transparent')+';flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:9px;color:#fff">'+(isDone?'✓':'')+'</div>';
+            html+='<span style="flex:1;font-size:12px;color:var(--textd);'+(isDone?'text-decoration:line-through;opacity:.6':'')+';min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+escHtml(t.title)+'</span>';
+            html+='</div>';
+          });
+          html+='</div>';
+        } else {
+          html+='<div style="font-size:11px;color:var(--textl);font-style:italic;padding:4px 0">No tasks assigned — tap ✏️ to add tasks to this block</div>';
+        }
+        html+='<div onclick="event.stopPropagation();editPlanBlock(\''+dStr+'\',\''+b.id+'\')" style="font-size:10px;color:var(--blue);cursor:pointer;padding:4px 0 0;text-align:right">+ manage tasks ✏️</div>';
+        html+='</div>';
         html+='</div>';
       });
       html+='<div onclick="event.stopPropagation();openPlanModal(\''+dStr+'\',\''+String(h).padStart(2,'0')+':00\')" style="font-size:10px;color:var(--blue);cursor:pointer;padding:1px 2px">+ add here</div>';
@@ -8322,6 +8354,50 @@ function deletePlanBlockFromModal(){
   if(!_planEditDate||!_planEditId)return;
   deletePlanBlock(_planEditDate,_planEditId);
   closeM('planBlockModal');
+}
+
+function togPlanBlock(expandId){
+  var body=document.getElementById(expandId);
+  var arr=document.getElementById(expandId+'-arr');
+  if(!body)return;
+  var open=body.style.display==='none';
+  body.style.display=open?'':'none';
+  if(arr)arr.textContent=open?'▾':'▸';
+}
+
+function togPlanBlockTask(blockId,taskId,dStr){
+  // Toggle done on the live task
+  var task=(TASKS||[]).find(function(t){return t.id===taskId;});
+  if(!task)return;
+  task.done=!task.done;
+  task.doneDate=task.done?todayStr():null;
+  localStorage.setItem('aTasks',JSON.stringify(TASKS));
+  if(typeof fbSave==='function')fbSave('tasks',task.id,task);
+  // Re-render the task list inside the block in-place
+  var expandId='pbx-'+blockId;
+  var body=document.getElementById(expandId);
+  if(!body)return;
+  // Find the block
+  var block=(PLAN_BLOCKS[dStr]||[]).find(function(b){return b.id===blockId;});
+  if(!block)return;
+  var liveTasks=(block.tasks||[]).map(function(bt){return (TASKS||[]).find(function(t){return t.id===bt.id;})||bt;});
+  var doneCnt=liveTasks.filter(function(t){return t.done;}).length;
+  var progEl=document.getElementById(expandId+'-prog');
+  if(progEl)progEl.textContent=' ('+doneCnt+'/'+liveTasks.length+')';
+  var urgColors={'urgent-important':'var(--rose)','important-not-urgent':'#c8a820','urgent-not-important':'var(--blue)','not-urgent':'var(--textl)','':'var(--textl)'};
+  var listHtml='<div style="max-height:200px;overflow-y:auto">';
+  liveTasks.forEach(function(t){
+    var isDone=!!t.done;
+    listHtml+='<div onclick="event.stopPropagation();togPlanBlockTask(\''+blockId+'\',\''+t.id+'\',\''+dStr+'\')" style="display:flex;align-items:center;gap:7px;padding:5px 4px;border-bottom:1px solid rgba(0,0,0,.05);cursor:pointer">';
+    listHtml+='<div style="width:16px;height:16px;border-radius:50%;border:2px solid '+(isDone?'var(--sage)':urgColors[t.urgency]||'#ccc')+';background:'+(isDone?'var(--sage)':'transparent')+';flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:9px;color:#fff">'+(isDone?'✓':'')+'</div>';
+    listHtml+='<span style="flex:1;font-size:12px;color:var(--textd);'+(isDone?'text-decoration:line-through;opacity:.6':'')+';min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+escHtml(t.title)+'</span>';
+    listHtml+='</div>';
+  });
+  listHtml+='</div>';
+  listHtml+='<div onclick="event.stopPropagation();editPlanBlock(\''+dStr+'\',\''+blockId+'\')" style="font-size:10px;color:var(--blue);cursor:pointer;padding:4px 0 0;text-align:right">+ manage tasks ✏️</div>';
+  body.innerHTML=listHtml;
+  if(typeof renderTasks==='function')renderTasks();
+  if(typeof updStats==='function')updStats();
 }
 
 // ── Block task list management ─────────────────
