@@ -1358,7 +1358,10 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
           </div>
           <!-- Mood -->
           <div style="margin-bottom:12px">
-            <div style="font-size:11px;font-weight:700;color:var(--textl);letter-spacing:.4px;text-transform:uppercase;margin-bottom:6px">😊 Mood</div>
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+              <div style="font-size:11px;font-weight:700;color:var(--textl);letter-spacing:.4px;text-transform:uppercase">😊 Mood</div>
+              <span id="tMoodD" style="font-size:11px;color:var(--textl);font-weight:600">Not logged yet</span>
+            </div>
             <div style="display:flex;gap:6px">
               <button class="today-mood-btn" data-m="1" onclick="logMoodToday(1)" style="flex:1;padding:7px 4px;border-radius:10px;border:2px solid transparent;background:#f8f4f0;font-size:18px;cursor:pointer;transition:all .15s">😔</button>
               <button class="today-mood-btn" data-m="2" onclick="logMoodToday(2)" style="flex:1;padding:7px 4px;border-radius:10px;border:2px solid transparent;background:#f8f4f0;font-size:18px;cursor:pointer;transition:all .15s">😕</button>
@@ -5521,7 +5524,7 @@ function goTabDirect(tab,btn){
   if(tab==='places')renderPlaces();
   if(SECTION_VIEWS[tab]||tab==='emporium')renderHubPreviews(tab);
   var hFab=document.getElementById('hatchFab');if(hFab){hFab.style.display=(tab==='today')?'flex':'none';if(tab==='today'){hFab.style.opacity='1';hFab.style.transform='translateX(-50%) translateY(0)';hFab.style.pointerEvents='auto';_fabHidden=false;_fabScrollLast=window.scrollY||window.pageYOffset;renderFabPills();}}
-  if(tab==='today'){ tickSpiritRun(); renderWaterBottle(); renderTodayStatsBars(); renderWeekStats(); renderTodayMoodBtns(); renderTodayPlanBar(); renderTodayWorkGlance(); }
+  if(tab==='today'){ tickSpiritRun(); renderWaterBottle(); renderTodayStatsBars(); renderWeekStats(); renderTodayMoodBtns(); renderTodayPlanBar(); renderTodayWorkGlance(); renderTodayHubSubs(); renderIntentionsHome(); }
   if(tab==='routines'){ renderDailyRtn(_dailyRtnKey); renderOtherRtns(); }
   if(tab==='hearthside'){ renderHWHubStats(); }
   if(tab==='lighthouse'){ updateLighthouseSpiritStatus(); }
@@ -5609,6 +5612,60 @@ function renderHubPreviews(section){
     if(wpSub){var active=(WORK_PROJECTS||[]).filter(function(p){return p.status==='active';}).length;wpSub.textContent=active+' active project'+(active!==1?'s':'');}
   }
   updateCharMoods(section);
+}
+
+function renderTodayHubSubs(){
+  var el;
+  var today=todayStr();
+  // Projects
+  var activeProj=(PROJECTS||[]).filter(function(p){return p.status==='active';}).length;
+  el=document.getElementById('hub-projects-sub');if(el)el.textContent=activeProj?activeProj+' active project'+(activeProj!==1?'s':''):'No active projects';
+  // Lists
+  el=document.getElementById('hub-lists-sub');if(el)el.textContent=(LISTS||[]).length+' list'+((LISTS||[]).length!==1?'s':'')+' saved';
+  // Focus session queue
+  var fssQ=(FOCUS_QUEUE&&FOCUS_QUEUE.tasks)?FOCUS_QUEUE.tasks.length:0;
+  el=document.getElementById('hub-focus-session-sub');if(el)el.textContent=fssQ?fssQ+' task'+(fssQ!==1?'s':'')+' queued':'Timer + queue';
+  // Grocery
+  var grocCount=(GROCERY_LIST||[]).filter(function(g){return !g.checked;}).length;
+  el=document.getElementById('hub-grocery-sub');if(el)el.textContent=grocCount?grocCount+' item'+(grocCount!==1?'s':'')+' to buy':'Shopping list';
+  // Routines — show today's completion across all daily groups
+  var rtnDue=RTN_GROUPS.filter(function(g){return rtnIsDueToday(g);}).length;
+  var rtnItemsDue=0,rtnItemsDone=0;
+  RTN_GROUPS.filter(function(g){return rtnIsDueToday(g);}).forEach(function(g){
+    var items=(g.items||[]);
+    var cs=rtnCompState(g,today);
+    rtnItemsDue+=items.length;
+    rtnItemsDone+=items.filter(function(_,i){return !!cs[i];}).length;
+  });
+  var rtnTxt=rtnItemsDue>0?(rtnItemsDone+'/'+rtnItemsDue+' done'):rtnDue+' group'+(rtnDue!==1?'s':'')+' due';
+  el=document.getElementById('hub-routines-sub');if(el)el.textContent=rtnTxt||'Daily & scheduled';
+  el=document.getElementById('hub-routines-sub2');if(el)el.textContent=rtnTxt||'Daily & weekly routines';
+  // Goals
+  var goals=(GOALS||[]).filter(function(g){return !g.done;}).length;
+  el=document.getElementById('hub-goals-sub');if(el)el.textContent=goals+' goal'+(goals!==1?'s':'')+' in progress';
+  // Move / workouts
+  var exToday=(MILLIE&&MILLIE.exLog)?MILLIE.exLog.filter(function(e){return e.date===today;}).length:0;
+  el=document.getElementById('hub-health-sub');if(el)el.textContent=exToday?exToday+' workout'+(exToday!==1?'s':'')+' today':'Workouts & movement';
+  // Meals — show today's logged items
+  var mealCount=(MEAL_LOG_ITEMS||[]).filter(function(m){return m.date===today;}).length;
+  var mealCal=Math.round(getTot().cal);
+  el=document.getElementById('hub-meals-sub');if(el)el.textContent=mealCount?mealCal+' cal logged today':'Nothing logged today';
+  // Mood board
+  el=document.getElementById('hub-board-sub');if(el)el.textContent=(VB_ITEMS||[]).length+' item'+((VB_ITEMS||[]).length!==1?'s':'');
+  // Faves
+  el=document.getElementById('hub-faves-sub');if(el)el.textContent=(FAVES||[]).length+' saved fave'+((FAVES||[]).length!==1?'s':'');
+  // Stories
+  el=document.getElementById('hub-stories-sub');if(el)el.textContent=(STORIES||[]).length?((STORIES||[]).length+' world'+((STORIES||[]).length!==1?'s':'')):'Your creative worlds';
+  // Wigs
+  var wigsCount=(WIGS||[]).length;
+  el=document.getElementById('hub-wigs-sub');
+  if(el){
+    var custLevels=['No customers yet','First visitors…','Word is spreading','Regular customers!','The Emporium is bustling!'];
+    var expCount=(JSON.parse(localStorage.getItem('aIncome')||'[]')).length;
+    var customers=Math.min(Math.floor(wigsCount/2)+Math.floor(expCount/3),20);
+    var custIdx=Math.min(Math.floor(customers/5),custLevels.length-1);
+    el.textContent=wigsCount+' wig'+(wigsCount!==1?'s':'')+' · '+custLevels[custIdx];
+  }
 }
 
 function renderHWHubStats(){
@@ -6517,6 +6574,7 @@ function togR(key,idx,el){
   el.classList.toggle('done',newVal);
   el.querySelector('.rchk').textContent=newVal?'✓':'';
   updRS();
+  if(typeof renderTodayHubSubs==='function')renderTodayHubSubs();
   if(newVal&&(MILLIE.habits||[]).indexOf(key)>-1){
     MILLIE.hunger=Math.min(100,MILLIE.hunger+12);
     MILLIE.happiness=Math.min(100,MILLIE.happiness+10);
@@ -7213,11 +7271,14 @@ function logMoodToday(m){
 function renderTodayMoodBtns(){
   var k=getTK();
   var m=MOOD[k]||0;
+  var moodNames=['','Rough day 😔','Not great 😕','Okay 😐','Pretty good 🙂','Great day 😊'];
   document.querySelectorAll('.today-mood-btn').forEach(function(b){
     var bm=parseInt(b.dataset.m);
     b.style.borderColor=bm===m?'var(--rose)':'transparent';
     b.style.background=bm===m?'rgba(210,140,140,.18)':'#f8f4f0';
   });
+  var tMoodEl=document.getElementById('tMoodD');
+  if(tMoodEl)tMoodEl.textContent=m?moodNames[m]:'Not logged yet';
 }
 
 function logSleepToday(){
@@ -20247,6 +20308,7 @@ function startApp(){
   renderDumpList();
   renderEnergyWidget();
   renderIntentionsHome();
+  renderTodayHubSubs();
   renderMeds();
   renderMinistryHome();
   renderGuide();
@@ -20283,6 +20345,11 @@ function startApp(){
   updEstateBadge();
   renderAppIndex();
   renderTodayWorkGlance();
+  renderTodayStatsBars();
+  renderTodayMoodBtns();
+  renderWeekStats();
+  renderWaterBottle();
+  renderTodayPlanBar();
   var hFab=document.getElementById('hatchFab');if(hFab)hFab.style.display='flex';
   renderFabPills();
   initFabScroll();
