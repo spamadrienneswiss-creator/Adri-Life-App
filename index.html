@@ -1620,6 +1620,7 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
   <!-- Quick access buttons -->
   <div style="display:flex;gap:8px;margin-bottom:14px">
     <button onclick="openOpeningShift()" style="flex:1;display:flex;align-items:center;justify-content:center;gap:8px;padding:11px 14px;border-radius:14px;border:none;background:linear-gradient(135deg,#f5d06a,#e09030);color:#fff;font-family:'Quicksand',sans-serif;font-size:13px;font-weight:700;cursor:pointer;box-shadow:0 3px 12px rgba(224,144,48,.35)">🌅 Opening Shift</button>
+    <button onclick="openMidday()" style="flex:1;display:flex;align-items:center;justify-content:center;gap:8px;padding:11px 14px;border-radius:14px;border:none;background:linear-gradient(135deg,#7ab8e8,#4a8ac8);color:#fff;font-family:'Quicksand',sans-serif;font-size:13px;font-weight:700;cursor:pointer;box-shadow:0 3px 12px rgba(74,138,200,.35)">☀️ Midday</button>
     <button onclick="openDayWrapUp()" style="flex:1;display:flex;align-items:center;justify-content:center;gap:8px;padding:11px 14px;border-radius:14px;border:none;background:linear-gradient(135deg,#5a3a8a,#3a2a6a);color:#fff;font-family:'Quicksand',sans-serif;font-size:13px;font-weight:700;cursor:pointer;box-shadow:0 3px 12px rgba(90,58,138,.35)">🌙 Wrap Up</button>
   </div>
   <!-- Interaction hint -->
@@ -6698,6 +6699,7 @@ function rtnCtxAct(action){
   if(!s.gId)return;
   if(action==='task'){
     rtnMoveToTask(s.gId,s.idx,s.dateStr);
+    _rerenderShiftOverlays(s.gId);
     return;
   }
   var newVal=action==='undo'?null:action;
@@ -6706,6 +6708,7 @@ function rtnCtxAct(action){
   updRS();
   if(typeof renderTodayHubSubs==='function')renderTodayHubSubs();
   checkRtnCelebration(s.gId,s.dateStr);
+  _rerenderShiftOverlays(s.gId);
 }
 
 function rtnMoveToTask(gId,idx,dateStr){
@@ -9466,6 +9469,7 @@ function openDayWrapUp(){
     +'</div>';
   }).join('');
   document.getElementById('wrapUpMsg').textContent=msg;
+  renderWrapUpChecklist();
   showOv('ovDayWrapUp');
 }
 
@@ -9477,13 +9481,18 @@ function renderTodayRtnPills(){
   if(h<12){
     pills.push({label:'🌅 Opening Shift',fn:'openOpeningShift()',gradient:'linear-gradient(135deg,#f5d06a,#e09030)',shadow:'rgba(224,144,48,.35)'});
   }
+  // Midday pill: show 11am–5pm
+  if(h>=11&&h<17){
+    pills.push({label:'☀️ Midday',fn:'openMidday()',gradient:'linear-gradient(135deg,#7ab8e8,#4a8ac8)',shadow:'rgba(74,138,200,.35)'});
+  }
   // Evening pill: show after 5pm
   if(h>=17){
     pills.push({label:'🌙 Wrap Up',fn:'openDayWrapUp()',gradient:'linear-gradient(135deg,#5a3a8a,#3a2a6a)',shadow:'rgba(90,58,138,.35)'});
   }
-  // Midday: show both as smaller secondary options
+  // Outside peak hours: show all as secondary options
   if(!pills.length){
     pills.push({label:'🌅 Opening Shift',fn:'openOpeningShift()',gradient:'linear-gradient(135deg,#e8e4e0,#d8d4d0)',shadow:'none',color:'var(--textd)'});
+    pills.push({label:'☀️ Midday',fn:'openMidday()',gradient:'linear-gradient(135deg,#e8e4e0,#d8d4d0)',shadow:'none',color:'var(--textd)'});
     pills.push({label:'🌙 Wrap Up',fn:'openDayWrapUp()',gradient:'linear-gradient(135deg,#e8e4e0,#d8d4d0)',shadow:'none',color:'var(--textd)'});
   }
   el.innerHTML=pills.map(function(p){
@@ -20900,35 +20909,71 @@ function initFabModalHide(){
     obs.observe(el,{attributes:true,attributeFilter:['class']});
   });
 }
-function openOpeningShift(){
-  renderOpeningShift();
-  showOv('ovOpeningShift');
+function openOpeningShift(){renderOpeningShift();showOv('ovOpeningShift');}
+function openMidday(){renderMidday();showOv('ovMidday');}
+
+// Shared shift toggle — syncs with Routines page (same RS storage)
+function shiftTog(key,idx,dateStr){
+  var g=RTN_GROUPS.find(function(x){return x.id===key;});
+  var today=dateStr||todayStr();
+  var cs=rtnCompState(g||{id:key,freq:'daily'},today);
+  var cur=rtnStateStr(cs[idx]);
+  var newVal=cur==='done'?null:'done';
+  rtnSetComp(key,today,idx,newVal);
+  updRS();
+  if(typeof renderTodayHubSubs==='function')renderTodayHubSubs();
+  if(newVal==='done'&&typeof emberHabitCheck==='function')emberHabitCheck(key);
+  checkRtnCelebration(key,today);
+  _rerenderShiftOverlays(key);
+  renderDailyRtn(key);
 }
-function openingShiftTog(idx){
-  if(!RS.am)RS.am={};
-  RS.am[idx]=RS.am[idx]?0:1;
-  localStorage.setItem('aRS',JSON.stringify(RS));
-  renderOpeningShift();
+
+function _rerenderShiftOverlays(key){
+  if(key==='am'){var ov=document.getElementById('ovOpeningShift');if(ov&&ov.classList.contains('show'))renderOpeningShift();}
+  if(key==='md'){var ov2=document.getElementById('ovMidday');if(ov2&&ov2.classList.contains('show'))renderMidday();}
+  if(key==='pm'){renderWrapUpChecklist();}
 }
-function renderOpeningShift(){
-  var el=document.getElementById('openingShiftList');if(!el)return;
-  var items=RTNS.am||[];
-  if(!items.length){el.innerHTML='<div style="font-size:13px;color:var(--textl);text-align:center;padding:20px;font-family:\'Quicksand\',sans-serif">No AM routine set up yet.<br>Add items in Archives → Routines → AM Routine.</div>';return;}
-  var state=RS.am||{};
-  var hidden=RH.am||{};
-  var visible=items.filter(function(item){return !hidden[item];});
-  var done=visible.filter(function(item){var realIdx=items.indexOf(item);return !!state[realIdx];}).length;
-  var total=visible.length;
-  el.innerHTML='<div style="font-size:11px;color:var(--textl);font-family:\'Quicksand\',sans-serif;font-weight:700;margin-bottom:12px;text-transform:uppercase;letter-spacing:.5px">'+done+' of '+total+' done</div>'
+
+// Shared checklist renderer for all three overlays
+function _renderShiftOverlay(key,elId){
+  var el=document.getElementById(elId);if(!el)return;
+  var items=RTNS[key]||[];
+  var routeLink='<button onclick="goTab(\'routines\',null);closeOv(\'ovOpeningShift\');closeOv(\'ovMidday\')" style="font-size:10px;color:var(--blue);background:none;border:none;cursor:pointer;font-family:\'Quicksand\',sans-serif;font-weight:700;padding:0">Edit in Routines →</button>';
+  if(!items.length){
+    el.innerHTML='<div style="font-size:13px;color:var(--textl);text-align:center;padding:20px;font-family:\'Quicksand\',sans-serif">No items yet.<br><br>'+routeLink+'</div>';
+    return;
+  }
+  var cs=RS[key]||{};
+  var rh=RH[key]||{};
+  var today=todayStr();
+  var visible=items.filter(function(item){return !rh[item];});
+  var resolvedCnt=visible.filter(function(item){var oi=items.indexOf(item);var s=rtnStateStr(cs[oi]);return s==='done'||s==='skip'||s==='task';}).length;
+  el.innerHTML='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">'
+    +'<span style="font-size:11px;color:var(--textl);font-family:\'Quicksand\',sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:.5px">'+resolvedCnt+' of '+visible.length+' done</span>'
+    +routeLink
+    +'</div>'
     +visible.map(function(item){
-      var realIdx=items.indexOf(item);
-      var isDone=!!state[realIdx];
-      return'<div onclick="openingShiftTog('+realIdx+')" style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid #f5f0eb;cursor:pointer">'
-        +'<div style="width:22px;height:22px;border-radius:6px;border:2px solid '+(isDone?'var(--sage)':'#ddd')+';background:'+(isDone?'var(--sage)':'#fff')+';display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;color:#fff;transition:all .15s">'+(isDone?'✓':'')+'</div>'
-        +'<span style="font-size:14px;font-weight:600;font-family:\'Quicksand\',sans-serif;color:'+(isDone?'var(--textl)':'var(--textd)')+(isDone?';text-decoration:line-through':'')+'">'
+      var oi=items.indexOf(item);
+      var state=rtnStateStr(cs[oi]);
+      var isDone=state==='done';var isSkip=state==='skip';var isTask=state==='task';
+      var resolved=isDone||isSkip||isTask;
+      var chkTxt=isDone?'✓':isSkip?'⏭':isTask?'📋':'';
+      var chkBg=isDone?'var(--sage)':isSkip?'#f0c030':isTask?'var(--blue)':'#fff';
+      var chkBdr=resolved?chkBg:'#ddd';
+      var eKey=JSON.stringify(key);
+      return'<div onclick="shiftTog('+eKey+','+oi+',\''+today+'\')" oncontextmenu="showRtnCtxMenu('+eKey+','+oi+',null,\''+today+'\',event)" ontouchstart="_rtnTouchStart(event,'+eKey+','+oi+',null,\''+today+'\')" ontouchend="_rtnTouchEnd()" ontouchmove="_rtnTouchEnd()" style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid #f5f0eb;cursor:pointer">'
+        +'<div style="width:22px;height:22px;border-radius:6px;border:2px solid '+chkBdr+';background:'+chkBg+';display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;color:#fff;transition:all .15s">'+chkTxt+'</div>'
+        +'<span style="font-size:14px;font-weight:600;font-family:\'Quicksand\',sans-serif;color:'+(resolved?'var(--textl)':'var(--textd)')+(resolved?';text-decoration:line-through':'')+'">'
         +escHtml(item)+'</span>'
       +'</div>';
     }).join('');
+}
+
+function renderOpeningShift(){_renderShiftOverlay('am','openingShiftList');}
+function renderMidday(){_renderShiftOverlay('md','middayList');}
+
+function renderWrapUpChecklist(){
+  _renderShiftOverlay('pm','wrapUpChecklist');
 }
 function renderFabPills(){
   var fab=document.getElementById('hatchFab');if(!fab)return;
@@ -23820,6 +23865,22 @@ function delProjInc(id){
   </div>
 </div>
 
+<!-- MIDDAY -->
+<div class="ov" id="ovMidday" onclick="closeOv('ovMidday')" style="align-items:flex-end;padding:0">
+  <div onclick="event.stopPropagation()" style="width:100%;max-width:480px;background:linear-gradient(180deg,#f0f8ff,#fff);border-radius:24px 24px 0 0;padding:24px 20px 40px;box-shadow:0 -8px 32px rgba(0,0,0,.12);max-height:80vh;overflow-y:auto">
+    <div style="width:36px;height:4px;background:#a0c8e8;border-radius:2px;margin:0 auto 16px"></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+      <div>
+        <div style="font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:var(--textd)">☀️ Midday Check-In</div>
+        <div style="font-size:12px;color:var(--textl);font-family:'Quicksand',sans-serif;margin-top:2px">Midday routine</div>
+      </div>
+      <button onclick="closeOv('ovMidday')" style="background:none;border:none;font-size:18px;cursor:pointer;color:var(--textl);padding:4px">✕</button>
+    </div>
+    <div id="middayList"></div>
+    <button onclick="closeOv('ovMidday')" style="width:100%;margin-top:16px;padding:13px;border-radius:14px;border:none;background:linear-gradient(135deg,#7ab8e8,#4a8ac8);color:#fff;font-family:'Quicksand',sans-serif;font-size:14px;font-weight:700;cursor:pointer">Keep going ☀️</button>
+  </div>
+</div>
+
 <!-- ONE THING MODE -->
 <div id="ovOneThing" style="position:fixed;inset:0;z-index:10000;display:none;flex-direction:column;background:linear-gradient(160deg,#fdf8f4 0%,#f8f0f4 50%,#f4f0fc 100%)">
   <div class="hatch-wrap">
@@ -24047,6 +24108,8 @@ function delProjInc(id){
       <div style="font-family:'Playfair Display',serif;font-size:20px;color:var(--textd);font-weight:700;margin-bottom:4px">Day Wrap-Up</div>
       <div id="wrapUpDate" style="font-size:12px;color:var(--textl)"></div>
     </div>
+    <div style="font-family:'Quicksand',sans-serif;font-size:12px;font-weight:700;color:var(--textl);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">🌙 PM Routine</div>
+    <div id="wrapUpChecklist" style="margin-bottom:16px"></div>
     <div id="wrapUpStats" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px"></div>
     <div id="wrapUpMsg" style="background:linear-gradient(135deg,#fff8e8,#fef4dc);border-radius:14px;padding:14px 16px;font-size:14px;color:var(--textd);line-height:1.5;text-align:center;margin-bottom:18px;font-style:italic"></div>
     <button onclick="closeOv('ovDayWrapUp')" style="width:100%;padding:13px;border-radius:14px;border:none;background:linear-gradient(135deg,#f0c840,#d4a820);font-family:'Quicksand',sans-serif;font-size:14px;font-weight:700;color:#fff;cursor:pointer">✨ Good work today</button>
