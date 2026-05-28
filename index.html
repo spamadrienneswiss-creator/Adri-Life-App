@@ -5866,6 +5866,8 @@ function goTabDirect(tab,btn){
   if(tab==='work-projects'){ renderWorkProjects(); }
 
   if(tab==='meals'||tab==='food') renderWaterBottle();
+  if(tab==='meals'){ showMealSec('meals',document.querySelector('#v-meals .pn-btn:nth-child(2)')); }
+  if(tab==='wellness'){ showWellnessSec('mood',document.querySelector('#v-wellness .pn-btn:nth-child(1)')); }
   if(tab==='workshop'){ renderWSProjects(); }
 }
 
@@ -21117,9 +21119,9 @@ function runSearch(q){
       });
     });
     // Meal log
-    (MEAL_LOG||[]).forEach(function(m){
+    (MEAL_LOG_ITEMS||[]).forEach(function(m){
       if((m.name||'').toLowerCase().includes(q))
-        push({icon:'🍳',label:m.name,sub:'Meal log · '+(m.date||m.day||''),action:nav+"goTab('meals',null)"});
+        push({icon:'🍳',label:m.name,sub:'Meal log · '+(m.date||''),action:nav+"goTab('meals',null)"});
     });
   }
   // ── Notes & brain dump
