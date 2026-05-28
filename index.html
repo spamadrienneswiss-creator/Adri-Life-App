@@ -1278,7 +1278,7 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     </div>
     <div class="hub-card span2" onclick="goTab('wigs',null)"><div class="hub-card-ic">🪄</div><div class="hub-card-name">Wigs</div><div class="hub-card-sub" id="hub-wigs-sub">Loading…</div></div>
     <div class="hub-card span2" onclick="goTab('work-projects',null)"><div class="hub-card-ic">📁</div><div class="hub-card-name">Work Projects</div><div class="hub-card-sub" id="hub-work-proj-sub">Wig projects &amp; tasks</div></div>
-    <div class="hub-card span2" onclick="goTab('loreal',null)" style="background:linear-gradient(135deg,#fff0f4,#fce8f0)"><div class="hub-card-ic">💄</div><div class="hub-card-name">Fragrance &amp; Beauty</div><div class="hub-card-sub">YSL · Prada · Miu Miu</div></div>
+    <div class="hub-card span2" onclick="goTab('content',null)" style="background:linear-gradient(135deg,#f0f4ff,#e8eeff)"><div class="hub-card-ic">🎬</div><div class="hub-card-name">Content Creation</div><div class="hub-card-sub" id="hub-content-sub">Ideas, drafts &amp; posts</div></div>
   </div>
 </div>
 
@@ -1838,6 +1838,28 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     <button onclick="openLorealNoteModal(null)" style="padding:3px 10px;border-radius:8px;border:1.5px solid var(--bdr);background:none;font-family:'Quicksand',sans-serif;font-size:11px;font-weight:700;cursor:pointer;color:var(--textd)">＋ Add</button>
   </div>
   <div id="lorealNotes" style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px"></div>
+</div>
+
+<div class="view" id="v-content">
+  <div style="background:linear-gradient(135deg,#f0f4ff,#e8eeff);border-radius:16px;padding:14px 16px;margin-bottom:14px;display:flex;align-items:center;gap:12px">
+    <span style="font-size:28px">🎬</span>
+    <div style="flex:1">
+      <div style="font-family:'Playfair Display',serif;font-size:18px;color:var(--textd);font-weight:700">Content Creation</div>
+      <div style="font-size:11px;color:var(--textl);margin-top:1px">Ideas, drafts &amp; posts</div>
+    </div>
+    <button onclick="openContentModal(null)" style="padding:6px 14px;border-radius:10px;border:1.5px solid #8899dd;background:#fff;font-family:'Quicksand',sans-serif;font-size:12px;font-weight:700;cursor:pointer;color:#4466cc">＋ Add</button>
+  </div>
+  <!-- Status filter pills -->
+  <div class="pill-nav" style="margin-bottom:12px;flex-wrap:wrap" id="contentFilterRow">
+    <button class="pn-btn on" data-cf="all" onclick="setContentFilter('all',this)">All</button>
+    <button class="pn-btn" data-cf="idea" onclick="setContentFilter('idea',this)">💡 Idea</button>
+    <button class="pn-btn" data-cf="draft" onclick="setContentFilter('draft',this)">✏️ Draft</button>
+    <button class="pn-btn" data-cf="filming" onclick="setContentFilter('filming',this)">🎥 Filming</button>
+    <button class="pn-btn" data-cf="editing" onclick="setContentFilter('editing',this)">🎞️ Editing</button>
+    <button class="pn-btn" data-cf="ready" onclick="setContentFilter('ready',this)">✅ Ready</button>
+    <button class="pn-btn" data-cf="posted" onclick="setContentFilter('posted',this)">🚀 Posted</button>
+  </div>
+  <div id="contentList"></div>
 </div>
 
 <div class="view" id="v-work-projects">
@@ -5464,9 +5486,9 @@ var MEAL_COMBOS = JSON.parse(localStorage.getItem('aMC')||'null')||[
 ];
 
 var DEFAULT_TAB_ORDER=['today','plan','helm','lighthouse','conservatory','hearthside','workshop','estate','emporium','archives','archive','settings'];
-var TAB_LABELS={today:'Today',plan:'Plan',helm:'Tasks & Projects',conservatory:'Personal Growth',hearthside:'Health & Wellness',workshop:'Workshop',lighthouse:'Spiritual',estate:'Money & Home',emporium:'Work',archives:'Research Library',archive:'Archive',settings:'Settings',stories:'Stories',mixtape:'Mixtape','focus-session':'Focus Session',grocery:'Grocery List',export:'Export',routines:'Routines',lists:'Lists'};
+var TAB_LABELS={today:'Today',plan:'Plan',helm:'Tasks & Projects',conservatory:'Personal Growth',hearthside:'Health & Wellness',workshop:'Workshop',lighthouse:'Spiritual',estate:'Money & Home',emporium:'Work',archives:'Research Library',archive:'Archive',settings:'Settings',stories:'Stories',mixtape:'Mixtape','focus-session':'Focus Session',grocery:'Grocery List',export:'Export',routines:'Routines',lists:'Lists',content:'Content Creation'};
 var TAB_ORDER=(function(){var o=JSON.parse(localStorage.getItem('aTabOrder')||'null');if(!o)return DEFAULT_TAB_ORDER.slice();var full=DEFAULT_TAB_ORDER.slice();o=o.filter(function(t){return full.indexOf(t)>-1;});full.forEach(function(t){if(o.indexOf(t)<0)o.push(t);});return o;})();
-var SECTION_VIEWS={today:['today'],plan:['plan'],helm:['tasks','projects','focus-session','grocery','routines'],lists:['lists'],conservatory:['goals','learn','focus','spark'],hearthside:['food','meals','wellness','recap'],workshop:['board','faves','stories','mixtape','places'],lighthouse:['spirit'],estate:['money','accounts','home-items','money-projects'],emporium:['wigs','work-projects','loreal'],archives:['guide'],settings:['settings','export'],archive:['archive']};
+var SECTION_VIEWS={today:['today'],plan:['plan'],helm:['tasks','projects','focus-session','grocery','routines'],lists:['lists'],conservatory:['goals','learn','focus','spark'],hearthside:['food','meals','wellness','recap'],workshop:['board','faves','stories','mixtape','places'],lighthouse:['spirit'],estate:['money','accounts','home-items','money-projects'],emporium:['wigs','work-projects','content'],archives:['guide'],settings:['settings','export'],archive:['archive']};
 var SECTION_LABELS={today:'Today',plan:'Plan',helm:'Tasks & Projects',conservatory:'Personal Growth',hearthside:'Health & Wellness',workshop:'Workshop',lighthouse:'Spiritual',estate:'Money & Home',emporium:'Work',archives:'Research Library',archive:'Archive',settings:'Settings'};
 var VIEW_SECTION=(function(){var m={};Object.keys(SECTION_VIEWS).forEach(function(s){SECTION_VIEWS[s].forEach(function(v){m[v]=s;});});return m;})();
 
@@ -5780,6 +5802,7 @@ function goTabDirect(tab,btn){
   if(tab==='lists'){ renderListQBar(); renderLists(); }
   if(tab==='wigs'){ renderWigOrders(); }
   if(tab==='loreal'){ renderLorealPage(); }
+  if(tab==='content'){ renderContentPage(); }
   if(tab==='plan'){ renderPlan(); }
   if(tab==='grocery'){ renderGroceryList(); populateGrocTaskDatalist(); }
   if(tab==='guide'){ renderResearchLib(); renderGuide(); renderTmplList(); renderAppIndex(); }
@@ -22784,6 +22807,121 @@ function delLorealNote(id){
   renderLorealNotes();
 }
 
+// ═══════════════════════════════════════════════
+// CONTENT CREATION PAGE
+// ═══════════════════════════════════════════════
+var CONTENT_ITEMS = JSON.parse(localStorage.getItem('aContentItems')||'[]');
+function saveContentItems(){ localStorage.setItem('aContentItems',JSON.stringify(CONTENT_ITEMS)); }
+
+var _contentFilter='all';
+function setContentFilter(f,btn){
+  _contentFilter=f;
+  document.querySelectorAll('#contentFilterRow .pn-btn').forEach(function(b){b.classList.remove('on');});
+  if(btn)btn.classList.add('on');
+  renderContentList();
+}
+
+var _CONTENT_STATUS_LABEL={idea:'💡 Idea',draft:'✏️ Draft',filming:'🎥 Filming',editing:'🎞️ Editing',ready:'✅ Ready',posted:'🚀 Posted'};
+var _CONTENT_STATUS_COLOR={idea:'#f5f0e8',draft:'#e8f0ff',filming:'#fff0e8',editing:'#f0e8ff',ready:'#e8f8e8',posted:'#e8f0f8'};
+var _CONTENT_PLATFORM_ICON={instagram:'📸',tiktok:'🎵',youtube:'▶️',pinterest:'📌',facebook:'👥',other:'🌐'};
+
+function renderContentPage(){
+  _contentFilter='all';
+  document.querySelectorAll('#contentFilterRow .pn-btn').forEach(function(b,i){b.classList.toggle('on',i===0);});
+  renderContentList();
+  var el=document.getElementById('hub-content-sub');
+  if(el){
+    var total=CONTENT_ITEMS.length;
+    var posted=CONTENT_ITEMS.filter(function(c){return c.status==='posted';}).length;
+    el.textContent=total?posted+' posted · '+(total-posted)+' in progress':'Ideas, drafts & posts';
+  }
+}
+
+function renderContentList(){
+  var el=document.getElementById('contentList');if(!el)return;
+  var items=_contentFilter==='all'?CONTENT_ITEMS:CONTENT_ITEMS.filter(function(c){return c.status===_contentFilter;});
+  if(!items.length){
+    el.innerHTML='<div class="empty"><div class="emj">🎬</div><p>'+(CONTENT_ITEMS.length?'Nothing in this status.':'No content yet. Tap ＋ Add to start!')+'</p></div>';
+    return;
+  }
+  el.innerHTML=items.map(function(c){
+    var platforms=(c.platforms||[]).map(function(p){return _CONTENT_PLATFORM_ICON[p]||'🌐';}).join(' ');
+    var bg=_CONTENT_STATUS_COLOR[c.status]||'#fff';
+    return '<div style="background:'+bg+';border-radius:14px;border:1.5px solid var(--bdr);padding:12px 14px;margin-bottom:10px;box-shadow:0 1px 3px rgba(0,0,0,.04)">'
+      +'<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">'
+        +'<div style="flex:1">'
+          +'<div style="font-size:13px;font-weight:700;color:var(--textd);margin-bottom:4px">'+escHtml(c.title)+'</div>'
+          +'<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">'
+            +'<span style="font-size:11px;font-weight:700;background:rgba(255,255,255,.7);border-radius:6px;padding:2px 7px;color:var(--textd)">'+(_CONTENT_STATUS_LABEL[c.status]||c.status)+'</span>'
+            +(platforms?'<span style="font-size:13px">'+platforms+'</span>':'')
+            +(c.date?'<span style="font-size:11px;color:var(--textl)">'+c.date+'</span>':'')
+          +'</div>'
+          +(c.notes?'<div style="font-size:12px;color:var(--textl);margin-top:6px;white-space:pre-wrap;line-height:1.4">'+escHtml(c.notes)+'</div>':'')
+        +'</div>'
+        +'<div style="display:flex;gap:2px;flex-shrink:0">'
+          +'<button onclick="openContentModal(\''+c.id+'\')" style="background:none;border:none;font-size:14px;cursor:pointer;padding:3px 5px">✏️</button>'
+          +'<button onclick="delContentItem(\''+c.id+'\')" style="background:none;border:none;font-size:14px;cursor:pointer;padding:3px 5px">🗑️</button>'
+        +'</div>'
+      +'</div>'
+    +'</div>';
+  }).join('');
+}
+
+function openContentModal(id){
+  var c=id?CONTENT_ITEMS.find(function(x){return x.id===id;}):null;
+  document.getElementById('contentModalTitle').textContent=c?'🎬 Edit Content':'🎬 New Content';
+  document.getElementById('contentItemId').value=id||'';
+  document.getElementById('contentItemTitle').value=c?c.title:'';
+  document.getElementById('contentItemStatus').value=c?c.status:'idea';
+  document.getElementById('contentItemNotes').value=c?c.notes||'':'';
+  document.getElementById('contentItemDate').value=c?c.date||'':'';
+  document.getElementById('contentPostDateWrap').style.display=(c&&c.status==='posted')?'':'none';
+  document.querySelectorAll('#contentPlatformPills .fchip').forEach(function(btn){
+    btn.classList.toggle('on',(c&&(c.platforms||[]).indexOf(btn.getAttribute('data-p'))>-1));
+  });
+  document.getElementById('contentItemStatus').onchange=function(){
+    document.getElementById('contentPostDateWrap').style.display=this.value==='posted'?'':'none';
+  };
+  showOv('ovContentModal');
+}
+
+function toggleContentPlatform(btn){
+  btn.classList.toggle('on');
+}
+
+function saveContentItem(){
+  var id=document.getElementById('contentItemId').value;
+  var title=document.getElementById('contentItemTitle').value.trim();
+  if(!title){showToast('Add a title first');return;}
+  var platforms=[];
+  document.querySelectorAll('#contentPlatformPills .fchip.on').forEach(function(btn){platforms.push(btn.getAttribute('data-p'));});
+  var obj={
+    id:id||'ct'+Date.now(),
+    title:title,
+    platforms:platforms,
+    status:document.getElementById('contentItemStatus').value,
+    date:document.getElementById('contentItemDate').value||'',
+    notes:document.getElementById('contentItemNotes').value.trim()
+  };
+  if(id){
+    var idx=CONTENT_ITEMS.findIndex(function(x){return x.id===id;});
+    if(idx>-1)CONTENT_ITEMS[idx]=obj;
+  } else {
+    CONTENT_ITEMS.unshift(obj);
+  }
+  saveContentItems();
+  closeOv('ovContentModal');
+  renderContentPage();
+  showToast('Saved 🎬');
+}
+
+function delContentItem(id){
+  if(!confirm('Delete this content item?'))return;
+  CONTENT_ITEMS=CONTENT_ITEMS.filter(function(c){return c.id!==id;});
+  saveContentItems();
+  renderContentList();
+}
+
 // WORK PROJECTS
 // ═══════════════════════════════════════════════
 function renderWorkProjects(){
@@ -24400,6 +24538,41 @@ function delProjInc(id){
     <div style="font-size:11px;font-weight:700;color:var(--textl);margin-bottom:4px">Notes</div>
     <textarea id="lorealNoteBody" class="fi" rows="7" placeholder="Write your reference notes here…" style="width:100%;resize:vertical;box-sizing:border-box;margin-bottom:14px"></textarea>
     <button class="ok-btn" style="width:100%;margin:0" onclick="saveLorealNote()">Save</button>
+  </div>
+</div>
+
+<!-- Content Creation Modal -->
+<div class="ov" id="ovContentModal" onclick="closeOv('ovContentModal')">
+  <div class="ov-box" onclick="event.stopPropagation()">
+    <div class="mh"><span class="mt" id="contentModalTitle">🎬 New Content</span><button class="mc" onclick="closeOv('ovContentModal')">✕</button></div>
+    <input type="hidden" id="contentItemId">
+    <div class="fg"><label class="fl">Title / Concept</label>
+      <input id="contentItemTitle" class="fi" placeholder="e.g. Wig install timelapse"></div>
+    <div class="fg"><label class="fl">Platform</label>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:4px" id="contentPlatformPills">
+        <button class="fchip" data-p="instagram" onclick="toggleContentPlatform(this)">📸 Instagram</button>
+        <button class="fchip" data-p="tiktok" onclick="toggleContentPlatform(this)">🎵 TikTok</button>
+        <button class="fchip" data-p="youtube" onclick="toggleContentPlatform(this)">▶️ YouTube</button>
+        <button class="fchip" data-p="pinterest" onclick="toggleContentPlatform(this)">📌 Pinterest</button>
+        <button class="fchip" data-p="facebook" onclick="toggleContentPlatform(this)">👥 Facebook</button>
+        <button class="fchip" data-p="other" onclick="toggleContentPlatform(this)">🌐 Other</button>
+      </div>
+    </div>
+    <div class="fg"><label class="fl">Status</label>
+      <select id="contentItemStatus" class="fi">
+        <option value="idea">💡 Idea</option>
+        <option value="draft">✏️ Draft</option>
+        <option value="filming">🎥 Filming</option>
+        <option value="editing">🎞️ Editing</option>
+        <option value="ready">✅ Ready to Post</option>
+        <option value="posted">🚀 Posted</option>
+      </select>
+    </div>
+    <div class="fg" id="contentPostDateWrap" style="display:none"><label class="fl">Date Posted</label>
+      <input id="contentItemDate" class="fi" type="date"></div>
+    <div class="fg"><label class="fl">Notes</label>
+      <textarea id="contentItemNotes" class="fi" rows="3" placeholder="Caption ideas, hashtags, links…" style="width:100%;resize:vertical;box-sizing:border-box"></textarea></div>
+    <button class="ok-btn" style="width:100%;margin:0" onclick="saveContentItem()">Save</button>
   </div>
 </div>
 
