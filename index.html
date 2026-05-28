@@ -5009,6 +5009,7 @@ function openMonthReflection(yr,mo){
   var MONTH_NAMES2=['','January','February','March','April','May','June','July','August','September','October','November','December'];
   var el=document.getElementById('reflModalTitle');
   if(el)el.textContent='📓 '+MONTH_NAMES2[parseInt(mo,10)]+' '+yr;
+  renderReflSleepSec(yr,mo);
   renderReflTimeSec(yr,mo);
   renderReflQuestions(yr,mo);
   var mems=(MEMORIES||[]).filter(function(m){return (m.date||'').startsWith(yr+'-'+mo);});
@@ -5069,6 +5070,50 @@ function saveReflNotes(){
   if(!ARCHIVE_YEARS[_reflYear].months[_reflMo])ARCHIVE_YEARS[_reflYear].months[_reflMo]={questions:[],notes:''};
   ARCHIVE_YEARS[_reflYear].months[_reflMo].notes=notesEl.value;
   saveArchiveYears();
+}
+
+function renderReflSleepSec(yr,mo){
+  var el=document.getElementById('reflSleepSection');if(!el)return;
+  var prefix=yr+'-'+mo;
+  var MONTH_NAMES=['','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  var moLabel=MONTH_NAMES[parseInt(mo,10)]+' '+yr;
+  var goalH=(S&&S.gSleep)||7;
+  var entries=(MILLIE.sleepLog||[]).filter(function(e){
+    var d=(e.slept||e.woke||'').slice(0,10);
+    return d.startsWith(prefix);
+  }).sort(function(a,b){return(a.slept||'')<(b.slept||'')?-1:1;});
+  if(!entries.length){el.innerHTML='';return;}
+  var totalH=entries.reduce(function(s,e){return s+(e.durH||0)+(e.durM||0)/60;},0);
+  var avg=totalH/entries.length;
+  var atGoal=entries.filter(function(e){return (e.durH||0)+(e.durM||0)/60>=goalH;}).length;
+  var ms=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  var ds=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  var html='<div style="background:var(--bg2);border-radius:12px;padding:12px 14px;margin-bottom:0">'
+    +'<div style="font-size:12px;font-weight:700;color:var(--textd);margin-bottom:8px">😴 Sleep — '+moLabel+'</div>'
+    +'<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px">'
+    +'<span style="font-size:11px;background:#fff;border-radius:8px;padding:3px 8px;font-weight:700;color:var(--textd)">'+entries.length+' nights logged</span>'
+    +'<span style="font-size:11px;background:#fff;border-radius:8px;padding:3px 8px;font-weight:700;color:var(--textd)">avg '+avg.toFixed(1)+'h</span>'
+    +(atGoal?'<span style="font-size:11px;background:#e8f8e8;border-radius:8px;padding:3px 8px;font-weight:700;color:#3a7a3a">'+atGoal+'x at goal</span>':'')
+    +'</div>'
+    +'<div style="display:flex;flex-direction:column;gap:4px">';
+  entries.forEach(function(e){
+    var sleptDT=e.slept?new Date(e.slept):null;
+    var wokeDT=e.woke?new Date(e.woke):null;
+    var h=(e.durH||0)+(e.durM||0)/60;
+    var dateLabel=sleptDT?(ds[sleptDT.getDay()]+', '+ms[sleptDT.getMonth()]+' '+sleptDT.getDate()):(e.date||'');
+    var bedStr=sleptDT?sleptDT.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'}):'—';
+    var wakeStr=wokeDT?wokeDT.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'}):'—';
+    var dur=e.durH!=null?(e.durH+'h '+(e.durM<10?'0':'')+e.durM+'m'):'—';
+    var dotC=h>=goalH?'#5a9a6a':h>=6?'#e09a30':'#d04040';
+    html+='<div style="display:flex;align-items:center;gap:8px;padding:4px 0;border-top:1px solid #ece8f0">'
+      +'<span style="width:8px;height:8px;border-radius:50%;background:'+dotC+';flex-shrink:0;display:inline-block"></span>'
+      +'<span style="font-size:11px;color:var(--textd);font-weight:600;min-width:90px">'+dateLabel+'</span>'
+      +'<span style="font-size:11px;color:var(--textl)">'+bedStr+' → '+wakeStr+'</span>'
+      +'<span style="font-size:11px;font-weight:700;color:var(--textd);margin-left:auto">'+dur+'</span>'
+      +'</div>';
+  });
+  html+='</div></div>';
+  el.innerHTML=html;
 }
 
 var _CATNAMES={mis:'Misc',wig:'Wigs',min:'Ministry',hom:'Home',per:'Personal',fin:'Finance',hea:'Health',lea:'Learning',soc:'Social',bus:'Business'};
@@ -22170,34 +22215,28 @@ function renderSleepGraph(){
   var avg=logged.length?(logged.reduce(function(a,b){return a+b;},0)/logged.length):0;
   if(avgLbl)avgLbl.textContent=logged.length?'avg '+avg.toFixed(1)+'h · goal '+goalH+'h':'goal: '+goalH+'h';
 
-  // Sparse data nudge
-  if(logged.length<3){
-    var msg=logged.length===0?'Log your sleep to see your trend here ✨':
-      'Keep logging — your trend will appear after a few nights 😴';
-    el.innerHTML='<div style="height:140px;display:flex;align-items:center;justify-content:center;text-align:center;padding:0 20px">'
-      +'<div style="font-size:12px;color:var(--textl);font-style:italic;line-height:1.5">'+msg+'</div></div>';
+  // No data at all — just a nudge, no graph
+  if(!logged.length){
+    el.innerHTML='<div style="height:120px;display:flex;align-items:center;justify-content:center;text-align:center;padding:0 20px">'
+      +'<div style="font-size:12px;color:var(--textl);font-style:italic">Log your sleep to see your trend here 😴</div></div>';
     return;
   }
 
   var W=el.offsetWidth||320;
   var H=160;
-  var padL=28,padR=10,padT=14,padB=26;
+  var padL=28,padR=36,padT=14,padB=26;
   var cW=W-padL-padR;
   var cH=H-padT-padB;
-
-  // Y scale: always 0–10 (or higher if someone logged >10h)
-  var dataMax=logged.length?Math.max.apply(null,logged):0;
+  var dataMax=Math.max.apply(null,logged);
   var maxH=Math.max(10,Math.ceil(dataMax)+1);
 
   function xp(i){return padL+(i/(numDays-1))*cW;}
   function yp(h){return padT+cH*(1-h/maxH);}
   function dotColor(h){return h>=goalH?'#5a9a6a':h>=6?'#e09a30':'#d04040';}
 
-  // Build line + area paths
   var linePts=[];
   values.forEach(function(v,i){if(v!==null)linePts.push({i:i,v:v,x:xp(i),y:yp(v)});});
 
-  // Connect all logged points with a single path
   var linePath='',areaPath='';
   if(linePts.length>=2){
     linePath=linePts.map(function(p,j){return(j===0?'M':'L')+p.x.toFixed(1)+' '+p.y.toFixed(1);}).join(' ');
@@ -22208,7 +22247,6 @@ function renderSleepGraph(){
   var uid='sg'+Date.now();
   var svg='<svg width="100%" height="'+H+'" viewBox="0 0 '+W+' '+H+'" xmlns="http://www.w3.org/2000/svg" style="display:block;overflow:visible">';
 
-  // Defs: area gradient
   svg+='<defs>'
     +'<linearGradient id="'+uid+'g" x1="0" y1="0" x2="0" y2="1">'
     +'<stop offset="0%" stop-color="#c9a8d8" stop-opacity="0.28"/>'
@@ -22216,25 +22254,19 @@ function renderSleepGraph(){
     +'</linearGradient>'
     +'</defs>';
 
-  // Grid — every 2 hours
+  // Grid every 2h
   for(var gh=0;gh<=maxH;gh+=2){
     var gy=yp(gh);
     var isGoal=(gh===goalH);
-    svg+='<line x1="'+padL+'" y1="'+gy.toFixed(1)+'" x2="'+(padL+cW)+'" y2="'+gy.toFixed(1)+'" stroke="'+(isGoal?'#8ab89a':'#e8e4ee')+'" stroke-width="'+(isGoal?'1.2':'0.7')+'" stroke-dasharray="'+(isGoal?'5,3':'')+'" opacity="'+(isGoal?'0.8':'1')+'"/>';
+    svg+='<line x1="'+padL+'" y1="'+gy.toFixed(1)+'" x2="'+(padL+cW)+'" y2="'+gy.toFixed(1)+'" stroke="'+(isGoal?'#8ab89a':'#e8e4ee')+'" stroke-width="'+(isGoal?'1.2':'0.7')+'" stroke-dasharray="'+(isGoal?'5,3':'')+'" opacity="'+(isGoal?'0.9':'1')+'"/>';
     svg+='<text x="'+(padL-4)+'" y="'+(gy+3.5).toFixed(1)+'" text-anchor="end" font-size="8" fill="#c0b8c8">'+gh+'</text>';
   }
+  // Goal label on right
+  svg+='<text x="'+(padL+cW+4)+'" y="'+(yp(goalH)+3.5).toFixed(1)+'" font-size="8" fill="#5a9a6a" font-weight="700">goal</text>';
 
-  // Goal line label
-  var gly=yp(goalH);
-  svg+='<text x="'+(padL+cW+3)+'" y="'+(gly+3.5).toFixed(1)+'" font-size="8" fill="#5a9a6a" font-weight="700">goal</text>';
-
-  // Area fill
   if(areaPath)svg+='<path d="'+areaPath+'" fill="url(#'+uid+'g)"/>';
-
-  // Line
   if(linePath)svg+='<path d="'+linePath+'" fill="none" stroke="#b0a0cc" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>';
 
-  // Dots
   linePts.forEach(function(p){
     var c=dotColor(p.v);
     var lbl=days[p.i]+': '+p.v.toFixed(1)+'h';
@@ -22242,7 +22274,7 @@ function renderSleepGraph(){
     svg+='<circle cx="'+p.x.toFixed(1)+'" cy="'+p.y.toFixed(1)+'" r="12" fill="transparent"><title>'+lbl+'</title></circle>';
   });
 
-  // X-axis labels
+  // X labels
   var today=todayStr();
   [0,7,14,21,28,29].forEach(function(i){
     if(i>=numDays)return;
@@ -22253,8 +22285,11 @@ function renderSleepGraph(){
   });
 
   svg+='</svg>';
-  el.innerHTML=svg;
-  el.style.height=H+'px';
+
+  // Subtle nudge below graph when fewer than 5 nights logged
+  var nudge=logged.length<5?'<div style="font-size:10px;color:var(--textl);font-style:italic;text-align:center;margin-top:4px">Keep logging — your trend builds after a few nights ✨</div>':'';
+  el.innerHTML=svg+nudge;
+  el.style.height='auto';
 }
 
 function renderTodaySleepChip(){
@@ -24888,6 +24923,7 @@ function delProjInc(id){
 <div class="ov" id="ovMonthReflection" onclick="closeOv('ovMonthReflection')">
   <div class="mod" style="max-height:90vh;overflow-y:auto" onclick="event.stopPropagation()">
     <div class="mh"><span class="mt" id="reflModalTitle">📓 Monthly Reflection</span><button class="mc" onclick="closeOv('ovMonthReflection')">✕</button></div>
+    <div id="reflSleepSection" style="margin-bottom:14px"></div>
     <div id="reflTimeSection" style="margin-bottom:14px"></div>
     <div style="font-size:11px;font-weight:700;color:var(--textl);letter-spacing:.5px;text-transform:uppercase;margin-bottom:6px">Reflection Questions</div>
     <div id="reflQList" style="margin-bottom:10px"></div>
