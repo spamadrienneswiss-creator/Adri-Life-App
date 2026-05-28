@@ -4613,7 +4613,8 @@ function snapshotToArchiveYear(){
     var yr=t.doneDate?+t.doneDate.substring(0,4):now.getFullYear();
     if(!ARCHIVE_YEARS[yr])ARCHIVE_YEARS[yr]={tasks:[],goals:[],notes:'',months:{},created:new Date().toISOString()};
     var already=ARCHIVE_YEARS[yr].tasks.find(function(x){return x.id===t.id;});
-    if(!already)ARCHIVE_YEARS[yr].tasks.push({id:t.id,title:t.title,cat:t.cat,doneDate:t.doneDate||'',due:t.due||''});
+    if(!already){ARCHIVE_YEARS[yr].tasks.push({id:t.id,title:t.title,cat:t.cat,doneDate:t.doneDate||'',due:t.due||'',estimatedMin:t.estimatedMin,actualMin:t.actualMin});}
+    else{if(t.estimatedMin)already.estimatedMin=t.estimatedMin;if(t.actualMin)already.actualMin=t.actualMin;}
   });
   // Snapshot completed goals
   (GOALS||[]).filter(function(g){return g.done;}).forEach(function(g){
@@ -4667,9 +4668,79 @@ function renderArchiveYear(yr){
   var habitLog=JSON.parse(localStorage.getItem('aHabitLog')||'{}');
   var yearHabitDays=Object.keys(habitLog).filter(function(k){return k.startsWith(yearStr);}).length;
 
+  // Time by month chart data
+  var _timeByMo={};var _activeDaysByMo={};var _MONLABS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  for(var _mi=1;_mi<=12;_mi++){_timeByMo[_mi]=0;_activeDaysByMo[_mi]={};}
+  // From archived tasks (includes historical)
+  tasks.forEach(function(t){
+    if(t.doneDate&&t.doneDate.startsWith(yearStr)){
+      var _mo2=parseInt(t.doneDate.slice(5,7));
+      if(t.actualMin)_timeByMo[_mo2]=((_timeByMo[_mo2]||0)+t.actualMin);
+      _activeDaysByMo[_mo2][t.doneDate]=1;
+    }
+  });
+  // Also pull from live TASKS for current year (time data may be newer)
+  if(yr===new Date().getFullYear()){
+    (TASKS||[]).filter(function(t){return t.done&&t.doneDate&&t.doneDate.startsWith(yearStr);}).forEach(function(t){
+      var _mo3=parseInt(t.doneDate.slice(5,7));
+      if(t.actualMin){var _arch=tasks.find(function(x){return x.id===t.id;});if(!_arch||!_arch.actualMin)_timeByMo[_mo3]=((_timeByMo[_mo3]||0)+t.actualMin);}
+      _activeDaysByMo[_mo3][t.doneDate]=1;
+    });
+  }
+  var _maxTime=0;for(var _mi2=1;_mi2<=12;_mi2++){if(_timeByMo[_mi2]>_maxTime)_maxTime=_timeByMo[_mi2];}
+  var _totalTimeYr=0;for(var _mi3=1;_mi3<=12;_mi3++)_totalTimeYr+=_timeByMo[_mi3];
+  var _totalActiveDays=0;for(var _mi4=1;_mi4<=12;_mi4++)_totalActiveDays+=Object.keys(_activeDaysByMo[_mi4]).length;
+
   content.innerHTML=
+    // Time bar chart (only show if there's any data)
+    (_maxTime>0?
+    '<div class="card" style="margin-bottom:10px">'
+      +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">'
+        +'<div style="font-size:13px;font-weight:700;color:var(--textd)">⏱️ Time Logged — '+yr+'</div>'
+        +'<div style="font-size:12px;color:var(--textl);font-weight:600">'+_fmtMin(_totalTimeYr)+' total</div>'
+      +'</div>'
+      +'<div style="display:flex;align-items:flex-end;gap:3px;height:56px;margin-bottom:4px">'
+      +(function(){
+        return _MONLABS.map(function(lab,i){
+          var mo=i+1;var t2=_timeByMo[mo];var h=_maxTime?Math.round((t2/_maxTime)*52):0;
+          var activeDays=Object.keys(_activeDaysByMo[mo]).length;
+          var isCurrentMo=(yr===new Date().getFullYear()&&mo===new Date().getMonth()+1);
+          var barColor=isCurrentMo?'var(--sage)':'var(--blue)';
+          return '<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:1px;cursor:pointer" onclick="openMonthReflection('+yr+',\''+(mo<10?'0'+mo:''+mo)+'\')" title="'+lab+': '+_fmtMin(t2)+(activeDays?' · '+activeDays+' active days':'')+'">'
+            +'<div style="width:100%;background:'+(h>0?barColor:'var(--bg2)')+';border-radius:3px 3px 0 0;min-height:3px;height:'+h+'px;transition:height .3s"></div>'
+            +'</div>';
+        }).join('');
+      })()
+      +'</div>'
+      +'<div style="display:flex;gap:0">'
+      +_MONLABS.map(function(lab,i){
+        var mo=i+1;var t2=_timeByMo[mo];
+        return '<div style="flex:1;text-align:center;font-size:9px;color:'+(t2>0?'var(--textd)':'var(--textl)')+';font-weight:'+(t2>0?'700':'400')+'">'+lab+'</div>';
+      }).join('')
+      +'</div>'
+    +'</div>'
+    :'')
+
+    // Active days summary
+    +(_totalActiveDays>0?
+    '<div class="card" style="margin-bottom:8px;padding:10px 14px">'
+      +'<div style="display:flex;align-items:center;justify-content:space-between">'
+        +'<div style="font-size:12px;font-weight:700;color:var(--textd)">📅 Active Days in '+yr+'</div>'
+        +'<div style="font-size:12px;color:var(--textl)"><strong>'+_totalActiveDays+'</strong> days with tasks logged</div>'
+      +'</div>'
+      +'<div style="display:flex;gap:3px;flex-wrap:wrap;margin-top:8px">'
+      +(function(){
+        return _MONLABS.map(function(lab,i){
+          var mo=i+1;var n=Object.keys(_activeDaysByMo[mo]).length;
+          return '<div style="font-size:10px;background:'+(n>0?'var(--sage-light)':'var(--bg2)')+';color:'+(n>0?'#4a7a46':'var(--textl)')+';border-radius:6px;padding:2px 6px;font-weight:700">'+lab+(n>0?' '+n:'')+'</div>';
+        }).join('');
+      })()
+      +'</div>'
+    +'</div>'
+    :'')
+
     // Stats row 1
-    '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:8px">'
+    +'<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:8px">'
       +'<div class="card" style="text-align:center;padding:10px"><div style="font-size:22px;font-weight:700;color:var(--rose)">'+tasks.length+'</div><div style="font-size:10px;color:var(--textl)">Tasks done</div></div>'
       +'<div class="card" style="text-align:center;padding:10px"><div style="font-size:22px;font-weight:700;color:var(--sage)">'+goals.length+'</div><div style="font-size:10px;color:var(--textl)">Goals achieved</div></div>'
       +'<div class="card" style="text-align:center;padding:10px"><div style="font-size:22px;font-weight:700;color:var(--blue)">'+(avgMood?moodEmoji[Math.round(avgMood)]||avgMood:'—')+'</div><div style="font-size:10px;color:var(--textl)">Avg mood</div></div>'
@@ -4889,6 +4960,7 @@ function openMonthReflection(yr,mo){
   var MONTH_NAMES2=['','January','February','March','April','May','June','July','August','September','October','November','December'];
   var el=document.getElementById('reflModalTitle');
   if(el)el.textContent='📓 '+MONTH_NAMES2[parseInt(mo,10)]+' '+yr;
+  renderReflTimeSec(yr,mo);
   renderReflQuestions(yr,mo);
   var mems=(MEMORIES||[]).filter(function(m){return (m.date||'').startsWith(yr+'-'+mo);});
   var memEl=document.getElementById('reflMemories');
@@ -4948,6 +5020,119 @@ function saveReflNotes(){
   if(!ARCHIVE_YEARS[_reflYear].months[_reflMo])ARCHIVE_YEARS[_reflYear].months[_reflMo]={questions:[],notes:''};
   ARCHIVE_YEARS[_reflYear].months[_reflMo].notes=notesEl.value;
   saveArchiveYears();
+}
+
+var _CATNAMES={mis:'Misc',wig:'Wigs',min:'Ministry',hom:'Home',per:'Personal',fin:'Finance',hea:'Health',lea:'Learning',soc:'Social',bus:'Business'};
+var _CATCOLORS={mis:'var(--textl)',wig:'var(--lav)',min:'#8a6030',hom:'var(--sage)',per:'var(--rose)',fin:'var(--blue)',hea:'#e07070',lea:'#4a8a9a',soc:'var(--peach)',bus:'#4a7a9b'};
+
+function renderReflTimeSec(yr,mo){
+  var el=document.getElementById('reflTimeSection');if(!el)return;
+  var datePrefix=yr+'-'+mo;
+  // Gather tasks: live TASKS first (more accurate), then archive
+  var seen={};
+  var timeTasks=[];
+  (TASKS||[]).filter(function(t){return t.done&&(t.estimatedMin||t.actualMin)&&(t.doneDate||'').startsWith(datePrefix);}).forEach(function(t){
+    seen[t.id]=true;
+    timeTasks.push({id:t.id,title:t.title,cat:t.cat||'mis',doneDate:t.doneDate,estimatedMin:t.estimatedMin,actualMin:t.actualMin,live:true});
+  });
+  var archTasks=((ARCHIVE_YEARS[yr]&&ARCHIVE_YEARS[yr].tasks)||[]).filter(function(t){return !seen[t.id]&&(t.estimatedMin||t.actualMin)&&(t.doneDate||'').startsWith(datePrefix);});
+  archTasks.forEach(function(t){timeTasks.push({id:t.id,title:t.title,cat:t.cat||'mis',doneDate:t.doneDate,estimatedMin:t.estimatedMin,actualMin:t.actualMin,live:false});});
+
+  var totEst=timeTasks.reduce(function(s,t){return s+(t.estimatedMin||0);},0);
+  var totAct=timeTasks.reduce(function(s,t){return s+(t.actualMin||0);},0);
+  var beaten=timeTasks.filter(function(t){return t.estimatedMin&&t.actualMin&&t.actualMin<t.estimatedMin;}).length;
+
+  // Category breakdown (actual minutes)
+  var byCat={};
+  timeTasks.forEach(function(t){if(t.actualMin){byCat[t.cat||'mis']=(byCat[t.cat||'mis']||0)+t.actualMin;}});
+  var catEntries=Object.keys(byCat).sort(function(a,b){return byCat[b]-byCat[a];});
+
+  var MONTH_NAMES=['','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  var moLabel=MONTH_NAMES[parseInt(mo,10)]+' '+yr;
+
+  // Active days
+  var activeDays={};
+  var allMonthTasks=[];
+  (TASKS||[]).filter(function(t){return t.done&&(t.doneDate||'').startsWith(datePrefix);}).forEach(function(t){activeDays[t.doneDate]=1;allMonthTasks.push(t);});
+  ((ARCHIVE_YEARS[yr]&&ARCHIVE_YEARS[yr].tasks)||[]).filter(function(t){return !seen[t.id]&&(t.doneDate||'').startsWith(datePrefix);}).forEach(function(t){activeDays[t.doneDate]=1;});
+  var activeDayCount=Object.keys(activeDays).length;
+
+  if(!timeTasks.length&&!activeDayCount){
+    el.innerHTML='<div style="font-size:12px;color:var(--textl);padding:4px 0 10px">No time data for '+moLabel+'. Set minutes on tasks and log actual time to see data here.</div>';
+    return;
+  }
+
+  var html='<div style="background:var(--bg2);border-radius:12px;padding:12px 14px;margin-bottom:0">';
+  html+='<div style="font-size:12px;font-weight:700;color:var(--textd);margin-bottom:8px">⏱️ Time Data — '+moLabel+'</div>';
+
+  // Summary chips
+  html+='<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px">';
+  if(activeDayCount)html+='<span style="font-size:11px;background:#fff;border-radius:8px;padding:3px 8px;font-weight:700;color:var(--textd)">📅 '+activeDayCount+' active days</span>';
+  if(timeTasks.length)html+='<span style="font-size:11px;background:#fff;border-radius:8px;padding:3px 8px;font-weight:700;color:var(--textd)">'+timeTasks.length+' tracked</span>';
+  if(totEst)html+='<span style="font-size:11px;background:#fff;border-radius:8px;padding:3px 8px;font-weight:700;color:var(--textd)">est '+_fmtMin(totEst)+'</span>';
+  if(totAct)html+='<span style="font-size:11px;background:#fff;border-radius:8px;padding:3px 8px;font-weight:700;color:var(--textd)">actual '+_fmtMin(totAct)+'</span>';
+  if(beaten>0)html+='<span style="font-size:11px;background:#e8f8e8;border-radius:8px;padding:3px 8px;font-weight:700;color:#3a7a3a">⚡ beat '+beaten+'x</span>';
+  html+='</div>';
+
+  // Category bars (if actual data)
+  if(catEntries.length&&totAct>0){
+    html+='<div style="margin-bottom:10px">';
+    catEntries.forEach(function(cat){
+      var pct=Math.round((byCat[cat]/totAct)*100);
+      var color=_CATCOLORS[cat]||'var(--textl)';
+      var name=_CATNAMES[cat]||cat;
+      html+='<div style="margin-bottom:4px">'
+        +'<div style="display:flex;justify-content:space-between;font-size:10px;margin-bottom:2px"><span style="color:'+color+';font-weight:700">'+name+'</span><span style="color:var(--textl)">'+_fmtMin(byCat[cat])+'</span></div>'
+        +'<div style="background:#e0e0e0;border-radius:4px;height:6px;overflow:hidden"><div style="height:6px;border-radius:4px;background:'+color+';width:'+pct+'%"></div></div>'
+        +'</div>';
+    });
+    html+='</div>';
+  }
+
+  // Task list with retroactive editing
+  if(timeTasks.length){
+    html+='<div id="reflTimeTasks">';
+    html+=timeTasks.map(function(t){
+      var diff=t.estimatedMin&&t.actualMin?t.estimatedMin-t.actualMin:null;
+      var badge=diff!==null?(diff>0?'<span style="font-size:10px;font-weight:700;color:#3a7a3a;background:#e8f8e8;border-radius:6px;padding:2px 6px">⚡-'+diff+'m</span>':diff<0?'<span style="font-size:10px;color:#c06030;background:#fef0e8;border-radius:6px;padding:2px 6px">+'+Math.abs(diff)+'m</span>':'<span style="font-size:10px;color:#3a7a3a;background:#e8f8e8;border-radius:6px;padding:2px 6px">🎯</span>'):'';
+      var actStr=t.actualMin?'<span style="color:var(--textd);font-weight:700">'+t.actualMin+'m</span>':'<input type="number" placeholder="actual min" min="1" max="9999" style="width:70px;padding:3px 6px;border:1.5px solid #ddd;border-radius:6px;font-size:11px;font-family:Quicksand,sans-serif" onchange="archiveSetActualMin(\''+t.id+'\','+yr+',\''+mo+'\',this.value,this)">';
+      return '<div style="display:flex;align-items:center;gap:6px;padding:5px 0;border-top:1px solid #e8e8e8">'
+        +'<div style="flex:1;font-size:11px;color:var(--textd)">'+_esc(t.title)+'</div>'
+        +(t.estimatedMin?'<span style="font-size:10px;color:var(--textl)">est '+t.estimatedMin+'m →</span>':'')
+        +actStr+badge
+        +'</div>';
+    }).join('');
+    html+='</div>';
+  }
+
+  html+='</div>';
+  el.innerHTML=html;
+}
+
+function archiveSetActualMin(taskId,yr,mo,val,inputEl){
+  var mins=parseInt(val);
+  if(isNaN(mins)||mins<1)return;
+  // Update live task if it exists
+  var liveTask=(TASKS||[]).find(function(t){return t.id===taskId;});
+  if(liveTask){
+    liveTask.actualMin=mins;
+    localStorage.setItem('aTasks',JSON.stringify(TASKS));
+    fbSave('tasks',taskId,liveTask);
+  }
+  // Update archive snapshot
+  if(ARCHIVE_YEARS[yr]){
+    var archTask=(ARCHIVE_YEARS[yr].tasks||[]).find(function(t){return t.id===taskId;});
+    if(archTask)archTask.actualMin=mins;
+    saveArchiveYears();
+  }
+  // Replace input with static display
+  if(inputEl&&inputEl.parentNode){
+    var span=document.createElement('span');
+    span.style.cssText='color:var(--textd);font-weight:700;font-size:11px';
+    span.textContent=mins+'m';
+    inputEl.parentNode.replaceChild(span,inputEl);
+  }
+  showToast('Time logged: '+mins+' min ✓');
 }
 
 function restoreTask(id){
@@ -23917,6 +24102,7 @@ function delProjInc(id){
 <div class="ov" id="ovMonthReflection" onclick="closeOv('ovMonthReflection')">
   <div class="mod" style="max-height:90vh;overflow-y:auto" onclick="event.stopPropagation()">
     <div class="mh"><span class="mt" id="reflModalTitle">📓 Monthly Reflection</span><button class="mc" onclick="closeOv('ovMonthReflection')">✕</button></div>
+    <div id="reflTimeSection" style="margin-bottom:14px"></div>
     <div style="font-size:11px;font-weight:700;color:var(--textl);letter-spacing:.5px;text-transform:uppercase;margin-bottom:6px">Reflection Questions</div>
     <div id="reflQList" style="margin-bottom:10px"></div>
     <div style="display:flex;gap:6px;margin-bottom:14px">
