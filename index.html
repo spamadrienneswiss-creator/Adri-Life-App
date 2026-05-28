@@ -5395,11 +5395,11 @@ function getAutoSection(dbItem){
 var PRICE_LOG = JSON.parse(localStorage.getItem('aPriceLog')||'[]');
 var MEAL_WEEK_OFFSET = 0; // weeks from current
 var MEAL_EDIT_INGS = []; // temp for recipe modal
-var TASKS = [];
-var EXPENSES = [];
-var WIGS = [];
-var PROJECTS = [];
-var GOALS = [];
+var TASKS = JSON.parse(localStorage.getItem('aTasks')||'[]');
+var EXPENSES = JSON.parse(localStorage.getItem('aExps')||'[]');
+var WIGS = JSON.parse(localStorage.getItem('aWigs')||'[]');
+var PROJECTS = JSON.parse(localStorage.getItem('aProjects')||'[]');
+var GOALS = JSON.parse(localStorage.getItem('aGoals')||'[]');
 var OPEN_PROJ = {}, OPEN_GOAL = {};
 
 var GCATMAP = {spiritual:{n:'🌱 Spiritual',c:'#6a5a90',bg:'var(--lav-light)'},health:{n:'💚 Health',c:'#4a7a4a',bg:'#e8f5e8'},hobbies:{n:'🌸 Hobbies',c:'#8a5060',bg:'var(--rose-light)'},learning:{n:'📚 Learning',c:'#4a7a9b',bg:'var(--blue-light)'},financial:{n:'💰 Financial',c:'#8a5a30',bg:'var(--peach-light)'},work:{n:'🪄 Work',c:'var(--rose)',bg:'var(--rose-light)'},home:{n:'🏠 Home',c:'#3a7570',bg:'var(--teal-light)'},people:{n:'💛 People',c:'#8a7030',bg:'#fff8e1'},misc:{n:'✨ Misc',c:'#7a6e68',bg:'#f5f0eb'}};
@@ -21070,129 +21070,212 @@ function runSearch(q){
   if(!q){ el.innerHTML='<p style="color:var(--textl);text-align:center;padding:20px;font-size:13px">Start typing to search…</p>'; return; }
   var results = [];
   var f = _searchFilter;
-
   function push(r){ results.push(r); }
   var nav = "closeM('searchModal');";
+  function inc(s){ return (s||'').toLowerCase().indexOf(q)>-1; }
 
-  // ── Tasks
-  if(f==='all'||f==='tasks'){
-    (TASKS||[]).forEach(function(t){
-      if(t.title.toLowerCase().includes(q)||(t.notes||'').toLowerCase().includes(q))
-        push({icon:'📋',label:t.title,sub:(t.done?'✓ Done · ':'')+( t.due?'Due '+t.due:'Task'),action:nav+"goTab('tasks',null)"});
-    });
-    (PROJECTS||[]).forEach(function(p){
-      if(p.title.toLowerCase().includes(q)||(p.notes||'').toLowerCase().includes(q))
-        push({icon:'📁',label:p.title,sub:'Project · '+(p.status||'active'),action:nav+"goTab('projects',null)"});
+  // ── Tab / page navigation
+  if(f==='all'){
+    var navTabs={today:'Today',plan:'Plan',helm:'Tasks & Projects',conservatory:'Personal Growth',hearthside:'Health & Wellness',workshop:'Workshop',lighthouse:'Spiritual',estate:'Money & Home',emporium:'Work',archives:'Research Library',archive:'Archive',settings:'Settings',routines:'Routines',lists:'Lists',meals:'Meals & Nutrition',food:'Move & Exercise',wellness:'Wellness',recap:'Recap',money:'Money',accounts:'Accounts',wigs:'Wig Orders',content:'Content Creation',learn:'Learning',goals:'Goals',spirit:'Spiritual',guide:'Research Library'};
+    Object.keys(navTabs).forEach(function(tab){
+      if(navTabs[tab].toLowerCase().indexOf(q)>-1)
+        push({icon:'🔗',label:'→ Go to '+navTabs[tab],sub:'Page / section',action:nav+"goTab('"+tab+"',null)"});
     });
   }
+
+  // ── Tasks & Projects
+  if(f==='all'||f==='tasks'){
+    (TASKS||[]).forEach(function(t){
+      if(inc(t.title)||inc(t.notes))
+        push({icon:'📋',label:t.title,sub:(t.done?'✓ Done · ':'')+( t.due?'Due '+t.due:'Task')+(t.cat?' · '+t.cat:''),action:nav+"goTab('helm',null)"});
+    });
+    (PROJECTS||[]).forEach(function(p){
+      if(inc(p.title)||inc(p.notes)||inc(p.name))
+        push({icon:'📁',label:p.title||p.name||'Project',sub:'Project · '+(p.status||'active'),action:nav+"goTab('helm',null)"});
+      (p.steps||[]).forEach(function(s){
+        if(inc(s.title))
+          push({icon:'↳',label:s.title,sub:'Project step · '+(p.title||p.name||''),action:nav+"goTab('helm',null)"});
+      });
+    });
+  }
+
   // ── Goals
   if(f==='all'||f==='goals'){
     (GOALS||[]).forEach(function(g){
-      if(g.title.toLowerCase().includes(q))
+      if(inc(g.title)||inc(g.notes))
         push({icon:'🎯',label:g.title,sub:(g.done?'✓ Complete':'In progress')+' · '+(g.horizon||''),action:nav+"goTab('goals',null)"});
     });
   }
-  // ── Lists & list items
+
+  // ── Routines — group names AND individual items
+  if(f==='all'||f==='tasks'){
+    (RTN_GROUPS||[]).forEach(function(g){
+      if(inc(g.name)||inc(g.id))
+        push({icon:'🔁',label:g.name,sub:'Routine group',action:nav+"goTab('routines',null)"});
+      var items=RTNS[g.id]||[];
+      items.forEach(function(item){
+        if(inc(item))
+          push({icon:'☑️',label:item,sub:'Routine item · '+g.name,action:nav+"goTab('routines',null)"});
+      });
+    });
+  }
+
+  // ── Plan blocks
+  if(f==='all'||f==='tasks'){
+    Object.keys(PLAN_BLOCKS||{}).forEach(function(date){
+      (PLAN_BLOCKS[date]||[]).forEach(function(b){
+        if(inc(b.title)||inc(b.notes))
+          push({icon:'📅',label:b.title,sub:'Plan block · '+date+(b.time?' at '+b.time:''),action:nav+"goTab('plan',null)"});
+      });
+    });
+  }
+
+  // ── Lists
   if(f==='all'||f==='lists'){
     (LISTS||[]).forEach(function(l){
-      if(l.name.toLowerCase().includes(q))
+      if(inc(l.name))
         push({icon:'📝',label:l.name,sub:'List · '+(l.items||[]).length+' items',action:nav+"goTab('lists',null)"});
       (l.items||[]).forEach(function(i){
-        if(i.text&&i.text.toLowerCase().includes(q))
+        if(inc(i.text))
           push({icon:'•',label:i.text,sub:'In list: '+l.name,action:nav+"goTab('lists',null)"});
       });
     });
   }
-  // ── Recipes
-  if(f==='all'||f==='recipes'||f==='meals'){
+
+  // ── Meals & Nutrition
+  if(f==='all'||f==='meals'){
     (RECIPES||[]).forEach(function(r){
-      if((r.name||r.title||'').toLowerCase().includes(q)||(r.notes||r.desc||'').toLowerCase().includes(q)||(r.tags||[]).join(' ').toLowerCase().includes(q))
+      if(inc(r.name||r.title)||inc(r.notes||r.desc)||(r.tags||[]).join(' ').toLowerCase().indexOf(q)>-1)
         push({icon:'📖',label:r.name||r.title||'Recipe',sub:'Recipe · '+(r.mealType||r.type||''),action:nav+"goTab('meals',null);setTimeout(function(){showMealSec('recipes',null)},150)"});
     });
-    // Meal plan entries
     Object.keys(MEAL_PLAN||{}).forEach(function(day){
       var meals=MEAL_PLAN[day]||{};
       Object.keys(meals).forEach(function(slot){
         var m=meals[slot];
-        if(m&&typeof m==='string'&&m.toLowerCase().includes(q))
+        if(m&&typeof m==='string'&&inc(m))
           push({icon:'🍽️',label:m,sub:'Meal plan · '+day+' '+slot,action:nav+"goTab('meals',null)"});
       });
     });
-    // Meal log
     (MEAL_LOG_ITEMS||[]).forEach(function(m){
-      if((m.name||'').toLowerCase().includes(q))
+      if(inc(m.name))
         push({icon:'🍳',label:m.name,sub:'Meal log · '+(m.date||''),action:nav+"goTab('meals',null)"});
     });
   }
-  // ── Notes & brain dump
+
+  // ── Notes & Brain dump
   if(f==='all'||f==='notes'){
     (BRAIN_DUMP||[]).forEach(function(d){
-      if(d.text&&d.text.toLowerCase().includes(q))
-        push({icon:'🧠',label:d.text,sub:'Brain dump · '+(d.date||''),action:nav+"goTab('tasks',null)"});
+      if(inc(d.text))
+        push({icon:'🧠',label:d.text,sub:'Brain dump · '+(d.date||''),action:nav+"goTab('helm',null)"});
     });
     (STUDY_NOTES||[]).forEach(function(n){
-      var txt=(n.title||'')+(n.body||n.content||'');
-      if(txt.toLowerCase().includes(q))
+      if(inc(n.title)||inc(n.body||n.content))
         push({icon:'📓',label:n.title||'Note',sub:'Study note · '+(n.cat||'')+(n.date?' · '+n.date:''),action:nav+"goTab('lighthouse',null)"});
     });
     (PRAYERS||[]).forEach(function(p){
-      if((p.text||'').toLowerCase().includes(q))
+      if(inc(p.text))
         push({icon:'🙏',label:p.text,sub:(p.answered?'✓ Answered':'Prayer')+' · '+(p.date||''),action:nav+"goTab('lighthouse',null)"});
     });
     (SCRIPTURE_CARDS||[]).forEach(function(sc){
-      if((sc.question||'').toLowerCase().includes(q)||(sc.scriptures||[]).join(' ').toLowerCase().includes(q))
+      if(inc(sc.question)||(sc.scriptures||[]).join(' ').toLowerCase().indexOf(q)>-1)
         push({icon:'📜',label:sc.question||'Scripture',sub:'Scripture card · '+((sc.tags||[]).join(', ')||''),action:nav+"goTab('lighthouse',null)"});
     });
   }
-  // ── Spiritual / habits
+
+  // ── Spiritual
   if(f==='all'||f==='spiritual'){
     (HABITS||[]).forEach(function(h){
-      if((h.name||h.title||'').toLowerCase().includes(q))
+      if(inc(h.name||h.title))
         push({icon:'🔥',label:h.name||h.title,sub:'Spiritual habit',action:nav+"goTab('lighthouse',null)"});
     });
     (GRAT_LOG||[]).forEach(function(g){
       var txt=(g.items||[]).join(' ')+(g.extra||'');
-      if(txt.toLowerCase().includes(q))
+      if(txt.toLowerCase().indexOf(q)>-1)
         push({icon:'🌸',label:(g.items||[])[0]||'Gratitude entry',sub:'Gratitude · '+(g.date||''),action:nav+"goTab('lighthouse',null)"});
     });
-  }
-  // ── Health
-  if(f==='all'||f==='health'){
-    (MEDS||[]).forEach(function(m){
-      if((m.name||'').toLowerCase().includes(q))
-        push({icon:'💊',label:m.name,sub:'Medication',action:nav+"goTab('health',null)"});
+    // Ministry log
+    (MINISTRY_LOG||[]).forEach(function(m){
+      if(inc(m.notes)||inc(m.type)||inc(m.person)||inc(m.location))
+        push({icon:'🌱',label:m.notes||m.type||'Ministry entry',sub:'Ministry log · '+(m.date||''),action:nav+"goTab('lighthouse',null)"});
     });
-    var symKeys=Object.keys(SYM_LOG||{});
-    symKeys.forEach(function(date){
-      var syms=SYM_LOG[date]||{};
-      Object.keys(syms).forEach(function(sym){
-        if(sym.toLowerCase().includes(q)&&syms[sym])
-          push({icon:'🩺',label:sym,sub:'Symptom · '+date,action:nav+"goTab('health',null)"});
+    // Bible log
+    Object.keys(BIBLE_LOG||{}).forEach(function(book){
+      var chapters=BIBLE_LOG[book]||{};
+      Object.keys(chapters).forEach(function(ch){
+        var entry=chapters[ch];
+        var note=(typeof entry==='string'?entry:(entry&&entry.note)||'');
+        if(inc(book)||inc(note))
+          push({icon:'📖',label:book+' '+ch,sub:'Bible log'+(note?' · '+note.substring(0,40):''),action:nav+"goTab('lighthouse',null)"});
       });
     });
   }
+
+  // ── Research library
+  if(f==='all'||f==='notes'){
+    (RESEARCH_ITEMS||[]).forEach(function(r){
+      if(inc(r.title)||inc(r.content)||inc(r.url)||(r.tags||[]).join(' ').toLowerCase().indexOf(q)>-1)
+        push({icon:'🔬',label:r.title,sub:'Research · '+(r.type||'')+(r.tags&&r.tags.length?' · '+(r.tags||[]).slice(0,3).join(', '):''),action:nav+"goTab('archives',null)"});
+    });
+    (RESEARCH||[]).forEach(function(r){
+      if(inc(r.title)||inc(r.notes))
+        push({icon:'📚',label:r.title,sub:'Research · '+(r.status||'')+(r.date?' · '+r.date:''),action:nav+"goTab('archives',null)"});
+    });
+  }
+
+  // ── Wig orders
+  if(f==='all'||f==='tasks'){
+    (WIG_ORDERS||[]).forEach(function(w){
+      if(inc(w.client)||inc(w.name)||inc(w.wigType)||inc(w.notes)||inc(w.style))
+        push({icon:'✂️',label:w.client||w.name||'Wig order',sub:'Wig order · '+(w.wigType||w.style||'')+(w.status?' · '+w.status:''),action:nav+"goTab('wigs',null)"});
+    });
+    // Legacy WIGS array
+    (WIGS||[]).forEach(function(w){
+      if(inc(w.client)||inc(w.name)||inc(w.notes))
+        push({icon:'✂️',label:w.client||w.name||'Wig',sub:'Wig · '+(w.status||''),action:nav+"goTab('wigs',null)"});
+    });
+  }
+
+  // ── Health
+  if(f==='all'||f==='health'){
+    (MEDS||[]).forEach(function(m){
+      if(inc(m.name))
+        push({icon:'💊',label:m.name,sub:'Medication',action:nav+"goTab('wellness',null)"});
+    });
+    Object.keys(SYM_LOG||{}).forEach(function(date){
+      var syms=SYM_LOG[date]||{};
+      Object.keys(syms).forEach(function(sym){
+        if(inc(sym)&&syms[sym])
+          push({icon:'🩺',label:sym,sub:'Symptom · '+date,action:nav+"goTab('wellness',null)"});
+      });
+    });
+  }
+
   // ── Finance
   if(f==='all'||f==='money'){
     (EXPENSES||[]).forEach(function(e){
-      if((e.label||e.name||e.desc||'').toLowerCase().includes(q)||(e.cat||'').toLowerCase().includes(q))
-        push({icon:'💰',label:e.label||e.name||'Expense',sub:'Expense · '+(e.cat||'')+(e.date?' · '+e.date:''),action:nav+"goTab('estate',null)"});
+      if(inc(e.label||e.name||e.desc)||inc(e.cat))
+        push({icon:'💰',label:e.label||e.name||e.desc||'Expense',sub:'Expense · '+(e.cat||'')+(e.date?' · '+e.date:''),action:nav+"goTab('estate',null)"});
     });
     (BILLS||[]).forEach(function(b){
-      if((b.name||'').toLowerCase().includes(q))
+      if(inc(b.name))
         push({icon:'📄',label:b.name,sub:'Bill · '+(b.amount?'$'+b.amount:''),action:nav+"goTab('estate',null)"});
+    });
+    (INCOME||[]).forEach(function(i){
+      if(inc(i.label||i.source)||inc(i.cat))
+        push({icon:'💵',label:i.label||i.source||'Income',sub:'Income · '+(i.cat||'')+(i.created?' · '+i.created.slice(0,10):''),action:nav+"goTab('estate',null)"});
     });
   }
 
   if(!results.length){
     el.innerHTML='<p style="color:var(--textl);text-align:center;padding:20px;font-size:13px">No results for "'+escHtml(q)+'"</p>'; return;
   }
-  el.innerHTML = results.slice(0,40).map(function(r){
+  el.innerHTML = results.slice(0,60).map(function(r){
     return '<div style="padding:10px 12px;border-bottom:1px solid var(--bdr);cursor:pointer;display:flex;align-items:flex-start;gap:10px" onclick="'+r.action+'">'
       +'<span style="font-size:16px;flex-shrink:0;margin-top:1px">'+r.icon+'</span>'
       +'<div style="min-width:0"><div style="font-size:13px;font-weight:600;color:var(--textd);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+escHtml(r.label)+'</div>'
       +(r.sub?'<div style="font-size:11px;color:var(--textl);margin-top:2px">'+escHtml(r.sub)+'</div>':'')
       +'</div></div>';
-  }).join('')+(results.length>40?'<p style="text-align:center;font-size:11px;color:var(--textl);padding:8px">+'+(results.length-40)+' more…</p>':'');
+  }).join('')+(results.length>60?'<p style="text-align:center;font-size:11px;color:var(--textl);padding:8px">+'+(results.length-60)+' more…</p>':'');
 }
 
 // ═══════════════════════════════════════════════
