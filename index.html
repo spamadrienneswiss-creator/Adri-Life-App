@@ -782,11 +782,7 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
 .batch-urg-btn:active{transform:scale(.95)}
 .qcap-bar{background:linear-gradient(135deg,var(--lav-light),var(--rose-light));border-radius:16px;padding:12px 14px;margin-bottom:12px}
 .cal-archives-badges-row{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;min-height:28px}
-.learn-widget{margin-top:16px;border-top:1px solid var(--border);padding-top:10px}
-.learn-widget-toggle{background:none;border:none;color:var(--accent);font-size:13px;cursor:pointer;padding:4px 0;font-weight:700;font-family:'Quicksand',sans-serif;display:block}
-.lw-item{background:var(--card);border-radius:8px;padding:8px 10px;margin:6px 0;cursor:pointer}
-.lw-item-title{font-weight:700;font-size:13px;color:var(--textd)}
-.lw-item-tags{font-size:11px;color:var(--textl);margin-top:2px}
+
 .rl-card{background:var(--card);border-radius:12px;padding:12px 14px;margin-bottom:8px}
 .rl-card-title{font-weight:700;font-size:14px;color:var(--textd);margin-bottom:4px}
 .rl-card-preview{font-size:12px;color:var(--textl);margin-bottom:6px;line-height:1.4}
@@ -1007,10 +1003,6 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     <div class="hub-card" onclick="goTab('lists',null)"><div class="hub-card-ic">📝</div><div class="hub-card-name">Lists</div><div class="hub-card-sub" id="hub-lists-sub">Loading…</div></div>
   </div>
 
-  <div class="learn-widget" id="lw-tasks">
-    <button class="learn-widget-toggle" onclick="toggleLearnWidget('tasks')">📚 Learning <span id="lw-tasks-count"></span></button>
-    <div id="lw-tasks-body" style="display:none"></div>
-  </div>
 </div>
 
 <!-- THE CONSERVATORY -->
@@ -1023,10 +1015,6 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     <div class="hub-card" onclick="goTab('learn',null)"><div class="hub-card-ic">📚</div><div class="hub-card-name">Learning</div><div class="hub-card-sub">Research &amp; study</div></div>
     <div class="hub-card" onclick="goTab('focus',null)"><div class="hub-card-ic">🧠</div><div class="hub-card-name">Focus Tools</div><div class="hub-card-sub">Intentions &amp; ADHD aids</div></div>
     <div class="hub-card" onclick="goTab('spark',null)"><div class="hub-card-ic">💬</div><div class="hub-card-name">Spark</div><div class="hub-card-sub">Questions &amp; reflection</div></div>
-  </div>
-  <div class="learn-widget" id="lw-goals">
-    <button class="learn-widget-toggle" onclick="toggleLearnWidget('goals')">📚 Learning <span id="lw-goals-count"></span></button>
-    <div id="lw-goals-body" style="display:none"></div>
   </div>
 </div>
 
@@ -1069,10 +1057,6 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     <div class="hub-card" onclick="goTab('wellness',null);setTimeout(function(){showWellnessSec('body',document.querySelector('#v-wellness .pn-btn:nth-child(6)'));renderMeasurements();},200)" style="background:linear-gradient(135deg,#f5f0ff,#ede8f8);border-color:#c8b8e8"><div class="hub-card-ic">📏</div><div class="hub-card-name">Body</div><div class="hub-card-sub" id="hub-body-sub">Measurements &amp; trends</div></div>
     <div class="hub-card span2" onclick="goTab('recap',null)"><div class="hub-card-ic">📊</div><div class="hub-card-name">Recap</div><div class="hub-card-sub">Stats &amp; year in review</div></div>
   </div>
-  <div class="learn-widget" id="lw-health">
-    <button class="learn-widget-toggle" onclick="toggleLearnWidget('health')">📚 Learning <span id="lw-health-count"></span></button>
-    <div id="lw-health-body" style="display:none"></div>
-  </div>
 </div>
 
 <!-- THE WORKSHOP -->
@@ -1105,10 +1089,6 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
       <button class="fchip" onclick="goTab('projects',null)">📁 Projects</button>
       <button class="fchip" onclick="goTab('lists',null)">📝 Lists</button>
     </div>
-  </div>
-  <div class="learn-widget" id="lw-workshop">
-    <button class="learn-widget-toggle" onclick="toggleLearnWidget('workshop')">📚 Learning <span id="lw-workshop-count"></span></button>
-    <div id="lw-workshop-body" style="display:none"></div>
   </div>
 </div>
 
@@ -1218,10 +1198,6 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     <div class="hub-card span2" onclick="goTab('spirit',null);setTimeout(function(){showSpiritSec('notes',document.querySelector('#v-spirit .pn-btn:nth-child(7)'))},200)"><div class="hub-card-ic">📓</div><div class="hub-card-name">Meeting Notes</div><div class="hub-card-sub" id="hub-meet-notes-sub">Study notes &amp; meeting insights</div></div>
     <div class="hub-card" onclick="goTab('spirit',null);setTimeout(function(){showSpiritSec('todos',document.querySelector('#v-spirit .pn-btn:nth-child(8)'))},200)"><div class="hub-card-ic">📋</div><div class="hub-card-name">Spiritual To Do's</div><div class="hub-card-sub" id="hub-spirit-proj-sub">Tasks, goals &amp; projects</div></div>
   </div>
-  <div class="learn-widget" id="lw-spirit">
-    <button class="learn-widget-toggle" onclick="toggleLearnWidget('spirit')">📚 Learning <span id="lw-spirit-count"></span></button>
-    <div id="lw-spirit-body" style="display:none"></div>
-  </div>
 </div>
 
 <!-- THE ESTATE -->
@@ -1250,10 +1226,6 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     <div class="hub-card" onclick="goTab('money',null);setTimeout(function(){showMoneySec('home-items',document.querySelector('#v-money .pn-btn[data-sec=home-items]'))},200)"><div class="hub-card-ic">🏠</div><div class="hub-card-name">Home</div><div class="hub-card-sub">Home inventory &amp; items</div></div>
     <div class="hub-card" onclick="goTab('money',null);setTimeout(function(){showMoneySec('projects',document.querySelector('#v-money .pn-btn[data-sec=projects]'))},200)"><div class="hub-card-ic">💼</div><div class="hub-card-name">Projects</div><div class="hub-card-sub">Savings &amp; money goals</div></div>
     <div class="hub-card" onclick="goTab('money',null);setTimeout(function(){showMoneySec('overview',document.querySelector('#v-money .pn-btn[data-sec=overview]'))},200)"><div class="hub-card-ic">📊</div><div class="hub-card-name">Overview</div><div class="hub-card-sub">Month summary</div></div>
-  </div>
-  <div class="learn-widget" id="lw-money">
-    <button class="learn-widget-toggle" onclick="toggleLearnWidget('money')">📚 Learning <span id="lw-money-count"></span></button>
-    <div id="lw-money-body" style="display:none"></div>
   </div>
 </div>
 
@@ -2488,11 +2460,7 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     <div id="spiritBooksList"></div>
   </div>
 
-  <div class="learn-widget" id="lw-food">
-    <button class="learn-widget-toggle" onclick="toggleLearnWidget('food')">📚 Learning <span id="lw-food-count"></span></button>
-    <div id="lw-food-body" style="display:none"></div>
-  </div>
-</div>
+
 <div class="view" id="v-meals">
   <div class="card" style="margin-bottom:10px">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
@@ -2707,10 +2675,6 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
       <button class="fchip on" onclick="setInvFilter('',this)">All</button>
     </div>
     <div id="inventoryListEl"></div>
-  </div>
-  <div class="learn-widget" id="lw-food-eat">
-    <button class="learn-widget-toggle" onclick="toggleLearnWidget('food-eat')">📚 Learning <span id="lw-food-eat-count"></span></button>
-    <div id="lw-food-eat-body" style="display:none"></div>
   </div>
 </div>
 
@@ -3043,10 +3007,6 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     </div>
   </div>
 
-  <div class="learn-widget" id="lw-wellness">
-    <button class="learn-widget-toggle" onclick="toggleLearnWidget('wellness')">📚 Learning <span id="lw-wellness-count"></span></button>
-    <div id="lw-wellness-body" style="display:none"></div>
-  </div>
 </div>
 
 <!-- STORIES -->
@@ -4643,6 +4603,23 @@ function snapshotToArchiveYear(){
     var already=(ARCHIVE_YEARS[yr].content||[]).find(function(x){return x.id===c.id;});
     if(!already)ARCHIVE_YEARS[yr].content.push({id:c.id,title:c.title,platforms:c.platforms||[],date:c.date});
   });
+  // Snapshot research items (all statuses) by created year
+  (RESEARCH_ITEMS||[]).filter(function(r){return r.created;}).forEach(function(r){
+    var yr=+r.created.substring(0,4);
+    if(!ARCHIVE_YEARS[yr])ARCHIVE_YEARS[yr]={tasks:[],goals:[],notes:'',months:{},created:new Date().toISOString()};
+    if(!ARCHIVE_YEARS[yr].research)ARCHIVE_YEARS[yr].research=[];
+    var already=(ARCHIVE_YEARS[yr].research||[]).find(function(x){return x.id===r.id;});
+    if(!already)ARCHIVE_YEARS[yr].research.push({id:r.id,title:r.title,type:r.type||'note',status:r.status||'',sections:r.sections||[],tags:r.tags||[],created:r.created});
+    else{already.title=r.title;already.status=r.status||'';}
+  });
+  // Snapshot old-style RESEARCH entries
+  (RESEARCH||[]).filter(function(r){return r.date;}).forEach(function(r){
+    var yr=+r.date.substring(0,4);
+    if(!ARCHIVE_YEARS[yr])ARCHIVE_YEARS[yr]={tasks:[],goals:[],notes:'',months:{},created:new Date().toISOString()};
+    if(!ARCHIVE_YEARS[yr].research)ARCHIVE_YEARS[yr].research=[];
+    var already=(ARCHIVE_YEARS[yr].research||[]).find(function(x){return x.id===r.id;});
+    if(!already)ARCHIVE_YEARS[yr].research.push({id:r.id,title:r.title,status:r.status||'',created:r.date});
+  });
   saveArchiveYears();
 }
 
@@ -4994,6 +4971,7 @@ function openMonthReflection(yr,mo){
   var el=document.getElementById('reflModalTitle');
   if(el)el.textContent='📓 '+MONTH_NAMES2[parseInt(mo,10)]+' '+yr;
   renderReflSleepSec(yr,mo);
+  renderReflResearchSec(yr,mo);
   renderReflTimeSec(yr,mo);
   renderReflQuestions(yr,mo);
   var mems=(MEMORIES||[]).filter(function(m){return (m.date||'').startsWith(yr+'-'+mo);});
@@ -5094,6 +5072,38 @@ function renderReflSleepSec(yr,mo){
       +'<span style="font-size:11px;color:var(--textd);font-weight:600;min-width:90px">'+dateLabel+'</span>'
       +'<span style="font-size:11px;color:var(--textl)">'+bedStr+' → '+wakeStr+'</span>'
       +'<span style="font-size:11px;font-weight:700;color:var(--textd);margin-left:auto">'+dur+'</span>'
+      +'</div>';
+  });
+  html+='</div></div>';
+  el.innerHTML=html;
+}
+
+function renderReflResearchSec(yr,mo){
+  var el=document.getElementById('reflResearchSection');if(!el)return;
+  var prefix=yr+'-'+mo;
+  var MONTH_NAMES=['','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  var moLabel=MONTH_NAMES[parseInt(mo,10)]+' '+yr;
+  // Items created this month (live list — supports deletion)
+  var items=(RESEARCH_ITEMS||[]).filter(function(r){return (r.created||'').startsWith(prefix);});
+  var old=(RESEARCH||[]).filter(function(r){return (r.date||'').startsWith(prefix);});
+  var seenIds={};
+  items.forEach(function(r){seenIds[r.id]=1;});
+  // Also show archived items for this month that have since been deleted
+  var archived=((ARCHIVE_YEARS[yr]&&ARCHIVE_YEARS[yr].research)||[]).filter(function(r){
+    return (r.created||'').startsWith(prefix)&&!seenIds[r.id];
+  });
+  var all=items.concat(archived).concat(old.filter(function(r){return !seenIds[r.id];}));
+  if(!all.length){el.innerHTML='';return;}
+  var html='<div style="background:var(--bg2);border-radius:12px;padding:12px 14px">'
+    +'<div style="font-size:12px;font-weight:700;color:var(--textd);margin-bottom:8px">📚 Learning — '+moLabel+' ('+all.length+')</div>'
+    +'<div style="display:flex;flex-direction:column;gap:4px">';
+  all.forEach(function(r){
+    var statusColor=r.status==='done'?'#5a9a6a':r.status==='doing'?'#e09a30':'#9090a8';
+    var statusLabel=r.status==='done'?'Learned ✓':r.status==='doing'?'Studying':'Want to learn';
+    html+='<div style="padding:5px 0;border-top:1px solid #ece8f0;display:flex;align-items:flex-start;gap:8px">'
+      +'<span style="font-size:10px;font-weight:700;color:'+statusColor+';white-space:nowrap;margin-top:1px">'+statusLabel+'</span>'
+      +'<span style="font-size:12px;color:var(--textd);flex:1">'+escHtml(r.title)+'</span>'
+      +(r.tags&&r.tags.length?'<span style="font-size:10px;color:var(--textl)">'+r.tags.join(', ')+'</span>':'')
       +'</div>';
   });
   html+='</div></div>';
@@ -5854,7 +5864,7 @@ function goTabDirect(tab,btn){
   if(tab==='grocery'){ renderGroceryList(); populateGrocTaskDatalist(); }
   if(tab==='guide'){ renderResearchLib(); renderGuide(); renderTmplList(); renderAppIndex(); }
   if(tab==='work-projects'){ renderWorkProjects(); }
-  if(tab==='helm'||tab==='conservatory'||tab==='hearthside'||tab==='lighthouse'||tab==='estate'||tab==='workshop'||tab==='food'||tab==='meals'||tab==='wellness'){ renderAllLearnWidgets(); }
+
   if(tab==='meals'||tab==='food') renderWaterBottle();
   if(tab==='workshop'){ renderWSProjects(); }
 }
@@ -11900,11 +11910,11 @@ var BANNER_PRESETS=[
 var SEL_BANNER='';
 
 var TOGGLEABLE_TABS=[
-  {id:'helm',label:'⚓ The Helm'},{id:'conservatory',label:'🌿 Conservatory'},
-  {id:'hearthside',label:'🏡 Hearthside'},{id:'workshop',label:'🔨 Workshop'},
-  {id:'lighthouse',label:'✨ Lighthouse'},{id:'estate',label:'🏛️ The Estate'},
-  {id:'emporium',label:'🏪 Emporium'},{id:'archives',label:'📚 Research Library'},
-  {id:'settings',label:'⚙️ Settings'},
+  {id:'helm',label:'Tasks & Projects'},{id:'conservatory',label:'Personal Growth'},
+  {id:'hearthside',label:'Health & Wellness'},{id:'workshop',label:'Workshop'},
+  {id:'lighthouse',label:'Spiritual'},{id:'estate',label:'Money & Home'},
+  {id:'emporium',label:'Work'},{id:'archives',label:'Research Library'},
+  {id:'settings',label:'Settings'},
 ];
 
 var _tabDragFrom=null;
@@ -15573,7 +15583,6 @@ function saveResearchItem(){
   saveResearchItems();
   closeM('researchItemModal');
   renderResearchLib();
-  renderAllLearnWidgets();
   showToast('Saved!');
 }
 
@@ -15582,7 +15591,6 @@ function deleteResearchItem(id){
   RESEARCH_ITEMS=RESEARCH_ITEMS.filter(function(r){return r.id!==id;});
   saveResearchItems();
   renderResearchLib();
-  renderAllLearnWidgets();
   showToast('Deleted.');
 }
 
@@ -15632,35 +15640,6 @@ function deleteResearchTopic(name){
   renderTopicsModal();
 }
 
-// ─── Per-section learning widgets ───
-
-function toggleLearnWidget(sec){
-  var body=document.getElementById('lw-'+sec+'-body');
-  if(body)body.style.display=body.style.display==='none'?'':'none';
-}
-
-function renderLearnWidget(sec){
-  var lookupSec=sec==='food-eat'?'food':sec;
-  var items=(RESEARCH_ITEMS||[]).filter(function(r){return (r.sections||[]).indexOf(lookupSec)>-1;});
-  var countEl=document.getElementById('lw-'+sec+'-count');
-  if(countEl)countEl.textContent=items.length?'('+items.length+')':'';
-  var body=document.getElementById('lw-'+sec+'-body');
-  if(!body)return;
-  if(!items.length){
-    body.innerHTML='<div style="color:var(--textl);font-size:12px;padding:6px 0">No items tagged for this section yet. <button onclick="openNewResearchItem()" style="background:none;border:none;color:var(--accent);font-size:12px;font-weight:700;cursor:pointer;padding:0">Add one →</button></div>';
-    return;
-  }
-  body.innerHTML=items.map(function(r){
-    return '<div class="lw-item" onclick="openResearchItem(\''+r.id+'\')">'
-      +'<div class="lw-item-title">'+escHtml(r.title)+'</div>'
-      +'<div class="lw-item-tags">'+((r.tags||[]).join(' · ')||'')+'</div>'
-      +'</div>';
-  }).join('');
-}
-
-function renderAllLearnWidgets(){
-  ['tasks','goals','health','food','food-eat','wellness','spirit','money','workshop'].forEach(renderLearnWidget);
-}
 
 // ═══════════════════════════════════════════════
 // LEARN TAB
@@ -21484,7 +21463,6 @@ function startApp(){
   renderMeds();
   renderMinistryHome();
   renderGuide();
-  renderAllLearnWidgets();
   applyAppTitle();
   applyTabOrder();
   tickMillie();
@@ -24846,6 +24824,7 @@ function delProjInc(id){
   <div class="mod" style="max-height:90vh;overflow-y:auto" onclick="event.stopPropagation()">
     <div class="mh"><span class="mt" id="reflModalTitle">📓 Monthly Reflection</span><button class="mc" onclick="closeOv('ovMonthReflection')">✕</button></div>
     <div id="reflSleepSection" style="margin-bottom:14px"></div>
+    <div id="reflResearchSection" style="margin-bottom:14px"></div>
     <div id="reflTimeSection" style="margin-bottom:14px"></div>
     <div style="font-size:11px;font-weight:700;color:var(--textl);letter-spacing:.5px;text-transform:uppercase;margin-bottom:6px">Reflection Questions</div>
     <div id="reflQList" style="margin-bottom:10px"></div>
