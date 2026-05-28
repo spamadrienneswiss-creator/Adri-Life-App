@@ -8115,44 +8115,23 @@ function renderPlanHoursHTML(dStr,blocks){
     if(hBlocks.length){
       hBlocks.forEach(function(b){
         var durLabel=b.duration>=60?(b.duration/60)+'h':b.duration+'m';
-        var blockTasks=b.tasks||[];
         var expandId='pbx-'+b.id;
-        // resolve live task data for each assigned task
-        var liveTasks=blockTasks.map(function(bt){
-          var live=(TASKS||[]).find(function(t){return t.id===bt.id;});
-          return live||bt; // fall back to stored snapshot if task was deleted
-        });
-        var doneCnt=liveTasks.filter(function(t){return t.done;}).length;
-        var progStr=liveTasks.length?' ('+doneCnt+'/'+liveTasks.length+')':'';
-        var urgColors={'urgent-important':'var(--rose)','important-not-urgent':'#c8a820','urgent-not-important':'var(--blue)','not-urgent':'var(--textl)','':'var(--textl)'};
+        var taskCount=(b.tasks||[]).length;
+        var doneCnt=taskCount?_pbBlockDoneCount(b,dStr):0;
+        var progStr=taskCount?' ('+doneCnt+'/'+taskCount+')':'';
         html+='<div style="border-radius:10px;background:'+planBlockBg(b.color)+';margin-bottom:2px;overflow:hidden">';
-        // Header row - tapping toggles task list
         html+='<div style="display:flex;align-items:center;gap:6px;padding:6px 8px;cursor:pointer" onclick="togPlanBlock(\''+expandId+'\')">';
         html+='<div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:700;color:var(--textd)">'+escHtml(b.title)+'</div>';
         if(b.notes)html+='<div style="font-size:10px;color:var(--textl);margin-top:1px">'+escHtml(b.notes)+'</div>';
         html+='</div>';
         html+='<span style="font-size:10px;color:var(--textl);flex-shrink:0">'+durLabel+'</span>';
-        if(liveTasks.length)html+='<span style="font-size:10px;font-weight:700;color:var(--textl);flex-shrink:0" id="'+expandId+'-prog">'+progStr+'</span>';
+        if(taskCount)html+='<span style="font-size:10px;font-weight:700;color:var(--textl);flex-shrink:0" id="'+expandId+'-prog">'+progStr+'</span>';
         html+='<span id="'+expandId+'-arr" style="font-size:10px;color:var(--textl);flex-shrink:0">▸</span>';
         html+='<button onclick="event.stopPropagation();editPlanBlock(\''+dStr+'\',\''+b.id+'\')" style="background:none;border:none;cursor:pointer;font-size:12px;color:var(--textl);padding:0 2px;line-height:1">✏️</button>';
         html+='<button onclick="event.stopPropagation();deletePlanBlock(\''+dStr+'\',\''+b.id+'\')" style="background:none;border:none;cursor:pointer;font-size:12px;color:var(--textl);padding:0 2px;line-height:1">✕</button>';
         html+='</div>';
-        // Task list (collapsed by default)
         html+='<div id="'+expandId+'" style="display:none;background:rgba(255,255,255,.6);border-top:1px solid rgba(0,0,0,.06);padding:4px 8px 6px">';
-        if(liveTasks.length){
-          html+='<div style="max-height:200px;overflow-y:auto">';
-          liveTasks.forEach(function(t){
-            var isDone=!!t.done;
-            html+='<div onclick="event.stopPropagation();togPlanBlockTask(\''+b.id+'\',\''+t.id+'\',\''+dStr+'\')" style="display:flex;align-items:center;gap:7px;padding:5px 4px;border-bottom:1px solid rgba(0,0,0,.05);cursor:pointer">';
-            html+='<div style="width:16px;height:16px;border-radius:50%;border:2px solid '+(isDone?'var(--sage)':urgColors[t.urgency]||'#ccc')+';background:'+(isDone?'var(--sage)':'transparent')+';flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:9px;color:#fff">'+(isDone?'✓':'')+'</div>';
-            html+='<span style="flex:1;font-size:12px;color:var(--textd);'+(isDone?'text-decoration:line-through;opacity:.6':'')+';min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+escHtml(t.title)+'</span>';
-            html+='</div>';
-          });
-          html+='</div>';
-        } else {
-          html+='<div style="font-size:11px;color:var(--textl);font-style:italic;padding:4px 0">No tasks assigned — tap ✏️ to add tasks to this block</div>';
-        }
-        html+='<div onclick="event.stopPropagation();editPlanBlock(\''+dStr+'\',\''+b.id+'\')" style="font-size:10px;color:var(--blue);cursor:pointer;padding:4px 0 0;text-align:right">+ manage tasks ✏️</div>';
+        html+=_renderPlanBlockTasksHtml(b,dStr);
         html+='</div>';
         html+='</div>';
       });
@@ -8356,6 +8335,105 @@ function deletePlanBlockFromModal(){
   closeM('planBlockModal');
 }
 
+// ── Plan block expanded task list (shared renderer) ──
+function _pbRelevance(blockTitle, text){
+  if(!blockTitle||!text)return 0;
+  var words=blockTitle.toLowerCase().split(/[\s\-_]+/).filter(function(w){return w.length>2;});
+  var t=(text||'').toLowerCase();
+  return words.reduce(function(s,w){return s+(t.indexOf(w)>-1?1:0);},0);
+}
+
+function _renderPlanBlockTasksHtml(block,dStr){
+  var blockTasks=block.tasks||[];
+  var urgColors={'urgent-important':'var(--rose)','important-not-urgent':'#c8a820','urgent-not-important':'var(--blue)','not-urgent':'var(--textl)','':'var(--textl)'};
+  // Resolve live data for each task item
+  var liveTasks=blockTasks.map(function(bt){
+    if(bt.type==='proj-step'){
+      var p=(PROJECTS||[]).find(function(p){return p.id===bt.sourceId;});
+      var s=p&&(p.steps||[]).find(function(s){return s.id===bt.id;});
+      return Object.assign({},bt,s?{title:s.title,done:s.done}:{});
+    } else if(bt.type==='routine'){
+      var g=(RTN_GROUPS||[]).find(function(g){return g.id===bt.sourceId;});
+      if(g){var cs=rtnCompState(g,dStr||todayStr());var state=rtnStateStr(cs[bt.idx]);return Object.assign({},bt,{done:state==='done'||state==='skip'||state==='task'});}
+      return bt;
+    } else {
+      var live=(TASKS||[]).find(function(t){return t.id===bt.id;});
+      return Object.assign({},bt,live||{});
+    }
+  });
+  // Sort by relevance to block title
+  liveTasks.sort(function(a,b){
+    return _pbRelevance(block.title,b.title)-_pbRelevance(block.title,a.title);
+  });
+  var html='';
+  if(liveTasks.length){
+    html+='<div style="max-height:220px;overflow-y:auto">';
+    liveTasks.forEach(function(t){
+      var isDone=!!t.done;
+      var typeBadge='';
+      if(t.type==='proj-step')typeBadge='<span style="font-size:9px;background:#e8f0ff;color:var(--blue);border-radius:4px;padding:1px 5px;flex-shrink:0">proj</span>';
+      else if(t.type==='routine')typeBadge='<span style="font-size:9px;background:#f0ecff;color:#7a5a9a;border-radius:4px;padding:1px 5px;flex-shrink:0">habit</span>';
+      html+='<div onclick="event.stopPropagation();togPlanBlockTask(\''+block.id+'\',\''+t.id+'\',\''+dStr+'\')" style="display:flex;align-items:center;gap:7px;padding:5px 4px;border-bottom:1px solid rgba(0,0,0,.05);cursor:pointer">';
+      html+='<div style="width:16px;height:16px;border-radius:50%;border:2px solid '+(isDone?'var(--sage)':urgColors[t.urgency]||'#ccc')+';background:'+(isDone?'var(--sage)':'transparent')+';flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:9px;color:#fff">'+(isDone?'✓':'')+'</div>';
+      html+='<span style="flex:1;font-size:12px;color:var(--textd);'+(isDone?'text-decoration:line-through;opacity:.6':'')+';min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+escHtml(t.title)+'</span>';
+      html+=typeBadge;
+      html+='</div>';
+    });
+    html+='</div>';
+  } else {
+    html+='<div style="font-size:11px;color:var(--textl);font-style:italic;padding:4px 0">No tasks linked — type below or tap ✏️ to link tasks & projects</div>';
+  }
+  // Quick-add input
+  html+='<div style="display:flex;gap:4px;margin-top:6px" onclick="event.stopPropagation()">';
+  html+='<input id="pbadd-'+block.id+'" class="sub-inp" placeholder="Quick add task…" style="flex:1;font-size:12px" onclick="event.stopPropagation()" onkeydown="if(event.key===\'Enter\'){event.stopPropagation();planBlockQuickAdd(\''+block.id+'\',\''+dStr+'\')}">';
+  html+='<button onclick="event.stopPropagation();planBlockQuickAdd(\''+block.id+'\',\''+dStr+'\')" style="padding:4px 9px;border-radius:7px;border:1.5px solid var(--sage);background:var(--sage);color:white;font-family:\'Quicksand\',sans-serif;font-size:11px;font-weight:700;cursor:pointer">+</button>';
+  html+='</div>';
+  html+='<div onclick="event.stopPropagation();editPlanBlock(\''+dStr+'\',\''+block.id+'\')" style="font-size:10px;color:var(--blue);cursor:pointer;padding:4px 0 0;text-align:right">⋯ link tasks, projects & routines</div>';
+  return html;
+}
+
+function _pbBlockDoneCount(block,dStr){
+  return (block.tasks||[]).filter(function(bt){
+    if(bt.type==='proj-step'){
+      var p=(PROJECTS||[]).find(function(p){return p.id===bt.sourceId;});
+      var s=p&&(p.steps||[]).find(function(s){return s.id===bt.id;});
+      return s&&s.done;
+    } else if(bt.type==='routine'){
+      var g=(RTN_GROUPS||[]).find(function(g){return g.id===bt.sourceId;});
+      if(!g)return false;
+      var cs=rtnCompState(g,dStr||todayStr());var state=rtnStateStr(cs[bt.idx]);
+      return state==='done'||state==='skip'||state==='task';
+    } else {
+      var live=(TASKS||[]).find(function(t){return t.id===bt.id;});
+      return live&&live.done;
+    }
+  }).length;
+}
+
+function planBlockQuickAdd(blockId,dStr){
+  var inp=document.getElementById('pbadd-'+blockId);
+  var val=inp&&inp.value.trim();if(!val)return;
+  var newTask={id:'t'+Date.now(),title:val,urgency:'',cat:'',done:false,subs:[],created:new Date().toISOString(),tags:[]};
+  TASKS.push(newTask);
+  localStorage.setItem('aTasks',JSON.stringify(TASKS));
+  if(typeof fbSave==='function')fbSave('tasks',newTask.id,newTask);
+  var block=(PLAN_BLOCKS[dStr]||[]).find(function(b){return b.id===blockId;});
+  if(block){
+    if(!block.tasks)block.tasks=[];
+    block.tasks.push({id:newTask.id,title:newTask.title,urgency:'',type:'task'});
+    savePlanBlocks();
+    var expandId='pbx-'+blockId;
+    var body=document.getElementById(expandId);
+    if(body)body.innerHTML=_renderPlanBlockTasksHtml(block,dStr);
+    var progEl=document.getElementById(expandId+'-prog');
+    if(progEl)progEl.textContent=' ('+_pbBlockDoneCount(block,dStr)+'/'+block.tasks.length+')';
+    else renderPlan();
+  }
+  if(inp)inp.value='';
+  if(typeof renderTasks==='function')renderTasks();
+  showToast('Task added ✓');
+}
+
 function togPlanBlock(expandId){
   var body=document.getElementById(expandId);
   var arr=document.getElementById(expandId+'-arr');
@@ -8366,36 +8444,37 @@ function togPlanBlock(expandId){
 }
 
 function togPlanBlockTask(blockId,taskId,dStr){
-  // Toggle done on the live task
-  var task=(TASKS||[]).find(function(t){return t.id===taskId;});
-  if(!task)return;
-  task.done=!task.done;
-  task.doneDate=task.done?todayStr():null;
-  localStorage.setItem('aTasks',JSON.stringify(TASKS));
-  if(typeof fbSave==='function')fbSave('tasks',task.id,task);
-  // Re-render the task list inside the block in-place
+  var block=(PLAN_BLOCKS[dStr]||[]).find(function(b){return b.id===blockId;});
+  if(!block)return;
+  var bt=(block.tasks||[]).find(function(t){return t.id===taskId;});
+  if(!bt)return;
+  if(bt.type==='proj-step'){
+    var p=(PROJECTS||[]).find(function(p){return p.id===bt.sourceId;});
+    if(!p||!p.steps)return;
+    var s=p.steps.find(function(s){return s.id===taskId;});
+    if(s)s.done=!s.done;
+    if(typeof fbSave==='function')fbSave('projects',bt.sourceId,p);
+  } else if(bt.type==='routine'){
+    var g=(RTN_GROUPS||[]).find(function(x){return x.id===bt.sourceId;});
+    if(!g)return;
+    var cs=rtnCompState(g,dStr||todayStr());
+    var cur=rtnStateStr(cs[bt.idx]);
+    var newState=cur==='done'?null:'done';
+    rtnSetComp(bt.sourceId,dStr||todayStr(),bt.idx,newState);
+    updRS();
+  } else {
+    var task=(TASKS||[]).find(function(t){return t.id===taskId;});
+    if(!task)return;
+    task.done=!task.done;task.doneDate=task.done?todayStr():null;
+    localStorage.setItem('aTasks',JSON.stringify(TASKS));
+    if(typeof fbSave==='function')fbSave('tasks',task.id,task);
+  }
   var expandId='pbx-'+blockId;
   var body=document.getElementById(expandId);
   if(!body)return;
-  // Find the block
-  var block=(PLAN_BLOCKS[dStr]||[]).find(function(b){return b.id===blockId;});
-  if(!block)return;
-  var liveTasks=(block.tasks||[]).map(function(bt){return (TASKS||[]).find(function(t){return t.id===bt.id;})||bt;});
-  var doneCnt=liveTasks.filter(function(t){return t.done;}).length;
   var progEl=document.getElementById(expandId+'-prog');
-  if(progEl)progEl.textContent=' ('+doneCnt+'/'+liveTasks.length+')';
-  var urgColors={'urgent-important':'var(--rose)','important-not-urgent':'#c8a820','urgent-not-important':'var(--blue)','not-urgent':'var(--textl)','':'var(--textl)'};
-  var listHtml='<div style="max-height:200px;overflow-y:auto">';
-  liveTasks.forEach(function(t){
-    var isDone=!!t.done;
-    listHtml+='<div onclick="event.stopPropagation();togPlanBlockTask(\''+blockId+'\',\''+t.id+'\',\''+dStr+'\')" style="display:flex;align-items:center;gap:7px;padding:5px 4px;border-bottom:1px solid rgba(0,0,0,.05);cursor:pointer">';
-    listHtml+='<div style="width:16px;height:16px;border-radius:50%;border:2px solid '+(isDone?'var(--sage)':urgColors[t.urgency]||'#ccc')+';background:'+(isDone?'var(--sage)':'transparent')+';flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:9px;color:#fff">'+(isDone?'✓':'')+'</div>';
-    listHtml+='<span style="flex:1;font-size:12px;color:var(--textd);'+(isDone?'text-decoration:line-through;opacity:.6':'')+';min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+escHtml(t.title)+'</span>';
-    listHtml+='</div>';
-  });
-  listHtml+='</div>';
-  listHtml+='<div onclick="event.stopPropagation();editPlanBlock(\''+dStr+'\',\''+blockId+'\')" style="font-size:10px;color:var(--blue);cursor:pointer;padding:4px 0 0;text-align:right">+ manage tasks ✏️</div>';
-  body.innerHTML=listHtml;
+  if(progEl)progEl.textContent=' ('+_pbBlockDoneCount(block,dStr)+'/'+block.tasks.length+')';
+  body.innerHTML=_renderPlanBlockTasksHtml(block,dStr);
   if(typeof renderTasks==='function')renderTasks();
   if(typeof updStats==='function')updStats();
 }
@@ -8404,12 +8483,16 @@ function togPlanBlockTask(blockId,taskId,dStr){
 function renderPbTaskList(){
   var el=document.getElementById('pbTaskList');
   if(!el)return;
-  if(!_pbTasks.length){el.innerHTML='<div style="font-size:12px;color:var(--textl);font-style:italic;padding:4px 0">No tasks assigned yet</div>';return;}
+  if(!_pbTasks.length){el.innerHTML='<div style="font-size:12px;color:var(--textl);font-style:italic;padding:4px 0">No tasks linked yet</div>';return;}
   var urgColors={'urgent-important':'var(--rose)','important-not-urgent':'#c8a820','urgent-not-important':'var(--blue)','not-urgent':'var(--textl)','':'var(--textl)'};
   el.innerHTML=_pbTasks.map(function(t,i){
+    var typeBadge='';
+    if(t.type==='proj-step')typeBadge='<span style="font-size:9px;background:#e8f0ff;color:var(--blue);border-radius:4px;padding:1px 5px">proj</span>';
+    else if(t.type==='routine')typeBadge='<span style="font-size:9px;background:#f0ecff;color:#7a5a9a;border-radius:4px;padding:1px 5px">habit</span>';
     return '<div style="display:flex;align-items:center;gap:6px;padding:6px 8px;border-radius:8px;background:#f8f4f0;margin-bottom:3px">'
       +'<span style="width:7px;height:7px;border-radius:50%;background:'+(urgColors[t.urgency]||'var(--textl)')+';flex-shrink:0"></span>'
       +'<span style="flex:1;font-size:12px;font-weight:600;color:var(--textd);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+escHtml(t.title)+'</span>'
+      +typeBadge
       +'<button onclick="pbMoveTask('+i+',-1)" style="background:none;border:none;cursor:pointer;color:var(--textl);font-size:12px;padding:0 3px" title="Move up">↑</button>'
       +'<button onclick="pbMoveTask('+i+',1)" style="background:none;border:none;cursor:pointer;color:var(--textl);font-size:12px;padding:0 3px" title="Move down">↓</button>'
       +'<button onclick="pbRemoveTask('+i+')" style="background:none;border:none;cursor:pointer;color:var(--textl);font-size:13px;padding:0 2px">✕</button>'
@@ -8437,28 +8520,94 @@ function openPbTaskPicker(){
 function renderPbTaskPicker(){
   var el=document.getElementById('pbTaskPickerList');
   if(!el)return;
+  var blockTitle=((document.getElementById('pbTitle')||{}).value||'').toLowerCase();
   var q=((document.getElementById('pbTaskSearch')||{}).value||'').toLowerCase();
   var inBlock=_pbTasks.map(function(t){return t.id;});
   var urgLabels={'urgent-important':'🔴 Do Now','important-not-urgent':'🟡 Schedule','urgent-not-important':'🔵 Quick Win','not-urgent':'⚪ Someday','':'📥 Unsorted'};
   var order={'urgent-important':0,'important-not-urgent':1,'urgent-not-important':2,'not-urgent':3,'':4};
+  var html='';
+
+  // ── Tasks ──────────────────────────────────────
   var pool=TASKS.filter(function(t){return !t.done&&(!q||t.title.toLowerCase().indexOf(q)>-1);});
-  pool.sort(function(a,b){return (order[a.urgency]!==undefined?order[a.urgency]:4)-(order[b.urgency]!==undefined?order[b.urgency]:4);});
-  if(!pool.length){el.innerHTML='<div style="text-align:center;padding:10px;font-size:12px;color:var(--textl)">'+(q?'No tasks match':'No open tasks')+'</div>';return;}
-  el.innerHTML=pool.map(function(t){
-    var added=inBlock.indexOf(t.id)>-1;
-    return '<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--bdr)">'
-      +'<div style="flex:1;font-size:12px;color:var(--textd);min-width:0"><div style="font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+escHtml(t.title)+'</div>'
-      +'<div style="font-size:10px;color:var(--textl)">'+(urgLabels[t.urgency]||'')+(t.due?' · due '+t.due:'')+'</div></div>'
-      +(added
-        ?'<button onclick="pbPickerRemove(\''+t.id+'\')" style="flex-shrink:0;padding:3px 9px;border-radius:7px;border:1.5px solid var(--sage);background:var(--sage);color:white;font-family:\'Quicksand\',sans-serif;font-size:11px;font-weight:700;cursor:pointer">✓</button>'
-        :'<button onclick="pbPickerAdd(\''+t.id+'\',\''+escHtml(t.title)+'\',\''+t.urgency+'\')" style="flex-shrink:0;padding:3px 9px;border-radius:7px;border:1.5px solid var(--bdr);background:none;font-family:\'Quicksand\',sans-serif;font-size:11px;font-weight:700;cursor:pointer">+ Add</button>')
-      +'</div>';
-  }).join('');
+  pool.sort(function(a,b){
+    var rd=_pbRelevance(blockTitle,b.title)-_pbRelevance(blockTitle,a.title);
+    if(rd!==0)return rd;
+    return (order[a.urgency]!==undefined?order[a.urgency]:4)-(order[b.urgency]!==undefined?order[b.urgency]:4);
+  });
+  if(pool.length){
+    var relevant=blockTitle?pool.filter(function(t){return _pbRelevance(blockTitle,t.title)>0;}):[];
+    var others=blockTitle?pool.filter(function(t){return _pbRelevance(blockTitle,t.title)===0;}):pool;
+    if(relevant.length){
+      html+='<div style="font-size:10px;font-weight:700;color:var(--textl);text-transform:uppercase;letter-spacing:.4px;padding:4px 0 2px">✨ Relevant Tasks</div>';
+      html+=relevant.map(function(t){return _pbPickerRow(t.id,t.title,'<span style="font-size:10px;color:var(--textl)">'+(urgLabels[t.urgency]||'')+(t.due?' · due '+t.due:'')+'</span>',inBlock.indexOf(t.id)>-1,'pbPickerAdd(\''+t.id+'\','+JSON.stringify(t.title)+',\''+t.urgency+'\')');}).join('');
+    }
+    if(others.length){
+      if(relevant.length)html+='<div style="font-size:10px;font-weight:700;color:var(--textl);text-transform:uppercase;letter-spacing:.4px;padding:8px 0 2px">All Tasks</div>';
+      html+=others.map(function(t){return _pbPickerRow(t.id,t.title,'<span style="font-size:10px;color:var(--textl)">'+(urgLabels[t.urgency]||'')+(t.due?' · due '+t.due:'')+'</span>',inBlock.indexOf(t.id)>-1,'pbPickerAdd(\''+t.id+'\','+JSON.stringify(t.title)+',\''+t.urgency+'\')');}).join('');
+    }
+  } else {
+    html+='<div style="text-align:center;padding:8px;font-size:12px;color:var(--textl)">'+(q?'No tasks match':'No open tasks')+'</div>';
+  }
+
+  // ── Project Steps ──────────────────────────────
+  var projSteps=[];
+  (PROJECTS||[]).forEach(function(p){
+    (p.steps||[]).filter(function(s){return !s.done&&(!q||s.title.toLowerCase().indexOf(q)>-1);}).forEach(function(s){
+      projSteps.push({id:s.id,title:s.title,projId:p.id,projName:escHtml(p.name||p.title||'Project'),rel:_pbRelevance(blockTitle,s.title)});
+    });
+  });
+  if(projSteps.length){
+    projSteps.sort(function(a,b){return b.rel-a.rel;});
+    html+='<div style="font-size:10px;font-weight:700;color:var(--blue);text-transform:uppercase;letter-spacing:.4px;padding:10px 0 4px;border-top:1px solid var(--bdr);margin-top:4px">📁 Project Steps</div>';
+    html+=projSteps.map(function(s){
+      return _pbPickerRow(s.id,s.title,'<span style="font-size:10px;color:var(--textl)">📁 '+s.projName+'</span>',inBlock.indexOf(s.id)>-1,'pbPickerAddTyped(\''+s.id+'\','+JSON.stringify(s.title)+',\'\',\'proj-step\',\''+s.projId+'\')');
+    }).join('');
+  }
+
+  // ── Routine Habits ─────────────────────────────
+  var rtnItems=[];var todayD=todayStr();
+  (RTN_GROUPS||[]).filter(function(g){return g.active!==false&&rtnFreq(g)==='daily';}).forEach(function(g){
+    var items=RTNS[g.id]||[];var cs=rtnCompState(g,todayD);
+    items.forEach(function(item,idx){
+      var s=rtnStateStr(cs[idx]);
+      if(s==='done'||s==='skip'||s==='task')return;
+      if(q&&item.toLowerCase().indexOf(q)===-1)return;
+      var rid=g.id+'_ri'+idx;
+      rtnItems.push({id:rid,title:item,groupId:g.id,idx:idx,icon:g.icon,groupName:g.name,rel:_pbRelevance(blockTitle,item)});
+    });
+  });
+  if(rtnItems.length){
+    rtnItems.sort(function(a,b){return b.rel-a.rel;});
+    html+='<div style="font-size:10px;font-weight:700;color:#7a5a9a;text-transform:uppercase;letter-spacing:.4px;padding:10px 0 4px;border-top:1px solid var(--bdr);margin-top:4px">🔵 Habit Items</div>';
+    html+=rtnItems.map(function(r){
+      return _pbPickerRow(r.id,r.title,'<span style="font-size:10px;color:var(--textl)">'+r.icon+' '+r.groupName+'</span>',inBlock.indexOf(r.id)>-1,'pbPickerAddTyped(\''+r.id+'\','+JSON.stringify(r.title)+',\'\',\'routine\',\''+r.groupId+'\','+r.idx+')');
+    }).join('');
+  }
+
+  el.innerHTML=html||'<div style="text-align:center;padding:8px;font-size:12px;color:var(--textl)">Nothing found</div>';
+}
+
+function _pbPickerRow(id,title,subHtml,added,addCall){
+  var addBtn=added
+    ?'<button onclick="pbPickerRemove(\''+id+'\')" style="flex-shrink:0;padding:3px 9px;border-radius:7px;border:1.5px solid var(--sage);background:var(--sage);color:white;font-family:\'Quicksand\',sans-serif;font-size:11px;font-weight:700;cursor:pointer">✓</button>'
+    :'<button onclick="'+addCall+'" style="flex-shrink:0;padding:3px 9px;border-radius:7px;border:1.5px solid var(--bdr);background:none;font-family:\'Quicksand\',sans-serif;font-size:11px;font-weight:700;cursor:pointer">+ Add</button>';
+  return '<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--bdr)">'
+    +'<div style="flex:1;font-size:12px;color:var(--textd);min-width:0"><div style="font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+escHtml(title)+'</div>'+subHtml+'</div>'
+    +addBtn+'</div>';
 }
 
 function pbPickerAdd(id,title,urgency){
   if(_pbTasks.find(function(t){return t.id===id;}))return;
-  _pbTasks.push({id:id,title:title,urgency:urgency||''});
+  _pbTasks.push({id:id,title:title,urgency:urgency||'',type:'task'});
+  renderPbTaskList();renderPbTaskPicker();
+}
+
+function pbPickerAddTyped(id,title,urgency,type,sourceId,idx){
+  if(_pbTasks.find(function(t){return t.id===id;}))return;
+  var item={id:id,title:title,urgency:urgency||'',type:type||'task'};
+  if(sourceId)item.sourceId=sourceId;
+  if(idx!==undefined&&idx!==null)item.idx=idx;
+  _pbTasks.push(item);
   renderPbTaskList();renderPbTaskPicker();
 }
 
