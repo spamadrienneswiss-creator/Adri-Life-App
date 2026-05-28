@@ -5867,6 +5867,7 @@ function goTabDirect(tab,btn){
 
   if(tab==='meals'||tab==='food') renderWaterBottle();
   if(tab==='meals'){ showMealSec('meals',document.querySelector('#v-meals .pn-btn:nth-child(2)')); }
+  if(tab==='food'){ renderExLog(); updExWeek(); renderWplanList(); updM(); }
   if(tab==='wellness'){ showWellnessSec('mood',document.querySelector('#v-wellness .pn-btn:nth-child(1)')); }
   if(tab==='workshop'){ renderWSProjects(); }
 }
