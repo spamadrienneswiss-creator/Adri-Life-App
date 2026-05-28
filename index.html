@@ -919,30 +919,63 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
 
 <!-- THE HELM -->
 <div class="view" id="v-helm">
-  <div class="hub-banner" style="background:linear-gradient(135deg,rgba(44,62,107,.1),rgba(212,168,32,.08))">
-    <div class="hub-info"><h2>Tasks &amp; Projects</h2></div>
-  </div>
-  <div style="display:flex;gap:8px;margin-bottom:10px">
-    <button class="ok-btn" style="flex:1;margin:0;padding:10px 8px;font-size:13px" onclick="openM('taskModal')">➕ New Task</button>
-    <button class="ok-btn" style="flex:1;margin:0;padding:10px 8px;font-size:13px;background:linear-gradient(135deg,var(--lav),var(--blue))" onclick="goTab('projects',null);setTimeout(openNewProj,200)">📁 New Project</button>
-  </div>
-  <div class="hub-grid">
-    <div class="hub-card" onclick="goTab('tasks',null)"><div class="hub-card-ic">📋</div><div class="hub-card-name">Tasks</div><div class="hub-card-sub" id="hub-tasks-sub">Loading…</div></div>
-    <div class="hub-card" onclick="goTab('projects',null)"><div class="hub-card-ic">📁</div><div class="hub-card-name">Projects</div><div class="hub-card-sub" id="hub-projects-sub">Loading…</div></div>
-    <div class="hub-card span2" onclick="goTab('lists',null)"><div class="hub-card-ic">📝</div><div class="hub-card-name">Lists</div><div class="hub-card-sub" id="hub-lists-sub">Active working lists</div></div>
-    <div class="hub-card span2" style="cursor:default;padding:12px">
-      <div style="font-size:12px;font-weight:700;color:var(--textd);margin-bottom:8px">🧠 Brain Dump</div>
-      <div style="display:flex;gap:6px;margin-bottom:8px">
-        <input class="fi" id="helmDumpInput" placeholder="Quick thought..." style="flex:1;font-size:12px;padding:6px 10px;margin:0">
-        <button class="btn" onclick="helmQuickDump()" style="padding:6px 12px;font-size:13px;flex-shrink:0">↵</button>
+
+  <!-- ① TASKS HERO -->
+  <div onclick="goTab('tasks',null)" style="background:linear-gradient(135deg,#fff8f8 0%,#fdf4fb 100%);border-radius:20px;padding:18px 18px 14px;margin-bottom:12px;box-shadow:0 3px 16px rgba(201,160,160,.18),0 1px 4px rgba(0,0,0,.04);border:1.5px solid rgba(201,160,160,.28);cursor:pointer;position:relative;transition:transform .15s,box-shadow .15s" onmousedown="this.style.transform='scale(.985)'" onmouseup="this.style.transform=''" ontouchstart="this.style.transform='scale(.985)'" ontouchend="this.style.transform=''">
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px">
+      <div>
+        <div style="font-size:10px;font-weight:700;color:var(--textl);text-transform:uppercase;letter-spacing:1px;margin-bottom:3px">Today's Command</div>
+        <div style="font-family:'Playfair Display',serif;font-size:21px;color:var(--textd);line-height:1.1">📋 Tasks</div>
       </div>
-      <div id="helmDumpPreview"></div>
-      <button class="btn sec" style="font-size:11px;padding:3px 10px;margin-top:6px;width:100%" onclick="goTab('tasks',null);setTimeout(function(){togHelmSec('hs-dump',true)},200)">See All Dumps →</button>
+      <span id="helm-urgent-badge" style="display:none;background:var(--ured);color:#fff;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;letter-spacing:.2px;flex-shrink:0"></span>
     </div>
-    <div class="hub-card span2" onclick="goTab('routines',null)" style="background:linear-gradient(135deg,#eef5ee,#f5eef8);border-color:#b8d4b8"><div class="hub-card-ic">📅</div><div class="hub-card-name">Routines</div><div class="hub-card-sub" id="hub-routines-sub">Daily &amp; scheduled routines</div></div>
-    <div class="hub-card span2" onclick="goTab('focus-session',null)" style="background:linear-gradient(135deg,#eee8f8,#f8e8e8);border-color:#c8b8e8"><div class="hub-card-ic">🎯</div><div class="hub-card-name">Focus Session</div><div class="hub-card-sub" id="hub-focus-session-sub">Timer + task queue</div></div>
-    <div class="hub-card span2" onclick="goTab('grocery',null)" style="background:linear-gradient(135deg,#eaf5ea,#f5f0e8);border-color:#b8d8b8"><div class="hub-card-ic">🛒</div><div class="hub-card-name">Grocery</div><div class="hub-card-sub" id="hub-grocery-sub">Shopping list by store</div></div>
+    <div style="display:flex;gap:0;margin-bottom:14px">
+      <div style="flex:1;text-align:center;border-right:1px solid rgba(201,160,160,.2)">
+        <div style="font-size:28px;font-weight:800;color:var(--textd);line-height:1;font-family:'Quicksand',sans-serif" id="helm-open-count">—</div>
+        <div style="font-size:10px;color:var(--textl);font-weight:600;margin-top:2px">open</div>
+      </div>
+      <div style="flex:1;text-align:center;border-right:1px solid rgba(201,160,160,.2)">
+        <div style="font-size:28px;font-weight:800;color:var(--ured);line-height:1;font-family:'Quicksand',sans-serif" id="helm-due-count">—</div>
+        <div style="font-size:10px;color:var(--textl);font-weight:600;margin-top:2px">due today</div>
+      </div>
+      <div style="flex:1;text-align:center">
+        <div style="font-size:28px;font-weight:800;color:var(--peach);line-height:1;font-family:'Quicksand',sans-serif" id="helm-overdue-count">—</div>
+        <div style="font-size:10px;color:var(--textl);font-weight:600;margin-top:2px">overdue</div>
+      </div>
+    </div>
+    <button onclick="event.stopPropagation();openM('taskModal')" style="width:100%;padding:9px;border-radius:12px;border:none;background:linear-gradient(135deg,var(--rose),var(--lav));color:#fff;font-family:'Quicksand',sans-serif;font-size:13px;font-weight:700;cursor:pointer;letter-spacing:.2px">➕ New Task</button>
   </div>
+
+  <!-- ② BRAIN DUMP quick capture -->
+  <div style="background:#fff;border-radius:15px;padding:12px 14px;margin-bottom:12px;box-shadow:0 1px 6px rgba(0,0,0,.06);border:1.5px solid #f0ebe6">
+    <div style="font-size:10px;font-weight:700;color:var(--textl);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px">🧠 Capture a Thought</div>
+    <div style="display:flex;gap:7px">
+      <input class="fi" id="helmDumpInput" placeholder="Brain dump it here…" style="flex:1;font-size:13px;padding:8px 12px;margin:0;border-radius:10px">
+      <button onclick="helmQuickDump()" style="padding:8px 14px;border-radius:10px;border:none;background:var(--sage);color:#fff;font-family:'Quicksand',sans-serif;font-size:14px;font-weight:700;cursor:pointer;flex-shrink:0">↵</button>
+    </div>
+    <div id="helmDumpPreview"></div>
+    <button style="font-size:11px;color:var(--textl);background:none;border:none;padding:6px 0 0;cursor:pointer;font-family:'Quicksand',sans-serif;font-weight:600" onclick="goTab('tasks',null);setTimeout(function(){togHelmSec('hs-dump',true)},200)">See all dumps →</button>
+  </div>
+
+  <!-- ③ PROJECTS secondary row -->
+  <div onclick="goTab('projects',null)" style="background:#fff;border-radius:14px;padding:12px 16px;margin-bottom:16px;box-shadow:0 1px 5px rgba(0,0,0,.06);border:1.5px solid #ede8e3;cursor:pointer;display:flex;align-items:center;gap:12px;transition:transform .15s" onmousedown="this.style.transform='scale(.98)'" onmouseup="this.style.transform=''" ontouchstart="this.style.transform='scale(.98)'" ontouchend="this.style.transform=''">
+    <span style="font-size:20px">📁</span>
+    <div style="flex:1">
+      <div style="font-size:14px;font-weight:700;color:var(--textd)">Projects</div>
+      <div style="font-size:11px;color:var(--textl);margin-top:1px" id="hub-projects-sub">Loading…</div>
+    </div>
+    <button onclick="event.stopPropagation();goTab('projects',null);setTimeout(openNewProj,200)" style="padding:5px 13px;border-radius:11px;border:1.5px solid var(--lav);background:var(--lav-light);color:var(--lav);font-size:12px;font-weight:700;font-family:'Quicksand',sans-serif;cursor:pointer;flex-shrink:0">+ New</button>
+  </div>
+
+  <!-- ④ QUICK ACCESS grid -->
+  <div style="font-size:10px;font-weight:700;color:var(--textl);text-transform:uppercase;letter-spacing:.9px;margin-bottom:8px">Quick Access</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px">
+    <div class="hub-card" onclick="goTab('routines',null)"><div class="hub-card-ic">📅</div><div class="hub-card-name">Routines</div><div class="hub-card-sub" id="hub-routines-sub">Daily &amp; scheduled</div></div>
+    <div class="hub-card" onclick="goTab('focus-session',null)"><div class="hub-card-ic">🎯</div><div class="hub-card-name">Focus</div><div class="hub-card-sub" id="hub-focus-session-sub">Timer + queue</div></div>
+    <div class="hub-card" onclick="goTab('grocery',null)"><div class="hub-card-ic">🛒</div><div class="hub-card-name">Grocery</div><div class="hub-card-sub" id="hub-grocery-sub">Shopping list</div></div>
+    <div class="hub-card" onclick="goTab('lists',null)"><div class="hub-card-ic">📝</div><div class="hub-card-name">Lists</div><div class="hub-card-sub" id="hub-lists-sub">Loading…</div></div>
+  </div>
+
   <div class="learn-widget" id="lw-tasks">
     <button class="learn-widget-toggle" onclick="toggleLearnWidget('tasks')">📚 Learning <span id="lw-tasks-count"></span></button>
     <div id="lw-tasks-body" style="display:none"></div>
@@ -5501,15 +5534,20 @@ function renderHubPreviews(section){
   if(section==='helm'){
     renderHelmMilestone();
     var open=TASKS.filter(function(t){return !t.done;}).length;
-    var due=TASKS.filter(function(t){return !t.done&&t.due&&t.due<=today;}).length;
-    el=document.getElementById('hub-tasks-sub');if(el)el.textContent=due+' due today · '+open+' open';
+    var due=TASKS.filter(function(t){return !t.done&&t.due&&t.due===today;}).length;
+    var overdue=TASKS.filter(function(t){return !t.done&&t.due&&t.due<today;}).length;
+    var urgent=TASKS.filter(function(t){return !t.done&&(t.urgency==='urgent-important'||t.priority==='Do Now');}).length;
+    el=document.getElementById('helm-open-count');if(el)el.textContent=open;
+    el=document.getElementById('helm-due-count');if(el)el.textContent=due;
+    el=document.getElementById('helm-overdue-count');if(el)el.textContent=overdue;
+    el=document.getElementById('helm-urgent-badge');if(el){if(urgent>0){el.textContent=urgent+' urgent';el.style.display='';}else{el.style.display='none';}}
     var active=(PROJECTS||[]).filter(function(p){return p.status==='active';}).length;
-    el=document.getElementById('hub-projects-sub');if(el)el.textContent=active+' active project'+(active!==1?'s':'');
+    el=document.getElementById('hub-projects-sub');if(el)el.textContent=active?active+' active project'+(active!==1?'s':''):'No active projects';
     el=document.getElementById('hub-lists-sub');if(el)el.textContent=(LISTS||[]).length+' list'+((LISTS||[]).length!==1?'s':'')+' saved';
     var fssQ=FOCUS_QUEUE.tasks.length;
-    el=document.getElementById('hub-focus-session-sub');if(el)el.textContent=fssQ?fssQ+' task'+(fssQ!==1?'s':'')+' in queue':'Timer + task queue';
+    el=document.getElementById('hub-focus-session-sub');if(el)el.textContent=fssQ?fssQ+' task'+(fssQ!==1?'s':'')+' queued':'Timer + queue';
     var grocCount=GROCERY_LIST.filter(function(g){return !g.checked;}).length;
-    el=document.getElementById('hub-grocery-sub');if(el)el.textContent=grocCount?grocCount+' item'+(grocCount!==1?'s':'')+' to buy':'Shopping list by store';
+    el=document.getElementById('hub-grocery-sub');if(el)el.textContent=grocCount?grocCount+' item'+(grocCount!==1?'s':'')+' to buy':'Shopping list';
     renderHelmDumpPreview();
   }else if(section==='archives'){
     var due3=RTN_GROUPS.filter(function(g){return rtnIsDueToday(g);}).length;
