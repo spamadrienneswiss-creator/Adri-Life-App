@@ -2764,56 +2764,53 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
 <!-- EXPORT -->
 <div class="view" id="v-export">
   <div class="card">
-    <div class="ct">💾 Backup & Restore</div>
+    <div class="ct">📅 Date Range</div>
+    <p style="font-size:12px;color:var(--textl);margin-bottom:12px">Leave blank to export everything. Set a range to capture only that period.</p>
+    <div style="display:flex;gap:10px;margin-bottom:10px">
+      <div style="flex:1"><label style="font-size:11px;font-weight:700;color:var(--textl);display:block;margin-bottom:4px">FROM</label><input type="date" id="expRangeFrom" class="fi" style="padding:7px 10px"></div>
+      <div style="flex:1"><label style="font-size:11px;font-weight:700;color:var(--textl);display:block;margin-bottom:4px">TO</label><input type="date" id="expRangeTo" class="fi" style="padding:7px 10px"></div>
+    </div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap">
+      <button class="fchip" onclick="expSetRange('this-week')">This week</button>
+      <button class="fchip" onclick="expSetRange('this-month')">This month</button>
+      <button class="fchip" onclick="expSetRange('last-month')">Last month</button>
+      <button class="fchip" onclick="expSetRange('this-year')">This year</button>
+      <button class="fchip" onclick="document.getElementById('expRangeFrom').value='';document.getElementById('expRangeTo').value=''">All time</button>
+    </div>
+  </div>
+  <div class="card">
+    <div class="ct">📂 Categories</div>
+    <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px" id="expCategoryGrid">
+      <button class="fchip on" data-ec="tasks" onclick="this.classList.toggle('on')">📋 Tasks &amp; Routines</button>
+      <button class="fchip on" data-ec="health" onclick="this.classList.toggle('on')">💚 Health &amp; Wellness</button>
+      <button class="fchip on" data-ec="time" onclick="this.classList.toggle('on')">⏱️ Time Tracking</button>
+      <button class="fchip on" data-ec="wigs" onclick="this.classList.toggle('on')">🪄 Wig Projects</button>
+      <button class="fchip on" data-ec="finance" onclick="this.classList.toggle('on')">💰 Finances</button>
+      <button class="fchip on" data-ec="notes" onclick="this.classList.toggle('on')">📝 Notes &amp; Journal</button>
+      <button class="fchip on" data-ec="ministry" onclick="this.classList.toggle('on')">🌱 Ministry</button>
+      <button class="fchip on" data-ec="goals" onclick="this.classList.toggle('on')">🎯 Goals &amp; Progress</button>
+      <button class="fchip on" data-ec="content" onclick="this.classList.toggle('on')">🎬 Content Creation</button>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="btn sec" style="font-size:12px;padding:5px 14px" onclick="expSelAll(true)">Select All</button>
+      <button class="btn sec" style="font-size:12px;padding:5px 14px" onclick="expSelAll(false)">Clear All</button>
+    </div>
+  </div>
+  <div class="card">
+    <div class="ct">📄 Format</div>
+    <div class="bg bg3">
+      <button class="sb on" data-g="expFmt" data-v="csv" onclick="pSB(this)">📊 CSV</button>
+      <button class="sb" data-g="expFmt" data-v="pdf" onclick="pSB(this)">📄 PDF Report</button>
+      <button class="sb" data-g="expFmt" data-v="both" onclick="pSB(this)">📋 Both</button>
+    </div>
+  </div>
+  <button class="ok-btn" style="width:100%;margin-bottom:20px" onclick="runExport()">📤 Export</button>
+  <div class="card">
+    <div class="ct">💾 Backup &amp; Restore</div>
     <p style="font-size:12px;color:var(--textl);margin-bottom:12px">Download a full JSON backup of all your data, or restore from a previous backup.</p>
     <button class="ok-btn" style="background:linear-gradient(135deg,var(--sage),var(--teal));margin-bottom:8px" onclick="downloadBackup()">⬇️ Download Backup (.json)</button>
     <div style="font-size:12px;color:var(--textl);margin-bottom:6px">Restore from backup:</div>
     <input type="file" accept=".json" onchange="restoreBackup(this)" style="font-size:12px;margin-bottom:10px">
-  </div>
-  <div class="card">
-    <div class="ct">📤 Export Everything</div>
-    <p style="font-size:12px;color:var(--textl);margin-bottom:12px">Generate a full export of all your data at once, or pick a section below.</p>
-    <button class="ok-btn" onclick="expAll()">📋 Export All Data</button>
-    <textarea id="expAllTxt" style="width:100%;height:160px;border:2px solid #ede8e3;border-radius:11px;padding:11px;font-family:monospace;font-size:12px;resize:none;outline:none;margin-top:10px;display:none" readonly></textarea>
-    <button id="expAllCopy" onclick="cpExpAll()" style="display:none;width:100%;padding:11px;border-radius:11px;border:none;background:var(--blue-light);color:var(--blue);font-family:'Quicksand',sans-serif;font-size:14px;font-weight:700;cursor:pointer;margin-top:6px">📋 Copy to Clipboard</button>
-  </div>
-  <div class="sh sect-toggle" onclick="togSect('expTasks','expTasksArrow')">📋 Tasks <span id="expTasksArrow">▸</span></div>
-  <div id="expTasks" style="display:none">
-    <div class="card">
-      <button class="ok-btn" onclick="expD('tasks')">📋 Export Tasks</button>
-      <textarea id="expTxt" style="width:100%;height:160px;border:2px solid #ede8e3;border-radius:11px;padding:11px;font-family:monospace;font-size:12px;resize:none;outline:none;margin-top:10px;display:none" readonly></textarea>
-      <button id="expCopyBtn" onclick="cpExp()" style="display:none;width:100%;padding:11px;border-radius:11px;border:none;background:var(--blue-light);color:var(--blue);font-family:'Quicksand',sans-serif;font-size:14px;font-weight:700;cursor:pointer;margin-top:6px">📋 Copy</button>
-    </div>
-  </div>
-  <div class="sh sect-toggle" onclick="togSect('expWigs','expWigsArrow')">🪄 Wigs <span id="expWigsArrow">▸</span></div>
-  <div id="expWigs" style="display:none">
-    <div class="card">
-      <button class="ok-btn" style="background:linear-gradient(135deg,var(--rose),var(--peach))" onclick="expD('wigs')">🪄 Export Wigs</button>
-    </div>
-  </div>
-  <div class="sh sect-toggle" onclick="togSect('expMoney','expMoneyArrow')">💰 Money <span id="expMoneyArrow">▸</span></div>
-  <div id="expMoney" style="display:none">
-    <div class="card">
-      <button class="ok-btn" style="background:linear-gradient(135deg,var(--sage),var(--teal))" onclick="expD('expenses')">💸 Export Expenses</button>
-    </div>
-  </div>
-  <div class="sh sect-toggle" onclick="togSect('expHealth','expHealthArrow')">💚 Health <span id="expHealthArrow">▸</span></div>
-  <div id="expHealth" style="display:none">
-    <div class="card">
-      <div style="display:flex;gap:8px;margin-bottom:10px">
-        <div style="flex:1"><label style="font-size:11px;font-weight:700;color:var(--textl);text-transform:uppercase;letter-spacing:.8px;display:block;margin-bottom:4px">From</label><input type="date" id="expFrom" class="fi" style="padding:7px 10px;font-size:13px"></div>
-        <div style="flex:1"><label style="font-size:11px;font-weight:700;color:var(--textl);text-transform:uppercase;letter-spacing:.8px;display:block;margin-bottom:4px">To</label><input type="date" id="expTo" class="fi" style="padding:7px 10px;font-size:13px"></div>
-      </div>
-      <div class="bg bg4" style="margin-bottom:10px">
-        <button class="sb on" data-g="expType" data-v="food" onclick="pSB(this)">🍽️ Food</button>
-        <button class="sb" data-g="expType" data-v="exercise" onclick="pSB(this)">💪 Exercise</button>
-        <button class="sb" data-g="expType" data-v="mood" onclick="pSB(this)">😊 Mood</button>
-        <button class="sb" data-g="expType" data-v="symptoms" onclick="pSB(this)">🩺 Symptoms</button>
-      </div>
-      <button class="ok-btn" onclick="expHealth()">📋 Generate Health Export</button>
-      <textarea id="healthExpTxt" style="width:100%;height:140px;border:2px solid #ede8e3;border-radius:11px;padding:11px;font-family:monospace;font-size:12px;resize:none;outline:none;margin-top:10px;display:none" readonly></textarea>
-      <button id="healthExpCopy" onclick="cpHealthExp()" style="display:none;width:100%;padding:11px;border-radius:11px;border:none;background:var(--blue-light);color:var(--blue);font-family:'Quicksand',sans-serif;font-size:14px;font-weight:700;cursor:pointer;margin-top:6px">📋 Copy to Clipboard</button>
-    </div>
   </div>
 </div>
 
@@ -3869,7 +3866,7 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     <button class="fchip" onclick="setSearchFilter('lists',this)">📝 Lists</button>
     <button class="fchip" onclick="setSearchFilter('meals',this)">🍽️ Meals</button>
     <button class="fchip" onclick="setSearchFilter('notes',this)">📓 Notes</button>
-    <button class="fchip" onclick="setSearchFilter('spiritual',this)">🕊️ Spiritual</button>
+    <button class="fchip" onclick="setSearchFilter('spiritual',this)">✨ Spiritual</button>
     <button class="fchip" onclick="setSearchFilter('health',this)">🩺 Health</button>
     <button class="fchip" onclick="setSearchFilter('money',this)">💰 Money</button>
   </div>
@@ -4654,6 +4651,14 @@ function snapshotToArchiveYear(){
     var already=(ARCHIVE_YEARS[yr].goals||[]).find(function(x){return x.id===g.id;});
     if(!already){if(!ARCHIVE_YEARS[yr].goals)ARCHIVE_YEARS[yr].goals=[];ARCHIVE_YEARS[yr].goals.push({id:g.id,title:g.title,due:g.due||'',doneDate:g.doneDate||''});}
   });
+  // Snapshot posted content items
+  (CONTENT_ITEMS||[]).filter(function(c){return c.status==='posted'&&c.date;}).forEach(function(c){
+    var yr=+c.date.substring(0,4);
+    if(!ARCHIVE_YEARS[yr])ARCHIVE_YEARS[yr]={tasks:[],goals:[],notes:'',months:{},created:new Date().toISOString()};
+    if(!ARCHIVE_YEARS[yr].content)ARCHIVE_YEARS[yr].content=[];
+    var already=(ARCHIVE_YEARS[yr].content||[]).find(function(x){return x.id===c.id;});
+    if(!already)ARCHIVE_YEARS[yr].content.push({id:c.id,title:c.title,platforms:c.platforms||[],date:c.date});
+  });
   saveArchiveYears();
 }
 
@@ -4681,6 +4686,10 @@ function renderArchiveYear(yr){
   // Ministry
   var ministryHrs=(MINISTRY_LOG||[]).filter(function(m){return (m.date||'').startsWith(yearStr);}).reduce(function(s,m){return s+(parseFloat(m.hours)||0);},0);
   var ministryEntries=(MINISTRY_LOG||[]).filter(function(m){return (m.date||'').startsWith(yearStr);});
+
+  // Content items
+  var yearContent=(ARCHIVE_YEARS[yr]&&ARCHIVE_YEARS[yr].content)||[];
+  var yearContentPosted=yearContent.filter(function(c){return c.status==='posted';}).length||yearContent.length;
 
   // Expenses
   var yearExps=EXPENSES.filter(function(e){return (e.created||e.date||'').startsWith(yearStr);});
@@ -4777,11 +4786,20 @@ function renderArchiveYear(yr){
       +'<div class="card" style="text-align:center;padding:10px"><div style="font-size:22px;font-weight:700;color:var(--blue)">'+(avgMood?moodEmoji[Math.round(avgMood)]||avgMood:'—')+'</div><div style="font-size:10px;color:var(--textl)">Avg mood</div></div>'
     +'</div>'
     // Stats row 2
-    +'<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px">'
+    +'<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:8px">'
       +'<div class="card" style="text-align:center;padding:10px"><div style="font-size:18px;font-weight:700;color:#8a5a20">'+ministryHrs.toFixed(1)+'h</div><div style="font-size:10px;color:var(--textl)">Ministry</div></div>'
       +'<div class="card" style="text-align:center;padding:10px"><div style="font-size:18px;font-weight:700;color:#4a7a9b">$'+yearExpTotal.toFixed(0)+'</div><div style="font-size:10px;color:var(--textl)">Spent</div></div>'
       +'<div class="card" style="text-align:center;padding:10px"><div style="font-size:18px;font-weight:700;color:var(--rose)">'+meals.length+'</div><div style="font-size:10px;color:var(--textl)">Meals logged</div></div>'
     +'</div>'
+    // Stats row 3 (content)
+    +(yearContentPosted>0?
+    '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px">'
+      +'<div class="card" style="text-align:center;padding:10px"><div style="font-size:18px;font-weight:700;color:var(--teal)">'+yearContentPosted+'</div><div style="font-size:10px;color:var(--textl)">Content Posted</div></div>'
+      +'<div class="card" style="text-align:center;padding:10px;grid-column:span 2"><div style="font-size:12px;font-weight:700;color:var(--textd);margin-bottom:4px">🎬 Top Platforms</div><div style="font-size:11px;color:var(--textl)">'
+      +(function(){var plats={};yearContent.forEach(function(c){(c.platforms||[]).forEach(function(p){plats[p]=(plats[p]||0)+1;});});var sorted=Object.keys(plats).sort(function(a,b){return plats[b]-plats[a];}).slice(0,3);return sorted.length?sorted.map(function(p){return p+' ('+plats[p]+')';}).join(', '):'—';})()
+      +'</div></div>'
+    +'</div>'
+    :'<div style="margin-bottom:14px"></div>')
 
     // Notes
     +'<div class="card" style="margin-bottom:10px">'
@@ -4792,7 +4810,7 @@ function renderArchiveYear(yr){
     // Ministry highlights
     +(ministryEntries.length?
       '<div class="card" style="margin-bottom:10px">'
-        +'<div style="font-size:13px;font-weight:700;color:var(--textd);margin-bottom:8px">⛪ Ministry Log — '+yr+' ('+ministryHrs.toFixed(1)+'h total)</div>'
+        +'<div style="font-size:13px;font-weight:700;color:var(--textd);margin-bottom:8px">🌱 Ministry Log — '+yr+' ('+ministryHrs.toFixed(1)+'h total)</div>'
         +ministryEntries.slice(0,8).map(function(m){
           return '<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--border)">'
             +'<span style="font-size:11px;color:var(--textl);flex-shrink:0;width:70px">'+m.date+'</span>'
@@ -10184,6 +10202,352 @@ function expAll(){
 function cpExpAll(){var t=document.getElementById('expAllTxt');if(t){t.select();document.execCommand('copy');alert('✅ All data copied!');}}
 
 // ═══════════════════════════════════════════════
+// COMPREHENSIVE EXPORT SYSTEM
+// ═══════════════════════════════════════════════
+function expSetRange(preset){
+  var now=new Date();
+  var f='',t='';
+  function p2(n){return n<10?'0'+n:''+n;}
+  function fmt(d){return d.getFullYear()+'-'+p2(d.getMonth()+1)+'-'+p2(d.getDate());}
+  if(preset==='this-week'){var dow=now.getDay();var mon=new Date(now);mon.setDate(now.getDate()-(dow===0?6:dow-1));f=fmt(mon);t=fmt(now);}
+  else if(preset==='this-month'){f=now.getFullYear()+'-'+p2(now.getMonth()+1)+'-01';t=fmt(now);}
+  else if(preset==='last-month'){var lm=new Date(now.getFullYear(),now.getMonth()-1,1);var lme=new Date(now.getFullYear(),now.getMonth(),0);f=fmt(lm);t=fmt(lme);}
+  else if(preset==='this-year'){f=now.getFullYear()+'-01-01';t=fmt(now);}
+  document.getElementById('expRangeFrom').value=f;
+  document.getElementById('expRangeTo').value=t;
+}
+
+function expSelAll(on){
+  document.querySelectorAll('#expCategoryGrid .fchip').forEach(function(btn){btn.classList.toggle('on',on);});
+}
+
+function _expInRange(d,from,to){
+  if(!d)return true;
+  if(from&&d<from)return false;
+  if(to&&d>to)return false;
+  return true;
+}
+
+function _expItemInRange(item,from,to){
+  if(!from&&!to)return true;
+  var dates=[item.date,item.doneDate,item.due,item.created,item.postedDate].filter(Boolean);
+  if(!dates.length)return!from;
+  return dates.some(function(d){return _expInRange(d,from,to);});
+}
+
+function _expGetCats(){
+  var c=[];
+  document.querySelectorAll('#expCategoryGrid .fchip.on').forEach(function(b){c.push(b.getAttribute('data-ec'));});
+  return c;
+}
+
+function _expCsvEsc(v){
+  if(v===null||v===undefined)return'';
+  v=String(v);
+  if(v.indexOf(',')>-1||v.indexOf('"')>-1||v.indexOf('\n')>-1)return'"'+v.replace(/"/g,'""')+'"';
+  return v;
+}
+function _expCsvRow(arr){return arr.map(_expCsvEsc).join(',');}
+
+function _expHtmlEsc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+function _expDownload(fname,type,content){
+  var blob=new Blob([content],{type:type+';charset=utf-8;'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');
+  a.href=url;a.download=fname;document.body.appendChild(a);a.click();
+  setTimeout(function(){document.body.removeChild(a);URL.revokeObjectURL(url);},1000);
+}
+
+function _expBuildSections(from,to,cats){
+  var sections=[];
+
+  if(cats.indexOf('tasks')>-1){
+    var taskRows=[['ID','Title','Category','Urgency','Status','Due','Done Date','Repeat','Est Min','Actual Min','Notes']];
+    (TASKS||[]).forEach(function(t){
+      if((from||to)&&!_expItemInRange(t,from,to))return;
+      taskRows.push([t.id||'',t.title||'',t.cat||'mis',t.urgency||'',t.done?'Done':'Active',t.due||'',t.doneDate||'',t.repeat?'Yes':'No',t.estimatedMin||'',t.actualMin||'',t.notes||'']);
+    });
+    sections.push({title:'Tasks',rows:taskRows,note:(taskRows.length-1)+' tasks'});
+    // Routine completions
+    var RS_raw=JSON.parse(localStorage.getItem('aRS')||'{}');
+    var rtnRows=[['Date','Group','Item','State']];
+    Object.keys(RS_raw).sort().forEach(function(dateKey){
+      if(!_expInRange(dateKey,from,to))return;
+      Object.keys(RS_raw[dateKey]||{}).forEach(function(grp){
+        Object.keys(RS_raw[dateKey][grp]||{}).forEach(function(item){
+          var state=RS_raw[dateKey][grp][item];
+          if(state==='done'||state==='skip')rtnRows.push([dateKey,grp,item,state]);
+        });
+      });
+    });
+    if(rtnRows.length>1)sections.push({title:'Routine Completions',rows:rtnRows,note:(rtnRows.length-1)+' entries'});
+  }
+
+  if(cats.indexOf('health')>-1){
+    var moodRows=[['Date','Mood (1-5)']];
+    Object.keys(MOOD||{}).sort().forEach(function(k){if(_expInRange(k,from,to))moodRows.push([k,MOOD[k]]);});
+    if(moodRows.length>1)sections.push({title:'Mood Log',rows:moodRows,note:(moodRows.length-1)+' entries'});
+
+    var sleepRows=[['Date','Bedtime','Wake','Dur Hrs','Dur Mins']];
+    (MILLIE.sleepLog||[]).forEach(function(s){
+      var d=(s.date||(s.slept||'').substring(0,10));
+      if(!_expInRange(d,from,to))return;
+      sleepRows.push([d,s.slept?s.slept.replace('T',' ').substring(0,16):'',s.woke?s.woke.replace('T',' ').substring(0,16):'',s.durH||'',s.durM||'']);
+    });
+    if(sleepRows.length>1)sections.push({title:'Sleep Log',rows:sleepRows,note:(sleepRows.length-1)+' nights'});
+
+    var symHeader=['Date'].concat((SYM_TYPES||[]).map(function(s){return(s.icon||'')+' '+s.name;}));
+    var symRows=[symHeader];
+    Object.keys(SYM_LOG||{}).sort().forEach(function(k){
+      if(!_expInRange(k,from,to))return;
+      var row=[k];(SYM_TYPES||[]).forEach(function(s){row.push((SYM_LOG[k]||{})[s.id]||0);});symRows.push(row);
+    });
+    if(symRows.length>1)sections.push({title:'Symptom Log',rows:symRows,note:(symRows.length-1)+' days'});
+
+    var ptRows=[['Date','Notes']];
+    (PT||[]).forEach(function(p){var d=typeof p==='string'?p:p.date;if(_expInRange(d,from,to))ptRows.push([d,typeof p==='object'?p.note||'':'']);});
+    if(ptRows.length>1)sections.push({title:'Period Log',rows:ptRows,note:(ptRows.length-1)+' entries'});
+
+    var medRows=[['Date','Medication','Taken']];
+    Object.keys(MED_LOG||{}).sort().forEach(function(k){
+      if(!_expInRange(k,from,to))return;
+      (MEDS||[]).forEach(function(med){medRows.push([k,med.name,(MED_LOG[k]||{})[med.id]?'Yes':'No']);});
+    });
+    if(medRows.length>1)sections.push({title:'Medication Log',rows:medRows,note:(medRows.length-1)+' entries'});
+
+    var watRows=[['Date','oz']];
+    Object.keys(WATER_OZ_LOG||{}).sort().forEach(function(k){if(_expInRange(k,from,to))watRows.push([k,WATER_OZ_LOG[k]||0]);});
+    if(watRows.length>1)sections.push({title:'Water Log',rows:watRows,note:(watRows.length-1)+' days'});
+
+    var measRows=[['Date','Type','Value','Unit']];
+    (MEASUREMENT_LOG||[]).forEach(function(m){if(_expInRange(m.date,from,to))measRows.push([m.date||'',m.type||'',m.value||'',m.unit||'']);});
+    if(measRows.length>1)sections.push({title:'Body Measurements',rows:measRows,note:(measRows.length-1)+' entries'});
+
+    var stepsRows=[['Date','Steps']];
+    Object.keys(STEPS_LOG||{}).sort().forEach(function(k){if(_expInRange(k,from,to))stepsRows.push([k,STEPS_LOG[k]||0]);});
+    if(stepsRows.length>1)sections.push({title:'Steps Log',rows:stepsRows,note:(stepsRows.length-1)+' days'});
+
+    var foodRows=[['Date','Food','Serving','Cal','Protein','Fiber','Carbs','Fat']];
+    Object.keys(FL||{}).sort().forEach(function(k){
+      if(!_expInRange(k,from,to))return;
+      (FL[k]||[]).forEach(function(f){foodRows.push([k,f.name||'',f.sv||'1srv',f.cal||0,f.pro||0,f.fib||0,f.crb||0,f.fat||0]);});
+    });
+    if(foodRows.length>1)sections.push({title:'Food Log',rows:foodRows,note:(foodRows.length-1)+' entries'});
+
+    var exRows=[['Date','Exercise','Duration','Unit','Notes']];
+    Object.keys(EX_LOG||{}).sort().forEach(function(k){
+      if(!_expInRange(k,from,to))return;
+      (EX_LOG[k]||[]).forEach(function(e){exRows.push([k,e.name||'',e.dur||'',e.unit||'',e.note||'']);});
+    });
+    if(exRows.length>1)sections.push({title:'Exercise Log',rows:exRows,note:(exRows.length-1)+' entries'});
+  }
+
+  if(cats.indexOf('time')>-1){
+    var ttRows=[['Title','Category','Est Min','Actual Min','Beat/Over','Done Date','XP']];
+    (TASKS||[]).filter(function(t){return t.done&&(t.estimatedMin||t.actualMin);}).forEach(function(t){
+      if(!_expInRange(t.doneDate||'',from,to))return;
+      var diff=(t.estimatedMin&&t.actualMin)?t.estimatedMin-t.actualMin:null;
+      var status=diff===null?'—':diff>0?'Beat '+diff+'m':diff<0?'Over '+(-diff)+'m':'Spot on';
+      var xp=diff&&diff>0?diff:0;
+      ttRows.push([t.title||'',t.cat||'mis',t.estimatedMin||'',t.actualMin||'',status,t.doneDate||'',xp]);
+    });
+    sections.push({title:'Time Tracking',rows:ttRows,note:(ttRows.length-1)+' tracked tasks'});
+
+    var tthRows=[['Task','Date','Actual Min','Est Min']];
+    Object.keys(TASK_TIME_HISTORY||{}).forEach(function(key){
+      (TASK_TIME_HISTORY[key]||[]).forEach(function(e){
+        if(!_expInRange(e.date||'',from,to))return;
+        tthRows.push([e.title||key,e.date||'',e.actualMin||'',e.estimatedMin||'']);
+      });
+    });
+    if(tthRows.length>1)sections.push({title:'Recurring Task History',rows:tthRows,note:(tthRows.length-1)+' entries'});
+  }
+
+  if(cats.indexOf('wigs')>-1){
+    var wigRows=[['Client','Character','Type','Price','Deposit','Status','CA#','Due','Notes']];
+    (WIGS||[]).forEach(function(w){
+      if((from||to)&&!_expItemInRange(w,from,to))return;
+      wigRows.push([w.client||'',w.char||'',w.ty||'',w.price||0,w.dep||'',w.st||'',w.ca||'',w.due||'',w.notes||'']);
+    });
+    sections.push({title:'Wig Orders',rows:wigRows,note:(wigRows.length-1)+' orders'});
+
+    var stepRows=[['Order/Client','Step','Est Min','Actual Min','Done','Done Date']];
+    (WIG_ORDERS||[]).forEach(function(order){
+      (order.steps||[]).forEach(function(st){
+        if((from||to)&&!_expInRange(st.doneDate||order.created||'',from,to))return;
+        stepRows.push([(order.clientName||order.client||''),st.label||st.id||'',st.estimatedMin||'',st.actualMin||'',st.done?'Yes':'No',st.doneDate||'']);
+      });
+    });
+    if(stepRows.length>1)sections.push({title:'Wig Order Steps',rows:stepRows,note:(stepRows.length-1)+' step entries'});
+  }
+
+  if(cats.indexOf('finance')>-1){
+    var expRows=[['Date','Description','Category','Type','Amount']];
+    (EXPENSES||[]).forEach(function(e){
+      var d=e.date||e.created||'';
+      if(!_expInRange(d,from,to))return;
+      expRows.push([d,e.desc||'',e.cat||'',e.ty||'',e.amt||0]);
+    });
+    sections.push({title:'Expenses',rows:expRows,note:(expRows.length-1)+' entries'});
+
+    var incRows=[['Date','Description','Category','Amount','Source']];
+    (INCOME||[]).forEach(function(i){
+      if(!_expInRange(i.date||'',from,to))return;
+      incRows.push([i.date||'',i.desc||'',i.cat||'',i.amt||0,i.source||'']);
+    });
+    sections.push({title:'Income',rows:incRows,note:(incRows.length-1)+' entries'});
+
+    var billRows=[['Name','Amount','Due Day','Frequency','Paid']];
+    (BILLS||[]).forEach(function(b){billRows.push([b.name||'',b.amt||0,b.due||'',b.freq||'monthly',b.paid?'Yes':'No']);});
+    if(billRows.length>1)sections.push({title:'Bills',rows:billRows,note:(billRows.length-1)+' bills'});
+  }
+
+  if(cats.indexOf('notes')>-1){
+    var bdRows=[['Text','Priority','Created']];
+    (BRAIN_DUMP||[]).forEach(function(item){
+      var d=(item&&item.created)||'';
+      if((from||to)&&!_expInRange(d,from,to))return;
+      bdRows.push([item&&item.text?item.text:String(item||''),item&&item.priority?item.priority:'',d]);
+    });
+    if(bdRows.length>1)sections.push({title:'Brain Dump',rows:bdRows,note:(bdRows.length-1)+' items'});
+
+    var listRows=[['List','Item','Checked']];
+    (LISTS||[]).forEach(function(list){
+      (list.items||[]).forEach(function(item){listRows.push([list.name||'',item.text||item||'',item.done?'Yes':'No']);});
+    });
+    if(listRows.length>1)sections.push({title:'Lists',rows:listRows,note:(listRows.length-1)+' items'});
+
+    var gratRows=[['Date','Entry']];
+    (GRAT_LOG||[]).forEach(function(g){
+      if(!_expInRange(g.date||'',from,to))return;
+      gratRows.push([g.date||'',g.text||g.entry||'']);
+    });
+    if(gratRows.length>1)sections.push({title:'Gratitude Journal',rows:gratRows,note:(gratRows.length-1)+' entries'});
+
+    var snRows=[['Title','Body','Created']];
+    (STUDY_NOTES||[]).forEach(function(n){
+      if((from||to)&&!_expInRange(n.created||'',from,to))return;
+      snRows.push([n.title||'',n.body||'',n.created||'']);
+    });
+    if(snRows.length>1)sections.push({title:'Study Notes',rows:snRows,note:(snRows.length-1)+' notes'});
+
+    var intRows=[['Date','Intention']];
+    Object.keys(INTENTIONS||{}).sort().forEach(function(k){
+      if(!_expInRange(k,from,to))return;
+      var items=INTENTIONS[k];
+      if(Array.isArray(items))items.forEach(function(it){intRows.push([k,it.text||it||'']);});
+      else if(typeof items==='string')intRows.push([k,items]);
+    });
+    if(intRows.length>1)sections.push({title:'Daily Intentions',rows:intRows,note:(intRows.length-1)+' entries'});
+  }
+
+  if(cats.indexOf('ministry')>-1){
+    var minRows=[['Date','Activity','Hours','Notes']];
+    (MINISTRY_LOG||[]).forEach(function(m){
+      if(!_expInRange(m.date||'',from,to))return;
+      minRows.push([m.date||'',m.activity||m.type||'',m.hours||m.hrs||0,m.notes||'']);
+    });
+    sections.push({title:'Ministry Hours',rows:minRows,note:(minRows.length-1)+' entries'});
+
+    var prayRows=[['Date','Title','Notes','Answered']];
+    (PRAYERS||[]).forEach(function(p){
+      if((from||to)&&!_expInRange(p.date||'',from,to))return;
+      prayRows.push([p.date||'',p.title||'',p.notes||'',p.answered?'Yes':'No']);
+    });
+    if(prayRows.length>1)sections.push({title:'Prayer Log',rows:prayRows,note:(prayRows.length-1)+' prayers'});
+  }
+
+  if(cats.indexOf('goals')>-1){
+    var goalRows=[['Title','Category','Due','Done Date','Status','Progress %','Notes']];
+    (GOALS||[]).forEach(function(g){
+      if((from||to)&&!_expItemInRange(g,from,to))return;
+      goalRows.push([g.title||'',g.cat||'',g.due||'',g.doneDate||'',g.done?'Done':'Active',g.progress||0,g.notes||'']);
+    });
+    sections.push({title:'Goals',rows:goalRows,note:(goalRows.length-1)+' goals'});
+
+    var habRows=[['Habit','Date','Done']];
+    (HABITS||[]).forEach(function(h){
+      Object.keys(HABIT_LOG||{}).sort().forEach(function(k){
+        if(!_expInRange(k,from,to))return;
+        if((HABIT_LOG[k]||{})[h.id])habRows.push([h.name||'',k,'Yes']);
+      });
+    });
+    if(habRows.length>1)sections.push({title:'Habit Log',rows:habRows,note:(habRows.length-1)+' completions'});
+  }
+
+  if(cats.indexOf('content')>-1){
+    var contRows=[['Title','Platform(s)','Status','Date Posted','Notes']];
+    (CONTENT_ITEMS||[]).forEach(function(c){
+      if((from||to)&&!_expInRange(c.date||'',from,to))return;
+      contRows.push([c.title||'',(c.platforms||[]).join(', '),c.status||'',c.date||'',c.notes||'']);
+    });
+    sections.push({title:'Content Creation',rows:contRows,note:(contRows.length-1)+' items'});
+  }
+
+  return sections;
+}
+
+function runExport(){
+  var from=document.getElementById('expRangeFrom').value;
+  var to=document.getElementById('expRangeTo').value;
+  var cats=_expGetCats();
+  var fmt=SBV.expFmt||'csv';
+  if(!cats.length){showToast('Select at least one category');return;}
+  if(fmt==='csv'||fmt==='both')_expRunCSV(from,to,cats);
+  if(fmt==='pdf'||fmt==='both')setTimeout(function(){_expRunPDF(from,to,cats);},fmt==='both'?700:0);
+}
+
+function _expRunCSV(from,to,cats){
+  var sections=_expBuildSections(from,to,cats);
+  if(!sections.length){showToast('Nothing to export');return;}
+  var parts=[];
+  sections.forEach(function(sec){
+    parts.push('# '+sec.title+' ('+sec.note+')\n');
+    parts.push(sec.rows.map(_expCsvRow).join('\n'));
+    parts.push('\n');
+  });
+  var rangeStr=(from||to)?(from||'start')+' to '+(to||'today'):'all-time';
+  _expDownload('adri-life-'+rangeStr+'.csv','text/csv',parts.join('\n'));
+  showToast('CSV downloaded 📊');
+  markExpExported();
+}
+
+function _expRunPDF(from,to,cats){
+  var sections=_expBuildSections(from,to,cats);
+  if(!sections.length){showToast('Nothing to export');return;}
+  var dateStr=new Date().toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'});
+  var rangeStr=(from||to)?(from||'start')+' → '+(to||'today'):'All time';
+  var html='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Adri-Life Export</title>'
+    +'<style>*{box-sizing:border-box}body{font-family:Georgia,serif;font-size:13px;color:#222;max-width:960px;margin:40px auto;padding:0 30px}'
+    +'.hdr{text-align:center;margin-bottom:36px;border-bottom:2px solid #c8a0a0;padding-bottom:20px}'
+    +'.hdr h1{font-size:26px;color:#8a4040;margin:0 0 6px;font-family:Georgia,serif}'
+    +'.hdr .meta{font-size:12px;color:#999}'
+    +'.sec{margin-bottom:32px}'
+    +'.sec h2{font-size:15px;color:#4a4a6a;margin:0 0 6px;padding-left:10px;border-left:4px solid #c8a0c0}'
+    +'.sec .note{font-size:11px;color:#bbb;margin-bottom:6px}'
+    +'table{width:100%;border-collapse:collapse;font-size:11px;margin-bottom:8px}'
+    +'th{background:#f5f0f8;color:#4a4a6a;text-align:left;padding:5px 8px;border:1px solid #ddd;font-weight:700}'
+    +'td{padding:4px 8px;border:1px solid #eee;vertical-align:top}'
+    +'tr:nth-child(even)td{background:#fafafa}'
+    +'.print-btn{display:block;text-align:center;margin:40px auto 0}'
+    +'@media print{.print-btn{display:none}@page{margin:1.5cm}}</style></head><body>'
+    +'<div class="hdr"><h1>📋 Adri-Life Export</h1>'
+    +'<div class="meta">Generated '+dateStr+' &nbsp;·&nbsp; '+rangeStr+'</div></div>';
+  sections.forEach(function(sec){
+    html+='<div class="sec"><h2>'+_expHtmlEsc(sec.title)+'</h2><div class="note">'+_expHtmlEsc(sec.note)+'</div>';
+    if(sec.rows.length<=1){html+='<p style="color:#bbb;font-style:italic;font-size:12px">No data in this range.</p></div>';return;}
+    html+='<table><thead><tr>'+sec.rows[0].map(function(h){return'<th>'+_expHtmlEsc(String(h||''))+'</th>';}).join('')+'</tr></thead><tbody>';
+    sec.rows.slice(1).forEach(function(row){html+='<tr>'+row.map(function(cell){return'<td>'+_expHtmlEsc(String(cell||''))+'</td>';}).join('')+'</tr>';});
+    html+='</tbody></table></div>';
+  });
+  html+='<div class="print-btn"><button onclick="window.print()" style="background:#8a4040;color:#fff;border:none;border-radius:8px;padding:12px 32px;font-size:14px;cursor:pointer">🖨️ Print / Save as PDF</button></div></body></html>';
+  var win=window.open('','_blank');
+  if(win){win.document.write(html);win.document.close();}
+  else showToast('Enable popups to open PDF report');
+}
+
+// ═══════════════════════════════════════════════
 // MODAL HELPERS
 // ═══════════════════════════════════════════════
 function openM(id){
@@ -11506,7 +11870,7 @@ var SEL_BANNER='';
 var TOGGLEABLE_TABS=[
   {id:'helm',label:'⚓ The Helm'},{id:'conservatory',label:'🌿 Conservatory'},
   {id:'hearthside',label:'🏡 Hearthside'},{id:'workshop',label:'🔨 Workshop'},
-  {id:'lighthouse',label:'🕊️ Lighthouse'},{id:'estate',label:'🏛️ The Estate'},
+  {id:'lighthouse',label:'✨ Lighthouse'},{id:'estate',label:'🏛️ The Estate'},
   {id:'emporium',label:'🏪 Emporium'},{id:'archives',label:'📚 Research Library'},
   {id:'settings',label:'⚙️ Settings'},
 ];
@@ -14507,7 +14871,9 @@ function renderIntentionTaskPicks(){
     var isToday=t.due===todayStr();
     var isOverdue=t.due&&t.due<todayStr();
     var badge=isOverdue?'<span style="font-size:9px;color:#c06060;font-weight:700"> !</span>':isToday?'<span style="font-size:9px;color:var(--rose);font-weight:700"> ★</span>':'';
-    return '<button class="btn sec" style="font-size:11px;padding:3px 10px" onclick="addIntentionFromTask('+JSON.stringify(t.title)+','+JSON.stringify(t.id)+')">'
+    var eTitle="'"+t.title.replace(/\\/g,'\\\\').replace(/'/g,"\\'")+"'";
+    var eId="'"+t.id+"'";
+    return '<button class="btn sec" style="font-size:11px;padding:3px 10px" onclick="addIntentionFromTask('+eTitle+','+eId+')">'
       +escHtml(label)+badge+'</button>';
   }).join('');
 }
@@ -20841,7 +21207,7 @@ function renderSpiritBooks(){
     el.innerHTML='<div class="empty"><div class="emj">📚</div><p>No books added yet.<br><small>Track your reading progress here!</small></p></div>';
     return;
   }
-  var catIcons={bible:'📖',spiritual:'🕊️',theocratic:'⛪',personal:'📘',other:'📚'};
+  var catIcons={bible:'📖',spiritual:'✨',theocratic:'⛪',personal:'📘',other:'📚'};
   el.innerHTML=SPIRIT_BOOKS.map(function(b){
     var pct=b.totalPages?Math.round((b.pagesRead||0)/b.totalPages*100):0;
     var done=pct>=100;
@@ -23770,7 +24136,7 @@ function delProjInc(id){
     <div class="fg"><label class="fl">Category</label>
       <select class="fi" id="spiritBookCat">
         <option value="bible">📖 Bible / Scripture</option>
-        <option value="spiritual">🕊️ Spiritual</option>
+        <option value="spiritual">✨ Spiritual</option>
         <option value="theocratic">⛪ Theocratic</option>
         <option value="personal">📘 Personal Growth</option>
         <option value="other">📚 Other</option>
