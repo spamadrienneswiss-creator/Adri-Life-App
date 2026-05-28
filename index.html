@@ -1419,18 +1419,16 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     <div id="todayPlanChips" style="display:flex;flex-wrap:wrap;gap:4px;margin-top:6px"></div>
   </div>
 
+  <!-- Routine entry pills (time-aware) -->
+  <div id="todayRtnPills" style="display:flex;gap:8px;margin-bottom:10px"></div>
+
   <!-- Tasks & Routines (collapsible) -->
   <div class="card" style="padding:0;margin-bottom:10px">
     <div style="display:flex;align-items:center;justify-content:space-between;padding:11px 14px;cursor:pointer" onclick="togTodaySec('todayTasksSec')">
-      <span style="font-size:11px;font-weight:700;color:var(--textl);letter-spacing:.5px;text-transform:uppercase">Tasks &amp; Routines</span>
+      <span style="font-size:11px;font-weight:700;color:var(--textl);letter-spacing:.5px;text-transform:uppercase">Tasks</span>
       <span class="sh-arr" id="sh-arr-todayTasksSec">▾</span>
     </div>
     <div id="todayTasksSec-wrap" style="padding:0 14px 14px">
-      <!-- AM Routine -->
-      <div style="font-size:11px;font-weight:700;color:var(--textl);letter-spacing:.4px;text-transform:uppercase;cursor:pointer;display:flex;justify-content:space-between;align-items:center;margin-bottom:4px" onclick="togTodaySec('todayAM')">
-        <span>Morning Routine</span><span class="sh-arr" id="sh-arr-todayAM">▾</span>
-      </div>
-      <div id="todayAM-wrap" style="margin-bottom:12px"><div class="rc" id="todayAM"><div class="rt">✨ AM Routine</div></div></div>
       <!-- Do Now -->
       <div style="font-size:11px;font-weight:700;color:var(--rose);letter-spacing:.4px;text-transform:uppercase;margin-bottom:6px">Do Now</div>
       <div id="todayUr" style="margin-bottom:12px"><div class="empty"><div class="emj">🎉</div><p>No urgent tasks!</p></div></div>
@@ -1439,11 +1437,6 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
         <span style="color:#c48a20">Do Soon</span><span class="sh-arr" id="sh-arr-todaySo">▸</span>
       </div>
       <div id="todaySo-wrap" style="display:none;margin-bottom:12px"><div id="todaySo"><div class="empty"><div class="emj">📝</div><p>Add tasks to see them here.</p></div></div></div>
-      <!-- PM Routine -->
-      <div style="font-size:11px;font-weight:700;color:var(--textl);letter-spacing:.4px;text-transform:uppercase;cursor:pointer;display:flex;justify-content:space-between;align-items:center;margin-bottom:4px" onclick="togTodaySec('todayPM')">
-        <span>Evening Routine</span><span class="sh-arr" id="sh-arr-todayPM">▸</span>
-      </div>
-      <div id="todayPM-wrap" style="display:none"><div class="rc pm" id="todayPM"><div class="rt">🌙 PM Routine</div></div></div>
     </div>
   </div>
 
@@ -5539,7 +5532,7 @@ function goTabDirect(tab,btn){
   if(tab==='places')renderPlaces();
   if(SECTION_VIEWS[tab]||tab==='emporium')renderHubPreviews(tab);
   var hFab=document.getElementById('hatchFab');if(hFab){hFab.style.display=(tab==='today')?'flex':'none';if(tab==='today'){hFab.style.opacity='1';hFab.style.transform='translateX(-50%) translateY(0)';hFab.style.pointerEvents='auto';_fabHidden=false;_fabScrollLast=window.scrollY||window.pageYOffset;renderFabPills();}}
-  if(tab==='today'){ tickSpiritRun(); renderWaterBottle(); renderTodayStatsBars(); renderWeekStats(); renderTodayMoodBtns(); renderTodayPlanBar(); renderTodayWorkGlance(); renderTodayHubSubs(); renderIntentionsHome(); }
+  if(tab==='today'){ tickSpiritRun(); renderWaterBottle(); renderTodayStatsBars(); renderWeekStats(); renderTodayMoodBtns(); renderTodayPlanBar(); renderTodayWorkGlance(); renderTodayHubSubs(); renderIntentionsHome(); renderTodayRtnPills(); }
   if(tab==='routines'){ renderDailyRtn(_dailyRtnKey); renderOtherRtns(); }
   if(tab==='hearthside'){ renderHWHubStats(); }
   if(tab==='lighthouse'){ updateLighthouseSpiritStatus(); }
@@ -6054,8 +6047,6 @@ function initTodaySecDefaults(){
   var today=todayStr();
   if(_todaySecC._autoDate!==today){
     var h=new Date().getHours();
-    _todaySecC['todayPM']=(h<19);
-    _todaySecC['todayAM']=(h>=19);
     _todaySecC['todaySo']=true; // Do Soon starts collapsed
     _todaySecC._autoDate=today;
     localStorage.setItem('aTodaySecC',JSON.stringify(_todaySecC));
@@ -6064,7 +6055,7 @@ function initTodaySecDefaults(){
   if(_todaySecC['statToday']===undefined) _todaySecC['statToday']=false; // Today open
   if(_todaySecC['statWeek']===undefined) _todaySecC['statWeek']=true; // This Week collapsed
   if(_todaySecC['todayTasksSec']===undefined) _todaySecC['todayTasksSec']=false; // Tasks open
-  ['todayAM','todayPM','todaySo','todayStatsBody','statToday','statWeek','todayTasksSec'].forEach(applyTodaySecState);
+  ['todaySo','todayStatsBody','statToday','statWeek','todayTasksSec'].forEach(applyTodaySecState);
 }
 
 function togTodaySec(id){
@@ -9118,6 +9109,28 @@ function openDayWrapUp(){
   }).join('');
   document.getElementById('wrapUpMsg').textContent=msg;
   showOv('ovDayWrapUp');
+}
+
+function renderTodayRtnPills(){
+  var el=document.getElementById('todayRtnPills');if(!el)return;
+  var h=new Date().getHours();
+  var pills=[];
+  // Morning pill: show until noon
+  if(h<12){
+    pills.push({label:'🌅 Opening Shift',fn:'openOpeningShift()',gradient:'linear-gradient(135deg,#f5d06a,#e09030)',shadow:'rgba(224,144,48,.35)'});
+  }
+  // Evening pill: show after 5pm
+  if(h>=17){
+    pills.push({label:'🌙 Wrap Up',fn:'openDayWrapUp()',gradient:'linear-gradient(135deg,#5a3a8a,#3a2a6a)',shadow:'rgba(90,58,138,.35)'});
+  }
+  // Midday: show both as smaller secondary options
+  if(!pills.length){
+    pills.push({label:'🌅 Opening Shift',fn:'openOpeningShift()',gradient:'linear-gradient(135deg,#e8e4e0,#d8d4d0)',shadow:'none',color:'var(--textd)'});
+    pills.push({label:'🌙 Wrap Up',fn:'openDayWrapUp()',gradient:'linear-gradient(135deg,#e8e4e0,#d8d4d0)',shadow:'none',color:'var(--textd)'});
+  }
+  el.innerHTML=pills.map(function(p){
+    return '<button onclick="'+p.fn+'" style="flex:1;padding:11px 14px;border-radius:14px;border:none;background:'+p.gradient+';color:'+(p.color||'#fff')+';font-family:\'Quicksand\',sans-serif;font-size:13px;font-weight:700;cursor:pointer;box-shadow:'+(p.shadow!=='none'?'0 3px 12px '+p.shadow:'none')+'">'+p.label+'</button>';
+  }).join('');
 }
 
 function renderTodayWorkGlance(){
@@ -20475,6 +20488,7 @@ function startApp(){
   renderWeekStats();
   renderWaterBottle();
   renderTodayPlanBar();
+  renderTodayRtnPills();
   var hFab=document.getElementById('hatchFab');if(hFab)hFab.style.display='flex';
   renderFabPills();
   initFabScroll();
