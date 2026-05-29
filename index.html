@@ -7391,8 +7391,8 @@ function fT(f){
 }
 
 function updStats(){
-  document.getElementById('sDone').textContent=TASKS.filter(function(t){return t.done;}).length;
-  document.getElementById('sLeft').textContent=TASKS.filter(function(t){return !t.done;}).length;
+  var d=document.getElementById('sDone');if(d)d.textContent=TASKS.filter(function(t){return t.done;}).length;
+  var l=document.getElementById('sLeft');if(l)l.textContent=TASKS.filter(function(t){return !t.done;}).length;
 }
 
 // ═══════════════════════════════════════════════
