@@ -5866,10 +5866,10 @@ function goTabDirect(tab,btn){
   if(tab==='work-projects'){ renderWorkProjects(); }
 
   if(tab==='meals'||tab==='food') renderWaterBottle();
-  if(tab==='meals'){ showMealSec('meals',document.querySelector('#v-meals .pn-btn:nth-child(2)')); }
-  if(tab==='food'){ renderExLog(); updExWeek(); renderWplanList(); updM(); }
-  if(tab==='wellness'){ showWellnessSec('mood',document.querySelector('#v-wellness .pn-btn:nth-child(1)')); }
-  if(tab==='recap'){ showRecapSec('stats',document.querySelector('#v-recap .pn-btn:nth-child(1)')); }
+  if(tab==='meals'){ setTimeout(function(){ showMealSec('meals',document.querySelector('#v-meals .pn-btn:nth-child(2)')); },50); }
+  if(tab==='food'){ setTimeout(function(){ renderExLog(); updExWeek(); renderWplanList(); updM(); },50); }
+  if(tab==='wellness'){ setTimeout(function(){ showWellnessSec('mood',document.querySelector('#v-wellness .pn-btn:nth-child(1)')); },50); }
+  if(tab==='recap'){ setTimeout(function(){ showRecapSec('stats',document.querySelector('#v-recap .pn-btn:nth-child(1)')); },50); }
   if(tab==='workshop'){ renderWSProjects(); }
 }
 
