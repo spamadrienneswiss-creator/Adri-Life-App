@@ -5734,7 +5734,7 @@ function initFirebase(){
 // Save to Firebase
 function fbSave(col, id, data){
   showSync();
-  if(!window.db) return;
+  if(!window.db){hideSync();return;}
   window.fsSetDoc(window.fsDoc(window.db, col, id), data).then(hideSync).catch(function(e){
     console.error(e);
     document.getElementById('syncStatus').textContent='⚠️ Sync error';
@@ -5743,7 +5743,7 @@ function fbSave(col, id, data){
 
 function fbDelete(col, id){
   showSync();
-  if(!window.db) return;
+  if(!window.db){hideSync();return;}
   window.fsDeleteDoc(window.fsDoc(window.db, col, id)).then(hideSync);
 }
 
@@ -7380,6 +7380,7 @@ function saveTask(){
   fbSave('tasks',id,t);
   localStorage.setItem('aTasks',JSON.stringify(TASKS));
   updHelmBadge();
+  renderT();
   closeM('taskModal');
   if(document.getElementById('v-plan')&&document.getElementById('v-plan').classList.contains('on'))renderPlan();
 }
