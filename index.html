@@ -5827,10 +5827,10 @@ function goTab(tab,btn){
 }
 
 function goTabDirect(tab,btn){
-  document.querySelectorAll('.view').forEach(function(v){v.classList.remove('on');});
+  document.querySelectorAll('.view').forEach(function(v){v.classList.remove('on');v.style.display='';});
   document.querySelectorAll('.tab-btn').forEach(function(b){b.classList.remove('on');});
   var v=document.getElementById('v-'+tab);
-  if(v)v.classList.add('on');
+  if(v){v.classList.add('on');v.style.display='block';}
   var section=VIEW_SECTION[tab]||tab;
   var sBtn=document.querySelector('[data-tab="'+section+'"]');
   if(sBtn)sBtn.classList.add('on');
@@ -5869,6 +5869,7 @@ function goTabDirect(tab,btn){
   if(tab==='meals'){ showMealSec('meals',document.querySelector('#v-meals .pn-btn:nth-child(2)')); }
   if(tab==='food'){ renderExLog(); updExWeek(); renderWplanList(); updM(); }
   if(tab==='wellness'){ showWellnessSec('mood',document.querySelector('#v-wellness .pn-btn:nth-child(1)')); }
+  if(tab==='recap'){ showRecapSec('stats',document.querySelector('#v-recap .pn-btn:nth-child(1)')); }
   if(tab==='workshop'){ renderWSProjects(); }
 }
 
