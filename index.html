@@ -7357,6 +7357,7 @@ function undoDel(){
 }
 
 function saveTask(){
+  try {
   var title=document.getElementById('tTit').value.trim();
   if(!title){alert('Please enter a task!');return;}
   var id=document.getElementById('editTId').value||Date.now().toString();
@@ -7385,12 +7386,17 @@ function saveTask(){
   };
   var isNew=!TASKS.find(function(x){return x.id===id;});
   if(isNew){TASKS.push(t);bumpHelmTask();}else{var idx=TASKS.findIndex(function(x){return x.id===id;});if(idx>=0)TASKS[idx]=t;}
-  fbSave('tasks',id,t);
   localStorage.setItem('aTasks',JSON.stringify(TASKS));
+  fbSave('tasks',id,t);
   updHelmBadge();
   renderT();
   closeM('taskModal');
+  showToast('Task saved ✨');
   if(document.getElementById('v-plan')&&document.getElementById('v-plan').classList.contains('on'))renderPlan();
+  } catch(e) {
+    alert('Save error: '+e.message);
+    console.error('saveTask error:',e);
+  }
 }
 
 function fT(f){
