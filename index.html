@@ -5737,6 +5737,7 @@ function fbSave(col, id, data){
   if(!window.db){hideSync();return;}
   window.fsSetDoc(window.fsDoc(window.db, col, id), data).then(hideSync).catch(function(e){
     console.error(e);
+    hideSync();
     document.getElementById('syncStatus').textContent='⚠️ Sync error';
   });
 }
@@ -7249,6 +7250,7 @@ function togT(id){
   if(!t)return;
   t.done=!t.done;
   if(t.done){t.doneDate=todayStr();t.parked=false;}else delete t.doneDate;
+  localStorage.setItem('aTasks',JSON.stringify(TASKS));
   fbSave('tasks',id,t);
   if(t.done){
     if(navigator.vibrate)navigator.vibrate(50);
@@ -7256,6 +7258,7 @@ function togT(id){
     setTimeout(function(){showActualTimePrompt(id);},350);
   }
   updHelmBadge();
+  renderT();
   renderThisWeek();
 }
 function unparkAllTasks(){
@@ -7273,6 +7276,7 @@ function toggleTaskDone(id,done){
   fbSave('tasks',id,t);
   if(t.done){if(t.meaningful)celebrate();millieTaskTreat();}
   updHelmBadge();
+  renderT();
 }
 
 function editT(id){
@@ -7322,7 +7326,11 @@ function delTask(id){
   var t=TASKS.find(function(t){return t.id===id;});
   if(!t)return;
   DELTED={task:JSON.parse(JSON.stringify(t))};
+  TASKS=TASKS.filter(function(x){return x.id!==id;});
+  localStorage.setItem('aTasks',JSON.stringify(TASKS));
   fbDelete('tasks',id);
+  updHelmBadge();
+  renderT();
   showUndo('Task deleted');
 }
 
