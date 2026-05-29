@@ -1055,7 +1055,6 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     <div class="hub-card" onclick="goTab('meals',null)"><div class="hub-card-ic">🥗</div><div class="hub-card-name">Eat</div><div class="hub-card-sub" id="hub-meals-sub">Nutrition &amp; meals</div></div>
     <div class="hub-card" onclick="goTab('wellness',null)"><div class="hub-card-ic">💆</div><div class="hub-card-name">Wellness</div><div class="hub-card-sub">Mood, sleep, symptoms &amp; meds</div></div>
     <div class="hub-card" onclick="goTab('wellness',null);setTimeout(function(){showWellnessSec('body',document.querySelector('#v-wellness .pn-btn:nth-child(6)'));renderMeasurements();},200)" style="background:linear-gradient(135deg,#f5f0ff,#ede8f8);border-color:#c8b8e8"><div class="hub-card-ic">📏</div><div class="hub-card-name">Body</div><div class="hub-card-sub" id="hub-body-sub">Measurements &amp; trends</div></div>
-    <div class="hub-card span2" onclick="goTab('recap',null)"><div class="hub-card-ic">📊</div><div class="hub-card-name">Recap</div><div class="hub-card-sub">Stats &amp; year in review</div></div>
   </div>
 </div>
 
@@ -2764,26 +2763,6 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
 </div>
 
 <!-- RECAP -->
-<div class="view" id="v-recap">
-  <div class="pill-nav" style="margin-bottom:12px">
-    <button class="pn-btn on" onclick="showRecapSec('stats',this)">📊 Stats</button>
-    <button class="pn-btn" onclick="showRecapSec('yearly',this)">📅 Year</button>
-  </div>
-  <div id="rs-stats">
-    <div class="recap-c"><div class="recap-t">📊 Today</div>
-      <div class="sr"><span>Tasks Done</span><span class="sv" id="sDone">0</span></div>
-      <div class="sr"><span>Tasks Left</span><span class="sv" id="sLeft">0</span></div>
-      <div class="sr"><span>Routine Items</span><span class="sv" id="sRout">0/0</span></div>
-      <div class="sr"><span>Water</span><span class="sv" id="sWatDisplay">0/8</span></div>
-    </div>
-  </div>
-  <!-- YEARLY REFLECTION -->
-  <div id="rs-yearly" style="display:none">
-    <div style="font-family:'Playfair Display',serif;font-size:18px;color:var(--text);margin-bottom:4px">📅 Year in Review</div>
-    <div style="font-size:12px;color:var(--textl);margin-bottom:14px">A look back at what you've built this year.</div>
-    <div id="yearlyStats"></div>
-  </div>
-</div>
 
 <!-- WELLNESS -->
 <div class="view" id="v-wellness">
@@ -5544,7 +5523,7 @@ var MEAL_COMBOS = JSON.parse(localStorage.getItem('aMC')||'null')||[
 var DEFAULT_TAB_ORDER=['today','plan','helm','lighthouse','conservatory','hearthside','workshop','estate','emporium','archives','archive','settings'];
 var TAB_LABELS={today:'Today',plan:'Plan',helm:'Tasks & Projects',conservatory:'Personal Growth',hearthside:'Health & Wellness',workshop:'Workshop',lighthouse:'Spiritual',estate:'Money & Home',emporium:'Work',archives:'Research Library',archive:'Archive',settings:'Settings',stories:'Stories',mixtape:'Mixtape','focus-session':'Focus Session',grocery:'Grocery List',export:'Export',routines:'Routines',lists:'Lists',content:'Content Creation',wellness:'Health & Wellness',food:'Move & Exercise',meals:'Meals & Nutrition',recap:'Recap',money:'Money',accounts:'Accounts','home-items':'Home Items','money-projects':'Money Projects',wigs:'Wig Orders','work-projects':'Work Projects',guide:'Research Library',spirit:'Spiritual',goals:'Goals',learn:'Learning',focus:'Focus Tools',spark:'Spark',board:'Mood Board',faves:'Faves',places:'Places'};
 var TAB_ORDER=(function(){var o=JSON.parse(localStorage.getItem('aTabOrder')||'null');if(!o)return DEFAULT_TAB_ORDER.slice();var full=DEFAULT_TAB_ORDER.slice();o=o.filter(function(t){return full.indexOf(t)>-1;});full.forEach(function(t){if(o.indexOf(t)<0)o.push(t);});return o;})();
-var SECTION_VIEWS={today:['today'],plan:['plan'],helm:['tasks','projects','focus-session','grocery','routines'],lists:['lists'],conservatory:['goals','learn','focus','spark'],hearthside:['food','meals','wellness','recap'],workshop:['board','faves','stories','mixtape','places'],lighthouse:['spirit'],estate:['money','accounts','home-items','money-projects'],emporium:['wigs','work-projects','content'],archives:['guide'],settings:['settings','export'],archive:['archive']};
+var SECTION_VIEWS={today:['today'],plan:['plan'],helm:['tasks','projects','focus-session','grocery','routines'],lists:['lists'],conservatory:['goals','learn','focus','spark'],hearthside:['food','meals','wellness'],workshop:['board','faves','stories','mixtape','places'],lighthouse:['spirit'],estate:['money','accounts','home-items','money-projects'],emporium:['wigs','work-projects','content'],archives:['guide'],settings:['settings','export'],archive:['archive']};
 var SECTION_LABELS={today:'Today',plan:'Plan',helm:'Tasks & Projects',conservatory:'Personal Growth',hearthside:'Health & Wellness',workshop:'Workshop',lighthouse:'Spiritual',estate:'Money & Home',emporium:'Work',archives:'Research Library',archive:'Archive',settings:'Settings'};
 var VIEW_SECTION=(function(){var m={};Object.keys(SECTION_VIEWS).forEach(function(s){SECTION_VIEWS[s].forEach(function(v){m[v]=s;});});return m;})();
 
@@ -5868,7 +5847,6 @@ function goTabDirect(tab,btn){
   if(tab==='meals'){ setTimeout(function(){ showMealSec('meals',document.querySelector('#v-meals .pn-btn:nth-child(2)')); },50); }
   if(tab==='food'){ setTimeout(function(){ renderExLog(); updExWeek(); renderWplanList(); updM(); },50); }
   if(tab==='wellness'){ setTimeout(function(){ showWellnessSec('mood',document.querySelector('#v-wellness .pn-btn:nth-child(1)')); },50); }
-  if(tab==='recap'){ setTimeout(function(){ showRecapSec('stats',document.querySelector('#v-recap .pn-btn:nth-child(1)')); },50); }
   if(tab==='workshop'){ renderWSProjects(); }
 }
 
@@ -21079,7 +21057,7 @@ function runSearch(q){
 
   // ── Tab / page navigation
   if(f==='all'){
-    var navTabs={today:'Today',plan:'Plan',helm:'Tasks & Projects',conservatory:'Personal Growth',hearthside:'Health & Wellness',workshop:'Workshop',lighthouse:'Spiritual',estate:'Money & Home',emporium:'Work',archives:'Research Library',archive:'Archive',settings:'Settings',routines:'Routines',lists:'Lists',meals:'Meals & Nutrition',food:'Move & Exercise',wellness:'Wellness',recap:'Recap',money:'Money',accounts:'Accounts',wigs:'Wig Orders',content:'Content Creation',learn:'Learning',goals:'Goals',spirit:'Spiritual',guide:'Research Library'};
+    var navTabs={today:'Today',plan:'Plan',helm:'Tasks & Projects',conservatory:'Personal Growth',hearthside:'Health & Wellness',workshop:'Workshop',lighthouse:'Spiritual',estate:'Money & Home',emporium:'Work',archives:'Research Library',archive:'Archive',settings:'Settings',routines:'Routines',lists:'Lists',meals:'Meals & Nutrition',food:'Move & Exercise',wellness:'Wellness',money:'Money',accounts:'Accounts',wigs:'Wig Orders',content:'Content Creation',learn:'Learning',goals:'Goals',spirit:'Spiritual',guide:'Research Library'};
     Object.keys(navTabs).forEach(function(tab){
       if(navTabs[tab].toLowerCase().indexOf(q)>-1)
         push({icon:'🔗',label:'→ Go to '+navTabs[tab],sub:'Page / section',action:nav+"goTab('"+tab+"',null)"});
@@ -21491,7 +21469,6 @@ var APP_INDEX=[
     {label:'Wellness — Sleep, Mood, Symptoms, Meds',action:"goTab('wellness',null)"},
     {label:'Food Database',action:"goTab('meals',null)"},
     {label:'Meal Plan (weekly)',action:"goTab('meals',null)"},
-    {label:'Recap & Year Stats',action:"goTab('recap',null)"},
   ]},
   {hub:'🔨 Workshop — Creative',items:[
     {label:'Vision Board',action:"goTab('board',null)"},
