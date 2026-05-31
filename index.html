@@ -893,6 +893,69 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
 /* Dispatch response buttons */
 #ovHatch .hatch-dispatch-row{display:flex;gap:8px;margin-top:10px}
 #ovHatch .hatch-dispatch-row button{flex:1;background:transparent;border:1px solid #142814;color:#1a5010;font-family:'Courier New',monospace;font-size:11px;cursor:pointer;padding:9px 6px;border-radius:3px;letter-spacing:.3px}
+/* ── Home Screen Tiles ─────────────────────────── */
+#v-home{padding:0 0 80px}
+.home-top-bar{display:flex;align-items:center;justify-content:space-between;padding:14px 16px 6px}
+.home-top-bar h2{font-size:17px;font-weight:800;color:var(--textd);margin:0}
+.home-edit-btn{background:none;border:1.5px solid var(--border);border-radius:20px;padding:5px 13px;font-size:12px;font-weight:700;color:var(--textl);cursor:pointer;font-family:'Quicksand',sans-serif}
+.home-edit-btn.on{border-color:var(--lav);color:var(--lav)}
+.home-grid{display:grid;grid-template-columns:1fr 1fr;gap:11px;padding:8px 14px}
+.h-tile{background:#fff;border-radius:18px;padding:16px;box-shadow:0 2px 10px rgba(0,0,0,.06);border:1.5px solid rgba(0,0,0,.04);position:relative;transition:box-shadow .15s}
+.h-tile.wide{grid-column:1/-1}
+.h-tile:active{box-shadow:0 1px 4px rgba(0,0,0,.08)}
+.h-tile-icon{font-size:26px;margin-bottom:6px;line-height:1}
+.h-tile-label{font-size:12px;font-weight:800;color:var(--textd);letter-spacing:.2px;text-transform:uppercase}
+.h-tile-sub{font-size:11px;color:var(--textl);margin-top:3px;font-weight:600}
+.h-tile-action{cursor:pointer}
+.h-tile-action:active{opacity:.8}
+.h-tile-edit-controls{display:none;position:absolute;top:8px;right:8px;gap:4px}
+.home-edit-mode .h-tile-edit-controls{display:flex}
+.h-edit-btn{background:var(--bg2);border:none;border-radius:8px;width:26px;height:26px;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.h-tile.h-hidden{opacity:.4}
+.home-add-bar{padding:10px 14px;display:none}
+.home-edit-mode .home-add-bar{display:block}
+.home-add-tile-btn{width:100%;padding:11px;border:2px dashed var(--border);border-radius:14px;background:none;font-family:'Quicksand',sans-serif;font-size:13px;font-weight:700;color:var(--textl);cursor:pointer}
+/* Meds tile */
+.med-home-row{display:flex;align-items:center;gap:6px;padding:5px 0;border-bottom:1px solid #f5f0eb}
+.med-home-row:last-child{border-bottom:none}
+.med-home-name{flex:1;font-size:12px;font-weight:700;color:var(--textd)}
+.med-home-btn{padding:4px 9px;border-radius:8px;border:2px solid #ddd;background:#fff;color:var(--textl);font-size:11px;font-weight:700;cursor:pointer;font-family:'Quicksand',sans-serif}
+.med-home-btn.done{border-color:var(--sage);background:var(--sage);color:#fff}
+/* Sleep tile */
+.sleep-tile-times{display:flex;gap:8px;margin-top:8px}
+.sleep-tile-btn{flex:1;padding:9px 6px;border-radius:12px;border:2px solid var(--border);background:var(--bg2);font-size:12px;font-weight:700;color:var(--textd);cursor:pointer;text-align:center;font-family:'Quicksand',sans-serif}
+.sleep-tile-btn.set{border-color:var(--blue);background:#e8f0fa}
+.sleep-tile-input{width:100%;margin-top:6px;padding:7px 10px;border:1.5px solid var(--border);border-radius:10px;font-size:13px;font-family:'Quicksand',sans-serif;background:#fff}
+/* Water tile */
+.water-home-bar{height:8px;background:#e8f0f8;border-radius:4px;margin:8px 0 4px;overflow:hidden}
+.water-home-fill{height:100%;background:linear-gradient(90deg,#a8cceb,#5a9fd4);border-radius:4px;transition:width .4s}
+.water-home-btns{display:flex;gap:5px;flex-wrap:wrap}
+.water-home-oz{padding:5px 9px;border-radius:8px;border:1.5px solid #a8cceb;background:#f0f8ff;font-size:11px;font-weight:700;color:#2e88c8;cursor:pointer;font-family:'Quicksand',sans-serif}
+/* Next Task tile */
+.next-task-card{background:var(--bg2);border-radius:12px;padding:10px 12px;margin-top:8px;cursor:pointer}
+.next-task-card .tt{font-size:13px;font-weight:700;color:var(--textd)}
+.next-task-card .tm{font-size:11px;color:var(--textl);margin-top:3px}
+/* Bible tile */
+.bible-checks{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}
+.bible-chk-btn{flex:1;padding:7px 6px;border-radius:10px;border:2px solid var(--border);background:var(--bg2);font-size:11px;font-weight:700;color:var(--textl);cursor:pointer;text-align:center;font-family:'Quicksand',sans-serif;min-width:80px}
+.bible-chk-btn.done{border-color:var(--sage);background:#e8f5e8;color:#4a7a4a}
+.bible-note-inp{width:100%;margin-top:7px;padding:7px 10px;border:1.5px solid var(--border);border-radius:10px;font-size:12px;font-family:'Quicksand',sans-serif;background:#fff;resize:none}
+.bible-passage-inp{width:100%;margin-top:5px;padding:6px 10px;border:1.5px solid var(--border);border-radius:10px;font-size:12px;font-family:'Quicksand',sans-serif;background:#fff}
+/* Cleaning tile */
+.clean-rooms{display:flex;gap:5px;flex-wrap:wrap;margin-top:8px}
+.clean-room-btn{padding:6px 11px;border-radius:10px;border:1.5px solid var(--border);background:var(--bg2);font-size:11px;font-weight:700;color:var(--textd);cursor:pointer;font-family:'Quicksand',sans-serif}
+.clean-room-btn:active{background:var(--sage);color:#fff;border-color:var(--sage)}
+.clean-custom-row{display:flex;gap:6px;margin-top:6px}
+.clean-custom-inp{flex:1;padding:7px 10px;border:1.5px solid var(--border);border-radius:10px;font-size:12px;font-family:'Quicksand',sans-serif}
+/* Hidden tile picker overlay */
+#homeAddOverlay{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:300;display:none;align-items:flex-end}
+#homeAddOverlay.show{display:flex}
+.home-add-panel{background:#fff;border-radius:20px 20px 0 0;width:100%;padding:20px 16px 40px;max-height:70vh;overflow-y:auto}
+.home-add-panel h3{font-size:15px;font-weight:800;color:var(--textd);margin:0 0 14px}
+.home-add-item{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);cursor:pointer}
+.home-add-item:last-child{border-bottom:none}
+.home-add-item-ic{font-size:20px;width:32px;text-align:center}
+.home-add-item-name{font-size:14px;font-weight:700;color:var(--textd);flex:1}
 </style>
 </head>
 <body>
@@ -925,7 +988,8 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
 
 <!-- TABS -->
 <div class="tabs" id="tabBar">
-  <button class="tab-btn on" data-tab="today" onclick="goTab('today',this)">Today</button>
+  <button class="tab-btn on" data-tab="home" onclick="goTab('home',this)">🏠 Home</button>
+  <button class="tab-btn" data-tab="today" onclick="goTab('today',this)">Today</button>
   <button class="tab-btn" data-tab="plan" onclick="goTab('plan',this)">Plan</button>
   <button class="tab-btn" data-tab="helm" onclick="goTab('helm',this)">Tasks &amp; Projects</button>
   <button class="tab-btn" data-tab="lists" onclick="goTab('lists',this)">📋 Lists</button>
@@ -1277,8 +1341,28 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
   </div>
 </div>
 
+<!-- HOME -->
+<div class="view on" id="v-home">
+  <div class="home-top-bar">
+    <h2>Good morning ✨</h2>
+    <button class="home-edit-btn" id="homeEditBtn" onclick="toggleHomeEdit()">✏️ Edit</button>
+  </div>
+  <div class="home-grid" id="homeGrid"></div>
+  <div class="home-add-bar">
+    <button class="home-add-tile-btn" onclick="showHomeAddOverlay()">+ Add Tile</button>
+  </div>
+</div>
+
+<!-- HOME ADD OVERLAY -->
+<div id="homeAddOverlay" onclick="if(event.target===this)closeHomeAddOverlay()">
+  <div class="home-add-panel">
+    <h3>Add a Tile</h3>
+    <div id="homeAddList"></div>
+  </div>
+</div>
+
 <!-- TODAY -->
-<div class="view on" id="v-today">
+<div class="view" id="v-today">
   <div class="gbanner" id="gBanner" style="background:linear-gradient(135deg,rgba(201,160,160,.15),rgba(169,159,201,.15))">
     <p id="gQuote">The plans of the diligent lead to success. — Prov 21:5</p>
   </div>
@@ -5523,7 +5607,7 @@ var MEAL_COMBOS = JSON.parse(localStorage.getItem('aMC')||'null')||[
 var DEFAULT_TAB_ORDER=['today','plan','helm','lighthouse','conservatory','hearthside','workshop','estate','emporium','archives','archive','settings'];
 var TAB_LABELS={today:'Today',plan:'Plan',helm:'Tasks & Projects',conservatory:'Personal Growth',hearthside:'Health & Wellness',workshop:'Workshop',lighthouse:'Spiritual',estate:'Money & Home',emporium:'Work',archives:'Research Library',archive:'Archive',settings:'Settings',stories:'Stories',mixtape:'Mixtape','focus-session':'Focus Session',grocery:'Grocery List',export:'Export',routines:'Routines',lists:'Lists',content:'Content Creation',wellness:'Health & Wellness',food:'Move & Exercise',meals:'Meals & Nutrition',recap:'Recap',money:'Money',accounts:'Accounts','home-items':'Home Items','money-projects':'Money Projects',wigs:'Wig Orders','work-projects':'Work Projects',guide:'Research Library',spirit:'Spiritual',goals:'Goals',learn:'Learning',focus:'Focus Tools',spark:'Spark',board:'Mood Board',faves:'Faves',places:'Places'};
 var TAB_ORDER=(function(){var o=JSON.parse(localStorage.getItem('aTabOrder')||'null');if(!o)return DEFAULT_TAB_ORDER.slice();var full=DEFAULT_TAB_ORDER.slice();o=o.filter(function(t){return full.indexOf(t)>-1;});full.forEach(function(t){if(o.indexOf(t)<0)o.push(t);});return o;})();
-var SECTION_VIEWS={today:['today'],plan:['plan'],helm:['tasks','projects','focus-session','grocery','routines'],lists:['lists'],conservatory:['goals','learn','focus','spark'],hearthside:['food','meals','wellness'],workshop:['board','faves','stories','mixtape','places'],lighthouse:['spirit'],estate:['money','accounts','home-items','money-projects'],emporium:['wigs','work-projects','content'],archives:['guide'],settings:['settings','export'],archive:['archive']};
+var SECTION_VIEWS={home:['home'],today:['today'],plan:['plan'],helm:['tasks','projects','focus-session','grocery','routines'],lists:['lists'],conservatory:['goals','learn','focus','spark'],hearthside:['food','meals','wellness'],workshop:['board','faves','stories','mixtape','places'],lighthouse:['spirit'],estate:['money','accounts','home-items','money-projects'],emporium:['wigs','work-projects','content'],archives:['guide'],settings:['settings','export'],archive:['archive']};
 var SECTION_LABELS={today:'Today',plan:'Plan',helm:'Tasks & Projects',conservatory:'Personal Growth',hearthside:'Health & Wellness',workshop:'Workshop',lighthouse:'Spiritual',estate:'Money & Home',emporium:'Work',archives:'Research Library',archive:'Archive',settings:'Settings'};
 var VIEW_SECTION=(function(){var m={};Object.keys(SECTION_VIEWS).forEach(function(s){SECTION_VIEWS[s].forEach(function(v){m[v]=s;});});return m;})();
 
@@ -5831,6 +5915,7 @@ function goTabDirect(tab,btn){
   if(tab==='places')renderPlaces();
   if(SECTION_VIEWS[tab]||tab==='emporium')renderHubPreviews(tab);
   var hFab=document.getElementById('hatchFab');if(hFab){hFab.style.display=(tab==='today')?'flex':'none';if(tab==='today'){hFab.style.opacity='1';hFab.style.transform='translateX(-50%) translateY(0)';hFab.style.pointerEvents='auto';_fabHidden=false;_fabScrollLast=window.scrollY||window.pageYOffset;renderFabPills();}}
+  if(tab==='home'){ renderHomePage(); }
   if(tab==='today'){ tickSpiritRun(); renderWaterBottle(); renderTodayStatsBars(); renderWeekStats(); renderTodayMoodBtns(); renderTodayPlanBar(); renderTodayWorkGlance(); renderTodayHubSubs(); renderIntentionsHome(); renderTodayRtnPills(); }
   if(tab==='routines'){ renderDailyRtn(_dailyRtnKey); renderOtherRtns(); }
   if(tab==='hearthside'){ renderHWHubStats(); }
@@ -7409,6 +7494,292 @@ function fT(f){
 function updStats(){
   var d=document.getElementById('sDone');if(d)d.textContent=TASKS.filter(function(t){return t.done;}).length;
   var l=document.getElementById('sLeft');if(l)l.textContent=TASKS.filter(function(t){return !t.done;}).length;
+}
+
+// ═══════════════════════════════════════════════
+// HOME SCREEN
+// ═══════════════════════════════════════════════
+
+var HOME_TILES = JSON.parse(localStorage.getItem('aHomeTiles2')||'null') || [
+  {id:'meds'},{id:'sleep'},{id:'water'},{id:'food'},{id:'workout'},
+  {id:'addtask'},{id:'nexttask'},{id:'bible'},{id:'expense'},{id:'ministry'},
+  {id:'grocery'},{id:'cleaning'},{id:'errands'},{id:'wigs'},{id:'onething'}
+];
+var HOME_EDIT_MODE = false;
+var HOME_BIBLE = JSON.parse(localStorage.getItem('aHomeBible')||'{}');
+var HOME_SLEEP_PENDING = JSON.parse(localStorage.getItem('aHomeSleep')||'{}');
+
+var HOME_TILE_DEFS = {
+  meds:     {icon:'💊', label:'Meds', wide:true},
+  sleep:    {icon:'⏰', label:'Sleep Log', wide:true},
+  water:    {icon:'💧', label:'Water', wide:true},
+  food:     {icon:'🍳', label:'Log Food', wide:false, action:"openM('fwModal')"},
+  workout:  {icon:'💪', label:'Log Workout', wide:false, action:"goTabDirect('food');setTimeout(function(){document.querySelector('#v-food .pn-btn')&&document.querySelector('#v-food .pn-btn').click()},200)"},
+  addtask:  {icon:'➕', label:'Add Task', wide:false, action:"openM('taskModal')"},
+  nexttask: {icon:'⚡', label:'Next Task', wide:true},
+  bible:    {icon:'📖', label:'Bible Reading', wide:true},
+  expense:  {icon:'💸', label:'Log Expense', wide:false, action:"openM('expModal')"},
+  ministry: {icon:'🌱', label:'Ministry Log', wide:false, action:"goTabDirect('spirit');setTimeout(function(){showSpiritSec('ministry',document.querySelector('#v-spirit .pn-btn:nth-child(3)'))},200)"},
+  grocery:  {icon:'🛒', label:'Grocery List', wide:false, action:"goTabDirect('grocery')"},
+  cleaning: {icon:'🧹', label:'Cleaning', wide:true},
+  errands:  {icon:'🚗', label:'Errands', wide:false, action:"TASK_FILTERS={urgs:[],cats:['mis']};goTabDirect('tasks')"},
+  wigs:     {icon:'✂️', label:'WIGs', wide:false, action:"goTabDirect('wigs')"},
+  onething: {icon:'🚪', label:'One Thing', wide:false, action:"openOneThingMode()"},
+  quickcap: {icon:'📝', label:'Quick Capture', wide:true}
+};
+
+function saveHomeTiles(){localStorage.setItem('aHomeTiles2',JSON.stringify(HOME_TILES));}
+
+function toggleHomeEdit(){
+  HOME_EDIT_MODE=!HOME_EDIT_MODE;
+  var grid=document.getElementById('homeGrid');
+  if(grid)grid.classList.toggle('home-edit-mode',HOME_EDIT_MODE);
+  var bar=document.querySelector('.home-add-bar');
+  if(bar)bar.style.display=HOME_EDIT_MODE?'block':'none';
+  var btn=document.getElementById('homeEditBtn');
+  if(btn){btn.textContent=HOME_EDIT_MODE?'✓ Done':'✏️ Edit';btn.classList.toggle('on',HOME_EDIT_MODE);}
+}
+
+function homeTileUp(idx){
+  if(idx===0)return;
+  var tmp=HOME_TILES[idx];HOME_TILES[idx]=HOME_TILES[idx-1];HOME_TILES[idx-1]=tmp;
+  saveHomeTiles();renderHomePage();
+}
+function homeTileDown(idx){
+  if(idx>=HOME_TILES.length-1)return;
+  var tmp=HOME_TILES[idx];HOME_TILES[idx]=HOME_TILES[idx+1];HOME_TILES[idx+1]=tmp;
+  saveHomeTiles();renderHomePage();
+}
+function homeTileToggle(idx){
+  HOME_TILES[idx].hidden=!HOME_TILES[idx].hidden;
+  saveHomeTiles();renderHomePage();
+}
+function showHomeAddOverlay(){
+  var used=HOME_TILES.map(function(t){return t.id;});
+  var avail=Object.keys(HOME_TILE_DEFS).filter(function(id){return used.indexOf(id)<0;});
+  var list=document.getElementById('homeAddList');
+  if(!list)return;
+  if(!avail.length){list.innerHTML='<p style="color:var(--textl);font-size:13px;text-align:center">All tiles are already added.</p>';document.getElementById('homeAddOverlay').classList.add('show');return;}
+  list.innerHTML=avail.map(function(id){
+    var d=HOME_TILE_DEFS[id];
+    return'<div class="home-add-item" onclick="addHomeTile(\''+id+'\')">'
+      +'<div class="home-add-item-ic">'+d.icon+'</div>'
+      +'<div class="home-add-item-name">'+d.label+'</div>'
+      +'<span style="color:var(--textl);font-size:18px">+</span>'
+      +'</div>';
+  }).join('');
+  document.getElementById('homeAddOverlay').classList.add('show');
+}
+function closeHomeAddOverlay(){document.getElementById('homeAddOverlay').classList.remove('show');}
+function addHomeTile(id){
+  HOME_TILES.push({id:id});
+  saveHomeTiles();
+  closeHomeAddOverlay();
+  renderHomePage();
+}
+
+function renderHomeTileMeds(){
+  var today=todayStr();
+  if(!MED_LOG[today])MED_LOG[today]={};
+  if(!MEDS.length)return '<div style="font-size:12px;color:var(--textl);padding:4px 0">No meds set up yet. <button onclick="goTabDirect(\'wellness\')" style="background:none;border:none;color:var(--rose);font-size:12px;cursor:pointer;font-family:\'Quicksand\',sans-serif;font-weight:700">Add in Wellness →</button></div>';
+  return MEDS.map(function(m){
+    var amDone=!!(MED_LOG[today]&&MED_LOG[today][m.id+'_am']);
+    var pmDone=!!(MED_LOG[today]&&MED_LOG[today][m.id+'_pm']);
+    return'<div class="med-home-row">'
+      +'<span class="med-home-name">'+escHtml(m.name||'Med')+'</span>'
+      +(m.am?'<button class="med-home-btn'+(amDone?' done':'')+'" onclick="togMed(\''+m.id+'\',\'am\');renderHomeMedsTile()">🌅 AM</button>':'')
+      +(m.pm?'<button class="med-home-btn'+(pmDone?' done':'')+'" onclick="togMed(\''+m.id+'\',\'pm\');renderHomeMedsTile()">🌙 PM</button>':'')
+      +'</div>';
+  }).join('');
+}
+function renderHomeMedsTile(){
+  var el=document.getElementById('home-meds-body');
+  if(el)el.innerHTML=renderHomeTileMeds();
+}
+
+function renderHomeSleepTile(){
+  var sp=HOME_SLEEP_PENDING;
+  var bedSet=!!sp.bed;var wakeSet=!!sp.wake;
+  var bedDisp=bedSet?'🌙 '+sp.bed:'🌙 Bedtime';
+  var wakeDisp=wakeSet?'☀️ '+sp.wake:'☀️ Wake Up';
+  return'<div class="sleep-tile-times">'
+    +'<button class="sleep-tile-btn'+(bedSet?' set':'')+'" onclick="homeCaptureSleep(\'bed\')">'+bedDisp+'</button>'
+    +'<button class="sleep-tile-btn'+(wakeSet?' set':'')+'" onclick="homeCaptureSleep(\'wake\')">'+wakeDisp+'</button>'
+    +'</div>'
+    +(bedSet||wakeSet?'<div style="display:flex;gap:6px;margin-top:6px"><button onclick="homeSaveSleep()" style="flex:1;padding:8px;border-radius:10px;border:none;background:var(--sage);color:#fff;font-family:\'Quicksand\',sans-serif;font-size:12px;font-weight:700;cursor:pointer">Log Sleep ✓</button><button onclick="homeClearSleep()" style="padding:8px 12px;border-radius:10px;border:none;background:var(--bg2);color:var(--textl);font-family:\'Quicksand\',sans-serif;font-size:12px;font-weight:700;cursor:pointer">Clear</button></div>':'');
+}
+function homeCaptureSleep(which){
+  var now=new Date();
+  var hh=('0'+now.getHours()).slice(-2);
+  var mm=('0'+now.getMinutes()).slice(-2);
+  HOME_SLEEP_PENDING[which]=hh+':'+mm;
+  localStorage.setItem('aHomeSleep',JSON.stringify(HOME_SLEEP_PENDING));
+  var el=document.getElementById('home-sleep-body');
+  if(el)el.innerHTML=renderHomeSleepTile();
+}
+function homeSaveSleep(){
+  var sp=HOME_SLEEP_PENDING;
+  if(!sp.bed||!sp.wake){showToast('Set both bedtime and wake time first');return;}
+  var today=todayStr();
+  var wokeDT=new Date(today+'T'+sp.wake+':00');
+  var sleptDT=new Date(today+'T'+sp.bed+':00');
+  if(sleptDT>=wokeDT)sleptDT.setDate(sleptDT.getDate()-1);
+  var dur=wokeDT-sleptDT;
+  var hrs=Math.floor(dur/3600000);var mins=Math.floor((dur%3600000)/60000);
+  if(hrs<0||hrs>24){showToast('Times look off, please check');return;}
+  MILLIE.sleepLog=(MILLIE.sleepLog||[]).concat([{slept:sleptDT.toISOString(),woke:wokeDT.toISOString(),durH:hrs,durM:mins,date:today}]).slice(-30);
+  localStorage.setItem('aMillie',JSON.stringify(MILLIE));
+  HOME_SLEEP_PENDING={};
+  localStorage.setItem('aHomeSleep','{}');
+  showToast('Sleep logged — '+hrs+'h '+mins+'m 💤');
+  var el=document.getElementById('home-sleep-body');
+  if(el)el.innerHTML=renderHomeSleepTile();
+}
+function homeClearSleep(){
+  HOME_SLEEP_PENDING={};
+  localStorage.setItem('aHomeSleep','{}');
+  var el=document.getElementById('home-sleep-body');
+  if(el)el.innerHTML=renderHomeSleepTile();
+}
+
+function renderHomeWaterTile(){
+  var today=new Date().toDateString();
+  var oz=(WATER_OZ_LOG[today]||0);
+  var goal=WATER_OZ_GOAL||64;
+  var pct=Math.min(100,Math.round(oz/goal*100));
+  return'<div class="water-home-bar"><div class="water-home-fill" style="width:'+pct+'%"></div></div>'
+    +'<div style="font-size:11px;color:var(--textl);margin-bottom:6px">'+oz+' / '+goal+' oz ('+pct+'%)</div>'
+    +'<div class="water-home-btns">'
+    +'<button class="water-home-oz" onclick="addWaterOz(8);refreshHomeWater()">+8oz</button>'
+    +'<button class="water-home-oz" onclick="addWaterOz(16);refreshHomeWater()">+16oz</button>'
+    +'<button class="water-home-oz" onclick="addWaterOz(20);refreshHomeWater()">+20oz</button>'
+    +'<button class="water-home-oz" onclick="addWaterOz(32);refreshHomeWater()">+32oz</button>'
+    +'</div>';
+}
+function refreshHomeWater(){
+  var el=document.getElementById('home-water-body');
+  if(el)el.innerHTML=renderHomeWaterTile();
+}
+
+function renderHomeNextTask(){
+  var now=new Date();var todayS=todayStr();
+  var urgent=TASKS.filter(function(t){
+    if(t.done||t.parked)return false;
+    if(t.urgency==='urgent-important')return true;
+    if(t.due){var d=new Date(t.due.slice(0,10));return d<=now;}
+    return false;
+  });
+  if(!urgent.length)return'<div style="font-size:12px;color:var(--textl);padding:6px 0;font-style:italic">No urgent tasks right now 🎉</div>';
+  var t=urgent[0];
+  return'<div class="next-task-card" onclick="editT(\''+t.id+'\')">'
+    +'<div class="tt">'+escHtml(t.title)+'</div>'
+    +'<div class="tm">'+(t.due?'📅 '+t.due.slice(0,10)+' · ':'')+catTag(t.cat)+'</div>'
+    +'</div>'
+    +(urgent.length>1?'<div style="font-size:11px;color:var(--textl);text-align:right;margin-top:4px">+' +(urgent.length-1)+' more</div>':'');
+}
+
+function renderHomeBibleTile(){
+  var today=todayStr();
+  if(!HOME_BIBLE.date||HOME_BIBLE.date!==today)HOME_BIBLE={date:today,read:false,text:false,note:'',passage:''};
+  return'<div class="bible-checks">'
+    +'<button class="bible-chk-btn'+(HOME_BIBLE.read?' done':'')+'" onclick="toggleHomeBible(\'read\')">📖 '+(HOME_BIBLE.read?'Read ✓':'Read')+' </button>'
+    +'<button class="bible-chk-btn'+(HOME_BIBLE.text?' done':'')+'" onclick="toggleHomeBible(\'text\')">💬 '+(HOME_BIBLE.text?'Texted ✓':'Sent Text')+' </button>'
+    +'</div>'
+    +'<input class="bible-passage-inp" id="homeBiblePassage" placeholder="Where you are (e.g. John 3)" value="'+escHtml(HOME_BIBLE.passage||'')+'" oninput="saveHomeBibleField(\'passage\',this.value)">'
+    +'<textarea class="bible-note-inp" id="homeBibleNote" rows="2" placeholder="One thing you learned..."  oninput="saveHomeBibleField(\'note\',this.value)">'+escHtml(HOME_BIBLE.note||'')+'</textarea>';
+}
+function toggleHomeBible(field){
+  var today=todayStr();
+  if(!HOME_BIBLE.date||HOME_BIBLE.date!==today)HOME_BIBLE={date:today,read:false,text:false,note:'',passage:''};
+  HOME_BIBLE[field]=!HOME_BIBLE[field];
+  localStorage.setItem('aHomeBible',JSON.stringify(HOME_BIBLE));
+  var el=document.getElementById('home-bible-body');
+  if(el)el.innerHTML=renderHomeBibleTile();
+}
+function saveHomeBibleField(field,val){
+  HOME_BIBLE[field]=val;
+  localStorage.setItem('aHomeBible',JSON.stringify(HOME_BIBLE));
+}
+
+function renderHomeCleaningTile(){
+  var rooms=['🚿 Bathroom','🍳 Kitchen','🛋️ Living Room','🛏️ Bedroom','👗 Laundry','🚗 Car','🪟 Windows'];
+  return'<div class="clean-rooms">'
+    +rooms.map(function(r){return'<button class="clean-room-btn" onclick="addCleaningTask(\''+r+'\')">'+r+'</button>';}).join('')
+    +'</div>'
+    +'<div class="clean-custom-row">'
+    +'<input class="clean-custom-inp" id="cleanCustomInp" placeholder="Other (e.g. wipe fridge)">'
+    +'<button onclick="addCleaningCustom()" style="padding:7px 12px;border-radius:10px;border:none;background:var(--sage);color:#fff;font-family:\'Quicksand\',sans-serif;font-size:12px;font-weight:700;cursor:pointer">Add</button>'
+    +'</div>';
+}
+function addCleaningTask(room){
+  var title='Clean '+room.replace(/^\S+\s/,'');
+  var id=Date.now().toString();
+  var t={id:id,title:title,cat:'mis',urgency:'important-not-urgent',etime:'',due:'',notes:'',done:false,repeat:'',repeatDays:0,subs:[],created:new Date().toISOString(),meaningful:false,tags:['cleaning']};
+  TASKS.push(t);
+  localStorage.setItem('aTasks',JSON.stringify(TASKS));
+  fbSave('tasks',id,t);
+  updHelmBadge();
+  showToast(title+' added to tasks ✓');
+}
+function addCleaningCustom(){
+  var inp=document.getElementById('cleanCustomInp');
+  if(!inp||!inp.value.trim())return;
+  addCleaningTask(inp.value.trim());
+  inp.value='';
+}
+
+function renderHomeTile(tile, idx){
+  var d=HOME_TILE_DEFS[tile.id];
+  if(!d)return'';
+  var isHidden=!!tile.hidden;
+  var editControls='<div class="h-tile-edit-controls">'
+    +(idx>0?'<button class="h-edit-btn" onclick="homeTileUp('+idx+')" title="Move up">↑</button>':'')
+    +'<button class="h-edit-btn" onclick="homeTileDown('+idx+')" title="Move down">↓</button>'
+    +'<button class="h-edit-btn" onclick="homeTileToggle('+idx+')" title="'+(isHidden?'Show':'Hide')+'">'+( isHidden?'👁':'🙈')+'</button>'
+    +'</div>';
+
+  var content='';
+  var clickAttr='';
+
+  if(tile.id==='meds'){
+    content='<div id="home-meds-body">'+renderHomeTileMeds()+'</div>';
+  } else if(tile.id==='sleep'){
+    content='<div id="home-sleep-body">'+renderHomeSleepTile()+'</div>';
+  } else if(tile.id==='water'){
+    content='<div id="home-water-body">'+renderHomeWaterTile()+'</div>';
+  } else if(tile.id==='nexttask'){
+    content=renderHomeNextTask();
+  } else if(tile.id==='bible'){
+    content='<div id="home-bible-body">'+renderHomeBibleTile()+'</div>';
+  } else if(tile.id==='cleaning'){
+    content=renderHomeCleaningTile();
+  } else if(tile.id==='quickcap'){
+    content='<div style="font-size:12px;color:var(--textl);padding:4px 0;font-style:italic">Quick Capture coming soon</div>';
+  } else if(d.action){
+    clickAttr=' onclick="'+d.action+'"';
+  }
+
+  return'<div class="h-tile'+(d.wide?' wide':'')+(isHidden?' h-hidden':'')+(d.action?' h-tile-action':'')+'"'+(d.action&&!isHidden?clickAttr:'')+' data-tile="'+tile.id+'">'
+    +editControls
+    +'<div class="h-tile-icon">'+d.icon+'</div>'
+    +'<div class="h-tile-label">'+d.label+'</div>'
+    +(content?'<div style="margin-top:4px">'+content+'</div>':'')
+    +'</div>';
+}
+
+function renderHomePage(){
+  var grid=document.getElementById('homeGrid');if(!grid)return;
+  grid.className='home-grid'+(HOME_EDIT_MODE?' home-edit-mode':'');
+  var visible=HOME_TILES.filter(function(t){return !t.hidden;});
+  var all=HOME_EDIT_MODE?HOME_TILES:visible;
+  grid.innerHTML=all.map(function(t,i){return renderHomeTile(t,HOME_TILES.indexOf(t));}).join('');
+  var bar=document.querySelector('.home-add-bar');
+  if(bar)bar.style.display=HOME_EDIT_MODE?'block':'none';
+  // greet by time of day
+  var h=new Date().getHours();
+  var greet=h<12?'Good morning ✨':h<17?'Good afternoon ✨':'Good evening ✨';
+  var hdr=document.querySelector('#v-home .home-top-bar h2');
+  if(hdr)hdr.textContent=greet;
 }
 
 // ═══════════════════════════════════════════════
@@ -21527,6 +21898,7 @@ function startApp(){
   chkReset();
   updDate();
   updGreet();
+  renderHomePage();
   document.getElementById('gQuote').textContent=S.quote;
   document.getElementById('mainHdr').style.background='linear-gradient('+S.banner+')';
   renderAllR();
