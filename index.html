@@ -1000,7 +1000,7 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
   <button class="tab-btn" data-tab="today" onclick="goTab('today',this)">Today</button>
   <button class="tab-btn" data-tab="plan" onclick="goTab('plan',this)">Plan</button>
   <button class="tab-btn" data-tab="helm" onclick="goTab('helm',this)">Tasks &amp; Projects</button>
-  <button class="tab-btn" data-tab="lists" onclick="goTab('lists',this)">📋 Lists</button>
+  <button class="tab-btn" data-tab="lists" onclick="goTabDirect('learn');setTimeout(function(){var b=document.querySelector('#v-learn .pn-btn:nth-child(3)');if(b)showLearnSec('lists',b);},50)">📋 Lists</button>
   <button class="tab-btn" data-tab="lighthouse" onclick="goTab('lighthouse',this)">Spiritual</button>
   <button class="tab-btn" data-tab="conservatory" onclick="goTab('conservatory',this)">Personal Growth</button>
   <button class="tab-btn" data-tab="hearthside" onclick="goTab('hearthside',this)">Health &amp; Wellness</button>
@@ -1072,7 +1072,7 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     <div class="hub-card" onclick="goTab('routines',null)"><div class="hub-card-ic">📅</div><div class="hub-card-name">Routines</div><div class="hub-card-sub" id="hub-routines-sub">Daily &amp; scheduled</div></div>
     <div class="hub-card" onclick="goTab('focus-session',null)"><div class="hub-card-ic">🎯</div><div class="hub-card-name">Focus</div><div class="hub-card-sub" id="hub-focus-session-sub">Timer + queue</div></div>
     <div class="hub-card" onclick="goTab('grocery',null)"><div class="hub-card-ic">🛒</div><div class="hub-card-name">Grocery</div><div class="hub-card-sub" id="hub-grocery-sub">Shopping list</div></div>
-    <div class="hub-card" onclick="goTab('lists',null)"><div class="hub-card-ic">📝</div><div class="hub-card-name">Lists</div><div class="hub-card-sub" id="hub-lists-sub">Loading…</div></div>
+    <div class="hub-card" onclick="goTabDirect('learn');setTimeout(function(){var b=document.querySelector('#v-learn .pn-btn:nth-child(3)');if(b)showLearnSec('lists',b);},50)"><div class="hub-card-ic">📝</div><div class="hub-card-name">Lists</div><div class="hub-card-sub" id="hub-lists-sub">Loading…</div></div>
   </div>
 
 </div>
@@ -1084,6 +1084,7 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
   </div>
   <div class="hub-grid">
     <div class="hub-card" onclick="goTab('goals',null)"><div class="hub-card-ic">🎯</div><div class="hub-card-name">Goals</div><div class="hub-card-sub" id="hub-goals-sub">Loading…</div></div>
+    <div class="hub-card" onclick="goTabDirect('learn');setTimeout(function(){var b=document.querySelector('#v-learn .pn-btn:nth-child(4)');if(b)showLearnSec('habits',b);},50)"><div class="hub-card-ic">🔥</div><div class="hub-card-name">Habits</div><div class="hub-card-sub" id="hub-habits-sub">Personal habits &amp; notes</div></div>
     <div class="hub-card" onclick="goTab('learn',null)"><div class="hub-card-ic">📚</div><div class="hub-card-name">Learning</div><div class="hub-card-sub">Research &amp; study</div></div>
     <div class="hub-card" onclick="goTab('focus',null)"><div class="hub-card-ic">🧠</div><div class="hub-card-name">Focus Tools</div><div class="hub-card-sub">Intentions &amp; ADHD aids</div></div>
     <div class="hub-card" onclick="goTab('spark',null)"><div class="hub-card-ic">💬</div><div class="hub-card-name">Spark</div><div class="hub-card-sub">Questions &amp; reflection</div></div>
@@ -1742,17 +1743,8 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
 
 
 
-<!-- LISTS -->
-<div class="view" id="v-lists">
-  <button class="ok-btn" style="margin-bottom:10px" onclick="openNewList()">📝 New List</button>
-  <div class="sh">Quick Start</div>
-  <div class="tmpl-row" id="listQBar"></div>
-  <div class="fbar" style="margin-top:4px;margin-bottom:14px">
-    <button class="fchip on" onclick="setLF('active',this)">Active</button>
-    <button class="fchip" onclick="setLF('archived',this)">📦 Archived</button>
-  </div>
-  <div id="allLists"><div class="empty"><div class="emj">📝</div><p>No lists yet. Create one or pick a Quick Start above.</p></div></div>
-</div>
+<!-- LISTS (redirects to Research Library → Lists) -->
+<div class="view" id="v-lists"></div>
 
 <!-- FOCUS SESSION -->
 <div class="view" id="v-focus-session">
@@ -2191,6 +2183,8 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
   <div class="pill-nav" style="margin-bottom:12px">
     <button class="pn-btn on" onclick="showLearnSec('flashcards',this)">🃏 Flashcards</button>
     <button class="pn-btn" onclick="showLearnSec('research',this)">🔬 Research</button>
+    <button class="pn-btn" onclick="showLearnSec('lists',this)">📝 Lists</button>
+    <button class="pn-btn" onclick="showLearnSec('habits',this)">🔥 Habits</button>
   </div>
 
   <!-- FLASHCARDS section -->
@@ -2270,6 +2264,28 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
         <div id="fcCardList"></div>
       </div>
     </div>
+  </div>
+
+  <!-- LISTS section -->
+  <div id="ls-lists" style="display:none">
+    <button class="ok-btn" style="margin-bottom:10px" onclick="openNewList()">📝 New List</button>
+    <div class="sh">Quick Start</div>
+    <div class="tmpl-row" id="listQBar"></div>
+    <div class="fbar" style="margin-top:4px;margin-bottom:14px">
+      <button class="fchip on" onclick="setLF('active',this)">Active</button>
+      <button class="fchip" onclick="setLF('archived',this)">📦 Archived</button>
+    </div>
+    <div id="allLists"><div class="empty"><div class="emj">📝</div><p>No lists yet. Create one or pick a Quick Start above.</p></div></div>
+  </div>
+
+  <!-- HABITS section -->
+  <div id="ls-habits" style="display:none">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+      <span style="font-weight:700;font-size:14px;color:var(--textd)">🔥 Habits</span>
+      <button class="btn sec" style="font-size:12px;padding:4px 12px" onclick="openAddHabit()">+ Habit</button>
+    </div>
+    <div style="font-size:11px;color:var(--textl);margin-bottom:14px">Star ⭐ a habit to feature it on your home screen. Add notes to remind yourself <em>why</em> it matters.</div>
+    <div id="habitList"></div>
   </div>
 
   <!-- RESEARCH section -->
@@ -2394,7 +2410,6 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     <button class="pn-btn" onclick="showSpiritSec('ministry',this)">⏱️ Ministry</button>
     <button class="pn-btn" onclick="showSpiritSec('gratitude',this)">🌸 Gratitude</button>
     <button class="pn-btn" onclick="showSpiritSec('scripture',this)">📜 Scripture</button>
-    <button class="pn-btn" onclick="showSpiritSec('habits',this)">🔥 Habits</button>
     <button class="pn-btn" onclick="showSpiritSec('notes',this)">📓 Notes</button>
     <button class="pn-btn" onclick="showSpiritSec('todos',this)">📋 To Do's</button>
     <button class="pn-btn" onclick="showSpiritSec('books',this)">📚 Books</button>
@@ -2488,15 +2503,6 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     <div id="scriptureStudyWrap" style="display:none"></div>
   </div>
 
-  <div id="ss-habits" style="display:none">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-      <span style="font-weight:700;font-size:14px;color:var(--textd)">🔥 Spiritual Habits</span>
-      <button class="btn sec" style="font-size:12px;padding:4px 12px" onclick="openAddHabit()">+ Habit</button>
-    </div>
-    <div style="font-size:11px;color:var(--textl);margin-bottom:12px">Check off each habit daily. Tap the checkbox for today.</div>
-    <div id="habitList"></div>
-    <div style="font-size:10px;color:var(--textl);text-align:center;margin-top:8px">■ = done &nbsp;□ = missed &nbsp;Today is outlined</div>
-  </div>
 
   <!-- STUDY NOTES section -->
   <div id="ss-notes" style="display:none">
@@ -5651,7 +5657,7 @@ var MEAL_COMBOS = JSON.parse(localStorage.getItem('aMC')||'null')||[
 var DEFAULT_TAB_ORDER=['today','plan','helm','lighthouse','conservatory','hearthside','workshop','estate','emporium','archives','archive','settings'];
 var TAB_LABELS={today:'Today',plan:'Plan',helm:'Tasks & Projects',conservatory:'Personal Growth',hearthside:'Health & Wellness',workshop:'Workshop',lighthouse:'Spiritual',estate:'Money & Home',emporium:'Work',archives:'Research Library',archive:'Archive',settings:'Settings',stories:'Stories',mixtape:'Mixtape','focus-session':'Focus Session',grocery:'Grocery List',export:'Export',routines:'Routines',lists:'Lists',content:'Content Creation',wellness:'Health & Wellness',food:'Move & Exercise',meals:'Meals & Nutrition',recap:'Recap',money:'Money',accounts:'Accounts','home-items':'Home Items','money-projects':'Money Projects',wigs:'Wig Orders','work-projects':'Work Projects',guide:'Research Library',spirit:'Spiritual',goals:'Goals',learn:'Learning',focus:'Focus Tools',spark:'Spark',board:'Mood Board',faves:'Faves',places:'Places'};
 var TAB_ORDER=(function(){var o=JSON.parse(localStorage.getItem('aTabOrder')||'null');if(!o)return DEFAULT_TAB_ORDER.slice();var full=DEFAULT_TAB_ORDER.slice();o=o.filter(function(t){return full.indexOf(t)>-1;});full.forEach(function(t){if(o.indexOf(t)<0)o.push(t);});return o;})();
-var SECTION_VIEWS={home:['home'],today:['today'],plan:['plan'],helm:['tasks','projects','focus-session','grocery','routines'],lists:['lists'],conservatory:['goals','learn','focus','spark'],hearthside:['food','meals','wellness'],workshop:['board','faves','stories','mixtape','places'],lighthouse:['spirit'],estate:['money','accounts','home-items','money-projects'],emporium:['wigs','work-projects','content'],archives:['guide'],settings:['settings','export'],archive:['archive']};
+var SECTION_VIEWS={home:['home'],today:['today'],plan:['plan'],helm:['tasks','projects','focus-session','grocery','routines'],conservatory:['goals','learn','focus','spark','lists'],hearthside:['food','meals','wellness'],workshop:['board','faves','stories','mixtape','places'],lighthouse:['spirit'],estate:['money','accounts','home-items','money-projects'],emporium:['wigs','work-projects','content'],archives:['guide'],settings:['settings','export'],archive:['archive']};
 var SECTION_LABELS={today:'Today',plan:'Plan',helm:'Tasks & Projects',conservatory:'Personal Growth',hearthside:'Health & Wellness',workshop:'Workshop',lighthouse:'Spiritual',estate:'Money & Home',emporium:'Work',archives:'Research Library',archive:'Archive',settings:'Settings'};
 var VIEW_SECTION=(function(){var m={};Object.keys(SECTION_VIEWS).forEach(function(s){SECTION_VIEWS[s].forEach(function(v){m[v]=s;});});return m;})();
 
@@ -5966,7 +5972,7 @@ function goTabDirect(tab,btn){
   if(tab==='lighthouse'){ updateLighthouseSpiritStatus(); }
   if(tab==='tasks'){ updateHelmBadges(); }
   if(tab==='focus-session'){ renderFocusSession(); }
-  if(tab==='lists'){ renderListQBar(); renderLists(); }
+  if(tab==='lists'){ goTabDirect('learn');setTimeout(function(){var b=document.querySelector('#v-learn .pn-btn:nth-child(3)');if(b)showLearnSec('lists',b);},50);return; }
   if(tab==='wigs'){ renderWigOrders(); }
 
   if(tab==='content'){ renderContentPage(); }
@@ -7872,7 +7878,7 @@ function buildBehaviorBody(){
   if(!shifts.length)return'<div style="text-align:center;padding:20px 0">'
     +'<div style="font-size:36px">☆</div>'
     +'<div style="font-size:14px;color:var(--textl);margin-top:8px">No behavior shifts set yet.</div>'
-    +'<button class="h-action-btn" style="margin-top:14px" onclick="closeHomeTileModal();goTabDirect(\'conservatory\')">Mark habits with ⭐ in Habits →</button>'
+    +'<button class="h-action-btn" style="margin-top:14px" onclick="closeHomeTileModal();goTabDirect(\'learn\');setTimeout(function(){var b=document.querySelector(\'#v-learn .pn-btn:nth-child(4)\');if(b)showLearnSec(\'habits\',b);},50)">Mark habits with ⭐ in Habits →</button>'
     +'</div>';
   if(_homeBehaviorIdx<0||_homeBehaviorIdx>=shifts.length)_homeBehaviorIdx=Math.floor(Math.random()*shifts.length);
   var h=shifts[_homeBehaviorIdx];
@@ -7889,7 +7895,7 @@ function buildBehaviorBody(){
     +'</div>'
     +'<div style="display:flex;gap:8px">'
     +'<button onclick="homeShuffleBehavior()" style="flex:1;padding:11px;border-radius:12px;border:1.5px solid var(--border);background:var(--bg2);font-family:\'Quicksand\',sans-serif;font-size:13px;font-weight:700;color:var(--textd);cursor:pointer">🔀 Next</button>'
-    +'<button onclick="closeHomeTileModal();goTabDirect(\'conservatory\')" style="flex:1;padding:11px;border-radius:12px;border:1.5px solid var(--border);background:var(--bg2);font-family:\'Quicksand\',sans-serif;font-size:13px;font-weight:700;color:var(--textd);cursor:pointer">All Habits →</button>'
+    +'<button onclick="closeHomeTileModal();goTabDirect(\'learn\');setTimeout(function(){var b=document.querySelector(\'#v-learn .pn-btn:nth-child(4)\');if(b)showLearnSec(\'habits\',b);},50)" style="flex:1;padding:11px;border-radius:12px;border:1.5px solid var(--border);background:var(--bg2);font-family:\'Quicksand\',sans-serif;font-size:13px;font-weight:700;color:var(--textd);cursor:pointer">All Habits →</button>'
     +'</div>'
     +'<div style="font-size:11px;color:var(--textl);text-align:center;margin-top:8px">'+_homeBehaviorIdx+1+' of '+shifts.length+' active shifts</div>';
 }
@@ -12825,13 +12831,13 @@ function quickList(name,emoji){
   LISTS.unshift({id:Date.now().toString(),name:name,emoji:emoji,col:col,items:items,tags:[],tabLink:'',created:new Date().toISOString(),archived:false});
   localStorage.setItem('aLists',JSON.stringify(LISTS));
   LIST_FILTER='active';
-  document.querySelectorAll('#v-lists .fchip').forEach(function(b){b.classList.toggle('on',b.textContent==='Active');});
+  document.querySelectorAll('#ls-lists .fchip').forEach(function(b){b.classList.toggle('on',b.textContent==='Active');});
   renderLists();
 }
 
 function setLF(f,btn){
   LIST_FILTER=f;
-  document.querySelectorAll('#v-lists .fchip').forEach(function(b){b.classList.remove('on');});
+  document.querySelectorAll('#ls-lists .fchip').forEach(function(b){b.classList.remove('on');});
   if(btn)btn.classList.add('on');
   renderLists();
 }
@@ -16029,7 +16035,7 @@ var GUIDE_SECTIONS=[
     '🚪 One Thing → opens One Thing mode (deep focus on a single task)',
     '🌅 Opening Shift → morning check-in: meds status, urgent tasks, set today\'s intention',
     '🌙 Wrap Up → evening summary: tasks done, water, meds, bible, gratitude note',
-    '⭐ Behavior Shifts → random active habit from your starred habits (Conservatory → Habits → ⭐)',
+    '⭐ Behavior Shifts → random active habit from your starred habits (Spiritual → 🔥 Habits → star them ⭐)',
     '💡 Learning → random item from flashcards (Conservatory → Learn), memory items, or life hacks (Research Library)',
     '📝 Quick Capture → coming soon (will save to Lists)',
     'Edit mode: tap ✏️ Edit → tiles jiggle → ✕ to remove → ↑↓ to reorder → + Add Tile to restore',
@@ -16301,7 +16307,7 @@ function deleteResearchTopic(name){
 // ═══════════════════════════════════════════════
 
 function showLearnSec(sec,btn){
-  ['flashcards','research'].forEach(function(s){
+  ['flashcards','research','lists','habits'].forEach(function(s){
     var el=document.getElementById('ls-'+s);
     if(el)el.style.display=(s===sec)?'':'none';
   });
@@ -16309,6 +16315,8 @@ function showLearnSec(sec,btn){
   if(btn)btn.classList.add('on');
   if(sec==='flashcards')renderFcDecks();
   if(sec==='research')renderResearch();
+  if(sec==='lists'){renderListQBar();renderLists();}
+  if(sec==='habits')renderHabits();
 }
 
 // ── Flashcard Decks ───────────────────────────
@@ -16956,41 +16964,34 @@ function confirmAddHabit(){
   renderHabits();
 }
 
+function saveHabitNotes(id,val){
+  var h=HABITS.find(function(x){return x.id===id;});
+  if(!h)return;
+  h.notes=val.trim();
+  localStorage.setItem('aHabits',JSON.stringify(HABITS));
+  fbSave('habits',id,h);
+}
 function renderHabits(){
   var el=document.getElementById('habitList');
   if(!el)return;
   if(!HABITS.length){
-    el.innerHTML='<p style="color:var(--textl);text-align:center;padding:20px">No habits yet. Tap "+ Habit" to add your first spiritual habit.</p>';
+    el.innerHTML='<p style="color:var(--textl);text-align:center;padding:20px">No habits yet. Tap "+ Habit" to add your first one.</p>';
     return;
   }
   var today=todayStr();
-  // Build last 28 days
-  var days=[];
-  var d=new Date();
-  for(var i=27;i>=0;i--){
-    var tmp=new Date(d);
-    tmp.setDate(tmp.getDate()-i);
-    days.push(tmp.toISOString().slice(0,10));
-  }
   el.innerHTML=HABITS.map(function(h){
     var done=habitDone(h.id,today);
     var streak=habitStreak(h.id);
-    var log=HABIT_LOG[h.id]||[];
-    var logSet=new Set(log);
-    var dots=days.map(function(ds){
-      var cls='habit-dot'+(logSet.has(ds)?' filled':'')+(ds===today?' today':'');
-      return '<div class="'+cls+'" title="'+ds+'"></div>';
-    }).join('');
-    return '<div class="habit-row">'
-      +'<div class="habit-top">'
-      +'<div class="habit-chk'+(done?' done':'')+'" onclick="toggleHabit(\''+h.id+'\')">'+(done?'✓':'')+'</div>'
-      +'<span style="font-size:18px;flex-shrink:0">'+h.emoji+'</span>'
-      +'<span class="habit-name">'+h.name+'</span>'
-      +(streak>0?'<span class="habit-streak">🔥'+streak+'</span>':'')
-      +'<button title="Behavior Shift — shows in home screen" onclick="toggleHabitShift(\''+h.id+'\')" style="background:none;border:none;font-size:16px;cursor:pointer;padding:2px 4px;flex-shrink:0;opacity:'+(h.shift?'1':'.3')+'">'+(h.shift?'⭐':'☆')+'</button>'
-      +'<button class="btn sec" style="font-size:11px;padding:2px 7px;flex-shrink:0" onclick="delHabit(\''+h.id+'\')">✕</button>'
+    return '<div class="habit-row" style="margin-bottom:12px;background:#fff;border-radius:16px;padding:14px;box-shadow:0 1px 6px rgba(0,0,0,.06);border:1.5px solid rgba(0,0,0,.04)">'
+      +'<div style="display:flex;align-items:center;gap:10px;margin-bottom:'+(h.notes?'10':'0')+'px">'
+      +'<div class="habit-chk'+(done?' done':'')+'" onclick="toggleHabit(\''+h.id+'\')" style="flex-shrink:0">'+(done?'✓':'')+'</div>'
+      +'<span style="font-size:20px;flex-shrink:0">'+h.emoji+'</span>'
+      +'<span style="font-size:14px;font-weight:700;color:var(--textd);flex:1">'+escHtml(h.name)+'</span>'
+      +(streak>0?'<span style="font-size:12px;color:var(--textl);flex-shrink:0">🔥'+streak+'d</span>':'')
+      +'<button title="Behavior Shift — shows on home screen" onclick="toggleHabitShift(\''+h.id+'\')" style="background:none;border:none;font-size:16px;cursor:pointer;padding:2px 4px;flex-shrink:0;opacity:'+(h.shift?'1':'.35')+'">'+(h.shift?'⭐':'☆')+'</button>'
+      +'<button style="background:none;border:none;font-size:13px;color:var(--textl);cursor:pointer;padding:2px 6px;flex-shrink:0;font-family:\'Quicksand\',sans-serif;font-weight:700" onclick="delHabit(\''+h.id+'\')">✕</button>'
       +'</div>'
-      +'<div class="habit-dots">'+dots+'</div>'
+      +'<textarea placeholder="Add a note — why this habit matters, what triggers it, how it feels…" rows="2" style="width:100%;padding:8px 11px;border-radius:10px;border:1.5px solid #e8e0d8;font-family:\'Quicksand\',sans-serif;font-size:12px;resize:vertical;box-sizing:border-box;color:var(--textd);background:var(--bg2)" onblur="saveHabitNotes(\''+h.id+'\',this.value)">'+escHtml(h.notes||'')+'</textarea>'
       +'</div>';
   }).join('');
 }
@@ -17563,7 +17564,7 @@ var BIBLE_BOOKS = [
 ];
 
 function showSpiritSec(sec,btn){
-  ['prayer','bible','ministry','gratitude','scripture','habits','notes','todos','books'].forEach(function(s){
+  ['prayer','bible','ministry','gratitude','scripture','notes','todos','books'].forEach(function(s){
     var el=document.getElementById('ss-'+s);
     if(el)el.style.display=(s===sec)?'':'none';
   });
