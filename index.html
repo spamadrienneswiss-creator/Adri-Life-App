@@ -1354,6 +1354,7 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
 <div class="view on" id="v-home">
   <div class="home-top-bar">
     <h2 id="homeGreet">Good morning ✨</h2>
+    <button class="home-edit-btn" id="homeResetBtn" onclick="resetHomeOrder()" style="display:none;margin-right:6px;font-size:12px">↺ Reset</button>
     <button class="home-edit-btn" id="homeEditBtn" onclick="toggleHomeEdit()">✏️ Edit</button>
   </div>
   <div class="home-grid" id="homeGrid"></div>
@@ -1956,6 +1957,25 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     </div>
     <!-- P&L stat tiles -->
     <div class="mny-g">
+      <div style="background:linear-gradient(135deg,#f0f8f0,#e8f5e8);border-radius:14px;padding:14px 16px;margin-bottom:14px;border:1.5px solid rgba(74,138,74,.15)">
+        <div style="font-size:11px;font-weight:700;color:var(--textl);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px">💵 Money Snapshot</div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:5px">
+          <span style="font-size:13px;color:var(--textd)">Cash on hand</span>
+          <span style="font-size:13px;font-weight:700;color:var(--sage)" id="snapCash">$—</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:5px">
+          <span style="font-size:13px;color:var(--textd)">Bills this month</span>
+          <span style="font-size:13px;font-weight:700;color:var(--ured)" id="snapBills">-$—</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:10px">
+          <span style="font-size:13px;color:var(--textd)">Credit due</span>
+          <span style="font-size:13px;font-weight:700;color:var(--ured)" id="snapCredit">-$—</span>
+        </div>
+        <div style="border-top:1.5px solid rgba(0,0,0,.08);padding-top:10px;display:flex;justify-content:space-between;align-items:center">
+          <span style="font-size:13px;font-weight:700;color:var(--textd)">After obligations</span>
+          <span style="font-size:18px;font-weight:800" id="snapNet">$—</span>
+        </div>
+      </div>
       <div class="mny-c"><div class="mny-l">Month Income</div><div class="mny-n" id="mThisInc">$0</div></div>
       <div class="mny-c"><div class="mny-l">Month Expenses</div><div class="mny-n" id="mThisExp">$0</div></div>
       <div class="mny-c"><div class="mny-l">Net</div><div class="mny-n" id="mNet" style="font-size:20px">$0</div></div>
@@ -3323,8 +3343,8 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     </div>
   </div>
   <div style="display:flex;align-items:center;gap:10px;margin-top:8px;padding:10px 0;border-top:1px solid #f0ebe6">
-    <button class="exp-pend-btn" id="expPendingBtn" onclick="this.classList.toggle('on')">⏳ Pending charge</button>
-    <span style="font-size:11px;color:var(--textl)">Excludes from totals until cleared</span>
+    <button class="exp-pend-btn on" id="expPendingBtn" onclick="this.classList.toggle('on')">⏳ Pending</button>
+    <span style="font-size:11px;color:var(--textl)">Auto-pending — tap ✓ in expenses list once it clears your bank</span>
   </div>
   <button class="ok-btn" onclick="saveExp()">Log It 💸</button>
   <button class="cn-btn" onclick="closeM('expModal')">Cancel</button>
@@ -7550,12 +7570,15 @@ function updStats(){
 // HOME SCREEN
 // ═══════════════════════════════════════════════
 
-var HOME_TILES = JSON.parse(localStorage.getItem('aHomeTiles2')||'null') || [
-  {id:'meds'},{id:'sleep'},{id:'water'},{id:'food'},{id:'workout'},
-  {id:'addtask'},{id:'nexttask'},{id:'bible'},{id:'expense'},{id:'ministry'},
-  {id:'grocery'},{id:'cleaning'},{id:'errands'},{id:'wigs'},{id:'onething'},
-  {id:'opening'},{id:'wrapup'},{id:'behavior'},{id:'learning'}
+var HOME_TILES_DEFAULT = [
+  {id:'meds'},{id:'water'},{id:'sleep'},
+  {id:'addtask'},{id:'nexttask'},{id:'expense'},
+  {id:'food'},{id:'grocery'},{id:'errands'},
+  {id:'workout'},{id:'cleaning'},{id:'behavior'},
+  {id:'ministry'},{id:'bible'},{id:'learning'},
+  {id:'feeling'}
 ];
+var HOME_TILES = JSON.parse(localStorage.getItem('aHomeTiles2')||'null') || HOME_TILES_DEFAULT;
 var HOME_EDIT_MODE = false;
 var HOME_BIBLE = JSON.parse(localStorage.getItem('aHomeBible')||'{}');
 var HOME_SLEEP_PENDING = JSON.parse(localStorage.getItem('aHomeSleep')||'{}');
@@ -7568,7 +7591,7 @@ var HOME_TILE_DEFS = {
   workout: {icon:'💪', label:'Workout',       bg:'#e8f5e8'},
   addtask: {icon:'➕', label:'Add Task',      bg:'#fde8e8'},
   nexttask:{icon:'⚡', label:'Next Task',     bg:'#fff8e8'},
-  bible:   {icon:'📖', label:'Bible',         bg:'#e8eef8'},
+  bible:   {icon:'📚', label:'Study',          bg:'#e8eef8'},
   expense: {icon:'💸', label:'Expense',       bg:'#e8fde8'},
   ministry:{icon:'🌱', label:'Ministry',      bg:'#e8f5ec'},
   grocery: {icon:'🛒', label:'Grocery',       bg:'#f5f0e8'},
@@ -7580,7 +7603,8 @@ var HOME_TILE_DEFS = {
   wrapup:  {icon:'🌙', label:'Wrap Up',       bg:'#eaeaf8'},
   quickcap: {icon:'📝', label:'Quick Capture', bg:'#f5f8e8'},
   behavior: {icon:'⭐', label:'Behavior Shifts', bg:'#fffae0'},
-  learning: {icon:'💡', label:'Learning', bg:'#f0f4e8'},
+  learning: {icon:'💡', label:'Learning',      bg:'#f0f4e8'},
+  feeling:  {icon:'💜', label:'I\'m Feeling',  bg:'#f5eaf8'},
 };
 
 function saveHomeTiles(){localStorage.setItem('aHomeTiles2',JSON.stringify(HOME_TILES));}
@@ -7589,6 +7613,14 @@ function toggleHomeEdit(){
   HOME_EDIT_MODE=!HOME_EDIT_MODE;
   var btn=document.getElementById('homeEditBtn');
   if(btn){btn.textContent=HOME_EDIT_MODE?'✓ Done':'✏️ Edit';btn.classList.toggle('on',HOME_EDIT_MODE);}
+  var rbtn=document.getElementById('homeResetBtn');
+  if(rbtn){rbtn.style.display=HOME_EDIT_MODE?'':'none';}
+  renderHomePage();
+}
+
+function resetHomeOrder(){
+  HOME_TILES=HOME_TILES_DEFAULT.slice();
+  localStorage.setItem('aHomeTiles2',JSON.stringify(HOME_TILES));
   renderHomePage();
 }
 
@@ -7666,6 +7698,7 @@ function buildHomeTileBody(id){
   if(id==='wrapup') return buildWrapUpBody();
   if(id==='quickcap') return '<p style="color:var(--textl);font-size:13px;padding:10px 0">Quick Capture coming soon!</p>';
   if(id==='behavior') return buildBehaviorBody();
+  if(id==='feeling') return buildFeelingBody();
   if(id==='learning') return buildLearningBody();
   return '';
 }
@@ -7788,16 +7821,22 @@ function buildNextTaskBody(){
 
 function buildBibleBody(){
   var today=todayStr();
-  if(!HOME_BIBLE.date||HOME_BIBLE.date!==today)HOME_BIBLE={date:today,read:false,text:false,note:'',passage:''};
-  return'<div class="bible-chk-row">'
-    +'<button class="bible-chk-btn'+(HOME_BIBLE.read?' done':'')+'" onclick="toggleHomeBible(\'read\')">'+(HOME_BIBLE.read?'📖 Read ✓':'📖 Read')+' </button>'
-    +'<button class="bible-chk-btn'+(HOME_BIBLE.text?' done':'')+'" onclick="toggleHomeBible(\'text\')">'+(HOME_BIBLE.text?'💬 Texted ✓':'💬 Send Text')+' </button>'
+  if(!HOME_BIBLE.date||HOME_BIBLE.date!==today)HOME_BIBLE={date:today,read:false,wt:false,midweek:false,personal:false,note:'',passage:''};
+  var btnStyle='flex:1;padding:12px 6px;border-radius:14px;border:2px solid var(--border);background:var(--bg2);font-size:12px;font-weight:700;color:var(--textl);cursor:pointer;text-align:center;font-family:\'Quicksand\',sans-serif;transition:all .15s';
+  var btnDone='flex:1;padding:12px 6px;border-radius:14px;border:2px solid var(--sage);background:#e8f5e8;font-size:12px;font-weight:700;color:#4a7a4a;cursor:pointer;text-align:center;font-family:\'Quicksand\',sans-serif;transition:all .15s';
+  return'<div style="display:flex;gap:8px;margin-bottom:14px">'
+    +'<button style="'+(HOME_BIBLE.wt?btnDone:btnStyle)+'" onclick="toggleHomeBible(\'wt\')">'+(HOME_BIBLE.wt?'✓ ':'')+'📰 WT Study</button>'
+    +'<button style="'+(HOME_BIBLE.midweek?btnDone:btnStyle)+'" onclick="toggleHomeBible(\'midweek\')">'+(HOME_BIBLE.midweek?'✓ ':'')+'🎤 Midweek</button>'
+    +'<button style="'+(HOME_BIBLE.personal?btnDone:btnStyle)+'" onclick="toggleHomeBible(\'personal\')">'+(HOME_BIBLE.personal?'✓ ':'')+'📝 Personal</button>'
     +'</div>'
-    +'<div class="h-sec-label">Where you are</div>'
-    +'<input class="h-inp" id="homeBiblePassage" placeholder="e.g. John 3" value="'+escHtml(HOME_BIBLE.passage||'')+'" oninput="saveHomeBibleField(\'passage\',this.value)" style="margin-top:0">'
-    +'<div class="h-sec-label">One thing you learned</div>'
-    +'<textarea class="h-textarea" id="homeBibleNote" rows="3" placeholder="Notes..." oninput="saveHomeBibleField(\'note\',this.value)" style="margin-top:0">'+escHtml(HOME_BIBLE.note||'')+'</textarea>'
-    +'<button class="h-action-btn" onclick="closeHomeTileModal();goTabDirect(\'spirit\')">Open Bible Study →</button>';
+    +'<div style="display:flex;gap:8px;margin-bottom:14px">'
+    +'<button class="bible-chk-btn'+(HOME_BIBLE.read?' done':'')+'" onclick="toggleHomeBible(\'read\')">'+(HOME_BIBLE.read?'📖 Bible Read ✓':'📖 Bible Reading')+'</button>'
+    +'</div>'
+    +'<div class="h-sec-label">Passage / where you are</div>'
+    +'<input class="h-inp" id="homeBiblePassage" placeholder="e.g. John 3, w24.05 p.4" value="'+escHtml(HOME_BIBLE.passage||'')+'" oninput="saveHomeBibleField(\'passage\',this.value)" style="margin-top:0">'
+    +'<div class="h-sec-label">Notes</div>'
+    +'<textarea class="h-textarea" id="homeBibleNote" rows="3" placeholder="One thing that stood out..." oninput="saveHomeBibleField(\'note\',this.value)" style="margin-top:0">'+escHtml(HOME_BIBLE.note||'')+'</textarea>'
+    +'<button class="h-action-btn" onclick="closeHomeTileModal();goTabDirect(\'spirit\')">Open Full Study →</button>';
 }
 function toggleHomeBible(field){
   var today=todayStr();
@@ -7872,6 +7911,58 @@ function buildWrapUpBody(){
     +'<button class="h-action-btn" onclick="closeHomeTileModal()">Rest up! 🌙</button>';
 }
 
+var FEELING_ITEMS = JSON.parse(localStorage.getItem('aFeelingItems')||'[]');
+var _feelingIdx = -1;
+function buildFeelingBody(){
+  if(!FEELING_ITEMS.length){
+    return'<div style="text-align:center;padding:16px 0">'
+      +'<div style="font-size:36px;margin-bottom:10px">💜</div>'
+      +'<div style="font-size:14px;color:var(--textl);margin-bottom:16px">Add reminders for when you\'re struggling — things that help, things to remember, things to do in the moment.</div>'
+      +'<div style="display:flex;gap:8px;margin-bottom:8px">'
+      +'<input id="feelingNewInp" class="h-inp" placeholder="e.g. When anxious: step outside" style="margin:0;flex:1">'
+      +'<button onclick="addFeelingItem()" style="padding:10px 14px;border-radius:12px;border:none;background:var(--lav);color:#fff;font-family:\'Quicksand\',sans-serif;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap">Add</button>'
+      +'</div>'
+      +'</div>';
+  }
+  if(_feelingIdx<0||_feelingIdx>=FEELING_ITEMS.length)_feelingIdx=Math.floor(Math.random()*FEELING_ITEMS.length);
+  var item=FEELING_ITEMS[_feelingIdx];
+  return'<div style="text-align:center;padding:10px 0 6px">'
+    +'<div style="font-size:42px;margin-bottom:14px">💜</div>'
+    +'<div style="background:var(--lav-light);border-radius:16px;padding:18px 16px;margin-bottom:16px;min-height:60px;display:flex;align-items:center;justify-content:center">'
+    +'<div style="font-size:15px;font-weight:700;color:var(--textd);line-height:1.5;text-align:center">'+escHtml(item)+'</div>'
+    +'</div>'
+    +'<div style="font-size:11px;color:var(--textl);margin-bottom:14px">'+(_feelingIdx+1)+' of '+FEELING_ITEMS.length+'</div>'
+    +'</div>'
+    +'<div style="display:flex;gap:8px;margin-bottom:12px">'
+    +'<button onclick="shuffleFeeling()" style="flex:1;padding:11px;border-radius:12px;border:1.5px solid var(--border);background:var(--bg2);font-family:\'Quicksand\',sans-serif;font-size:13px;font-weight:700;color:var(--textd);cursor:pointer">🔀 Next</button>'
+    +'<button onclick="removeFeelingItem('+_feelingIdx+')" style="flex:1;padding:11px;border-radius:12px;border:1.5px solid #fde8e8;background:#fde8e8;font-family:\'Quicksand\',sans-serif;font-size:13px;font-weight:700;color:var(--ured);cursor:pointer">🗑️ Remove</button>'
+    +'</div>'
+    +'<div class="h-sec-label">Add a new reminder</div>'
+    +'<div style="display:flex;gap:8px">'
+    +'<input id="feelingNewInp" class="h-inp" placeholder="e.g. You are safe. This will pass." style="margin:0;flex:1">'
+    +'<button onclick="addFeelingItem()" style="padding:10px 14px;border-radius:12px;border:none;background:var(--lav);color:#fff;font-family:\'Quicksand\',sans-serif;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap">Add</button>'
+    +'</div>';
+}
+function addFeelingItem(){
+  var inp=document.getElementById('feelingNewInp');
+  if(!inp||!inp.value.trim())return;
+  FEELING_ITEMS.push(inp.value.trim());
+  localStorage.setItem('aFeelingItems',JSON.stringify(FEELING_ITEMS));
+  _feelingIdx=FEELING_ITEMS.length-1;
+  document.getElementById('homeTileModalBody').innerHTML=buildFeelingBody();
+}
+function shuffleFeeling(){
+  if(FEELING_ITEMS.length<=1)return;
+  var prev=_feelingIdx;
+  while(_feelingIdx===prev)_feelingIdx=Math.floor(Math.random()*FEELING_ITEMS.length);
+  document.getElementById('homeTileModalBody').innerHTML=buildFeelingBody();
+}
+function removeFeelingItem(idx){
+  FEELING_ITEMS.splice(idx,1);
+  localStorage.setItem('aFeelingItems',JSON.stringify(FEELING_ITEMS));
+  _feelingIdx=-1;
+  document.getElementById('homeTileModalBody').innerHTML=buildFeelingBody();
+}
 var _homeBehaviorIdx = -1;
 function buildBehaviorBody(){
   var shifts=HABITS.filter(function(h){return h.shift;});
@@ -10767,9 +10858,9 @@ function saveExp(){
   if(!amt||!desc){alert('Please fill in amount and description!');return;}
   var id=Date.now().toString();
   var pendBtn=document.getElementById('expPendingBtn');
-  var isPending=pendBtn&&pendBtn.classList.contains('on');
-  var e={id:id,amt:parseFloat(amt),desc:desc,ty:SBV.ety||'personal',cat:SBV.ecat||'other',date:new Date().toLocaleDateString(),created:new Date().toISOString(),pending:isPending||false};
-  if(pendBtn)pendBtn.classList.remove('on');
+  var isPending=!pendBtn||pendBtn.classList.contains('on');
+  var e={id:id,amt:parseFloat(amt),desc:desc,ty:SBV.ety||'personal',cat:SBV.ecat||'other',date:new Date().toLocaleDateString(),created:new Date().toISOString(),pending:isPending,reconciled:false};
+  if(pendBtn){pendBtn.classList.remove('on');pendBtn.classList.add('on');}
   fbSave('expenses',id,e);
   var taskId=id+'_e';
   var task={id:taskId,title:'Transfer $'+amt+' '+desc+' to spreadsheet',cat:'fin',urgency:'important-not-urgent',etime:'<10min',due:'',notes:(SBV.ety==='business'?'💼 Biz':'🏠 Personal'),done:false,created:new Date().toISOString()};
@@ -10797,12 +10888,14 @@ function renderE(){
   if(el)el.innerHTML=EXPENSES.slice(0,40).map(function(e){
     var isReconciled=!!(e.reconciled||(e.pending===false&&e.reconciled===undefined?false:undefined));
     isReconciled=!!e.reconciled;
+    var isPend=e.pending&&!isReconciled;
+    var isExported=!!e.exported;
     return'<div class="er'+(isReconciled?' exp-reconciled':'')+'">'+
       '<div class="er-l">'+
-        '<div class="er-d">'+e.desc+'</div>'+
+        '<div class="er-d">'+e.desc+(isPend?'<span style="font-size:10px;color:#c07a2a;background:#fff8e8;padding:1px 6px;border-radius:6px;margin-left:6px;font-weight:700">⏳</span>':'')+(isExported?'<span style="font-size:10px;color:#5a8a5a;background:#e8f5e8;padding:1px 6px;border-radius:6px;margin-left:4px;font-weight:700">📤</span>':'')+'</div>'+
         '<div class="er-m">'+(e.ty==='business'?'💼':'🏠')+' '+e.cat+' • '+e.date+'</div>'+
       '</div>'+
-      '<button class="exp-pend-btn'+(isReconciled?' on':'')+'" onclick="toggleExpReconciled(\''+e.id+'\')" title="'+(isReconciled?'Mark unreconciled':'Mark reconciled')+'" style="font-size:11px;font-weight:700">'+(isReconciled?'✓ R':'○ R')+'</button>'+
+      '<button class="exp-pend-btn'+(isReconciled?' on':'')+'" onclick="toggleExpReconciled(\''+e.id+'\')" title="'+(isReconciled?'Cleared ✓ — tap to undo':'Pending — tap when it clears your bank')+'" style="font-size:11px;font-weight:700">'+(isReconciled?'✓':'⏳')+'</button>'+
       '<div class="er-a '+(e.ty==='business'?'biz':'')+'">$'+e.amt.toFixed(2)+'</div>'+
       '<button onclick="delExpense(\''+e.id+'\')" style="background:none;border:none;font-size:13px;cursor:pointer;color:var(--textl);padding:4px 6px;flex-shrink:0">🗑️</button>'+
     '</div>';
@@ -11096,6 +11189,9 @@ function _expBuildSections(from,to,cats){
       if(!_expInRange(d,from,to))return;
       expRows.push([d,e.desc||'',e.cat||'',e.ty||'',e.amt||0]);
     });
+    var exportTs=new Date().toISOString();
+    EXPENSES.forEach(function(e){e.exported=exportTs;});
+    localStorage.setItem('aExpenses',JSON.stringify(EXPENSES));
     sections.push({title:'Expenses',rows:expRows,note:(expRows.length-1)+' entries'});
 
     var incRows=[['Date','Description','Category','Amount','Source']];
@@ -13339,6 +13435,11 @@ function renderMoneyOverview(){
   if(gFill&&goal>0&&thisMonIncAmt>=goal)gFill.style.background='linear-gradient(90deg,#3aaa3a,#2a8a2a)';
   if(gAmt)gAmt.textContent='$'+thisMonIncAmt.toFixed(0)+' this month';
   if(gTgt)gTgt.textContent=goal>0?'Goal: $'+goal.toFixed(0)+(thisMonIncAmt>=goal?' ✅':''):'No goal set';
+  var snapAvail=cash-billsTotal-credit;
+  var sc=document.getElementById('snapCash');if(sc)sc.textContent='$'+cash.toFixed(0);
+  var sb=document.getElementById('snapBills');if(sb)sb.textContent='-$'+billsTotal.toFixed(0);
+  var scr=document.getElementById('snapCredit');if(scr)scr.textContent='-$'+credit.toFixed(0);
+  var sn=document.getElementById('snapNet');if(sn){sn.textContent=(snapAvail>=0?'+':'')+snapAvail.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g,'$&,');sn.style.color=snapAvail>=0?'var(--sage)':'var(--ured)';}
   updateEstateStrip();
 }
 
