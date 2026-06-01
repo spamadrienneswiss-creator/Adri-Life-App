@@ -2044,9 +2044,15 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
   <!-- Expenses -->
   <div id="ms-expenses" class="money-sec" style="display:none">
     <button class="ok-btn" style="width:100%;margin-bottom:12px" onclick="openM('expModal')">💸 Add Expense</button>
-    <div class="sh">💸 Recent Expenses</div>
+    <div class="fbar" style="margin-bottom:10px">
+      <button class="fchip on" onclick="setExpFilter('all',this)">All</button>
+      <button class="fchip" onclick="setExpFilter('uncleared',this)">⏳ Uncleared</button>
+      <button class="fchip" onclick="setExpFilter('cleared',this)">✓ Cleared</button>
+      <button class="fchip" onclick="setExpFilter('unexported',this)">📤 Not Exported</button>
+    </div>
+    <div class="sh" id="expListLabel">💸 Recent Expenses</div>
     <div class="card"><div id="expList"><div class="empty"><div class="emj">💸</div><p>No expenses yet.</p></div></div></div>
-    <button class="exp-btn" onclick="goTabDirect('export',document.querySelector('[data-tab=\'export\']'))" style="margin-top:8px">📤 Export →</button>
+    <button class="exp-btn" onclick="goTabDirect('export',document.querySelector('[data-tab=\'export\']'))" style="margin-top:8px">📤 Export all →</button>
   </div>
   <!-- Income -->
   <div id="ms-income" class="money-sec" style="display:none">
@@ -7576,7 +7582,7 @@ var HOME_TILES_DEFAULT = [
   {id:'food'},{id:'grocery'},{id:'errands'},
   {id:'workout'},{id:'cleaning'},{id:'behavior'},
   {id:'ministry'},{id:'bible'},{id:'learning'},
-  {id:'feeling'}
+  {id:'feeling'},{id:'quickcap'}
 ];
 var HOME_TILES = JSON.parse(localStorage.getItem('aHomeTiles2')||'null') || HOME_TILES_DEFAULT;
 var HOME_EDIT_MODE = false;
@@ -7696,7 +7702,7 @@ function buildHomeTileBody(id){
   if(id==='cleaning') return buildCleaningBody();
   if(id==='opening') return buildOpeningBody();
   if(id==='wrapup') return buildWrapUpBody();
-  if(id==='quickcap') return '<p style="color:var(--textl);font-size:13px;padding:10px 0">Quick Capture coming soon!</p>';
+  if(id==='quickcap') return buildQuickCapBody();
   if(id==='behavior') return buildBehaviorBody();
   if(id==='feeling') return buildFeelingBody();
   if(id==='learning') return buildLearningBody();
@@ -7963,6 +7969,64 @@ function removeFeelingItem(idx){
   _feelingIdx=-1;
   document.getElementById('homeTileModalBody').innerHTML=buildFeelingBody();
 }
+// ── Quick Capture tile ────────────────────────
+function buildQuickCapBody(){
+  var recent=BRAIN_DUMP.slice(0,4);
+  var recentHtml=recent.length
+    ? recent.map(function(d){
+        return '<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--bdr)">'
+          +'<span style="flex:1;font-size:13px;color:var(--textd);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+escHtml(d.text)+'</span>'
+          +'<button onclick="qcToTask(\''+d.id+'\')" style="flex-shrink:0;padding:3px 9px;border-radius:8px;border:1.5px solid var(--lav);background:var(--lav-light);color:var(--lav);font-size:11px;font-weight:700;cursor:pointer;font-family:\'Quicksand\',sans-serif">→ Task</button>'
+          +'<button onclick="qcDone(\''+d.id+'\')" style="flex-shrink:0;padding:3px 8px;border-radius:8px;border:1.5px solid var(--sage);background:#e8f5e8;color:#4a7a4a;font-size:11px;font-weight:700;cursor:pointer;font-family:\'Quicksand\',sans-serif">✓</button>'
+          +'</div>';
+      }).join('')
+    : '<p style="font-size:12px;color:var(--textl);text-align:center;padding:12px 0;margin:0">Nothing captured yet — clear your head!</p>';
+  return '<div style="display:flex;gap:8px;margin-bottom:14px">'
+    +'<input id="qcInput" class="h-inp" placeholder="Type anything…" style="margin:0;flex:1" onkeydown="if(event.key===\'Enter\')qcSave()">'
+    +'<button onclick="qcSave()" style="flex-shrink:0;padding:10px 16px;border-radius:12px;border:none;background:var(--sage);color:#fff;font-family:\'Quicksand\',sans-serif;font-size:15px;font-weight:700;cursor:pointer">↵</button>'
+    +'</div>'
+    +(recent.length?'<div class="h-sec-label">Recent captures</div>':'')+recentHtml
+    +'<div style="display:flex;gap:8px;margin-top:14px">'
+    +'<button onclick="closeHomeTileModal();goTabDirect(\'tasks\');setTimeout(function(){togHelmSec(\'hs-dump\',true)},200)" style="flex:1;padding:10px;border-radius:12px;border:1.5px solid var(--border);background:var(--bg2);font-family:\'Quicksand\',sans-serif;font-size:12px;font-weight:700;color:var(--textd);cursor:pointer">🧠 All captures →</button>'
+    +'<button onclick="closeHomeTileModal();goTabDirect(\'spirit\');setTimeout(function(){var b=document.querySelector(\'#v-spirit .pn-btn:nth-child(7)\');if(b)showSpiritSec(\'notes\',b);},200)" style="flex:1;padding:10px;border-radius:12px;border:1.5px solid var(--border);background:var(--bg2);font-family:\'Quicksand\',sans-serif;font-size:12px;font-weight:700;color:var(--textd);cursor:pointer">📓 Notes →</button>'
+    +'</div>';
+}
+function qcSave(){
+  var el=document.getElementById('qcInput');
+  var text=(el&&el.value||'').trim();
+  if(!text)return;
+  var item={id:'bd-'+Date.now(),text:text,date:todayStr(),priority:'none',notes:'',due:''};
+  BRAIN_DUMP.unshift(item);
+  localStorage.setItem('aBrainDump',JSON.stringify(BRAIN_DUMP));
+  el.value='';
+  // create "process inbox" task if none exists
+  var hasInboxTask=TASKS.some(function(t){return!t.done&&t.title&&t.title.indexOf('brain dump')>-1;});
+  if(!hasInboxTask){
+    var tid='inbox-'+Date.now();
+    var t={id:tid,title:'🧠 Process brain dump inbox',cat:'mis',urgency:'important-not-urgent',etime:'<15min',due:'',notes:'',done:false,created:new Date().toISOString()};
+    TASKS.push(t);localStorage.setItem('aTasks',JSON.stringify(TASKS));fbSave('tasks',tid,t);updHelmBadge();
+  }
+  showToast('Captured ✓');
+  document.getElementById('homeTileModalBody').innerHTML=buildQuickCapBody();
+}
+function qcToTask(id){
+  var d=BRAIN_DUMP.find(function(x){return x.id===id;});
+  if(!d)return;
+  closeHomeTileModal();
+  openM('taskModal');
+  setTimeout(function(){
+    var ti=document.getElementById('taskTitle');
+    if(ti){ti.value=d.text;ti.focus();}
+    BRAIN_DUMP=BRAIN_DUMP.filter(function(x){return x.id!==id;});
+    localStorage.setItem('aBrainDump',JSON.stringify(BRAIN_DUMP));
+  },200);
+}
+function qcDone(id){
+  BRAIN_DUMP=BRAIN_DUMP.filter(function(x){return x.id!==id;});
+  localStorage.setItem('aBrainDump',JSON.stringify(BRAIN_DUMP));
+  document.getElementById('homeTileModalBody').innerHTML=buildQuickCapBody();
+}
+
 var _homeBehaviorIdx = -1;
 function buildBehaviorBody(){
   var shifts=HABITS.filter(function(h){return h.shift;});
@@ -10870,6 +10934,13 @@ function saveExp(){
 
 function getMonStr(){var n=new Date();return n.getFullYear()+'-'+(String(n.getMonth()+1).padStart(2,'0'));}
 
+var EXP_FILTER='all';
+function setExpFilter(f,btn){
+  EXP_FILTER=f;
+  document.querySelectorAll('#ms-expenses .fchip').forEach(function(b){b.classList.remove('on');});
+  if(btn)btn.classList.add('on');
+  renderE();
+}
 function renderExpenses(){renderE();}
 function renderE(){
   var el=document.getElementById('expList');
@@ -10885,7 +10956,19 @@ function renderE(){
   var e3=document.getElementById('mNet');if(e3){e3.textContent=(net>=0?'+':'-')+'$'+Math.abs(net).toFixed(0);e3.style.color=net>=0?'var(--sage)':'var(--ured)';}
   var e4=document.getElementById('mInc');if(e4)e4.textContent='$'+wigInc.toFixed(0);
   if(!EXPENSES.length){if(el)el.innerHTML='<div class="empty"><div class="emj">💸</div><p>No expenses yet.</p></div>';renderIncome();renderBills();return;}
-  if(el)el.innerHTML=EXPENSES.slice(0,40).map(function(e){
+  var filtered=EXPENSES.slice(0,100).filter(function(e){
+    if(EXP_FILTER==='uncleared')return!e.reconciled;
+    if(EXP_FILTER==='cleared')return!!e.reconciled;
+    if(EXP_FILTER==='unexported')return!e.exported;
+    return true;
+  });
+  var lbl=document.getElementById('expListLabel');
+  if(lbl){
+    var labels={all:'💸 Recent Expenses',uncleared:'⏳ Uncleared — tap ⏳ once it hits your bank',cleared:'✓ Cleared expenses',unexported:'📤 Not yet exported to spreadsheet'};
+    lbl.textContent=labels[EXP_FILTER]||'💸 Expenses';
+  }
+  if(!filtered.length){if(el)el.innerHTML='<div class="empty"><p>No expenses match this filter.</p></div>';renderIncome();renderBills();return;}
+  if(el)el.innerHTML=filtered.map(function(e){
     var isReconciled=!!(e.reconciled||(e.pending===false&&e.reconciled===undefined?false:undefined));
     isReconciled=!!e.reconciled;
     var isPend=e.pending&&!isReconciled;
