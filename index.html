@@ -1707,11 +1707,9 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
 
 <!-- ROUTINES -->
 <div class="view" id="v-routines">
-  <!-- Quick access buttons -->
+  <!-- Quick access button -->
   <div style="display:flex;gap:8px;margin-bottom:14px">
-    <button onclick="openOpeningShift()" style="flex:1;display:flex;align-items:center;justify-content:center;gap:8px;padding:11px 14px;border-radius:14px;border:none;background:linear-gradient(135deg,#f5d06a,#e09030);color:#fff;font-family:'Quicksand',sans-serif;font-size:13px;font-weight:700;cursor:pointer;box-shadow:0 3px 12px rgba(224,144,48,.35)">🌅 Opening Shift</button>
-    <button onclick="openMidday()" style="flex:1;display:flex;align-items:center;justify-content:center;gap:8px;padding:11px 14px;border-radius:14px;border:none;background:linear-gradient(135deg,#7ab8e8,#4a8ac8);color:#fff;font-family:'Quicksand',sans-serif;font-size:13px;font-weight:700;cursor:pointer;box-shadow:0 3px 12px rgba(74,138,200,.35)">☀️ Midday</button>
-    <button onclick="openDayWrapUp()" style="flex:1;display:flex;align-items:center;justify-content:center;gap:8px;padding:11px 14px;border-radius:14px;border:none;background:linear-gradient(135deg,#5a3a8a,#3a2a6a);color:#fff;font-family:'Quicksand',sans-serif;font-size:13px;font-weight:700;cursor:pointer;box-shadow:0 3px 12px rgba(90,58,138,.35)">🌙 Wrap Up</button>
+    <button onclick="openMidday()" style="flex:1;display:flex;align-items:center;justify-content:center;gap:8px;padding:11px 14px;border-radius:14px;border:none;background:linear-gradient(135deg,#7ab8e8,#4a8ac8);color:#fff;font-family:'Quicksand',sans-serif;font-size:13px;font-weight:700;cursor:pointer;box-shadow:0 3px 12px rgba(74,138,200,.35)">☀️ Midday Check-in</button>
   </div>
   <!-- Interaction hint -->
   <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
@@ -2932,6 +2930,7 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     <button class="pn-btn" onclick="showWellnessSec('meds',this)">💊 Meds</button>
     <button class="pn-btn" onclick="showWellnessSec('body',this);renderMeasurements()">📏 Body</button>
     <button class="pn-btn" onclick="showWellnessSec('time',this);renderTimeTracking()">⏱️ Time</button>
+    <button class="pn-btn" onclick="showWellnessSec('feeling',this)">💜 Feeling</button>
   </div>
 
   <!-- MOOD -->
@@ -2946,7 +2945,8 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
         <button class="mood-btn" data-m="4" onclick="logMood(4)">🙂</button>
         <button class="mood-btn" data-m="5" onclick="logMood(5)">😊</button>
       </div>
-      <div style="font-size:11px;color:var(--textl);margin-top:8px;margin-bottom:4px">Last 7 days</div>
+      <textarea id="moodNoteInput" placeholder="Add a note… what's going on today? (optional)" rows="2" style="width:100%;margin-top:10px;padding:8px 11px;border-radius:10px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:12px;resize:none;box-sizing:border-box;color:var(--textd)" onblur="saveMoodNote(this.value)"></textarea>
+      <div style="font-size:11px;color:var(--textl);margin-top:10px;margin-bottom:4px">Last 7 days</div>
       <div class="hist-row" id="moodHist"></div>
     </div>
   </div>
@@ -3142,6 +3142,22 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
       <div class="ct" style="margin-bottom:4px">🔁 Recurring Averages</div>
       <div style="font-size:11px;color:var(--textl);margin-bottom:10px">Your real time for tasks you do repeatedly</div>
       <div id="tt-recurring"><div style="font-size:12px;color:var(--textl);padding:8px 0">Complete a recurring task with time logged to see averages.</div></div>
+    </div>
+  </div>
+
+  <!-- FEELING section -->
+  <div id="ws-feeling" style="display:none">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+      <span style="font-weight:700;font-size:14px;color:var(--textd)">💜 I'm Feeling…</span>
+    </div>
+    <div style="font-size:12px;color:var(--textl);margin-bottom:14px">Tap a card when you need it. Add reminders, coping tools, or affirmations.</div>
+    <div id="wellnessFeelingList"></div>
+    <div style="margin-top:14px">
+      <div class="h-sec-label">Add a new card</div>
+      <div style="display:flex;gap:8px">
+        <input id="wellnessFeelingInp" class="fi" placeholder="e.g. When anxious: step outside for 5 min" style="flex:1;margin:0">
+        <button onclick="addWellnessFeeling()" style="padding:10px 14px;border-radius:12px;border:none;background:var(--lav);color:#fff;font-family:'Quicksand',sans-serif;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0">Add</button>
+      </div>
     </div>
   </div>
 
@@ -7924,10 +7940,7 @@ function buildFeelingBody(){
     return'<div style="text-align:center;padding:16px 0">'
       +'<div style="font-size:36px;margin-bottom:10px">💜</div>'
       +'<div style="font-size:14px;color:var(--textl);margin-bottom:16px">Add reminders for when you\'re struggling — things that help, things to remember, things to do in the moment.</div>'
-      +'<div style="display:flex;gap:8px;margin-bottom:8px">'
-      +'<input id="feelingNewInp" class="h-inp" placeholder="e.g. When anxious: step outside" style="margin:0;flex:1">'
-      +'<button onclick="addFeelingItem()" style="padding:10px 14px;border-radius:12px;border:none;background:var(--lav);color:#fff;font-family:\'Quicksand\',sans-serif;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap">Add</button>'
-      +'</div>'
+      +'<button class="h-action-btn" onclick="closeHomeTileModal();goTabDirect(\'wellness\');setTimeout(function(){var b=document.querySelector(\'#v-wellness .pn-btn:last-child\');if(b)showWellnessSec(\'feeling\',b);},200)">Add your first card in Wellness →</button>'
       +'</div>';
   }
   if(_feelingIdx<0||_feelingIdx>=FEELING_ITEMS.length)_feelingIdx=Math.floor(Math.random()*FEELING_ITEMS.length);
@@ -7941,12 +7954,7 @@ function buildFeelingBody(){
     +'</div>'
     +'<div style="display:flex;gap:8px;margin-bottom:12px">'
     +'<button onclick="shuffleFeeling()" style="flex:1;padding:11px;border-radius:12px;border:1.5px solid var(--border);background:var(--bg2);font-family:\'Quicksand\',sans-serif;font-size:13px;font-weight:700;color:var(--textd);cursor:pointer">🔀 Next</button>'
-    +'<button onclick="removeFeelingItem('+_feelingIdx+')" style="flex:1;padding:11px;border-radius:12px;border:1.5px solid #fde8e8;background:#fde8e8;font-family:\'Quicksand\',sans-serif;font-size:13px;font-weight:700;color:var(--ured);cursor:pointer">🗑️ Remove</button>'
-    +'</div>'
-    +'<div class="h-sec-label">Add a new reminder</div>'
-    +'<div style="display:flex;gap:8px">'
-    +'<input id="feelingNewInp" class="h-inp" placeholder="e.g. You are safe. This will pass." style="margin:0;flex:1">'
-    +'<button onclick="addFeelingItem()" style="padding:10px 14px;border-radius:12px;border:none;background:var(--lav);color:#fff;font-family:\'Quicksand\',sans-serif;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap">Add</button>'
+    +'<button onclick="closeHomeTileModal();goTabDirect(\'wellness\');setTimeout(function(){var b=document.querySelector(\'#v-wellness .pn-btn:last-child\');if(b)showWellnessSec(\'feeling\',b);},200)" style="flex:1;padding:11px;border-radius:12px;border:1.5px solid var(--border);background:var(--bg2);font-family:\'Quicksand\',sans-serif;font-size:13px;font-weight:700;color:var(--textd);cursor:pointer">All cards →</button>'
     +'</div>';
 }
 function addFeelingItem(){
@@ -14219,6 +14227,12 @@ function togSect(secId,arrowId){
 // ═══════════════════════════════════════════════
 // HEALTH — MOOD
 // ═══════════════════════════════════════════════
+var MOOD_NOTES = JSON.parse(localStorage.getItem('aMoodNotes')||'{}');
+function saveMoodNote(val){
+  var k=getTK();
+  MOOD_NOTES[k]=val.trim();
+  localStorage.setItem('aMoodNotes',JSON.stringify(MOOD_NOTES));
+}
 function logMood(m){
   var k=getTK();
   MOOD[k]=m;
@@ -14232,15 +14246,19 @@ function renderMood(){
   document.querySelectorAll('.mood-btn').forEach(function(b){
     b.classList.toggle('on',parseInt(b.dataset.m)===today);
   });
+  var noteEl=document.getElementById('moodNoteInput');
+  if(noteEl)noteEl.value=MOOD_NOTES[k]||'';
   var hist=document.getElementById('moodHist');if(!hist)return;
   var emojis=['','😔','😕','😐','🙂','😊'];
   var days=[];
   for(var i=6;i>=0;i--){
     var d=new Date();d.setDate(d.getDate()-i);
-    days.push(MOOD[d.toDateString()]||0);
+    var dk=d.toDateString();
+    var note=MOOD_NOTES[dk];
+    days.push({m:MOOD[dk]||0,note:note||''});
   }
-  hist.innerHTML=days.map(function(m){
-    return'<div class="hist-dot">'+(m?emojis[m]:'·')+'</div>';
+  hist.innerHTML=days.map(function(entry){
+    return'<div class="hist-dot" title="'+(entry.note?escHtml(entry.note):'')+'" style="cursor:'+(entry.note?'help':'default')+'">'+(entry.m?emojis[entry.m]:'·')+'</div>';
   }).join('');
 }
 
@@ -15422,7 +15440,7 @@ function delMixSong(id){
 
 // ── Recap Sections ────────────────────────────────
 function showWellnessSec(sec,btn){
-  ['mood','sleep','symptoms','period','meds','body','time'].forEach(function(s){
+  ['mood','sleep','symptoms','period','meds','body','time','feeling'].forEach(function(s){
     var el=document.getElementById('ws-'+s);if(el)el.style.display=s===sec?'':'none';
   });
   document.querySelectorAll('#v-wellness .pn-btn').forEach(function(b){b.classList.remove('on');});
@@ -15434,6 +15452,36 @@ function showWellnessSec(sec,btn){
   if(sec==='meds'){renderMeds();}
   if(sec==='body'){renderMeasurements();}
   if(sec==='time'){renderTimeTracking();}
+  if(sec==='feeling')renderWellnessFeeling();
+}
+
+function renderWellnessFeeling(){
+  var el=document.getElementById('wellnessFeelingList');
+  if(!el)return;
+  if(!FEELING_ITEMS.length){
+    el.innerHTML='<p style="color:var(--textl);text-align:center;padding:16px 0;font-size:13px">No cards yet — add your first reminder below.</p>';
+    return;
+  }
+  el.innerHTML=FEELING_ITEMS.map(function(item,i){
+    return '<div style="display:flex;align-items:center;gap:10px;padding:12px 14px;background:#fff;border-radius:14px;margin-bottom:8px;box-shadow:0 1px 4px rgba(0,0,0,.06);border:1.5px solid rgba(0,0,0,.04)">'
+      +'<span style="font-size:20px;flex-shrink:0">💜</span>'
+      +'<span style="flex:1;font-size:13px;color:var(--textd);line-height:1.5">'+escHtml(item)+'</span>'
+      +'<button onclick="removeWellnessFeeling('+i+')" style="background:none;border:none;font-size:13px;color:var(--textl);cursor:pointer;padding:2px 6px;flex-shrink:0;font-family:\'Quicksand\',sans-serif;font-weight:700">✕</button>'
+      +'</div>';
+  }).join('');
+}
+function addWellnessFeeling(){
+  var inp=document.getElementById('wellnessFeelingInp');
+  if(!inp||!inp.value.trim())return;
+  FEELING_ITEMS.push(inp.value.trim());
+  localStorage.setItem('aFeelingItems',JSON.stringify(FEELING_ITEMS));
+  inp.value='';
+  renderWellnessFeeling();
+}
+function removeWellnessFeeling(idx){
+  FEELING_ITEMS.splice(idx,1);
+  localStorage.setItem('aFeelingItems',JSON.stringify(FEELING_ITEMS));
+  renderWellnessFeeling();
 }
 
 // ── Body Measurements ─────────────────────────────────
@@ -17293,6 +17341,7 @@ function renderStudyNotes(){
       +'<div class="snote-head">'
       +'<span class="snote-cat-badge" style="background:'+color+'22;color:'+color+'">'+n.cat+'</span>'
       +(n.title?'<span class="snote-title">'+n.title+'</span>':'')
+      +'<button onclick="event.stopPropagation();noteToTask(\''+escHtml(n.title||'')+'\',\''+escHtml(n.body||'')+'\',\''+n.id+'\')" style="background:none;border:none;font-size:11px;font-weight:700;color:var(--lav);cursor:pointer;padding:2px 6px;font-family:\'Quicksand\',sans-serif;flex-shrink:0">→ Task</button>'
       +'<button class="btn sec" style="font-size:11px;padding:2px 7px;flex-shrink:0;margin-left:auto" onclick="event.stopPropagation();delStudyNote(\''+n.id+'\')">✕</button>'
       +'</div>'
       +'<div class="snote-date">'+n.date+'</div>'
@@ -17311,6 +17360,16 @@ function delStudyNote(id){
   STUDY_NOTES=STUDY_NOTES.filter(function(n){return n.id!==id;});
   localStorage.setItem('aStudyNotes',JSON.stringify(STUDY_NOTES));
   renderStudyNotes();
+}
+
+function noteToTask(title,notes,noteId){
+  openM('taskModal');
+  setTimeout(function(){
+    var ti=document.getElementById('taskTitle');
+    if(ti)ti.value=(title?'Re: '+title:'Process study note');
+    var ni=document.getElementById('taskNotes');
+    if(ni)ni.value=notes||'';
+  },200);
 }
 
 // ═══════════════════════════════════════════════
