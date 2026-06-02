@@ -1707,10 +1707,6 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
 
 <!-- ROUTINES -->
 <div class="view" id="v-routines">
-  <!-- Quick access button -->
-  <div style="display:flex;gap:8px;margin-bottom:14px">
-    <button onclick="openMidday()" style="flex:1;display:flex;align-items:center;justify-content:center;gap:8px;padding:11px 14px;border-radius:14px;border:none;background:linear-gradient(135deg,#7ab8e8,#4a8ac8);color:#fff;font-family:'Quicksand',sans-serif;font-size:13px;font-weight:700;cursor:pointer;box-shadow:0 3px 12px rgba(74,138,200,.35)">☀️ Midday Check-in</button>
-  </div>
   <!-- Interaction hint -->
   <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
     <span style="font-size:10px;background:#f5f0fd;color:#7a5a9a;border-radius:8px;padding:3px 8px;font-family:'Quicksand',sans-serif;font-weight:600">Tap = done ✅</span>
@@ -7843,28 +7839,34 @@ function buildNextTaskBody(){
 
 function buildBibleBody(){
   var today=todayStr();
-  if(!HOME_BIBLE.date||HOME_BIBLE.date!==today)HOME_BIBLE={date:today,read:false,wt:false,midweek:false,personal:false,note:'',passage:''};
+  if(!HOME_BIBLE.date||HOME_BIBLE.date!==today)HOME_BIBLE={date:today,read:false,wt:false,midweek:false,personal:false,text:false,note:'',passage:''};
   var btnStyle='flex:1;padding:12px 6px;border-radius:14px;border:2px solid var(--border);background:var(--bg2);font-size:12px;font-weight:700;color:var(--textl);cursor:pointer;text-align:center;font-family:\'Quicksand\',sans-serif;transition:all .15s';
   var btnDone='flex:1;padding:12px 6px;border-radius:14px;border:2px solid var(--sage);background:#e8f5e8;font-size:12px;font-weight:700;color:#4a7a4a;cursor:pointer;text-align:center;font-family:\'Quicksand\',sans-serif;transition:all .15s';
-  return'<div style="display:flex;gap:8px;margin-bottom:14px">'
+  return'<div style="display:flex;gap:8px;margin-bottom:10px">'
     +'<button style="'+(HOME_BIBLE.wt?btnDone:btnStyle)+'" onclick="toggleHomeBible(\'wt\')">'+(HOME_BIBLE.wt?'✓ ':'')+'📰 WT Study</button>'
     +'<button style="'+(HOME_BIBLE.midweek?btnDone:btnStyle)+'" onclick="toggleHomeBible(\'midweek\')">'+(HOME_BIBLE.midweek?'✓ ':'')+'🎤 Midweek</button>'
     +'<button style="'+(HOME_BIBLE.personal?btnDone:btnStyle)+'" onclick="toggleHomeBible(\'personal\')">'+(HOME_BIBLE.personal?'✓ ':'')+'📝 Personal</button>'
     +'</div>'
     +'<div style="display:flex;gap:8px;margin-bottom:14px">'
     +'<button class="bible-chk-btn'+(HOME_BIBLE.read?' done':'')+'" onclick="toggleHomeBible(\'read\')">'+(HOME_BIBLE.read?'📖 Bible Read ✓':'📖 Bible Reading')+'</button>'
+    +'<button class="bible-chk-btn'+(HOME_BIBLE.text?' done':'')+'" onclick="toggleHomeBible(\'text\')">'+(HOME_BIBLE.text?'💬 Text ✓':'💬 Text')+'</button>'
     +'</div>'
     +'<div class="h-sec-label">Passage / where you are</div>'
     +'<input class="h-inp" id="homeBiblePassage" placeholder="e.g. John 3, w24.05 p.4" value="'+escHtml(HOME_BIBLE.passage||'')+'" oninput="saveHomeBibleField(\'passage\',this.value)" style="margin-top:0">'
     +'<div class="h-sec-label">Notes</div>'
-    +'<textarea class="h-textarea" id="homeBibleNote" rows="3" placeholder="One thing that stood out..." oninput="saveHomeBibleField(\'note\',this.value)" style="margin-top:0">'+escHtml(HOME_BIBLE.note||'')+'</textarea>'
+    +'<textarea class="h-textarea" id="homeBibleNote" rows="2" placeholder="One thing that stood out..." oninput="saveHomeBibleField(\'note\',this.value)" style="margin-top:0">'+escHtml(HOME_BIBLE.note||'')+'</textarea>'
     +'<button class="h-action-btn" onclick="closeHomeTileModal();goTabDirect(\'spirit\')">Open Full Study →</button>';
 }
 function toggleHomeBible(field){
   var today=todayStr();
-  if(!HOME_BIBLE.date||HOME_BIBLE.date!==today)HOME_BIBLE={date:today,read:false,text:false,note:'',passage:''};
-  HOME_BIBLE[field]=!HOME_BIBLE[field];
+  if(!HOME_BIBLE.date||HOME_BIBLE.date!==today)HOME_BIBLE={date:today,read:false,wt:false,midweek:false,personal:false,text:false,note:'',passage:''};
+  var turning=!HOME_BIBLE[field];
+  HOME_BIBLE[field]=turning;
   localStorage.setItem('aHomeBible',JSON.stringify(HOME_BIBLE));
+  if(turning){
+    var spiritMap={text:'dailyText',read:'bibleReading',wt:'personalStudy',personal:'personalStudy',midweek:'meeting'};
+    if(spiritMap[field])spiritRunAdd(spiritMap[field]);
+  }
   document.getElementById('homeTileModalBody').innerHTML=buildBibleBody();
 }
 function saveHomeBibleField(field,val){HOME_BIBLE[field]=val;localStorage.setItem('aHomeBible',JSON.stringify(HOME_BIBLE));}
@@ -7994,10 +7996,12 @@ function buildQuickCapBody(){
     +'<button onclick="qcSave()" style="flex-shrink:0;padding:10px 16px;border-radius:12px;border:none;background:var(--sage);color:#fff;font-family:\'Quicksand\',sans-serif;font-size:15px;font-weight:700;cursor:pointer">↵</button>'
     +'</div>'
     +(recent.length?'<div class="h-sec-label">Recent captures</div>':'')+recentHtml
-    +'<div style="display:flex;gap:8px;margin-top:14px">'
-    +'<button onclick="closeHomeTileModal();goTabDirect(\'tasks\');setTimeout(function(){togHelmSec(\'hs-dump\',true)},200)" style="flex:1;padding:10px;border-radius:12px;border:1.5px solid var(--border);background:var(--bg2);font-family:\'Quicksand\',sans-serif;font-size:12px;font-weight:700;color:var(--textd);cursor:pointer">🧠 All captures →</button>'
-    +'<button onclick="closeHomeTileModal();goTabDirect(\'spirit\');setTimeout(function(){var b=document.querySelector(\'#v-spirit .pn-btn:nth-child(7)\');if(b)showSpiritSec(\'notes\',b);},200)" style="flex:1;padding:10px;border-radius:12px;border:1.5px solid var(--border);background:var(--bg2);font-family:\'Quicksand\',sans-serif;font-size:12px;font-weight:700;color:var(--textd);cursor:pointer">📓 Notes →</button>'
-    +'</div>';
+    +'<div class="h-sec-label" style="margin-top:14px">Quick note</div>'
+    +'<div style="display:flex;gap:8px">'
+    +'<textarea id="qcNoteInput" class="h-textarea" rows="2" placeholder="Jot a note… saves to captures" style="margin:0;flex:1;resize:none"></textarea>'
+    +'<button onclick="qcSaveNote()" style="flex-shrink:0;padding:10px 14px;border-radius:12px;border:none;background:var(--lav);color:#fff;font-family:\'Quicksand\',sans-serif;font-size:13px;font-weight:700;cursor:pointer;align-self:flex-end">Save</button>'
+    +'</div>'
+    +'<button onclick="closeHomeTileModal();goTabDirect(\'tasks\');setTimeout(function(){togHelmSec(\'hs-dump\',true)},200)" style="width:100%;margin-top:10px;padding:10px;border-radius:12px;border:1.5px solid var(--border);background:var(--bg2);font-family:\'Quicksand\',sans-serif;font-size:12px;font-weight:700;color:var(--textd);cursor:pointer">🧠 All captures →</button>';
 }
 function qcSave(){
   var el=document.getElementById('qcInput');
@@ -8032,6 +8036,15 @@ function qcToTask(id){
 function qcDone(id){
   BRAIN_DUMP=BRAIN_DUMP.filter(function(x){return x.id!==id;});
   localStorage.setItem('aBrainDump',JSON.stringify(BRAIN_DUMP));
+  document.getElementById('homeTileModalBody').innerHTML=buildQuickCapBody();
+}
+function qcSaveNote(){
+  var el=document.getElementById('qcNoteInput');
+  var text=(el&&el.value||'').trim();
+  if(!text)return;
+  BRAIN_DUMP.unshift({id:'bd-'+Date.now(),text:'📓 '+text,date:todayStr(),priority:'none',notes:'',due:''});
+  localStorage.setItem('aBrainDump',JSON.stringify(BRAIN_DUMP));
+  showToast('Note saved ✓');
   document.getElementById('homeTileModalBody').innerHTML=buildQuickCapBody();
 }
 
