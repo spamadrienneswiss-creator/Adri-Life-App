@@ -958,6 +958,12 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
 .clean-room-btn:active{background:var(--sage);color:#fff;border-color:var(--sage)}
 .h-action-btn{width:100%;padding:13px;border-radius:14px;border:none;background:linear-gradient(135deg,var(--rose),var(--lav));color:#fff;font-family:'Quicksand',sans-serif;font-size:15px;font-weight:800;cursor:pointer;margin-top:12px}
 .h-sec-label{font-size:11px;font-weight:700;color:var(--textl);text-transform:uppercase;letter-spacing:.5px;margin:14px 0 6px}
+.feel-mood-btn{padding:12px 8px;border-radius:14px;border:2px solid #e8ddd4;background:#faf6f2;font-size:13px;font-weight:700;color:#3d3530;cursor:pointer;text-align:center;font-family:'Quicksand',sans-serif;line-height:1.3;transition:all .15s}
+.feel-mood-btn:active{border-color:var(--lav);background:var(--lav-light)}
+.feel-card{width:calc(50% - 5px);cursor:pointer}
+.feel-card-face{border-radius:14px;padding:14px 12px;min-height:88px;display:flex;align-items:center;justify-content:center;text-align:center;transition:all .2s;box-sizing:border-box;flex-direction:column;gap:6px}
+.feel-card-face.down{background:var(--lav-light);border:2px solid var(--lav)}
+.feel-card-face.up{background:#fff;border:2px solid #e8ddd4}
 .next-task-item{display:flex;align-items:flex-start;gap:10px;padding:10px;background:var(--bg2);border-radius:12px;margin-bottom:8px;cursor:pointer}
 .next-task-item .tchk{width:22px;height:22px;border-radius:50%;border:2px solid #ddd;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:12px;cursor:pointer}
 .next-task-item .tt{font-size:14px;font-weight:700;color:var(--textd);flex:1}
@@ -3143,18 +3149,8 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
 
   <!-- FEELING section -->
   <div id="ws-feeling" style="display:none">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-      <span style="font-weight:700;font-size:14px;color:var(--textd)">💜 I'm Feeling…</span>
-    </div>
-    <div style="font-size:12px;color:var(--textl);margin-bottom:14px">Tap a card when you need it. Add reminders, coping tools, or affirmations.</div>
+    <div style="font-size:12px;color:var(--textl);margin-bottom:14px">Your personal coping library. Tap a feeling on the home tile to flip cards. Add or remove tips here anytime.</div>
     <div id="wellnessFeelingList"></div>
-    <div style="margin-top:14px">
-      <div class="h-sec-label">Add a new card</div>
-      <div style="display:flex;gap:8px">
-        <input id="wellnessFeelingInp" class="fi" placeholder="e.g. When anxious: step outside for 5 min" style="flex:1;margin:0">
-        <button onclick="addWellnessFeeling()" style="padding:10px 14px;border-radius:12px;border:none;background:var(--lav);color:#fff;font-family:'Quicksand',sans-serif;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0">Add</button>
-      </div>
-    </div>
   </div>
 
 </div>
@@ -7935,48 +7931,121 @@ function buildWrapUpBody(){
     +'<button class="h-action-btn" onclick="closeHomeTileModal()">Rest up! 🌙</button>';
 }
 
-var FEELING_ITEMS = JSON.parse(localStorage.getItem('aFeelingItems')||'[]');
-var _feelingIdx = -1;
+var FEELING_CARDS_DEFAULT=[
+  {id:'anxious',label:'😟 Anxious',cards:[
+    {id:'a1',text:'Name 5 things you can see right now. Then 4 you can touch. Say them out loud.'},
+    {id:'a2',text:'Your brain thinks this is an emergency. It probably isn\'t. Nothing needs to be solved this second.'},
+    {id:'a3',text:'Splash cold water on your face or hold ice — it physically slows your heart rate.'},
+    {id:'a4',text:'Text someone just "hey." You don\'t have to explain anything.'},
+    {id:'a5',text:'Write the worry down. Once it\'s on paper, your brain stops looping it.'},
+    {id:'a6',text:'This feeling will peak and pass in about 90 seconds if you don\'t feed it.'}
+  ]},
+  {id:'overwhelmed',label:'😤 Overwhelmed',cards:[
+    {id:'o1',text:'Pick ONE thing. Not the most important — the smallest. Do only that.'},
+    {id:'o2',text:'You don\'t have to finish. You just have to start for 2 minutes.'},
+    {id:'o3',text:'Everything feels equally urgent with ADHD. It isn\'t. Write a list and circle one item.'},
+    {id:'o4',text:'Close every tab. Phone face down. One window, one thing.'},
+    {id:'o5',text:'You\'re not behind. You\'re dysregulated. Those are different problems.'},
+    {id:'o6',text:'The mess is real. So is your ability to handle one piece of it.'}
+  ]},
+  {id:'sad',label:'😢 Sad',cards:[
+    {id:'s1',text:'You don\'t have to feel better right now. Just get through the next hour.'},
+    {id:'s2',text:'Low dopamine makes sadness feel permanent. It isn\'t — it will shift.'},
+    {id:'s3',text:'Do one physical thing: change rooms, go outside for 60 seconds, drink water.'},
+    {id:'s4',text:'ADHD rejection sensitivity makes ordinary disappointment feel catastrophic. Name that.'},
+    {id:'s5',text:'You\'re allowed to do something comforting that isn\'t productive.'},
+    {id:'s6',text:'If this has lasted more than a few days, it\'s worth mentioning to someone you trust.'}
+  ]},
+  {id:'numb',label:'😐 Numb / Flat',cards:[
+    {id:'n1',text:'Flat or numb is an ADHD thing — your brain is under-stimulated, not broken.'},
+    {id:'n2',text:'Try contrast: hot shower then a cold blast, spicy food, loud music with movement.'},
+    {id:'n3',text:'Check the basics first: Have you eaten? Slept? Had water today?'},
+    {id:'n4',text:'Body doubling helps — put on a video of someone working or talking near you.'},
+    {id:'n5',text:'Boredom in ADHD can feel exactly like depression. Add stimulation, not pressure.'},
+    {id:'n6',text:'You don\'t have to feel motivated to move. Move first — feeling follows.'}
+  ]},
+  {id:'angry',label:'😠 Angry',cards:[
+    {id:'r1',text:'Wait 20 minutes before responding to anything. ADHD anger spikes fast and fades fast.'},
+    {id:'r2',text:'Your reaction is probably bigger than the situation. That\'s the disorder, not your character.'},
+    {id:'r3',text:'Physical release: walk fast, do pushups, squeeze something hard.'},
+    {id:'r4',text:'Say what you\'re angry about out loud, alone, before saying it to anyone else.'},
+    {id:'r5',text:'Rejection-sensitive dysphoria can look like anger. Ask: am I actually hurt under this?'},
+    {id:'r6',text:'The intensity will drop. You don\'t have to act on it right now.'}
+  ]},
+  {id:'okay',label:'🙂 Okay',cards:[
+    {id:'k1',text:'This is a good window. Notice it — your brain will forget it happened.'},
+    {id:'k2',text:'Use this moment to do something you\'ve been avoiding. Momentum is real.'},
+    {id:'k3',text:'Drink water. Seriously. You probably haven\'t.'},
+    {id:'k4',text:'Send the text you\'ve been putting off. Right now while you feel capable.'},
+    {id:'k5',text:'Bank a win: finish one small thing so future-you has something to build on.'},
+    {id:'k6',text:'What made today feel okay? Try to repeat one thing tomorrow.'}
+  ]}
+];
+var FEELING_CARDS=JSON.parse(localStorage.getItem('aFeelingCards')||'null')||JSON.parse(JSON.stringify(FEELING_CARDS_DEFAULT));
+var _feelingSelected=null;
+var _feelingFlipped={};
 function buildFeelingBody(){
-  if(!FEELING_ITEMS.length){
-    return'<div style="text-align:center;padding:16px 0">'
-      +'<div style="font-size:36px;margin-bottom:10px">💜</div>'
-      +'<div style="font-size:14px;color:var(--textl);margin-bottom:16px">Add reminders for when you\'re struggling — things that help, things to remember, things to do in the moment.</div>'
-      +'<button class="h-action-btn" onclick="closeHomeTileModal();goTabDirect(\'wellness\');setTimeout(function(){var b=document.querySelector(\'#v-wellness .pn-btn:last-child\');if(b)showWellnessSec(\'feeling\',b);},200)">Add your first card in Wellness →</button>'
-      +'</div>';
-  }
-  if(_feelingIdx<0||_feelingIdx>=FEELING_ITEMS.length)_feelingIdx=Math.floor(Math.random()*FEELING_ITEMS.length);
-  var item=FEELING_ITEMS[_feelingIdx];
-  return'<div style="text-align:center;padding:10px 0 6px">'
-    +'<div style="font-size:42px;margin-bottom:14px">💜</div>'
-    +'<div style="background:var(--lav-light);border-radius:16px;padding:18px 16px;margin-bottom:16px;min-height:60px;display:flex;align-items:center;justify-content:center">'
-    +'<div style="font-size:15px;font-weight:700;color:var(--textd);line-height:1.5;text-align:center">'+escHtml(item)+'</div>'
+  if(!_feelingSelected)return buildFeelingSelector();
+  return buildFeelingDeck(_feelingSelected);
+}
+function buildFeelingSelector(){
+  return'<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px">'
+    +FEELING_CARDS.map(function(f){return'<button class="feel-mood-btn" onclick="selectFeeling(\''+f.id+'\')">'+f.label+'</button>';}).join('')
     +'</div>'
-    +'<div style="font-size:11px;color:var(--textl);margin-bottom:14px">'+(_feelingIdx+1)+' of '+FEELING_ITEMS.length+'</div>'
+    +'<div style="font-size:11px;color:var(--textl);text-align:center">Tap how you\'re feeling to see your cards</div>';
+}
+function buildFeelingDeck(feelingId){
+  var f=FEELING_CARDS.find(function(x){return x.id===feelingId;});
+  if(!f)return buildFeelingSelector();
+  var cardsHtml=(f.cards||[]).map(function(c){
+    var flipped=!!_feelingFlipped[c.id];
+    if(flipped){
+      return'<div class="feel-card">'
+        +'<div class="feel-card-face up">'
+        +'<div style="font-size:12px;font-weight:600;color:#3d3530;line-height:1.5">'+escHtml(c.text)+'</div>'
+        +'<button onclick="event.stopPropagation();deleteFeelingCard(\''+feelingId+'\',\''+c.id+'\')" style="padding:2px 8px;border-radius:8px;border:none;background:#f5efe8;color:var(--textl);font-size:11px;cursor:pointer;font-family:\'Quicksand\',sans-serif;margin-top:4px;flex-shrink:0">✕ remove</button>'
+        +'</div></div>';
+    }
+    return'<div class="feel-card" onclick="flipFeelingCard(\''+c.id+'\')">'
+      +'<div class="feel-card-face down">'
+      +'<div style="font-size:28px">💜</div>'
+      +'<div style="font-size:10px;color:var(--lav);font-weight:700;margin-top:4px">tap to reveal</div>'
+      +'</div></div>';
+  }).join('');
+  return'<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">'
+    +'<button onclick="selectFeeling(null)" style="padding:6px 12px;border-radius:10px;border:1.5px solid #e8ddd4;background:#faf6f2;font-family:\'Quicksand\',sans-serif;font-size:13px;font-weight:700;color:#3d3530;cursor:pointer">← Back</button>'
+    +'<div style="font-size:15px;font-weight:700;color:#3d3530">'+f.label+'</div>'
     +'</div>'
-    +'<div style="display:flex;gap:8px;margin-bottom:12px">'
-    +'<button onclick="shuffleFeeling()" style="flex:1;padding:11px;border-radius:12px;border:1.5px solid var(--border);background:var(--bg2);font-family:\'Quicksand\',sans-serif;font-size:13px;font-weight:700;color:var(--textd);cursor:pointer">🔀 Next</button>'
-    +'<button onclick="closeHomeTileModal();goTabDirect(\'wellness\');setTimeout(function(){var b=document.querySelector(\'#v-wellness .pn-btn:last-child\');if(b)showWellnessSec(\'feeling\',b);},200)" style="flex:1;padding:11px;border-radius:12px;border:1.5px solid var(--border);background:var(--bg2);font-family:\'Quicksand\',sans-serif;font-size:13px;font-weight:700;color:var(--textd);cursor:pointer">All cards →</button>'
+    +'<div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:14px">'+cardsHtml+'</div>'
+    +'<div style="display:flex;gap:8px">'
+    +'<input id="feelNewCardInp" class="h-inp" placeholder="Add your own tip…" style="margin:0;flex:1" onkeydown="if(event.key===\'Enter\')addFeelingCard(\''+feelingId+'\')">'
+    +'<button onclick="addFeelingCard(\''+feelingId+'\')" style="padding:10px 14px;border-radius:12px;border:none;background:var(--lav);color:#fff;font-family:\'Quicksand\',sans-serif;font-size:13px;font-weight:700;cursor:pointer;flex-shrink:0">Add</button>'
     +'</div>';
 }
-function addFeelingItem(){
-  var inp=document.getElementById('feelingNewInp');
+function selectFeeling(id){
+  _feelingSelected=id;
+  _feelingFlipped={};
+  document.getElementById('homeTileModalBody').innerHTML=buildFeelingBody();
+}
+function flipFeelingCard(cardId){
+  _feelingFlipped[cardId]=true;
+  document.getElementById('homeTileModalBody').innerHTML=buildFeelingBody();
+}
+function addFeelingCard(feelingId){
+  var inp=document.getElementById('feelNewCardInp');
   if(!inp||!inp.value.trim())return;
-  FEELING_ITEMS.push(inp.value.trim());
-  localStorage.setItem('aFeelingItems',JSON.stringify(FEELING_ITEMS));
-  _feelingIdx=FEELING_ITEMS.length-1;
+  var f=FEELING_CARDS.find(function(x){return x.id===feelingId;});
+  if(!f)return;
+  f.cards.push({id:'c'+Date.now(),text:inp.value.trim()});
+  localStorage.setItem('aFeelingCards',JSON.stringify(FEELING_CARDS));
+  inp.value='';
   document.getElementById('homeTileModalBody').innerHTML=buildFeelingBody();
 }
-function shuffleFeeling(){
-  if(FEELING_ITEMS.length<=1)return;
-  var prev=_feelingIdx;
-  while(_feelingIdx===prev)_feelingIdx=Math.floor(Math.random()*FEELING_ITEMS.length);
-  document.getElementById('homeTileModalBody').innerHTML=buildFeelingBody();
-}
-function removeFeelingItem(idx){
-  FEELING_ITEMS.splice(idx,1);
-  localStorage.setItem('aFeelingItems',JSON.stringify(FEELING_ITEMS));
-  _feelingIdx=-1;
+function deleteFeelingCard(feelingId,cardId){
+  var f=FEELING_CARDS.find(function(x){return x.id===feelingId;});
+  if(!f)return;
+  f.cards=f.cards.filter(function(c){return c.id!==cardId;});
+  localStorage.setItem('aFeelingCards',JSON.stringify(FEELING_CARDS));
   document.getElementById('homeTileModalBody').innerHTML=buildFeelingBody();
 }
 // ── Quick Capture tile ────────────────────────
@@ -15471,31 +15540,43 @@ function showWellnessSec(sec,btn){
 function renderWellnessFeeling(){
   var el=document.getElementById('wellnessFeelingList');
   if(!el)return;
-  if(!FEELING_ITEMS.length){
-    el.innerHTML='<p style="color:var(--textl);text-align:center;padding:16px 0;font-size:13px">No cards yet — add your first reminder below.</p>';
-    return;
-  }
-  el.innerHTML=FEELING_ITEMS.map(function(item,i){
-    return '<div style="display:flex;align-items:center;gap:10px;padding:12px 14px;background:#fff;border-radius:14px;margin-bottom:8px;box-shadow:0 1px 4px rgba(0,0,0,.06);border:1.5px solid rgba(0,0,0,.04)">'
-      +'<span style="font-size:20px;flex-shrink:0">💜</span>'
-      +'<span style="flex:1;font-size:13px;color:var(--textd);line-height:1.5">'+escHtml(item)+'</span>'
-      +'<button onclick="removeWellnessFeeling('+i+')" style="background:none;border:none;font-size:13px;color:var(--textl);cursor:pointer;padding:2px 6px;flex-shrink:0;font-family:\'Quicksand\',sans-serif;font-weight:700">✕</button>'
+  el.innerHTML=FEELING_CARDS.map(function(f){
+    var cardsHtml=(f.cards||[]).map(function(c){
+      return'<div style="display:flex;align-items:flex-start;gap:8px;padding:8px 12px;background:#fff;border-radius:10px;margin-bottom:6px;border:1px solid #f0e8e0">'
+        +'<span style="flex:1;font-size:13px;color:#3d3530;line-height:1.5">'+escHtml(c.text)+'</span>'
+        +'<button onclick="wfDeleteCard(\''+f.id+'\',\''+c.id+'\')" style="background:none;border:none;font-size:13px;color:var(--textl);cursor:pointer;padding:0 4px;flex-shrink:0;font-family:\'Quicksand\',sans-serif;font-weight:700">✕</button>'
+        +'</div>';
+    }).join('');
+    var addId='wfInp_'+f.id;
+    return'<div style="margin-bottom:18px">'
+      +'<div style="font-size:13px;font-weight:800;color:#3d3530;margin-bottom:8px">'+f.label+'</div>'
+      +cardsHtml
+      +'<div style="display:flex;gap:8px;margin-top:6px">'
+      +'<input id="'+addId+'" class="fi" placeholder="Add a tip…" style="flex:1;margin:0" onkeydown="if(event.key===\'Enter\')wfAddCard(\''+f.id+'\',\''+addId+'\')">'
+      +'<button onclick="wfAddCard(\''+f.id+'\',\''+addId+'\')" style="padding:8px 14px;border-radius:10px;border:none;background:var(--lav);color:#fff;font-family:\'Quicksand\',sans-serif;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0">Add</button>'
+      +'</div>'
       +'</div>';
   }).join('');
 }
-function addWellnessFeeling(){
-  var inp=document.getElementById('wellnessFeelingInp');
+function wfAddCard(feelingId,inputId){
+  var inp=document.getElementById(inputId);
   if(!inp||!inp.value.trim())return;
-  FEELING_ITEMS.push(inp.value.trim());
-  localStorage.setItem('aFeelingItems',JSON.stringify(FEELING_ITEMS));
+  var f=FEELING_CARDS.find(function(x){return x.id===feelingId;});
+  if(!f)return;
+  f.cards.push({id:'c'+Date.now(),text:inp.value.trim()});
+  localStorage.setItem('aFeelingCards',JSON.stringify(FEELING_CARDS));
   inp.value='';
   renderWellnessFeeling();
 }
-function removeWellnessFeeling(idx){
-  FEELING_ITEMS.splice(idx,1);
-  localStorage.setItem('aFeelingItems',JSON.stringify(FEELING_ITEMS));
+function wfDeleteCard(feelingId,cardId){
+  var f=FEELING_CARDS.find(function(x){return x.id===feelingId;});
+  if(!f)return;
+  f.cards=f.cards.filter(function(c){return c.id!==cardId;});
+  localStorage.setItem('aFeelingCards',JSON.stringify(FEELING_CARDS));
   renderWellnessFeeling();
 }
+function addWellnessFeeling(){}
+function removeWellnessFeeling(){}
 
 // ── Body Measurements ─────────────────────────────────
 var MEAS_FIELDS=[
