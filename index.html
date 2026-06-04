@@ -29,6 +29,8 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
 .tabs::-webkit-scrollbar{display:none}
 .tab-btn{flex-shrink:0;padding:11px 13px;border:none;background:none;font-family:'Quicksand',sans-serif;font-size:12px;font-weight:700;color:var(--textl);cursor:pointer;border-bottom:3px solid transparent;white-space:nowrap;transition:all .2s}
 .tab-btn.on{color:var(--rose);border-bottom-color:var(--rose)}
+.fav-tab-btn{flex-shrink:0;padding:5px 11px;border-radius:20px;border:1.5px solid rgba(169,159,201,.35);background:#fff;font-family:'Quicksand',sans-serif;font-size:12px;font-weight:700;color:var(--textd);cursor:pointer;white-space:nowrap;transition:background .15s}
+.fav-tab-btn:active{background:var(--lav);color:#fff}
 
 /* PAGE */
 .pg{padding:14px;padding-bottom:110px}
@@ -1000,6 +1002,8 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
   </div>
 </div>
 
+<!-- FAVORITES ROW -->
+<div id="favTabsRow" style="display:flex;flex-wrap:nowrap;overflow-x:auto;gap:6px;padding:6px 12px 4px;background:rgba(255,255,255,.9);border-bottom:1px solid rgba(0,0,0,.06);-webkit-overflow-scrolling:touch;scrollbar-width:none"></div>
 <!-- TABS -->
 <div class="tabs" id="tabBar">
   <button class="tab-btn on" data-tab="home" onclick="goTab('home',this)">🏠 Home</button>
@@ -1393,6 +1397,23 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
   <div class="gbanner" id="gBanner" style="background:linear-gradient(135deg,rgba(201,160,160,.15),rgba(169,159,201,.15))">
     <p id="gQuote">The plans of the diligent lead to success. — Prov 21:5</p>
   </div>
+  <!-- While Away Banner -->
+  <div id="whileAwayBanner" style="display:none;background:linear-gradient(135deg,#e8f4e8,#f4f8e8);border-radius:14px;padding:11px 14px;margin-bottom:10px;border:1.5px solid rgba(143,170,139,.35)">
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px">
+      <div style="flex:1">
+        <div style="font-size:12px;font-weight:700;color:var(--sage);margin-bottom:3px">👋 Welcome back!</div>
+        <div id="whileAwayText" style="font-size:11px;color:var(--textl);line-height:1.5"></div>
+      </div>
+      <button onclick="document.getElementById('whileAwayBanner').style.display='none'" style="background:none;border:none;font-size:14px;color:var(--textl);cursor:pointer;padding:0;flex-shrink:0">✕</button>
+    </div>
+  </div>
+  <!-- Focus Mode / Overwhelmed row -->
+  <div style="display:flex;gap:8px;margin-bottom:10px">
+    <button id="focusModeBtn" onclick="toggleTodayFocusMode()" style="flex:1;padding:9px 10px;border-radius:12px;border:1.5px solid rgba(169,159,201,.4);background:#fff;font-family:'Quicksand',sans-serif;font-size:12px;font-weight:700;color:var(--lav);cursor:pointer;transition:background .2s,color .2s">🎯 Focus Mode</button>
+    <button onclick="openOverwhelmedMode()" style="flex:1;padding:9px 10px;border-radius:12px;border:1.5px solid rgba(224,112,112,.3);background:#fff;font-family:'Quicksand',sans-serif;font-size:12px;font-weight:700;color:var(--ured);cursor:pointer">😵 Overwhelmed?</button>
+  </div>
+  <!-- Time-of-day greeting -->
+  <div id="todayTimeGreet" style="font-size:11px;color:var(--textl);font-weight:700;letter-spacing:.4px;text-transform:uppercase;margin-bottom:8px;padding:0 2px"></div>
   <!-- Intentions widget -->
   <div id="intentionsHomeWrap" style="margin-bottom:10px">
     <div style="background:#fff;border-radius:14px;padding:12px 14px;box-shadow:0 1px 4px rgba(0,0,0,.06)">
@@ -5961,7 +5982,7 @@ function initFirebase(){
     MINISTRY_LOG = [];
     snap.forEach(function(d){ MINISTRY_LOG.push(d.data()); });
     MINISTRY_LOG.sort(function(a,b){ return (b.date||'') > (a.date||'') ? 1 : -1; });
-    localStorage.setItem('aMinistryLog', JSON.stringify(MINISTRY_LOG));
+    _origSetItem('aMinistryLog', JSON.stringify(MINISTRY_LOG));
     renderMinistryStats();
     renderMinistryLog();
     renderTodayStatsBars();
@@ -6046,12 +6067,12 @@ function initFirebase(){
   window.fsOnSnapshot(window.fsDoc(window.db,'settings','appearance'), function(snap){
     if(!snap.exists())return;
     var d=snap.data();
-    if(d.name&&d.name!==S.name){S.name=d.name;localStorage.setItem('aSName',S.name);updGreet();}
-    if(d.quote&&d.quote!==S.quote){S.quote=d.quote;localStorage.setItem('aSQuote',S.quote);var qEl=document.getElementById('gQuote');if(qEl)qEl.textContent=S.quote;}
-    if(d.banner&&d.banner!==S.banner){S.banner=d.banner;localStorage.setItem('aSBanner',S.banner);}
-    if(d.bannerImg&&d.bannerImg!==BANNER_IMG){BANNER_IMG=d.bannerImg;localStorage.setItem('aBannerImg',BANNER_IMG);applyBannerImg();}
-    if(d.appTitle&&d.appTitle!==S.appTitle){S.appTitle=d.appTitle;localStorage.setItem('aSAppTitle',S.appTitle);applyAppTitle();}
-    if(d.customColors){CUSTOM_COLORS=d.customColors;localStorage.setItem('aCustomColors',JSON.stringify(CUSTOM_COLORS));}
+    if(d.name&&d.name!==S.name){S.name=d.name;_origSetItem('aSName',S.name);updGreet();}
+    if(d.quote&&d.quote!==S.quote){S.quote=d.quote;_origSetItem('aSQuote',S.quote);var qEl=document.getElementById('gQuote');if(qEl)qEl.textContent=S.quote;}
+    if(d.banner&&d.banner!==S.banner){S.banner=d.banner;_origSetItem('aSBanner',S.banner);}
+    if(d.bannerImg&&d.bannerImg!==BANNER_IMG){BANNER_IMG=d.bannerImg;_origSetItem('aBannerImg',BANNER_IMG);applyBannerImg();}
+    if(d.appTitle&&d.appTitle!==S.appTitle){S.appTitle=d.appTitle;_origSetItem('aSAppTitle',S.appTitle);applyAppTitle();}
+    if(d.customColors){CUSTOM_COLORS=d.customColors;_origSetItem('aCustomColors',JSON.stringify(CUSTOM_COLORS));}
   });
 
   // Listen to settings/goals
@@ -6060,10 +6081,177 @@ function initFirebase(){
     var d=snap.data();
     if(d.gCal)S.gCal=d.gCal;if(d.gPro)S.gPro=d.gPro;if(d.gFib)S.gFib=d.gFib;
     if(d.gCrb)S.gCrb=d.gCrb;if(d.gFat)S.gFat=d.gFat;if(d.gWat)S.gWat=d.gWat;if(d.gEx)S.gEx=d.gEx;
-    localStorage.setItem('aGCal',S.gCal);localStorage.setItem('aGPro',S.gPro);
-    localStorage.setItem('aGFib',S.gFib);localStorage.setItem('aGCrb',S.gCrb);
-    localStorage.setItem('aGFat',S.gFat);localStorage.setItem('aGWat',S.gWat);
-    localStorage.setItem('aGEx',S.gEx);
+    _origSetItem('aGCal',S.gCal);_origSetItem('aGPro',S.gPro);
+    _origSetItem('aGFib',S.gFib);_origSetItem('aGCrb',S.gCrb);
+    _origSetItem('aGFat',S.gFat);_origSetItem('aGWat',S.gWat);
+    _origSetItem('aGEx',S.gEx);
+  });
+
+  // ── Blob group listeners ─────────────────────────────────
+  function _applyBlobGroup(group,d){
+    _fbBlobPause=true;
+    function ap(key,fn){if(d[key]!=null){try{fn(JSON.parse(d[key]),d[key]);}catch(e){fn(d[key],d[key]);}}}
+    if(group==='money'){
+      ap('aBills',function(v,r){BILLS=v||[];_origSetItem('aBills',r);});
+      ap('aBillPay',function(v,r){BILL_PAY=v||{};_origSetItem('aBillPay',r);});
+      ap('aBillMonthAmt',function(v,r){BILL_MONTH_AMT=v||{};_origSetItem('aBillMonthAmt',r);});
+      ap('aAccounts',function(v,r){ACCOUNTS=v||[];_origSetItem('aAccounts',r);});
+      ap('aIncome',function(v,r){INCOME=v||[];_origSetItem('aIncome',r);});
+      ap('aIncGoal',function(v,r){_origSetItem('aIncGoal',r);});
+      ap('aMonIncGoal',function(v,r){_origSetItem('aMonIncGoal',r);});
+      ap('aMoneyChecks',function(v,r){MONEY_CHECKS=v||{};_origSetItem('aMoneyChecks',r);});
+      ap('aTaxLog',function(v,r){TAX_LOG=v||[];_origSetItem('aTaxLog',r);});
+      ap('aProjIncome',function(v,r){PROJ_INCOME=v||[];_origSetItem('aProjIncome',r);});
+      ap('aPriceLog',function(v,r){PRICE_LOG=v||[];_origSetItem('aPriceLog',r);});
+      ap('aExpCats',function(v,r){if(v&&v.length)EXPENSE_CATS=v;_origSetItem('aExpCats',r);});
+      _fbBlobPause=false;
+      renderBills();renderAccounts();renderIncome();updMoneyBadge();
+    }else if(group==='health'){
+      ap('aMeds',function(v,r){MEDS=v||[];_origSetItem('aMeds',r);});
+      ap('aMedLog',function(v,r){MED_LOG=v||{};_origSetItem('aMedLog',r);});
+      ap('aEnergyLog',function(v,r){ENERGY_LOG=v||{};_origSetItem('aEnergyLog',r);});
+      ap('aMeasLog',function(v,r){MEASUREMENT_LOG=v||[];_origSetItem('aMeasLog',r);});
+      ap('aMealLogItems',function(v,r){MEAL_LOG_ITEMS=v||[];_origSetItem('aMealLogItems',r);});
+      ap('aMoodNotes',function(v,r){MOOD_NOTES=v||{};_origSetItem('aMoodNotes',r);});
+      ap('aWineDrinks',function(v,r){WINE_DRINKS=v||[];_origSetItem('aWineDrinks',r);});
+      _fbBlobPause=false;
+      if(typeof renderMeds==='function')renderMeds();
+      if(typeof renderEnergyWidget==='function')renderEnergyWidget();
+    }else if(group==='habits'){
+      ap('aHabits',function(v,r){HABITS=v||[];_origSetItem('aHabits',r);});
+      ap('aHabitLog',function(v,r){HABIT_LOG=v||{};_origSetItem('aHabitLog',r);});
+      _fbBlobPause=false;
+      if(typeof renderHabits==='function')renderHabits();
+    }else if(group==='routines'){
+      ap('aRS',function(v,r){RS=v||{};_origSetItem('aRS',r);});
+      ap('aRS2',function(v,r){RS2=v||{};_origSetItem('aRS2',r);});
+      ap('aRH',function(v,r){RH=v||{};_origSetItem('aRH',r);});
+      ap('aRTG',function(v,r){if(v&&v.length)RTN_GROUPS=v;_origSetItem('aRTG',r);});
+      ap('aRtns',function(v,r){if(v)RTNS=v;_origSetItem('aRtns',r);});
+      _fbBlobPause=false;
+      if(typeof renderAllR==='function')renderAllR();
+    }else if(group==='planning'){
+      ap('aSOPs',function(v,r){if(v&&v.length)SOPS=v;_origSetItem('aSOPs',r);});
+      ap('aBrainDump',function(v,r){BRAIN_DUMP=v||[];_origSetItem('aBrainDump',r);});
+      ap('aIntentions',function(v,r){INTENTIONS=v||{};_origSetItem('aIntentions',r);});
+      ap('aMonthTodos',function(v,r){MONTH_TODOS=v||{};_origSetItem('aMonthTodos',r);});
+      ap('aTmpls',function(v,r){if(v&&v.length)TMPLS=v;_origSetItem('aTmpls',r);});
+      _fbBlobPause=false;
+      if(typeof renderDumpList==='function')renderDumpList();
+      if(typeof renderIntentionList==='function')renderIntentionList();
+      if(typeof renderTmplBar==='function')renderTmplBar();
+      if(typeof renderTmplList==='function')renderTmplList();
+    }else if(group==='spiritual'){
+      ap('aBibleLog',function(v,r){BIBLE_LOG=v||{};_origSetItem('aBibleLog',r);});
+      ap('aBibleChapNotes',function(v,r){BIBLE_CHAPTER_NOTES=v||{};_origSetItem('aBibleChapNotes',r);});
+      ap('aPrayers',function(v,r){PRAYERS=v||[];_origSetItem('aPrayers',r);});
+      ap('aGratLog',function(v,r){GRAT_LOG=v||[];_origSetItem('aGratLog',r);});
+      ap('aSpiritBooks',function(v,r){SPIRIT_BOOKS=v||[];_origSetItem('aSpiritBooks',r);});
+      ap('aSpiritSettings',function(v,r){if(v)SPIRIT_SETTINGS=v;_origSetItem('aSpiritSettings',r);});
+      ap('aSpiritRun',function(v,r){if(v)SPIRIT_RUN=v;_origSetItem('aSpiritRun',r);});
+      _fbBlobPause=false;
+      if(typeof renderPrayers==='function')renderPrayers();
+      if(typeof renderGratitudeLog==='function')renderGratitudeLog();
+    }else if(group==='food'){
+      ap('aRecipes',function(v,r){RECIPES=v||[];_origSetItem('aRecipes',r);});
+      ap('aMealPlan',function(v,r){MEAL_PLAN=v||{};_origSetItem('aMealPlan',r);});
+      ap('aGroceryList',function(v,r){GROCERY_LIST=v||[];_origSetItem('aGroceryList',r);});
+      ap('aInventory',function(v,r){INVENTORY=v||[];_origSetItem('aInventory',r);});
+      ap('aInvSections',function(v,r){if(v&&v.length)INV_SECTIONS=v;_origSetItem('aInvSections',r);});
+      ap('aMC',function(v,r){if(v&&v.length)MEAL_COMBOS=v;_origSetItem('aMC',r);});
+      ap('aFoodDb',function(v,r){FOOD_DB=v||[];_origSetItem('aFoodDb',r);});
+      ap('aIngredients',function(v,r){INGREDIENTS=v||[];_origSetItem('aIngredients',r);});
+      _fbBlobPause=false;
+      if(typeof renderRecipes==='function')renderRecipes();
+      if(typeof renderMealPlan==='function')renderMealPlan();
+      if(typeof renderGroceryList==='function')renderGroceryList();
+      if(typeof renderCombos==='function')renderCombos();
+    }else if(group==='fitness'){
+      ap('aWplans',function(v,r){WORKOUT_PLANS=v||[];_origSetItem('aWplans',r);});
+      ap('aWlog2',function(v,r){WORKOUT_LOG2=v||[];_origSetItem('aWlog2',r);});
+      ap('aMovements',function(v,r){MOVEMENTS=v||[];_origSetItem('aMovements',r);});
+      ap('aExTypes',function(v,r){if(v&&v.length)EXERCISE_TYPES=v;_origSetItem('aExTypes',r);});
+      ap('aExDB',function(v,r){if(v&&v.length)EX_DB=v;_origSetItem('aExDB',r);});
+      ap('aExLog',function(v,r){EX_LOG=v||{};_origSetItem('aExLog',r);});
+      ap('aPT',function(v,r){PT=v||[];_origSetItem('aPT',r);});
+      _fbBlobPause=false;
+      if(typeof renderWplanList==='function')renderWplanList();
+      if(typeof renderExLog==='function')renderExLog();
+    }else if(group==='creative'){
+      ap('aStories',function(v,r){STORIES=v||[];_origSetItem('aStories',r);});
+      ap('aSChars',function(v,r){STORY_CHARS=v||[];_origSetItem('aSChars',r);});
+      ap('aSScenes',function(v,r){STORY_SCENES=v||[];_origSetItem('aSScenes',r);});
+      ap('aFaves',function(v,r){FAVES=v||[];_origSetItem('aFaves',r);});
+      ap('aMixtape',function(v,r){MIXTAPE=v||[];_origSetItem('aMixtape',r);});
+      ap('aMemories',function(v,r){MEMORIES=v||[];_origSetItem('aMemories',r);});
+      ap('aPlaces',function(v,r){PLACES=v||[];_origSetItem('aPlaces',r);});
+      ap('aVbItems',function(v,r){VB_ITEMS=v||[];_origSetItem('aVbItems',r);});
+      _fbBlobPause=false;
+      if(typeof renderFaves==='function')renderFaves();
+      if(typeof renderMemories==='function')renderMemories();
+    }else if(group==='tools'){
+      // Hatch/Spark — loaded on demand from localStorage, just update the store
+      BLOB_GROUPS.tools.forEach(function(k){ap(k,function(v,r){_origSetItem(k,r);});});
+      _fbBlobPause=false;
+    }else if(group==='learning'){
+      ap('aKEvents',function(v,r){K_EVENTS=v||[];_origSetItem('aKEvents',r);});
+      ap('aLifeHacks',function(v,r){LIFE_HACKS=v||[];_origSetItem('aLifeHacks',r);});
+      ap('aResearch',function(v,r){RESEARCH=v||[];_origSetItem('aResearch',r);});
+      ap('aResearchTopics',function(v,r){if(v&&v.length)RESEARCH_TOPICS=v;_origSetItem('aResearchTopics',r);});
+      ap('aMemoryItems',function(v,r){MEMORY_ITEMS=v||[];_origSetItem('aMemoryItems',r);});
+      ap('aFcDecks',function(v,r){FC_DECKS=v||[];_origSetItem('aFcDecks',r);});
+      ap('aFcCards',function(v,r){FC_CARDS=v||[];_origSetItem('aFcCards',r);});
+      ap('aStudyNotes',function(v,r){STUDY_NOTES=v||[];_origSetItem('aStudyNotes',r);});
+      _fbBlobPause=false;
+      if(typeof renderFcDecks==='function')renderFcDecks();
+      if(typeof renderMemoryItems==='function')renderMemoryItems();
+      if(typeof renderLifeHacks==='function')renderLifeHacks();
+      if(typeof renderKEvents==='function')renderKEvents();
+    }else if(group==='game'){
+      ap('aBadges',function(v,r){BADGES=v||{};_origSetItem('aBadges',r);});
+      ap('aHelmMiles',function(v,r){if(v)HELM_MILES=v;_origSetItem('aHelmMiles',r);});
+      ap('aSprintStats',function(v,r){if(v)SPRINT_STATS=v;_origSetItem('aSprintStats',r);});
+      ap('aEmber',function(v,r){if(v)EMBER=v;_origSetItem('aEmber',r);});
+      ap('aMillie',function(v,r){if(v)MILLIE=v;_origSetItem('aMillie',r);});
+      ap('aFishLevel',function(v,r){if(v)FISH_LEVEL=v;_origSetItem('aFishLevel',r);});
+      ap('aFishLog',function(v,r){FISH_LOG=v||[];_origSetItem('aFishLog',r);});
+      _fbBlobPause=false;
+      if(typeof renderHelmMilestone==='function')renderHelmMilestone();
+    }else if(group==='work2'){
+      ap('aWigOrders',function(v,r){WIG_ORDERS=v||[];_origSetItem('aWigOrders',r);});
+      ap('aWorkProjects',function(v,r){WORK_PROJECTS=v||[];_origSetItem('aWorkProjects',r);});
+      _fbBlobPause=false;
+      if(typeof renderWorkProjects==='function')renderWorkProjects();
+    }else if(group==='content2'){
+      ap('aContentItems',function(v,r){CONTENT_ITEMS=v||[];_origSetItem('aContentItems',r);});
+      ap('aScrCards',function(v,r){SCRIPTURE_CARDS=v||[];_origSetItem('aScrCards',r);});
+      ap('aFeelingCards',function(v,r){if(v&&v.length)FEELING_CARDS=v;_origSetItem('aFeelingCards',r);});
+      ap('aDailyQuests',function(v,r){DAILY_QUESTS=v;_origSetItem('aDailyQuests',r);});
+      _fbBlobPause=false;
+    }else if(group==='settings2'){
+      ap('aPIN',function(v,r){_origSetItem('aPIN',r||'');if(S)S.pin=r||'';});
+      ap('aProtTabs',function(v,r){_origSetItem('aProtTabs',r||'{}');if(S&&v)S.protTabs=v;});
+      ap('aWUnit',function(v,r){_origSetItem('aWUnit',r||'glasses');if(S)S.wUnit=r||'glasses';});
+      ap('aHideMillie',function(v,r){_origSetItem('aHideMillie',r||'');if(S)S.hideMillie=r==='1';});
+      ap('aSavedThemes',function(v,r){SAVED_THEMES=v||[];_origSetItem('aSavedThemes',r);});
+      ap('aTabOrder',function(v,r){if(v&&v.length){TAB_ORDER=v;_origSetItem('aTabOrder',r);if(typeof applyTabOrder==='function')applyTabOrder();}});
+      ap('aAboutMe',function(v,r){ABOUT_ME=v||{};_origSetItem('aAboutMe',r);});
+      ap('aTabFavs',function(v,r){_origSetItem('aTabFavs',r);if(typeof renderFavTabs==='function')renderFavTabs();});
+      ap('aHomeTiles2',function(v,r){if(v)HOME_TILES=v;_origSetItem('aHomeTiles2',r);});
+      ap('aHomeItems',function(v,r){HOME_ITEMS=v||[];_origSetItem('aHomeItems',r);});
+      _fbBlobPause=false;
+    }else{
+      _fbBlobPause=false;
+    }
+  }
+
+  // Set up real-time listeners for all blob groups
+  Object.keys(BLOB_GROUPS).forEach(function(group){
+    window.fsOnSnapshot(window.fsDoc(window.db,'blobs',group),function(snap){
+      if(!snap.exists())return;
+      var d=snap.data();
+      if(d&&d.updated)_applyBlobGroup(group,d);
+    });
   });
 }
 
@@ -6087,8 +6275,57 @@ function fbDelete(col, id){
 }
 
 // ═══════════════════════════════════════════════
-// INIT
+// BLOB SYNC — all local-only localStorage keys
+// Groups related keys into 15 Firestore docs in the 'blobs' collection.
+// localStorage.setItem is intercepted to auto-save on every write.
 // ═══════════════════════════════════════════════
+var BLOB_GROUPS={
+  money:['aBills','aBillPay','aBillMonthAmt','aAccounts','aIncome','aIncGoal','aMonIncGoal','aMoneyChecks','aTaxLog','aProjIncome','aPriceLog','aExpCats'],
+  health:['aMeds','aMedLog','aEnergyLog','aMeasLog','aMealLogItems','aMoodNotes','aWineDrinks'],
+  habits:['aHabits','aHabitLog'],
+  routines:['aRS','aRS2','aRH','aRTG','aRtns'],
+  planning:['aSOPs','aBrainDump','aIntentions','aMonthTodos','aTmpls'],
+  spiritual:['aBibleLog','aBibleChapNotes','aPrayers','aGratLog','aSpiritBooks','aSpiritSettings','aSpiritRun'],
+  food:['aRecipes','aMealPlan','aGroceryList','aInventory','aInvSections','aMC','aFoodDb','aIngredients'],
+  fitness:['aWplans','aWlog2','aMovements','aExTypes','aExDB','aExLog','aPT'],
+  creative:['aStories','aSChars','aSScenes','aFaves','aMixtape','aMemories','aPlaces','aVbItems'],
+  tools:['aSparkPrompts','aSparkSaved','aDispatchJournal','aHatchChaos','aHatchTransmissions','aHatchMissions','aHatchShocks','aHatchCast'],
+  learning:['aKEvents','aLifeHacks','aResearch','aResearchTopics','aMemoryItems','aFcDecks','aFcCards','aStudyNotes'],
+  game:['aBadges','aHelmMiles','aSprintStats','aEmber','aMillie','aFishLevel','aFishLog'],
+  work2:['aWigOrders','aWorkProjects'],
+  content2:['aContentItems','aScrCards','aFeelingCards','aDailyQuests'],
+  settings2:['aPIN','aProtTabs','aWUnit','aHideMillie','aSavedThemes','aTabOrder','aAboutMe','aTabFavs','aHomeTiles2','aHomeItems'],
+};
+var BLOB_KEY_GROUP={};
+(function(){Object.keys(BLOB_GROUPS).forEach(function(g){BLOB_GROUPS[g].forEach(function(k){BLOB_KEY_GROUP[k]=g;});});})();
+
+// Capture original before override
+var _origSetItem=localStorage.setItem.bind(localStorage);
+var _fbBlobPause=false;
+var _blobSaveTimers={};
+
+function saveBlobGroup(group){
+  if(!window.db)return;
+  var keys=BLOB_GROUPS[group];if(!keys)return;
+  var doc={updated:Date.now()};
+  keys.forEach(function(k){var v=localStorage.getItem(k);if(v!=null)doc[k]=v;});
+  showSync();
+  window.fsSetDoc(window.fsDoc(window.db,'blobs',group),doc)
+    .then(hideSync).catch(function(e){console.error('blobSync',group,e);hideSync();});
+}
+
+function _debounceBlobSave(group){
+  if(_blobSaveTimers[group])clearTimeout(_blobSaveTimers[group]);
+  _blobSaveTimers[group]=setTimeout(function(){_blobSaveTimers[group]=null;saveBlobGroup(group);},900);
+}
+
+// Override localStorage.setItem — auto-syncs all mapped keys
+localStorage.setItem=function(key,val){
+  _origSetItem(key,val);
+  if(!_fbBlobPause&&window.db&&BLOB_KEY_GROUP[key])_debounceBlobSave(BLOB_KEY_GROUP[key]);
+};
+
+
 function chkReset(){
   var t=new Date().toDateString();
   if(RS.date!==t){
@@ -6168,7 +6405,7 @@ function goTabDirect(tab,btn){
   if(SECTION_VIEWS[tab]||tab==='emporium')renderHubPreviews(tab);
   var hFab=document.getElementById('hatchFab');if(hFab){hFab.style.display=(tab==='today')?'flex':'none';if(tab==='today'){hFab.style.opacity='1';hFab.style.transform='translateX(-50%) translateY(0)';hFab.style.pointerEvents='auto';_fabHidden=false;_fabScrollLast=window.scrollY||window.pageYOffset;renderFabPills();}}
   if(tab==='home'){ renderHomePage(); }
-  if(tab==='today'){ tickSpiritRun(); renderWaterBottle(); renderTodayStatsBars(); renderWeekStats(); renderTodayMoodBtns(); renderTodayPlanBar(); renderTodayWorkGlance(); renderTodayHubSubs(); renderIntentionsHome(); renderTodayRtnPills(); renderTodayMoneyCard(); }
+  if(tab==='today'){ tickSpiritRun(); renderWaterBottle(); renderTodayStatsBars(); renderWeekStats(); renderTodayMoodBtns(); renderTodayPlanBar(); renderTodayWorkGlance(); renderTodayHubSubs(); renderIntentionsHome(); renderTodayRtnPills(); renderTodayMoneyCard(); renderTodayTimeGreet(); checkAndShowWhileAway(); trackLastActive(); }
   if(tab==='routines'){ renderDailyRtn(_dailyRtnKey); renderOtherRtns(); }
   if(tab==='hearthside'){ renderHWHubStats(); }
   if(tab==='lighthouse'){ updateLighthouseSpiritStatus(); }
@@ -7521,6 +7758,28 @@ function tHTML(t){
   var subDone=subs.filter(function(s){return s.done;}).length;
   var subPct=subs.length?Math.round(subDone/subs.length*100):0;
   var subBtnIco=subs.length?'▾':'➕';
+  // Due time urgency coloring
+  var dueTimeBadge='';
+  if(!t.done&&t.due){
+    var dueStr=t.due.slice(0,10);
+    var todayS=todayStr();
+    var dueTimeStr=t.due.indexOf('T')>-1?t.due.slice(11,16):'';
+    if(dueStr===todayS&&dueTimeStr){
+      var now=new Date();var hh=now.getHours();var mm=now.getMinutes();
+      var parts=dueTimeStr.split(':');var dh=parseInt(parts[0])||0;var dm=parseInt(parts[1])||0;
+      var nowMin=hh*60+mm;var dueMin=dh*60+dm;var diff=dueMin-nowMin;
+      var fmtH=dh%12||12;var ampm=dh<12?'am':'pm';var fmtTime=fmtH+':'+(dm<10?'0':'')+dm+' '+ampm;
+      if(diff<0){
+        dueTimeBadge='<div style="display:inline-flex;align-items:center;gap:4px;background:#fff0f0;border:1.5px solid #e07070;border-radius:8px;padding:3px 9px;margin-top:5px"><span style="font-size:13px;font-weight:800;color:#c04040">⏰ '+fmtTime+'</span><span style="font-size:10px;color:#c04040;font-weight:700">OVERDUE</span></div>';
+      } else if(diff<=30){
+        dueTimeBadge='<div style="display:inline-flex;align-items:center;gap:4px;background:#fff5e8;border:1.5px solid #e08030;border-radius:8px;padding:3px 9px;margin-top:5px"><span style="font-size:13px;font-weight:800;color:#c06020">🔥 '+fmtTime+'</span><span style="font-size:10px;color:#c06020;font-weight:700">'+diff+'m away</span></div>';
+      } else if(diff<=120){
+        dueTimeBadge='<div style="display:inline-flex;align-items:center;gap:4px;background:#fff8e8;border:1.5px solid rgba(200,160,60,.4);border-radius:8px;padding:3px 9px;margin-top:5px"><span style="font-size:13px;font-weight:800;color:#b08020">⏱ '+fmtTime+'</span><span style="font-size:10px;color:#b08020;font-weight:700">'+Math.round(diff/60)+'h '+diff%60+'m</span></div>';
+      } else {
+        dueTimeBadge='<span style="font-size:11px;color:var(--textl);margin-left:2px">@ '+fmtTime+'</span>';
+      }
+    }
+  }
   var subsHTML=subs.map(function(s){
     var sid=s.id.replace(/'/g,"\\'");
     return'<div class="sub-item'+(s.done?' done':'')+'">'+
@@ -7536,8 +7795,9 @@ function tHTML(t){
         '<div class="tt">'+t.title+(t.repeat?'<span class="rep-badge">'+repIco[t.repeat]+'</span>':'')+'</div>'+
         '<div class="tm">'+catTag(t.cat)+
           (t.etime?'<span class="ttime">'+etm[t.etime]+'</span>':'')+
-          (t.due?'<span class="tnote">📅 '+t.due+'</span>':'')+
+          (t.due&&!t.due.indexOf('T')>-1?'<span class="tnote">📅 '+t.due.slice(0,10)+'</span>':(t.due?'<span class="tnote">📅 '+t.due.slice(0,10)+'</span>':''))+
         '</div>'+
+        (dueTimeBadge?'<div>'+dueTimeBadge+'</div>':'')+
         (subs.length?'<div class="sub-bar"><div class="pt" style="margin-bottom:2px"><span style="font-size:10px;color:var(--textl)">'+subDone+'/'+subs.length+' subtasks</span><span style="font-size:10px;color:var(--textl)">'+subPct+'%</span></div><div class="pb" style="height:5px"><div class="pf pf-pro" style="width:'+subPct+'%"></div></div></div>':'')+
         (!t.done&&t.resume?'<div style="font-size:11px;color:var(--peach);background:var(--peach-light);padding:3px 9px;border-radius:6px;margin-top:4px;display:inline-block">⏸️ '+t.resume+'</div>':'')+
       '</div>'+
@@ -7546,6 +7806,7 @@ function tHTML(t){
         (t.notes?'<button class="tact" onclick="openNotes(\''+t.id+'\')">📝</button>':'')+
         (!t.done?'<button class="tact" onclick="setResumeNote(\''+t.id+'\')" title="Resume note">⏸️</button>':'')+
         (!t.done?'<button class="tact fss-q-btn" onclick="fssAddFromTask(\''+t.id+'\')" title="Add to Focus Queue" id="fssBtn-'+t.id+'">🎯</button>':'')+
+        (!t.done?'<button class="tact" onclick="event.stopPropagation();parkTask(\''+t.id+'\')" title="Park it — do later" style="font-size:12px">🅿️</button>':'')+
         '<button class="tact" onclick="delTask(\''+t.id+'\')">🗑️</button>'+
       '</div>'+
     '</div>'+
@@ -7602,9 +7863,21 @@ function togT(id){
   renderThisWeek();
 }
 function unparkAllTasks(){
-  TASKS.forEach(function(t){if(t.parked){t.parked=false;fbSave('tasks',t.id,t);}});
+  TASKS.forEach(function(t){if(t.parked){t.parked=false;delete t.parkedUntil;fbSave('tasks',t.id,t);}});
+  localStorage.setItem('aTasks',JSON.stringify(TASKS));
   showToast('All parked tasks restored ✓');
-  renderThisWeek();
+  renderT();renderTdTasks();renderThisWeek();
+}
+function parkTask(id){
+  var t=TASKS.find(function(x){return x.id===id;});if(!t)return;
+  t.parked=true;
+  var tom=new Date();tom.setDate(tom.getDate()+1);
+  t.parkedUntil=tom.toISOString().slice(0,10);
+  localStorage.setItem('aTasks',JSON.stringify(TASKS));
+  fbSave('tasks',id,t);
+  if(navigator.vibrate)navigator.vibrate([30,20,30]);
+  showToast('🅿️ Parked — back tomorrow');
+  renderT();renderTdTasks();
 }
 
 function toggleTaskDone(id,done){
@@ -10986,6 +11259,184 @@ function renderTodayPlanBar(){
       return '<span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:6px;background:'+planBlockBg(b.color)+';color:var(--textd)">'+planFmtTime(b.time)+' '+escHtml(b.title)+'</span>';
     }).join('');
   }
+}
+
+// ═══════════════════════════════════════════════
+// TODAY PAGE — FOCUS MODE, OVERWHELM, TIME CONTEXT
+// ═══════════════════════════════════════════════
+var TODAY_FOCUS_MODE=false;
+function renderTodayTimeGreet(){
+  var el=document.getElementById('todayTimeGreet');if(!el)return;
+  var h=new Date().getHours();
+  var greet='',color='var(--textl)';
+  if(h>=5&&h<12){greet='🌅 Good morning — morning routines active';color='#b08020';}
+  else if(h>=12&&h<17){greet='☀️ Afternoon — midday check-in time';color='#4a8ac8';}
+  else if(h>=17&&h<21){greet='🌆 Evening — time to wind down';color='#7a58a8';}
+  else if(h>=21){greet='🌙 Night — rest is productive';color='var(--textl)';}
+  else{greet='🌌 Late night — take it easy';color='var(--textl)';}
+  el.textContent=greet;el.style.color=color;
+}
+function toggleTodayFocusMode(){
+  TODAY_FOCUS_MODE=!TODAY_FOCUS_MODE;
+  var btn=document.getElementById('focusModeBtn');
+  if(btn){
+    btn.style.background=TODAY_FOCUS_MODE?'var(--lav)':'#fff';
+    btn.style.color=TODAY_FOCUS_MODE?'#fff':'var(--lav)';
+    btn.textContent=TODAY_FOCUS_MODE?'✓ Focus Mode ON':'🎯 Focus Mode';
+  }
+  var ids=['intentionsHomeWrap','keventsWrap','todayMoneyBody-wrap','todayStatsBody-wrap'];
+  ids.forEach(function(id){
+    var el=document.getElementById(id);if(!el)return;
+    if(TODAY_FOCUS_MODE){el.dataset.fmHidden=el.style.display||'';el.style.display='none';}
+    else{el.style.display=el.dataset.fmHidden||'';}
+  });
+  if(TODAY_FOCUS_MODE){
+    var focusEl=document.getElementById('todayFocusOnly');
+    if(!focusEl){
+      focusEl=document.createElement('div');focusEl.id='todayFocusOnly';
+      var planBar=document.getElementById('todayPlanBar');
+      if(planBar&&planBar.parentNode)planBar.parentNode.insertBefore(focusEl,planBar);
+    }
+    var today=todayStr();
+    var urgent=TASKS.filter(function(t){return!t.done&&!t.parked&&(t.urgency==='urgent-important'||(t.due&&t.due.slice(0,10)===today));});
+    urgent=urgent.slice(0,3);
+    focusEl.innerHTML='<div style="background:linear-gradient(135deg,#f8f0ff,#fff);border-radius:14px;padding:12px 14px;margin-bottom:10px;border:1.5px solid rgba(169,159,201,.3)">'
+      +'<div style="font-size:11px;font-weight:700;color:var(--lav);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">🎯 Focus — Top 3</div>'
+      +(urgent.length?urgent.map(tHTML).join(''):'<div style="font-size:12px;color:var(--textl);padding:6px 0">All clear! No urgent tasks. 🎉</div>')
+      +'</div>';
+  } else {
+    var focusEl2=document.getElementById('todayFocusOnly');
+    if(focusEl2)focusEl2.remove();
+  }
+}
+var _ovwPool=[];var _ovwIdx=0;
+function openOverwhelmedMode(){
+  _ovwPool=TASKS.filter(function(t){return!t.done&&!t.parked;}).slice().sort(function(a,b){
+    var au=a.urgency==='urgent-important'?0:a.urgency==='important-not-urgent'?1:2;
+    var bu=b.urgency==='urgent-important'?0:b.urgency==='important-not-urgent'?1:2;
+    if(au!==bu)return au-bu;
+    var today=todayStr();
+    var ad=a.due?a.due.slice(0,10):'';var bd=b.due?b.due.slice(0,10):'';
+    if(ad&&bd)return ad<bd?-1:ad>bd?1:0;
+    if(ad)return -1;if(bd)return 1;
+    return 0;
+  });
+  _ovwIdx=0;
+  _renderOvwCard();
+  showOv('ovOverwhelmed');
+  if(navigator.vibrate)navigator.vibrate(30);
+}
+function _renderOvwCard(){
+  var t=_ovwPool[_ovwIdx];
+  var titleEl=document.getElementById('ovwTaskTitle');
+  var metaEl=document.getElementById('ovwTaskMeta');
+  if(!t){
+    if(titleEl)titleEl.textContent='All done! 🎉';
+    if(metaEl)metaEl.textContent='Nothing left to do right now.';
+    return;
+  }
+  if(titleEl)titleEl.textContent=t.title;
+  var meta=[];
+  if(t.cat)meta.push(t.cat);
+  if(t.due)meta.push('Due '+t.due.slice(0,10));
+  if(t.etime)meta.push(t.etime);
+  if(metaEl)metaEl.textContent=meta.join(' · ');
+}
+function ovwDone(){
+  var t=_ovwPool[_ovwIdx];if(!t)return;
+  togT(t.id);
+  if(navigator.vibrate)navigator.vibrate([40,20,60]);
+  _ovwPool.splice(_ovwIdx,1);
+  if(!_ovwPool.length){closeOv('ovOverwhelmed');showToast('🎉 You cleared everything!');return;}
+  if(_ovwIdx>=_ovwPool.length)_ovwIdx=0;
+  _renderOvwCard();
+}
+function ovwPark(){
+  var t=_ovwPool[_ovwIdx];if(!t)return;
+  parkTask(t.id);
+  _ovwPool.splice(_ovwIdx,1);
+  if(!_ovwPool.length){closeOv('ovOverwhelmed');showToast('🅿️ All parked. Rest up. 💜');return;}
+  if(_ovwIdx>=_ovwPool.length)_ovwIdx=0;
+  _renderOvwCard();
+}
+function ovwNext(){
+  if(!_ovwPool.length)return;
+  _ovwIdx=(_ovwIdx+1)%_ovwPool.length;
+  _renderOvwCard();
+}
+
+// ═══════════════════════════════════════════════
+// WHILE YOU WERE AWAY
+// ═══════════════════════════════════════════════
+function trackLastActive(){
+  localStorage.setItem('aLastActive',Date.now().toString());
+}
+function checkAndShowWhileAway(){
+  var last=parseInt(localStorage.getItem('aLastActive')||'0');
+  if(!last)return;
+  var diffMin=Math.round((Date.now()-last)/60000);
+  if(diffMin<60)return;
+  var diffH=Math.round(diffMin/60);
+  var today=todayStr();
+  var doneSince=TASKS.filter(function(t){return t.done&&t.doneDate===today;}).length;
+  var dueTodayCt=TASKS.filter(function(t){return!t.done&&!t.parked&&t.due&&t.due.slice(0,10)===today;}).length;
+  var urgentCt=TASKS.filter(function(t){return!t.done&&!t.parked&&t.urgency==='urgent-important';}).length;
+  var lines=[];
+  lines.push('You were away for about '+diffH+(diffH===1?' hour':' hours')+'.');
+  if(doneSince)lines.push(doneSince+' task'+(doneSince!==1?'s':'')+' already done today.');
+  if(dueTodayCt)lines.push(dueTodayCt+' task'+(dueTodayCt!==1?'s':'')+' due today.');
+  if(urgentCt)lines.push(urgentCt+' urgent task'+(urgentCt!==1?'s':'')+' waiting.');
+  var el=document.getElementById('whileAwayBanner');
+  var txt=document.getElementById('whileAwayText');
+  if(el&&txt){txt.textContent=lines.join(' ');el.style.display='';}
+}
+
+// ═══════════════════════════════════════════════
+// TAB FAVORITES
+// ═══════════════════════════════════════════════
+var TAB_LABEL_MAP={home:'🏠 Home',today:'Today',plan:'Plan',helm:'Tasks',lists:'📋 Lists',lighthouse:'Spiritual',conservatory:'Growth',hearthside:'Wellness',workshop:'Workshop',estate:'Money',emporium:'Work',archives:'Research',archive:'Archive',settings:'⚙️'};
+function loadFavTabs(){
+  try{return JSON.parse(localStorage.getItem('aTabFavs')||'["today","helm","estate","hearthside"]');}catch(e){return['today','helm','estate','hearthside'];}
+}
+function saveFavTabs(favs){localStorage.setItem('aTabFavs',JSON.stringify(favs));}
+function renderFavTabs(){
+  var row=document.getElementById('favTabsRow');if(!row)return;
+  var favs=loadFavTabs();
+  row.innerHTML=favs.map(function(tab){
+    return '<button class="fav-tab-btn" data-tab="'+tab+'" onclick="goTabDirect(\''+tab+'\')" title="'+tab+'">'+((TAB_LABEL_MAP[tab])||tab)+'</button>';
+  }).join('')+'<button onclick="openFavTabEdit()" class="fav-tab-btn" style="opacity:.55;min-width:32px;padding:5px 7px" title="Customize favorites">⭐</button>';
+}
+function openFavTabEdit(){
+  var favs=loadFavTabs();
+  var all=['home','today','plan','helm','lists','lighthouse','conservatory','hearthside','workshop','estate','emporium','archives','archive','settings'];
+  var html='<div style="padding:16px 16px 8px">'
+    +'<div style="font-size:13px;font-weight:700;color:var(--textd);margin-bottom:3px">⭐ Favorite Tabs</div>'
+    +'<div style="font-size:11px;color:var(--textl);margin-bottom:12px">Pick up to 5 tabs to pin in the quick row.</div>'
+    +all.map(function(tab){
+      var on=favs.indexOf(tab)>-1;
+      return '<label style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #f0ebe6;cursor:pointer">'
+        +'<input type="checkbox" data-favtab="'+tab+'"'+(on?' checked':'')+' style="width:16px;height:16px;accent-color:var(--lav)">'
+        +'<span style="font-size:13px;color:var(--textd);font-weight:600">'+(TAB_LABEL_MAP[tab]||tab)+'</span>'
+        +'</label>';
+    }).join('')
+    +'<button onclick="saveFavTabsFromModal()" style="width:100%;margin-top:12px;padding:11px;border-radius:12px;border:none;background:var(--lav);color:#fff;font-family:\'Quicksand\',sans-serif;font-size:13px;font-weight:700;cursor:pointer">Save ✓</button>'
+    +'</div>';
+  var ov=document.getElementById('ovFavEdit');
+  if(!ov){
+    ov=document.createElement('div');ov.id='ovFavEdit';ov.className='ov';
+    ov.style.cssText='align-items:flex-end;padding:0';
+    ov.innerHTML='<div onclick="event.stopPropagation()" style="width:100%;max-width:480px;background:#fff;border-radius:24px 24px 0 0;max-height:80vh;overflow-y:auto;box-shadow:0 -8px 32px rgba(0,0,0,.12)" id="ovFavEditBody"></div>';
+    ov.addEventListener('click',function(){closeOv('ovFavEdit');});
+    document.body.appendChild(ov);
+  }
+  document.getElementById('ovFavEditBody').innerHTML=html;
+  showOv('ovFavEdit');
+}
+function saveFavTabsFromModal(){
+  var checked=[].slice.call(document.querySelectorAll('[data-favtab]:checked')).map(function(el){return el.dataset.favtab;});
+  saveFavTabs(checked.slice(0,5));
+  renderFavTabs();
+  closeOv('ovFavEdit');
 }
 
 function updM(){
@@ -23222,9 +23673,18 @@ function purgeRoutineTasks(){
   });
   if(TASKS.length!==before)localStorage.setItem('aTasks',JSON.stringify(TASKS));
 }
+function autoUnparkDueTasks(){
+  var today=todayStr();
+  var changed=false;
+  TASKS.forEach(function(t){
+    if(t.parked&&t.parkedUntil&&t.parkedUntil<=today){t.parked=false;delete t.parkedUntil;changed=true;fbSave('tasks',t.id,t);}
+  });
+  if(changed){localStorage.setItem('aTasks',JSON.stringify(TASKS));showToast('🅿️ Parked tasks are back — welcome home!');}
+}
 function startApp(){
   document.getElementById('loadingScreen').classList.add('hidden');
   purgeRoutineTasks();
+  autoUnparkDueTasks();
   syncRtnTasks();
   chkReset();
   updDate();
@@ -23313,6 +23773,9 @@ function startApp(){
   renderWaterBottle();
   renderTodayPlanBar();
   renderTodayRtnPills();
+  renderTodayTimeGreet();
+  renderFavTabs();
+  trackLastActive();
   var hFab=document.getElementById('hatchFab');if(hFab)hFab.style.display='flex';
   renderFabPills();
   initFabScroll();
@@ -27077,6 +27540,27 @@ function delProjInc(id){
   <button class="rtn-ctx-btn" id="rtnCtxSkip" onclick="rtnCtxAct('skip')">⏭️ Skip</button>
   <button class="rtn-ctx-btn" id="rtnCtxTask" onclick="rtnCtxAct('task')">📋 Move to task</button>
   <button class="rtn-ctx-btn" id="rtnCtxUndo" onclick="rtnCtxAct('undo')">↩️ Clear</button>
+</div>
+
+<!-- OVERWHELMED MODE -->
+<div class="ov" id="ovOverwhelmed" onclick="closeOv('ovOverwhelmed')" style="align-items:center;justify-content:center;padding:20px">
+  <div onclick="event.stopPropagation()" style="width:100%;max-width:440px;background:#fff;border-radius:24px;padding:28px 22px;box-shadow:0 8px 40px rgba(0,0,0,.18)">
+    <div style="text-align:center;margin-bottom:18px">
+      <div style="font-size:38px;margin-bottom:10px">🌸</div>
+      <div style="font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:var(--textd);margin-bottom:5px">One thing.</div>
+      <div style="font-size:12px;color:var(--textl)">You only need to do this one thing right now.</div>
+    </div>
+    <div id="ovwTaskCard" style="background:linear-gradient(135deg,#fff5f5,#fff8f8);border:2px solid rgba(201,160,160,.5);border-radius:16px;padding:20px 18px;text-align:center;margin-bottom:18px;min-height:80px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px">
+      <div id="ovwTaskTitle" style="font-size:18px;font-weight:700;color:var(--textd);line-height:1.4"></div>
+      <div id="ovwTaskMeta" style="font-size:11px;color:var(--textl)"></div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <button onclick="ovwDone()" style="padding:13px;border-radius:14px;border:none;background:linear-gradient(135deg,var(--sage),#3a6a36);color:#fff;font-family:'Quicksand',sans-serif;font-size:14px;font-weight:700;cursor:pointer">✅ I did it!</button>
+      <button onclick="ovwPark()" style="padding:11px;border-radius:14px;border:1.5px solid #e0d8d0;background:#fff;font-family:'Quicksand',sans-serif;font-size:13px;font-weight:700;color:var(--textl);cursor:pointer">🅿️ Park it — do later</button>
+      <button onclick="ovwNext()" style="padding:10px;border-radius:14px;border:none;background:#f8f4f0;font-family:'Quicksand',sans-serif;font-size:12px;font-weight:700;color:var(--textl);cursor:pointer">→ Show me a different one</button>
+      <button onclick="closeOv('ovOverwhelmed')" style="padding:7px;border-radius:14px;border:none;background:none;font-family:'Quicksand',sans-serif;font-size:11px;color:var(--textl);cursor:pointer;opacity:.7">Exit to full list</button>
+    </div>
+  </div>
 </div>
 
 </body>
