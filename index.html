@@ -1407,26 +1407,8 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
       <button onclick="document.getElementById('whileAwayBanner').style.display='none'" style="background:none;border:none;font-size:14px;color:var(--textl);cursor:pointer;padding:0;flex-shrink:0">✕</button>
     </div>
   </div>
-  <!-- Focus Mode / Overwhelmed row -->
-  <div style="display:flex;gap:8px;margin-bottom:10px">
-    <button id="focusModeBtn" onclick="toggleTodayFocusMode()" style="flex:1;padding:9px 10px;border-radius:12px;border:1.5px solid rgba(169,159,201,.4);background:#fff;font-family:'Quicksand',sans-serif;font-size:12px;font-weight:700;color:var(--lav);cursor:pointer;transition:background .2s,color .2s">🎯 Focus Mode</button>
-    <button onclick="openOverwhelmedMode()" style="flex:1;padding:9px 10px;border-radius:12px;border:1.5px solid rgba(224,112,112,.3);background:#fff;font-family:'Quicksand',sans-serif;font-size:12px;font-weight:700;color:var(--ured);cursor:pointer">😵 Overwhelmed?</button>
-  </div>
   <!-- Time-of-day greeting -->
   <div id="todayTimeGreet" style="font-size:11px;color:var(--textl);font-weight:700;letter-spacing:.4px;text-transform:uppercase;margin-bottom:8px;padding:0 2px"></div>
-  <!-- Intentions widget -->
-  <div id="intentionsHomeWrap" style="margin-bottom:10px">
-    <div style="background:#fff;border-radius:14px;padding:12px 14px;box-shadow:0 1px 4px rgba(0,0,0,.06)">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-        <span style="font-size:11px;font-weight:700;color:var(--textl);letter-spacing:.5px;text-transform:uppercase">🎯 Today's Focus</span>
-        <div style="display:flex;gap:6px">
-          <button class="btn sec" style="font-size:11px;padding:2px 9px" onclick="autoFillIntentions();renderIntentionsHome()">✨ Auto</button>
-          <button class="btn sec" style="font-size:11px;padding:2px 9px" onclick="showFocusSec('intentions',null);goTab('focus',document.querySelector('[data-tab=\'focus\']'))">+ Set</button>
-        </div>
-      </div>
-      <div id="intentionsHomeList"></div>
-    </div>
-  </div>
   <!-- Kingdom Events -->
   <div id="keventsWrap" style="display:none">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
@@ -1434,17 +1416,6 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
       <button class="btn sec" style="font-size:11px;padding:3px 10px" onclick="openKEventAdd()">+ Add</button>
     </div>
     <div class="kevents-strip" id="keventsStrip"></div>
-  </div>
-  <!-- Quick Add -->
-  <div class="quick-add">
-    <button class="qa" onclick="openM('taskModal')" style="background:linear-gradient(135deg,#f2dede,#fdf6ee)"><div class="qa-ic">➕</div><div class="qa-lb">Task</div></button>
-    <button class="qa" onclick="openM('expModal')" style="background:linear-gradient(135deg,#f5e8d8,#fdf6ee)"><div class="qa-ic">💸</div><div class="qa-lb">Expense</div></button>
-    <button class="qa" onclick="openM('fwModal')" style="background:linear-gradient(135deg,#e8f0e8,#fdf6ee)"><div class="qa-ic">🍽️</div><div class="qa-lb">Food</div></button>
-    <button class="qa" onclick="openM('moveModal')" style="background:linear-gradient(135deg,#e8eef8,#fdf6ee)"><div class="qa-ic">👟</div><div class="qa-lb">Move</div></button>
-    <button class="qa" onclick="openGroceryQuick()" style="background:linear-gradient(135deg,#e8f4e8,#fdf6ee)"><div class="qa-ic">🛒</div><div class="qa-lb">Grocery</div></button>
-    <button class="qa" onclick="goTab('focus-session',null)" style="background:linear-gradient(135deg,#eee8f8,#f8e8e8)"><div class="qa-ic">🎯</div><div class="qa-lb">Focus</div></button>
-    <button class="qa" onclick="goTab('spirit',null);setTimeout(function(){showSpiritSec('bible',document.querySelector('#v-spirit .pn-btn:nth-child(2)'))},200)" style="background:linear-gradient(135deg,#e8f0f8,#dce8f4)"><div class="qa-ic">📖</div><div class="qa-lb">Bible</div></button>
-    <button class="qa" onclick="goTab('wigs',null)" style="background:linear-gradient(135deg,#f0e8f8,#fdf0f8)"><div class="qa-ic">✂️</div><div class="qa-lb">Wigs</div></button>
   </div>
   <!-- Daily Money Check (collapsible) -->
   <div class="card" style="padding:0;margin-bottom:10px">
@@ -1551,29 +1522,22 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     </div>
   </div>
 
-  <!-- Today's Plan preview -->
-  <div id="todayPlanBar" style="display:none;background:#fff;border-radius:12px;padding:10px 14px;margin-bottom:10px;box-shadow:0 1px 4px rgba(0,0,0,.05);cursor:pointer;border:1.5px solid rgba(170,150,220,.2)" onclick="goTab('plan',document.querySelector('[data-tab=\'plan\']'))">
-    <div style="display:flex;align-items:center;gap:8px">
-      <span style="font-size:14px">📅</span>
-      <span style="font-size:12px;font-weight:700;color:var(--textd);flex:1" id="todayPlanBlocks">—</span>
-      <span style="font-size:11px;color:var(--lav);font-weight:700">View Plan →</span>
-    </div>
-    <div id="todayPlanChips" style="display:flex;flex-wrap:wrap;gap:4px;margin-top:6px"></div>
-  </div>
-
-  <!-- Routine entry pills (time-aware) -->
+  <!-- Routine entry pills (time-aware / Opening Shift) -->
   <div id="todayRtnPills" style="display:flex;gap:8px;margin-bottom:10px"></div>
+
+  <!-- Do Now tasks (always visible) -->
+  <div class="card" style="padding:14px;margin-bottom:10px">
+    <div style="font-size:11px;font-weight:700;color:var(--rose);letter-spacing:.4px;text-transform:uppercase;margin-bottom:8px">🔥 Do Now</div>
+    <div id="todayUr"><div class="empty"><div class="emj">🎉</div><p>No urgent tasks!</p></div></div>
+  </div>
 
   <!-- Tasks & Routines (collapsible) -->
   <div class="card" style="padding:0;margin-bottom:10px">
     <div style="display:flex;align-items:center;justify-content:space-between;padding:11px 14px;cursor:pointer" onclick="togTodaySec('todayTasksSec')">
-      <span style="font-size:11px;font-weight:700;color:var(--textl);letter-spacing:.5px;text-transform:uppercase">Tasks</span>
+      <span style="font-size:11px;font-weight:700;color:var(--textl);letter-spacing:.5px;text-transform:uppercase">Tasks &amp; Routines</span>
       <span class="sh-arr" id="sh-arr-todayTasksSec">▾</span>
     </div>
     <div id="todayTasksSec-wrap" style="padding:0 14px 14px">
-      <!-- Do Now -->
-      <div style="font-size:11px;font-weight:700;color:var(--rose);letter-spacing:.4px;text-transform:uppercase;margin-bottom:6px">Do Now</div>
-      <div id="todayUr" style="margin-bottom:12px"><div class="empty"><div class="emj">🎉</div><p>No urgent tasks!</p></div></div>
       <!-- Do Soon -->
       <div style="font-size:11px;font-weight:700;color:var(--textl);letter-spacing:.4px;text-transform:uppercase;cursor:pointer;display:flex;justify-content:space-between;align-items:center;margin-bottom:4px" onclick="togTodaySec('todaySo')">
         <span style="color:#c48a20">Do Soon</span><span class="sh-arr" id="sh-arr-todaySo">▸</span>
@@ -6928,10 +6892,11 @@ function initTodaySecDefaults(){
     _todaySecC._autoDate=today;
     localStorage.setItem('aTodaySecC',JSON.stringify(_todaySecC));
   }
-  if(_todaySecC['todayStatsBody']===undefined) _todaySecC['todayStatsBody']=true; // stats collapsed by default
-  if(_todaySecC['todayTasksSec']===undefined) _todaySecC['todayTasksSec']=false; // Tasks open
-  if(_todaySecC['todayMoneyBody']===undefined) _todaySecC['todayMoneyBody']=true; // money check collapsed by default
-  ['todaySo','todayStatsBody','todayTasksSec','todayMoneyBody'].forEach(applyTodaySecState);
+  if(_todaySecC['todayStatsBody']===undefined) _todaySecC['todayStatsBody']=true;
+  if(_todaySecC['todayTasksSec']===undefined) _todaySecC['todayTasksSec']=false;
+  if(_todaySecC['todayMoneyBody']===undefined) _todaySecC['todayMoneyBody']=true;
+  if(_todaySecC['todayQuickAdd']===undefined) _todaySecC['todayQuickAdd']=true;
+  ['todaySo','todayStatsBody','todayTasksSec','todayMoneyBody','todayQuickAdd'].forEach(applyTodaySecState);
 }
 
 function togTodaySec(id){
