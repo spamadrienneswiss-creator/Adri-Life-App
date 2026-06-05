@@ -5733,8 +5733,10 @@ var RTNS = JSON.parse(localStorage.getItem('aRtns')||'null')||{
   pm:['Magnesium / gummy','Quick tidy 🧹','Everything off floor','Sweep / Swiffer','What are we eating tomorrow?','Brush teeth','Wash face','Pray 🙏'],
   da:['Bible Reading 📖','Text','Walking','Check schedule + plan','Make food','Weekly tasks','Prep Nick','Track steps','Track macros'],
   we:['Review Calendar','Check projects','Plan errands','Plan tasks','Review goals','Record finances','Check accounts','Family Worship','Service hours','Answer wig messages','Plan wig work','Talk to Gina'],
-  cl:['Trash Monday night 🗑️','Tidy clutter','Papers/mail','Dust','Water plants 🌱','Laundry','Kitchen counters+stovetop+fridge','Floors sweep+mop','Bathroom toilet+mirrors+shower']
+  cl:['Trash Monday night 🗑️','Tidy clutter','Papers/mail','Dust','Water plants 🌱','Laundry','Kitchen counters+stovetop+fridge','Floors sweep+mop','Bathroom toilet+mirrors+shower'],
+  money:['🙏 Pray','💰 Log today\'s expenses','💵 Log any income today','🏦 Update account balances','✂️ Any California WWOW sales?','💳 Any bills come through today?']
 };
+if(!RTNS.money)RTNS.money=['🙏 Pray','💰 Log today\'s expenses','💵 Log any income today','🏦 Update account balances','✂️ Any California WWOW sales?','💳 Any bills come through today?'];
 
 var LISTS = JSON.parse(localStorage.getItem('aLists')||'[]');
 var INCOME = JSON.parse(localStorage.getItem('aIncome')||'[]');
@@ -6334,7 +6336,7 @@ function chkReset(){
     var newRS={date:t};
     RTN_GROUPS.forEach(function(g){if(rtnFreq(g)==='daily')newRS[g.id]={};});
     // preserve built-in daily keys in case RTN_GROUPS not loaded yet
-    ['am','pm','da','we','cl'].forEach(function(k){if(!newRS[k])newRS[k]={};});
+    ['am','pm','da','we','cl','money'].forEach(function(k){if(!newRS[k])newRS[k]={};});
     RS=newRS;
     localStorage.setItem('aRS',JSON.stringify(RS));
   }
@@ -6846,7 +6848,9 @@ var RTN_GROUPS = JSON.parse(localStorage.getItem('aRTG')||'null')||[
   {id:'da',name:'Daily Habits',icon:'📅',color:'var(--blue)',freq:'daily'},
   {id:'we',name:'Weekly Reset',icon:'📆',color:'var(--blue)',freq:'weekly',weekDays:[0]},
   {id:'cl',name:'Cleaning',icon:'🧹',color:'var(--teal)',freq:'weekly',weekDays:[1]},
+  {id:'money',name:'Daily Money',icon:'💰',color:'var(--rose)',freq:'daily'},
 ];
+if(!RTN_GROUPS.find(function(g){return g.id==='money';}))RTN_GROUPS.push({id:'money',name:'Daily Money',icon:'💰',color:'var(--rose)',freq:'daily'});
 var RTN_EDIT_ITEMS=[]; // temp storage during edit
 
 // ── Routine Frequency Helpers ──────────────────
@@ -6968,6 +6972,7 @@ function renderAllR(){
   renderRtnGroups();
   renderLookahead();
   updRS();
+  if(typeof renderTodayMoneyCard==='function')renderTodayMoneyCard();
 }
 
 function renderNonDailyToday(){
@@ -7653,11 +7658,12 @@ function launchConfetti(){
 
 function updRS(){
   var done=0,total=0;
-  [['am',RTNS.am],['md',RTNS.md||[]],['pm',RTNS.pm],['da',RTNS.da]].forEach(function(p){
+  [['am',RTNS.am],['md',RTNS.md||[]],['pm',RTNS.pm],['da',RTNS.da],['money',RTNS.money||[]]].forEach(function(p){
     total+=(p[1]||[]).length;
     if(RS[p[0]])done+=Object.values(RS[p[0]]).filter(Boolean).length;
   });
   var el=document.getElementById('sRout');if(el)el.textContent=done+'/'+total;
+  if(typeof renderTodayMoneyStreak==='function')renderTodayMoneyStreak();
 }
 
 // ═══════════════════════════════════════════════
@@ -17567,13 +17573,57 @@ function buildMCList(type){
       +'</div>';
   }).join('');
 }
+function buildMoneyRtnList(){
+  var items=RTNS.money||[];
+  var rh=RH.money||{};
+  var cs=RS.money||{};
+  if(!items.length)return'';
+  var visible=items.filter(function(item){return!rh[item];});
+  var html=visible.map(function(item){
+    var oi=items.indexOf(item);
+    var state=rtnStateStr(cs[oi]);
+    var eItem="'"+item.replace(/\\/g,'\\\\').replace(/'/g,"\\'")+"'";
+    var chkTxt=state==='done'?'✓':state==='skip'?'⏭':state==='task'?'📋':'';
+    var stateClass=state?' '+state:'';
+    return'<div class="ri'+stateClass+'" onclick="togR(\'money\','+oi+',this)" oncontextmenu="showRtnCtxMenu(\'money\','+oi+',this,null,event)" ontouchstart="_rtnTouchStart(event,\'money\','+oi+',this,null)" ontouchend="_rtnTouchEnd()" ontouchmove="_rtnTouchEnd()">'+
+      '<div class="rchk">'+chkTxt+'</div>'+
+      '<div class="rlb" style="flex:1">'+escHtml(item)+'</div>'+
+      '<button class="rhi" onclick="event.stopPropagation();hideRI(event,\'money\','+eItem+')" title="Hide">👁️</button>'+
+      '<button class="rhi" onclick="event.stopPropagation();delRtnItem(event,\'money\','+eItem+')" title="Delete" style="color:var(--ured)">✕</button>'+
+    '</div>';
+  }).join('');
+  html+='<div style="display:flex;gap:6px;margin-top:8px;padding-top:8px;border-top:1px solid #f0ebe6">'
+    +'<input class="sub-inp" id="moneyRtnInp" placeholder="Add item…" style="flex:1;font-size:12px" onkeydown="if(event.key===\'Enter\')moneyRtnAdd()">'
+    +'<button class="sub-add-btn" onclick="moneyRtnAdd()" style="background:var(--rose)">+</button>'
+    +'</div>';
+  return html;
+}
+function moneyRtnAdd(){
+  var inp=document.getElementById('moneyRtnInp');
+  var val=inp&&inp.value.trim();if(!val)return;
+  if(!RTNS.money)RTNS.money=[];
+  RTNS.money.push(val);
+  localStorage.setItem('aRtns',JSON.stringify(RTNS));
+  inp.value='';
+  renderTodayMoneyCard();
+}
+function _moneyRtnAllDoneToday(){
+  var items=RTNS.money||[];var rh=RH.money||{};var cs=RS.money||{};
+  var visible=items.filter(function(item){return!rh[item];});
+  return visible.length>0&&visible.every(function(item){var oi=items.indexOf(item);return rtnStateStr(cs[oi])==='done';});
+}
 function moneyDailyStreak(){
   var streak=0;
   var d=new Date();
   for(var i=0;i<365;i++){
     var ds=d.getFullYear()+'-'+(('0'+(d.getMonth()+1)).slice(-2))+'-'+(('0'+d.getDate()).slice(-2));
-    var dc=(MONEY_CHECKS.daily||{})[ds]||{};
-    var allDone=MONEY_CHECK_DEFS.daily.every(function(def){return!!dc[def.key];});
+    var allDone=false;
+    if(i===0){
+      allDone=_moneyRtnAllDoneToday();
+    } else {
+      var dc=(MONEY_CHECKS.daily||{})[ds]||{};
+      allDone=MONEY_CHECK_DEFS.daily.every(function(def){return!!dc[def.key];});
+    }
     if(!allDone)break;
     streak++;
     d.setDate(d.getDate()-1);
@@ -17582,7 +17632,7 @@ function moneyDailyStreak(){
 }
 function renderTodayMoneyCard(){
   var todayEl=document.getElementById('mc-today');
-  if(todayEl)todayEl.innerHTML=buildMCList('daily');
+  if(todayEl)todayEl.innerHTML=buildMoneyRtnList();
   renderTodayMoneyStreak();
   // Spending + bills snapshot
   var snapEl=document.getElementById('todayMoneySnapshot');
@@ -17622,15 +17672,21 @@ function renderTodayMoneyStreak(){
   for(var i=6;i>=0;i--){
     var d=new Date();d.setDate(d.getDate()-i);
     var ds=d.getFullYear()+'-'+(('0'+(d.getMonth()+1)).slice(-2))+'-'+(('0'+d.getDate()).slice(-2));
-    var dc=(MONEY_CHECKS.daily||{})[ds]||{};
-    var dayDone=MONEY_CHECK_DEFS.daily.every(function(def){return!!dc[def.key];});
+    var dayDone=false;
+    if(i===0){
+      dayDone=_moneyRtnAllDoneToday();
+    } else {
+      var dc=(MONEY_CHECKS.daily||{})[ds]||{};
+      dayDone=MONEY_CHECK_DEFS.daily.every(function(def){return!!dc[def.key];});
+    }
     dots+='<div style="width:7px;height:7px;border-radius:50%;background:'+(dayDone?'var(--sage)':'#e8ddd4')+'"></div>';
   }
-  var checks=getMoneyChecks('daily');
-  var done=MONEY_CHECK_DEFS.daily.filter(function(d){return!!checks[d.key];}).length;
+  var items=RTNS.money||[];var rh=RH.money||{};var cs=RS.money||{};
+  var visible=items.filter(function(item){return!rh[item];});
+  var done=visible.filter(function(item){var oi=items.indexOf(item);return rtnStateStr(cs[oi])==='done';}).length;
   el.innerHTML='<div style="display:flex;gap:3px">'+dots+'</div>'
     +'<span style="font-size:11px;font-weight:700;color:'+(streak>0?'var(--sage)':'var(--textl)')+'">'+streak+' day streak</span>'
-    +'<span style="font-size:11px;color:var(--textl)">'+done+'/'+MONEY_CHECK_DEFS.daily.length+'</span>';
+    +'<span style="font-size:11px;color:var(--textl)">'+done+'/'+visible.length+'</span>';
 }
 function renderAllMoneyChecklists(){
   var types=['daily','weekly','monthly','tax'];
