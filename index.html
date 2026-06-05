@@ -25,7 +25,7 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
 .sync-status{font-size:10px;color:rgba(255,255,255,.7);margin-top:1px}
 
 /* TABS */
-.tabs{display:flex;background:white;border-bottom:1px solid #ede8e3;overflow-x:auto;scrollbar-width:none;position:sticky;top:78px;z-index:99}
+.tabs{display:flex;background:white;overflow-x:auto;scrollbar-width:none}
 .tabs::-webkit-scrollbar{display:none}
 .tab-btn{flex-shrink:0;padding:11px 13px;border:none;background:none;font-family:'Quicksand',sans-serif;font-size:12px;font-weight:700;color:var(--textl);cursor:pointer;border-bottom:3px solid transparent;white-space:nowrap;transition:all .2s}
 .tab-btn.on{color:var(--rose);border-bottom-color:var(--rose)}
@@ -1004,22 +1004,28 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
 
 <!-- FAVORITES ROW -->
 <div id="favTabsRow" style="display:flex;flex-wrap:nowrap;overflow-x:auto;gap:6px;padding:6px 12px 4px;background:rgba(255,255,255,.9);border-bottom:1px solid rgba(0,0,0,.06);-webkit-overflow-scrolling:touch;scrollbar-width:none"></div>
-<!-- TABS -->
-<div class="tabs" id="tabBar">
-  <button class="tab-btn on" data-tab="home" onclick="goTab('home',this)">🏠 Home</button>
-  <button class="tab-btn" data-tab="today" onclick="goTab('today',this)">Today</button>
-  <button class="tab-btn" data-tab="plan" onclick="goTab('plan',this)">Plan</button>
-  <button class="tab-btn" data-tab="helm" onclick="goTab('helm',this)">Tasks &amp; Projects</button>
-  <button class="tab-btn" data-tab="lists" onclick="goTabDirect('learn');setTimeout(function(){var b=document.querySelector('#v-learn .pn-btn:nth-child(3)');if(b)showLearnSec('lists',b);},50)">📋 Lists</button>
-  <button class="tab-btn" data-tab="lighthouse" onclick="goTab('lighthouse',this)">Spiritual</button>
-  <button class="tab-btn" data-tab="conservatory" onclick="goTab('conservatory',this)">Personal Growth</button>
-  <button class="tab-btn" data-tab="hearthside" onclick="goTab('hearthside',this)">Health &amp; Wellness</button>
-  <button class="tab-btn" data-tab="workshop" onclick="goTab('workshop',this)">Workshop</button>
-  <button class="tab-btn" data-tab="estate" onclick="goTab('estate',this)">Money &amp; Home</button>
-  <button class="tab-btn" data-tab="emporium" onclick="goTab('emporium',this)">Work</button>
-  <button class="tab-btn" data-tab="archives" onclick="goTab('archives',this)">Research Library</button>
-  <button class="tab-btn" data-tab="archive" onclick="goTab('archive',this)">Archive</button>
-  <button class="tab-btn" data-tab="settings" onclick="goTab('settings',this)">Settings</button>
+<!-- TABS WRAPPER -->
+<div id="tabBarWrap" style="position:sticky;top:78px;z-index:99;background:white;border-bottom:1px solid #ede8e3">
+  <div onclick="toggleTabBar()" style="display:flex;align-items:center;justify-content:center;gap:5px;padding:3px 12px;cursor:pointer">
+    <span style="font-size:10px;font-weight:700;color:var(--textl);letter-spacing:.5px;text-transform:uppercase">Navigation</span>
+    <span id="tabToggleArr" style="font-size:11px;color:var(--textl)">▸</span>
+  </div>
+  <div class="tabs" id="tabBar" style="display:none">
+    <button class="tab-btn on" data-tab="home" onclick="goTab('home',this)">🏠 Home</button>
+    <button class="tab-btn" data-tab="today" onclick="goTab('today',this)">Today</button>
+    <button class="tab-btn" data-tab="plan" onclick="goTab('plan',this)">Plan</button>
+    <button class="tab-btn" data-tab="helm" onclick="goTab('helm',this)">Tasks &amp; Projects</button>
+    <button class="tab-btn" data-tab="lists" onclick="goTabDirect('learn');setTimeout(function(){var b=document.querySelector('#v-learn .pn-btn:nth-child(3)');if(b)showLearnSec('lists',b);},50)">📋 Lists</button>
+    <button class="tab-btn" data-tab="lighthouse" onclick="goTab('lighthouse',this)">Spiritual</button>
+    <button class="tab-btn" data-tab="conservatory" onclick="goTab('conservatory',this)">Personal Growth</button>
+    <button class="tab-btn" data-tab="hearthside" onclick="goTab('hearthside',this)">Health &amp; Wellness</button>
+    <button class="tab-btn" data-tab="workshop" onclick="goTab('workshop',this)">Workshop</button>
+    <button class="tab-btn" data-tab="estate" onclick="goTab('estate',this)">Money &amp; Home</button>
+    <button class="tab-btn" data-tab="emporium" onclick="goTab('emporium',this)">Work</button>
+    <button class="tab-btn" data-tab="archives" onclick="goTab('archives',this)">Research Library</button>
+    <button class="tab-btn" data-tab="archive" onclick="goTab('archive',this)">Archive</button>
+    <button class="tab-btn" data-tab="settings" onclick="goTab('settings',this)">Settings</button>
+  </div>
 </div>
 
 <div class="pg">
@@ -23660,8 +23666,22 @@ function autoUnparkDueTasks(){
   });
   if(changed){localStorage.setItem('aTasks',JSON.stringify(TASKS));showToast('🅿️ Parked tasks are back — welcome home!');}
 }
+var _tabBarCollapsed=localStorage.getItem('aTabBarCollapsed')!=='false';
+function toggleTabBar(){
+  _tabBarCollapsed=!_tabBarCollapsed;
+  localStorage.setItem('aTabBarCollapsed',String(_tabBarCollapsed));
+  applyTabBarState();
+}
+function applyTabBarState(){
+  var bar=document.getElementById('tabBar');
+  var arr=document.getElementById('tabToggleArr');
+  if(bar)bar.style.display=_tabBarCollapsed?'none':'';
+  if(arr)arr.textContent=_tabBarCollapsed?'▸':'▾';
+}
+
 function startApp(){
   document.getElementById('loadingScreen').classList.add('hidden');
+  applyTabBarState();
   purgeRoutineTasks();
   autoUnparkDueTasks();
   syncRtnTasks();
