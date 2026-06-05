@@ -1417,6 +1417,17 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     </div>
     <div class="kevents-strip" id="keventsStrip"></div>
   </div>
+  <!-- Tasks (Do Now always visible, Do Soon collapsible) -->
+  <div class="card" style="padding:14px;margin-bottom:10px">
+    <div style="font-size:11px;font-weight:700;color:var(--rose);letter-spacing:.4px;text-transform:uppercase;margin-bottom:8px">🔥 Do Now</div>
+    <div id="todayUr"><div class="empty"><div class="emj">🎉</div><p>No urgent tasks!</p></div></div>
+    <div style="margin-top:12px;padding-top:10px;border-top:1px solid #f0ebe6">
+      <div style="font-size:11px;font-weight:700;color:var(--textl);letter-spacing:.4px;text-transform:uppercase;cursor:pointer;display:flex;justify-content:space-between;align-items:center;margin-bottom:4px" onclick="togTodaySec('todaySo')">
+        <span style="color:#c48a20">Do Soon</span><span class="sh-arr" id="sh-arr-todaySo">▸</span>
+      </div>
+      <div id="todaySo-wrap" style="display:none;margin-top:6px"><div id="todaySo"><div class="empty"><div class="emj">📝</div><p>Add tasks to see them here.</p></div></div></div>
+    </div>
+  </div>
   <!-- Daily Money Check (collapsible) -->
   <div class="card" style="padding:0;margin-bottom:10px">
     <div style="display:flex;align-items:center;justify-content:space-between;padding:11px 14px;cursor:pointer" onclick="togTodaySec('todayMoneyBody')">
@@ -1525,24 +1536,25 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
   <!-- Routine entry pills (time-aware / Opening Shift) -->
   <div id="todayRtnPills" style="display:flex;gap:8px;margin-bottom:10px"></div>
 
-  <!-- Do Now tasks (always visible) -->
-  <div class="card" style="padding:14px;margin-bottom:10px">
-    <div style="font-size:11px;font-weight:700;color:var(--rose);letter-spacing:.4px;text-transform:uppercase;margin-bottom:8px">🔥 Do Now</div>
-    <div id="todayUr"><div class="empty"><div class="emj">🎉</div><p>No urgent tasks!</p></div></div>
-  </div>
-
-  <!-- Tasks & Routines (collapsible) -->
+  <!-- Quick Add (collapsible) -->
   <div class="card" style="padding:0;margin-bottom:10px">
-    <div style="display:flex;align-items:center;justify-content:space-between;padding:11px 14px;cursor:pointer" onclick="togTodaySec('todayTasksSec')">
-      <span style="font-size:11px;font-weight:700;color:var(--textl);letter-spacing:.5px;text-transform:uppercase">Tasks &amp; Routines</span>
-      <span class="sh-arr" id="sh-arr-todayTasksSec">▾</span>
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:11px 14px;cursor:pointer" onclick="togTodaySec('todayQuickAdd')">
+      <span style="font-size:11px;font-weight:700;color:var(--textl);letter-spacing:.5px;text-transform:uppercase">⚡ Quick Add +</span>
+      <span class="sh-arr" id="sh-arr-todayQuickAdd">▸</span>
     </div>
-    <div id="todayTasksSec-wrap" style="padding:0 14px 14px">
-      <!-- Do Soon -->
-      <div style="font-size:11px;font-weight:700;color:var(--textl);letter-spacing:.4px;text-transform:uppercase;cursor:pointer;display:flex;justify-content:space-between;align-items:center;margin-bottom:4px" onclick="togTodaySec('todaySo')">
-        <span style="color:#c48a20">Do Soon</span><span class="sh-arr" id="sh-arr-todaySo">▸</span>
+    <div id="todayQuickAdd-wrap" style="display:none">
+      <div style="padding:0 14px 14px">
+        <div class="quick-add" style="margin-bottom:0">
+          <button class="qa" onclick="openM('taskModal')" style="background:linear-gradient(135deg,#f2dede,#fdf6ee)"><div class="qa-ic">➕</div><div class="qa-lb">Task</div></button>
+          <button class="qa" onclick="openM('expModal')" style="background:linear-gradient(135deg,#f5e8d8,#fdf6ee)"><div class="qa-ic">💸</div><div class="qa-lb">Expense</div></button>
+          <button class="qa" onclick="openM('fwModal')" style="background:linear-gradient(135deg,#e8f0e8,#fdf6ee)"><div class="qa-ic">🍽️</div><div class="qa-lb">Food</div></button>
+          <button class="qa" onclick="openM('moveModal')" style="background:linear-gradient(135deg,#e8eef8,#fdf6ee)"><div class="qa-ic">👟</div><div class="qa-lb">Move</div></button>
+          <button class="qa" onclick="openGroceryQuick()" style="background:linear-gradient(135deg,#e8f4e8,#fdf6ee)"><div class="qa-ic">🛒</div><div class="qa-lb">Grocery</div></button>
+          <button class="qa" onclick="goTab('focus-session',null)" style="background:linear-gradient(135deg,#eee8f8,#f8e8e8)"><div class="qa-ic">🎯</div><div class="qa-lb">Focus</div></button>
+          <button class="qa" onclick="goTab('spirit',null);setTimeout(function(){showSpiritSec('bible',document.querySelector('#v-spirit .pn-btn:nth-child(2)'))},200)" style="background:linear-gradient(135deg,#e8f0f8,#dce8f4)"><div class="qa-ic">📖</div><div class="qa-lb">Bible</div></button>
+          <button class="qa" onclick="goTab('wigs',null)" style="background:linear-gradient(135deg,#f0e8f8,#fdf0f8)"><div class="qa-ic">✂️</div><div class="qa-lb">Wigs</div></button>
+        </div>
       </div>
-      <div id="todaySo-wrap" style="display:none;margin-bottom:12px"><div id="todaySo"><div class="empty"><div class="emj">📝</div><p>Add tasks to see them here.</p></div></div></div>
     </div>
   </div>
 
@@ -6893,10 +6905,9 @@ function initTodaySecDefaults(){
     localStorage.setItem('aTodaySecC',JSON.stringify(_todaySecC));
   }
   if(_todaySecC['todayStatsBody']===undefined) _todaySecC['todayStatsBody']=true;
-  if(_todaySecC['todayTasksSec']===undefined) _todaySecC['todayTasksSec']=false;
   if(_todaySecC['todayMoneyBody']===undefined) _todaySecC['todayMoneyBody']=true;
   if(_todaySecC['todayQuickAdd']===undefined) _todaySecC['todayQuickAdd']=true;
-  ['todaySo','todayStatsBody','todayTasksSec','todayMoneyBody','todayQuickAdd'].forEach(applyTodaySecState);
+  ['todaySo','todayStatsBody','todayMoneyBody','todayQuickAdd'].forEach(applyTodaySecState);
 }
 
 function togTodaySec(id){
