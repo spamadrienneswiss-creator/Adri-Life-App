@@ -1355,7 +1355,7 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     </div>
     <div class="hub-card" onclick="goTab('guide',null)"><div class="hub-card-ic">📚</div><div class="hub-card-name">Research Library</div><div class="hub-card-sub">Notes, guides &amp; learning</div></div>
     <div class="hub-card" onclick="goTab('archive',null)"><div class="hub-card-ic">📁</div><div class="hub-card-name">Year Archive</div><div class="hub-card-sub" id="hub-archive-sub">Year-by-year history</div></div>
-    <div class="hub-card" onclick="goTab('guide',null);setTimeout(function(){openAppIndexInGuide()},300)"><div class="hub-card-ic">🗂️</div><div class="hub-card-name">App Index</div><div class="hub-card-sub">Navigate all sections</div></div>
+    <div class="hub-card" onclick="goTab('appindex',null)"><div class="hub-card-ic">🗂️</div><div class="hub-card-name">App Index</div><div class="hub-card-sub">Navigate all sections</div></div>
     <div class="hub-card span2" onclick="goTab('guide',null);setTimeout(function(){openTemplatesInGuide()},300)"><div class="hub-card-ic">📋</div><div class="hub-card-name">Project Templates</div><div class="hub-card-sub">Load a template to start fast</div></div>
   </div>
 </div>
@@ -1367,7 +1367,19 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     <button class="home-edit-btn" id="homeResetBtn" onclick="resetHomeOrder()" style="display:none;margin-right:6px;font-size:12px">↺ Reset</button>
     <button class="home-edit-btn" id="homeEditBtn" onclick="toggleHomeEdit()">✏️ Edit</button>
   </div>
+  <div style="margin-bottom:10px">
+    <button onclick="goTab('appindex',null)" style="width:100%;padding:10px 14px;border-radius:14px;border:1.5px solid rgba(143,170,139,.4);background:#fff;font-family:'Quicksand',sans-serif;font-size:13px;font-weight:700;color:var(--sage);cursor:pointer;display:flex;align-items:center;gap:8px;box-shadow:var(--sh2)"><span>🗂️</span><span>App Index — Navigate All Sections</span><span style="margin-left:auto;font-size:11px;color:var(--textl)">→</span></button>
+  </div>
   <div class="home-grid" id="homeGrid"></div>
+</div>
+
+<!-- APP INDEX PAGE -->
+<div class="view" id="v-appindex">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
+    <h2 style="font-family:'Playfair Display',serif;font-size:19px;color:var(--textd);flex:1">🗂️ App Index</h2>
+  </div>
+  <div style="font-size:12px;color:var(--textl);margin-bottom:14px">Every section of the app. Tap → Go to jump there directly.</div>
+  <div id="appIndexPageBody"></div>
 </div>
 
 <!-- HOME TILE MODAL -->
@@ -2965,7 +2977,10 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     </div>
   </div>
   <div style="margin-top:8px;border-top:1px solid var(--border);padding-top:14px">
-    <div class="sh sect-toggle" onclick="togSect('rlIndexBody','rlIndexArr')" id="rlIndexHeader">🗂️ App Index <span id="rlIndexArr">▸</span></div>
+    <div style="display:flex;align-items:center;justify-content:space-between">
+      <div class="sh sect-toggle" style="flex:1" onclick="togSect('rlIndexBody','rlIndexArr')" id="rlIndexHeader">🗂️ App Index <span id="rlIndexArr">▸</span></div>
+      <button onclick="goTab('appindex',null)" style="font-size:11px;font-weight:700;color:var(--sage);background:none;border:none;cursor:pointer;font-family:'Quicksand',sans-serif;padding:0 2px 0 10px;flex-shrink:0">Open full page →</button>
+    </div>
     <div id="rlIndexBody" style="display:none;padding:8px 0">
       <div style="font-size:12px;color:var(--textl);margin-bottom:10px">Tap any section to navigate there.</div>
       <div id="appIndexBody"></div>
@@ -5854,7 +5869,7 @@ var MEAL_COMBOS = JSON.parse(localStorage.getItem('aMC')||'null')||[
 ];
 
 var DEFAULT_TAB_ORDER=['today','plan','helm','lighthouse','conservatory','hearthside','workshop','estate','emporium','archives','archive','settings'];
-var TAB_LABELS={today:'Today',plan:'Plan',helm:'Tasks & Projects',conservatory:'Personal Growth',hearthside:'Health & Wellness',workshop:'Workshop',lighthouse:'Spiritual',estate:'Money & Home',emporium:'Work',archives:'Research Library',archive:'Archive',settings:'Settings',stories:'Stories',mixtape:'Mixtape','focus-session':'Focus Session',grocery:'Grocery List',export:'Export',routines:'Routines',lists:'Lists',content:'Content Creation',wellness:'Health & Wellness',food:'Move & Exercise',meals:'Meals & Nutrition',recap:'Recap',money:'Money',accounts:'Accounts','home-items':'Home Items','money-projects':'Money Projects',wigs:'Wig Orders','work-projects':'Work Projects',guide:'Research Library',spirit:'Spiritual',goals:'Goals',learn:'Learning',focus:'Focus Tools',spark:'Spark',board:'Mood Board',faves:'Faves',places:'Places'};
+var TAB_LABELS={appindex:'App Index',today:'Today',plan:'Plan',helm:'Tasks & Projects',conservatory:'Personal Growth',hearthside:'Health & Wellness',workshop:'Workshop',lighthouse:'Spiritual',estate:'Money & Home',emporium:'Work',archives:'Research Library',archive:'Archive',settings:'Settings',stories:'Stories',mixtape:'Mixtape','focus-session':'Focus Session',grocery:'Grocery List',export:'Export',routines:'Routines',lists:'Lists',content:'Content Creation',wellness:'Health & Wellness',food:'Move & Exercise',meals:'Meals & Nutrition',recap:'Recap',money:'Money',accounts:'Accounts','home-items':'Home Items','money-projects':'Money Projects',wigs:'Wig Orders','work-projects':'Work Projects',guide:'Research Library',spirit:'Spiritual',goals:'Goals',learn:'Learning',focus:'Focus Tools',spark:'Spark',board:'Mood Board',faves:'Faves',places:'Places'};
 var TAB_ORDER=(function(){var o=JSON.parse(localStorage.getItem('aTabOrder')||'null');if(!o)return DEFAULT_TAB_ORDER.slice();var full=DEFAULT_TAB_ORDER.slice();o=o.filter(function(t){return full.indexOf(t)>-1;});full.forEach(function(t){if(o.indexOf(t)<0)o.push(t);});return o;})();
 var SECTION_VIEWS={home:['home'],today:['today'],plan:['plan'],helm:['tasks','projects','focus-session','grocery','routines'],conservatory:['goals','learn','focus','spark','lists'],hearthside:['food','meals','wellness'],workshop:['board','faves','stories','mixtape','places'],lighthouse:['spirit'],estate:['money','accounts','home-items','money-projects'],emporium:['wigs','work-projects','content'],archives:['guide'],settings:['settings','export'],archive:['archive']};
 var SECTION_LABELS={today:'Today',plan:'Plan',helm:'Tasks & Projects',conservatory:'Personal Growth',hearthside:'Health & Wellness',workshop:'Workshop',lighthouse:'Spiritual',estate:'Money & Home',emporium:'Work',archives:'Research Library',archive:'Archive',settings:'Settings'};
@@ -6394,6 +6409,7 @@ function goTabDirect(tab,btn){
   if(tab==='plan'){ renderPlan(); }
   if(tab==='grocery'){ renderGroceryList(); populateGrocTaskDatalist(); }
   if(tab==='guide'){ renderResearchLib(); renderGuide(); renderTmplList(); renderAppIndex(); renderMemoryItems(); renderLifeHacks(); }
+  if(tab==='appindex'){ renderAppIndex(); }
   if(tab==='work-projects'){ renderWorkProjects(); }
 
   if(tab==='meals'||tab==='food') renderWaterBottle();
@@ -23518,122 +23534,109 @@ function updateSpiritBookPages(id,val){
 }
 
 var APP_INDEX=[
-  {hub:'🏠 Home Screen — Daily Tiles',items:[
-    {label:'💊 Meds tile → Wellness Meds (mark AM/PM)',action:"goTabDirect('wellness');setTimeout(function(){showWellnessSec('meds',document.querySelector('#v-wellness .pn-btn:nth-child(6)'))},200)"},
-    {label:'⏰ Sleep tile → Wellness Sleep Log',action:"goTabDirect('wellness');setTimeout(function(){showWellnessSec('sleep',document.querySelector('#v-wellness .pn-btn:nth-child(2)'))},200)"},
-    {label:'💧 Water tile → Today water tracker',action:"goTabDirect('today')"},
-    {label:'🍳 Log Food tile → Food log modal',action:"openM('fwModal')"},
-    {label:'💪 Workout tile → Move & Exercise',action:"goTabDirect('food')"},
-    {label:'➕ Add Task tile → Task modal',action:"openM('taskModal')"},
-    {label:'⚡ Next Task tile → Urgent tasks',action:"goTabDirect('tasks')"},
-    {label:'📖 Bible tile → Spiritual Bible tracker',action:"goTabDirect('spirit');setTimeout(function(){var b=document.querySelector('#v-spirit .pn-btn:nth-child(2)');if(b)showSpiritSec('bible',b)},200)"},
-    {label:'💸 Expense tile → Expense modal',action:"openM('expModal')"},
-    {label:'🌱 Ministry tile → Spiritual Ministry',action:"goTabDirect('spirit');setTimeout(function(){var b=document.querySelector('#v-spirit .pn-btn:nth-child(3)');if(b)showSpiritSec('ministry',b)},200)"},
-    {label:'🛒 Grocery tile → Grocery List',action:"goTabDirect('grocery')"},
-    {label:'🧹 Cleaning tile → Creates tasks in task list',action:"goTabDirect('tasks')"},
-    {label:'🚗 Errands tile → Task list',action:"goTabDirect('tasks')"},
-    {label:'✂️ WIGs tile → Wig Inventory',action:"goTabDirect('wigs')"},
-    {label:'🚪 One Thing tile → One Thing mode',action:"openOneThingMode()"},
-    {label:'🌅 Opening Shift → Morning check-in',action:"goTabDirect('home')"},
-    {label:'🌙 Wrap Up → Evening summary',action:"goTabDirect('home')"},
-    {label:'⭐ Behavior Shifts → Star habits in Habits page',action:"goTabDirect('conservatory')"},
-    {label:'💡 Learning → Flashcards, Memory Items, Life Hacks',action:"goTabDirect('guide')"},
+  {hub:'Today',items:[
+    {label:'Today — Dashboard',action:"goTab('today',null)"},
+    {label:'Do Now Tasks',action:"goTab('today',null)"},
+    {label:'Daily Money Check',action:"goTab('today',null)"},
+    {label:'Stats — Water, Mood, Sleep, Steps, Calories',action:"goTab('today',null)"},
+    {label:'Opening Shift / Wrap Up',action:"goTab('routines',null)"},
   ]},
-  {hub:'🏠 Today',items:[
-    {label:'Today Overview',action:"goTab('today',null)"},
-    {label:'Daily Intentions',action:"goTab('today',null)"},
-    {label:'Quick Stats — Water, Tasks, Mood',action:"goTab('today',null)"},
-    {label:'This Week Summary',action:"goTab('today',null)"},
-    {label:'Active Goals Widget',action:"goTab('today',null)"},
-    {label:'Spirit Run Meter',action:"goTab('today',null)"},
-  ]},
-  {hub:'📅 Plan',items:[
-    {label:'Monthly Calendar View',action:"goTab('plan',null)"},
-    {label:'This Month\'s To-Do List',action:"goTab('plan',null)"},
-    {label:'Weekly Block Planner',action:"goTab('plan',null)"},
-  ]},
-  {hub:'⚓ Helm — Tasks & Projects',items:[
-    {label:'Tasks (multi-filter, sort)',action:"goTab('tasks',null)"},
+  {hub:'Tasks & Projects',items:[
+    {label:'Tasks',action:"goTab('tasks',null)"},
     {label:'Projects',action:"goTab('projects',null)"},
-    {label:'Lists',action:"goTab('lists',null)"},
-    {label:'Brain Dump',action:"goTab('tasks',null)"},
     {label:'Focus Session / Timer',action:"goTab('focus-session',null)"},
     {label:'Grocery List',action:"goTab('grocery',null)"},
+    {label:'Lists',action:"goTab('learn',null)"},
   ]},
-  {hub:'🌿 Conservatory — Personal Growth',items:[
-    {label:'Goals (Yearly/Quarterly/Monthly)',action:"goTab('goals',null)"},
+  {hub:'Plan',items:[
+    {label:'Monthly Calendar',action:"goTab('plan',null)"},
+    {label:'Weekly Block Planner',action:"goTab('plan',null)"},
+    {label:'This Month\'s To-Do',action:"goTab('plan',null)"},
+  ]},
+  {hub:'Routines',items:[
+    {label:'Daily Habits',action:"goTab('routines',null)"},
+    {label:'Opening Shift — Morning Check-In',action:"goTab('routines',null)"},
+    {label:'Wrap Up — Evening Summary',action:"goTab('routines',null)"},
+    {label:'Weekly / Monthly / Quarterly Blocks',action:"goTab('routines',null)"},
+  ]},
+  {hub:'Money',items:[
+    {label:'Money — Overview & Budget',action:"goTab('money',null)"},
+    {label:'Bills',action:"goTab('money',null)"},
+    {label:'Expenses Log',action:"goTab('money',null)"},
+    {label:'Income',action:"goTab('money',null)"},
+    {label:'Accounts & Balances',action:"goTab('accounts',null)"},
+    {label:'Home Items',action:"goTab('home-items',null)"},
+    {label:'Money Projects',action:"goTab('money-projects',null)"},
+  ]},
+  {hub:'Health & Wellness',items:[
+    {label:'Move — Workouts & Exercise Log',action:"goTab('food',null)"},
+    {label:'Eat — Meals, Recipes & Nutrition',action:"goTab('meals',null)"},
+    {label:'Wellness — Mood, Sleep, Symptoms',action:"goTab('wellness',null)"},
+    {label:'Meds Tracker',action:"goTabDirect('wellness');setTimeout(function(){showWellnessSec('meds',document.querySelector('#v-wellness .pn-btn:nth-child(5)'))},200)"},
+    {label:'Body — Weight & Measurements',action:"goTab('wellness',null)"},
+  ]},
+  {hub:'Spiritual',items:[
+    {label:'Spiritual — Overview',action:"goTab('spirit',null)"},
+    {label:'Bible Reading Tracker',action:"goTabDirect('spirit');setTimeout(function(){var b=document.querySelector('#v-spirit .pn-btn:nth-child(2)');if(b)showSpiritSec('bible',b)},200)"},
+    {label:'Ministry Log',action:"goTab('spirit',null)"},
+    {label:'Prayer Log',action:"goTab('spirit',null)"},
+    {label:'Gratitude Journal',action:"goTab('spirit',null)"},
+    {label:'Study Notes & Scriptures',action:"goTab('spirit',null)"},
+    {label:'Spirit Books',action:"goTab('spirit',null)"},
+  ]},
+  {hub:'Personal Growth',items:[
+    {label:'Goals — Yearly / Quarterly / Monthly',action:"goTab('goals',null)"},
     {label:'Learning & Flashcards',action:"goTab('learn',null)"},
     {label:'Focus Tools & Intentions',action:"goTab('focus',null)"},
   ]},
-  {hub:'🏡 Hearthside — Health & Wellness',items:[
-    {label:'Move — Workouts & Exercise Log',action:"goTab('food',null)"},
-    {label:'Eat — Meals, Recipes, Grocery, Nutrition',action:"goTab('meals',null)"},
-    {label:'Wellness — Sleep, Mood, Symptoms, Meds',action:"goTab('wellness',null)"},
-    {label:'Food Database',action:"goTab('meals',null)"},
-    {label:'Meal Plan (weekly)',action:"goTab('meals',null)"},
-  ]},
-  {hub:'🔨 Workshop — Creative',items:[
+  {hub:'Workshop',items:[
+    {label:'Workshop — Creative Hub',action:"goTab('workshop',null)"},
     {label:'Vision Board',action:"goTab('board',null)"},
     {label:'Favorites',action:"goTab('faves',null)"},
     {label:'Stories',action:"goTab('stories',null)"},
     {label:'Mixtape',action:"goTab('mixtape',null)"},
     {label:'Places',action:"goTab('places',null)"},
   ]},
-  {hub:'🕯️ Lighthouse — Spiritual',items:[
-    {label:'Prayer Log',action:"goTab('spirit',null)"},
-    {label:'Ministry Log',action:"goTab('spirit',null)"},
-    {label:'Gratitude Journal',action:"goTab('spirit',null)"},
-    {label:'Bible Reading Tracker',action:"goTab('spirit',null)"},
-    {label:'Favorite Scriptures',action:"goTab('spirit',null)"},
-    {label:'Spiritual To-Do\'s',action:"goTab('spirit',null)"},
-    {label:'Spirit Books',action:"goTab('spirit',null)"},
-    {label:'Study Notes',action:"goTab('spirit',null)"},
-  ]},
-  {hub:'🏛️ Estate — Money & Home',items:[
-    {label:'Bills & Budget',action:"goTab('money',null)"},
-    {label:'Accounts',action:"goTab('accounts',null)"},
-    {label:'Expenses',action:"goTab('money',null)"},
-    {label:'Income',action:"goTab('money',null)"},
-    {label:'Home Items',action:"goTab('home-items',null)"},
-    {label:'Money Projects',action:"goTab('money-projects',null)"},
-  ]},
-  {hub:'🏪 Emporium — Work',items:[
-    {label:'Wig Inventory',action:"goTab('wigs',null)"},
+  {hub:'Work — Emporium',items:[
+    {label:'Wig Inventory & Orders',action:"goTab('wigs',null)"},
     {label:'Work Projects',action:"goTab('work-projects',null)"},
-    {label:'Income Goal',action:"goTab('wigs',null)"},
+    {label:'Content Creation',action:"goTab('content',null)"},
   ]},
-  {hub:'📚 Research Library',items:[
-    {label:'Study Cards & Research Notes',action:"goTab('guide',null)"},
-    {label:'Routines (Daily & Weekly)',action:"goTab('routines',null)"},
-    {label:'App Index',action:"openAppIndexInGuide()"},
+  {hub:'Research Library',items:[
+    {label:'Research Notes & Study Cards',action:"goTab('guide',null)"},
+    {label:'App Guide',action:"goTab('guide',null)"},
+    {label:'Memory Items',action:"goTab('guide',null)"},
+    {label:'Life Hacks',action:"goTab('guide',null)"},
     {label:'Project Templates',action:"openTemplatesInGuide()"},
-    {label:'Year Archive',action:"goTab('archive',null)"},
   ]},
-  {hub:'⚙️ Settings',items:[
-    {label:'Appearance & Banner',action:"goTab('settings',null)"},
-    {label:'Theme Colors',action:"goTab('settings',null)"},
+  {hub:'Archive',items:[
+    {label:'Year Archive — Full History',action:"goTab('archive',null)"},
+  ]},
+  {hub:'Settings',items:[
+    {label:'Appearance & Theme',action:"goTab('settings',null)"},
     {label:'Task Categories',action:"goTab('settings',null)"},
     {label:'PIN & Tab Protection',action:"goTab('settings',null)"},
+    {label:'Health Goals (calories, water, steps)',action:"goTab('settings',null)"},
     {label:'Export & Backup',action:"goTab('export',null)"},
-    {label:'Spiritual Meter',action:"goTab('settings',null)"},
-    {label:'Health Goals (calories, water, exercise)',action:"goTab('settings',null)"},
   ]},
 ];
 
 function renderAppIndex(){
-  var el=document.getElementById('appIndexBody');
-  if(!el)return;
-  el.innerHTML=APP_INDEX.map(function(section){
-    return '<div style="margin-bottom:12px">'
-      +'<div style="font-size:12px;font-weight:700;color:var(--textd);margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px">'+section.hub+'</div>'
+  var html=APP_INDEX.map(function(section){
+    return '<div style="margin-bottom:14px;background:#fff;border-radius:14px;padding:12px 14px;box-shadow:var(--sh2)">'
+      +'<div style="font-size:11px;font-weight:700;color:var(--textl);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px">'+section.hub+'</div>'
       +section.items.map(function(item){
-        return '<div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--bdr)">'
+        return '<div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f5f0eb">'
           +'<span style="font-size:13px;color:var(--text)">'+item.label+'</span>'
-          +'<button onclick="'+item.action+'" style="background:var(--sage-light);color:#5a7a56;border:none;border-radius:8px;padding:4px 10px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit">→ Go</button>'
+          +'<button onclick="'+item.action+'" style="background:var(--sage-light);color:#5a7a56;border:none;border-radius:8px;padding:4px 10px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;flex-shrink:0">→ Go</button>'
           +'</div>';
       }).join('')
       +'</div>';
   }).join('');
+  var el=document.getElementById('appIndexBody');
+  if(el)el.innerHTML=html;
+  var el2=document.getElementById('appIndexPageBody');
+  if(el2)el2.innerHTML=html;
 }
 
 function purgeRoutineTasks(){
