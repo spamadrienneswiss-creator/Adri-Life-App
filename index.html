@@ -5663,6 +5663,8 @@ var LISTS = JSON.parse(localStorage.getItem('aLists')||'[]');
 var INCOME = JSON.parse(localStorage.getItem('aIncome')||'[]');
 var ACCOUNTS = JSON.parse(localStorage.getItem('aAccounts')||'[]');
 // {id, name, amount, notes, updated, isCredit:bool}
+var PAYOFFS = JSON.parse(localStorage.getItem('aPayoffs')||'[]');
+// {id, accountId, accountName, amount, newBalance, source, sourceName, date, notes, created}
 var HOME_ITEMS = JSON.parse(localStorage.getItem('aHomeItems')||'[]');
 // {id, name, category, notes, photo:'', date, tags:[]}
 var MONEY_PROJECTS = JSON.parse(localStorage.getItem('aMoneyProjects')||'[]');
@@ -6029,6 +6031,8 @@ function initFirebase(){
       ap('aProjIncome',function(v,r){PROJ_INCOME=v||[];_origSetItem('aProjIncome',r);});
       ap('aPriceLog',function(v,r){PRICE_LOG=v||[];_origSetItem('aPriceLog',r);});
       ap('aExpCats',function(v,r){if(v&&v.length)EXPENSE_CATS=v;_origSetItem('aExpCats',r);});
+      ap('aMoneyProjects',function(v,r){MONEY_PROJECTS=v||[];_origSetItem('aMoneyProjects',r);});
+      ap('aPayoffs',function(v,r){PAYOFFS=v||[];_origSetItem('aPayoffs',r);});
       _fbBlobPause=false;
       renderBills();renderAccounts();renderIncome();updMoneyBadge();
     }else if(group==='health'){
@@ -6205,7 +6209,7 @@ function fbDelete(col, id){
 // localStorage.setItem is intercepted to auto-save on every write.
 // ═══════════════════════════════════════════════
 var BLOB_GROUPS={
-  money:['aBills','aBillPay','aBillMonthAmt','aAccounts','aIncome','aIncGoal','aMonIncGoal','aMoneyChecks','aTaxLog','aProjIncome','aPriceLog','aExpCats'],
+  money:['aBills','aBillPay','aBillMonthAmt','aAccounts','aIncome','aIncGoal','aMonIncGoal','aMoneyChecks','aTaxLog','aProjIncome','aPriceLog','aExpCats','aMoneyProjects','aPayoffs'],
   health:['aMeds','aMedLog','aEnergyLog','aMeasLog','aMealLogItems','aMoodNotes','aWineDrinks'],
   habits:['aHabits','aHabitLog'],
   routines:['aRS','aRS2','aRH','aRTG','aRtns'],
@@ -11532,6 +11536,17 @@ function saveExp(){
   var e={id:id,amt:parseFloat(amt),desc:desc,ty:SBV.ety||'personal',cat:SBV.ecat||'other',date:new Date().toLocaleDateString(),created:new Date().toISOString(),pending:isPending,reconciled:false,account:eAcctVal};
   if(pendBtn){pendBtn.classList.remove('on');pendBtn.classList.add('on');}
   fbSave('expenses',id,e);
+  // Auto-update account balance: credit card goes up (more owed), cash goes down
+  if(eAcctVal){
+    var _ea=ACCOUNTS.find(function(a){return a.id===eAcctVal;});
+    if(_ea){
+      var _eamt=parseFloat(amt)||0;
+      if(_ea.isCredit){_ea.amount=(parseFloat(_ea.amount)||0)+_eamt;}
+      else{_ea.amount=Math.max(0,(parseFloat(_ea.amount)||0)-_eamt);}
+      _ea.updated=new Date().toISOString().slice(0,10);
+      localStorage.setItem('aAccounts',JSON.stringify(ACCOUNTS));
+    }
+  }
   var taskId=id+'_e';
   var task={id:taskId,title:'Transfer $'+amt+' '+desc+' to spreadsheet',cat:'fin',urgency:'important-not-urgent',etime:'<10min',due:'',notes:(SBV.ety==='business'?'💼 Biz':'🏠 Personal'),done:false,created:new Date().toISOString()};
   fbSave('tasks',taskId,task);
@@ -11694,6 +11709,18 @@ function renderE(){
 
 function delExpense(id){
   if(!confirm('Delete this expense?'))return;
+  var _de=EXPENSES.find(function(e){return e.id===id;});
+  // Reverse the account balance effect from when this was logged
+  if(_de&&_de.account){
+    var _da=ACCOUNTS.find(function(a){return a.id===_de.account;});
+    if(_da){
+      var _damt=parseFloat(_de.amt)||0;
+      if(_da.isCredit){_da.amount=Math.max(0,(parseFloat(_da.amount)||0)-_damt);}
+      else{_da.amount=(parseFloat(_da.amount)||0)+_damt;}
+      _da.updated=new Date().toISOString().slice(0,10);
+      localStorage.setItem('aAccounts',JSON.stringify(ACCOUNTS));
+    }
+  }
   EXPENSES=EXPENSES.filter(function(e){return e.id!==id;});
   try{if(window.db&&window.fsDoc&&window.fsDeleteDoc)window.fsDeleteDoc(window.fsDoc(window.db,'expenses',id));}catch(err){}
   renderExpenses();
@@ -14552,6 +14579,66 @@ function delAccount(){
   showToast('Account deleted.');
 }
 
+function openPayoffModal(id){
+  var a=ACCOUNTS.find(function(x){return x.id===id;});
+  if(!a)return;
+  var curBal=parseFloat(a.amount)||0;
+  document.getElementById('payoffAcctId').value=id;
+  document.getElementById('payoffAcctName').textContent=a.name;
+  document.getElementById('payoffCurBal').textContent='$'+curBal.toFixed(2);
+  document.getElementById('payoffAmt').value=curBal.toFixed(2);
+  document.getElementById('payoffNewBal').value='0.00';
+  document.getElementById('payoffDate').value=new Date().toISOString().slice(0,10);
+  document.getElementById('payoffNotes').value='';
+  var sel=document.getElementById('payoffSource');
+  var cashAccts=ACCOUNTS.filter(function(x){return!x.isCredit&&x.id!==id;});
+  sel.innerHTML='<option value="external">External / Nick\'s account</option>'+
+    cashAccts.map(function(x){return'<option value="'+x.id+'">'+escHtml(x.name)+'</option>';}).join('');
+  document.getElementById('payoffModal').classList.add('show');
+}
+
+function payoffUpdateNewBal(){
+  var id=document.getElementById('payoffAcctId').value;
+  var a=ACCOUNTS.find(function(x){return x.id===id;});
+  if(!a)return;
+  var cur=parseFloat(a.amount)||0;
+  var paid=parseFloat(document.getElementById('payoffAmt').value)||0;
+  document.getElementById('payoffNewBal').value=Math.max(0,cur-paid).toFixed(2);
+}
+
+function savePayoff(){
+  var id=document.getElementById('payoffAcctId').value;
+  var a=ACCOUNTS.find(function(x){return x.id===id;});
+  if(!a){showToast('Account not found.');return;}
+  var amt=parseFloat(document.getElementById('payoffAmt').value)||0;
+  var newBal=parseFloat(document.getElementById('payoffNewBal').value)||0;
+  if(!amt){showToast('Please enter the amount paid.');return;}
+  var source=document.getElementById('payoffSource').value;
+  var sourceAcct=source!=='external'?ACCOUNTS.find(function(x){return x.id===source;}):null;
+  var sourceName=sourceAcct?sourceAcct.name:'External / Nick';
+  var date=document.getElementById('payoffDate').value||new Date().toISOString().slice(0,10);
+  var notes=document.getElementById('payoffNotes').value.trim();
+  // Record payoff
+  PAYOFFS.unshift({id:Date.now().toString(),accountId:id,accountName:a.name,amount:amt,newBalance:newBal,source:source,sourceName:sourceName,date:date,notes:notes,created:new Date().toISOString()});
+  localStorage.setItem('aPayoffs',JSON.stringify(PAYOFFS));
+  // Update paid-off account balance
+  a.amount=newBal;
+  a.updated=date;
+  // If paying from one of your own cash accounts, deduct it there too
+  if(sourceAcct){
+    sourceAcct.amount=Math.max(0,(parseFloat(sourceAcct.amount)||0)-amt);
+    sourceAcct.updated=date;
+  }
+  localStorage.setItem('aAccounts',JSON.stringify(ACCOUNTS));
+  closeM('payoffModal');
+  renderAccounts();
+  renderMoneyOverview();
+  updateEstateStrip();
+  var msg=a.name+' → $'+newBal.toFixed(2)+'  ✅';
+  if(sourceAcct)msg+='  ('+sourceAcct.name+' balance updated too)';
+  showToast(msg);
+}
+
 function renderAccounts(){
   var el=document.getElementById('acctList');if(!el)return;
   if(!ACCOUNTS.length){el.innerHTML='<div class="empty"><div class="emj">🏦</div><p>No accounts yet. Add your checking, savings, and credit cards.</p></div>';return;}
@@ -14574,9 +14661,11 @@ function renderAccounts(){
       (a.isCredit&&(a.minPayDate||a.minPayAmt)?'<div style="font-size:11px;color:var(--ured);margin-bottom:4px">📅 Min payment'+(a.minPayAmt?' $'+(parseFloat(a.minPayAmt)||0).toFixed(2):'')+' due day '+(a.minPayDate||'?')+'</div>':'')+
       (pendingByAcct[a.id]?'<div style="display:inline-block;font-size:11px;color:#a07020;background:#fff8e8;padding:2px 8px;border-radius:6px;margin-bottom:4px">⏳ $'+pendingByAcct[a.id].toFixed(2)+' pending</div>':'')+
       (a.notes?'<div style="font-size:12px;color:var(--textl);margin-bottom:4px">'+escHtml(a.notes)+'</div>':'')+
+      (function(){var lp=PAYOFFS.filter(function(p){return p.accountId===a.id;});return lp.length?'<div style="font-size:11px;color:var(--sage);margin-bottom:4px">✅ Last payoff: $'+lp[0].amount.toFixed(2)+' on '+lp[0].date+' via '+escHtml(lp[0].sourceName||'?')+'</div>':'';})()+
       '<div style="display:flex;justify-content:space-between;align-items:center">'+
         '<span style="font-size:11px;color:var(--textl)">Updated: '+(a.updated||'—')+'</span>'+
         '<div style="display:flex;gap:6px">'+
+          (a.isCredit&&amt>0?'<button onclick="openPayoffModal(\''+a.id+'\')" style="background:none;border:1.5px solid var(--ured);border-radius:7px;padding:3px 10px;cursor:pointer;font-size:12px;font-family:\'Quicksand\',sans-serif;color:var(--ured);font-weight:700">💸 Pay Off</button>':'')+
           '<button onclick="openAcctModal(\''+a.id+'\')" style="background:none;border:1.5px solid var(--border);border-radius:7px;padding:3px 10px;cursor:pointer;font-size:12px;font-family:\'Quicksand\',sans-serif;color:var(--textd)">✏️ Edit</button>'+
         '</div>'+
       '</div>'+
@@ -26069,6 +26158,29 @@ function delProjInc(id){
   <button class="ok-btn" onclick="saveAccount()">Save Account 🏦</button>
   <button class="del-btn" id="acctDelBtn" onclick="delAccount()" style="display:none">🗑️ Delete Account</button>
   <button class="cn-btn" onclick="closeM('acctModal')">Cancel</button>
+</div></div>
+
+<!-- PAYOFF MODAL -->
+<div class="ov" id="payoffModal"><div class="mod">
+  <div class="mh"></div>
+  <div class="mtit">💸 Record Debt Payoff</div>
+  <input type="hidden" id="payoffAcctId">
+  <div style="background:#fff8e8;border:1.5px solid #f0e0c0;border-radius:12px;padding:12px 14px;margin-bottom:14px">
+    <div style="font-size:14px;font-weight:700;color:var(--textd)" id="payoffAcctName">Account</div>
+    <div style="font-size:12px;color:var(--textl);margin-top:2px">Balance currently owed: <span id="payoffCurBal" style="font-weight:700;color:var(--ured)">$0</span></div>
+  </div>
+  <div class="fg"><label class="fl">Amount Paid ($)</label><input class="fi" type="number" id="payoffAmt" placeholder="0.00" step="0.01" oninput="payoffUpdateNewBal()"></div>
+  <div class="fg"><label class="fl">New Balance After ($)</label><input class="fi" type="number" id="payoffNewBal" placeholder="0.00" step="0.01" value="0.00"><div style="font-size:11px;color:var(--textl);margin-top:3px">Leave 0 if fully paid off. Edit if partial payment.</div></div>
+  <div class="fg"><label class="fl">Paid From</label>
+    <select class="fi" id="payoffSource" style="padding:8px 10px">
+      <option value="external">External / Nick's account</option>
+    </select>
+    <div style="font-size:11px;color:var(--textl);margin-top:3px">If one of your cash accounts, its balance will be reduced too.</div>
+  </div>
+  <div class="fg"><label class="fl">Date</label><input class="fi" type="date" id="payoffDate"></div>
+  <div class="fg"><label class="fl">Notes (optional)</label><textarea class="fi" id="payoffNotes" placeholder="e.g. Paid in full by Nick" style="min-height:55px"></textarea></div>
+  <button class="ok-btn" onclick="savePayoff()">Save Payoff 💸</button>
+  <button class="cn-btn" onclick="closeM('payoffModal')">Cancel</button>
 </div></div>
 
 <!-- HOME ITEM MODAL -->
