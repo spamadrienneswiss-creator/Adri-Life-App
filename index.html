@@ -1971,132 +1971,55 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
   <!-- Overview -->
   <div id="ms-overview" class="money-sec">
     <!-- Quick actions -->
-    <div style="display:flex;gap:8px;margin-bottom:12px">
-      <button class="ok-btn" style="flex:1;margin:0;padding:9px;font-size:12px;background:linear-gradient(135deg,var(--sage),var(--teal))" onclick="openM('incModal')">💰 Log Income</button>
-      <button class="ok-btn" style="flex:1;margin:0;padding:9px;font-size:12px;background:linear-gradient(135deg,#e07a5f,#c05a3f)" onclick="openM('expModal')">💸 Log Expense</button>
+    <div style="display:flex;gap:8px;margin-bottom:16px">
+      <button class="ok-btn" style="flex:1;margin:0;padding:10px;font-size:13px;background:linear-gradient(135deg,var(--sage),var(--teal))" onclick="openM('incModal')">💰 Log Income</button>
+      <button class="ok-btn" style="flex:1;margin:0;padding:10px;font-size:13px;background:linear-gradient(135deg,#e07a5f,#c05a3f)" onclick="openM('expModal')">💸 Log Expense</button>
     </div>
-    <!-- Income goal bar -->
-    <div class="card" style="margin-bottom:12px;padding:10px 14px">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
-        <span style="font-size:12px;font-weight:700;color:var(--textd)">🎯 Monthly Income Goal</span>
-        <button onclick="setMonthlyIncGoal()" style="font-size:10px;padding:2px 8px;border-radius:6px;border:1.5px solid var(--bdr);background:none;font-family:'Quicksand',sans-serif;font-weight:700;cursor:pointer;color:var(--textd)">Set</button>
+    <!-- Hidden tiles kept for backward compat -->
+    <span id="mThisInc" style="display:none"></span>
+    <span id="mThisExp" style="display:none"></span>
+    <span id="mNet" style="display:none"></span>
+    <span id="mInc" style="display:none"></span>
+    <!-- 1. What came in -->
+    <div class="card" style="margin-bottom:12px">
+      <div style="font-size:11px;font-weight:700;color:var(--textl);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px">💰 What came in this month</div>
+      <div id="ov2IncTotal" style="font-size:30px;font-weight:800;color:var(--sage);margin-bottom:6px">$0</div>
+      <div style="height:6px;background:#f0ebe6;border-radius:3px;overflow:hidden;margin-bottom:4px">
+        <div id="ov2GoalFill" style="height:100%;background:linear-gradient(90deg,var(--sage),var(--teal));transition:width .6s;width:0%"></div>
       </div>
-      <div style="height:7px;background:#f0ebe6;border-radius:4px;overflow:hidden;margin-bottom:5px">
-        <div id="ovGoalFill" style="height:100%;background:linear-gradient(90deg,var(--sage),var(--teal));transition:width .6s;width:0%"></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;font-size:11px;color:var(--textl);margin-bottom:10px">
+        <span id="ov2GoalLabel">Tap to set a goal</span>
+        <button onclick="setMonthlyIncGoal()" style="font-size:10px;padding:1px 8px;border-radius:6px;border:1.5px solid var(--bdr);background:none;font-family:'Quicksand',sans-serif;font-weight:700;cursor:pointer;color:var(--textl)">Set goal</button>
       </div>
-      <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--textl)">
-        <span id="ovGoalAmt">$0 this month</span>
-        <span id="ovGoalTarget">No goal set</span>
-      </div>
+      <div id="ov2IncBreakdown"></div>
     </div>
-    <!-- P&L stat tiles -->
-    <div class="mny-g">
-      <div style="background:linear-gradient(135deg,#f0f8f0,#e8f5e8);border-radius:14px;padding:14px 16px;margin-bottom:14px;border:1.5px solid rgba(74,138,74,.15)">
-        <div style="font-size:11px;font-weight:700;color:var(--textl);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px">💵 Money Snapshot</div>
-        <div style="font-size:10px;font-weight:700;color:var(--textl);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;margin-top:8px">💳 Debt</div>
-        <div style="display:flex;justify-content:space-between;margin-bottom:3px">
-          <span style="font-size:12px;color:var(--textd)">Total debt (cards + loans)</span>
-          <span style="font-size:12px;font-weight:700;color:var(--ured)" id="snapTotalDebt">$—</span>
-        </div>
-        <div style="font-size:10px;font-weight:700;color:var(--textl);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;margin-top:10px">📅 This Month</div>
-        <div style="display:flex;justify-content:space-between;margin-bottom:3px">
-          <span style="font-size:12px;color:var(--textd)">Min. payments on debt</span>
-          <span style="font-size:12px;font-weight:700;color:var(--ured)" id="snapMinPay">-$—</span>
-        </div>
-        <div style="display:flex;justify-content:space-between;margin-bottom:3px">
-          <span style="font-size:12px;color:var(--textd)">Fixed bills</span>
-          <span style="font-size:12px;font-weight:700;color:var(--ured)" id="snapBills">-$—</span>
-        </div>
-        <div style="display:flex;justify-content:space-between;margin-bottom:3px">
-          <span style="font-size:12px;color:var(--textd)">Total monthly outgoing</span>
-          <span style="font-size:12px;font-weight:700;color:var(--ured)" id="snapOutgoing">-$—</span>
-        </div>
-        <div style="display:flex;justify-content:space-between;margin-bottom:10px">
-          <span style="font-size:12px;color:var(--textd)">Income this month</span>
-          <span style="font-size:12px;font-weight:700;color:var(--sage)" id="snapCash">+$—</span>
-        </div>
-        <div style="border-top:1.5px solid rgba(0,0,0,.08);padding-top:10px;display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-          <span style="font-size:13px;font-weight:700;color:var(--textd)">After obligations</span>
-          <span style="font-size:20px;font-weight:800" id="snapNet">$—</span>
-        </div>
-        <div style="background:rgba(255,255,255,.6);border-radius:10px;padding:10px 12px;font-size:10px;font-weight:700;color:var(--textl);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">🏦 True Available Cash</div>
-        <div style="display:flex;justify-content:space-between;margin-bottom:3px">
-          <span style="font-size:12px;color:var(--textd)">Cash in checking/savings</span>
-          <span style="font-size:12px;font-weight:700;color:var(--sage)" id="snapRealCash">$—</span>
-        </div>
-        <div style="display:flex;justify-content:space-between;margin-bottom:3px">
-          <span style="font-size:12px;color:var(--textd)">Bills hitting cards this month</span>
-          <span style="font-size:12px;font-weight:700;color:var(--ured)" id="snapBillsOnCards">-$—</span>
-        </div>
-        <div style="display:flex;justify-content:space-between;margin-bottom:6px">
-          <span style="font-size:12px;color:var(--textd)">Card payments due</span>
-          <span style="font-size:12px;font-weight:700;color:var(--ured)" id="snapCredit">-$—</span>
-        </div>
-        <div style="display:flex;justify-content:space-between;align-items:center;border-top:1px solid rgba(0,0,0,.06);padding-top:8px">
-          <span style="font-size:13px;font-weight:700;color:var(--textd)">True available</span>
-          <span style="font-size:18px;font-weight:800" id="snapTrueAvail">$—</span>
-        </div>
-      </div>
-      <div class="mny-c"><div class="mny-l">Month Income</div><div class="mny-n" id="mThisInc">$0</div></div>
-      <div class="mny-c"><div class="mny-l">Month Expenses</div><div class="mny-n" id="mThisExp">$0</div></div>
-      <div class="mny-c"><div class="mny-l">Net</div><div class="mny-n" id="mNet" style="font-size:20px">$0</div></div>
-      <div class="mny-c"><div class="mny-l">WWOW This Month</div><div class="mny-n" id="mInc">$0</div></div>
-    </div>
-    <!-- WWOW Business P&L card -->
-    <div class="card" style="padding:0;margin-bottom:8px">
-      <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;cursor:pointer" onclick="togOvSec('ov-biz')">
-        <span style="font-size:13px;font-weight:700;color:var(--textd)">✂️ WWOW Business P&amp;L</span>
-        <span style="display:flex;align-items:center;gap:8px"><span style="font-size:15px;font-weight:700;color:var(--sage)" id="ovBizNet">$0</span><span id="ovBizArr">▸</span></span>
-      </div>
-      <div id="ov-biz" style="display:none;padding:0 14px 12px">
-        <div id="ovBizDetail" style="font-size:13px;color:var(--textd)"></div>
+    <!-- 2. In my accounts -->
+    <div class="card" style="margin-bottom:12px">
+      <div style="font-size:11px;font-weight:700;color:var(--textl);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px">🏦 In my accounts right now</div>
+      <div id="ov2AcctList"></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;padding-top:8px;border-top:1px solid var(--border);margin-top:4px">
+        <span style="font-size:13px;font-weight:700;color:var(--textd)">🎯 Safe to spend</span>
+        <span style="font-size:22px;font-weight:800" id="ov2SafeSpend">$0</span>
       </div>
     </div>
-    <!-- Collapsible overview sections -->
-    <div class="card" style="padding:0;margin-bottom:8px">
-      <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;cursor:pointer" onclick="togOvSec('ov-cash')">
-        <span style="font-size:13px;font-weight:700;color:var(--textd)">💵 Cash on Hand</span>
-        <span style="display:flex;align-items:center;gap:8px"><span style="font-size:15px;font-weight:700;color:var(--sage)" id="ovCashTotal">$0</span><span id="ovCashArr">▸</span></span>
-      </div>
-      <div id="ov-cash" style="display:none;padding:0 14px 10px"><div id="ovCashList" style="font-size:13px;color:var(--textd)"></div></div>
+    <!-- 3. What we spent -->
+    <div class="card" style="margin-bottom:12px">
+      <div style="font-size:11px;font-weight:700;color:var(--textl);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px">💸 What we spent this month</div>
+      <div id="ov2ExpTotal" style="font-size:30px;font-weight:800;color:var(--ured);margin-bottom:10px">$0</div>
+      <div id="ov2ExpBreakdown"></div>
     </div>
-    <div class="card" style="padding:0;margin-bottom:8px">
-      <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;cursor:pointer" onclick="togOvSec('ov-credit')">
-        <span style="font-size:13px;font-weight:700;color:var(--textd)">💳 Credit Owed</span>
-        <span style="display:flex;align-items:center;gap:8px"><span style="font-size:15px;font-weight:700;color:var(--ured)" id="ovCreditTotal">$0</span><span id="ovCreditArr">▸</span></span>
-      </div>
-      <div id="ov-credit" style="display:none;padding:0 14px 10px"><div id="ovCreditList" style="font-size:13px;color:var(--textd)"></div></div>
+    <!-- 4. Bills still to pay -->
+    <div class="card" style="margin-bottom:12px">
+      <div style="font-size:11px;font-weight:700;color:var(--textl);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px">📅 Bills — what we still need to pay</div>
+      <div id="ov2BillsList"></div>
+      <button onclick="showMoneySec('bills',document.querySelector('[data-sec=\'bills\']'))" style="width:100%;margin-top:10px;padding:8px;border-radius:8px;border:1.5px solid var(--bdr);background:none;font-family:'Quicksand',sans-serif;font-size:12px;font-weight:700;cursor:pointer;color:var(--textd)">Manage all bills →</button>
     </div>
-    <div class="card" style="padding:0;margin-bottom:8px">
-      <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;cursor:pointer" onclick="togOvSec('ov-bills')">
-        <span style="font-size:13px;font-weight:700;color:var(--textd)">🏦 Bills This Month</span>
-        <span style="display:flex;align-items:center;gap:8px"><span style="font-size:15px;font-weight:700;color:var(--blue)" id="ovBillsTotal">$0</span><span id="ovBillsArr">▸</span></span>
-      </div>
-      <div id="ov-bills" style="display:none;padding:0 14px 10px"><div id="ovBillsList" style="font-size:13px;color:var(--textd)"></div></div>
+    <!-- 5. Where to go from here -->
+    <div class="card" style="margin-bottom:12px">
+      <div style="font-size:11px;font-weight:700;color:var(--textl);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px">🎯 Where to go from here</div>
+      <div id="ov2PlanSection"></div>
     </div>
-    <div class="card" style="padding:0;margin-bottom:8px">
-      <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;cursor:pointer" onclick="togOvSec('ov-spending')">
-        <span style="font-size:13px;font-weight:700;color:var(--textd)">📊 Month Spending</span>
-        <span style="display:flex;align-items:center;gap:8px"><span style="font-size:15px;font-weight:700;color:var(--ured)" id="ovSpendTotal">$0</span><span id="ovSpendArr">▸</span></span>
-      </div>
-      <div id="ov-spending" style="display:none;padding:0 14px 10px"><div class="card" id="monthlyCard" style="margin:0"><div style="text-align:center;padding:12px;font-size:13px;color:var(--textl)">Loading...</div></div></div>
-    </div>
-    <div class="card" style="padding:0;margin-bottom:8px">
-      <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;cursor:pointer" onclick="togOvSec('ov-income')">
-        <span style="font-size:13px;font-weight:700;color:var(--textd)">💰 Month Income</span>
-        <span style="display:flex;align-items:center;gap:8px"><span style="font-size:15px;font-weight:700;color:var(--sage)" id="ovIncomeTotal">$0</span><span id="ovIncomeArr">▸</span></span>
-      </div>
-      <div id="ov-income" style="display:none;padding:0 14px 10px"><div id="ovIncomeList" style="font-size:13px;color:var(--textd)"></div></div>
-    </div>
-    <div class="card" style="padding:0;margin-bottom:8px">
-      <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;cursor:pointer" onclick="togOvSec('ov-projects')">
-        <span style="font-size:13px;font-weight:700;color:var(--textd)">💼 Projects Saved</span>
-        <span style="display:flex;align-items:center;gap:8px"><span style="font-size:15px;font-weight:700;color:var(--accent)" id="ovProjectsTotal">$0</span><span id="ovProjectsArr">▸</span></span>
-      </div>
-      <div id="ov-projects" style="display:none;padding:0 14px 10px"><div id="ovProjectsList" style="font-size:13px;color:var(--textd)"></div></div>
-    </div>
-  </div>
-    <!-- Daily Money Checklist -->
+    <!-- Checklists (collapsed) -->
     <div class="card" style="padding:0;margin-bottom:8px">
       <div style="display:flex;align-items:center;padding:10px 14px;cursor:pointer" onclick="togOvSec('mc-daily-wrap')">
         <span style="font-size:13px;font-weight:700;color:#3d3530;flex:1">💰 Daily Money</span>
@@ -2108,7 +2031,6 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
         <div id="mc-body-daily"></div>
       </div>
     </div>
-    <!-- Weekly Money Checklist -->
     <div class="card" style="padding:0;margin-bottom:8px">
       <div style="display:flex;align-items:center;padding:10px 14px;cursor:pointer" onclick="togOvSec('mc-weekly-wrap')">
         <span style="font-size:13px;font-weight:700;color:#3d3530;flex:1">📅 Weekly Money</span>
@@ -2119,7 +2041,6 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
         <div id="mc-body-weekly"></div>
       </div>
     </div>
-    <!-- Monthly Money Checklist -->
     <div class="card" style="padding:0;margin-bottom:8px">
       <div style="display:flex;align-items:center;padding:10px 14px;cursor:pointer" onclick="togOvSec('mc-monthly-wrap')">
         <span style="font-size:13px;font-weight:700;color:#3d3530;flex:1">🗓️ Monthly Money</span>
@@ -14352,58 +14273,134 @@ function togOvSec(id){
 
 function renderMoneyOverview(){
   var mon=getMonStr();
-  var thisMonExp=EXPENSES.filter(function(e){return(e.created||'').startsWith(mon);});
-  var confirmedExp=thisMonExp.filter(function(e){return!e.pending;});
-  var thisMonExpAmt=confirmedExp.reduce(function(s,e){return s+e.amt;},0);
-  var thisMonIncAmt=INCOME.filter(function(i){return(i.created||'').startsWith(mon);}).reduce(function(s,i){return s+i.amt;},0);
-  var wigMonInc=INCOME.filter(function(i){return(i.created||'').startsWith(mon)&&i.cat==='Wig Commission';}).reduce(function(s,i){return s+i.amt;},0);
+  var thisMonInc=INCOME.filter(function(i){return(i.date||i.created||'').startsWith(mon);});
+  var thisMonIncAmt=thisMonInc.reduce(function(s,i){return s+(parseFloat(i.amt)||0);},0);
+  var thisMonExp=EXPENSES.filter(function(e){return(e.created||'').startsWith(mon)&&!e.pending;});
+  var thisMonExpAmt=thisMonExp.reduce(function(s,e){return s+(parseFloat(e.amt)||0);},0);
   var cash=ACCOUNTS.filter(function(a){return!a.isCredit;}).reduce(function(s,a){return s+(parseFloat(a.amount)||0);},0);
-  var credit=ACCOUNTS.filter(function(a){return a.isCredit;}).reduce(function(s,a){return s+(parseFloat(a.amount)||0);},0);
-  var projSaved=MONEY_PROJECTS.reduce(function(s,p){return s+(parseFloat(p.saved)||0);},0);
-  var billsTotal=BILLS.reduce(function(s,b){return s+(parseFloat(b.amt)||0);},0);
+  var minPayTotal=ACCOUNTS.filter(function(a){return a.isCredit;}).reduce(function(s,a){return s+(parseFloat(a.minPayAmt)||0);},0);
+  var billsFromCash=BILLS.reduce(function(s,b){var acct=b.paidWith?ACCOUNTS.find(function(a){return a.id===b.paidWith;}):null;return(!acct||!acct.isCredit)?s+(parseFloat(getBillMonthAmt(b.id))||0):s;},0);
+  var safeToSpend=cash-minPayTotal-billsFromCash;
+  var wigMonInc=INCOME.filter(function(i){return(i.date||i.created||'').startsWith(mon)&&(i.cat==='wig'||i.cat==='Wig Commission');}).reduce(function(s,i){return s+(parseFloat(i.amt)||0);},0);
   var net=thisMonIncAmt-thisMonExpAmt;
-  // top tiles
+
+  // Backward-compat hidden tiles
   var t1=document.getElementById('mThisInc');if(t1)t1.textContent='$'+thisMonIncAmt.toFixed(0);
   var t2=document.getElementById('mThisExp');if(t2)t2.textContent='$'+thisMonExpAmt.toFixed(0);
   var t3=document.getElementById('mNet');if(t3){t3.textContent=(net>=0?'+':'-')+'$'+Math.abs(net).toFixed(0);t3.style.color=net>=0?'var(--sage)':'var(--ured)';}
   var t4=document.getElementById('mInc');if(t4)t4.textContent='$'+wigMonInc.toFixed(0);
-  // collapsible totals
-  var e1=document.getElementById('ovCashTotal');if(e1)e1.textContent='$'+cash.toFixed(0);
-  var e2=document.getElementById('ovCreditTotal');if(e2)e2.textContent='$'+credit.toFixed(0);
-  var e3=document.getElementById('ovBillsTotal');if(e3)e3.textContent='$'+billsTotal.toFixed(0);
-  var e4=document.getElementById('ovSpendTotal');if(e4)e4.textContent='$'+thisMonExpAmt.toFixed(0);
-  var e5=document.getElementById('ovIncomeTotal');if(e5)e5.textContent='$'+thisMonIncAmt.toFixed(0);
-  var e6=document.getElementById('ovProjectsTotal');if(e6)e6.textContent='$'+projSaved.toFixed(0);
-  // WWOW biz net label
-  var wigExp=EXPENSES.filter(function(e){return(e.created||'').startsWith(mon)&&e.cat==='wig-supplies';}).reduce(function(s,e){return s+e.amt;},0);
-  var bizNet=wigMonInc-wigExp;
-  var eb=document.getElementById('ovBizNet');if(eb){eb.textContent=(bizNet>=0?'+':'-')+'$'+Math.abs(bizNet).toFixed(0);eb.style.color=bizNet>=0?'var(--sage)':'var(--ured)';}
-  // income goal bar
+
+  // 1. What came in
+  var incEl=document.getElementById('ov2IncTotal');if(incEl)incEl.textContent='$'+thisMonIncAmt.toFixed(2);
   var goal=S.monthlyIncGoal||parseFloat(localStorage.getItem('aMonIncGoal')||'0');
-  var gFill=document.getElementById('ovGoalFill');
-  var gAmt=document.getElementById('ovGoalAmt');
-  var gTgt=document.getElementById('ovGoalTarget');
-  if(gFill)gFill.style.width=(goal>0?Math.min(100,Math.round(thisMonIncAmt/goal*100)):0)+'%';
-  if(gFill&&goal>0&&thisMonIncAmt>=goal)gFill.style.background='linear-gradient(90deg,#3aaa3a,#2a8a2a)';
-  if(gAmt)gAmt.textContent='$'+thisMonIncAmt.toFixed(0)+' this month';
-  if(gTgt)gTgt.textContent=goal>0?'Goal: $'+goal.toFixed(0)+(thisMonIncAmt>=goal?' ✅':''):'No goal set';
-  var totalDebt=credit;
-  var minPayTotal=ACCOUNTS.filter(function(a){return a.isCredit;}).reduce(function(s,a){return s+(parseFloat(a.minPayAmt)||0);},0);
-  var billsOnCards=BILLS.reduce(function(s,b){var acct=b.paidWith?ACCOUNTS.find(function(a){return a.id===b.paidWith;}):null;return acct&&acct.isCredit?s+(parseFloat(getBillMonthAmt(b.id))||0):s;},0);
-  var billsFromCash=BILLS.reduce(function(s,b){var acct=b.paidWith?ACCOUNTS.find(function(a){return a.id===b.paidWith;}):null;return(!acct||!acct.isCredit)?s+(parseFloat(getBillMonthAmt(b.id))||0):s;},0);
-  var totalOutgoing=minPayTotal+billsTotal;
-  var afterObligations=thisMonIncAmt-totalOutgoing;
-  var trueAvail=cash-minPayTotal-billsFromCash;
-  var sc=document.getElementById('snapCash');if(sc)sc.textContent='+$'+thisMonIncAmt.toFixed(0);
-  var sb=document.getElementById('snapBills');if(sb)sb.textContent='-$'+billsTotal.toFixed(0);
-  var scr=document.getElementById('snapCredit');if(scr)scr.textContent='-$'+minPayTotal.toFixed(0);
-  var sn=document.getElementById('snapNet');if(sn){sn.textContent=(afterObligations>=0?'+':'')+afterObligations.toFixed(0);sn.style.color=afterObligations>100?'var(--sage)':afterObligations>=0?'#c09020':'var(--ured)';}
-  var std=document.getElementById('snapTotalDebt');if(std)std.textContent='$'+totalDebt.toFixed(0);
-  var smp=document.getElementById('snapMinPay');if(smp)smp.textContent='-$'+minPayTotal.toFixed(0);
-  var sog=document.getElementById('snapOutgoing');if(sog)sog.textContent='-$'+totalOutgoing.toFixed(0);
-  var src2=document.getElementById('snapRealCash');if(src2)src2.textContent='$'+cash.toFixed(0);
-  var sboc=document.getElementById('snapBillsOnCards');if(sboc)sboc.textContent='-$'+billsOnCards.toFixed(0);
-  var sta=document.getElementById('snapTrueAvail');if(sta){sta.textContent=(trueAvail>=0?'+':'')+trueAvail.toFixed(0);sta.style.color=trueAvail>100?'var(--sage)':trueAvail>=0?'#c09020':'var(--ured)';}
+  var gFill=document.getElementById('ov2GoalFill');
+  if(gFill){gFill.style.width=(goal>0?Math.min(100,Math.round(thisMonIncAmt/goal*100)):0)+'%';if(goal>0&&thisMonIncAmt>=goal)gFill.style.background='linear-gradient(90deg,#3aaa3a,#2a8a2a)';}
+  var gLabel=document.getElementById('ov2GoalLabel');
+  if(gLabel)gLabel.textContent=goal>0?'Goal: $'+goal.toFixed(0)+(thisMonIncAmt>=goal?' ✅ Hit it!':' — $'+(goal-thisMonIncAmt).toFixed(0)+' to go'):'Tap "Set goal" to track progress';
+  var incBreak=document.getElementById('ov2IncBreakdown');
+  if(incBreak){
+    if(!thisMonInc.length){incBreak.innerHTML='<div style="font-size:12px;color:var(--textl);font-style:italic">Nothing logged yet this month.</div>';}
+    else{
+      var srcTotals={};thisMonInc.forEach(function(i){var s=i.source||i.cat||'other';srcTotals[s]=(srcTotals[s]||0)+(parseFloat(i.amt)||0);});
+      var catIco={wig:'💜',loreal:'💄',nick:'🪟',service:'🛠️',other:'📦'};
+      var catLabel={wig:'Wig Sales',loreal:'Loreal',nick:'Nick-Window',service:'Service',other:'Other'};
+      incBreak.innerHTML=Object.keys(srcTotals).map(function(s){
+        return'<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border);font-size:13px">'+
+          '<span>'+(catIco[s]||'💰')+' '+(catLabel[s]||s)+'</span>'+
+          '<span style="font-weight:700;color:var(--sage)">+$'+srcTotals[s].toFixed(2)+'</span></div>';
+      }).join('');
+    }
+  }
+
+  // 2. In my accounts
+  var acctList=document.getElementById('ov2AcctList');
+  if(acctList){
+    if(!ACCOUNTS.length){acctList.innerHTML='<div style="font-size:12px;color:var(--textl);font-style:italic;margin-bottom:8px">No accounts added yet.</div>';}
+    else{acctList.innerHTML=ACCOUNTS.map(function(a){
+      return'<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border);font-size:13px">'+
+        '<span>'+(a.isCredit?'💳':'💵')+' '+escHtml(a.name)+(a.isCredit?'<span style="font-size:10px;color:var(--textl);margin-left:4px">owed</span>':'')+'</span>'+
+        '<span style="font-weight:700;color:'+(a.isCredit?'var(--ured)':'var(--sage)')+'">'+
+          (a.isCredit?'-':'+')+'$'+(parseFloat(a.amount)||0).toFixed(2)+'</span></div>';
+    }).join('');}
+  }
+  var safeEl=document.getElementById('ov2SafeSpend');
+  if(safeEl){safeEl.textContent=(safeToSpend<0?'-':'')+'$'+Math.abs(safeToSpend).toFixed(2);safeEl.style.color=safeToSpend>100?'var(--sage)':safeToSpend>=0?'#c09020':'var(--ured)';}
+
+  // 3. What we spent
+  var expEl=document.getElementById('ov2ExpTotal');if(expEl)expEl.textContent='$'+thisMonExpAmt.toFixed(2);
+  var expBreak=document.getElementById('ov2ExpBreakdown');
+  if(expBreak){
+    if(!thisMonExp.length){expBreak.innerHTML='<div style="font-size:12px;color:var(--textl);font-style:italic">No expenses this month.</div>';}
+    else{
+      var catTotals={};thisMonExp.forEach(function(e){catTotals[e.cat||'other']=(catTotals[e.cat||'other']||0)+(parseFloat(e.amt)||0);});
+      var sortedCats=Object.keys(catTotals).sort(function(a,b){return catTotals[b]-catTotals[a];}).slice(0,5);
+      expBreak.innerHTML=sortedCats.map(function(c){
+        var pct=thisMonExpAmt>0?Math.round(catTotals[c]/thisMonExpAmt*100):0;
+        return'<div style="margin-bottom:7px">'+
+          '<div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px">'+
+            '<span style="color:var(--textd)">'+escHtml(c)+'</span>'+
+            '<span style="font-weight:700;color:var(--ured)">$'+catTotals[c].toFixed(2)+' <span style="font-weight:400;color:var(--textl)">('+pct+'%)</span></span></div>'+
+          '<div style="height:5px;background:#f0ebe6;border-radius:3px;overflow:hidden">'+
+            '<div style="height:100%;width:'+pct+'%;background:linear-gradient(90deg,var(--rose),var(--ured));border-radius:3px"></div></div></div>';
+      }).join('');
+    }
+  }
+
+  // 4. Bills still to pay
+  var billsList=document.getElementById('ov2BillsList');
+  if(billsList){
+    var paid=BILL_PAY[mon]||{};
+    if(!BILLS.length){billsList.innerHTML='<div style="font-size:12px;color:var(--textl);font-style:italic">No bills added yet.</div>';}
+    else{
+      var unpaid=BILLS.filter(function(b){return(paid[b.id]||'')!=='posted';});
+      var postedCount=BILLS.length-unpaid.length;
+      var html=unpaid.map(function(b){
+        var status=paid[b.id]||'';
+        var badge=status?'<span style="font-size:10px;padding:2px 6px;border-radius:6px;margin-right:4px;background:'+(status==='paid'?'var(--blue)':'#f0e8c8')+';color:'+(status==='paid'?'#fff':'#8a6020')+'">'+status+'</span>':'';
+        return'<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border);font-size:13px">'+
+          '<span>'+badge+escHtml(b.name)+' <span style="font-size:11px;color:var(--textl)">day '+b.day+'</span></span>'+
+          '<span style="font-weight:700">$'+(parseFloat(getBillMonthAmt(b.id))||0).toFixed(2)+'</span></div>';
+      }).join('');
+      if(postedCount>0)html+='<div style="font-size:11px;color:var(--textl);padding:5px 0;font-style:italic">'+postedCount+' bill(s) already posted ✅</div>';
+      var remaining=unpaid.reduce(function(s,b){return s+(parseFloat(getBillMonthAmt(b.id))||0);},0);
+      html+='<div style="display:flex;justify-content:space-between;padding-top:8px;border-top:1px solid var(--border);margin-top:4px">'+
+        '<span style="font-size:12px;font-weight:700;color:var(--textd)">Still owed this month</span>'+
+        '<span style="font-size:16px;font-weight:800;color:var(--ured)">$'+remaining.toFixed(2)+'</span></div>';
+      billsList.innerHTML=html;
+    }
+  }
+
+  // 5. Where to go from here
+  var planEl=document.getElementById('ov2PlanSection');
+  if(planEl){
+    var rows=[
+      {label:'Cash in accounts',val:'$'+cash.toFixed(2),color:'var(--sage)'},
+      {label:'Bills still from cash',val:'-$'+billsFromCash.toFixed(2),color:'var(--ured)'},
+      {label:'Credit min. payments',val:'-$'+minPayTotal.toFixed(2),color:'var(--ured)'},
+      {label:'Safe to spend',val:(safeToSpend<0?'-':'')+'$'+Math.abs(safeToSpend).toFixed(2),color:safeToSpend>100?'var(--sage)':safeToSpend>=0?'#c09020':'var(--ured)',bold:true}
+    ];
+    var html=rows.map(function(r){
+      return'<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border);font-size:13px">'+
+        '<span style="'+(r.bold?'font-weight:700':'')+'">'+r.label+'</span>'+
+        '<span style="font-weight:700;color:'+r.color+'">'+r.val+'</span></div>';
+    }).join('');
+    if(MONEY_PROJECTS&&MONEY_PROJECTS.length){
+      html+='<div style="margin-top:10px;font-size:11px;font-weight:700;color:var(--textl);text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px">Savings goals</div>';
+      html+=MONEY_PROJECTS.map(function(p){
+        var pct=p.goal?Math.min(100,Math.round((p.saved||0)/p.goal*100)):0;
+        return'<div style="margin-bottom:8px">'+
+          '<div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px">'+
+            '<span style="font-weight:600">'+escHtml(p.name)+'</span>'+
+            '<span style="color:var(--sage)">$'+(p.saved||0).toFixed(0)+' / $'+(p.goal||0).toFixed(0)+'</span></div>'+
+          '<div style="height:6px;background:#f0ebe6;border-radius:3px;overflow:hidden">'+
+            '<div style="height:100%;border-radius:3px;background:'+(p.color||'var(--accent)')+';width:'+pct+'%"></div></div></div>';
+      }).join('');
+    }else{
+      html+='<div style="font-size:12px;color:var(--textl);font-style:italic;margin-top:8px">Add savings goals in the Projects tab.</div>';
+    }
+    planEl.innerHTML=html;
+  }
+
   updateEstateStrip();
   renderAllMoneyChecklists();
 }
