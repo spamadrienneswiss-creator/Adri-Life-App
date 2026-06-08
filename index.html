@@ -1020,7 +1020,8 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     <button class="tab-btn" data-tab="conservatory" onclick="goTab('conservatory',this)">Personal Growth</button>
     <button class="tab-btn" data-tab="hearthside" onclick="goTab('hearthside',this)">Health &amp; Wellness</button>
     <button class="tab-btn" data-tab="workshop" onclick="goTab('workshop',this)">Workshop</button>
-    <button class="tab-btn" data-tab="estate" onclick="goTab('estate',this)">Money &amp; Home</button>
+    <button class="tab-btn" data-tab="estate" onclick="goTab('estate',this)">Money</button>
+    <button class="tab-btn" data-tab="myhome" onclick="goTab('myhome',this)">🏠 Home</button>
     <button class="tab-btn" data-tab="emporium" onclick="goTab('emporium',this)">Work</button>
     <button class="tab-btn" data-tab="archives" onclick="goTab('archives',this)">Research Library</button>
     <button class="tab-btn" data-tab="archive" onclick="goTab('archive',this)">Archive</button>
@@ -1291,7 +1292,7 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
 <!-- THE ESTATE -->
 <div class="view" id="v-estate">
   <div class="hub-banner" style="background:linear-gradient(135deg,rgba(42,46,54,.1),rgba(212,168,32,.08))">
-    <div class="hub-info"><h2>Money &amp; Home</h2></div>
+    <div class="hub-info"><h2>Money</h2></div>
   </div>
   <!-- Financial summary strip -->
   <div class="card" style="margin-bottom:10px;padding:10px 14px">
@@ -1311,7 +1312,7 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
   <div class="hub-grid">
     <div class="hub-card span2" onclick="goTab('money',null)"><div class="hub-card-ic">💰</div><div class="hub-card-name">Money</div><div class="hub-card-sub" id="hub-money-sub">Bills, budget &amp; expenses</div></div>
     <div class="hub-card" onclick="goTab('money',null);setTimeout(function(){showMoneySec('accounts',document.querySelector('#v-money .pn-btn[data-sec=accounts]'))},200)"><div class="hub-card-ic">🏦</div><div class="hub-card-name">Accounts</div><div class="hub-card-sub">Cash &amp; credit balances</div></div>
-    <div class="hub-card" onclick="goTab('money',null);setTimeout(function(){showMoneySec('home-items',document.querySelector('#v-money .pn-btn[data-sec=home-items]'))},200)"><div class="hub-card-ic">🏠</div><div class="hub-card-name">Home</div><div class="hub-card-sub">Home inventory &amp; items</div></div>
+    <div class="hub-card" onclick="goTab('myhome',null)"><div class="hub-card-ic">🏠</div><div class="hub-card-name">Home</div><div class="hub-card-sub">Home inventory &amp; items</div></div>
     <div class="hub-card" onclick="goTab('money',null);setTimeout(function(){showMoneySec('projects',document.querySelector('#v-money .pn-btn[data-sec=projects]'))},200)"><div class="hub-card-ic">💼</div><div class="hub-card-name">Projects</div><div class="hub-card-sub">Savings &amp; money goals</div></div>
     <div class="hub-card" onclick="goTab('money',null);setTimeout(function(){showMoneySec('overview',document.querySelector('#v-money .pn-btn[data-sec=overview]'))},200)"><div class="hub-card-ic">📊</div><div class="hub-card-name">Overview</div><div class="hub-card-sub">Month summary</div></div>
   </div>
@@ -1963,7 +1964,6 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     <button class="pn-btn" data-sec="expenses" onclick="showMoneySec('expenses',this)">💸 Expenses</button>
     <button class="pn-btn" data-sec="income" onclick="showMoneySec('income',this)">💰 Income</button>
     <button class="pn-btn" data-sec="accounts" onclick="showMoneySec('accounts',this)">🏦 Accounts</button>
-    <button class="pn-btn" data-sec="home-items" onclick="showMoneySec('home-items',this)">🏠 Home</button>
     <button class="pn-btn" data-sec="projects" onclick="showMoneySec('projects',this)">💼 Projects</button>
     <button class="pn-btn" data-sec="tax" onclick="showMoneySec('tax',this)">💸 Tax</button>
     <button class="pn-btn" data-sec="money-plan" onclick="showMoneySec('money-plan',this)">📈 Plan</button>
@@ -2108,15 +2108,6 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
       </div>
     </div>
   </div>
-  <!-- Home Items -->
-  <div id="ms-home-items" class="money-sec" style="display:none">
-    <div style="display:flex;gap:8px;margin-bottom:12px">
-      <input id="homeItemSearch" class="fi" placeholder="Search home items…" oninput="renderHomeItems()" style="flex:1;margin-bottom:0">
-      <button class="ok-btn" style="margin:0;padding:8px 14px" onclick="openHomeItemModal(null)">＋ Add</button>
-    </div>
-    <div id="homeItemCats" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px"></div>
-    <div id="homeItemsList"></div>
-  </div>
   <!-- Projects -->
   <div id="ms-projects" class="money-sec" style="display:none">
     <button class="ok-btn" style="width:100%;margin-bottom:12px" onclick="openMoneyProjectModal(null)">＋ New Project</button>
@@ -2178,6 +2169,16 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
       <div id="moneyTasksList"></div>
     </div>
   </div>
+</div>
+
+<!-- HOME ITEMS -->
+<div class="view" id="v-myhome">
+  <div style="display:flex;gap:8px;margin-bottom:12px">
+    <input id="homeItemSearch" class="fi" placeholder="Search home items…" oninput="renderHomeItems()" style="flex:1;margin-bottom:0">
+    <button class="ok-btn" style="margin:0;padding:8px 14px" onclick="openHomeItemModal(null)">＋ Add</button>
+  </div>
+  <div id="homeItemCats" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px"></div>
+  <div id="homeItemsList"></div>
 </div>
 
 <div class="view" id="v-focus">
@@ -5802,11 +5803,11 @@ var MEAL_COMBOS = JSON.parse(localStorage.getItem('aMC')||'null')||[
   {id:'mc4',name:'Recovery Meal',emoji:'🍗',foods:['f2','f3','f10']},
 ];
 
-var DEFAULT_TAB_ORDER=['today','plan','helm','lighthouse','conservatory','hearthside','workshop','estate','emporium','archives','archive','settings'];
+var DEFAULT_TAB_ORDER=['today','plan','helm','lighthouse','conservatory','hearthside','workshop','estate','myhome','emporium','archives','archive','settings'];
 var TAB_LABELS={appindex:'App Index',today:'Today',plan:'Plan',helm:'Tasks & Projects',conservatory:'Personal Growth',hearthside:'Health & Wellness',workshop:'Workshop',lighthouse:'Spiritual',estate:'Money & Home',emporium:'Work',archives:'Research Library',archive:'Archive',settings:'Settings',stories:'Stories',mixtape:'Mixtape','focus-session':'Focus Session',grocery:'Grocery List',export:'Export',routines:'Routines',lists:'Lists',content:'Content Creation',wellness:'Health & Wellness',food:'Move & Exercise',meals:'Meals & Nutrition',recap:'Recap',money:'Money',accounts:'Accounts','home-items':'Home Items','money-projects':'Money Projects',wigs:'Wig Orders','work-projects':'Work Projects',guide:'Research Library',spirit:'Spiritual',goals:'Goals',learn:'Learning',focus:'Focus Tools',spark:'Spark',board:'Mood Board',faves:'Faves',places:'Places'};
 var TAB_ORDER=(function(){var o=JSON.parse(localStorage.getItem('aTabOrder')||'null');if(!o)return DEFAULT_TAB_ORDER.slice();var full=DEFAULT_TAB_ORDER.slice();o=o.filter(function(t){return full.indexOf(t)>-1;});full.forEach(function(t){if(o.indexOf(t)<0)o.push(t);});return o;})();
-var SECTION_VIEWS={home:['home'],today:['today'],plan:['plan'],helm:['tasks','projects','focus-session','grocery','routines'],conservatory:['goals','learn','focus','spark','lists'],hearthside:['food','meals','wellness'],workshop:['board','faves','stories','mixtape','places'],lighthouse:['spirit'],estate:['money','accounts','home-items','money-projects'],emporium:['wigs','work-projects','content'],archives:['guide'],settings:['settings','export'],archive:['archive']};
-var SECTION_LABELS={today:'Today',plan:'Plan',helm:'Tasks & Projects',conservatory:'Personal Growth',hearthside:'Health & Wellness',workshop:'Workshop',lighthouse:'Spiritual',estate:'Money & Home',emporium:'Work',archives:'Research Library',archive:'Archive',settings:'Settings'};
+var SECTION_VIEWS={home:['home'],today:['today'],plan:['plan'],helm:['tasks','projects','focus-session','grocery','routines'],conservatory:['goals','learn','focus','spark','lists'],hearthside:['food','meals','wellness'],workshop:['board','faves','stories','mixtape','places'],lighthouse:['spirit'],estate:['money','accounts','money-projects'],myhome:['myhome'],emporium:['wigs','work-projects','content'],archives:['guide'],settings:['settings','export'],archive:['archive']};
+var SECTION_LABELS={today:'Today',plan:'Plan',helm:'Tasks & Projects',conservatory:'Personal Growth',hearthside:'Health & Wellness',workshop:'Workshop',lighthouse:'Spiritual',estate:'Money',myhome:'🏠 Home',emporium:'Work',archives:'Research Library',archive:'Archive',settings:'Settings'};
 var VIEW_SECTION=(function(){var m={};Object.keys(SECTION_VIEWS).forEach(function(s){SECTION_VIEWS[s].forEach(function(v){m[v]=s;});});return m;})();
 
 var S = {
@@ -6341,6 +6342,7 @@ function goTabDirect(tab,btn){
   if(tab==='tasks'){ updateHelmBadges(); }
   if(tab==='focus-session'){ renderFocusSession(); }
   if(tab==='lists'){ goTabDirect('learn');setTimeout(function(){var b=document.querySelector('#v-learn .pn-btn:nth-child(3)');if(b)showLearnSec('lists',b);},50);return; }
+  if(tab==='myhome'){ renderHomeItems(); }
   if(tab==='wigs'){ renderWigOrders(); }
 
   if(tab==='content'){ renderContentPage(); }
@@ -15808,14 +15810,13 @@ function celebrate(){
 // ═══════════════════════════════════════════════
 
 function showMoneySec(sec,btn){
-  ['overview','bills','expenses','income','accounts','home-items','projects','tax','money-plan'].forEach(function(s){
+  ['overview','bills','expenses','income','accounts','projects','tax','money-plan'].forEach(function(s){
     var el=document.getElementById('ms-'+s);
     if(el)el.style.display=(s===sec)?'':'none';
   });
   document.querySelectorAll('#v-money .pn-btn').forEach(function(b){b.classList.remove('on');});
   if(btn)btn.classList.add('on');
   if(sec==='accounts')renderAccounts();
-  if(sec==='home-items')renderHomeItems();
   if(sec==='projects')renderMoneyProjects();
   if(sec==='tax')renderTaxSection();
   if(sec==='overview')renderMoneyOverview();
@@ -23712,7 +23713,7 @@ var APP_INDEX=[
     {label:'Expenses Log',action:"goTab('money',null)"},
     {label:'Income',action:"goTab('money',null)"},
     {label:'Accounts & Balances',action:"goTab('accounts',null)"},
-    {label:'Home Items',action:"goTab('home-items',null)"},
+    {label:'Home Items',action:"goTab('myhome',null)"},
     {label:'Money Projects',action:"goTab('money-projects',null)"},
   ]},
   {hub:'Health & Wellness',items:[
