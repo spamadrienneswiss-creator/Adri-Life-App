@@ -3750,10 +3750,18 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     <div id="fdbCustomTagList" style="display:flex;gap:5px;flex-wrap:wrap;margin-top:6px"></div>
   </div>
 
-  <!-- Store / Price / URL / Notes -->
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-    <div class="fg"><label class="fl">Store</label><input class="fi" id="fdbStore" placeholder="e.g. Costco"></div>
-    <div class="fg"><label class="fl">Price / pkg ($)</label><input class="fi" id="fdbPrice" type="number" placeholder="0.00" step="0.01"></div>
+  <!-- Price History -->
+  <div class="fg">
+    <label class="fl">💰 Price History</label>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:4px">
+      <div><div style="font-size:11px;color:var(--textl);margin-bottom:3px">Store</div><input class="fi" id="fdbPeStore" placeholder="Costco, Aldi…" style="margin-bottom:0"></div>
+      <div><div style="font-size:11px;color:var(--textl);margin-bottom:3px">Price $</div><input class="fi" id="fdbPePrice" type="number" placeholder="0.00" step="0.01" style="margin-bottom:0"></div>
+      <div><div style="font-size:11px;color:var(--textl);margin-bottom:3px">Date</div><input class="fi" id="fdbPeDate" type="date" style="margin-bottom:0"></div>
+    </div>
+    <button type="button" onclick="fdbAddPriceEntry()" class="btn sec" style="margin-top:6px;width:100%;font-size:12px">+ Add Price Entry</button>
+    <div id="fdbPriceLatest" style="margin-top:6px"></div>
+    <button type="button" id="fdbPriceHistoryBtn" onclick="togFdbPriceHistory()" style="display:none;font-size:11px;background:none;border:none;color:var(--textl);cursor:pointer;padding:2px 0;margin-top:2px;text-decoration:underline">▸ Show full history</button>
+    <div id="fdbPriceHistoryList" style="display:none;margin-top:4px"></div>
   </div>
   <div class="fg"><label class="fl">URL / Link</label><input class="fi" id="fdbUrl" placeholder="Product page, recipe link…"></div>
   <div class="fg"><label class="fl">Notes</label><textarea class="fi" id="fdbNotes" rows="2" placeholder="Anything else…" style="resize:vertical"></textarea></div>
@@ -5753,7 +5761,7 @@ function togTaskPin(id){
   renderT();
 }
 function jumpToTask(id){
-  goTab('helm',null);
+  goTab('tasks',null);
   setTimeout(function(){
     // Expand all ancestors so the card exists in the DOM
     function _expandPath(arr){
@@ -19707,7 +19715,7 @@ function addMealLogItem(){
   var dbItem=FOOD_DB.find(function(x){return (x.name||'').toLowerCase()===nl;});
   var addToDb=(document.getElementById('mealLogAddToDB')||{}).checked;
   if(dbItem){dbItem.useCount=(dbItem.useCount||0)+1;saveFoodDbData();}
-  else if(addToDb){FOOD_DB.unshift({id:'fd-'+Date.now(),name:name,tags:[],useCount:1,staple:false,store:'',price:0,cal:0,pro:0,carb:0,fat:0,notes:'',created:todayStr()});saveFoodDbData();}
+  else if(addToDb){FOOD_DB.unshift({id:'fd-'+Date.now(),name:name,tags:[],useCount:1,staple:false,store:'',price:0,priceEntries:[],cal:0,pro:0,carb:0,fat:0,notes:'',created:todayStr()});saveFoodDbData();}
   autoFlagStaples();
   document.getElementById('mealLogName').value='';
   document.getElementById('mealLogDay').value='';
@@ -20751,7 +20759,7 @@ function addGroceryManual(){
   var nl=name.toLowerCase();
   var grocAddToDB=(document.getElementById('groceryAddToDB')||{}).checked;
   if(grocAddToDB&&!FOOD_DB.find(function(x){return (x.name||'').toLowerCase()===nl;})){
-    FOOD_DB.unshift({id:'fd-'+Date.now(),name:name,tags:[],useCount:0,staple:false,store:store||'',price:0,cal:0,pro:0,carb:0,fat:0,notes:'',created:todayStr()});
+    FOOD_DB.unshift({id:'fd-'+Date.now(),name:name,tags:[],useCount:0,staple:false,store:store||'',price:0,priceEntries:[],cal:0,pro:0,carb:0,fat:0,notes:'',created:todayStr()});
     saveFoodDbData();
   }
   document.getElementById('groceryAddName').value='';
@@ -21884,6 +21892,13 @@ FOOD_DB.forEach(function(item){
   // Migrate single cat string to tags array
   if(item.cat&&!item.tags){item.tags=[item.cat];}
   if(!item.tags)item.tags=[];
+  // Migrate single store+price to priceEntries array
+  if(!item.priceEntries){
+    item.priceEntries=[];
+    if(item.store||item.price){
+      item.priceEntries.push({id:'pe-'+item.id,store:item.store||'',price:item.price||0,date:item.added||new Date().toISOString().slice(0,10)});
+    }
+  }
 });
 var _foodDbCat = '';
 var _foodDbSort = 'fav'; // 'fav','az','store','cat'
@@ -21937,18 +21952,85 @@ function addDbItemToGrocery(id){
 var FOOD_CAT_EMOJI = {protein:'🥩',vegetable:'🥦',grain:'🌾',dairy:'🥛',fruit:'🍎',snack:'🍿',beverage:'☕',condiment:'🧂',other:'📦'};
 
 var _fdbServings = []; // working array for serving sizes in modal
+var _fdbPriceEntries = []; // working array for price entries in modal
+
+function fdbAddPriceEntry(){
+  var store=(document.getElementById('fdbPeStore').value||'').trim();
+  var price=parseFloat(document.getElementById('fdbPePrice').value)||0;
+  var date=(document.getElementById('fdbPeDate').value||'').trim()||todayStr();
+  if(!store&&!price)return;
+  _fdbPriceEntries.push({id:'pe-'+Date.now(),store:store,price:price,date:date});
+  document.getElementById('fdbPeStore').value='';
+  document.getElementById('fdbPePrice').value='';
+  document.getElementById('fdbPeDate').value=todayStr();
+  renderFdbPriceEntries();
+}
+
+function fdbDeletePriceEntry(id){
+  _fdbPriceEntries=_fdbPriceEntries.filter(function(e){return e.id!==id;});
+  renderFdbPriceEntries();
+}
+
+function togFdbPriceHistory(){
+  var el=document.getElementById('fdbPriceHistoryList');
+  var btn=document.getElementById('fdbPriceHistoryBtn');
+  if(!el)return;
+  var open=el.style.display!=='none';
+  el.style.display=open?'none':'';
+  if(btn)btn.textContent=open?'▸ Show full history':'▴ Hide history';
+}
+
+function renderFdbPriceEntries(){
+  var latestEl=document.getElementById('fdbPriceLatest');
+  var histEl=document.getElementById('fdbPriceHistoryList');
+  var histBtn=document.getElementById('fdbPriceHistoryBtn');
+  if(!latestEl)return;
+  if(!_fdbPriceEntries.length){
+    latestEl.innerHTML='<div style="font-size:11px;color:var(--textl)">No price entries yet.</div>';
+    if(histEl)histEl.innerHTML='';
+    if(histBtn)histBtn.style.display='none';
+    return;
+  }
+  var lps={};
+  _fdbPriceEntries.forEach(function(e){
+    var s=e.store||'(no store)';
+    if(!lps[s]||(e.date||'')>=(lps[s].date||''))lps[s]=e;
+  });
+  var keys=Object.keys(lps);
+  var latestHtml=keys.map(function(s){
+    var e=lps[s];
+    return'<span style="font-size:12px;background:#f8f4f0;border-radius:7px;padding:4px 9px;margin-right:5px;margin-bottom:4px;display:inline-block">'
+      +'🏪 '+escHtml(s)+' <strong>$'+(e.price||0).toFixed(2)+'</strong>'
+      +'<span style="color:var(--textl);font-size:10px"> · '+(e.date||'')+'</span>'
+      +'</span>';
+  }).join('');
+  latestEl.innerHTML='<div style="display:flex;flex-wrap:wrap">'+latestHtml+'</div>';
+  if(histEl){
+    var sorted=_fdbPriceEntries.slice().sort(function(a,b){return (b.date||'')>(a.date||'')?1:-1;});
+    histEl.innerHTML='<div style="border-top:1px solid #f0ece8;margin-top:4px">'+sorted.map(function(e){
+      return'<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid #f8f4f0;font-size:12px">'
+        +'<span style="flex:1;color:var(--textd)">🏪 '+escHtml(e.store||'—')+'</span>'
+        +'<span style="font-weight:700">$'+(e.price||0).toFixed(2)+'</span>'
+        +'<span style="color:var(--textl);font-size:11px;min-width:80px;text-align:right">'+(e.date||'')+'</span>'
+        +'<button type="button" onclick="fdbDeletePriceEntry(\''+e.id+'\')" style="background:none;border:none;color:#e74c3c;cursor:pointer;font-size:15px;padding:0 2px;line-height:1">×</button>'
+        +'</div>';
+    }).join('')+'</div>';
+    if(histBtn)histBtn.style.display='';
+  }
+}
 function openFoodDbModal(editId){
   document.getElementById('fdbModalTitle').textContent = editId ? '✏️ Edit Ingredient' : '🧩 Add Ingredient';
   document.getElementById('fdbId').value = editId||'';
   // Reset all fields
-  ['fdbName','fdbBrand','fdbAliases','fdbSvLabel','fdbBarcode','fdbUrl','fdbNotes','fdbCustomTag','fdbStore'].forEach(function(id){var e=document.getElementById(id);if(e)e.value='';});
-  ['fdbCal','fdbPro','fdbCarb','fdbFat','fdbFib','fdbPrice','fdbSvGrams','fdbUsualQty'].forEach(function(id){var e=document.getElementById(id);if(e)e.value='';});
+  ['fdbName','fdbBrand','fdbAliases','fdbSvLabel','fdbBarcode','fdbUrl','fdbNotes','fdbCustomTag'].forEach(function(id){var e=document.getElementById(id);if(e)e.value='';});
+  ['fdbCal','fdbPro','fdbCarb','fdbFat','fdbFib','fdbSvGrams','fdbUsualQty'].forEach(function(id){var e=document.getElementById(id);if(e)e.value='';});
   document.querySelectorAll('#fdbTagChips .fchip').forEach(function(b){b.classList.remove('on');});
   var ctl=document.getElementById('fdbCustomTagList');if(ctl)ctl.innerHTML='';
   var per100el=document.getElementById('fdbPer100Preview');if(per100el){per100el.style.display='none';per100el.textContent='';}
   var bst=document.getElementById('fdbBarcodeStatus');if(bst)bst.textContent='';
   var typeEl=document.getElementById('fdbType');if(typeEl)typeEl.value='generic';
   _fdbServings=[];
+  _fdbPriceEntries=[];
   var del=document.getElementById('fdbDelBtn');
   if(editId){
     var item=FOOD_DB.find(function(x){return x.id===editId;});
@@ -21960,8 +22042,7 @@ function openFoodDbModal(editId){
       var ure=document.getElementById('fdbUrl');if(ure)ure.value=item.url||'';
       var bar=document.getElementById('fdbBarcode');if(bar)bar.value=item.barcode||'';
       var no=document.getElementById('fdbNotes');if(no)no.value=item.notes||'';
-      var st=document.getElementById('fdbStore');if(st)st.value=item.store||'';
-      var pr=document.getElementById('fdbPrice');if(pr)pr.value=item.price||'';
+      _fdbPriceEntries=(item.priceEntries||[]).slice();
       // Primary serving
       var primarySv=item.servings&&item.servings.length?item.servings[0]:null;
       var svl=document.getElementById('fdbSvLabel');if(svl)svl.value=primarySv?primarySv.label:(item.serving||'');
@@ -21989,7 +22070,9 @@ function openFoodDbModal(editId){
     if(del)del.style.display='none';
     document.getElementById('fdbUsualQty').value='1';
   }
+  var _peDate=document.getElementById('fdbPeDate');if(_peDate)_peDate.value=todayStr();
   renderFdbServings();
+  renderFdbPriceEntries();
   calcFdbPer100Preview();
   openM('foodDbModal');
 }
@@ -22046,8 +22129,9 @@ function saveFoodDb(){
     servings:allServings,
     myUsual:myUsual,
     serving:svLabel||(existingItem?existingItem.serving||'':''),
-    price:parseFloat(document.getElementById('fdbPrice').value)||0,
-    store:(document.getElementById('fdbStore').value||'').trim(),
+    priceEntries:_fdbPriceEntries.slice(),
+    price:(function(){var lat=null;_fdbPriceEntries.forEach(function(e){if(!lat||(e.date||'')>=(lat.date||''))lat=e;});return lat?lat.price:0;}()),
+    store:(function(){var lat=null;_fdbPriceEntries.forEach(function(e){if(!lat||(e.date||'')>=(lat.date||''))lat=e;});return lat?lat.store:'';}()),
     url:(document.getElementById('fdbUrl').value||'').trim(),
     barcode:(document.getElementById('fdbBarcode').value||'').trim(),
     notes:(document.getElementById('fdbNotes').value||'').trim(),
@@ -22338,10 +22422,18 @@ function renderFoodDb(){
         +item.servings.map(function(s){return escHtml(s.label)+(s.grams?' ('+s.grams+'g)':'');}).join(' · ')
         +(item.myUsual&&item.myUsual.qty&&item.myUsual.qty!==1?'  ⭐ usual: '+item.myUsual.qty+'×':'')
         +'</div>':'')
-      +((item.store||item.price)?'<div style="font-size:11px;color:var(--textl);margin-top:2px">'
-        +(item.store?'🏪 '+escHtml(item.store)+' ':'')
-        +(item.price?'· $'+item.price.toFixed(2)+'/srv':'')
-        +'</div>':'')
+      +(function(){
+        var es=item.priceEntries||[];
+        if(!es.length){
+          if(!item.store&&!item.price)return'';
+          return'<div style="font-size:11px;color:var(--textl);margin-top:2px">'+(item.store?'🏪 '+escHtml(item.store)+' ':'')+(item.price?'$'+item.price.toFixed(2):'')+'</div>';
+        }
+        var lps={};
+        es.forEach(function(e){var s=e.store||'(no store)';if(!lps[s]||(e.date||'')>=(lps[s].date||''))lps[s]=e;});
+        var keys=Object.keys(lps);
+        if(!keys.length)return'';
+        return'<div style="font-size:11px;color:var(--textl);margin-top:2px">'+keys.map(function(s){return'🏪 '+escHtml(s)+' <strong style="color:var(--textd)">$'+lps[s].price.toFixed(2)+'</strong>';}).join(' · ')+'</div>';
+      }())
       +(item.recipe?'<div style="font-size:11px;color:var(--lav);margin-top:2px">📖 '+escHtml(item.recipe)+'</div>':'')
       +'</div>'
       +'<div style="display:flex;flex-direction:column;gap:3px;flex-shrink:0;align-items:flex-end">'
