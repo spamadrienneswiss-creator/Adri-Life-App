@@ -1622,15 +1622,27 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
       <span id="ha-tasklist" style="color:var(--textl);font-size:12px">▾</span>
     </div>
     <div id="hs-tasklist" style="padding-top:10px">
-      <div class="ul" style="margin-bottom:10px">
-        <div class="uli r"><div class="uln">🔴 Do Now</div><div class="uls">Urgent+Important</div></div>
-        <div class="uli y"><div class="uln">🟡 Schedule</div><div class="uls">Important, not urgent</div></div>
-        <div class="uli b"><div class="uln">🔵 Quick Win</div><div class="uls">Urgent, not important</div></div>
-        <div class="uli g"><div class="uln">⚪ Someday</div><div class="uls">Not urgent</div></div>
+      <!-- Priority legend — collapsed by default -->
+      <div class="helm-sec-hdr" onclick="togTaskSub('ts-legend','ta-legend')" style="margin-bottom:0;padding:5px 0;border-bottom:1px solid var(--bdr)">
+        <span style="font-size:11px;font-weight:700;color:var(--textl);text-transform:uppercase;letter-spacing:.5px">Priority Guide</span>
+        <span id="ta-legend" style="font-size:11px;color:var(--textl)">▸</span>
       </div>
-      <div style="margin-bottom:10px">
+      <div id="ts-legend" style="display:none;margin-bottom:10px;padding-top:8px">
+        <div class="ul">
+          <div class="uli r"><div class="uln">🔴 Do Now</div><div class="uls">Urgent+Important</div></div>
+          <div class="uli y"><div class="uln">🟡 Schedule</div><div class="uls">Important, not urgent</div></div>
+          <div class="uli b"><div class="uln">🔵 Quick Win</div><div class="uls">Urgent, not important</div></div>
+          <div class="uli g"><div class="uln">⚪ Someday</div><div class="uls">Not urgent</div></div>
+        </div>
+      </div>
+      <!-- Filter — collapsed by default, dot when active -->
+      <div class="helm-sec-hdr" onclick="togTaskSub('ts-filter','ta-filter')" style="padding:5px 0;border-bottom:1px solid var(--bdr);margin-bottom:8px">
+        <span style="font-size:11px;font-weight:700;color:var(--textl);text-transform:uppercase;letter-spacing:.5px">Filter &amp; Sort<span id="ts-filter-dot" style="display:none;width:7px;height:7px;background:var(--rose);border-radius:50%;margin-left:6px;vertical-align:middle"></span></span>
+        <span id="ta-filter" style="font-size:11px;color:var(--textl)">▸</span>
+      </div>
+      <div id="ts-filter" style="display:none;margin-bottom:10px">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
-          <span style="font-size:11px;font-weight:700;color:var(--textl);text-transform:uppercase;letter-spacing:.5px">Filter</span>
+          <span style="font-size:11px;font-weight:700;color:var(--textl);text-transform:uppercase;letter-spacing:.5px">Sort</span>
           <div style="display:flex;gap:6px;align-items:center">
             <select id="taskSortSel" onchange="setTaskSort(this.value)" style="padding:5px 10px;border-radius:9px;border:1.5px solid var(--bdr);font-family:'Quicksand',sans-serif;font-size:12px;font-weight:700;color:var(--textd);background:#fff;cursor:pointer">
               <option value="urgency">By Priority</option>
@@ -6288,7 +6300,7 @@ function goTabDirect(tab,btn){
   if(tab==='routines'){ renderDailyRtn(_dailyRtnKey); renderOtherRtns(); }
   if(tab==='hearthside'){ renderHWHubStats(); }
   if(tab==='lighthouse'){ updateLighthouseSpiritStatus(); }
-  if(tab==='tasks'){ updateHelmBadges(); }
+  if(tab==='tasks'){ updateHelmBadges(); updTaskFilterDot(); }
   if(tab==='projects'){ renderProjects(); renderTmplBar(); }
   if(tab==='focus-session'){ renderFocusSession(); }
   if(tab==='lists'){ goTabDirect('learn');setTimeout(function(){var b=document.querySelector('#v-learn .pn-btn:nth-child(3)');if(b)showLearnSec('lists',b);},50);return; }
@@ -7591,17 +7603,33 @@ function sortTaskArr(arr){
 
 var TASK_FILTERS={urgs:[],cats:[]};
 
+function togTaskSub(secId,arrowId){
+  var el=document.getElementById(secId);if(!el)return;
+  var arr=document.getElementById(arrowId);
+  var open=el.style.display==='none';
+  el.style.display=open?'':'none';
+  if(arr)arr.textContent=open?'▾':'▸';
+}
+
+function updTaskFilterDot(){
+  var active=TASK_FILTERS.urgs.length>0||TASK_FILTERS.cats.length>0;
+  var dot=document.getElementById('ts-filter-dot');
+  if(dot)dot.style.display=active?'inline-block':'none';
+}
+
 function togTaskFilter(type,val,btn){
   var arr=type==='urg'?TASK_FILTERS.urgs:TASK_FILTERS.cats;
   var idx=arr.indexOf(val);
   if(idx>-1)arr.splice(idx,1);else arr.push(val);
   if(btn)btn.classList.toggle('on',arr.indexOf(val)>-1);
+  updTaskFilterDot();
   renderT();
 }
 
 function clearTaskFilters(){
   TASK_FILTERS={urgs:[],cats:[]};
   document.querySelectorAll('.tf-chip').forEach(function(b){b.classList.remove('on');});
+  updTaskFilterDot();
   renderT();
 }
 
