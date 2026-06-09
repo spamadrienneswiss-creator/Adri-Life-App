@@ -5716,6 +5716,7 @@ function togTaskCollapse(id){
   t.collapsed=!t.collapsed;
   var root=_findRootFor(id,TASKS)||t;
   saveTasks();
+  fbSave('tasks',root.id,root);
   renderT();
 }
 function togChildAdd(id){
@@ -5739,10 +5740,11 @@ function addChildTask(taskId){
   renderT();
 }
 function togTaskPin(id){
-  var t=TASKS.find(function(x){return x.id===id;});if(!t)return;
+  var t=findTaskDeep(id,TASKS);if(!t)return;
   t.pinned=!t.pinned;
   saveTasks();
-  fbSave('tasks',id,t);
+  var root=_findRootFor(id,TASKS)||t;
+  fbSave('tasks',root.id,root);
   renderPinned();
   renderT();
 }
@@ -7602,6 +7604,7 @@ function sortTaskArr(arr){
 }
 
 var TASK_FILTERS={urgs:[],cats:[]};
+var _doneSectionOpen=false, _doneProjSectionOpen=false;
 
 function togTaskSub(secId,arrowId){
   var el=document.getElementById(secId);if(!el)return;
@@ -7659,10 +7662,23 @@ function renderT(){
   });
   arr=sortTaskArr(arr);
   var parkedBanner=parkedCount?'<div onclick="unparkAllTasks()" style="text-align:center;padding:8px;font-size:12px;color:var(--textl);cursor:pointer;border-bottom:1px solid var(--border)">🅿️ '+parkedCount+' task'+(parkedCount!==1?'s':'')+' parked — tap to restore</div>':'';
-  list.innerHTML=parkedBanner+(arr.length?arr.map(function(t){return tHTML(t,0);}).join(''):'<div class="empty"><div class="emj">✨</div><p>No tasks match this filter.</p></div>');
+  var activeTasks=parkedBanner+(arr.length?arr.map(function(t){return tHTML(t,0);}).join(''):'<div class="empty"><div class="emj">✨</div><p>No tasks match this filter.</p></div>');
+  var doneTasks=TASKS.filter(function(t){return t.done;}).slice().sort(function(a,b){return (b.doneDate||'')>(a.doneDate||'')?1:-1;});
+  var doneSection='';
+  if(doneTasks.length&&!showDone){
+    doneSection='<div style="margin-top:14px">'
+      +'<div onclick="togDoneSection()" style="display:flex;align-items:center;justify-content:space-between;padding:6px 2px;border-top:1px solid var(--bdr);cursor:pointer">'
+      +'<span style="font-size:11px;font-weight:700;color:var(--textl);text-transform:uppercase;letter-spacing:.5px">✅ Completed ('+doneTasks.length+')</span>'
+      +'<span style="font-size:11px;color:var(--textl)">'+(_doneSectionOpen?'▾':'▸')+'</span>'
+      +'</div>'
+      +(_doneSectionOpen?'<div style="padding-top:6px">'+doneTasks.map(function(t){return tHTML(t,0);}).join('')+'</div>':'')
+      +'</div>';
+  }
+  list.innerHTML=activeTasks+doneSection;
   renderTdTasks();
   updStats();
 }
+function togDoneSection(){_doneSectionOpen=!_doneSectionOpen;renderT();}
 
 function tHTML(t,depth){
   if(!t||!t.title)return''; // skip malformed entries
@@ -7781,12 +7797,13 @@ function unparkAllTasks(){
   renderT();renderTdTasks();renderThisWeek();
 }
 function parkTask(id){
-  var t=TASKS.find(function(x){return x.id===id;});if(!t)return;
+  var t=findTaskDeep(id,TASKS);if(!t)return;
   t.parked=true;
   var tom=new Date();tom.setDate(tom.getDate()+1);
   t.parkedUntil=tom.toISOString().slice(0,10);
   saveTasks();
-  fbSave('tasks',id,t);
+  var root=_findRootFor(id,TASKS)||t;
+  fbSave('tasks',root.id,root);
   if(navigator.vibrate)navigator.vibrate([30,20,30]);
   showToast('🅿️ Parked — back tomorrow');
   renderT();renderTdTasks();
@@ -7868,6 +7885,8 @@ function delTask(id){
   else if(root)fbSave('tasks',root.id,root);
   updHelmBadge();
   renderT();
+  renderProjects();
+  renderPinned();
   showUndo('Task deleted');
 }
 
@@ -9025,7 +9044,7 @@ function renderWeekStats(){
     row('🔥','Calories avg',calAvg+'/day')+
     row('💪','Protein avg',proAvg+'g/day')+
     row('🌿','Fiber avg',fibAvg+'g/day')+
-    (slim?'':row('👟','Steps avg',stepAvg.toLocaleString()+'/day'))+
+    row('👟','Steps avg',stepAvg.toLocaleString()+'/day')+
     row('💸','Spending','$'+spending.toFixed(2))+
     (slim?'':row('😊','Mood avg',moodAvg?moodAvg+'/5 '+moodEmoji[Math.round(moodAvg)]:'—'));
 }
@@ -11192,7 +11211,7 @@ function renderTodayPlanBar(){
 var TODAY_FOCUS_MODE=false;
 var TODAY_SLIM=localStorage.getItem('aTodaySlim')!=='0';
 function applyTodaySlim(){
-  var ids=['todayTimeGreet','todayMoodRow','todayStepsRow','todaySleepRow','todayMinistryRow','todayMedsRow','todayWorkoutsRow','todayQuickAddCard'];
+  var ids=['todayTimeGreet','todayMoodRow','todaySleepRow','todayMinistryRow','todayMedsRow','todayWorkoutsRow','todayQuickAddCard'];
   ids.forEach(function(id){var el=document.getElementById(id);if(el)el.style.display=TODAY_SLIM?'none':'';});
   var btn=document.getElementById('todaySlimBtn');if(btn)btn.classList.toggle('on',TODAY_SLIM);
   renderWeekStats();
@@ -12322,8 +12341,21 @@ function renderProjects(){
   var el=document.getElementById('projList');if(!el)return;
   var projs=TASKS.filter(function(t){return t.isProject&&!t.done;});
   projs.sort(function(a,b){return (b.created||'')>(a.created||'')?1:-1;});
-  el.innerHTML=projs.length?projs.map(function(t){return tHTML(t,0);}).join(''):'<div class="empty"><div class="emj">📁</div><p>No projects yet. Create one or load a template!</p></div>';
+  var activeHTML=projs.length?projs.map(function(t){return tHTML(t,0);}).join(''):'<div class="empty"><div class="emj">📁</div><p>No projects yet. Create one or load a template!</p></div>';
+  var doneProjs=TASKS.filter(function(t){return t.isProject&&t.done;}).slice().sort(function(a,b){return (b.doneDate||'')>(a.doneDate||'')?1:-1;});
+  var doneProjSection='';
+  if(doneProjs.length){
+    doneProjSection='<div style="margin-top:14px">'
+      +'<div onclick="togDoneProjSection()" style="display:flex;align-items:center;justify-content:space-between;padding:6px 2px;border-top:1px solid var(--bdr);cursor:pointer">'
+      +'<span style="font-size:11px;font-weight:700;color:var(--textl);text-transform:uppercase;letter-spacing:.5px">✅ Completed ('+doneProjs.length+')</span>'
+      +'<span style="font-size:11px;color:var(--textl)">'+(_doneProjSectionOpen?'▾':'▸')+'</span>'
+      +'</div>'
+      +(_doneProjSectionOpen?'<div style="padding-top:6px">'+doneProjs.map(function(t){return tHTML(t,0);}).join('')+'</div>':'')
+      +'</div>';
+  }
+  el.innerHTML=activeHTML+doneProjSection;
 }
+function togDoneProjSection(){_doneProjSectionOpen=!_doneProjSectionOpen;renderProjects();}
 
 function togProjPanel(id){
   var p=document.getElementById('psp-'+id);if(!p)return;
@@ -13738,7 +13770,7 @@ function saveGoals(){
 var NOTES_TASK_ID='';
 
 function openNotes(taskId){
-  var t=TASKS.find(function(t){return t.id===taskId;});if(!t)return;
+  var t=findTaskDeep(taskId,TASKS);if(!t)return;
   NOTES_TASK_ID=taskId;
   document.getElementById('notesMTitle').textContent='📝 '+t.title;
   document.getElementById('notesTA').value=t.notes||'';
@@ -13758,8 +13790,8 @@ function saveNotesM(){
   var tNotesEl=document.getElementById('tNotes');
   if(tNotesEl)tNotesEl.value=notes;
   if(NOTES_TASK_ID){
-    var t=TASKS.find(function(t){return t.id===NOTES_TASK_ID;});
-    if(t){t.notes=notes;fbSave('tasks',NOTES_TASK_ID,t);}
+    var t=findTaskDeep(NOTES_TASK_ID,TASKS);
+    if(t){t.notes=notes;saveTasks();var root=_findRootFor(NOTES_TASK_ID,TASKS)||t;fbSave('tasks',root.id,root);}
   }
   document.getElementById('notesModal').classList.remove('show');
 }
@@ -16879,13 +16911,15 @@ function renderEnergyWidget(){
 
 // ── Resume Notes ──────────────────────────────
 function setResumeNote(id){
-  var t=TASKS.find(function(x){return x.id===id;});
+  var t=findTaskDeep(id,TASKS);
   if(!t)return;
   var note=prompt('Where did you leave off?\n(Leave blank to clear)',t.resume||'');
   if(note===null)return;
   t.resume=note.trim();
-  fbSave('tasks',id,t);
-  renderAllR();
+  saveTasks();
+  var root=_findRootFor(id,TASKS)||t;
+  fbSave('tasks',root.id,root);
+  renderT();
 }
 
 // ── Meds ──────────────────────────────────────
@@ -23356,9 +23390,13 @@ function runSearch(q){
 
   // ── Tasks & Projects
   if(f==='all'||f==='tasks'){
-    (TASKS||[]).forEach(function(t){
-      if(inc(t.title)||inc(t.notes))
-        push({icon:'📋',label:t.title,sub:(t.done?'✓ Done · ':'')+( t.due?'Due '+t.due:'Task')+(t.cat?' · '+t.cat:''),action:nav+"goTab('helm',null)"});
+    flattenTasks(TASKS||[]).forEach(function(t){
+      if(inc(t.title)||inc(t.notes)){
+        var root=_findRootFor(t.id,TASKS);
+        var parentHint=root&&root.id!==t.id?' · in '+root.title:'';
+        var sub=(t.done?'✓ Done · ':'')+( t.due?'Due '+t.due.slice(0,10):'Task')+(t.cat?' · '+t.cat:'')+parentHint;
+        push({icon:'📋',label:t.title,sub:sub,action:nav+"goTab('helm',null)"});
+      }
     });
     (PROJECTS||[]).forEach(function(p){
       if(inc(p.title)||inc(p.notes)||inc(p.name))
