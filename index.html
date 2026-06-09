@@ -5744,10 +5744,14 @@ function togTIsProject(btn){
 function _migrateTasksProjects(){
   var changed=false;
   TASKS.forEach(function(t){
+    if(!t.id)t.id='t'+Date.now()+Math.random().toString(36).slice(2,6);
     if(!t.children){
-      t.children=(t.subs||[]).map(function(s){return{id:s.id,title:s.title||s.text||'',done:!!s.done,children:[],collapsed:false};});
+      t.children=(t.subs||[]).map(function(s,i){
+        return{id:s.id||(t.id+'_m'+i),title:s.title||s.text||'',done:!!s.done,children:[],collapsed:false};
+      });
       changed=true;
     }
+    t.children.forEach(function(c,i){if(!c.id)c.id=t.id+'_c'+i;});
     if(!('pinned' in t)){t.pinned=false;changed=true;}
     if(!('collapsed' in t)){t.collapsed=false;changed=true;}
   });
@@ -7633,14 +7637,16 @@ function renderT(){
 }
 
 function tHTML(t,depth){
+  if(!t||!t.title)return''; // skip malformed entries
   if(typeof depth!=='number'||depth<0||depth>99)depth=0;
+  if(!t.id)t.id='t'+Date.now()+Math.random().toString(36).slice(2,6); // heal missing id
   var etm={'<10min':'⚡<10m','<1hr':'🕐<1hr','half-day':'📅Half','full-day':'🗓️Full'};
   var repIco={'daily':'🔁','weekly':'📆','monthly':'🗓️','yearly':'📅','custom':'⚙️'};
   var children=t.children||[];
   var prog=_countChildProg(t);
   var progPct=prog.total?Math.round(prog.done/prog.total*100):0;
   var collapsed=typeof t.collapsed!=='undefined'?!!t.collapsed:(depth>0);
-  var tid=t.id.replace(/'/g,"\\'");
+  var tid=String(t.id).replace(/'/g,"\\'");
   // Due time badge
   var dueTimeBadge='';
   if(!t.done&&t.due){
