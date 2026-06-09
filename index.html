@@ -7602,6 +7602,7 @@ function sortTaskArr(arr){
 }
 
 var TASK_FILTERS={urgs:[],cats:[]};
+var _doneSectionOpen=false, _doneProjSectionOpen=false;
 
 function togTaskSub(secId,arrowId){
   var el=document.getElementById(secId);if(!el)return;
@@ -7659,10 +7660,23 @@ function renderT(){
   });
   arr=sortTaskArr(arr);
   var parkedBanner=parkedCount?'<div onclick="unparkAllTasks()" style="text-align:center;padding:8px;font-size:12px;color:var(--textl);cursor:pointer;border-bottom:1px solid var(--border)">🅿️ '+parkedCount+' task'+(parkedCount!==1?'s':'')+' parked — tap to restore</div>':'';
-  list.innerHTML=parkedBanner+(arr.length?arr.map(function(t){return tHTML(t,0);}).join(''):'<div class="empty"><div class="emj">✨</div><p>No tasks match this filter.</p></div>');
+  var activeTasks=parkedBanner+(arr.length?arr.map(function(t){return tHTML(t,0);}).join(''):'<div class="empty"><div class="emj">✨</div><p>No tasks match this filter.</p></div>');
+  var doneTasks=TASKS.filter(function(t){return t.done;}).slice().sort(function(a,b){return (b.doneDate||'')>(a.doneDate||'')?1:-1;});
+  var doneSection='';
+  if(doneTasks.length&&!showDone){
+    doneSection='<div style="margin-top:14px">'
+      +'<div onclick="togDoneSection()" style="display:flex;align-items:center;justify-content:space-between;padding:6px 2px;border-top:1px solid var(--bdr);cursor:pointer">'
+      +'<span style="font-size:11px;font-weight:700;color:var(--textl);text-transform:uppercase;letter-spacing:.5px">✅ Completed ('+doneTasks.length+')</span>'
+      +'<span style="font-size:11px;color:var(--textl)">'+(_doneSectionOpen?'▾':'▸')+'</span>'
+      +'</div>'
+      +(_doneSectionOpen?'<div style="padding-top:6px">'+doneTasks.map(function(t){return tHTML(t,0);}).join('')+'</div>':'')
+      +'</div>';
+  }
+  list.innerHTML=activeTasks+doneSection;
   renderTdTasks();
   updStats();
 }
+function togDoneSection(){_doneSectionOpen=!_doneSectionOpen;renderT();}
 
 function tHTML(t,depth){
   if(!t||!t.title)return''; // skip malformed entries
@@ -12324,8 +12338,21 @@ function renderProjects(){
   var el=document.getElementById('projList');if(!el)return;
   var projs=TASKS.filter(function(t){return t.isProject&&!t.done;});
   projs.sort(function(a,b){return (b.created||'')>(a.created||'')?1:-1;});
-  el.innerHTML=projs.length?projs.map(function(t){return tHTML(t,0);}).join(''):'<div class="empty"><div class="emj">📁</div><p>No projects yet. Create one or load a template!</p></div>';
+  var activeHTML=projs.length?projs.map(function(t){return tHTML(t,0);}).join(''):'<div class="empty"><div class="emj">📁</div><p>No projects yet. Create one or load a template!</p></div>';
+  var doneProjs=TASKS.filter(function(t){return t.isProject&&t.done;}).slice().sort(function(a,b){return (b.doneDate||'')>(a.doneDate||'')?1:-1;});
+  var doneProjSection='';
+  if(doneProjs.length){
+    doneProjSection='<div style="margin-top:14px">'
+      +'<div onclick="togDoneProjSection()" style="display:flex;align-items:center;justify-content:space-between;padding:6px 2px;border-top:1px solid var(--bdr);cursor:pointer">'
+      +'<span style="font-size:11px;font-weight:700;color:var(--textl);text-transform:uppercase;letter-spacing:.5px">✅ Completed ('+doneProjs.length+')</span>'
+      +'<span style="font-size:11px;color:var(--textl)">'+(_doneProjSectionOpen?'▾':'▸')+'</span>'
+      +'</div>'
+      +(_doneProjSectionOpen?'<div style="padding-top:6px">'+doneProjs.map(function(t){return tHTML(t,0);}).join('')+'</div>':'')
+      +'</div>';
+  }
+  el.innerHTML=activeHTML+doneProjSection;
 }
+function togDoneProjSection(){_doneProjSectionOpen=!_doneProjSectionOpen;renderProjects();}
 
 function togProjPanel(id){
   var p=document.getElementById('psp-'+id);if(!p)return;
