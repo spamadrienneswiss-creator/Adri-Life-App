@@ -7868,6 +7868,8 @@ function delTask(id){
   else if(root)fbSave('tasks',root.id,root);
   updHelmBadge();
   renderT();
+  renderProjects();
+  renderPinned();
   showUndo('Task deleted');
 }
 
