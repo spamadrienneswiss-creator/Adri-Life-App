@@ -103,6 +103,7 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
 /* TASK */
 .tc{background:white;border-radius:var(--r2);padding:12px 14px;margin-bottom:8px;box-shadow:var(--sh2);display:flex;align-items:flex-start;gap:10px;border-left:3px solid transparent;position:relative;transition:transform .15s}
 .tc:active{transform:scale(.98)}.tc.done{opacity:.55}.tc.done .tt{text-decoration:line-through}
+.tc.search-hi{outline:2px solid var(--rose);background:var(--rose-light)!important;transition:outline .4s,background .4s}
 .tc[data-u="urgent-important"]{border-left:4px solid var(--ured);background:linear-gradient(90deg,#fff5f5 0%,#fff 60%)}
 .tc[data-u="urgent-important"] .tt{font-weight:700}
 .tc[data-u="important-not-urgent"]{border-left-color:var(--uyel)}.tc[data-u="urgent-not-important"]{border-left-color:var(--ublu)}.tc[data-u="not-urgent"]{border-left-color:var(--una)}
@@ -5750,6 +5751,29 @@ function togTaskPin(id){
   fbSave('tasks',root.id,root);
   renderPinned();
   renderT();
+}
+function jumpToTask(id){
+  goTab('helm',null);
+  setTimeout(function(){
+    // Expand all ancestors so the card exists in the DOM
+    function _expandPath(arr){
+      for(var i=0;i<arr.length;i++){
+        if(arr[i].id===id)return true;
+        if(_expandPath(arr[i].children||[])){arr[i].collapsed=false;return true;}
+      }
+      return false;
+    }
+    _expandPath(TASKS);
+    saveTasks();
+    renderT();
+    setTimeout(function(){
+      var el=document.getElementById('tc-'+id);
+      if(!el)return;
+      el.scrollIntoView({behavior:'smooth',block:'center'});
+      el.classList.add('search-hi');
+      setTimeout(function(){el.classList.remove('search-hi');},1800);
+    },120);
+  },300);
 }
 function togTaskMore(btn){
   var el=document.getElementById('taskMoreOpts');if(!el)return;
@@ -23430,7 +23454,7 @@ function runSearch(q){
         var root=_findRootFor(t.id,TASKS);
         var parentHint=root&&root.id!==t.id?' · in '+root.title:'';
         var sub=(t.done?'✓ Done · ':'')+( t.due?'Due '+t.due.slice(0,10):'Task')+(t.cat?' · '+t.cat:'')+parentHint;
-        push({icon:'📋',label:t.title,sub:sub,action:nav+"goTab('helm',null)"});
+        push({icon:'📋',label:t.title,sub:sub,action:nav+"jumpToTask('"+t.id.replace(/'/g,"\\'")+"')"});
       }
     });
     (PROJECTS||[]).forEach(function(p){
