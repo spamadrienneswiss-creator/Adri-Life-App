@@ -1015,7 +1015,7 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     <button class="tab-btn" data-tab="today" onclick="goTab('today',this)">Today</button>
     <button class="tab-btn" data-tab="plan" onclick="goTab('plan',this)">Plan</button>
     <button class="tab-btn" data-tab="helm" onclick="goTab('helm',this)">Tasks &amp; Projects</button>
-    <button class="tab-btn" data-tab="lists" onclick="goTabDirect('learn');setTimeout(function(){var b=document.querySelector('#v-learn .pn-btn:nth-child(3)');if(b)showLearnSec('lists',b);},50)">📋 Lists</button>
+
     <button class="tab-btn" data-tab="lighthouse" onclick="goTab('lighthouse',this)">Spiritual</button>
     <button class="tab-btn" data-tab="conservatory" onclick="goTab('conservatory',this)">Personal Growth</button>
     <button class="tab-btn" data-tab="hearthside" onclick="goTab('hearthside',this)">Health &amp; Wellness</button>
@@ -1348,17 +1348,6 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     <div class="hub-info"><h2>Research Library</h2></div>
   </div>
   <div class="hub-grid">
-    <div class="hub-card span2" onclick="openTutorial()" style="background:linear-gradient(135deg,#f0eaff,#e8e0f8);border-color:#c4b0e8">
-      <div style="display:flex;align-items:center;gap:12px">
-        <div style="flex:1">
-          <div class="hub-card-ic" style="margin-bottom:2px">🎓</div>
-          <div class="hub-card-name">App Tour</div>
-          <div class="hub-card-sub" id="tutorialBadgeLine">Learn the app and earn badges</div>
-          <div class="cal-archives-badges-row" id="calArchivesBadgeRow"></div>
-        </div>
-        <button onclick="event.stopPropagation();openBadgeBoard()" style="background:rgba(169,159,201,.2);border:1.5px solid rgba(169,159,201,.4);border-radius:10px;padding:6px 10px;font-size:11px;font-weight:700;color:#6a5a90;cursor:pointer;flex-shrink:0;font-family:'Quicksand',sans-serif">🏅 Badges</button>
-      </div>
-    </div>
     <div class="hub-card" onclick="goTab('guide',null)"><div class="hub-card-ic">📚</div><div class="hub-card-name">Research Library</div><div class="hub-card-sub">Notes, guides &amp; learning</div></div>
     <div class="hub-card" onclick="goTab('archive',null)"><div class="hub-card-ic">📁</div><div class="hub-card-name">Year Archive</div><div class="hub-card-sub" id="hub-archive-sub">Year-by-year history</div></div>
     <div class="hub-card" onclick="goTab('appindex',null)"><div class="hub-card-ic">🗂️</div><div class="hub-card-name">App Index</div><div class="hub-card-sub">Navigate all sections</div></div>
@@ -4122,6 +4111,8 @@ if(!MILLIE.bedtime)MILLIE.bedtime='22:00';
 if(!MILLIE.waketime)MILLIE.waketime='07:00';
 if(MILLIE.asleep===undefined)MILLIE.asleep=false;
 if(!MILLIE.sleepLog)MILLIE.sleepLog=[];
+// Deduplicate sleepLog by slept timestamp (fixes old duplicate entries)
+(function(){var seen={};MILLIE.sleepLog=MILLIE.sleepLog.filter(function(e){var k=e.id||e.slept;if(!k||seen[k])return false;seen[k]=true;return true;});})();
 if(!MILLIE.habits)MILLIE.habits=[];
 if(!MILLIE.habitWeek)MILLIE.habitWeek='';
 var EMBER = (function(){
@@ -4372,7 +4363,7 @@ function logRetroSleep(){
   var hrs=Math.floor(dur/3600000);var mins=Math.floor((dur%3600000)/60000);
   if(hrs<0||hrs>20){msgEl.textContent='Times look off — check date/times.';msgEl.style.color='#cc5566';msgEl.style.display='';return;}
   // Add to Millie's sleep log
-  MILLIE.sleepLog=(MILLIE.sleepLog||[]).concat([{slept:sleptDT.toISOString(),woke:wokeDT.toISOString(),durH:hrs,durM:mins}]).slice(-14);
+  MILLIE.sleepLog=(MILLIE.sleepLog||[]).concat([{id:Date.now().toString(),slept:sleptDT.toISOString(),woke:wokeDT.toISOString(),durH:hrs,durM:mins}]).slice(-14);
   // Boost Millie's energy based on sleep duration (as if she slept)
   var energyGain=Math.min(hrs*14,95);
   MILLIE.energy=Math.min(100,MILLIE.energy+energyGain);
@@ -5955,9 +5946,10 @@ function initFirebase(){
     var localIds=(MILLIE.sleepLog||[]).map(function(e){return e.id||e.slept;});
     var changed=false;
     remote.forEach(function(e){
-      if(!e.id||localIds.indexOf(e.id)<0){
+      var key=e.id||e.slept;
+      if(key&&localIds.indexOf(key)<0){
         MILLIE.sleepLog=(MILLIE.sleepLog||[]).concat([e]).slice(-30);
-        localIds.push(e.id||e.slept);
+        localIds.push(key);
         changed=true;
       }
     });
@@ -6167,7 +6159,7 @@ function initFirebase(){
       ap('aTabOrder',function(v,r){if(v&&v.length){TAB_ORDER=_mergeTabOrder(v);_origSetItem('aTabOrder',r);if(typeof applyTabOrder==='function')applyTabOrder();}});
       ap('aAboutMe',function(v,r){ABOUT_ME=v||{};_origSetItem('aAboutMe',r);});
       ap('aTabFavs',function(v,r){_origSetItem('aTabFavs',r);if(typeof renderFavTabs==='function')renderFavTabs();});
-      ap('aHomeTiles2',function(v,r){if(v)HOME_TILES=v;_origSetItem('aHomeTiles2',r);});
+      ap('aHomeTiles2',function(v,r){if(_homeTilesSavedAt&&Date.now()-_homeTilesSavedAt<4000)return;if(v)HOME_TILES=v;_origSetItem('aHomeTiles2',r);if(document.getElementById('homeGrid'))renderHomePage();});
       ap('aHomeItems',function(v,r){HOME_ITEMS=v||[];_origSetItem('aHomeItems',r);});
       _fbBlobPause=false;
     }else{
@@ -7997,9 +7989,11 @@ var HOME_TILE_DEFS = {
   behavior: {icon:'⭐', label:'Behavior Shifts', bg:'#fffae0'},
   learning: {icon:'💡', label:'Learning',      bg:'#f0f4e8'},
   feeling:  {icon:'💜', label:'I\'m Feeling',  bg:'#f5eaf8'},
+  lists:    {icon:'📋', label:'Lists',          bg:'#eef5f0'},
 };
 
-function saveHomeTiles(){localStorage.setItem('aHomeTiles2',JSON.stringify(HOME_TILES));}
+var _homeTilesSavedAt=0;
+function saveHomeTiles(){_homeTilesSavedAt=Date.now();localStorage.setItem('aHomeTiles2',JSON.stringify(HOME_TILES));}
 
 function toggleHomeEdit(){
   HOME_EDIT_MODE=!HOME_EDIT_MODE;
@@ -8071,6 +8065,7 @@ function openHomeTileModal(id){
   if(id==='grocery'){goTabDirect('grocery');return;}
   if(id==='errands'){goTabDirect('tasks');return;}
   if(id==='wigs'){goTabDirect('wigs');return;}
+  if(id==='lists'){goTabDirect('learn');setTimeout(function(){var b=document.querySelector('#v-learn .pn-btn:nth-child(3)');if(b)showLearnSec('lists',b);},50);return;}
   document.getElementById('homeTileModalIc').textContent=d.icon;
   document.getElementById('homeTileModalTitle').textContent=d.label;
   document.getElementById('homeTileModalBody').innerHTML=buildHomeTileBody(id);
@@ -8153,7 +8148,7 @@ function homeSaveSleep(){
   var dur=wokeDT-sleptDT;
   var hrs=Math.floor(dur/3600000);var mins=Math.floor((dur%3600000)/60000);
   if(hrs<0||hrs>24){showToast('Times look off — check them');return;}
-  MILLIE.sleepLog=(MILLIE.sleepLog||[]).concat([{slept:sleptDT.toISOString(),woke:wokeDT.toISOString(),durH:hrs,durM:mins,date:today}]).slice(-30);
+  MILLIE.sleepLog=(MILLIE.sleepLog||[]).concat([{id:Date.now().toString(),slept:sleptDT.toISOString(),woke:wokeDT.toISOString(),durH:hrs,durM:mins,date:today}]).slice(-30);
   localStorage.setItem('aMillie',JSON.stringify(MILLIE));
   HOME_SLEEP_PENDING={};
   localStorage.setItem('aHomeSleep','{}');
@@ -22692,9 +22687,7 @@ var TUTORIAL_STEPS = [
 ];
 
 function earnBadge(id){
-  if(BADGES[id])return;
-  BADGES[id]=new Date().toISOString().slice(0,10);
-  saveBadges();
+  return; // badge system hidden
   var def=BADGE_DEFS.find(function(b){return b.id===id;});
   if(!def)return;
   var flash=document.createElement('div');
