@@ -22137,7 +22137,7 @@ function openFoodDbModal(editId){
       (item.tags||(item.cat?[item.cat]:[])).forEach(function(tag){
         var chip=document.querySelector('#fdbTagChips .fchip[data-tag="'+tag+'"]');
         if(chip)chip.classList.add('on');
-        else if(ctl&&knownTags.indexOf(tag)<0){var sp=document.createElement('span');sp.className='fchip on';sp.dataset.customTag=tag;sp.style.cursor='pointer';sp.textContent=tag;sp.onclick=function(){sp.remove();updateFdbTagSummary();};ctl.appendChild(sp);}
+        else if(ctl&&knownTags.indexOf(tag)<0){var sp=document.createElement('span');sp.className='fchip on';sp.dataset.customTag=tag;sp.style.cursor='default';var xb=document.createElement('button');xb.type='button';xb.textContent='×';xb.style.cssText='background:none;border:none;color:inherit;cursor:pointer;font-size:13px;padding:0 0 0 4px;line-height:1;opacity:.7;vertical-align:middle';(function(s,b){b.onclick=function(){s.remove();updateFdbTagSummary();};}(sp,xb));sp.textContent=tag;sp.appendChild(xb);ctl.appendChild(sp);}
       });
       updateFdbTagSummary();
       // Auto-expand More Details if item has optional fields
@@ -22421,10 +22421,13 @@ function addFdbCustomTag(){
   var span=document.createElement('span');
   span.className='fchip on';
   span.dataset.customTag=val;
-  span.style.cursor='pointer';
+  span.style.cursor='default';
+  var xBtn=document.createElement('button');
+  xBtn.type='button';xBtn.textContent='×';
+  xBtn.style.cssText='background:none;border:none;color:inherit;cursor:pointer;font-size:13px;padding:0 0 0 4px;line-height:1;opacity:.7;vertical-align:middle';
+  xBtn.onclick=function(){span.remove();updateFdbTagSummary();};
   span.textContent=val;
-  span.title='Click to remove';
-  span.onclick=function(){span.remove();updateFdbTagSummary();};
+  span.appendChild(xBtn);
   list.appendChild(span);
   input.value='';
   updateFdbTagSummary();
