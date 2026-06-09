@@ -1492,7 +1492,7 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
           </div>
         </div>
         <!-- Mood -->
-        <div style="margin-bottom:12px">
+        <div id="todayMoodRow" style="margin-bottom:12px">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
             <div style="font-size:11px;font-weight:700;color:var(--textl);letter-spacing:.4px;text-transform:uppercase">😊 Mood</div>
             <span id="tMoodD" style="font-size:11px;color:var(--textl);font-weight:600">Not logged yet</span>
@@ -1506,17 +1506,17 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
           </div>
         </div>
         <!-- Steps -->
-        <div class="pr" style="cursor:pointer" onclick="openM('stepModal')">
+        <div id="todayStepsRow" class="pr" style="cursor:pointer" onclick="openM('stepModal')">
           <div class="pt"><span class="pn">👟 Steps</span><span class="pm2" id="tStepD">0 / 8,000</span><span style="font-size:10px;color:var(--blue);margin-left:6px">+ log</span></div>
           <div class="pb"><div class="pf" id="tStepB" style="width:0%;background:var(--sage)"></div></div>
         </div>
         <!-- Sleep -->
-        <div class="pr">
+        <div id="todaySleepRow" class="pr">
           <div class="pt" style="cursor:pointer" onclick="openM('todaySleepModal')"><span class="pn">😴 Sleep</span><span class="pm2" id="tSleepD">—</span><span style="font-size:10px;color:var(--blue);margin-left:6px">+ log</span><button onclick="event.stopPropagation();goTab('wellness',null);setTimeout(function(){showWellnessSec('sleep',document.querySelector('#v-wellness .pn-btn:nth-child(2)'))},200)" style="margin-left:auto;background:none;border:none;color:var(--lav);font-size:10px;font-weight:700;cursor:pointer;font-family:'Quicksand',sans-serif;flex-shrink:0;padding:0 2px">History →</button></div>
           <div class="pb"><div class="pf" id="tSleepB" style="width:0%;background:var(--lav)"></div></div>
         </div>
         <!-- Ministry -->
-        <div class="pr">
+        <div id="todayMinistryRow" class="pr">
           <div class="pt" style="align-items:center">
             <span class="pn">⏱️ Ministry</span>
             <span class="pm2" id="tMinD">—</span>
@@ -1528,11 +1528,11 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
         <div class="pr" style="cursor:pointer" onclick="goTab('meals',null)"><div class="pt"><span class="pn">🔥 Calories</span><span class="pm2" id="tcD">0/1900</span><span style="font-size:10px;color:var(--blue);margin-left:auto;flex-shrink:0">Log →</span></div><div class="pb"><div class="pf pf-cal" id="tcB" style="width:0%"></div></div></div>
         <div class="pr" style="cursor:pointer" onclick="goTab('meals',null)"><div class="pt"><span class="pn">💪 Protein</span><span class="pm2" id="tpD">0g/120g</span></div><div class="pb"><div class="pf pf-pro" id="tpB" style="width:0%"></div></div></div>
         <div class="pr" style="cursor:pointer" onclick="goTab('meals',null)"><div class="pt"><span class="pn">🌿 Fiber</span><span class="pm2" id="tfD">0g/25g</span></div><div class="pb"><div class="pf pf-fib" id="tfB" style="width:0%"></div></div></div>
-        <div class="pr" style="cursor:pointer" onclick="goTab('wellness',null);setTimeout(function(){showWellnessSec('meds',document.querySelector('#v-wellness .pn-btn:nth-child(5)'))},200)">
+        <div id="todayMedsRow" class="pr" style="cursor:pointer" onclick="goTab('wellness',null);setTimeout(function(){showWellnessSec('meds',document.querySelector('#v-wellness .pn-btn:nth-child(5)'))},200)">
           <div class="pt"><span class="pn">💊 Meds</span><span class="pm2" id="tMedsD">—</span><span style="font-size:10px;color:var(--lav);margin-left:auto;flex-shrink:0">Check off →</span></div>
         </div>
         <!-- Workouts -->
-        <div class="pr" style="cursor:pointer" onclick="openM('moveModal')">
+        <div id="todayWorkoutsRow" class="pr" style="cursor:pointer" onclick="openM('moveModal')">
           <div class="pt"><span class="pn">💪 Workouts</span><span class="pm2" id="tExD">—</span><span style="font-size:10px;color:var(--blue);margin-left:6px">+ log</span></div>
           <div class="pb"><div class="pf" id="tExB" style="width:0%;background:var(--peach)"></div></div>
         </div>
@@ -1547,7 +1547,7 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
   <div id="todayRtnPills" style="display:flex;gap:8px;margin-bottom:10px"></div>
 
   <!-- Quick Add (collapsible) -->
-  <div class="card" style="padding:0;margin-bottom:10px">
+  <div id="todayQuickAddCard" class="card" style="padding:0;margin-bottom:10px">
     <div style="display:flex;align-items:center;justify-content:space-between;padding:11px 14px;cursor:pointer" onclick="togTodaySec('todayQuickAdd')">
       <span style="font-size:11px;font-weight:700;color:var(--textl);letter-spacing:.5px;text-transform:uppercase">⚡ Quick Add +</span>
       <span class="sh-arr" id="sh-arr-todayQuickAdd">▸</span>
@@ -3615,6 +3615,12 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
       <div style="font-size:12px;color:var(--textl);margin-bottom:10px">Drag sections into the order you want them to appear in the navigation bar.</div>
       <div id="tabOrderList"></div>
       <button onclick="resetTabOrder()" class="btn sec" style="font-size:12px;padding:5px 14px;margin-top:6px">↺ Reset to default</button>
+    </div>
+  </div>
+  <div class="card">
+    <div class="set-sec-t" onclick="togSetSec('sc-today',this)">📋 Today View <span class="sst-arr">▶</span></div>
+    <div id="sc-today" style="display:none">
+      <div class="set-row"><div><div class="set-lbl">Slim Today Page</div><div class="set-sub">Hide Quick Add, mood, steps, sleep, meds, workouts, and ministry rows</div></div><button class="tog" id="todaySlimBtn" onclick="togTodaySlim(this)"></button></div>
     </div>
   </div>
   <div class="card">
@@ -6327,7 +6333,7 @@ function goTabDirect(tab,btn){
   if(SECTION_VIEWS[tab]||tab==='emporium')renderHubPreviews(tab);
   var hFab=document.getElementById('hatchFab');if(hFab){hFab.style.display=(tab==='today')?'flex':'none';if(tab==='today'){hFab.style.opacity='1';hFab.style.transform='translateX(-50%) translateY(0)';hFab.style.pointerEvents='auto';_fabHidden=false;_fabScrollLast=window.scrollY||window.pageYOffset;renderFabPills();}}
   if(tab==='home'){ renderHomePage(); }
-  if(tab==='today'){ tickSpiritRun(); renderWaterBottle(); renderTodayStatsBars(); renderWeekStats(); renderTodayMoodBtns(); renderTodayPlanBar(); renderTodayWorkGlance(); renderTodayHubSubs(); renderIntentionsHome(); renderTodayRtnPills(); renderTodayMoneyCard(); renderTodayTimeGreet(); checkAndShowWhileAway(); trackLastActive(); }
+  if(tab==='today'){ tickSpiritRun(); renderWaterBottle(); renderTodayStatsBars(); renderWeekStats(); renderTodayMoodBtns(); renderTodayPlanBar(); renderTodayWorkGlance(); renderTodayHubSubs(); renderIntentionsHome(); renderTodayRtnPills(); renderTodayMoneyCard(); renderTodayTimeGreet(); checkAndShowWhileAway(); trackLastActive(); applyTodaySlim(); }
   if(tab==='routines'){ renderDailyRtn(_dailyRtnKey); renderOtherRtns(); }
   if(tab==='hearthside'){ renderHWHubStats(); }
   if(tab==='lighthouse'){ updateLighthouseSpiritStatus(); }
@@ -8068,6 +8074,7 @@ function openHomeTileModal(id){
   if(id==='onething'){openOneThingMode();return;}
   if(id==='workout'){goTabDirect('food');return;}
   if(id==='ministry'){goTabDirect('spirit');setTimeout(function(){var b=document.querySelector('#v-spirit .pn-btn:nth-child(3)');if(b)showSpiritSec('ministry',b);},200);return;}
+  if(id==='bible'){goTabDirect('spirit');setTimeout(function(){var b=document.querySelector('#v-spirit .pn-btn:nth-child(2)');if(b)showSpiritSec('bible',b);},200);return;}
   if(id==='grocery'){goTabDirect('grocery');return;}
   if(id==='errands'){goTabDirect('tasks');return;}
   if(id==='wigs'){goTabDirect('wigs');return;}
@@ -8992,19 +8999,20 @@ function renderWeekStats(){
       +'<span style="font-size:12px;font-weight:700;color:var(--textd)">'+val+'</span></div>';
   }
 
+  var slim=typeof TODAY_SLIM!=='undefined'&&TODAY_SLIM;
   el.innerHTML=
     row('✅','Tasks done',tasksDone)+
-    row('🔄','Routines today',routineRate+'%')+
-    row('🎯','Active goals',activeGoals)+
-    row('⏱️','Ministry',minHrs+' hrs')+
+    (slim?'':row('🔄','Routines today',routineRate+'%'))+
+    (slim?'':row('🎯','Active goals',activeGoals))+
+    (slim?'':row('⏱️','Ministry',minHrs+' hrs'))+
     '<div style="height:6px"></div>'+
     row('💧','Water avg',waterAvg+' oz/day')+
     row('🔥','Calories avg',calAvg+'/day')+
     row('💪','Protein avg',proAvg+'g/day')+
     row('🌿','Fiber avg',fibAvg+'g/day')+
-    row('👟','Steps avg',stepAvg.toLocaleString()+'/day')+
+    (slim?'':row('👟','Steps avg',stepAvg.toLocaleString()+'/day'))+
     row('💸','Spending','$'+spending.toFixed(2))+
-    row('😊','Mood avg',moodAvg?moodAvg+'/5 '+moodEmoji[Math.round(moodAvg)]:'—');
+    (slim?'':row('😊','Mood avg',moodAvg?moodAvg+'/5 '+moodEmoji[Math.round(moodAvg)]:'—'));
 }
 
 // ── Do Next ────────────────────────────────────
@@ -11167,6 +11175,18 @@ function renderTodayPlanBar(){
 // TODAY PAGE — FOCUS MODE, OVERWHELM, TIME CONTEXT
 // ═══════════════════════════════════════════════
 var TODAY_FOCUS_MODE=false;
+var TODAY_SLIM=localStorage.getItem('aTodaySlim')!=='0';
+function applyTodaySlim(){
+  var ids=['todayTimeGreet','todayMoodRow','todayStepsRow','todaySleepRow','todayMinistryRow','todayMedsRow','todayWorkoutsRow','todayQuickAddCard'];
+  ids.forEach(function(id){var el=document.getElementById(id);if(el)el.style.display=TODAY_SLIM?'none':'';});
+  var btn=document.getElementById('todaySlimBtn');if(btn)btn.classList.toggle('on',TODAY_SLIM);
+  renderWeekStats();
+}
+function togTodaySlim(btn){
+  TODAY_SLIM=!TODAY_SLIM;
+  localStorage.setItem('aTodaySlim',TODAY_SLIM?'1':'0');
+  applyTodaySlim();
+}
 function renderTodayTimeGreet(){
   var el=document.getElementById('todayTimeGreet');if(!el)return;
   var h=new Date().getHours();
@@ -13574,6 +13594,8 @@ function renderSettings(){
   renderTabOrderList();
   var millieBtn=document.getElementById('millieTogBtn');
   if(millieBtn)millieBtn.classList.toggle('on',!S.hideMillie);
+  var slimBtn=document.getElementById('todaySlimBtn');
+  if(slimBtn)slimBtn.classList.toggle('on',TODAY_SLIM);
   document.getElementById('sCal').value=S.gCal;document.getElementById('sPro').value=S.gPro;
   document.getElementById('sFib').value=S.gFib;document.getElementById('sCrb').value=S.gCrb;
   document.getElementById('sFat').value=S.gFat;document.getElementById('sWat').value=S.gWat;
