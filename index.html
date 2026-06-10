@@ -1652,6 +1652,7 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
               <option value="cat">By Category</option>
               <option value="newest">Newest First</option>
               <option value="oldest">Oldest First</option>
+              <option value="manual">My Order</option>
             </select>
             <button onclick="clearTaskFilters()" style="padding:5px 10px;border-radius:9px;border:1.5px solid var(--bdr);background:#fff;font-family:'Quicksand',sans-serif;font-size:12px;font-weight:700;color:var(--textl);cursor:pointer">Clear</button>
           </div>
@@ -1703,8 +1704,7 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
 
 
 
-<!-- LISTS (redirects to Research Library → Lists) -->
-<div class="view" id="v-lists"></div>
+<!-- LISTS: goTab('lists') is intercepted and redirects to v-learn → Lists tab -->
 
 <!-- FOCUS SESSION -->
 <!-- GROCERY (Tasks section) -->
@@ -5702,7 +5702,7 @@ var S = {
   appTitle:localStorage.getItem('aSAppTitle')||'✨ Adri\'s Life',
 };
 
-var SBV={}, CF='all', TASK_SORT='urgency', DELTED=null, UNDO_T=null, OPEN_PANELS={};
+var SBV={}, CF='all', TASK_SORT=localStorage.getItem('aTaskSort')||'urgency', DELTED=null, UNDO_T=null, OPEN_PANELS={};
 var firebaseLoaded = false;
 
 // ── Unified task tree helpers ─────────────────────
@@ -7666,7 +7666,15 @@ buildCatMap();
 function catTag(id){var c=catMap[id]||catMap.mis;return'<span class="ttag" style="background:'+c.bg+';color:'+c.c+'">'+c.n+'</span>';}
 
 function setTaskSort(s){
+  if(s==='manual'&&TASK_SORT!=='manual'){
+    // Freeze current display order into order field on every root task
+    var _sorted=sortTaskArr(TASKS);
+    _sorted.forEach(function(t,i){t.order=i*10;});
+    TASKS.forEach(function(t){fbSave('tasks',t.id,t);});
+    saveTasks();
+  }
   TASK_SORT=s;
+  localStorage.setItem('aTaskSort',s);
   var sel=document.getElementById('taskSortSel');
   if(sel&&sel.value!==s)sel.value=s;
   renderT();
@@ -7684,7 +7692,45 @@ function sortTaskArr(arr){
   if(s==='cat') return arr.slice().sort(function(a,b){return (a.cat||'').localeCompare(b.cat||'');});
   if(s==='newest') return arr.slice().sort(function(a,b){return (b.created||'').localeCompare(a.created||'');});
   if(s==='oldest') return arr.slice().sort(function(a,b){return (a.created||'').localeCompare(b.created||'');});
+  if(s==='manual') return arr.slice().sort(function(a,b){
+    var oa=a.order!=null?a.order:999999;
+    var ob=b.order!=null?b.order:999999;
+    return oa-ob;
+  });
   return arr;
+}
+
+function moveTask(id,dir){
+  // For root tasks swap order values; for subtasks swap array positions
+  function _findPos(id,arr,isRoot){
+    for(var i=0;i<arr.length;i++){
+      if(arr[i].id===id)return{arr:arr,idx:i,isRoot:!!isRoot};
+      var ch=arr[i].children;if(ch&&ch.length){var r=_findPos(id,ch,false);if(r)return r;}
+    }
+    return null;
+  }
+  var pos=_findPos(id,TASKS,true);if(!pos)return;
+  if(pos.isRoot){
+    var sorted=sortTaskArr(TASKS); // already in manual order
+    var si=-1;for(var i=0;i<sorted.length;i++){if(sorted[i].id===id){si=i;break;}}
+    if(si<0)return;
+    var ni=dir==='up'?si-1:si+1;
+    if(ni<0||ni>=sorted.length)return;
+    var t1=sorted[si],t2=sorted[ni];
+    var o1=t1.order!=null?t1.order:si*10;
+    var o2=t2.order!=null?t2.order:ni*10;
+    t1.order=o2;t2.order=o1;
+    saveTasks();fbSave('tasks',t1.id,t1);fbSave('tasks',t2.id,t2);
+  }else{
+    var a=pos.arr,ix=pos.idx;
+    var ni2=dir==='up'?ix-1:ix+1;
+    if(ni2<0||ni2>=a.length)return;
+    var tmp=a[ix];a[ix]=a[ni2];a[ni2]=tmp;
+    saveTasks();
+    var root=_findRootFor(id,TASKS)||_findRootFor(a[ix].id,TASKS);
+    if(root)fbSave('tasks',root.id,root);
+  }
+  renderT();
 }
 
 var TASK_FILTERS={urgs:[],cats:[]};
@@ -7730,6 +7776,7 @@ function renderCatFilterChips(){
 
 function renderT(){
   var list=document.getElementById('taskList');if(!list)return;
+  var _sel=document.getElementById('taskSortSel');if(_sel&&_sel.value!==TASK_SORT)_sel.value=TASK_SORT;
   renderCatFilterChips();
   var urgs=TASK_FILTERS.urgs;
   var cats=TASK_FILTERS.cats;
@@ -7746,7 +7793,7 @@ function renderT(){
   });
   arr=sortTaskArr(arr);
   var parkedBanner=parkedCount?'<div onclick="unparkAllTasks()" style="text-align:center;padding:8px;font-size:12px;color:var(--textl);cursor:pointer;border-bottom:1px solid var(--border)">🅿️ '+parkedCount+' task'+(parkedCount!==1?'s':'')+' parked — tap to restore</div>':'';
-  var activeTasks=parkedBanner+(arr.length?arr.map(function(t){return tHTML(t,0);}).join(''):'<div class="empty"><div class="emj">✨</div><p>No tasks match this filter.</p></div>');
+  var activeTasks=parkedBanner+(arr.length?arr.map(function(t,i){return tHTML(t,0,i,arr.length);}).join(''):'<div class="empty"><div class="emj">✨</div><p>No tasks match this filter.</p></div>');
   var doneTasks=TASKS.filter(function(t){return t.done;}).slice().sort(function(a,b){return (b.doneDate||'')>(a.doneDate||'')?1:-1;});
   var doneSection='';
   if(doneTasks.length&&!showDone){
@@ -7764,7 +7811,7 @@ function renderT(){
 }
 function togDoneSection(){_doneSectionOpen=!_doneSectionOpen;renderT();}
 
-function tHTML(t,depth){
+function tHTML(t,depth,idx,siblingsLen){
   if(!t||!t.title)return''; // skip malformed entries
   if(typeof depth!=='number'||depth<0||depth>99)depth=0;
   if(!t.id)t.id='t'+Date.now()+Math.random().toString(36).slice(2,6); // heal missing id
@@ -7795,7 +7842,12 @@ function tHTML(t,depth){
   var projBadge=t.isProject?'<span style="background:var(--lav-light);color:var(--lav);font-size:10px;font-weight:700;padding:1px 6px;border-radius:5px;margin-left:5px">📁</span>':'';
   var childrenHTML='';
   if(children.length&&!collapsed){
-    childrenHTML='<div class="tc-children">'+children.map(function(c){return tHTML(c,depth+1);}).join('')+'</div>';
+    childrenHTML='<div class="tc-children">'+children.map(function(c,ci){return tHTML(c,depth+1,ci,children.length);}).join('')+'</div>';
+  }
+  var moveHTML='';
+  if(TASK_SORT==='manual'&&typeof idx==='number'){
+    moveHTML='<button class="tact" onclick="event.stopPropagation();moveTask(\''+tid+'\',\'up\')" title="Move up"'+(idx===0?' disabled style="opacity:.25;cursor:default"':'')+'>↑</button>'+
+             '<button class="tact" onclick="event.stopPropagation();moveTask(\''+tid+'\',\'down\')" title="Move down"'+(idx===siblingsLen-1?' disabled style="opacity:.25;cursor:default"':'')+'>↓</button>';
   }
   var wrapStyle=depth>0?'margin-bottom:4px':'';
   var cardStyle=depth>0?'font-size:13px;':'';
@@ -7813,6 +7865,7 @@ function tHTML(t,depth){
         (!t.done&&t.resume?'<div style="font-size:11px;color:var(--peach);background:var(--peach-light);padding:3px 9px;border-radius:6px;margin-top:4px;display:inline-block">⏸️ '+t.resume+'</div>':'')+
       '</div>'+
       '<div class="tacts">'+
+        moveHTML+
         (children.length?'<button class="tact" onclick="event.stopPropagation();togTaskCollapse(\''+tid+'\')" title="'+(collapsed?'Expand':'Collapse')+'">'+(collapsed?'▸':'▾')+'</button>':'')+
         '<button class="tact" onclick="event.stopPropagation();togChildAdd(\''+tid+'\')" title="Add subtask">➕</button>'+
         (depth===0&&t.notes?'<button class="tact" onclick="openNotes(\''+tid+'\')">📝</button>':'')+
@@ -20089,6 +20142,82 @@ function quickPlanRecipe(r){
   showToast('Added "'+r.name+'" to today\'s mains 🍽️');
 }
 
+function openCookItModal(recId){
+  var rec=RECIPES.find(function(r){return r.id===recId;});
+  if(!rec)return;
+  document.getElementById('cookItRecId').value=recId;
+  document.getElementById('cookItRecName').textContent=rec.name;
+  document.getElementById('cookItServings').value=1;
+  document.getElementById('cookItNotes').value='';
+  var mt=(rec.mealTypes&&rec.mealTypes[0])||rec.mealType||'dinner';
+  var sel=document.getElementById('cookItMealType');
+  if(sel){
+    var found=false;
+    for(var i=0;i<sel.options.length;i++){if(sel.options[i].value===mt){sel.value=mt;found=true;break;}}
+    if(!found)sel.value='main';
+  }
+  updateCookItMacros();
+  showOv('cookItModal');
+}
+
+function updateCookItMacros(){
+  var recId=document.getElementById('cookItRecId').value;
+  var rec=RECIPES.find(function(r){return r.id===recId;});
+  if(!rec)return;
+  var servingsEaten=parseFloat(document.getElementById('cookItServings').value)||1;
+  var recServings=rec.servings||1;
+  var m=rec.macros||{};
+  var scale=servingsEaten/recServings;
+  var cal=m.cal?Math.round(m.cal*scale):null;
+  var pro=m.pro?Math.round(m.pro*scale*10)/10:null;
+  var carb=m.carb?Math.round(m.carb*scale*10)/10:null;
+  var fat=m.fat?Math.round(m.fat*scale*10)/10:null;
+  var el=document.getElementById('cookItMacroDisplay');
+  if(!el)return;
+  if(cal||pro||carb||fat){
+    el.innerHTML=(cal!==null?'<span class="recipe-macro-tag">🔥 '+cal+' cal</span>':'')
+      +(pro!==null?'<span class="recipe-macro-tag">💪 '+pro+'g pro</span>':'')
+      +(carb!==null?'<span class="recipe-macro-tag">🌾 '+carb+'g carb</span>':'')
+      +(fat!==null?'<span class="recipe-macro-tag">🫙 '+fat+'g fat</span>':'');
+    el.style.display='';
+  } else {
+    el.innerHTML='<span style="color:var(--textl);font-size:12px;font-style:italic">No macros saved for this recipe — add them in the edit view</span>';
+    el.style.display='';
+  }
+}
+
+function logCookIt(){
+  var recId=document.getElementById('cookItRecId').value;
+  var rec=RECIPES.find(function(r){return r.id===recId;});
+  if(!rec)return;
+  var servings=parseFloat(document.getElementById('cookItServings').value)||1;
+  var notes=(document.getElementById('cookItNotes').value||'').trim();
+  var mealType=(document.getElementById('cookItMealType').value||'main');
+  var m=rec.macros||{};
+  var scale=servings/(rec.servings||1);
+  var cal=m.cal?Math.round(m.cal*scale):0;
+  var pro=m.pro?Math.round(m.pro*scale*10)/10:0;
+  var carb=m.carb?Math.round(m.carb*scale*10)/10:0;
+  var fat=m.fat?Math.round(m.fat*scale*10)/10:0;
+  var logName=rec.name+(servings!==1?' ('+servings+' svg)':'')+(notes?' — '+notes:'');
+  MEAL_LOG_ITEMS.unshift({
+    id:'ml-'+Date.now(),
+    name:logName,
+    category:mealType,
+    day:'',
+    date:todayStr(),
+    cal:cal,
+    pro:pro,
+    carb:carb,
+    fat:fat,
+    recipeId:recId
+  });
+  localStorage.setItem('aMealLogItems',JSON.stringify(MEAL_LOG_ITEMS));
+  closeOv('cookItModal');
+  renderMealLog();
+  showToast(rec.name+' logged ✨');
+}
+
 function showToast(msg){
   var el=document.getElementById('appToast');
   if(!el){
@@ -20143,6 +20272,7 @@ function renderRecipes(){
       +'<div style="display:flex;align-items:center;justify-content:space-between">'
       +'<span class="recipe-card-name">'+escHtml(r.name)+'</span>'
       +'<div style="display:flex;gap:4px;flex-shrink:0">'
+      +'<button title="Cook it & log to today" style="background:#fff3e0;border:1.5px solid #ffb347;border-radius:8px;padding:3px 8px;font-size:13px;cursor:pointer;font-family:inherit" onclick="event.stopPropagation();openCookItModal(\''+r.id+'\')">🍳</button>'
       +'<button title="Add to today\'s meal plan" style="background:var(--sage-light);border:none;border-radius:8px;padding:3px 8px;font-size:13px;cursor:pointer" onclick="event.stopPropagation();quickPlanRecipe({id:\''+r.id+'\',name:\''+r.name.replace(/'/g,"\\'")+'\'})">📋</button>'
       +'<button class="btn sec" style="font-size:11px;padding:3px 8px;background:#e8f5e8;border-color:var(--sage);color:var(--sage)" onclick="event.stopPropagation();openRecipeToGrocery(\''+r.id+'\')">→ 🛒</button>'
       +'<button class="btn sec" style="font-size:11px;padding:3px 8px" onclick="event.stopPropagation();openRecipeModal(\''+r.id+'\')">✏️</button>'
@@ -20201,6 +20331,11 @@ function openRecipeModal(id){
   if(prev){prev.style.display='none';prev.innerHTML='';}
   var svRow=document.getElementById('recIngSvRow');if(svRow)svRow.style.display='none';
   var badge=document.getElementById('recMacroBadge');if(badge)badge.style.display='none';
+  // Clear manual-entry flags on macro fields so auto-calc can fill them
+  ['recCal','recPro','recCarb','recFat'].forEach(function(id){var el=document.getElementById(id);if(el)delete el.dataset.manual;});
+  // Reset ingredient unit row
+  var unitRow=document.getElementById('recIngUnitRow');if(unitRow)unitRow.style.display='';
+  var unitEl=document.getElementById('recIngUnit');if(unitEl)unitEl.value='';
   // Populate photos
   var p1Prev=document.getElementById('recPhoto1Preview');
   var p2Prev=document.getElementById('recPhoto2Preview');
@@ -20258,14 +20393,15 @@ function previewRecIngDb(val){
   var svRow=document.getElementById('recIngSvRow');
   var svSel=document.getElementById('recIngSvSel');
   if(!prev)return;
+  var unitRow=document.getElementById('recIngUnitRow');
   var v=(val||'').trim().toLowerCase();
-  if(!v){prev.style.display='none';if(svRow)svRow.style.display='none';return;}
+  if(!v){prev.style.display='none';if(svRow)svRow.style.display='none';if(unitRow)unitRow.style.display='';return;}
   var dbi=FOOD_DB.find(function(x){
     if(x.name.toLowerCase()===v)return true;
     if((x.aliases||[]).some(function(a){return a.toLowerCase()===v;}))return true;
     return false;
   });
-  if(!dbi){prev.style.display='none';if(svRow)svRow.style.display='none';return;}
+  if(!dbi){prev.style.display='none';if(svRow)svRow.style.display='none';if(unitRow)unitRow.style.display='';return;}
   // Show DB match info
   var facts=[];
   if(dbi.cal)facts.push('🔥 '+dbi.cal+' cal');
@@ -20275,7 +20411,7 @@ function previewRecIngDb(val){
   prev.innerHTML='<strong>✅ In library:</strong> '+escHtml(dbi.name)+(facts.length?' · '+facts.join(' · '):'')
     +((!dbi.cal&&!dbi.per100)?'<a style="color:var(--blue);cursor:pointer;margin-left:6px" onclick="closeOv(\'recipeModal\');openFoodDbModal(\''+dbi.id+'\')">Add nutrition →</a>':'');
   prev.style.display='';
-  // Show serving size picker
+  // Show serving size picker, hide manual unit row (DB handles units)
   if(svRow&&svSel&&dbi.servings&&dbi.servings.length){
     svSel.innerHTML=dbi.servings.map(function(s){
       return '<option value="'+s.id+'">'+escHtml(s.label)+(s.grams?' ('+s.grams+'g)':'')+'</option>';
@@ -20286,8 +20422,10 @@ function previewRecIngDb(val){
     var qtyEl=document.getElementById('recIngQty');
     if(qtyEl&&dbi.myUsual&&dbi.myUsual.qty)qtyEl.value=dbi.myUsual.qty;
     svRow.style.display='';
+    if(unitRow)unitRow.style.display='none';
   } else if(svRow){
     svRow.style.display='none';
+    if(unitRow)unitRow.style.display='';
   }
 }
 
@@ -20321,6 +20459,7 @@ function addRecipeIng(){
   if(unitEl&&unitEl.tagName==='INPUT')unitEl.value='';
   var prev=document.getElementById('recIngDbPreview');if(prev){prev.style.display='none';prev.innerHTML='';}
   var svRow=document.getElementById('recIngSvRow');if(svRow)svRow.style.display='none';
+  var unitRow=document.getElementById('recIngUnitRow');if(unitRow)unitRow.style.display='';
   renderRecipeIngList();
   updateRecipeMacroDisplay();
 }
@@ -20374,10 +20513,10 @@ function updateRecipeMacroDisplay(){
   var proEl=document.getElementById('recPro');
   var carbEl=document.getElementById('recCarb');
   var fatEl=document.getElementById('recFat');
-  if(calEl)calEl.value=sv.cal||'';
-  if(proEl)proEl.value=sv.pro||'';
-  if(carbEl)carbEl.value=sv.carb||'';
-  if(fatEl)fatEl.value=sv.fat||'';
+  if(calEl&&!calEl.dataset.manual)calEl.value=sv.cal||'';
+  if(proEl&&!proEl.dataset.manual)proEl.value=sv.pro||'';
+  if(carbEl&&!carbEl.dataset.manual)carbEl.value=sv.carb||'';
+  if(fatEl&&!fatEl.dataset.manual)fatEl.value=sv.fat||'';
   var badge=document.getElementById('recMacroBadge');
   if(badge){
     if(result.allLinked){
@@ -20409,16 +20548,15 @@ function saveRecipe(){
     prepTime:prepEl?parseInt(prepEl.value)||0:0,
     cookTime:cookEl?parseInt(cookEl.value)||0:0,
     macros:(function(){
-      var result=calcRecipeMacros();
-      if(result.linkedCount>0){
-        return{cal:result.perSv.cal,pro:result.perSv.pro,carb:result.perSv.carb,fat:result.perSv.fat,fib:result.perSv.fib};
+      var cal=parseFloat(document.getElementById('recCal').value)||0;
+      var pro=parseFloat(document.getElementById('recPro').value)||0;
+      var carb=parseFloat(document.getElementById('recCarb').value)||0;
+      var fat=parseFloat(document.getElementById('recFat').value)||0;
+      if(!cal&&!pro&&!carb&&!fat){
+        var result=calcRecipeMacros();
+        if(result.linkedCount>0)return{cal:result.perSv.cal,pro:result.perSv.pro,carb:result.perSv.carb,fat:result.perSv.fat,fib:result.perSv.fib};
       }
-      return{
-        cal:parseInt(document.getElementById('recCal').value)||0,
-        pro:parseInt(document.getElementById('recPro').value)||0,
-        carb:parseInt(document.getElementById('recCarb').value)||0,
-        fat:parseInt(document.getElementById('recFat').value)||0
-      };
+      return{cal:Math.round(cal),pro:Math.round(pro*10)/10,carb:Math.round(carb*10)/10,fat:Math.round(fat*10)/10};
     })(),
     tags:(document.getElementById('recTags').value||'').split(',').map(function(t){return t.trim();}).filter(Boolean),
     ingredients:MEAL_EDIT_INGS,
@@ -24421,7 +24559,7 @@ function renderWrapUpChecklist(){
 var _actualTimeTaskId=null;
 
 function showActualTimePrompt(taskId){
-  var t=TASKS.find(function(x){return x.id===taskId;});
+  var t=findTaskDeep(taskId,TASKS);
   if(!t)return;
   _actualTimeTaskId=taskId;
   var nameEl=document.getElementById('atpTaskName');
@@ -24459,11 +24597,11 @@ function saveActualTime(){
   var inp=document.getElementById('atpActualInput');
   var mins=parseInt(inp?inp.value:'');
   if(!isNaN(mins)&&mins>0&&_actualTimeTaskId){
-    var t=TASKS.find(function(x){return x.id===_actualTimeTaskId;});
+    var t=findTaskDeep(_actualTimeTaskId,TASKS);
     if(t){
       t.actualMin=mins;
       localStorage.setItem('aTasks',JSON.stringify(TASKS));
-      fbSave('tasks',t.id,t);
+      var _r=_findRootFor(_actualTimeTaskId,TASKS)||t;fbSave('tasks',_r.id,_r);
       // Store in recurring history
       if(t.repeat){
         var hKey=(t.title||'').toLowerCase().trim();
@@ -26733,10 +26871,10 @@ function delProjInc(id){
     <div id="recMacroBadge" style="display:none;font-size:10px;font-weight:600"></div>
   </div>
   <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:6px;margin-bottom:12px">
-    <div><label style="font-size:11px;color:var(--textl)">Cal</label><input id="recCal" type="number" placeholder="auto" style="width:100%;padding:7px 8px;border-radius:8px;border:1.5px solid #e8e0d8;font-size:13px;box-sizing:border-box"></div>
-    <div><label style="font-size:11px;color:var(--textl)">Protein g</label><input id="recPro" type="number" placeholder="auto" style="width:100%;padding:7px 8px;border-radius:8px;border:1.5px solid #e8e0d8;font-size:13px;box-sizing:border-box"></div>
-    <div><label style="font-size:11px;color:var(--textl)">Carbs g</label><input id="recCarb" type="number" placeholder="auto" style="width:100%;padding:7px 8px;border-radius:8px;border:1.5px solid #e8e0d8;font-size:13px;box-sizing:border-box"></div>
-    <div><label style="font-size:11px;color:var(--textl)">Fat g</label><input id="recFat" type="number" placeholder="auto" style="width:100%;padding:7px 8px;border-radius:8px;border:1.5px solid #e8e0d8;font-size:13px;box-sizing:border-box"></div>
+    <div><label style="font-size:11px;color:var(--textl)">Cal</label><input id="recCal" type="number" placeholder="auto" style="width:100%;padding:7px 8px;border-radius:8px;border:1.5px solid #e8e0d8;font-size:13px;box-sizing:border-box" oninput="this.dataset.manual='1'"></div>
+    <div><label style="font-size:11px;color:var(--textl)">Protein g</label><input id="recPro" type="number" placeholder="auto" style="width:100%;padding:7px 8px;border-radius:8px;border:1.5px solid #e8e0d8;font-size:13px;box-sizing:border-box" oninput="this.dataset.manual='1'"></div>
+    <div><label style="font-size:11px;color:var(--textl)">Carbs g</label><input id="recCarb" type="number" placeholder="auto" style="width:100%;padding:7px 8px;border-radius:8px;border:1.5px solid #e8e0d8;font-size:13px;box-sizing:border-box" oninput="this.dataset.manual='1'"></div>
+    <div><label style="font-size:11px;color:var(--textl)">Fat g</label><input id="recFat" type="number" placeholder="auto" style="width:100%;padding:7px 8px;border-radius:8px;border:1.5px solid #e8e0d8;font-size:13px;box-sizing:border-box" oninput="this.dataset.manual='1'"></div>
   </div>
   <div style="font-size:12px;font-weight:700;color:var(--textl);margin-bottom:6px">INGREDIENTS</div>
   <div id="recIngList" style="margin-bottom:8px"></div>
@@ -26752,7 +26890,10 @@ function delProjInc(id){
       <label style="font-size:11px;color:var(--textl);display:block;margin-bottom:3px">Serving size:</label>
       <select id="recIngSvSel" style="width:100%;padding:6px 10px;border-radius:8px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:12px;background:#fff"></select>
     </div>
-    <div id="recIngUnit" style="display:none"></div>
+    <div id="recIngUnitRow" style="margin-top:6px">
+      <label style="font-size:11px;color:var(--textl);display:block;margin-bottom:3px">Unit (optional):</label>
+      <input type="text" id="recIngUnit" placeholder="e.g. cups, oz, tbsp, whole" style="width:100%;padding:6px 10px;border-radius:8px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:12px;background:#fff;box-sizing:border-box">
+    </div>
   </div>
   <label style="font-size:12px;color:var(--textl)">Notes</label>
   <textarea id="recNotes" placeholder="Instructions, tips…" rows="2" style="width:100%;padding:8px 11px;border-radius:10px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px;resize:vertical;box-sizing:border-box;margin-bottom:12px"></textarea>
@@ -26776,6 +26917,38 @@ function delProjInc(id){
     <button class="btn sec" style="flex:1" onclick="closeOv('recipeModal')">Cancel</button>
   </div>
 </div></div>
+
+<!-- COOK IT MODAL -->
+<div class="ov" id="cookItModal" onclick="closeOv('cookItModal')">
+  <div class="mod" onclick="event.stopPropagation()">
+    <div class="mh"><span class="mt">🍳 Cook It</span><button class="mc" onclick="closeOv('cookItModal')">✕</button></div>
+    <input type="hidden" id="cookItRecId">
+    <div id="cookItRecName" style="font-size:15px;font-weight:700;color:var(--textd);margin-bottom:14px"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+      <div>
+        <label style="font-size:12px;color:var(--textl)">Servings eaten</label>
+        <input id="cookItServings" type="number" value="1" min="0.25" step="0.25" style="width:100%;padding:8px 11px;border-radius:10px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px;box-sizing:border-box" oninput="updateCookItMacros()">
+      </div>
+      <div>
+        <label style="font-size:12px;color:var(--textl)">Meal type</label>
+        <select id="cookItMealType" style="width:100%;padding:8px 11px;border-radius:10px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px;box-sizing:border-box;background:#fff">
+          <option value="breakfast">🌅 Breakfast</option>
+          <option value="lunch">🥙 Lunch</option>
+          <option value="dinner" selected>🍽️ Dinner</option>
+          <option value="snack">🥨 Snack</option>
+          <option value="main">Main</option>
+        </select>
+      </div>
+    </div>
+    <div id="cookItMacroDisplay" style="background:var(--bg2,#f8f5f1);border-radius:10px;padding:10px;margin-bottom:12px;display:flex;gap:6px;flex-wrap:wrap;align-items:center"></div>
+    <label style="font-size:12px;color:var(--textl)">Modifications / Notes</label>
+    <textarea id="cookItNotes" placeholder="e.g. used oat milk instead, skipped the oil, added extra garlic…" rows="3" style="width:100%;padding:8px 11px;border-radius:10px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px;resize:vertical;box-sizing:border-box;margin-bottom:14px"></textarea>
+    <div style="display:flex;gap:8px">
+      <button class="btn" style="flex:1" onclick="logCookIt()">Log It ✓</button>
+      <button class="btn sec" style="flex:1" onclick="closeOv('cookItModal')">Cancel</button>
+    </div>
+  </div>
+</div>
 
 <!-- INVENTORY ADD/EDIT MODAL -->
 <div class="ov" id="ovInvAdd" onclick="closeOv('ovInvAdd')">
