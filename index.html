@@ -5485,6 +5485,7 @@ function getAutoSection(dbItem){
 var PRICE_LOG = JSON.parse(localStorage.getItem('aPriceLog')||'[]');
 var MEAL_WEEK_OFFSET = 0; // weeks from current
 var MEAL_EDIT_INGS = []; // temp for recipe modal
+var _cookItIngs = []; // temp for cook-it modal
 var TASKS = JSON.parse(localStorage.getItem('aTasks')||'[]');
 var EXPENSES = JSON.parse(localStorage.getItem('aExps')||'[]');
 var WIGS = JSON.parse(localStorage.getItem('aWigs')||'[]');
@@ -20151,71 +20152,161 @@ function openCookItModal(recId){
   document.getElementById('cookItNotes').value='';
   var mt=(rec.mealTypes&&rec.mealTypes[0])||rec.mealType||'dinner';
   var sel=document.getElementById('cookItMealType');
-  if(sel){
-    var found=false;
-    for(var i=0;i<sel.options.length;i++){if(sel.options[i].value===mt){sel.value=mt;found=true;break;}}
-    if(!found)sel.value='main';
-  }
-  updateCookItMacros();
+  if(sel){var found=false;for(var i=0;i<sel.options.length;i++){if(sel.options[i].value===mt){sel.value=mt;found=true;break;}}if(!found)sel.value='main';}
+  _cookItIngs=(rec.ingredients||[]).map(function(ing){return{dbItemId:ing.dbItemId,name:ing.name,qty:ing.qty,svId:ing.svId,svGrams:ing.svGrams,unit:ing.unit,omit:false};});
+  renderCookItIngs();
   showOv('cookItModal');
 }
 
-function updateCookItMacros(){
+function _calcIngMacros(ing,qty){
+  var dbi=ing.dbItemId?FOOD_DB.find(function(x){return x.id===ing.dbItemId;}):null;
+  if(!dbi)dbi=FOOD_DB.find(function(x){return x.name.toLowerCase()===(ing.name||'').toLowerCase();});
+  if(!dbi)return null;
+  var q=parseFloat(qty)||1;
+  if(dbi.per100&&dbi.per100.cal!==undefined&&ing.svGrams){
+    var g=ing.svGrams*q;
+    return{cal:g*dbi.per100.cal/100,pro:g*(dbi.per100.pro||0)/100,carb:g*(dbi.per100.carb||0)/100,fat:g*(dbi.per100.fat||0)/100,fib:g*(dbi.per100.fib||0)/100};
+  }
+  if(dbi.cal){return{cal:dbi.cal*q,pro:(dbi.pro||0)*q,carb:(dbi.carb||0)*q,fat:(dbi.fat||0)*q,fib:(dbi.fiber||0)*q};}
+  return null;
+}
+
+function renderCookItIngs(){
+  var el=document.getElementById('cookItIngList');if(!el)return;
   var recId=document.getElementById('cookItRecId').value;
   var rec=RECIPES.find(function(r){return r.id===recId;});
-  if(!rec)return;
-  var servingsEaten=parseFloat(document.getElementById('cookItServings').value)||1;
-  var recServings=rec.servings||1;
-  var m=rec.macros||{};
+  var recServings=rec?rec.servings||1:1;
+  var servingsEaten=parseFloat((document.getElementById('cookItServings')||{}).value)||1;
   var scale=servingsEaten/recServings;
-  var cal=m.cal?Math.round(m.cal*scale):null;
-  var pro=m.pro?Math.round(m.pro*scale*10)/10:null;
-  var carb=m.carb?Math.round(m.carb*scale*10)/10:null;
-  var fat=m.fat?Math.round(m.fat*scale*10)/10:null;
-  var el=document.getElementById('cookItMacroDisplay');
-  if(!el)return;
-  if(cal||pro||carb||fat){
-    el.innerHTML=(cal!==null?'<span class="recipe-macro-tag">🔥 '+cal+' cal</span>':'')
-      +(pro!==null?'<span class="recipe-macro-tag">💪 '+pro+'g pro</span>':'')
-      +(carb!==null?'<span class="recipe-macro-tag">🌾 '+carb+'g carb</span>':'')
-      +(fat!==null?'<span class="recipe-macro-tag">🫙 '+fat+'g fat</span>':'');
-    el.style.display='';
-  } else {
-    el.innerHTML='<span style="color:var(--textl);font-size:12px;font-style:italic">No macros saved for this recipe — add them in the edit view</span>';
-    el.style.display='';
-  }
+  if(!_cookItIngs.length){el.innerHTML='<p style="color:var(--textl);font-size:12px;text-align:center;padding:8px">No ingredients — save the recipe with ingredients first</p>';updateCookItMacros();return;}
+  el.innerHTML=_cookItIngs.map(function(ing,i){
+    var scaledQty=Math.round(ing.qty*scale*4)/4;
+    var m=_calcIngMacros(ing,ing.qty*scale);
+    var calStr=m?' <span style="font-size:10px;color:var(--textl)">'+Math.round(m.cal)+' cal</span>':'';
+    return '<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--bdr)'+(ing.omit?';opacity:.4':'')+';">'
+      +'<input type="checkbox"'+(ing.omit?' checked':'')+' onchange="_cookItIngs['+i+'].omit=this.checked;renderCookItIngs()" style="width:16px;height:16px;flex-shrink:0;accent-color:var(--sage)">'
+      +'<div style="flex:1;min-width:0">'
+      +'<div style="font-size:13px;font-weight:600;color:var(--textd)'+(ing.omit?';text-decoration:line-through':'')+'">'+escHtml(ing.name)+'</div>'
+      +'<div style="display:flex;gap:6px;align-items:center;margin-top:3px">'
+      +'<input type="number" value="'+scaledQty+'" min="0.25" step="0.25" style="width:58px;padding:4px 6px;border-radius:7px;border:1.5px solid #e8e0d8;font-size:12px;text-align:center;font-family:inherit"'+(ing.omit?' disabled':'')+' onchange="_cookItIngs['+i+'].qty=Math.max(0.25,parseFloat(this.value)||0.25)/'+scale+';renderCookItIngs()">'
+      +'<span style="font-size:12px;color:var(--textl)">'+escHtml(ing.unit||'')+'</span>'
+      +calStr
+      +'</div>'
+      +'</div>'
+      +'<button onclick="swapCookItIng('+i+')" style="background:none;border:1.5px solid #d8d0e8;border-radius:7px;padding:3px 7px;font-size:12px;color:var(--lav);cursor:pointer;flex-shrink:0"'+(ing.omit?' disabled':'')+'>⇄</button>'
+      +'</div>';
+  }).join('');
+  updateCookItMacros();
+}
+
+function updateCookItMacros(){
+  var el=document.getElementById('cookItMacroDisplay');if(!el)return;
+  var t={cal:0,pro:0,carb:0,fat:0,fib:0};var hasData=false;
+  var recId=document.getElementById('cookItRecId').value;
+  var rec=RECIPES.find(function(r){return r.id===recId;});
+  var recServings=rec?rec.servings||1:1;
+  var servingsEaten=parseFloat((document.getElementById('cookItServings')||{}).value)||1;
+  var scale=servingsEaten/recServings;
+  _cookItIngs.forEach(function(ing){
+    if(ing.omit)return;
+    var m=_calcIngMacros(ing,ing.qty*scale);
+    if(m){t.cal+=m.cal;t.pro+=m.pro;t.carb+=m.carb;t.fat+=m.fat;t.fib+=m.fib;hasData=true;}
+  });
+  if(!hasData){el.innerHTML='<span style="color:var(--textl);font-size:12px;font-style:italic">Add ingredients with nutrition in Foods to see macros</span>';return;}
+  var tag=function(x){return'<span class="recipe-macro-tag">'+x+'</span>';};
+  el.innerHTML=tag('🔥 '+Math.round(t.cal)+' cal')+(t.pro?tag('💪 '+Math.round(t.pro*10)/10+'g pro'):'')+(t.carb?tag('🌾 '+Math.round(t.carb*10)/10+'g carb'):'')+(t.fat?tag('🫙 '+Math.round(t.fat*10)/10+'g fat'):'')+(t.fib?tag('🌱 '+Math.round(t.fib*10)/10+'g fib'):'');
+}
+
+function swapCookItIng(i){
+  var newName=prompt('Swap "'+_cookItIngs[i].name+'" with (exact food name from your library):');
+  if(!newName)return;
+  newName=newName.trim();
+  var dbi=FOOD_DB.find(function(x){return x.name.toLowerCase()===newName.toLowerCase()||(x.aliases||[]).some(function(a){return a.toLowerCase()===newName.toLowerCase();});});
+  if(!dbi){showToast('Not found in Foods — add it there first');return;}
+  var sv=dbi.servings&&dbi.servings.length?dbi.servings[0]:null;
+  _cookItIngs[i]={dbItemId:dbi.id,name:dbi.name,qty:_cookItIngs[i].qty,svId:sv?sv.id:'',svGrams:sv?sv.grams:0,unit:sv?sv.label:'',omit:false};
+  renderCookItIngs();
 }
 
 function logCookIt(){
   var recId=document.getElementById('cookItRecId').value;
-  var rec=RECIPES.find(function(r){return r.id===recId;});
-  if(!rec)return;
-  var servings=parseFloat(document.getElementById('cookItServings').value)||1;
+  var rec=RECIPES.find(function(r){return r.id===recId;});if(!rec)return;
   var notes=(document.getElementById('cookItNotes').value||'').trim();
   var mealType=(document.getElementById('cookItMealType').value||'main');
-  var m=rec.macros||{};
-  var scale=servings/(rec.servings||1);
-  var cal=m.cal?Math.round(m.cal*scale):0;
-  var pro=m.pro?Math.round(m.pro*scale*10)/10:0;
-  var carb=m.carb?Math.round(m.carb*scale*10)/10:0;
-  var fat=m.fat?Math.round(m.fat*scale*10)/10:0;
-  var logName=rec.name+(servings!==1?' ('+servings+' svg)':'')+(notes?' — '+notes:'');
-  MEAL_LOG_ITEMS.unshift({
-    id:'ml-'+Date.now(),
-    name:logName,
-    category:mealType,
-    day:'',
-    date:todayStr(),
-    cal:cal,
-    pro:pro,
-    carb:carb,
-    fat:fat,
-    recipeId:recId
+  var t={cal:0,pro:0,carb:0,fat:0,fib:0};
+  var recId2=document.getElementById('cookItRecId').value;
+  var rec2=RECIPES.find(function(r){return r.id===recId2;});
+  var recServings=rec2?rec2.servings||1:1;
+  var servingsEaten=parseFloat((document.getElementById('cookItServings')||{}).value)||1;
+  var scale=servingsEaten/recServings;
+  _cookItIngs.forEach(function(ing){
+    if(ing.omit)return;
+    var m=_calcIngMacros(ing,ing.qty*scale);
+    if(m){t.cal+=m.cal;t.pro+=m.pro;t.carb+=m.carb;t.fat+=m.fat;}
   });
+  var logName=rec.name+(notes?' — '+notes:'');
+  MEAL_LOG_ITEMS.unshift({id:'ml-'+Date.now(),name:logName,category:mealType,day:'',date:todayStr(),cal:Math.round(t.cal),pro:Math.round(t.pro*10)/10,carb:Math.round(t.carb*10)/10,fat:Math.round(t.fat*10)/10,recipeId:recId});
   localStorage.setItem('aMealLogItems',JSON.stringify(MEAL_LOG_ITEMS));
-  closeOv('cookItModal');
-  renderMealLog();
-  showToast(rec.name+' logged ✨');
+  closeOv('cookItModal');renderMealLog();showToast(rec.name+' logged ✨');
+}
+
+function saveRecipeAsCopy(){
+  var recId=document.getElementById('cookItRecId').value;
+  var rec=RECIPES.find(function(r){return r.id===recId;});if(!rec)return;
+  var notes=(document.getElementById('cookItNotes').value||'').trim();
+  var copyName=(rec.name+' (variation)'+(notes?': '+notes.substring(0,20):'')).substring(0,60);
+  var activeIngs=_cookItIngs.filter(function(ing){return!ing.omit;});
+  var recServings=rec.servings||1;
+  var t={cal:0,pro:0,carb:0,fat:0,fib:0};
+  activeIngs.forEach(function(ing){var m=_calcIngMacros(ing,ing.qty);if(m){t.cal+=m.cal;t.pro+=m.pro;t.carb+=m.carb;t.fat+=m.fat;t.fib+=m.fib;}});
+  var copy=Object.assign({},rec,{
+    id:'rec-'+Date.now(),name:copyName,
+    ingredients:activeIngs.map(function(ing){return Object.assign({},ing);}),
+    notes:(rec.notes?rec.notes+'\n':'')+(notes?'Variation: '+notes:''),
+    macros:{cal:Math.round(t.cal/recServings),pro:Math.round(t.pro/recServings*10)/10,carb:Math.round(t.carb/recServings*10)/10,fat:Math.round(t.fat/recServings*10)/10,fib:Math.round(t.fib/recServings*10)/10}
+  });
+  RECIPES.push(copy);
+  localStorage.setItem('aRecipes',JSON.stringify(RECIPES));
+  closeOv('cookItModal');renderRecipes();showToast('Saved as "'+copyName+'" ✨');
+}
+
+function openInlineAddFood(name){
+  var el=document.getElementById('recInlineAddFood');if(el)el.style.display='';
+  var btn=document.getElementById('recIngAddBtn');if(btn)btn.style.display='none';
+  var ni=document.getElementById('iafName');if(ni)ni.value=name||'';
+  ['iafSvLabel','iafSvGrams','iafCal','iafPro','iafCarb','iafFat','iafFib'].forEach(function(id){var e=document.getElementById(id);if(e)e.value='';});
+}
+
+function cancelInlineAddFood(){
+  var el=document.getElementById('recInlineAddFood');if(el)el.style.display='none';
+  var btn=document.getElementById('recIngAddBtn');if(btn)btn.style.display='';
+  document.getElementById('recIngName').value='';
+  var prev=document.getElementById('recIngDbPreview');if(prev){prev.style.display='none';prev.innerHTML='';}
+  var svRow=document.getElementById('recIngSvRow');if(svRow)svRow.style.display='none';
+}
+
+function saveInlineFood(){
+  var name=(document.getElementById('iafName').value||'').trim();
+  if(!name)return alert('Name required');
+  var svLabel=(document.getElementById('iafSvLabel').value||'').trim()||'1 serving';
+  var svGrams=parseFloat(document.getElementById('iafSvGrams').value)||0;
+  var cal=parseFloat(document.getElementById('iafCal').value)||0;
+  var pro=parseFloat(document.getElementById('iafPro').value)||0;
+  var carb=parseFloat(document.getElementById('iafCarb').value)||0;
+  var fat=parseFloat(document.getElementById('iafFat').value)||0;
+  var fib=parseFloat(document.getElementById('iafFib').value)||0;
+  var per100={};
+  if(svGrams>0){per100={cal:Math.round(cal/svGrams*1000)/10,pro:Math.round(pro/svGrams*1000)/10,carb:Math.round(carb/svGrams*1000)/10,fat:Math.round(fat/svGrams*1000)/10,fib:Math.round(fib/svGrams*1000)/10};}
+  var newId='fd-'+Date.now();
+  var newFood={id:newId,name:name,cal:cal,pro:pro,carb:carb,fat:fat,fiber:fib,per100:per100,servings:[{id:'sv-'+Date.now(),label:svLabel,grams:svGrams}],tags:['other'],created:todayStr()};
+  FOOD_DB.push(newFood);
+  saveFoodDbData();
+  var dl=document.getElementById('recIngDbSuggest');
+  if(dl){var opt=document.createElement('option');opt.value=name;dl.appendChild(opt);}
+  var el=document.getElementById('recInlineAddFood');if(el)el.style.display='none';
+  var btn=document.getElementById('recIngAddBtn');if(btn)btn.style.display='';
+  document.getElementById('recIngName').value=name;
+  previewRecIngDb(name);
 }
 
 function showToast(msg){
@@ -20245,8 +20336,18 @@ function renderRecipes(){
     return matchQ&&matchF;
   });
   if(!list.length){el.innerHTML='<p style="color:var(--textl);text-align:center;padding:20px">No recipes yet. Add one!</p>';return;}
+  var _recipesDirty=false;
   el.innerHTML=list.map(function(r){
+    // Recalculate macros live from current ingredient+Foods data; heal stale snapshots silently
     var m=r.macros||{};
+    if(r.ingredients&&r.ingredients.length){
+      var _rc=_sumIngsMacros(r.ingredients);var _sv=r.servings||1;var _t=_rc.totals;
+      var _lm={cal:Math.round(_t.cal/_sv),pro:Math.round(_t.pro/_sv*10)/10,carb:Math.round(_t.carb/_sv*10)/10,fat:Math.round(_t.fat/_sv*10)/10,fib:Math.round(_t.fib/_sv*10)/10};
+      if(_lm.cal||_lm.pro){
+        if(_lm.cal!==m.cal||_lm.pro!==m.pro||_lm.carb!==m.carb){r.macros=_lm;_recipesDirty=true;}
+        m=_lm;
+      }
+    }
     var mts=r.mealTypes||[];
     var mt=mts[0]||r.mealType||'';
     var mtColor=MEAL_TYPE_COLORS[mt]||'white';
@@ -20295,6 +20396,7 @@ function renderRecipes(){
       +'</div>'  // close outer flex row
       +'</div>';
   }).join('');
+  if(_recipesDirty)localStorage.setItem('aRecipes',JSON.stringify(RECIPES));
 }
 
 function openRecipeModal(id){
@@ -20303,39 +20405,27 @@ function openRecipeModal(id){
   document.getElementById('recModalTitle').textContent=rec?'Edit Recipe':'New Recipe';
   document.getElementById('recName').value=rec?rec.name:'';
   document.getElementById('recServings').value=rec?rec.servings||1:1;
-  document.getElementById('recCal').value=rec&&rec.macros?rec.macros.cal||'':'';
-  document.getElementById('recPro').value=rec&&rec.macros?rec.macros.pro||'':'';
-  document.getElementById('recCarb').value=rec&&rec.macros?rec.macros.carb||'':'';
-  document.getElementById('recFat').value=rec&&rec.macros?rec.macros.fat||'':'';
   document.getElementById('recTags').value=rec&&rec.tags?rec.tags.join(', '):'';
   document.getElementById('recNotes').value=rec?rec.notes||'':'';
   document.getElementById('recId').value=rec?rec.id:'';
-  // mealTypes multi-select chips (migrate mealType→mealTypes if needed)
   var mts=rec?(rec.mealTypes||(rec.mealType?[rec.mealType]:[])):[];
-  document.querySelectorAll('#recMealTypeBar .fchip').forEach(function(b){
-    b.classList.toggle('on',mts.indexOf(b.dataset.val)>=0);
-  });
-  var prepEl=document.getElementById('recPrepTime');
-  var cookEl=document.getElementById('recCookTime');
+  document.querySelectorAll('#recMealTypeBar .fchip').forEach(function(b){b.classList.toggle('on',mts.indexOf(b.dataset.val)>=0);});
+  var prepEl=document.getElementById('recPrepTime');var cookEl=document.getElementById('recCookTime');
   if(prepEl)prepEl.value=rec?rec.prepTime||'':'';
   if(cookEl)cookEl.value=rec?rec.cookTime||'':'';
   renderRecipeIngList();
-  // Populate ingredient name datalist from FOOD_DB
+  renderRecipeNutrition();
   var dl=document.getElementById('recIngDbSuggest');
   if(dl)dl.innerHTML=FOOD_DB.map(function(x){
     var opts='<option value="'+escHtml(x.name)+'">';
     (x.aliases||[]).forEach(function(a){opts+='<option value="'+escHtml(a)+'">';});
     return opts;
   }).join('');
-  var prev=document.getElementById('recIngDbPreview');
-  if(prev){prev.style.display='none';prev.innerHTML='';}
+  var prev=document.getElementById('recIngDbPreview');if(prev){prev.style.display='none';prev.innerHTML='';}
   var svRow=document.getElementById('recIngSvRow');if(svRow)svRow.style.display='none';
-  var badge=document.getElementById('recMacroBadge');if(badge)badge.style.display='none';
-  // Clear manual-entry flags on macro fields so auto-calc can fill them
-  ['recCal','recPro','recCarb','recFat'].forEach(function(id){var el=document.getElementById(id);if(el)delete el.dataset.manual;});
-  // Reset ingredient unit row
-  var unitRow=document.getElementById('recIngUnitRow');if(unitRow)unitRow.style.display='';
-  var unitEl=document.getElementById('recIngUnit');if(unitEl)unitEl.value='';
+  var nid=document.getElementById('recIngNotInDb');if(nid)nid.style.display='none';
+  var iaf=document.getElementById('recInlineAddFood');if(iaf)iaf.style.display='none';
+  var btn=document.getElementById('recIngAddBtn');if(btn)btn.style.display='';
   // Populate photos
   var p1Prev=document.getElementById('recPhoto1Preview');
   var p2Prev=document.getElementById('recPhoto2Preview');
@@ -20357,7 +20447,6 @@ function renderRecipeIngList(){
   if(!el)return;
   if(!MEAL_EDIT_INGS.length){
     el.innerHTML='<p style="color:var(--textl);font-size:12px;text-align:center;padding:8px">No ingredients added yet</p>';
-    var badge=document.getElementById('recMacroBadge');if(badge)badge.style.display='none';
     return;
   }
   el.innerHTML=MEAL_EDIT_INGS.map(function(ing,i){
@@ -20366,169 +20455,136 @@ function renderRecipeIngList(){
     var qty=parseFloat(ing.qty)||1;
     var macroLine='';
     if(dbi&&dbi.per100&&dbi.per100.cal!==undefined&&ing.svGrams){
-      var totalGrams=ing.svGrams*qty;
-      var c=Math.round(totalGrams*dbi.per100.cal/100);
-      var p=Math.round(totalGrams*dbi.per100.pro/100*10)/10;
-      macroLine='<div style="font-size:10px;color:var(--textl)">→ '+c+' cal · '+p+'g pro · '+totalGrams+'g total</div>';
+      var g=ing.svGrams*qty;
+      macroLine='→ '+Math.round(g*dbi.per100.cal/100)+' cal'+(dbi.per100.pro?' · '+Math.round(g*dbi.per100.pro/100*10)/10+'g pro':'');
     } else if(dbi&&dbi.cal){
-      macroLine='<div style="font-size:10px;color:var(--textl)">→ '+Math.round(dbi.cal*qty)+' cal · '+Math.round((dbi.pro||0)*qty*10)/10+'g pro</div>';
+      macroLine='→ '+Math.round(dbi.cal*qty)+' cal'+(dbi.pro?' · '+Math.round((dbi.pro||0)*qty*10)/10+'g pro':'');
     } else if(dbi){
-      macroLine='<div style="font-size:10px;color:#f0a020">⚠️ No nutrition in library — <a style="color:var(--blue);cursor:pointer" onclick="closeOv(\'recipeModal\');openFoodDbModal(\''+dbi.id+'\')">add it →</a></div>';
-    } else {
-      macroLine='<div style="font-size:10px;color:var(--textl)">Not in library — macros unknown</div>';
+      macroLine='⚠️ no nutrition — <a onclick="closeOv(\'recipeModal\');openFoodDbModal(\''+dbi.id+'\')" style="color:var(--blue);cursor:pointer;font-size:10px">add it →</a>';
     }
-    var svDisplay=ing.unit?(' · '+escHtml(ing.unit)):'';
-    return '<div style="display:flex;align-items:flex-start;gap:8px;padding:6px 0;border-bottom:1px solid var(--bdr)">'
+    var svHtml='';
+    if(dbi&&dbi.servings&&dbi.servings.length>1){
+      svHtml='<select onchange="editRecipeIngServing('+i+',this.value)" style="padding:3px 6px;border-radius:7px;border:1.5px solid #e8e0d8;font-family:\'Quicksand\',sans-serif;font-size:11px;background:#fff;max-width:130px">'
+        +dbi.servings.map(function(s){return'<option value="'+s.id+'"'+(s.id===ing.svId?' selected':'')+'>'+escHtml(s.label)+'</option>';}).join('')+'</select>';
+    } else {
+      svHtml='<span style="font-size:11px;color:var(--textl)">'+escHtml(ing.unit||'')+'</span>';
+    }
+    return '<div style="display:flex;align-items:flex-start;gap:8px;padding:7px 0;border-bottom:1px solid var(--bdr)">'
       +'<div style="flex:1;min-width:0">'
-      +'<div style="font-size:13px;font-weight:600;color:var(--textd)">'+qty+'×'+svDisplay+' '+escHtml(ing.name)+'</div>'
-      +macroLine
+      +'<div style="font-size:13px;font-weight:600;color:var(--textd);margin-bottom:4px">'+escHtml(ing.name)+'</div>'
+      +'<div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">'
+      +'<input type="number" value="'+qty+'" min="0.25" step="0.25" onchange="editRecipeIngQty('+i+',this.value)" style="width:58px;padding:4px 6px;border-radius:7px;border:1.5px solid #e8e0d8;font-size:12px;text-align:center;font-family:inherit">'
+      +svHtml
+      +(macroLine?'<span style="font-size:10px;color:var(--textl)">'+macroLine+'</span>':'')
       +'</div>'
-      +'<button style="background:none;border:none;color:#e74c3c;font-size:16px;cursor:pointer;flex-shrink:0;padding:2px 4px" onclick="delRecipeIng('+i+')">✕</button>'
+      +'</div>'
+      +'<button style="background:none;border:none;color:#e74c3c;font-size:16px;cursor:pointer;flex-shrink:0;padding:2px 4px;margin-top:2px" onclick="delRecipeIng('+i+')">✕</button>'
       +'</div>';
   }).join('');
+}
+
+function editRecipeIngQty(i,val){
+  MEAL_EDIT_INGS[i].qty=Math.max(0.25,parseFloat(val)||0.25);
+  renderRecipeIngList();
+  renderRecipeNutrition();
+}
+
+function editRecipeIngServing(i,svId){
+  var ing=MEAL_EDIT_INGS[i];
+  var dbi=ing.dbItemId?FOOD_DB.find(function(x){return x.id===ing.dbItemId;}):null;
+  if(!dbi||!dbi.servings)return;
+  var sv=dbi.servings.find(function(s){return s.id===svId;});
+  if(!sv)return;
+  ing.svId=sv.id;ing.svGrams=sv.grams;ing.unit=sv.label;
+  renderRecipeIngList();
+  renderRecipeNutrition();
 }
 
 function previewRecIngDb(val){
   var prev=document.getElementById('recIngDbPreview');
   var svRow=document.getElementById('recIngSvRow');
   var svSel=document.getElementById('recIngSvSel');
+  var notInDbRow=document.getElementById('recIngNotInDb');
   if(!prev)return;
-  var unitRow=document.getElementById('recIngUnitRow');
   var v=(val||'').trim().toLowerCase();
-  if(!v){prev.style.display='none';if(svRow)svRow.style.display='none';if(unitRow)unitRow.style.display='';return;}
+  if(!v){prev.style.display='none';if(svRow)svRow.style.display='none';if(notInDbRow)notInDbRow.style.display='none';return;}
   var dbi=FOOD_DB.find(function(x){
     if(x.name.toLowerCase()===v)return true;
     if((x.aliases||[]).some(function(a){return a.toLowerCase()===v;}))return true;
     return false;
   });
-  if(!dbi){prev.style.display='none';if(svRow)svRow.style.display='none';if(unitRow)unitRow.style.display='';return;}
-  // Show DB match info
+  if(!dbi){
+    prev.style.display='none';
+    if(svRow)svRow.style.display='none';
+    if(notInDbRow){notInDbRow.style.display='';notInDbRow.innerHTML='<span style="font-size:11px;color:#b05020">Not in your Foods yet — </span><a style="font-size:11px;color:var(--blue);cursor:pointer;font-weight:700" onclick="openInlineAddFood(\''+escHtml(v)+'\')">+ Add it inline →</a>';}
+    return;
+  }
+  if(notInDbRow)notInDbRow.style.display='none';
   var facts=[];
   if(dbi.cal)facts.push('🔥 '+dbi.cal+' cal');
   if(dbi.pro)facts.push('💪 '+dbi.pro+'g pro');
   if(dbi.per100&&dbi.per100.cal)facts.push('('+dbi.per100.cal+' cal/100g)');
-  if(dbi.store)facts.push('🏪 '+escHtml(dbi.store));
-  prev.innerHTML='<strong>✅ In library:</strong> '+escHtml(dbi.name)+(facts.length?' · '+facts.join(' · '):'')
-    +((!dbi.cal&&!dbi.per100)?'<a style="color:var(--blue);cursor:pointer;margin-left:6px" onclick="closeOv(\'recipeModal\');openFoodDbModal(\''+dbi.id+'\')">Add nutrition →</a>':'');
+  prev.innerHTML='<strong>✅</strong> '+escHtml(dbi.name)+(facts.length?' · '+facts.join(' · '):'')+(!dbi.cal&&!dbi.per100?' <a style="color:var(--blue);cursor:pointer" onclick="closeOv(\'recipeModal\');openFoodDbModal(\''+dbi.id+'\')">Add nutrition →</a>':'');
   prev.style.display='';
-  // Show serving size picker, hide manual unit row (DB handles units)
   if(svRow&&svSel&&dbi.servings&&dbi.servings.length){
-    svSel.innerHTML=dbi.servings.map(function(s){
-      return '<option value="'+s.id+'">'+escHtml(s.label)+(s.grams?' ('+s.grams+'g)':'')+'</option>';
-    }).join('');
-    // Pre-select myUsual if set
+    svSel.innerHTML=dbi.servings.map(function(s){return'<option value="'+s.id+'">'+escHtml(s.label)+(s.grams?' ('+s.grams+'g)':'')+'</option>';}).join('');
     if(dbi.myUsual&&dbi.myUsual.svId)svSel.value=dbi.myUsual.svId;
-    // Pre-fill qty from myUsual
     var qtyEl=document.getElementById('recIngQty');
     if(qtyEl&&dbi.myUsual&&dbi.myUsual.qty)qtyEl.value=dbi.myUsual.qty;
     svRow.style.display='';
-    if(unitRow)unitRow.style.display='none';
   } else if(svRow){
     svRow.style.display='none';
-    if(unitRow)unitRow.style.display='';
   }
 }
 
 function addRecipeIng(){
   var name=(document.getElementById('recIngName').value||'').trim();
   var qty=parseFloat(document.getElementById('recIngQty').value)||1;
-  var unitEl=document.getElementById('recIngUnit');
-  var unit=unitEl&&unitEl.tagName==='INPUT'?(unitEl.value||'').trim():'';
   if(!name)return;
-  var dbi=FOOD_DB.find(function(x){return x.name.toLowerCase()===name.toLowerCase();});
-  // Get chosen serving size
-  var svId='',svGrams=0,svLabel=unit;
+  var dbi=FOOD_DB.find(function(x){return x.name.toLowerCase()===name.toLowerCase()||(x.aliases||[]).some(function(a){return a.toLowerCase()===name.toLowerCase();});});
+  if(!dbi){openInlineAddFood(name);return;}
+  var svId='',svGrams=0,svLabel='';
   var svSel=document.getElementById('recIngSvSel');
-  if(svSel&&svSel.value&&dbi&&dbi.servings){
+  if(svSel&&svSel.value&&dbi.servings){
     var sv=dbi.servings.find(function(s){return s.id===svSel.value;});
     if(sv){svId=sv.id;svGrams=sv.grams;svLabel=sv.label;}
   }
-  if(!svGrams&&dbi&&dbi.servings&&dbi.servings.length){
-    svId=dbi.servings[0].id;svGrams=dbi.servings[0].grams;svLabel=dbi.servings[0].label;
-  }
-  MEAL_EDIT_INGS.push({
-    name:name,
-    qty:qty,
-    unit:svLabel||unit||'',
-    dbItemId:dbi?dbi.id:'',
-    svId:svId,
-    svGrams:svGrams
-  });
+  if(!svGrams&&dbi.servings&&dbi.servings.length){svId=dbi.servings[0].id;svGrams=dbi.servings[0].grams;svLabel=dbi.servings[0].label;}
+  MEAL_EDIT_INGS.push({name:dbi.name,qty:qty,unit:svLabel,dbItemId:dbi.id,svId:svId,svGrams:svGrams});
   document.getElementById('recIngName').value='';
   document.getElementById('recIngQty').value='1';
-  if(unitEl&&unitEl.tagName==='INPUT')unitEl.value='';
   var prev=document.getElementById('recIngDbPreview');if(prev){prev.style.display='none';prev.innerHTML='';}
   var svRow=document.getElementById('recIngSvRow');if(svRow)svRow.style.display='none';
-  var unitRow=document.getElementById('recIngUnitRow');if(unitRow)unitRow.style.display='';
+  var nid=document.getElementById('recIngNotInDb');if(nid)nid.style.display='none';
   renderRecipeIngList();
-  updateRecipeMacroDisplay();
+  renderRecipeNutrition();
 }
 
 function delRecipeIng(i){
   MEAL_EDIT_INGS.splice(i,1);
   renderRecipeIngList();
-  updateRecipeMacroDisplay();
+  renderRecipeNutrition();
 }
 
-function calcRecipeMacros(){
-  var servingsCount=parseInt((document.getElementById('recServings')||{}).value)||1;
-  var totals={cal:0,pro:0,carb:0,fat:0,fib:0};
-  var linkedCount=0,totalCount=MEAL_EDIT_INGS.length;
-  MEAL_EDIT_INGS.forEach(function(ing){
-    var dbi=ing.dbItemId?FOOD_DB.find(function(x){return x.id===ing.dbItemId;}):null;
-    if(!dbi)dbi=FOOD_DB.find(function(x){return x.name.toLowerCase()===(ing.name||'').toLowerCase();});
-    var qty=parseFloat(ing.qty)||1;
-    if(dbi&&dbi.per100&&dbi.per100.cal!==undefined&&ing.svGrams){
-      var totalGrams=ing.svGrams*qty;
-      totals.cal+=totalGrams*dbi.per100.cal/100;
-      totals.pro+=totalGrams*dbi.per100.pro/100;
-      totals.carb+=totalGrams*dbi.per100.carb/100;
-      totals.fat+=totalGrams*dbi.per100.fat/100;
-      totals.fib+=totalGrams*(dbi.per100.fib||0)/100;
-      linkedCount++;
-    } else if(dbi&&dbi.cal){
-      totals.cal+=dbi.cal*qty;
-      totals.pro+=(dbi.pro||0)*qty;
-      totals.carb+=(dbi.carb||0)*qty;
-      totals.fat+=(dbi.fat||0)*qty;
-      totals.fib+=(dbi.fiber||0)*qty;
-      linkedCount++;
-    }
-  });
-  var perSv={
-    cal:Math.round(totals.cal/servingsCount),
-    pro:Math.round(totals.pro/servingsCount*10)/10,
-    carb:Math.round(totals.carb/servingsCount*10)/10,
-    fat:Math.round(totals.fat/servingsCount*10)/10,
-    fib:Math.round(totals.fib/servingsCount*10)/10
-  };
-  return{totals:totals,perSv:perSv,linkedCount:linkedCount,totalCount:totalCount,allLinked:linkedCount===totalCount&&totalCount>0};
+function _sumIngsMacros(ings){
+  var t={cal:0,pro:0,carb:0,fat:0,fib:0};var unlinked=0;
+  ings.forEach(function(ing){var m=_calcIngMacros(ing,ing.qty);if(m){t.cal+=m.cal;t.pro+=m.pro;t.carb+=m.carb;t.fat+=m.fat;t.fib+=m.fib;}else{unlinked++;}});
+  return{totals:t,unlinked:unlinked};
 }
-function updateRecipeMacroDisplay(){
-  if(!MEAL_EDIT_INGS.length)return;
-  var result=calcRecipeMacros();
-  if(!result.linkedCount)return;
-  var sv=result.perSv;
-  var calEl=document.getElementById('recCal');
-  var proEl=document.getElementById('recPro');
-  var carbEl=document.getElementById('recCarb');
-  var fatEl=document.getElementById('recFat');
-  if(calEl&&!calEl.dataset.manual)calEl.value=sv.cal||'';
-  if(proEl&&!proEl.dataset.manual)proEl.value=sv.pro||'';
-  if(carbEl&&!carbEl.dataset.manual)carbEl.value=sv.carb||'';
-  if(fatEl&&!fatEl.dataset.manual)fatEl.value=sv.fat||'';
-  var badge=document.getElementById('recMacroBadge');
-  if(badge){
-    if(result.allLinked){
-      badge.textContent='✅ Auto-calculated from '+result.linkedCount+' ingredient'+(result.linkedCount!==1?'s':'');
-      badge.style.color='var(--sage)';
-    } else {
-      badge.textContent='⚡ '+result.linkedCount+'/'+result.totalCount+' ingredients linked — remaining macros need manual entry';
-      badge.style.color='#f0a020';
-    }
-    badge.style.display='';
-  }
+
+function renderRecipeNutrition(){
+  var el=document.getElementById('recMacroCalcDisplay');if(!el)return;
+  var servings=parseInt((document.getElementById('recServings')||{}).value)||1;
+  if(!MEAL_EDIT_INGS.length){el.innerHTML='<span style="color:var(--textl);font-size:12px">Add ingredients to see nutrition</span>';return;}
+  var r=_sumIngsMacros(MEAL_EDIT_INGS);var t=r.totals;
+  var tag=function(x){return'<span class="recipe-macro-tag">'+x+'</span>';};
+  var perSv={cal:Math.round(t.cal/servings),pro:Math.round(t.pro/servings*10)/10,carb:Math.round(t.carb/servings*10)/10,fat:Math.round(t.fat/servings*10)/10,fib:Math.round(t.fib/servings*10)/10};
+  el.innerHTML='<div style="margin-bottom:4px"><span style="font-size:10px;color:var(--textl);font-weight:700;text-transform:uppercase">Per serving</span> '+tag('🔥 '+perSv.cal+' cal')+(perSv.pro?tag('💪 '+perSv.pro+'g pro'):'')+(perSv.carb?tag('🌾 '+perSv.carb+'g carb'):'')+(perSv.fat?tag('🫙 '+perSv.fat+'g fat'):'')+(perSv.fib?tag('🌱 '+perSv.fib+'g fib'):'')+'</div>'
+    +(servings>1?'<div><span style="font-size:10px;color:var(--textl);font-weight:700;text-transform:uppercase">Total</span> '+tag('🔥 '+Math.round(t.cal)+' cal')+(t.pro?tag(Math.round(t.pro*10)/10+'g pro'):'')+'</div>':'')
+    +(r.unlinked?'<div style="font-size:10px;color:#f0a020;margin-top:3px">⚠️ '+r.unlinked+' ingredient'+(r.unlinked>1?'s':'')+' missing nutrition — edit in Foods</div>':'');
 }
+
+function updateRecipeMacroDisplay(){renderRecipeNutrition();}
 
 function saveRecipe(){
   var name=document.getElementById('recName').value.trim();
@@ -20548,15 +20604,9 @@ function saveRecipe(){
     prepTime:prepEl?parseInt(prepEl.value)||0:0,
     cookTime:cookEl?parseInt(cookEl.value)||0:0,
     macros:(function(){
-      var cal=parseFloat(document.getElementById('recCal').value)||0;
-      var pro=parseFloat(document.getElementById('recPro').value)||0;
-      var carb=parseFloat(document.getElementById('recCarb').value)||0;
-      var fat=parseFloat(document.getElementById('recFat').value)||0;
-      if(!cal&&!pro&&!carb&&!fat){
-        var result=calcRecipeMacros();
-        if(result.linkedCount>0)return{cal:result.perSv.cal,pro:result.perSv.pro,carb:result.perSv.carb,fat:result.perSv.fat,fib:result.perSv.fib};
-      }
-      return{cal:Math.round(cal),pro:Math.round(pro*10)/10,carb:Math.round(carb*10)/10,fat:Math.round(fat*10)/10};
+      var servings=parseInt(document.getElementById('recServings').value)||1;
+      var r=_sumIngsMacros(MEAL_EDIT_INGS);var t=r.totals;
+      return{cal:Math.round(t.cal/servings),pro:Math.round(t.pro/servings*10)/10,carb:Math.round(t.carb/servings*10)/10,fat:Math.round(t.fat/servings*10)/10,fib:Math.round(t.fib/servings*10)/10,totalCal:Math.round(t.cal),totalPro:Math.round(t.pro*10)/10};
     })(),
     tags:(document.getElementById('recTags').value||'').split(',').map(function(t){return t.trim();}).filter(Boolean),
     ingredients:MEAL_EDIT_INGS,
@@ -26866,33 +26916,42 @@ function delProjInc(id){
     <label style="font-size:12px;color:var(--textl)">Tags (comma sep)</label>
     <input id="recTags" type="text" placeholder="e.g. high protein, quick" style="width:100%;padding:8px 11px;border-radius:10px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px;box-sizing:border-box">
   </div>
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
-    <div style="font-size:12px;font-weight:700;color:var(--textl)">MACROS (per serving)</div>
-    <div id="recMacroBadge" style="display:none;font-size:10px;font-weight:600"></div>
-  </div>
-  <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:6px;margin-bottom:12px">
-    <div><label style="font-size:11px;color:var(--textl)">Cal</label><input id="recCal" type="number" placeholder="auto" style="width:100%;padding:7px 8px;border-radius:8px;border:1.5px solid #e8e0d8;font-size:13px;box-sizing:border-box" oninput="this.dataset.manual='1'"></div>
-    <div><label style="font-size:11px;color:var(--textl)">Protein g</label><input id="recPro" type="number" placeholder="auto" style="width:100%;padding:7px 8px;border-radius:8px;border:1.5px solid #e8e0d8;font-size:13px;box-sizing:border-box" oninput="this.dataset.manual='1'"></div>
-    <div><label style="font-size:11px;color:var(--textl)">Carbs g</label><input id="recCarb" type="number" placeholder="auto" style="width:100%;padding:7px 8px;border-radius:8px;border:1.5px solid #e8e0d8;font-size:13px;box-sizing:border-box" oninput="this.dataset.manual='1'"></div>
-    <div><label style="font-size:11px;color:var(--textl)">Fat g</label><input id="recFat" type="number" placeholder="auto" style="width:100%;padding:7px 8px;border-radius:8px;border:1.5px solid #e8e0d8;font-size:13px;box-sizing:border-box" oninput="this.dataset.manual='1'"></div>
+  <div style="margin-bottom:12px">
+    <div style="font-size:12px;font-weight:700;color:var(--textl);margin-bottom:5px">NUTRITION <span style="font-weight:400;font-size:11px">(auto-calculated from ingredients)</span></div>
+    <div id="recMacroCalcDisplay" style="background:var(--bg2,#f8f5f1);border-radius:10px;padding:10px;min-height:36px;font-size:12px"><span style="color:var(--textl)">Add ingredients to see nutrition</span></div>
   </div>
   <div style="font-size:12px;font-weight:700;color:var(--textl);margin-bottom:6px">INGREDIENTS</div>
   <div id="recIngList" style="margin-bottom:8px"></div>
   <div class="card" style="margin-bottom:10px;padding:10px">
     <div style="display:flex;gap:6px;margin-bottom:6px;align-items:center">
-      <input id="recIngName" type="text" placeholder="Search ingredient library…" list="recIngDbSuggest" style="flex:1;padding:7px 9px;border-radius:8px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:12px" oninput="previewRecIngDb(this.value)">
+      <input id="recIngName" type="text" placeholder="Type food name from your library…" list="recIngDbSuggest" style="flex:1;padding:7px 9px;border-radius:8px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:12px" oninput="previewRecIngDb(this.value)">
       <datalist id="recIngDbSuggest"></datalist>
       <input id="recIngQty" type="number" value="1" min="0.25" step="0.25" style="width:56px;padding:7px 8px;border-radius:8px;border:1.5px solid #e8e0d8;font-size:13px;text-align:center">
-      <button class="btn" onclick="addRecipeIng()" style="padding:7px 12px;font-size:12px;flex-shrink:0">+ Add</button>
+      <button id="recIngAddBtn" class="btn" onclick="addRecipeIng()" style="padding:7px 12px;font-size:12px;flex-shrink:0">+ Add</button>
     </div>
     <div id="recIngDbPreview" style="display:none;font-size:11px;color:var(--textd);padding:4px 0 4px 2px"></div>
+    <div id="recIngNotInDb" style="display:none;padding:4px 0 2px 2px"></div>
     <div id="recIngSvRow" style="display:none;margin-top:6px">
       <label style="font-size:11px;color:var(--textl);display:block;margin-bottom:3px">Serving size:</label>
       <select id="recIngSvSel" style="width:100%;padding:6px 10px;border-radius:8px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:12px;background:#fff"></select>
     </div>
-    <div id="recIngUnitRow" style="margin-top:6px">
-      <label style="font-size:11px;color:var(--textl);display:block;margin-bottom:3px">Unit (optional):</label>
-      <input type="text" id="recIngUnit" placeholder="e.g. cups, oz, tbsp, whole" style="width:100%;padding:6px 10px;border-radius:8px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:12px;background:#fff;box-sizing:border-box">
+    <div id="recInlineAddFood" style="display:none;margin-top:8px;padding:10px;background:#fff8e8;border-radius:10px;border:1.5px solid #ffd580">
+      <div style="font-size:12px;font-weight:700;color:var(--textd);margin-bottom:8px">📌 Quick-add to Foods</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:6px">
+        <div><label style="font-size:11px;color:var(--textl)">Name</label><input id="iafName" type="text" style="width:100%;padding:6px 9px;border-radius:8px;border:1.5px solid #e8e0d8;font-size:12px;font-family:'Quicksand',sans-serif;box-sizing:border-box"></div>
+        <div><label style="font-size:11px;color:var(--textl)">Serving label</label><input id="iafSvLabel" type="text" placeholder="e.g. 1 cup, 100g" style="width:100%;padding:6px 9px;border-radius:8px;border:1.5px solid #e8e0d8;font-size:12px;font-family:'Quicksand',sans-serif;box-sizing:border-box"></div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:5px;margin-bottom:8px">
+        <div><label style="font-size:10px;color:var(--textl)">Grams</label><input id="iafSvGrams" type="number" placeholder="0" style="width:100%;padding:5px 6px;border-radius:7px;border:1.5px solid #e8e0d8;font-size:12px;box-sizing:border-box"></div>
+        <div><label style="font-size:10px;color:var(--textl)">Cal</label><input id="iafCal" type="number" placeholder="0" style="width:100%;padding:5px 6px;border-radius:7px;border:1.5px solid #e8e0d8;font-size:12px;box-sizing:border-box"></div>
+        <div><label style="font-size:10px;color:var(--textl)">Pro g</label><input id="iafPro" type="number" placeholder="0" style="width:100%;padding:5px 6px;border-radius:7px;border:1.5px solid #e8e0d8;font-size:12px;box-sizing:border-box"></div>
+        <div><label style="font-size:10px;color:var(--textl)">Carb g</label><input id="iafCarb" type="number" placeholder="0" style="width:100%;padding:5px 6px;border-radius:7px;border:1.5px solid #e8e0d8;font-size:12px;box-sizing:border-box"></div>
+        <div><label style="font-size:10px;color:var(--textl)">Fat g</label><input id="iafFat" type="number" placeholder="0" style="width:100%;padding:5px 6px;border-radius:7px;border:1.5px solid #e8e0d8;font-size:12px;box-sizing:border-box"></div>
+      </div>
+      <div style="display:flex;gap:6px">
+        <button class="btn" style="flex:1;padding:7px;font-size:12px" onclick="saveInlineFood()">Save & Add →</button>
+        <button class="btn sec" style="padding:7px 12px;font-size:12px" onclick="cancelInlineAddFood()">Cancel</button>
+      </div>
     </div>
   </div>
   <label style="font-size:12px;color:var(--textl)">Notes</label>
@@ -26920,18 +26979,19 @@ function delProjInc(id){
 
 <!-- COOK IT MODAL -->
 <div class="ov" id="cookItModal" onclick="closeOv('cookItModal')">
-  <div class="mod" onclick="event.stopPropagation()">
+  <div class="mod" style="max-height:90vh;overflow-y:auto" onclick="event.stopPropagation()">
     <div class="mh"><span class="mt">🍳 Cook It</span><button class="mc" onclick="closeOv('cookItModal')">✕</button></div>
     <input type="hidden" id="cookItRecId">
-    <div id="cookItRecName" style="font-size:15px;font-weight:700;color:var(--textd);margin-bottom:14px"></div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
-      <div>
-        <label style="font-size:12px;color:var(--textl)">Servings eaten</label>
-        <input id="cookItServings" type="number" value="1" min="0.25" step="0.25" style="width:100%;padding:8px 11px;border-radius:10px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px;box-sizing:border-box" oninput="updateCookItMacros()">
+    <div id="cookItRecName" style="font-size:15px;font-weight:700;color:var(--textd);margin-bottom:4px"></div>
+    <div style="font-size:11px;color:var(--textl);margin-bottom:12px">Uncheck to omit · adjust qty per ingredient · ⇄ to swap · macros update live</div>
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap">
+      <div style="display:flex;align-items:center;gap:6px">
+        <label style="font-size:12px;color:var(--textl);white-space:nowrap">Servings eaten</label>
+        <input id="cookItServings" type="number" value="1" min="0.25" step="0.25" style="width:66px;padding:7px 9px;border-radius:9px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px" oninput="renderCookItIngs()">
       </div>
-      <div>
-        <label style="font-size:12px;color:var(--textl)">Meal type</label>
-        <select id="cookItMealType" style="width:100%;padding:8px 11px;border-radius:10px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px;box-sizing:border-box;background:#fff">
+      <div style="display:flex;align-items:center;gap:6px;flex:1;min-width:140px">
+        <label style="font-size:12px;color:var(--textl);white-space:nowrap">Meal type</label>
+        <select id="cookItMealType" style="flex:1;padding:7px 9px;border-radius:9px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px;background:#fff">
           <option value="breakfast">🌅 Breakfast</option>
           <option value="lunch">🥙 Lunch</option>
           <option value="dinner" selected>🍽️ Dinner</option>
@@ -26940,12 +27000,14 @@ function delProjInc(id){
         </select>
       </div>
     </div>
-    <div id="cookItMacroDisplay" style="background:var(--bg2,#f8f5f1);border-radius:10px;padding:10px;margin-bottom:12px;display:flex;gap:6px;flex-wrap:wrap;align-items:center"></div>
+    <div id="cookItIngList" style="margin-bottom:10px"></div>
+    <div id="cookItMacroDisplay" style="background:var(--bg2,#f8f5f1);border-radius:10px;padding:10px;margin-bottom:10px;display:flex;gap:6px;flex-wrap:wrap;align-items:center;min-height:38px"></div>
     <label style="font-size:12px;color:var(--textl)">Modifications / Notes</label>
-    <textarea id="cookItNotes" placeholder="e.g. used oat milk instead, skipped the oil, added extra garlic…" rows="3" style="width:100%;padding:8px 11px;border-radius:10px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px;resize:vertical;box-sizing:border-box;margin-bottom:14px"></textarea>
+    <textarea id="cookItNotes" placeholder="e.g. used oat milk, skipped the oil, added extra garlic…" rows="2" style="width:100%;padding:8px 11px;border-radius:10px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px;resize:vertical;box-sizing:border-box;margin-bottom:12px"></textarea>
     <div style="display:flex;gap:8px">
       <button class="btn" style="flex:1" onclick="logCookIt()">Log It ✓</button>
-      <button class="btn sec" style="flex:1" onclick="closeOv('cookItModal')">Cancel</button>
+      <button class="btn sec" style="padding:10px 14px;font-size:12px;white-space:nowrap" onclick="saveRecipeAsCopy()">Save as copy</button>
+      <button class="btn sec" style="padding:10px 14px;font-size:12px" onclick="closeOv('cookItModal')">Cancel</button>
     </div>
   </div>
 </div>
