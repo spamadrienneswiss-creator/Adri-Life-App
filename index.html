@@ -1539,6 +1539,24 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     </div>
   </div>
 
+  <!-- How I Feel — Symptoms quick-log -->
+  <div class="card" style="padding:0;margin-bottom:10px">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:11px 14px;cursor:pointer" onclick="togTodaySec('todaySympBody')">
+      <span style="font-size:11px;font-weight:700;color:var(--textl);letter-spacing:.5px;text-transform:uppercase">🤕 How I Feel</span>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span id="todaySympSummary" style="font-size:11px;color:var(--textl)"></span>
+        <span class="sh-arr" id="sh-arr-todaySympBody">▸</span>
+      </div>
+    </div>
+    <div id="todaySympBody-wrap" style="display:none">
+      <div style="padding:0 14px 12px">
+        <div style="font-size:10px;color:var(--textl);margin-bottom:8px">Tap to log · tap again to clear · fine-tune in Wellness</div>
+        <div id="todaySympChips" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px"></div>
+        <button onclick="goTab('wellness',null);setTimeout(function(){showWellnessSec('symptoms',document.querySelector('#v-wellness .pn-btn:nth-child(4)'))},200)" style="font-size:11px;background:none;border:none;color:var(--lav);cursor:pointer;font-family:'Quicksand',sans-serif;font-weight:700;text-decoration:underline;padding:0">Detailed log in Wellness →</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Routine entry pills (time-aware / Opening Shift) -->
   <div id="todayRtnPills" style="display:flex;gap:8px;margin-bottom:10px"></div>
 
@@ -5717,8 +5735,16 @@ var SYM_LOG = JSON.parse(localStorage.getItem('aSymLog')||'{}');
 var SYM_TYPES = JSON.parse(localStorage.getItem('aSymTypes')||'null')||[
   {id:'energy',name:'Energy',icon:'⚡'},{id:'pain',name:'Pain',icon:'🔴'},
   {id:'brainfog',name:'Brain Fog',icon:'🌫️'},{id:'headache',name:'Headache',icon:'😵'},
-  {id:'histamine',name:'Histamine',icon:'🌿'},
+  {id:'histamine',name:'Histamine',icon:'🌿'},{id:'migraine',name:'Migraine',icon:'🤯'},
+  {id:'stomach',name:'Stomach',icon:'🤢'},
 ];
+// One-time migration: ensure Migraine + Stomach exist for existing users
+(function(){
+  var needed=[{id:'migraine',name:'Migraine',icon:'🤯'},{id:'stomach',name:'Stomach',icon:'🤢'}];
+  var changed=false;
+  needed.forEach(function(n){if(!SYM_TYPES.some(function(s){return s.id===n.id||s.name===n.name;})){SYM_TYPES.push(n);changed=true;}});
+  if(changed)localStorage.setItem('aSymTypes',JSON.stringify(SYM_TYPES));
+})();
 var EX_DB = JSON.parse(localStorage.getItem('aExDB')||'null')||[
   {id:'ex1',name:'Walking',cat:'cardio'},{id:'ex2',name:'Running',cat:'cardio'},
   {id:'ex3',name:'Cycling',cat:'cardio'},{id:'ex4',name:'Strength Training',cat:'strength'},
@@ -6444,7 +6470,7 @@ function goTabDirect(tab,btn){
   if(SECTION_VIEWS[tab]||tab==='emporium')renderHubPreviews(tab);
   var hFab=document.getElementById('hatchFab');if(hFab){hFab.style.display=(tab==='today')?'flex':'none';if(tab==='today'){hFab.style.opacity='1';hFab.style.transform='translateX(-50%) translateY(0)';hFab.style.pointerEvents='auto';_fabHidden=false;_fabScrollLast=window.scrollY||window.pageYOffset;renderFabPills();}}
   if(tab==='home'){ renderHomePage(); }
-  if(tab==='today'){ tickSpiritRun(); renderWaterBottle(); renderTodayStatsBars(); renderWeekStats(); renderTodayMoodBtns(); renderTodayPlanBar(); renderTodayWorkGlance(); renderTodayHubSubs(); renderIntentionsHome(); renderTodayRtnPills(); renderTodayMoneyCard(); renderTodayTimeGreet(); checkAndShowWhileAway(); trackLastActive(); applyTodaySlim(); }
+  if(tab==='today'){ tickSpiritRun(); renderWaterBottle(); renderTodayStatsBars(); renderWeekStats(); renderTodayMoodBtns(); renderTodayPlanBar(); renderTodayWorkGlance(); renderTodayHubSubs(); renderIntentionsHome(); renderTodayRtnPills(); renderTodayMoneyCard(); renderTodayTimeGreet(); checkAndShowWhileAway(); trackLastActive(); applyTodaySlim(); renderTodaySymptoms(); }
   if(tab==='routines'){ renderDailyRtn(_dailyRtnKey); renderOtherRtns(); }
   if(tab==='hearthside'){ renderHWHubStats(); }
   if(tab==='lighthouse'){ updateLighthouseSpiritStatus(); }
@@ -9175,6 +9201,38 @@ function renderTodayStatsBars(){
   el=document.getElementById('tExB');if(el)el.style.width=pct(exCount,S.gEx||3);
 }
 
+// ── Symptoms Quick-Log (Today page) ───────────
+function renderTodaySymptoms(){
+  var k=getTK();
+  var today=SYM_LOG[k]||{};
+  var el=document.getElementById('todaySympChips');
+  if(!el)return;
+  if(!SYM_TYPES.length){
+    el.innerHTML='<div style="font-size:12px;color:var(--textl)">No symptoms set up — add some in Wellness → Symptoms.</div>';
+  }else{
+    el.innerHTML=SYM_TYPES.map(function(s){
+      var val=today[s.id]||0;
+      var logged=val>0;
+      return '<button onclick="quickLogSym(\''+s.id+'\')" style="display:flex;align-items:center;gap:5px;padding:7px 12px;border-radius:18px;border:1.5px solid '+(logged?'var(--rose)':'#e8e0d8')+';background:'+(logged?'#fde8e8':'#fff')+';font-family:\'Quicksand\',sans-serif;font-size:12px;font-weight:700;color:'+(logged?'#c05050':'var(--textd)')+';cursor:pointer;white-space:nowrap">'
+        +s.icon+' '+escHtml(s.name)+(logged?' · '+val+'/5':'')+'</button>';
+    }).join('');
+  }
+  var loggedSyms=SYM_TYPES.filter(function(s){return(today[s.id]||0)>0;});
+  var sumEl=document.getElementById('todaySympSummary');
+  if(sumEl)sumEl.textContent=loggedSyms.length?loggedSyms.map(function(s){return s.icon;}).join(''):'None logged';
+}
+
+function quickLogSym(symId){
+  var k=getTK();
+  if(!SYM_LOG[k])SYM_LOG[k]={};
+  var current=SYM_LOG[k][symId]||0;
+  SYM_LOG[k][symId]=current===0?3:0;
+  localStorage.setItem('aSymLog',JSON.stringify(SYM_LOG));
+  renderTodaySymptoms();
+  var s=SYM_TYPES.find(function(t){return t.id===symId;});
+  if(SYM_LOG[k][symId]>0)showToast((s?s.icon+' '+s.name:'Symptom')+' logged');
+}
+
 // ── This Week Stats ────────────────────────────
 function getWeekDates(){
   var d=[];
@@ -11676,8 +11734,9 @@ function addFL(id){
   document.getElementById('foodSugs').style.display='none';
   renderFL();updM();
 }
-function addFLFromLib(id){
-  // Log a FOOD_DB library item using its first serving size / myUsual defaults
+function addFLFromLib(id){ addFLFromLibQty(id,1); }
+function addFLFromLibQty(id,mult){
+  // Log a FOOD_DB library item using its first serving size / myUsual defaults, scaled by mult
   var item=(FOOD_DB||[]).find(function(f){return f.id===id;});
   if(!item)return;
   var sv=(item.servings&&item.servings.length)?item.servings[0]:{id:'100g',label:'100g',grams:100};
@@ -11685,10 +11744,10 @@ function addFLFromLib(id){
     var ms=(item.servings||[]).find(function(s){return s.id===item.myUsual.svId;});
     if(ms)sv=ms;
   }
-  var qty=(item.myUsual&&item.myUsual.qty)?parseFloat(item.myUsual.qty):1;
+  var qty=((item.myUsual&&item.myUsual.qty)?parseFloat(item.myUsual.qty):1)*(parseFloat(mult)||1);
   var n=calcNutFromLib(item,sv.grams,qty);
   addFoodFromLib(item.name,n.cal,n.pro,n.carb,n.fat);
-  showToast(item.name+' logged ✨');
+  showToast(item.name+(mult&&mult!=1?' ×'+mult:'')+' logged ✨');
   renderTodayStatsBars();
 }
 function logFoodManual(prefill){
@@ -12119,7 +12178,19 @@ function budgetSpentMapForMonth(mon){
 }
 function budgetSpentMap(){return budgetSpentMapForMonth(getMonStr());}
 
-// effective target = base target +/- this month's cover-from moves (monthly total never changes)
+// Rollover bonus: if opted in, last month's unspent amount carries forward as extra target
+function budgetRolloverBonus(b){
+  if(!b||!b.rollover)return 0;
+  var nowD=new Date();var prevD=new Date(nowD.getFullYear(),nowD.getMonth()-1,1);
+  var prevMon=prevD.getFullYear()+'-'+(String(prevD.getMonth()+1).padStart(2,'0'));
+  var base=parseFloat(b.target)||0;
+  BUDGET_MOVES.forEach(function(m){if(m.mon!==prevMon)return;if(m.to===b.id)base+=m.amt;if(m.from===b.id)base-=m.amt;});
+  var sp=budgetSpentMapForMonth(prevMon)[b.id]||0;
+  var bonus=base-sp;
+  return bonus>0?Math.round(bonus*100)/100:0;
+}
+
+// effective target = base target +/- this month's cover-from moves (+ rollover bonus if opted in)
 function budgetEffTarget(b){
   var mon=getMonStr();
   var t=parseFloat(b.target)||0;
@@ -12128,6 +12199,7 @@ function budgetEffTarget(b){
     if(m.to===b.id)t+=m.amt;
     if(m.from===b.id)t-=m.amt;
   });
+  t+=budgetRolloverBonus(b);
   return t;
 }
 
@@ -12142,6 +12214,7 @@ function renderBudget(){
   var totTarget=0,totSpent=0;
   var rows=BUDGET_BUCKETS.map(function(b){
     var eff=budgetEffTarget(b);
+    var roll=budgetRolloverBonus(b);
     var sp=spent[b.id]||0;
     var prevSp=prevSpent[b.id]||0;
     totTarget+=eff;totSpent+=sp;
@@ -12165,7 +12238,7 @@ function renderBudget(){
       +'<div style="height:100%;width:'+pct.toFixed(1)+'%;background:'+barColor+';transition:width .4s"></div>'
       +'</div>'
       +'<div style="display:flex;justify-content:space-between;font-size:10px;color:var(--textl);margin-top:3px">'
-      +'<span>'+(over?'<span style="color:var(--ured);font-weight:700">over by $'+Math.abs(rem).toFixed(0)+' — tap to cover</span>':'$'+rem.toFixed(0)+' left')+'</span>'
+      +'<span>'+(over?'<span style="color:var(--ured);font-weight:700">over by $'+Math.abs(rem).toFixed(0)+' — tap to cover</span>':'$'+rem.toFixed(0)+' left')+(roll>0?' <span style="color:var(--sage);font-weight:700" title="Carried over from last month">♻️ +$'+roll.toFixed(0)+'</span>':'')+'</span>'
       +(eff!==(parseFloat(b.target)||0)?'<span>base $'+(parseFloat(b.target)||0).toFixed(0)+'</span>':'')
       +'</div>'
       +'</div>';
@@ -12276,6 +12349,7 @@ function renderBudgetEditList(){
     return '<div style="padding:8px 0;border-bottom:1px solid #f5efe8">'
       +'<div style="display:flex;gap:6px;align-items:center">'
       +'<button onclick="_bgEdit['+i+'].protected=!_bgEdit['+i+'].protected;renderBudgetEditList()" title="'+(b.protected?'Protected — never a donor':'Tap to protect from Cover From')+'" style="background:none;border:none;font-size:14px;cursor:pointer;padding:2px;opacity:'+(b.protected?'1':'.3')+'">🔒</button>'
+      +'<button onclick="_bgEdit['+i+'].rollover=!_bgEdit['+i+'].rollover;renderBudgetEditList()" title="'+(b.rollover?'Rollover ON — unspent carries to next month':'Tap to roll unspent into next month')+'" style="background:none;border:none;font-size:14px;cursor:pointer;padding:2px;opacity:'+(b.rollover?'1':'.3')+'">♻️</button>'
       +'<input value="'+escHtml(b.name)+'" oninput="_bgEdit['+i+'].name=this.value" style="flex:1;min-width:0;padding:6px 8px;border-radius:8px;border:1.5px solid #e8e0d8;font-family:\'Quicksand\',sans-serif;font-size:13px;font-weight:600">'
       +'<span style="font-size:12px;color:var(--textl)">$</span>'
       +'<input type="number" value="'+(parseFloat(b.target)||0)+'" oninput="_bgEdit['+i+'].target=parseFloat(this.value)||0;updBgEditTotal()" style="width:70px;padding:6px 8px;border-radius:8px;border:1.5px solid #e8e0d8;font-size:13px;text-align:right">'
@@ -14972,6 +15046,9 @@ function renderMoneyOverview(){
     var unclearedCt=EXPENSES.filter(function(e){return!e.reconciled;}).length;
     // Savings rate (this month)
     var savingsRate=thisMonIncAmt>0?Math.round((thisMonIncAmt-thisMonExpAmt)/thisMonIncAmt*100):null;
+    // Net worth = cash on hand minus credit owed
+    var creditOwed=ACCOUNTS.filter(function(a){return a.isCredit;}).reduce(function(s,a){return s+(parseFloat(a.amount)||0);},0);
+    var netWorth=cash-creditOwed;
     var tile=function(label,big,sub,color){
       return '<div class="card" style="margin:0;padding:11px 13px">'
         +'<div style="font-size:10px;font-weight:700;color:var(--textl);text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px">'+label+'</div>'
@@ -14988,6 +15065,9 @@ function renderMoneyOverview(){
     html+=tile('💵 Net this month',(net>=0?'+':'-')+'$'+Math.abs(net).toFixed(0),'$'+thisMonIncAmt.toFixed(0)+' in · $'+thisMonExpAmt.toFixed(0)+' out',net>=0?'var(--sage)':'var(--ured)');
     html+=tile('📈 Savings rate',savingsRate!==null?savingsRate+'%':'—',savingsRate!==null?(savingsRate>=20?'looking good':savingsRate>=0?'of income kept':'spending over income'):'log income to see',savingsRate===null?'var(--textd)':savingsRate>=20?'var(--sage)':savingsRate>=0?'#c09020':'var(--ured)');
     html+=tile('⏳ Uncleared',unclearedCt,unclearedCt?'tap Expenses to reconcile':'all reconciled ✓',unclearedCt?'#c09020':'var(--sage)');
+    if(ACCOUNTS.length){
+      html+=tile('🏦 Net worth',(netWorth<0?'-':'')+'$'+Math.abs(netWorth).toFixed(0),'$'+cash.toFixed(0)+' cash'+(creditOwed>0?' · -$'+creditOwed.toFixed(0)+' owed':''),netWorth>=0?'var(--sage)':'var(--ured)');
+    }
     dashEl.innerHTML=html;
   }
 
@@ -20345,10 +20425,10 @@ function logFromLibrary(){
 function addFoodFromLib(name, cal, pro, carb, fat){
   var cat = (document.getElementById('mealLogCat')||{}).value||'main';
   var day = (document.getElementById('mealLogDay')||{}).value||'';
-  MEAL_LOG_ITEMS.unshift({id:'ml-'+Date.now(),name:name,category:cat,day:day,date:todayStr(),cal:cal,pro:pro,carb:carb,fat:fat});
-  localStorage.setItem('aMealLogItems',JSON.stringify(MEAL_LOG_ITEMS));
   var nl = name.toLowerCase();
   var dbItem = FOOD_DB.find(function(x){ return (x.name||'').toLowerCase()===nl; });
+  MEAL_LOG_ITEMS.unshift({id:'ml-'+Date.now(),name:name,category:cat,day:day,date:todayStr(),cal:cal,pro:pro,carb:carb,fat:fat,gluten:!!(dbItem&&dbItem.gluten)});
+  localStorage.setItem('aMealLogItems',JSON.stringify(MEAL_LOG_ITEMS));
   if(dbItem){ dbItem.useCount=(dbItem.useCount||0)+1; saveFoodDbData(); }
   autoFlagStaples();
   document.getElementById('mealLogDay').value='';
@@ -20387,6 +20467,11 @@ function renderMealMacroBar(){
     +row('💪 Protein',t.pro,S.gPro,'#6080c0')
     +row('🌾 Carbs',t.crb,S.gCrb,'#c09030')
     +row('🫙 Fat',t.fat,S.gFat,'#d06060')
+    +(function(){
+      var td=todayStr();
+      var hasGluten=(MEAL_LOG_ITEMS||[]).some(function(m){return m.date===td&&m.gluten;});
+      return hasGluten?'<div style="background:#fdf6e0;border-radius:8px;padding:5px 10px;margin-top:2px;font-size:11px;color:#a07820;font-weight:700">🌾 Gluten logged today</div>':'';
+    }())
     +_weeklyTrendHtml()
     +'<div style="text-align:right;margin-top:4px"><button onclick="openM(\'settingsModal\')" style="font-size:10px;background:none;border:none;color:var(--textl);cursor:pointer;font-family:inherit;text-decoration:underline">Edit goals →</button></div>';
 }
@@ -20435,7 +20520,7 @@ function renderQuickLogChips(){
   // Top foods: staples + most-used, ranked by useCount, only ones with nutrition data
   var candidates=(FOOD_DB||[]).filter(function(f){
     var hasNut=(f.per100&&f.per100.cal!=null)||f.cal;
-    return hasNut;
+    return hasNut&&!f.ick;
   });
   candidates.sort(function(a,b){
     if(!!b.staple!==!!a.staple)return b.staple?1:-1;
@@ -20448,9 +20533,34 @@ function renderQuickLogChips(){
     +top.map(function(f){
       var unit='';
       if(f.myUsual&&f.myUsual.svId){var sv=(f.servings||[]).find(function(s){return s.id===f.myUsual.svId;});if(sv)unit=(f.myUsual.qty&&f.myUsual.qty!=1?f.myUsual.qty+' ':'')+sv.label;}
-      return '<button onclick="addFLFromLib(\''+f.id+'\')" style="flex-shrink:0;padding:7px 12px;border-radius:18px;border:1.5px solid var(--bdr);background:#fff;font-family:\'Quicksand\',sans-serif;font-size:12px;font-weight:700;color:var(--textd);cursor:pointer;white-space:nowrap" title="'+(unit?escHtml(unit):'1 serving')+'">'
+      return '<button onclick="openQuickLogPortion(\''+f.id+'\')" style="flex-shrink:0;padding:7px 12px;border-radius:18px;border:1.5px solid var(--bdr);background:#fff;font-family:\'Quicksand\',sans-serif;font-size:12px;font-weight:700;color:var(--textd);cursor:pointer;white-space:nowrap" title="'+(unit?escHtml(unit):'1 serving')+'">'
         +(f.staple?'🏷️ ':'')+escHtml(f.name)+'</button>';
     }).join('')
+    +'</div>'
+    +'<div id="quickLogPicker" style="display:none"></div>';
+}
+
+function openQuickLogPortion(id){
+  var el=document.getElementById('quickLogPicker');if(!el)return;
+  var item=(FOOD_DB||[]).find(function(f){return f.id===id;});if(!item)return;
+  // Toggle off if already open for this item
+  if(el.style.display!=='none'&&el.dataset.fid===id){el.style.display='none';el.dataset.fid='';return;}
+  el.dataset.fid=id;el.style.display='';
+  var mults=[0.5,1,1.5,2];
+  var unit='';
+  if(item.myUsual&&item.myUsual.svId){var sv=(item.servings||[]).find(function(s){return s.id===item.myUsual.svId;});if(sv)unit=(item.myUsual.qty&&item.myUsual.qty!=1?item.myUsual.qty+' ':'')+sv.label;}
+  el.innerHTML='<div style="background:#faf7f3;border:1.5px solid var(--bdr);border-radius:12px;padding:8px 10px;margin-top:6px">'
+    +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">'
+    +'<span style="font-size:12px;font-weight:700;color:var(--textd)">'+escHtml(item.name)+(unit?' <span style="font-weight:600;color:var(--textl)">· '+escHtml(unit)+'</span>':'')+'</span>'
+    +'<button onclick="document.getElementById(\'quickLogPicker\').style.display=\'none\'" style="background:none;border:none;font-size:13px;cursor:pointer;color:var(--textl)">✕</button>'
+    +'</div>'
+    +'<div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">'
+    +mults.map(function(mu){
+      return '<button onclick="addFLFromLibQty(\''+id+'\','+mu+');document.getElementById(\'quickLogPicker\').style.display=\'none\'" style="padding:6px 12px;border-radius:16px;border:1.5px solid var(--sage);background:'+(mu===1?'var(--sage)':'#fff')+';color:'+(mu===1?'#fff':'var(--sage)')+';font-family:inherit;font-size:12px;font-weight:700;cursor:pointer">×'+mu+'</button>';
+    }).join('')
+    +'<input type="number" id="quickLogCustomQty" placeholder="custom" min="0.25" step="0.25" style="width:72px;padding:6px 8px;border-radius:9px;border:1.5px solid #e8e0d8;font-family:inherit;font-size:12px">'
+    +'<button onclick="var q=parseFloat(document.getElementById(\'quickLogCustomQty\').value);if(q>0){addFLFromLibQty(\''+id+'\',q);document.getElementById(\'quickLogPicker\').style.display=\'none\'}" style="padding:6px 12px;border-radius:16px;border:1.5px solid var(--lav);background:#fff;color:var(--lav);font-family:inherit;font-size:12px;font-weight:700;cursor:pointer">Log ✓</button>'
+    +'</div>'
     +'</div>';
 }
 
@@ -20478,6 +20588,7 @@ function renderMealLog(){
         html+='<div class="meal-log-item">'
           +'<span class="meal-log-name">'+escHtml(m.name)+'</span>'
           +(m.day?'<span class="meal-log-day">'+escHtml(m.day)+'</span>':'')
+          +(m.gluten?'<span title="Contains gluten" style="font-size:10px;background:#fdf6e0;border-radius:5px;padding:1px 4px;color:#a07820;flex-shrink:0">🌾</span>':'')
           +'<span style="font-size:10px;color:var(--textl);flex-shrink:0">'+m.date+'</span>'
           +'<button onclick="delMealLogItem(\''+m.id+'\')" style="background:none;border:none;font-size:12px;cursor:pointer;color:var(--textl);flex-shrink:0;padding:2px">✕</button>'
           +'</div>';
@@ -20491,6 +20602,7 @@ function renderMealLog(){
         return '<div class="meal-log-item">'
           +'<span class="meal-log-name">'+escHtml(m.name)+'</span>'
           +(m.day?'<span class="meal-log-day">'+escHtml(m.day)+'</span>':'')
+          +(m.gluten?'<span title="Contains gluten" style="font-size:10px;background:#fdf6e0;border-radius:5px;padding:1px 4px;color:#a07820;flex-shrink:0">🌾</span>':'')
           +'<span style="font-size:10px;color:var(--textl);flex-shrink:0">'+m.date+'</span>'
           +'<button onclick="delMealLogItem(\''+m.id+'\')" style="background:none;border:none;font-size:12px;cursor:pointer;color:var(--textl);flex-shrink:0;padding:2px">✕</button>'
           +'</div>';
@@ -20769,6 +20881,27 @@ function swapCookItIng(i){
   renderCookItIngs();
 }
 
+function copyCookItList(){
+  var recId=document.getElementById('cookItRecId').value;
+  var rec=RECIPES.find(function(r){return r.id===recId;});
+  var recServings=rec?rec.servings||1:1;
+  var batchServings=parseFloat((document.getElementById('cookItBatch')||{}).value)||recServings;
+  var scale=batchServings/recServings;
+  var lines=_cookItIngs.filter(function(ing){return!ing.omit;}).map(function(ing){
+    var scaledQty=Math.round(ing.qty*scale*4)/4;
+    return '☐ '+scaledQty+' '+(ing.unit||'')+' '+ing.name;
+  });
+  if(!lines.length){showToast('Nothing to copy');return;}
+  var text=(rec?rec.name:'Recipe')+' — '+batchServings+' serving'+(batchServings===1?'':'s')+'\n'+lines.join('\n');
+  var done=function(){showToast('Shopping list copied 📋');};
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(done,function(){_fallbackCopy(text);done();});
+  }else{_fallbackCopy(text);done();}
+}
+function _fallbackCopy(text){
+  try{var ta=document.createElement('textarea');ta.value=text;ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);}catch(e){}
+}
+
 function logCookIt(){
   var recId=document.getElementById('cookItRecId').value;
   var rec=RECIPES.find(function(r){return r.id===recId;});if(!rec)return;
@@ -20776,9 +20909,22 @@ function logCookIt(){
   var mealType=(document.getElementById('cookItMealType').value||'main');
   var t=_cookItEatenMacros().eaten;
   var logName=rec.name+(notes?' — '+notes:'');
-  MEAL_LOG_ITEMS.unshift({id:'ml-'+Date.now(),name:logName,category:mealType,day:'',date:todayStr(),cal:Math.round(t.cal),pro:Math.round(t.pro*10)/10,carb:Math.round(t.carb*10)/10,fat:Math.round(t.fat*10)/10,recipeId:recId});
+  var _ingGluten=_cookItIngs.some(function(ing){if(ing.omit)return false;var dbi=ing.dbItemId?FOOD_DB.find(function(x){return x.id===ing.dbItemId;}):FOOD_DB.find(function(x){return x.name.toLowerCase()===(ing.name||'').toLowerCase();});return dbi&&dbi.gluten;});
+  MEAL_LOG_ITEMS.unshift({id:'ml-'+Date.now(),name:logName,category:mealType,day:'',date:todayStr(),cal:Math.round(t.cal),pro:Math.round(t.pro*10)/10,carb:Math.round(t.carb*10)/10,fat:Math.round(t.fat*10)/10,recipeId:recId,gluten:_ingGluten});
   localStorage.setItem('aMealLogItems',JSON.stringify(MEAL_LOG_ITEMS));
   closeOv('cookItModal');renderMealLog();renderRecipes();showToast(rec.name+' logged ✨');
+}
+
+function logLeftover(recId){
+  var rec=RECIPES.find(function(r){return r.id===recId;});if(!rec)return;
+  var m=rec.macros||{};
+  if(!m.cal){showToast('No per-serving macros yet — cook it first');return;}
+  var mt=(rec.mealTypes&&rec.mealTypes[0])||rec.mealType||'main';
+  var _lftGluten=(rec.ingredients||[]).some(function(ing){var dbi=ing.dbItemId?FOOD_DB.find(function(x){return x.id===ing.dbItemId;}):FOOD_DB.find(function(x){return x.name.toLowerCase()===(ing.name||'').toLowerCase();});return dbi&&dbi.gluten;});
+  MEAL_LOG_ITEMS.unshift({id:'ml-'+Date.now(),name:rec.name+' (leftovers)',category:mt,day:'',date:todayStr(),cal:Math.round(m.cal),pro:Math.round((m.pro||0)*10)/10,carb:Math.round((m.carb||0)*10)/10,fat:Math.round((m.fat||0)*10)/10,recipeId:recId,gluten:_lftGluten});
+  localStorage.setItem('aMealLogItems',JSON.stringify(MEAL_LOG_ITEMS));
+  renderMealLog();renderRecipes();
+  showToast('🥡 '+rec.name+' leftovers logged ✨');
 }
 
 function saveRecipeAsCopy(){
@@ -20902,6 +21048,15 @@ function renderRecipes(){
       }
       cookChip='<span class="recipe-macro-tag" style="background:#fff3e0;color:#c07a2a" title="Times cooked · last time">🍳 '+cooks.length+'×'+(lastStr?' · '+lastStr:'')+'</span>';
     }
+    // "Ate leftovers" — one-tap re-log of one serving, only when there's cook history + per-serving macros
+    var leftoverChip='';
+    if(cooks.length&&m.cal){
+      leftoverChip='<button class="recipe-macro-tag" style="background:#eef7ee;color:#5a8a5a;border:1px solid #cfe6cf;cursor:pointer;font-family:inherit" title="Log one more serving to today" onclick="event.stopPropagation();logLeftover(\''+r.id+'\')">🥡 +1 serving</button>';
+    }
+    var glutenChip='';
+    if(r.ingredients&&r.ingredients.some(function(ing){var dbi=ing.dbItemId?FOOD_DB.find(function(x){return x.id===ing.dbItemId;}):FOOD_DB.find(function(x){return x.name.toLowerCase()===(ing.name||'').toLowerCase();});return dbi&&dbi.gluten;})){
+      glutenChip='<span class="recipe-macro-tag" style="background:#fdf6e0;color:#a07820" title="Contains gluten ingredients">🌾 gluten</span>';
+    }
     var ingHtml=(r.ingredients&&r.ingredients.length)?r.ingredients.map(function(i){
       var dbi=i.dbItemId?FOOD_DB.find(function(x){return x.id===i.dbItemId;}):null;
       if(!dbi)dbi=FOOD_DB.find(function(x){return x.name.toLowerCase()===(i.name||'').toLowerCase();});
@@ -20928,6 +21083,8 @@ function renderRecipes(){
       +mtChips
       +(timeStr?'<span class="recipe-macro-tag">'+timeStr+'</span>':'')
       +cookChip
+      +leftoverChip
+      +glutenChip
       +'</div>'
       +'<div class="recipe-card-macros">'
       +(m.cal?'<span class="recipe-macro-tag">🔥 '+m.cal+' cal</span>':'')
@@ -22724,8 +22881,29 @@ function toggleFoodStaple(id){
   var item=FOOD_DB.find(function(x){return x.id===id;});
   if(!item)return;
   item.staple=!item.staple;
+  if(item.staple)item.ick=false;
   saveFoodDbData();
   renderFoodDb();
+}
+
+function toggleFoodIck(id){
+  var item=FOOD_DB.find(function(x){return x.id===id;});
+  if(!item)return;
+  item.ick=!item.ick;
+  if(item.ick)item.staple=false;
+  saveFoodDbData();
+  renderFoodDb();
+  renderQuickLogChips();
+  showToast(item.ick?item.name+' marked as ick 🙅':item.name+' un-icked ✓');
+}
+
+function toggleFoodGluten(id){
+  var item=FOOD_DB.find(function(x){return x.id===id;});
+  if(!item)return;
+  item.gluten=!item.gluten;
+  saveFoodDbData();
+  renderFoodDb();
+  showToast(item.gluten?'🌾 '+item.name+' marked as gluten':'🌾 Gluten flag removed from '+item.name);
 }
 
 function addDbItemToGrocery(id){
@@ -23272,13 +23450,15 @@ function renderFoodDb(){
     var emoji=FOOD_CAT_EMOJI[tags[0]]||FOOD_CAT_EMOJI[item.cat]||'📦';
     var tagChips=tags.map(function(t){return '<span style="font-size:10px;background:#f0ece8;border-radius:6px;padding:1px 5px;color:var(--textl)">'+escHtml(t)+'</span>';}).join(' ');
     var favBtn='<button title="Favorite" onclick="toggleFoodFav(\''+item.id+'\')" style="background:none;border:none;font-size:16px;cursor:pointer;line-height:1;padding:2px">'+(item.favorite?'⭐':'☆')+'</button>';
-    var stapleBtn=item.staple?'<button title="Unflag staple" onclick="toggleFoodStaple(\''+item.id+'\')" style="background:none;border:none;font-size:13px;cursor:pointer;line-height:1;padding:2px">🏷️</button>':'';
+    var stapleBtn='<button title="'+(item.staple?'Unflag staple':'Flag as staple')+'" onclick="toggleFoodStaple(\''+item.id+'\')" style="background:none;border:none;font-size:13px;cursor:pointer;line-height:1;padding:2px;opacity:'+(item.staple?'1':'.25')+'">🏷️</button>';
+    var ickBtn='<button title="'+(item.ick?'Un-ick (tap to allow in quick-log)':'Mark as ick — hides from quick-log')+'" onclick="toggleFoodIck(\''+item.id+'\')" style="background:none;border:none;font-size:13px;cursor:pointer;line-height:1;padding:2px;opacity:'+(item.ick?'1':'.25')+'">🙅</button>';
+    var glutenBtn='<button title="'+(item.gluten?'Contains gluten (tap to toggle)':'Mark as contains gluten')+'" onclick="toggleFoodGluten(\''+item.id+'\')" style="background:none;border:none;font-size:13px;cursor:pointer;line-height:1;padding:2px;opacity:'+(item.gluten?'1':'.25')+'">🌾</button>';
     var grocBtn='<button title="Add to Grocery" onclick="addDbItemToGrocery(\''+item.id+'\')" style="background:none;border:none;font-size:15px;cursor:pointer;line-height:1;padding:2px">🛒</button>';
     return'<div style="background:#fff;border-radius:12px;padding:12px 14px;margin-bottom:8px;box-shadow:0 1px 4px rgba(0,0,0,.06)">'
       +'<div style="display:flex;align-items:flex-start;gap:10px">'
       +'<span style="font-size:20px;flex-shrink:0;margin-top:1px">'+emoji+'</span>'
       +'<div style="flex:1;min-width:0">'
-      +'<div style="font-size:13px;font-weight:700;color:var(--textd)">'+escHtml(item.name)+(item.serving?'<span style="font-weight:400;color:var(--textl);font-size:11px"> · '+escHtml(item.serving)+'</span>':'')+(item.staple?' <span style="font-size:10px;background:#fff0d0;border-radius:6px;padding:1px 5px;color:#a07020">staple</span>':'')+'</div>'
+      +'<div style="font-size:13px;font-weight:700;color:var(--textd)">'+escHtml(item.name)+(item.serving?'<span style="font-weight:400;color:var(--textl);font-size:11px"> · '+escHtml(item.serving)+'</span>':'')+(item.staple?' <span style="font-size:10px;background:#fff0d0;border-radius:6px;padding:1px 5px;color:#a07020">staple</span>':'')+(item.ick?' <span style="font-size:10px;background:#fde8e8;border-radius:6px;padding:1px 5px;color:#c05050">🙅 ick</span>':'')+(item.gluten?' <span style="font-size:10px;background:#fdf6e0;border-radius:6px;padding:1px 5px;color:#a07820">🌾 gluten</span>':'')+'</div>'
       +(tags.length?'<div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:3px">'+tagChips+'</div>':'')
       +(item.cal||item.pro?'<div style="font-size:11px;color:var(--textl);margin-top:3px">'
         +(item.cal?'<span style="margin-right:8px">🔥 '+item.cal+'cal</span>':'')
@@ -23317,7 +23497,7 @@ function renderFoodDb(){
       +(item.recipe?'<div style="font-size:11px;color:var(--lav);margin-top:2px">📖 '+escHtml(item.recipe)+'</div>':'')
       +'</div>'
       +'<div style="display:flex;flex-direction:column;gap:3px;flex-shrink:0;align-items:flex-end">'
-      +'<div style="display:flex;gap:2px">'+favBtn+stapleBtn+grocBtn+'</div>'
+      +'<div style="display:flex;gap:2px">'+favBtn+stapleBtn+ickBtn+glutenBtn+grocBtn+'</div>'
       +'<button class="btn sec" style="font-size:11px;padding:4px 9px" onclick="foodDbAddToLog(\''+escHtml(item.name)+'\','+item.cal+','+item.pro+','+item.carb+','+item.fat+')">+ Log</button>'
       +'<button class="btn sec" style="font-size:11px;padding:4px 9px" onclick="openFoodDbModal(\''+item.id+'\')">Edit</button>'
       +'</div></div></div>';
@@ -27436,7 +27616,7 @@ function delProjInc(id){
 <!-- BUDGET EDIT MODAL -->
 <div class="ov" id="budgetEditModal" onclick="closeM('budgetEditModal')"><div class="mod" style="max-height:88vh;overflow-y:auto" onclick="event.stopPropagation()">
   <div class="mh"><span class="mt">🎯 Edit Budget Targets</span><button class="mc" onclick="closeM('budgetEditModal')">✕</button></div>
-  <div style="font-size:11px;color:var(--textl);margin-bottom:6px">🔒 = protected (never offered as a donor for Cover From). Map expense categories to each bucket so spending counts automatically.</div>
+  <div style="font-size:11px;color:var(--textl);margin-bottom:6px">🔒 = protected (never offered as a donor for Cover From). ♻️ = rollover (this month's unspent carries into next month's target). Map expense categories to each bucket so spending counts automatically.</div>
   <div id="bgEditList" style="margin-bottom:8px"></div>
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
     <button onclick="addBgEditBucket()" style="font-size:12px;padding:5px 12px;border-radius:9px;border:1.5px dashed var(--bdr);background:none;font-family:'Quicksand',sans-serif;font-weight:700;cursor:pointer;color:var(--textl)">+ Add bucket</button>
@@ -27574,7 +27754,8 @@ function delProjInc(id){
         </select>
       </div>
     </div>
-    <div id="cookItIngList" style="margin-bottom:10px"></div>
+    <div id="cookItIngList" style="margin-bottom:6px"></div>
+    <div style="text-align:right;margin-bottom:10px"><button onclick="copyCookItList()" style="font-size:11px;background:none;border:1px solid #d8d0e8;border-radius:8px;padding:4px 10px;color:var(--lav);cursor:pointer;font-family:inherit;font-weight:700">📋 Copy shopping list</button></div>
     <div id="cookItMacroDisplay" style="background:var(--bg2,#f8f5f1);border-radius:10px;padding:10px;margin-bottom:10px;display:flex;gap:6px;flex-wrap:wrap;align-items:center;min-height:38px"></div>
     <label style="font-size:12px;color:var(--textl)">Modifications / Notes</label>
     <textarea id="cookItNotes" placeholder="e.g. used oat milk, skipped the oil, added extra garlic…" rows="2" style="width:100%;padding:8px 11px;border-radius:10px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px;resize:vertical;box-sizing:border-box;margin-bottom:12px"></textarea>
