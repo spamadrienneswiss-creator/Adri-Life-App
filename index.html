@@ -1021,7 +1021,7 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     <button class="tab-btn" data-tab="hearthside" onclick="goTab('hearthside',this)">Health &amp; Wellness</button>
     <button class="tab-btn" data-tab="workshop" onclick="goTab('workshop',this)">Workshop</button>
     <button class="tab-btn" data-tab="estate" onclick="goTab('estate',this)">Money</button>
-    <button class="tab-btn" data-tab="myhome" onclick="goTab('myhome',this)">🏠 Home</button>
+    <button class="tab-btn" data-tab="myhome" onclick="goTab('myhome',this)">Home Items</button>
     <button class="tab-btn" data-tab="emporium" onclick="goTab('emporium',this)">Work</button>
     <button class="tab-btn" data-tab="archives" onclick="goTab('archives',this)">Research Library</button>
     <button class="tab-btn" data-tab="archive" onclick="goTab('archive',this)">Archive</button>
@@ -5805,9 +5805,10 @@ var MEAL_COMBOS = JSON.parse(localStorage.getItem('aMC')||'null')||[
 
 var DEFAULT_TAB_ORDER=['today','plan','helm','lighthouse','conservatory','hearthside','workshop','estate','myhome','emporium','archives','archive','settings'];
 var TAB_LABELS={appindex:'App Index',today:'Today',plan:'Plan',helm:'Tasks & Projects',conservatory:'Personal Growth',hearthside:'Health & Wellness',workshop:'Workshop',lighthouse:'Spiritual',estate:'Money & Home',emporium:'Work',archives:'Research Library',archive:'Archive',settings:'Settings',stories:'Stories',mixtape:'Mixtape','focus-session':'Focus Session',grocery:'Grocery List',export:'Export',routines:'Routines',lists:'Lists',content:'Content Creation',wellness:'Health & Wellness',food:'Move & Exercise',meals:'Meals & Nutrition',recap:'Recap',money:'Money',accounts:'Accounts','home-items':'Home Items','money-projects':'Money Projects',wigs:'Wig Orders','work-projects':'Work Projects',guide:'Research Library',spirit:'Spiritual',goals:'Goals',learn:'Learning',focus:'Focus Tools',spark:'Spark',board:'Mood Board',faves:'Faves',places:'Places'};
-var TAB_ORDER=(function(){var o=JSON.parse(localStorage.getItem('aTabOrder')||'null');if(!o)return DEFAULT_TAB_ORDER.slice();var full=DEFAULT_TAB_ORDER.slice();o=o.filter(function(t){return full.indexOf(t)>-1;});full.forEach(function(t){if(o.indexOf(t)<0)o.push(t);});return o;})();
+function _mergeTabOrder(o){var full=DEFAULT_TAB_ORDER.slice();o=o.filter(function(t){return full.indexOf(t)>-1;});full.forEach(function(t){if(o.indexOf(t)<0){var fi=full.indexOf(t),inserted=false;for(var i=fi-1;i>=0;i--){var oi=o.indexOf(full[i]);if(oi>-1){o.splice(oi+1,0,t);inserted=true;break;}}if(!inserted)o.unshift(t);}});return o;}
+var TAB_ORDER=(function(){var o=JSON.parse(localStorage.getItem('aTabOrder')||'null');if(!o)return DEFAULT_TAB_ORDER.slice();return _mergeTabOrder(o);})();
 var SECTION_VIEWS={home:['home'],today:['today'],plan:['plan'],helm:['tasks','projects','focus-session','grocery','routines'],conservatory:['goals','learn','focus','spark','lists'],hearthside:['food','meals','wellness'],workshop:['board','faves','stories','mixtape','places'],lighthouse:['spirit'],estate:['money','accounts','money-projects'],myhome:['myhome'],emporium:['wigs','work-projects','content'],archives:['guide'],settings:['settings','export'],archive:['archive']};
-var SECTION_LABELS={today:'Today',plan:'Plan',helm:'Tasks & Projects',conservatory:'Personal Growth',hearthside:'Health & Wellness',workshop:'Workshop',lighthouse:'Spiritual',estate:'Money',myhome:'🏠 Home',emporium:'Work',archives:'Research Library',archive:'Archive',settings:'Settings'};
+var SECTION_LABELS={today:'Today',plan:'Plan',helm:'Tasks & Projects',conservatory:'Personal Growth',hearthside:'Health & Wellness',workshop:'Workshop',lighthouse:'Spiritual',estate:'Money',myhome:'Home Items',emporium:'Work',archives:'Research Library',archive:'Archive',settings:'Settings'};
 var VIEW_SECTION=(function(){var m={};Object.keys(SECTION_VIEWS).forEach(function(s){SECTION_VIEWS[s].forEach(function(v){m[v]=s;});});return m;})();
 
 var S = {
@@ -6164,7 +6165,7 @@ function initFirebase(){
       ap('aWUnit',function(v,r){_origSetItem('aWUnit',r||'glasses');if(S)S.wUnit=r||'glasses';});
       ap('aHideMillie',function(v,r){_origSetItem('aHideMillie',r||'');if(S)S.hideMillie=r==='1';});
       ap('aSavedThemes',function(v,r){SAVED_THEMES=v||[];_origSetItem('aSavedThemes',r);});
-      ap('aTabOrder',function(v,r){if(v&&v.length){TAB_ORDER=v;_origSetItem('aTabOrder',r);if(typeof applyTabOrder==='function')applyTabOrder();}});
+      ap('aTabOrder',function(v,r){if(v&&v.length){TAB_ORDER=_mergeTabOrder(v);_origSetItem('aTabOrder',r);if(typeof applyTabOrder==='function')applyTabOrder();}});
       ap('aAboutMe',function(v,r){ABOUT_ME=v||{};_origSetItem('aAboutMe',r);});
       ap('aTabFavs',function(v,r){_origSetItem('aTabFavs',r);if(typeof renderFavTabs==='function')renderFavTabs();});
       ap('aHomeTiles2',function(v,r){if(v)HOME_TILES=v;_origSetItem('aHomeTiles2',r);});
@@ -13493,8 +13494,8 @@ var SEL_BANNER='';
 var TOGGLEABLE_TABS=[
   {id:'helm',label:'Tasks & Projects'},{id:'conservatory',label:'Personal Growth'},
   {id:'hearthside',label:'Health & Wellness'},{id:'workshop',label:'Workshop'},
-  {id:'lighthouse',label:'Spiritual'},{id:'estate',label:'Money & Home'},
-  {id:'emporium',label:'Work'},{id:'archives',label:'Research Library'},
+  {id:'lighthouse',label:'Spiritual'},{id:'estate',label:'Money'},
+  {id:'myhome',label:'Home Items'},{id:'emporium',label:'Work'},{id:'archives',label:'Research Library'},
   {id:'settings',label:'Settings'},
 ];
 
