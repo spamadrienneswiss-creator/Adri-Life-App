@@ -1832,6 +1832,7 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
 <div class="view" id="v-money">
   <div class="pill-nav" style="margin-bottom:12px;flex-wrap:wrap">
     <button class="pn-btn on" data-sec="overview" onclick="showMoneySec('overview',this)">📊 Overview</button>
+    <button class="pn-btn" data-sec="budget" onclick="showMoneySec('budget',this)">🎯 Budget</button>
     <button class="pn-btn" data-sec="bills" onclick="showMoneySec('bills',this)">🏦 Bills</button>
     <button class="pn-btn" data-sec="expenses" onclick="showMoneySec('expenses',this)">💸 Expenses</button>
     <button class="pn-btn" data-sec="income" onclick="showMoneySec('income',this)">💰 Income</button>
@@ -1924,6 +1925,18 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
       </div>
     </div>
   </div>
+  <!-- Budget -->
+  <div id="ms-budget" class="money-sec" style="display:none">
+    <div class="card" style="margin-bottom:12px">
+      <div style="font-size:11px;font-weight:700;color:var(--textl);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px">🎯 Left to spend this month</div>
+      <div id="bgLeftNum" style="font-size:34px;font-weight:800;color:var(--sage);margin-bottom:2px">$0</div>
+      <div id="bgLeftSub" style="font-size:11px;color:var(--textl)"></div>
+    </div>
+    <div class="sh" style="display:flex;justify-content:space-between;align-items:center"><span>💰 Buckets</span><button onclick="openBudgetEdit()" style="font-size:11px;padding:3px 10px;border-radius:8px;border:1.5px solid var(--bdr);background:#fff;font-family:'Quicksand',sans-serif;font-weight:700;cursor:pointer;color:var(--textd)">✏️ Edit targets</button></div>
+    <div class="card" id="bgBucketList" style="margin-bottom:12px"></div>
+    <div class="sh">🔄 Moves this month</div>
+    <div class="card" id="bgMovesLog"></div>
+  </div>
   <!-- Bills -->
   <div id="ms-bills" class="money-sec" style="display:none">
     <div class="sh">🏦 Bills</div>
@@ -1938,11 +1951,18 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
       <button class="fchip" id="expViewCatBtn" onclick="setExpView('cats',this)">📊 Categories</button>
     </div>
     <div id="expListWrap">
-      <div class="fbar" style="margin-bottom:10px">
+      <div class="fbar" style="margin-bottom:6px">
         <button class="fchip on" onclick="setExpFilter('all',this)">All</button>
         <button class="fchip" onclick="setExpFilter('uncleared',this)">⏳ Uncleared</button>
         <button class="fchip" onclick="setExpFilter('cleared',this)">✓ Cleared</button>
         <button class="fchip" onclick="setExpFilter('unexported',this)">📤 Not Exported</button>
+      </div>
+      <div class="fbar" style="margin-bottom:10px" id="expSortBar">
+        <span style="font-size:10px;color:var(--textl);font-weight:700;align-self:center;letter-spacing:.5px">SORT</span>
+        <button class="fchip on" data-es="date" onclick="setExpSort('date',this)">📅 Date</button>
+        <button class="fchip" data-es="account" onclick="setExpSort('account',this)">🏦 Account</button>
+        <button class="fchip" data-es="type" onclick="setExpSort('type',this)">💼 Type</button>
+        <button class="fchip" data-es="cat" onclick="setExpSort('cat',this)">📊 Category</button>
       </div>
       <div class="sh" id="expListLabel">💸 Recent Expenses</div>
       <div class="card"><div id="expList"><div class="empty"><div class="emj">💸</div><p>No expenses yet.</p></div></div></div>
@@ -5618,6 +5638,21 @@ var BILLS = JSON.parse(localStorage.getItem('aBills')||'null')||[
 var BILL_PAY = JSON.parse(localStorage.getItem('aBillPay')||'{}');
 var MONEY_CHECKS=JSON.parse(localStorage.getItem('aMoneyChecks')||'{}');
 var BILL_MONTH_AMT=JSON.parse(localStorage.getItem('aBillMonthAmt')||'{}');
+var BUDGET_BUCKETS=JSON.parse(localStorage.getItem('aBudgetBuckets')||'null')||[
+  {id:'bk-rent',name:'Rent',target:850,cats:[],protected:true},
+  {id:'bk-bti',name:'Bills/Taxes/Insurance',target:1200,cats:['Fee']},
+  {id:'bk-citi',name:'Citi paydown',target:900,cats:[],protected:true},
+  {id:'bk-groc',name:'Groceries',target:600,cats:['Groceries & Personal Care']},
+  {id:'bk-dine',name:'Dining',target:300,cats:['Dining Out & Drinks']},
+  {id:'bk-dis',name:'Disneyland',target:200,cats:['Disneyland']},
+  {id:'bk-gas',name:'Gas',target:160,cats:['Gas']},
+  {id:'bk-subs',name:'Subscriptions',target:100,cats:[]},
+  {id:'bk-health',name:'Health',target:100,cats:['Health']},
+  {id:'bk-buf',name:'Buffer',target:590,cats:[],catchAll:true}
+];
+// {id, name, target, cats:[expense category names], protected:bool, catchAll:bool}
+var BUDGET_MOVES=JSON.parse(localStorage.getItem('aBudgetMoves')||'[]');
+// {id, mon:'YYYY-MM', from:bucketId, to:bucketId, amt, created}
 var MONEY_CHECK_DEFS={
   daily:[
     {key:'pray',label:'🙏 Pray',link:null},
@@ -6081,8 +6116,10 @@ function initFirebase(){
       ap('aExpCats',function(v,r){if(v&&v.length)EXPENSE_CATS=v;_origSetItem('aExpCats',r);});
       ap('aMoneyProjects',function(v,r){MONEY_PROJECTS=v||[];_origSetItem('aMoneyProjects',r);});
       ap('aPayoffs',function(v,r){PAYOFFS=v||[];_origSetItem('aPayoffs',r);});
+      ap('aBudgetBuckets',function(v,r){if(v&&v.length)BUDGET_BUCKETS=v;_origSetItem('aBudgetBuckets',r);});
+      ap('aBudgetMoves',function(v,r){BUDGET_MOVES=v||[];_origSetItem('aBudgetMoves',r);});
       _fbBlobPause=false;
-      renderBills();renderAccounts();renderIncome();updMoneyBadge();
+      renderBills();renderAccounts();renderIncome();updMoneyBadge();renderBudget();
     }else if(group==='health'){
       ap('aMeds',function(v,r){MEDS=v||[];_origSetItem('aMeds',r);});
       ap('aMedLog',function(v,r){MED_LOG=v||{};_origSetItem('aMedLog',r);});
@@ -6257,7 +6294,7 @@ function fbDelete(col, id){
 // localStorage.setItem is intercepted to auto-save on every write.
 // ═══════════════════════════════════════════════
 var BLOB_GROUPS={
-  money:['aBills','aBillPay','aBillMonthAmt','aAccounts','aIncome','aIncGoal','aMonIncGoal','aMoneyChecks','aTaxLog','aProjIncome','aPriceLog','aExpCats','aMoneyProjects','aPayoffs'],
+  money:['aBills','aBillPay','aBillMonthAmt','aAccounts','aIncome','aIncGoal','aMonIncGoal','aMoneyChecks','aTaxLog','aProjIncome','aPriceLog','aExpCats','aMoneyProjects','aPayoffs','aBudgetBuckets','aBudgetMoves'],
   health:['aMeds','aMedLog','aEnergyLog','aMeasLog','aMealLogItems','aMoodNotes','aWineDrinks'],
   habits:['aHabits','aHabitLog'],
   routines:['aRS','aRS2','aRH','aRTG','aRtns'],
@@ -11767,6 +11804,24 @@ function getMonStr(){var n=new Date();return n.getFullYear()+'-'+(String(n.getMo
 var EXP_FILTER='all';
 var EXP_CAT_FILTER=null;
 var EXP_TY_FILTER=null;
+var EXP_SORT='date';
+function setExpSort(s,btn){
+  EXP_SORT=s;
+  document.querySelectorAll('#expSortBar .fchip').forEach(function(b){b.classList.toggle('on',b.dataset.es===s);});
+  renderE();
+}
+function _acctNameOf(id){
+  if(!id)return'';
+  var a=ACCOUNTS.find(function(x){return x.id===id;});
+  return a?a.name:'';
+}
+function _expSortFn(a,b){
+  var byDate=function(){return(b.created||'').localeCompare(a.created||'');};
+  if(EXP_SORT==='account'){var an=_acctNameOf(a.account),bn=_acctNameOf(b.account);if(an!==bn)return an?(bn?an.localeCompare(bn):-1):1;return byDate();}
+  if(EXP_SORT==='type'){if((a.ty||'')!==(b.ty||''))return(a.ty||'').localeCompare(b.ty||'');return byDate();}
+  if(EXP_SORT==='cat'){if((a.cat||'')!==(b.cat||''))return(a.cat||'').localeCompare(b.cat||'');return byDate();}
+  return byDate();
+}
 function setExpFilter(f,btn){
   EXP_FILTER=f;
   EXP_CAT_FILTER=null;EXP_TY_FILTER=null;
@@ -11854,14 +11909,14 @@ function renderE(){
   var e2=document.getElementById('mThisExp');if(e2)e2.textContent='$'+thisMonExpAmt.toFixed(0)+(reconciledAmt?'  ✓$'+reconciledAmt.toFixed(0)+' recon':'');
   var e3=document.getElementById('mNet');if(e3){e3.textContent=(net>=0?'+':'-')+'$'+Math.abs(net).toFixed(0);e3.style.color=net>=0?'var(--sage)':'var(--ured)';}
   var e4=document.getElementById('mInc');if(e4)e4.textContent='$'+wigInc.toFixed(0);
-  if(!EXPENSES.length){if(el)el.innerHTML='<div class="empty"><div class="emj">💸</div><p>No expenses yet.</p></div>';renderIncome();renderBills();return;}
-  var filtered=EXPENSES.slice(0,200).filter(function(e){
+  if(!EXPENSES.length){if(el)el.innerHTML='<div class="empty"><div class="emj">💸</div><p>No expenses yet.</p></div>';renderIncome();renderBills();renderBudget();return;}
+  var filtered=EXPENSES.slice().sort(_expSortFn).filter(function(e){
     if(EXP_CAT_FILTER)return e.cat===EXP_CAT_FILTER&&(!EXP_TY_FILTER||e.ty===EXP_TY_FILTER);
     if(EXP_FILTER==='uncleared')return!e.reconciled;
     if(EXP_FILTER==='cleared')return!!e.reconciled;
     if(EXP_FILTER==='unexported')return!e.exported;
     return true;
-  });
+  }).slice(0,200);
   var lbl=document.getElementById('expListLabel');
   if(lbl){
     if(EXP_CAT_FILTER){
@@ -11880,7 +11935,7 @@ function renderE(){
     return'<div class="er'+(isReconciled?' exp-reconciled':'')+'">'+
       '<div class="er-l">'+
         '<div class="er-d">'+e.desc+(isPend?'<span style="font-size:10px;color:#c07a2a;background:#fff8e8;padding:1px 6px;border-radius:6px;margin-left:6px;font-weight:700">⏳</span>':'')+(isExported?'<span style="font-size:10px;color:#5a8a5a;background:#e8f5e8;padding:1px 6px;border-radius:6px;margin-left:4px;font-weight:700">📤</span>':'')+'</div>'+
-        '<div class="er-m">'+(e.ty==='business'?'💼':'🏠')+' '+e.cat+' • '+e.date+'</div>'+
+        '<div class="er-m">'+(e.ty==='business'?'💼':'🏠')+' '+e.cat+' • '+e.date+(_acctNameOf(e.account)?' • 🏦 '+escHtml(_acctNameOf(e.account)):'')+'</div>'+
       '</div>'+
       '<button class="exp-pend-btn'+(isReconciled?' on':'')+'" onclick="toggleExpReconciled(\''+e.id+'\')" title="'+(isReconciled?'Cleared ✓ — tap to undo':'Pending — tap when it clears your bank')+'" style="font-size:11px;font-weight:700">'+(isReconciled?'✓':'⏳')+'</button>'+
       '<div class="er-a '+(e.ty==='business'?'biz':'')+'">$'+e.amt.toFixed(2)+'</div>'+
@@ -11914,6 +11969,7 @@ function renderE(){
   renderIncome();
   renderBills();
   updMoneyBadge();
+  renderBudget();
 }
 
 function delExpense(id){
@@ -11946,6 +12002,214 @@ function toggleExpReconciled(id){
   e.reconciled=!e.reconciled;
   fbSave('expenses',id,e);
   renderE();
+}
+
+// ═══════════════════════════════════════════════
+// BUDGET — buckets, cover-from, moves log
+// ═══════════════════════════════════════════════
+function saveBudgetBuckets(){localStorage.setItem('aBudgetBuckets',JSON.stringify(BUDGET_BUCKETS));}
+function saveBudgetMoves(){localStorage.setItem('aBudgetMoves',JSON.stringify(BUDGET_MOVES));}
+
+// spent per bucket this month: mapped cats first, Buffer (catchAll) absorbs the rest of personal spending
+function budgetSpentMap(){
+  var mon=getMonStr();
+  var claimed={};
+  BUDGET_BUCKETS.forEach(function(b){(b.cats||[]).forEach(function(c){claimed[c]=b.id;});});
+  var catchId=null;
+  BUDGET_BUCKETS.forEach(function(b){if(b.catchAll)catchId=b.id;});
+  var workCats=['Covered by Work','Work-Adrienne','Work-Nick'];
+  var spent={};
+  EXPENSES.forEach(function(e){
+    if(!(e.created||'').startsWith(mon))return;
+    if(e.ty==='business')return;
+    var cat=e.cat||'other';
+    var bid=claimed[cat];
+    if(!bid){
+      if(workCats.indexOf(cat)>=0)return;
+      bid=catchId;
+    }
+    if(bid)spent[bid]=(spent[bid]||0)+(parseFloat(e.amt)||0);
+  });
+  return spent;
+}
+
+// effective target = base target +/- this month's cover-from moves (monthly total never changes)
+function budgetEffTarget(b){
+  var mon=getMonStr();
+  var t=parseFloat(b.target)||0;
+  BUDGET_MOVES.forEach(function(m){
+    if(m.mon!==mon)return;
+    if(m.to===b.id)t+=m.amt;
+    if(m.from===b.id)t-=m.amt;
+  });
+  return t;
+}
+
+function renderBudget(){
+  var listEl=document.getElementById('bgBucketList');
+  if(!listEl)return;
+  var spent=budgetSpentMap();
+  var totTarget=0,totSpent=0;
+  var rows=BUDGET_BUCKETS.map(function(b){
+    var eff=budgetEffTarget(b);
+    var sp=spent[b.id]||0;
+    totTarget+=eff;totSpent+=sp;
+    var rem=eff-sp;
+    var pct=eff>0?Math.min(100,sp/eff*100):(sp>0?100:0);
+    var over=rem<-0.005;
+    var barColor=over?'var(--ured)':(pct>85?'#f0a020':'var(--sage)');
+    return '<div style="padding:9px 0;border-bottom:1px solid #f5efe8'+(over?';cursor:pointer':'')+'"'+(over?' onclick="openCoverFrom(\''+b.id+'\')"':'')+'>'
+      +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">'
+      +'<span style="font-size:13px;font-weight:700;color:var(--textd)">'+(b.protected?'🔒 ':'')+escHtml(b.name)+(b.catchAll?' <span style="font-size:9px;color:var(--textl);font-weight:600">(catches the rest)</span>':'')+'</span>'
+      +'<span style="font-size:12px;font-weight:700;color:'+(over?'var(--ured)':'var(--textd)')+'">$'+sp.toFixed(0)+' / $'+eff.toFixed(0)+'</span>'
+      +'</div>'
+      +'<div style="height:7px;background:#f0ebe6;border-radius:4px;overflow:hidden">'
+      +'<div style="height:100%;width:'+pct.toFixed(1)+'%;background:'+barColor+';transition:width .4s"></div>'
+      +'</div>'
+      +'<div style="display:flex;justify-content:space-between;font-size:10px;color:var(--textl);margin-top:3px">'
+      +'<span>'+(over?'<span style="color:var(--ured);font-weight:700">over by $'+Math.abs(rem).toFixed(0)+' — tap to cover</span>':'$'+rem.toFixed(0)+' left')+'</span>'
+      +(eff!==(parseFloat(b.target)||0)?'<span>base $'+(parseFloat(b.target)||0).toFixed(0)+'</span>':'')
+      +'</div>'
+      +'</div>';
+  }).join('');
+  listEl.innerHTML=rows||'<div class="empty"><p>No buckets — tap Edit targets to add some.</p></div>';
+  var left=totTarget-totSpent;
+  var numEl=document.getElementById('bgLeftNum');
+  if(numEl){numEl.textContent=(left<0?'-':'')+'$'+Math.abs(left).toFixed(0);numEl.style.color=left<0?'var(--ured)':'var(--sage)';}
+  var subEl=document.getElementById('bgLeftSub');
+  if(subEl)subEl.textContent='$'+totSpent.toFixed(0)+' spent of $'+totTarget.toFixed(0)+' budgeted · resets monthly';
+  // Moves log
+  var logEl=document.getElementById('bgMovesLog');
+  if(logEl){
+    var mon=getMonStr();
+    var moves=BUDGET_MOVES.filter(function(m){return m.mon===mon;});
+    if(!moves.length){logEl.innerHTML='<div style="font-size:12px;color:var(--textl);text-align:center;padding:10px">No moves yet this month</div>';}
+    else{
+      logEl.innerHTML=moves.slice().reverse().map(function(m){
+        var fb=BUDGET_BUCKETS.find(function(b){return b.id===m.from;});
+        var tb=BUDGET_BUCKETS.find(function(b){return b.id===m.to;});
+        var d=new Date(m.created);
+        return '<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #f5efe8;font-size:12px">'
+          +'<span style="color:var(--textd)"><strong>'+escHtml(tb?tb.name:'?')+'</strong> ← $'+m.amt.toFixed(0)+' from <strong>'+escHtml(fb?fb.name:'?')+'</strong></span>'
+          +'<span style="display:flex;align-items:center;gap:8px"><span style="color:var(--textl);font-size:10px">'+(d.getMonth()+1)+'/'+d.getDate()+'</span>'
+          +'<button onclick="undoBudgetMove(\''+m.id+'\')" style="background:none;border:none;color:var(--textl);font-size:13px;cursor:pointer;padding:2px 4px" title="Undo this move">✕</button></span>'
+          +'</div>';
+      }).join('');
+    }
+  }
+}
+
+function undoBudgetMove(id){
+  BUDGET_MOVES=BUDGET_MOVES.filter(function(m){return m.id!==id;});
+  saveBudgetMoves();
+  renderBudget();
+}
+
+var _coverBucketId=null;
+function openCoverFrom(bucketId){
+  var b=BUDGET_BUCKETS.find(function(x){return x.id===bucketId;});
+  if(!b)return;
+  var spent=budgetSpentMap();
+  var overage=(spent[bucketId]||0)-budgetEffTarget(b);
+  if(overage<=0.005)return;
+  _coverBucketId=bucketId;
+  document.getElementById('coverFromTitle').textContent='Cover "'+b.name+'" — over by $'+overage.toFixed(2);
+  // Donors: not protected, not the over bucket, with money left; Buffer first
+  var donors=BUDGET_BUCKETS.filter(function(d){
+    if(d.protected||d.id===bucketId)return false;
+    return(budgetEffTarget(d)-(spent[d.id]||0))>0.005;
+  }).sort(function(a,c){
+    var aBuf=a.catchAll||a.name==='Buffer',cBuf=c.catchAll||c.name==='Buffer';
+    if(aBuf!==cBuf)return aBuf?-1:1;
+    return(budgetEffTarget(c)-(spent[c.id]||0))-(budgetEffTarget(a)-(spent[a.id]||0));
+  });
+  var el=document.getElementById('coverFromList');
+  if(!donors.length){
+    el.innerHTML='<div style="font-size:12px;color:var(--textl);text-align:center;padding:14px">No bucket has money left to give 😬</div>';
+  }else{
+    el.innerHTML=donors.map(function(d,i){
+      var rem=budgetEffTarget(d)-(spent[d.id]||0);
+      var short=rem<overage-0.005;
+      return '<label style="display:flex;align-items:center;gap:10px;padding:9px 6px;border-bottom:1px solid #f5efe8;cursor:pointer">'
+        +'<input type="radio" name="coverDonor" value="'+d.id+'"'+(i===0?' checked':'')+' style="width:16px;height:16px;accent-color:var(--sage)">'
+        +'<span style="flex:1;font-size:13px;font-weight:600;color:var(--textd)">'+escHtml(d.name)+(i===0?' <span style="font-size:9px;color:var(--sage);font-weight:700">SUGGESTED</span>':'')+'</span>'
+        +'<span style="font-size:11px;color:'+(short?'#f0a020':'var(--textl)')+'">$'+rem.toFixed(0)+' left'+(short?' ⚠️ will go red':'')+'</span>'
+        +'</label>';
+    }).join('');
+  }
+  document.getElementById('coverFromConfirm').style.display=donors.length?'':'none';
+  openM('coverFromModal');
+}
+
+function confirmCoverFrom(){
+  var sel=document.querySelector('input[name="coverDonor"]:checked');
+  if(!sel||!_coverBucketId)return;
+  var b=BUDGET_BUCKETS.find(function(x){return x.id===_coverBucketId;});
+  if(!b)return;
+  var spent=budgetSpentMap();
+  var overage=(spent[_coverBucketId]||0)-budgetEffTarget(b);
+  if(overage<=0.005){closeM('coverFromModal');return;}
+  BUDGET_MOVES.push({id:'bm-'+Date.now(),mon:getMonStr(),from:sel.value,to:_coverBucketId,amt:Math.round(overage*100)/100,created:new Date().toISOString()});
+  saveBudgetMoves();
+  closeM('coverFromModal');
+  renderBudget();
+  var fb=BUDGET_BUCKETS.find(function(x){return x.id===sel.value;});
+  showToast(b.name+' covered from '+(fb?fb.name:'bucket')+' ✓');
+}
+
+// ── Budget edit modal ──
+var _bgEdit=[];
+function openBudgetEdit(){
+  _bgEdit=BUDGET_BUCKETS.map(function(b){return JSON.parse(JSON.stringify(b));});
+  renderBudgetEditList();
+  openM('budgetEditModal');
+}
+function renderBudgetEditList(){
+  var el=document.getElementById('bgEditList');if(!el)return;
+  el.innerHTML=_bgEdit.map(function(b,i){
+    var catsBtn='<button onclick="togBgEditCats('+i+')" style="font-size:10px;padding:2px 8px;border-radius:7px;border:1.5px solid var(--bdr);background:#fff;font-family:\'Quicksand\',sans-serif;font-weight:700;cursor:pointer;color:var(--textl)">'+(b.catchAll?'catches the rest':'categories ('+(b.cats||[]).length+') ▾')+'</button>';
+    var chips='';
+    if(b._showCats&&!b.catchAll){
+      chips='<div style="display:flex;flex-wrap:wrap;gap:4px;padding:6px 0 2px">'+EXPENSE_CATS.map(function(c){
+        var on=(b.cats||[]).indexOf(c)>=0;
+        return '<button onclick="togBgEditCat('+i+',\''+c.replace(/'/g,"\\'")+'\')" class="fchip'+(on?' on':'')+'" style="font-size:10px;padding:3px 8px">'+escHtml(c)+'</button>';
+      }).join('')+'</div>';
+    }
+    return '<div style="padding:8px 0;border-bottom:1px solid #f5efe8">'
+      +'<div style="display:flex;gap:6px;align-items:center">'
+      +'<button onclick="_bgEdit['+i+'].protected=!_bgEdit['+i+'].protected;renderBudgetEditList()" title="'+(b.protected?'Protected — never a donor':'Tap to protect from Cover From')+'" style="background:none;border:none;font-size:14px;cursor:pointer;padding:2px;opacity:'+(b.protected?'1':'.3')+'">🔒</button>'
+      +'<input value="'+escHtml(b.name)+'" oninput="_bgEdit['+i+'].name=this.value" style="flex:1;min-width:0;padding:6px 8px;border-radius:8px;border:1.5px solid #e8e0d8;font-family:\'Quicksand\',sans-serif;font-size:13px;font-weight:600">'
+      +'<span style="font-size:12px;color:var(--textl)">$</span>'
+      +'<input type="number" value="'+(parseFloat(b.target)||0)+'" oninput="_bgEdit['+i+'].target=parseFloat(this.value)||0;updBgEditTotal()" style="width:70px;padding:6px 8px;border-radius:8px;border:1.5px solid #e8e0d8;font-size:13px;text-align:right">'
+      +'<button onclick="_bgEdit.splice('+i+',1);renderBudgetEditList()" style="background:none;border:none;color:#e74c3c;font-size:14px;cursor:pointer;padding:2px 4px">✕</button>'
+      +'</div>'
+      +'<div style="padding-left:28px;margin-top:4px">'+catsBtn+chips+'</div>'
+      +'</div>';
+  }).join('');
+  updBgEditTotal();
+}
+function updBgEditTotal(){
+  var el=document.getElementById('bgEditTotal');if(!el)return;
+  var t=_bgEdit.reduce(function(s,b){return s+(parseFloat(b.target)||0);},0);
+  el.textContent='Monthly total: $'+t.toFixed(0);
+}
+function togBgEditCats(i){_bgEdit[i]._showCats=!_bgEdit[i]._showCats;renderBudgetEditList();}
+function togBgEditCat(i,cat){
+  var b=_bgEdit[i];b.cats=b.cats||[];
+  var ix=b.cats.indexOf(cat);
+  if(ix>=0)b.cats.splice(ix,1);else b.cats.push(cat);
+  renderBudgetEditList();
+}
+function addBgEditBucket(){
+  _bgEdit.push({id:'bk-'+Date.now(),name:'New bucket',target:0,cats:[]});
+  renderBudgetEditList();
+}
+function saveBudgetEdit(){
+  BUDGET_BUCKETS=_bgEdit.map(function(b){var c=JSON.parse(JSON.stringify(b));delete c._showCats;return c;}).filter(function(b){return(b.name||'').trim();});
+  saveBudgetBuckets();
+  closeM('budgetEditModal');
+  renderBudget();
+  showToast('Budget targets saved ✓');
 }
 
 // ═══════════════════════════════════════════════
@@ -16056,7 +16320,7 @@ function celebrate(){
 // ═══════════════════════════════════════════════
 
 function showMoneySec(sec,btn){
-  ['overview','bills','expenses','income','accounts','projects','tax','money-plan'].forEach(function(s){
+  ['overview','budget','bills','expenses','income','accounts','projects','tax','money-plan'].forEach(function(s){
     var el=document.getElementById('ms-'+s);
     if(el)el.style.display=(s===sec)?'':'none';
   });
@@ -16065,6 +16329,7 @@ function showMoneySec(sec,btn){
   if(sec==='accounts')renderAccounts();
   if(sec==='projects')renderMoneyProjects();
   if(sec==='tax')renderTaxSection();
+  if(sec==='budget')renderBudget();
   if(sec==='overview')renderMoneyOverview();
   if(sec==='money-plan')renderMoneyPlan();
 }
@@ -26876,6 +27141,28 @@ function delProjInc(id){
   <button class="ok-btn" onclick="saveBill()">Save Bill 🏦</button>
   <button class="del-btn" id="billDelBtn" onclick="delBillEdit()" style="display:none">🗑️ Delete Bill</button>
   <button class="cn-btn" onclick="closeM('billModal')">Cancel</button>
+</div></div>
+
+<!-- COVER FROM MODAL -->
+<div class="ov" id="coverFromModal" onclick="closeM('coverFromModal')"><div class="mod" onclick="event.stopPropagation()">
+  <div class="mh"><span class="mt" id="coverFromTitle">Cover from…</span><button class="mc" onclick="closeM('coverFromModal')">✕</button></div>
+  <div style="font-size:11px;color:var(--textl);margin-bottom:8px">Pick a donor bucket. The exact overage moves over — your monthly total never changes.</div>
+  <div id="coverFromList" style="margin-bottom:12px"></div>
+  <button class="ok-btn" id="coverFromConfirm" onclick="confirmCoverFrom()">Move it ✓</button>
+  <button class="cn-btn" onclick="closeM('coverFromModal')">Cancel</button>
+</div></div>
+
+<!-- BUDGET EDIT MODAL -->
+<div class="ov" id="budgetEditModal" onclick="closeM('budgetEditModal')"><div class="mod" style="max-height:88vh;overflow-y:auto" onclick="event.stopPropagation()">
+  <div class="mh"><span class="mt">🎯 Edit Budget Targets</span><button class="mc" onclick="closeM('budgetEditModal')">✕</button></div>
+  <div style="font-size:11px;color:var(--textl);margin-bottom:6px">🔒 = protected (never offered as a donor for Cover From). Map expense categories to each bucket so spending counts automatically.</div>
+  <div id="bgEditList" style="margin-bottom:8px"></div>
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+    <button onclick="addBgEditBucket()" style="font-size:12px;padding:5px 12px;border-radius:9px;border:1.5px dashed var(--bdr);background:none;font-family:'Quicksand',sans-serif;font-weight:700;cursor:pointer;color:var(--textl)">+ Add bucket</button>
+    <span id="bgEditTotal" style="font-size:13px;font-weight:700;color:var(--textd)"></span>
+  </div>
+  <button class="ok-btn" onclick="saveBudgetEdit()">Save Targets ✓</button>
+  <button class="cn-btn" onclick="closeM('budgetEditModal')">Cancel</button>
 </div></div>
 
 <!-- RECIPE MODAL -->
