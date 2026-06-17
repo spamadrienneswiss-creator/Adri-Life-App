@@ -20394,9 +20394,46 @@ function delGrat(id){
 // MEALS TAB
 // ═══════════════════════════════════════════════
 
-var MEAL_SLOTS = ['breakfast','mains','soup','other'];
-var MEAL_SLOT_ICONS = {breakfast:'🌅',mains:'🍽️',soup:'🍲',other:'🥗'};
-var MEAL_SLOT_LABELS = {breakfast:'Breakfast',mains:'Main Meals',soup:'Soup',other:'Other'};
+var MEAL_SLOTS = ['breakfast','lunch','dinner','snack','dessert'];
+var MEAL_SLOT_ICONS = {breakfast:'🌅',lunch:'☀️',dinner:'🌙',snack:'🍿',dessert:'🍰'};
+var MEAL_SLOT_LABELS = {breakfast:'Breakfast',lunch:'Lunch',dinner:'Dinner',snack:'Snack',dessert:'Dessert'};
+// One-time migration: rename old slot keys in stored data to new names
+(function(){
+  var map={mains:'dinner',soup:'dinner',other:'snack'};
+  var dirty={plan:false,sv:false,groc:false};
+  Object.keys(MEAL_PLAN).forEach(function(date){
+    var day=MEAL_PLAN[date];
+    Object.keys(map).forEach(function(old){
+      if(day[old]!==undefined){
+        if(!day[map[old]])day[map[old]]=day[old];
+        delete day[old];
+        dirty.plan=true;
+      }
+    });
+  });
+  var newSv={};
+  Object.keys(MEAL_MY_SERVINGS).forEach(function(key){
+    var sep=key.lastIndexOf('|');
+    var d=key.slice(0,sep),sl=key.slice(sep+1);
+    var ns=map[sl]||sl;
+    var nk=d+'|'+ns;
+    if(newSv[nk]===undefined)newSv[nk]=MEAL_MY_SERVINGS[key];
+    if(ns!==sl)dirty.sv=true;
+  });
+  if(dirty.sv)MEAL_MY_SERVINGS=newSv;
+  GROCERY_LIST.forEach(function(g){
+    if(!g.planKeys||!g.planKeys.length)return;
+    var orig=JSON.stringify(g.planKeys);
+    g.planKeys=g.planKeys.map(function(pk){
+      var sep=pk.lastIndexOf('|');
+      return pk.slice(0,sep)+'|'+(map[pk.slice(sep+1)]||pk.slice(sep+1));
+    }).filter(function(pk,i,a){return a.indexOf(pk)===i;});
+    if(JSON.stringify(g.planKeys)!==orig)dirty.groc=true;
+  });
+  if(dirty.plan)localStorage.setItem('aMealPlan',JSON.stringify(MEAL_PLAN));
+  if(dirty.sv)localStorage.setItem('aMealMyServings',JSON.stringify(MEAL_MY_SERVINGS));
+  if(dirty.groc)localStorage.setItem('aGroceryList',JSON.stringify(GROCERY_LIST));
+})();
 var GROCERY_CATS = ['Produce','Dairy','Meat & Fish','Bakery','Pantry','Frozen','Beverages','Other'];
 
 function showMealSec(sec,btn){
@@ -21007,9 +21044,9 @@ function setRecMealType(val,btn){
 function quickPlanRecipe(r){
   var today=todayStr();
   if(!MEAL_PLAN[today])MEAL_PLAN[today]={};
-  MEAL_PLAN[today]['mains']=r.name;
+  MEAL_PLAN[today]['dinner']=r.name;
   localStorage.setItem('aMealPlan',JSON.stringify(MEAL_PLAN));
-  showToast('Added "'+r.name+'" to today\'s mains 🍽️');
+  showToast('Added "'+r.name+'" to tonight\'s dinner 🌙');
 }
 
 function openCookItModal(recId){
