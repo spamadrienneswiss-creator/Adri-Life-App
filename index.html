@@ -1854,6 +1854,8 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
       <button class="ok-btn" style="flex:1;margin:0;padding:10px;font-size:13px;background:linear-gradient(135deg,var(--sage),var(--teal))" onclick="openM('incModal')">💰 Log Income</button>
       <button class="ok-btn" style="flex:1;margin:0;padding:10px;font-size:13px;background:linear-gradient(135deg,#e07a5f,#c05a3f)" onclick="openM('expModal')">💸 Log Expense</button>
     </div>
+    <!-- At-a-glance dashboard -->
+    <div id="ovDashboard" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px"></div>
     <!-- Hidden tiles kept for backward compat -->
     <span id="mThisInc" style="display:none"></span>
     <span id="mThisExp" style="display:none"></span>
@@ -2539,6 +2541,8 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
   <div id="ms-meals">
     <!-- Daily macro summary -->
     <div id="mealMacroCard" class="card" style="margin-bottom:10px;padding:11px 14px"></div>
+    <!-- Quick-log chips -->
+    <div id="quickLogWrap" style="margin-bottom:10px"></div>
     <div class="card" style="margin-bottom:10px">
       <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end">
         <div style="flex:2;min-width:130px">
@@ -14953,6 +14957,40 @@ function renderMoneyOverview(){
   var t3=document.getElementById('mNet');if(t3){t3.textContent=(net>=0?'+':'-')+'$'+Math.abs(net).toFixed(0);t3.style.color=net>=0?'var(--sage)':'var(--ured)';}
   var t4=document.getElementById('mInc');if(t4)t4.textContent='$'+wigMonInc.toFixed(0);
 
+  // At-a-glance dashboard
+  var dashEl=document.getElementById('ovDashboard');
+  if(dashEl){
+    // Budget left + days remaining
+    var totTarget=0,totSpent=0;
+    try{var _sp=budgetSpentMap();BUDGET_BUCKETS.forEach(function(b){totTarget+=budgetEffTarget(b);totSpent+=(_sp[b.id]||0);});}catch(e){}
+    var budgetLeft=totTarget-totSpent;
+    var now=new Date();
+    var daysInMon=new Date(now.getFullYear(),now.getMonth()+1,0).getDate();
+    var daysLeft=daysInMon-now.getDate();
+    var perDay=daysLeft>0?budgetLeft/daysLeft:budgetLeft;
+    // Uncleared count
+    var unclearedCt=EXPENSES.filter(function(e){return!e.reconciled;}).length;
+    // Savings rate (this month)
+    var savingsRate=thisMonIncAmt>0?Math.round((thisMonIncAmt-thisMonExpAmt)/thisMonIncAmt*100):null;
+    var tile=function(label,big,sub,color){
+      return '<div class="card" style="margin:0;padding:11px 13px">'
+        +'<div style="font-size:10px;font-weight:700;color:var(--textl);text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px">'+label+'</div>'
+        +'<div style="font-size:21px;font-weight:800;color:'+color+';line-height:1.1">'+big+'</div>'
+        +(sub?'<div style="font-size:10px;color:var(--textl);margin-top:2px">'+sub+'</div>':'')
+        +'</div>';
+    };
+    var html='';
+    if(totTarget>0){
+      html+=tile('🎯 Budget left',(budgetLeft<0?'-':'')+'$'+Math.abs(budgetLeft).toFixed(0),daysLeft+' day'+(daysLeft===1?'':'s')+' left · $'+Math.max(0,perDay).toFixed(0)+'/day',budgetLeft<0?'var(--ured)':'var(--sage)');
+    }else{
+      html+=tile('🎯 Budget',daysLeft+' days',(daysLeft===1?'day':'days')+' left in month · set targets in 🎯 Budget','var(--textd)');
+    }
+    html+=tile('💵 Net this month',(net>=0?'+':'-')+'$'+Math.abs(net).toFixed(0),'$'+thisMonIncAmt.toFixed(0)+' in · $'+thisMonExpAmt.toFixed(0)+' out',net>=0?'var(--sage)':'var(--ured)');
+    html+=tile('📈 Savings rate',savingsRate!==null?savingsRate+'%':'—',savingsRate!==null?(savingsRate>=20?'looking good':savingsRate>=0?'of income kept':'spending over income'):'log income to see',savingsRate===null?'var(--textd)':savingsRate>=20?'var(--sage)':savingsRate>=0?'#c09020':'var(--ured)');
+    html+=tile('⏳ Uncleared',unclearedCt,unclearedCt?'tap Expenses to reconcile':'all reconciled ✓',unclearedCt?'#c09020':'var(--sage)');
+    dashEl.innerHTML=html;
+  }
+
   // 1. What came in
   var incEl=document.getElementById('ov2IncTotal');if(incEl)incEl.textContent='$'+thisMonIncAmt.toFixed(2);
   var goal=S.monthlyIncGoal||parseFloat(localStorage.getItem('aMonIncGoal')||'0');
@@ -20349,11 +20387,76 @@ function renderMealMacroBar(){
     +row('💪 Protein',t.pro,S.gPro,'#6080c0')
     +row('🌾 Carbs',t.crb,S.gCrb,'#c09030')
     +row('🫙 Fat',t.fat,S.gFat,'#d06060')
+    +_weeklyTrendHtml()
     +'<div style="text-align:right;margin-top:4px"><button onclick="openM(\'settingsModal\')" style="font-size:10px;background:none;border:none;color:var(--textl);cursor:pointer;font-family:inherit;text-decoration:underline">Edit goals →</button></div>';
+}
+
+// 7-day calorie trend sparkline (last 7 days incl. today)
+function _weeklyTrendHtml(){
+  var days=[];
+  var dowLabels=['S','M','T','W','T','F','S'];
+  for(var i=6;i>=0;i--){
+    var d=new Date();d.setDate(d.getDate()-i);
+    var iso=d.toISOString().slice(0,10);
+    var ds=d.toDateString();
+    var flCal=(FL[ds]||[]).reduce(function(s,f){return s+(f.cal||0);},0);
+    var mlCal=(MEAL_LOG_ITEMS||[]).filter(function(m){return m.date===iso;}).reduce(function(s,m){return s+(m.cal||0);},0);
+    days.push({iso:iso,dow:dowLabels[d.getDay()],cal:Math.round(flCal+mlCal),isToday:i===0});
+  }
+  var loggedDays=days.filter(function(d){return d.cal>0;});
+  if(loggedDays.length<2)return '';
+  var avg=Math.round(loggedDays.reduce(function(s,d){return s+d.cal;},0)/loggedDays.length);
+  var goal=S.gCal||1900;
+  var maxVal=Math.max(goal,days.reduce(function(m,d){return Math.max(m,d.cal);},0))*1.1;
+  var bars=days.map(function(d){
+    var h=d.cal>0?Math.max(6,Math.round(d.cal/maxVal*46)):2;
+    var col=d.cal===0?'#e8e0d8':(d.cal>goal?'#d88040':(d.cal>=goal*0.7?'#8aaa6a':'#c9b88a'));
+    return '<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px">'
+      +'<div style="width:100%;height:48px;display:flex;align-items:flex-end;justify-content:center">'
+      +'<div style="width:70%;height:'+h+'px;background:'+col+';border-radius:3px 3px 0 0"'+(d.cal?' title="'+d.cal+' cal"':'')+'></div>'
+      +'</div>'
+      +'<span style="font-size:8px;color:'+(d.isToday?'var(--textd)':'var(--textl)')+';font-weight:'+(d.isToday?'800':'600')+'">'+d.dow+'</span>'
+      +'</div>';
+  }).join('');
+  var vsGoal=avg-goal;
+  var trendNote=Math.abs(vsGoal)<goal*0.08?'on target':(vsGoal>0?'+'+vsGoal+' over avg':vsGoal+' under avg');
+  var trendCol=Math.abs(vsGoal)<goal*0.08?'var(--sage)':(vsGoal>0?'#c09020':'var(--textl)');
+  return '<div style="margin-top:10px;padding-top:9px;border-top:1px solid #f0ebe6">'
+    +'<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px">'
+    +'<span style="font-size:10px;font-weight:700;color:var(--textl);text-transform:uppercase;letter-spacing:.6px">📈 7-day calories</span>'
+    +'<span style="font-size:10px;color:var(--textl)">avg <b style="color:var(--textd)">'+avg+'</b> · <span style="color:'+trendCol+';font-weight:700">'+trendNote+'</span></span>'
+    +'</div>'
+    +'<div style="display:flex;align-items:flex-end;gap:3px">'+bars+'</div>'
+    +'</div>';
+}
+
+function renderQuickLogChips(){
+  var el=document.getElementById('quickLogWrap');if(!el)return;
+  // Top foods: staples + most-used, ranked by useCount, only ones with nutrition data
+  var candidates=(FOOD_DB||[]).filter(function(f){
+    var hasNut=(f.per100&&f.per100.cal!=null)||f.cal;
+    return hasNut;
+  });
+  candidates.sort(function(a,b){
+    if(!!b.staple!==!!a.staple)return b.staple?1:-1;
+    return(b.useCount||0)-(a.useCount||0);
+  });
+  var top=candidates.filter(function(f){return f.staple||(f.useCount||0)>0;}).slice(0,8);
+  if(!top.length){el.innerHTML='';return;}
+  el.innerHTML='<div style="font-size:10px;font-weight:700;color:var(--textl);text-transform:uppercase;letter-spacing:.6px;margin-bottom:5px">⚡ Quick log</div>'
+    +'<div style="display:flex;gap:6px;overflow-x:auto;padding-bottom:4px">'
+    +top.map(function(f){
+      var unit='';
+      if(f.myUsual&&f.myUsual.svId){var sv=(f.servings||[]).find(function(s){return s.id===f.myUsual.svId;});if(sv)unit=(f.myUsual.qty&&f.myUsual.qty!=1?f.myUsual.qty+' ':'')+sv.label;}
+      return '<button onclick="addFLFromLib(\''+f.id+'\')" style="flex-shrink:0;padding:7px 12px;border-radius:18px;border:1.5px solid var(--bdr);background:#fff;font-family:\'Quicksand\',sans-serif;font-size:12px;font-weight:700;color:var(--textd);cursor:pointer;white-space:nowrap" title="'+(unit?escHtml(unit):'1 serving')+'">'
+        +(f.staple?'🏷️ ':'')+escHtml(f.name)+'</button>';
+    }).join('')
+    +'</div>';
 }
 
 function renderMealLog(){
   renderMealMacroBar();
+  renderQuickLogChips();
   var el=document.getElementById('mealLogList');if(!el)return;
   var list=_mealLogFilter?MEAL_LOG_ITEMS.filter(function(m){return m.category===_mealLogFilter;}):MEAL_LOG_ITEMS;
   if(!list.length){el.innerHTML='<p style="color:var(--textl);text-align:center;padding:20px">No meals logged yet. Start tracking what you eat!</p>';return;}
