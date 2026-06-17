@@ -20781,12 +20781,25 @@ function renderMealPlan(){
         var val=dayData[slot]||'';
         var rec=val?RECIPES.find(function(r){return r.name===val;}):null;
         var hasPrepTime=rec&&rec.prepTime;
-        html+='<div class="meal-slot" onclick="openSlotPicker(\''+date+'\',\''+slot+'\')">';
+        var isWtt=val&&!rec&&WANT_TO_TRY.some(function(w){return w.text===val;});
+        var slotMacros=rec&&rec.macros&&rec.macros.cal?rec.macros:null;
+        html+='<div class="meal-slot" onclick="openSlotPicker(\''+date+'\',\''+slot+'\')" style="flex-direction:column;align-items:stretch;gap:3px">';
+        html+='<div style="display:flex;align-items:center;gap:4px">';
         html+='<span class="meal-slot-lbl">'+MEAL_SLOT_ICONS[slot]+' '+(MEAL_SLOT_LABELS[slot]||slot)+'</span>';
         html+='<span style="display:flex;align-items:center;gap:4px;flex:1;min-width:0">';
-        html+='<span class="meal-slot-val'+(val?'':' empty')+'" style="flex:1">'+(val||'tap to add')+'</span>';
-        if(hasPrepTime)html+='<button onclick="event.stopPropagation();addPrepTask(\''+val+'\','+rec.prepTime+')" style="background:none;border:1px solid var(--sage);border-radius:6px;padding:1px 5px;font-size:10px;color:var(--sage);cursor:pointer;flex-shrink:0">⏱ '+rec.prepTime+'m</button>';
-        html+='</span>';
+        html+='<span class="meal-slot-val'+(val?'':' empty')+'" style="flex:1">'+(val?escHtml(val):'tap to add')+'</span>';
+        if(isWtt)html+='<span style="font-size:10px;background:#fef9e7;border:1px solid #e8d88a;border-radius:6px;padding:1px 5px;color:#9a7c0a;flex-shrink:0">⭐ WTT</span>';
+        if(hasPrepTime)html+='<button onclick="event.stopPropagation();addPrepTask(\''+escHtml(val)+'\','+rec.prepTime+')" style="background:none;border:1px solid var(--sage);border-radius:6px;padding:1px 5px;font-size:10px;color:var(--sage);cursor:pointer;flex-shrink:0">⏱ '+rec.prepTime+'m</button>';
+        if(val)html+='<button onclick="event.stopPropagation();clearMealSlot(\''+date+'\',\''+slot+'\')" style="background:none;border:none;font-size:12px;cursor:pointer;color:var(--textl);padding:1px 3px;flex-shrink:0;opacity:.5" title="Clear">✕</button>';
+        html+='</span></div>';
+        if(slotMacros){
+          html+='<div style="font-size:10px;color:var(--textl);padding-left:4px;display:flex;gap:8px;flex-wrap:wrap">'
+            +'<span>🔥 '+slotMacros.cal+' cal</span>'
+            +'<span>💪 '+slotMacros.pro+'g</span>'
+            +'<span>🌾 '+slotMacros.carb+'g</span>'
+            +'<span>🫙 '+slotMacros.fat+'g</span>'
+            +'</div>';
+        }
         html+='</div>';
       });
       if(macros.cal>0){
@@ -20829,20 +20842,72 @@ function calcDayMacros(date){
   return totals;
 }
 
+var _slotPickDate='', _slotPickSlot='';
 function openSlotPicker(date,slot){
+  _slotPickDate=date; _slotPickSlot=slot;
   var current=(MEAL_PLAN[date]||{})[slot]||'';
-  var names=RECIPES.map(function(r){return r.name;});
-  var opts=names.length?'\n\nYour recipes:\n'+names.join(', '):'';
-  var slotLabel=MEAL_SLOT_LABELS[slot]||slot;
-  var val=prompt('Meal for '+slotLabel+' on '+date+':\n(Enter recipe name or any text, leave blank to clear)'+opts, current);
-  if(val===null)return;
-  if(!MEAL_PLAN[date])MEAL_PLAN[date]={};
-  if(val.trim()===''){
-    delete MEAL_PLAN[date][slot];
-  } else {
-    MEAL_PLAN[date][slot]=val.trim();
+  var slotLabel=(MEAL_SLOT_ICONS[slot]||'')+(MEAL_SLOT_LABELS[slot]||slot);
+  var el=document.getElementById('spTitle');if(el)el.textContent=slotLabel+' · '+date;
+  var inp=document.getElementById('spCustom');if(inp){inp.value=current;inp.placeholder='Type a meal name, or pick below…';}
+  var srch=document.getElementById('spSearch');if(srch)srch.value='';
+  renderSlotPickerList('');
+  showOv('ovSlotPicker');
+  setTimeout(function(){if(inp)inp.focus();},120);
+}
+
+function renderSlotPickerList(q){
+  var el=document.getElementById('spList');if(!el)return;
+  var lq=(q||'').toLowerCase().trim();
+  var recList=RECIPES.filter(function(r){return !lq||(r.name||'').toLowerCase().indexOf(lq)>=0;});
+  var wttList=WANT_TO_TRY.filter(function(w){return !w.tried&&(!lq||w.text.toLowerCase().indexOf(lq)>=0);});
+  var html='';
+  if(recList.length){
+    html+='<div style="font-size:10px;font-weight:700;color:var(--textl);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">📖 Recipes</div>';
+    recList.forEach(function(r){
+      var m=r.macros&&r.macros.cal?r.macros:null;
+      html+='<div onclick="pickMealSlot(\''+escHtml(r.name).replace(/'/g,"\\'")+'\',false)" style="padding:9px 12px;border-radius:12px;border:1.5px solid #e8e0d8;margin-bottom:6px;cursor:pointer;background:#fff;transition:background .1s" onmouseover="this.style.background=\'#fdf6ee\'" onmouseout="this.style.background=\'#fff\'">'
+        +'<div style="font-size:13px;font-weight:700;color:var(--textd)">'+escHtml(r.name)+'</div>'
+        +(m?'<div style="font-size:11px;color:var(--textl);margin-top:2px">🔥 '+m.cal+' cal · 💪 '+m.pro+'g · 🌾 '+m.carb+'g · 🫙 '+m.fat+'g <span style="font-size:10px">(per serving)</span></div>':'')
+        +(r.servings&&r.servings>1?'<div style="font-size:10px;color:var(--textl);margin-top:1px">'+r.servings+' servings</div>':'')
+        +'</div>';
+    });
   }
+  if(wttList.length){
+    html+='<div style="font-size:10px;font-weight:700;color:var(--textl);text-transform:uppercase;letter-spacing:.5px;margin:'+(recList.length?'12px':'0')+' 0 6px">⭐ Want to Try</div>';
+    wttList.forEach(function(w){
+      html+='<div onclick="pickMealSlot(\''+escHtml(w.text).replace(/'/g,"\\'")+'\',true)" style="padding:9px 12px;border-radius:12px;border:1.5px solid #e8d88a;margin-bottom:6px;cursor:pointer;background:#fefdf5;transition:background .1s" onmouseover="this.style.background=\'#fffbe8\'" onmouseout="this.style.background=\'#fefdf5\'">'
+        +'<div style="font-size:13px;font-weight:700;color:var(--textd)">⭐ '+escHtml(w.text)+'</div>'
+        +(w.note?'<div style="font-size:11px;color:var(--textl);margin-top:2px;font-style:italic">'+escHtml(w.note)+'</div>':'')
+        +'</div>';
+    });
+  }
+  if(!recList.length&&!wttList.length){
+    html='<div style="text-align:center;padding:18px;color:var(--textl);font-size:13px">'+(lq?'No matches for "'+escHtml(q)+'"':'No recipes yet — add some in Recipes tab')+'</div>';
+  }
+  el.innerHTML=html;
+}
+
+function pickMealSlot(name, fromWtt){
+  if(!_slotPickDate||!_slotPickSlot)return;
+  if(!MEAL_PLAN[_slotPickDate])MEAL_PLAN[_slotPickDate]={};
+  MEAL_PLAN[_slotPickDate][_slotPickSlot]=name;
   localStorage.setItem('aMealPlan',JSON.stringify(MEAL_PLAN));
+  closeOv('ovSlotPicker');
+  renderMealPlan();
+}
+
+function pickMealSlotCustom(){
+  var val=(document.getElementById('spCustom')||{}).value||'';
+  val=val.trim();
+  if(!val){clearMealSlot(_slotPickDate,_slotPickSlot);return;}
+  pickMealSlot(val,false);
+}
+
+function clearMealSlot(date,slot){
+  if(!MEAL_PLAN[date])return;
+  delete MEAL_PLAN[date][slot];
+  localStorage.setItem('aMealPlan',JSON.stringify(MEAL_PLAN));
+  if(document.getElementById('ovSlotPicker') && document.getElementById('ovSlotPicker').classList.contains('show'))closeOv('ovSlotPicker');
   renderMealPlan();
 }
 
@@ -29314,6 +29379,25 @@ function delProjInc(id){
       <button onclick="ovwNext()" style="padding:10px;border-radius:14px;border:none;background:#f8f4f0;font-family:'Quicksand',sans-serif;font-size:12px;font-weight:700;color:var(--textl);cursor:pointer">→ Show me a different one</button>
       <button onclick="closeOv('ovOverwhelmed')" style="padding:7px;border-radius:14px;border:none;background:none;font-family:'Quicksand',sans-serif;font-size:11px;color:var(--textl);cursor:pointer;opacity:.7">Exit to full list</button>
     </div>
+  </div>
+</div>
+
+<!-- MEAL PLAN SLOT PICKER MODAL -->
+<div class="ov" id="ovSlotPicker" onclick="if(event.target===this)closeOv('ovSlotPicker')">
+  <div class="mod" style="max-width:420px;max-height:86vh;display:flex;flex-direction:column" onclick="event.stopPropagation()">
+    <div class="mh" style="flex-shrink:0">
+      <span class="mt" id="spTitle">Pick a meal</span>
+      <button class="mc" onclick="closeOv('ovSlotPicker')">✕</button>
+    </div>
+    <div style="padding:4px 0 10px;flex-shrink:0">
+      <input id="spCustom" type="text" style="width:100%;padding:9px 12px;border-radius:12px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px;box-sizing:border-box;margin-bottom:8px" onkeydown="if(event.key==='Enter')pickMealSlotCustom()">
+      <div style="display:flex;gap:7px;margin-bottom:10px">
+        <button class="btn" style="flex:1;font-size:12px" onclick="pickMealSlotCustom()">✓ Set meal</button>
+        <button class="btn sec" style="font-size:12px;color:#c05050" onclick="clearMealSlot(_slotPickDate,_slotPickSlot)">Clear slot</button>
+      </div>
+      <input id="spSearch" type="text" placeholder="Search recipes or want-to-try…" style="width:100%;padding:8px 12px;border-radius:10px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:12px;box-sizing:border-box" oninput="renderSlotPickerList(this.value)">
+    </div>
+    <div id="spList" style="overflow-y:auto;flex:1;padding-bottom:6px"></div>
   </div>
 </div>
 
