@@ -2744,6 +2744,7 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px" id="invSectionFilter">
       <button class="fchip on" onclick="setInvFilter('',this)">All</button>
     </div>
+    <div id="invRestockCard"></div>
     <div id="inventoryListEl"></div>
   </div>
 
@@ -21640,7 +21641,7 @@ function confirmRecipeToGrocery(rec){
 function renderInventory(){
   var el=document.getElementById('inventoryListEl');
   if(!el)return;
-  // Update section filter chips
+  // Section filter chips
   var filterEl=document.getElementById('invSectionFilter');
   if(filterEl){
     var usedSections={};
@@ -21651,6 +21652,25 @@ function renderInventory(){
         return'<button class="fchip'+((_invFilter===s)?' on':'')+'" onclick="setInvFilter(\''+escHtml(s)+'\',this)">'+escHtml(s)+' <span style="font-size:10px;opacity:.7">'+count+'</span></button>';
       }).join('');
   }
+  // Restock card
+  var restockEl=document.getElementById('invRestockCard');
+  if(restockEl){
+    var lowItems=INVENTORY.filter(function(inv){return inv.status==='low';});
+    var outItems=INVENTORY.filter(function(inv){return inv.status==='out';});
+    if(lowItems.length||outItems.length){
+      var chips='';
+      outItems.forEach(function(inv){chips+='<span style="background:#fde8e8;border:1px solid #f0c0c0;border-radius:10px;padding:2px 8px;font-size:11px;color:#c05050;white-space:nowrap">🔴 '+escHtml(inv.name)+'</span>';});
+      lowItems.forEach(function(inv){chips+='<span style="background:#fff8e8;border:1px solid #e8d48a;border-radius:10px;padding:2px 8px;font-size:11px;color:#9a7020;white-space:nowrap">🟡 '+escHtml(inv.name)+'</span>';});
+      var parts=[];if(outItems.length)parts.push(outItems.length+' out');if(lowItems.length)parts.push(lowItems.length+' low');
+      restockEl.innerHTML='<div style="background:#fff8e8;border:1.5px solid #e8d48a;border-radius:12px;padding:10px 12px;margin-bottom:10px">'
+        +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">'
+        +'<span style="font-size:12px;font-weight:700;color:#9a7020">⚠️ Restock needed · '+parts.join(', ')+'</span>'
+        +'<button onclick="addAllRestockToGrocery()" style="background:#4a7a9b;color:white;border:none;border-radius:8px;padding:4px 10px;font-size:11px;font-weight:700;cursor:pointer;font-family:Quicksand,sans-serif">→ 🛒 Add all</button>'
+        +'</div>'
+        +'<div style="display:flex;flex-wrap:wrap;gap:4px">'+chips+'</div>'
+        +'</div>';
+    }else{restockEl.innerHTML='';}
+  }
   var list=_invFilter?INVENTORY.filter(function(inv){return (inv.section||'Pantry')===_invFilter;}):INVENTORY;
   if(!list.length){
     el.innerHTML='<p style="color:var(--textl);text-align:center;padding:20px">'+(_invFilter?'Nothing in '+_invFilter+' — tap + Add':'Inventory is empty. Items checked off your grocery list appear here automatically.')+'</p>';
@@ -21659,12 +21679,9 @@ function renderInventory(){
   // Group by section
   var today=todayStr();
   var sections={};
-  list.forEach(function(inv){
-    var sec=inv.section||'Pantry';
-    if(!sections[sec])sections[sec]=[];
-    sections[sec].push(inv);
-  });
+  list.forEach(function(inv){var sec=inv.section||'Pantry';if(!sections[sec])sections[sec]=[];sections[sec].push(inv);});
   var sectionOrder=INV_SECTIONS.concat(Object.keys(sections).filter(function(s){return INV_SECTIONS.indexOf(s)<0;}));
+  var stBtn='border:1.5px solid;border-radius:7px;padding:2px 6px;font-size:11px;cursor:pointer;font-family:Quicksand,sans-serif;font-weight:700;line-height:1.4;background:none';
   var html='';
   sectionOrder.forEach(function(sec){
     if(!sections[sec]||!sections[sec].length)return;
@@ -21674,7 +21691,6 @@ function renderInventory(){
       var dbi=inv.dbItemId?FOOD_DB.find(function(x){return x.id===inv.dbItemId;}):null;
       if(!dbi)dbi=FOOD_DB.find(function(x){return x.name.toLowerCase()===(inv.name||'').toLowerCase();});
       var nutLine=dbi&&dbi.cal?'<span style="font-size:10px;color:var(--textl)"> · '+dbi.cal+'cal'+(dbi.pro?' · '+dbi.pro+'g pro':'')+'</span>':'';
-      // Expiration
       var expLine='';
       if(inv.expDate){
         var daysLeft=Math.ceil((new Date(inv.expDate)-new Date(today))/(1000*60*60*24));
@@ -21682,20 +21698,61 @@ function renderInventory(){
         var expText=daysLeft<0?'Expired '+Math.abs(daysLeft)+'d ago':daysLeft===0?'Expires today':daysLeft===1?'Expires tomorrow':'Exp '+inv.expDate;
         expLine='<span style="font-size:10px;color:'+expColor+';font-weight:700;margin-left:6px">⏰ '+expText+'</span>';
       }
-      html+='<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--bdr)">'
+      var st=inv.status||'have';
+      html+='<div style="display:flex;align-items:center;gap:6px;padding:8px 0;border-bottom:1px solid var(--bdr)">'
         +'<div style="flex:1;min-width:0">'
         +'<div style="font-size:13px;font-weight:600;color:var(--textd)">'+escHtml(inv.name)
         +'<span style="font-size:12px;font-weight:400;color:var(--textl)"> '+escHtml(inv.qty||'')+(inv.unit?' '+escHtml(inv.unit):'')+'</span>'
         +nutLine+expLine+'</div>'
         +(inv.notes?'<div style="font-size:10px;color:var(--textl)">'+escHtml(inv.notes)+'</div>':'')
         +'</div>'
+        +'<div style="display:flex;gap:3px;flex-shrink:0">'
+        +'<button title="Have" onclick="setInvStatus(\''+inv.id+'\',\'have\')" style="'+stBtn+';border-color:'+(st==='have'?'#5a9a70':'#ddd')+';color:'+(st==='have'?'#3a8058':'#bbb')+';background:'+(st==='have'?'#e8f5ec':'none')+'">🟢</button>'
+        +'<button title="Low" onclick="setInvStatus(\''+inv.id+'\',\'low\')" style="'+stBtn+';border-color:'+(st==='low'?'#c8a020':'#ddd')+';color:'+(st==='low'?'#9a7020':'#bbb')+';background:'+(st==='low'?'#fff8e8':'none')+'">🟡</button>'
+        +'<button title="Out" onclick="setInvStatus(\''+inv.id+'\',\'out\')" style="'+stBtn+';border-color:'+(st==='out'?'#c05050':'#ddd')+';color:'+(st==='out'?'#c05050':'#bbb')+';background:'+(st==='out'?'#fde8e8':'none')+'">🔴</button>'
+        +'</div>'
         +'<button onclick="openInvAddModal(\''+inv.id+'\')" style="background:none;border:1.5px solid var(--bdr);border-radius:8px;padding:3px 8px;font-size:11px;cursor:pointer;color:var(--textl)">✏️</button>'
-        +'<button onclick="priceToGrocery(\''+escHtml(inv.name)+'\','+(inv.lastPrice||0)+',\''+escHtml(inv.lastPriceStore||'')+'\');showMealSec(\'grocery\',document.querySelector(\'#v-meals .pn-btn:nth-child(1)\'))" style="background:var(--blue-light);border:none;border-radius:8px;padding:4px 9px;font-size:11px;font-weight:700;color:#4a7a9b;cursor:pointer">→ 🛒</button>'
         +'<button onclick="delInventoryById(\''+inv.id+'\')" style="background:none;border:none;font-size:14px;cursor:pointer;color:var(--textl);padding:2px 4px">🗑️</button>'
         +'</div>';
     });
   });
   el.innerHTML=html;
+}
+
+function setInvStatus(id,status){
+  var item=INVENTORY.find(function(x){return x.id===id;});
+  if(!item)return;
+  var prev=item.status||'have';
+  item.status=status;
+  localStorage.setItem('aInventory',JSON.stringify(INVENTORY));
+  if(status==='out'&&prev!=='out'){
+    var already=GROCERY_LIST.some(function(g){return g.name.toLowerCase()===item.name.toLowerCase()&&!g.checked;});
+    if(!already){
+      GROCERY_LIST.push({id:'gr-'+Date.now(),name:item.name,qty:item.qty||'1',unit:item.unit||'',category:'Other',checked:false,source:'inventory'});
+      localStorage.setItem('aGroceryList',JSON.stringify(GROCERY_LIST));
+      showToast('🔴 Out — added to 🛒 grocery list');
+    }else{showToast('🔴 Marked as out');}
+  }else if(status==='low'&&prev!=='low'){
+    showToast('🟡 Marked as low — shows in restock card');
+  }else if(status==='have'){
+    showToast('🟢 Back in stock');
+  }
+  renderInventory();
+}
+
+function addAllRestockToGrocery(){
+  var toAdd=INVENTORY.filter(function(inv){return inv.status==='low'||inv.status==='out';});
+  if(!toAdd.length){showToast('Nothing to restock');return;}
+  var added=0;
+  toAdd.forEach(function(inv){
+    var already=GROCERY_LIST.some(function(g){return g.name.toLowerCase()===inv.name.toLowerCase()&&!g.checked;});
+    if(!already){
+      GROCERY_LIST.push({id:'gr-'+Date.now()+Math.random(),name:inv.name,qty:inv.qty||'1',unit:inv.unit||'',category:'Other',checked:false,source:'inventory'});
+      added++;
+    }
+  });
+  if(added)localStorage.setItem('aGroceryList',JSON.stringify(GROCERY_LIST));
+  showToast(added?added+' item'+(added>1?'s':'')+' added to 🛒':'Already on grocery list');
 }
 
 function addInventoryManual(){
