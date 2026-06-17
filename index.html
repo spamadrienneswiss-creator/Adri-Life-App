@@ -8027,9 +8027,11 @@ function homeTileDown(idx,e){
   saveHomeTiles();renderHomePage();
 }
 function homeTileRemove(idx,e){
-  e.stopPropagation();
+  if(e)e.stopPropagation();
+  if(idx<0||idx>=HOME_TILES.length)return;
   HOME_TILES.splice(idx,1);
-  saveHomeTiles();renderHomePage();
+  saveHomeTiles();
+  renderHomePage();
 }
 
 function showHomeAddOverlay(){
@@ -8604,9 +8606,9 @@ function renderHomePage(){
   grid.innerHTML=HOME_TILES.map(function(tile,idx){
     var d=HOME_TILE_DEFS[tile.id];if(!d)return'';
     var badge=getHomeTileBadge(tile.id);
-    return'<div class="h-tile" style="background:'+d.bg+'" onclick="'+(HOME_EDIT_MODE?'':'openHomeTileModal(\''+tile.id+'\')')+'" data-tile="'+tile.id+'">'
+    return'<div class="h-tile" style="background:'+d.bg+'" onclick="'+(HOME_EDIT_MODE?'homeTileRemove('+idx+',event)':'openHomeTileModal(\''+tile.id+'\')')+'" data-tile="'+tile.id+'">'
       +(HOME_EDIT_MODE
-        ?'<button class="h-tile-remove" onclick="homeTileRemove('+idx+',event)">✕</button>'
+        ?'<div style="position:absolute;top:-7px;right:-7px;width:24px;height:24px;background:#ff3b30;border-radius:50%;color:#fff;font-size:15px;font-weight:700;display:flex;align-items:center;justify-content:center;z-index:10;pointer-events:none;line-height:1;box-shadow:0 2px 6px rgba(0,0,0,.25)">✕</div>'
         :(badge?'<div class="h-tile-badge">'+badge+'</div>':''))
       +'<div class="h-tile-icon">'+d.icon+'</div>'
       +'<div class="h-tile-label">'+d.label+'</div>'
