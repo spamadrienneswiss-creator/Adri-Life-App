@@ -20515,6 +20515,7 @@ function openCookItModal(recId){
   if(!rec)return;
   document.getElementById('cookItRecId').value=recId;
   document.getElementById('cookItRecName').textContent=rec.name;
+  var _bEl=document.getElementById('cookItBatch');if(_bEl)_bEl.value=rec.servings||1;
   document.getElementById('cookItServings').value=1;
   document.getElementById('cookItNotes').value='';
   var mt=(rec.mealTypes&&rec.mealTypes[0])||rec.mealType||'dinner';
@@ -20543,8 +20544,8 @@ function renderCookItIngs(){
   var recId=document.getElementById('cookItRecId').value;
   var rec=RECIPES.find(function(r){return r.id===recId;});
   var recServings=rec?rec.servings||1:1;
-  var servingsEaten=parseFloat((document.getElementById('cookItServings')||{}).value)||1;
-  var scale=servingsEaten/recServings;
+  var batchServings=parseFloat((document.getElementById('cookItBatch')||{}).value)||recServings;
+  var scale=batchServings/recServings;
   if(!_cookItIngs.length){el.innerHTML='<p style="color:var(--textl);font-size:12px;text-align:center;padding:8px">No ingredients — save the recipe with ingredients first</p>';updateCookItMacros();return;}
   el.innerHTML=_cookItIngs.map(function(ing,i){
     var scaledQty=Math.round(ing.qty*scale*4)/4;
@@ -20566,22 +20567,37 @@ function renderCookItIngs(){
   updateCookItMacros();
 }
 
-function updateCookItMacros(){
-  var el=document.getElementById('cookItMacroDisplay');if(!el)return;
-  var t={cal:0,pro:0,carb:0,fat:0,fib:0};var hasData=false;
+function _cookItEatenMacros(){
+  // batch totals from current (possibly adjusted) ingredients, scaled down to servings eaten
   var recId=document.getElementById('cookItRecId').value;
   var rec=RECIPES.find(function(r){return r.id===recId;});
   var recServings=rec?rec.servings||1:1;
+  var batchServings=parseFloat((document.getElementById('cookItBatch')||{}).value)||recServings;
   var servingsEaten=parseFloat((document.getElementById('cookItServings')||{}).value)||1;
-  var scale=servingsEaten/recServings;
+  var scale=batchServings/recServings;
+  var t={cal:0,pro:0,carb:0,fat:0,fib:0};var hasData=false;
   _cookItIngs.forEach(function(ing){
     if(ing.omit)return;
     var m=_calcIngMacros(ing,ing.qty*scale);
     if(m){t.cal+=m.cal;t.pro+=m.pro;t.carb+=m.carb;t.fat+=m.fat;t.fib+=m.fib;hasData=true;}
   });
-  if(!hasData){el.innerHTML='<span style="color:var(--textl);font-size:12px;font-style:italic">Add ingredients with nutrition in Foods to see macros</span>';return;}
+  var per=batchServings>0?{cal:t.cal/batchServings,pro:t.pro/batchServings,carb:t.carb/batchServings,fat:t.fat/batchServings,fib:t.fib/batchServings}:t;
+  return{hasData:hasData,batch:t,perServing:per,eaten:{cal:per.cal*servingsEaten,pro:per.pro*servingsEaten,carb:per.carb*servingsEaten,fat:per.fat*servingsEaten,fib:per.fib*servingsEaten},batchServings:batchServings,servingsEaten:servingsEaten};
+}
+
+function updateCookItMacros(){
+  var el=document.getElementById('cookItMacroDisplay');if(!el)return;
+  var r=_cookItEatenMacros();
+  if(!r.hasData){el.innerHTML='<span style="color:var(--textl);font-size:12px;font-style:italic">Add ingredients with nutrition in Foods to see macros</span>';return;}
   var tag=function(x){return'<span class="recipe-macro-tag">'+x+'</span>';};
-  el.innerHTML=tag('🔥 '+Math.round(t.cal)+' cal')+(t.pro?tag('💪 '+Math.round(t.pro*10)/10+'g pro'):'')+(t.carb?tag('🌾 '+Math.round(t.carb*10)/10+'g carb'):'')+(t.fat?tag('🫙 '+Math.round(t.fat*10)/10+'g fat'):'')+(t.fib?tag('🌱 '+Math.round(t.fib*10)/10+'g fib'):'');
+  var e=r.eaten,p=r.perServing;
+  el.innerHTML='<div style="width:100%">'
+    +'<div style="font-size:10px;font-weight:700;color:var(--textl);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">You\'re eating ('+r.servingsEaten+' srv)</div>'
+    +'<div style="display:flex;gap:6px;flex-wrap:wrap">'
+    +tag('🔥 '+Math.round(e.cal)+' cal')+(e.pro?tag('💪 '+Math.round(e.pro*10)/10+'g pro'):'')+(e.carb?tag('🌾 '+Math.round(e.carb*10)/10+'g carb'):'')+(e.fat?tag('🫙 '+Math.round(e.fat*10)/10+'g fat'):'')+(e.fib?tag('🌱 '+Math.round(e.fib*10)/10+'g fib'):'')
+    +'</div>'
+    +'<div style="font-size:11px;color:var(--textl);margin-top:5px">Per serving: 🔥 '+Math.round(p.cal)+' cal · 💪 '+Math.round(p.pro*10)/10+'g · batch makes '+r.batchServings+'</div>'
+    +'</div>';
 }
 
 function swapCookItIng(i){
@@ -20600,21 +20616,11 @@ function logCookIt(){
   var rec=RECIPES.find(function(r){return r.id===recId;});if(!rec)return;
   var notes=(document.getElementById('cookItNotes').value||'').trim();
   var mealType=(document.getElementById('cookItMealType').value||'main');
-  var t={cal:0,pro:0,carb:0,fat:0,fib:0};
-  var recId2=document.getElementById('cookItRecId').value;
-  var rec2=RECIPES.find(function(r){return r.id===recId2;});
-  var recServings=rec2?rec2.servings||1:1;
-  var servingsEaten=parseFloat((document.getElementById('cookItServings')||{}).value)||1;
-  var scale=servingsEaten/recServings;
-  _cookItIngs.forEach(function(ing){
-    if(ing.omit)return;
-    var m=_calcIngMacros(ing,ing.qty*scale);
-    if(m){t.cal+=m.cal;t.pro+=m.pro;t.carb+=m.carb;t.fat+=m.fat;}
-  });
+  var t=_cookItEatenMacros().eaten;
   var logName=rec.name+(notes?' — '+notes:'');
   MEAL_LOG_ITEMS.unshift({id:'ml-'+Date.now(),name:logName,category:mealType,day:'',date:todayStr(),cal:Math.round(t.cal),pro:Math.round(t.pro*10)/10,carb:Math.round(t.carb*10)/10,fat:Math.round(t.fat*10)/10,recipeId:recId});
   localStorage.setItem('aMealLogItems',JSON.stringify(MEAL_LOG_ITEMS));
-  closeOv('cookItModal');renderMealLog();showToast(rec.name+' logged ✨');
+  closeOv('cookItModal');renderMealLog();renderRecipes();showToast(rec.name+' logged ✨');
 }
 
 function saveRecipeAsCopy(){
@@ -20725,6 +20731,19 @@ function renderRecipes(){
     }
     var tags=(r.tags||[]).map(function(t){return '<span class="recipe-macro-tag">'+escHtml(t)+'</span>';}).join('');
     var mtChips=mts.map(function(t){var ic=MEAL_TYPE_ICONS[t]||'';return '<span class="recipe-macro-tag" style="background:rgba(0,0,0,0.08)">'+(ic?ic+' ':'')+escHtml(t)+'</span>';}).join('');
+    // Cook history from meal log
+    var cooks=(MEAL_LOG_ITEMS||[]).filter(function(ml){return ml.recipeId===r.id;});
+    var cookChip='';
+    if(cooks.length){
+      var lastDate='';
+      cooks.forEach(function(ml){if((ml.date||'')>lastDate)lastDate=ml.date||'';});
+      var lastStr='';
+      if(lastDate){
+        var ld=new Date(lastDate+'T12:00:00');
+        if(!isNaN(ld))lastStr=lastDate===todayStr()?'today':ld.toLocaleDateString(undefined,{month:'short',day:'numeric'});
+      }
+      cookChip='<span class="recipe-macro-tag" style="background:#fff3e0;color:#c07a2a" title="Times cooked · last time">🍳 '+cooks.length+'×'+(lastStr?' · '+lastStr:'')+'</span>';
+    }
     var ingHtml=(r.ingredients&&r.ingredients.length)?r.ingredients.map(function(i){
       var dbi=i.dbItemId?FOOD_DB.find(function(x){return x.id===i.dbItemId;}):null;
       if(!dbi)dbi=FOOD_DB.find(function(x){return x.name.toLowerCase()===(i.name||'').toLowerCase();});
@@ -20750,6 +20769,7 @@ function renderRecipes(){
       +'<div style="display:flex;gap:4px;flex-wrap:wrap;margin:4px 0">'
       +mtChips
       +(timeStr?'<span class="recipe-macro-tag">'+timeStr+'</span>':'')
+      +cookChip
       +'</div>'
       +'<div class="recipe-card-macros">'
       +(m.cal?'<span class="recipe-macro-tag">🔥 '+m.cal+' cal</span>':'')
@@ -27376,8 +27396,14 @@ function delProjInc(id){
     <div style="font-size:11px;color:var(--textl);margin-bottom:12px">Uncheck to omit · adjust qty per ingredient · ⇄ to swap · macros update live</div>
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap">
       <div style="display:flex;align-items:center;gap:6px">
-        <label style="font-size:12px;color:var(--textl);white-space:nowrap">Servings eaten</label>
-        <input id="cookItServings" type="number" value="1" min="0.25" step="0.25" style="width:66px;padding:7px 9px;border-radius:9px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px" oninput="renderCookItIngs()">
+        <label style="font-size:12px;color:var(--textl);white-space:nowrap" title="Batch size — scales ingredient amounts">Making</label>
+        <input id="cookItBatch" type="number" value="1" min="0.25" step="0.25" style="width:60px;padding:7px 9px;border-radius:9px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px" oninput="renderCookItIngs()">
+        <span style="font-size:11px;color:var(--textl)">srv</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px">
+        <label style="font-size:12px;color:var(--textl);white-space:nowrap" title="How many servings you're logging">Eating</label>
+        <input id="cookItServings" type="number" value="1" min="0.25" step="0.25" style="width:60px;padding:7px 9px;border-radius:9px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px" oninput="renderCookItIngs()">
+        <span style="font-size:11px;color:var(--textl)">srv</span>
       </div>
       <div style="display:flex;align-items:center;gap:6px;flex:1;min-width:140px">
         <label style="font-size:12px;color:var(--textl);white-space:nowrap">Meal type</label>
