@@ -3753,9 +3753,26 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
   <!-- Price History -->
   <div class="fg">
     <label class="fl">💰 Price History</label>
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:4px">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:4px">
       <div><div style="font-size:11px;color:var(--textl);margin-bottom:3px">Store</div><input class="fi" id="fdbPeStore" placeholder="Costco, Aldi…" style="margin-bottom:0"></div>
-      <div><div style="font-size:11px;color:var(--textl);margin-bottom:3px">Price $</div><input class="fi" id="fdbPePrice" type="number" placeholder="0.00" step="0.01" style="margin-bottom:0"></div>
+      <div><div style="font-size:11px;color:var(--textl);margin-bottom:3px">Total Price $</div><input class="fi" id="fdbPePrice" type="number" placeholder="0.00" step="0.01" style="margin-bottom:0"></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:6px">
+      <div><div style="font-size:11px;color:var(--textl);margin-bottom:3px">Pkg Size</div><input class="fi" id="fdbPeAmt" type="number" placeholder="e.g. 5" step="any" style="margin-bottom:0"></div>
+      <div><div style="font-size:11px;color:var(--textl);margin-bottom:3px">Unit</div>
+        <select class="fi" id="fdbPeUnit" style="margin-bottom:0;cursor:pointer">
+          <option value="">—</option>
+          <option value="lb">lb</option>
+          <option value="oz">oz</option>
+          <option value="g">g</option>
+          <option value="kg">kg</option>
+          <option value="each">each</option>
+          <option value="fl oz">fl oz</option>
+          <option value="mL">mL</option>
+          <option value="L">L</option>
+          <option value="ct">ct</option>
+        </select>
+      </div>
       <div><div style="font-size:11px;color:var(--textl);margin-bottom:3px">Date</div><input class="fi" id="fdbPeDate" type="date" style="margin-bottom:0"></div>
     </div>
     <button type="button" onclick="fdbAddPriceEntry()" class="btn sec" style="margin-top:6px;width:100%;font-size:12px">+ Add Price Entry</button>
@@ -21957,11 +21974,15 @@ var _fdbPriceEntries = []; // working array for price entries in modal
 function fdbAddPriceEntry(){
   var store=(document.getElementById('fdbPeStore').value||'').trim();
   var price=parseFloat(document.getElementById('fdbPePrice').value)||0;
+  var amt=parseFloat(document.getElementById('fdbPeAmt').value)||0;
+  var unit=(document.getElementById('fdbPeUnit').value||'').trim();
   var date=(document.getElementById('fdbPeDate').value||'').trim()||todayStr();
   if(!store&&!price)return;
-  _fdbPriceEntries.push({id:'pe-'+Date.now(),store:store,price:price,date:date});
+  _fdbPriceEntries.push({id:'pe-'+Date.now(),store:store,price:price,amount:amt||undefined,unit:unit||undefined,date:date});
   document.getElementById('fdbPeStore').value='';
   document.getElementById('fdbPePrice').value='';
+  document.getElementById('fdbPeAmt').value='';
+  // keep unit selected — user likely adding multiple entries with same unit
   document.getElementById('fdbPeDate').value=todayStr();
   renderFdbPriceEntries();
 }
@@ -21980,6 +22001,8 @@ function togFdbPriceHistory(){
   if(btn)btn.textContent=open?'▸ Show full history':'▴ Hide history';
 }
 
+function _fdbCalcUP(e){return(e.amount&&e.unit)?e.price/e.amount:null;}
+
 function renderFdbPriceEntries(){
   var latestEl=document.getElementById('fdbPriceLatest');
   var histEl=document.getElementById('fdbPriceHistoryList');
@@ -21991,27 +22014,60 @@ function renderFdbPriceEntries(){
     if(histBtn)histBtn.style.display='none';
     return;
   }
+  // Latest entry per store
   var lps={};
   _fdbPriceEntries.forEach(function(e){
     var s=e.store||'(no store)';
     if(!lps[s]||(e.date||'')>=(lps[s].date||''))lps[s]=e;
   });
-  var keys=Object.keys(lps);
-  var latestHtml=keys.map(function(s){
-    var e=lps[s];
-    return'<span style="font-size:12px;background:#f8f4f0;border-radius:7px;padding:4px 9px;margin-right:5px;margin-bottom:4px;display:inline-block">'
-      +'🏪 '+escHtml(s)+' <strong>$'+(e.price||0).toFixed(2)+'</strong>'
-      +'<span style="color:var(--textl);font-size:10px"> · '+(e.date||'')+'</span>'
-      +'</span>';
+  // Group latest entries by unit for ranking
+  var uGroups={};var noUnit=[];
+  Object.keys(lps).forEach(function(s){
+    var e=lps[s];var up=_fdbCalcUP(e);
+    if(up!==null){
+      if(!uGroups[e.unit])uGroups[e.unit]=[];
+      uGroups[e.unit].push({s:s,e:e,up:up});
+    }else{noUnit.push({s:s,e:e});}
+  });
+  // Sort each unit group cheapest first
+  Object.keys(uGroups).forEach(function(u){uGroups[u].sort(function(a,b){return a.up-b.up;});});
+  // Build rows: unit groups first (sorted), then no-unit entries
+  var rows=[];
+  Object.keys(uGroups).forEach(function(u){
+    uGroups[u].forEach(function(x,i){rows.push({x:x,u:u,rank:i,groupLen:uGroups[u].length});});
+  });
+  noUnit.forEach(function(x){rows.push({x:x,u:null,rank:-1,groupLen:0});});
+
+  var latestHtml=rows.map(function(r){
+    var e=r.x.e;
+    var isBest=r.u&&r.rank===0&&r.groupLen>1;
+    var isWorse=r.u&&r.rank>0&&r.groupLen>1;
+    var bg=isBest?'#edf7ed':isWorse?'#fdf6f0':'#f8f4f0';
+    var upBadge=r.u!==null?'<span style="font-size:10px;background:'+(isBest?'#c8eec8':'#e8f0e8')+';border-radius:5px;padding:1px 5px;color:#2a6a2a;font-weight:600">$'+r.x.up.toFixed(2)+'/'+escHtml(r.u)+'</span>':'';
+    var bestMark=isBest?'<span style="font-size:11px;margin-right:2px" title="Best unit price">★</span>':'';
+    return'<div style="display:flex;align-items:center;gap:6px;padding:5px 8px;background:'+bg+';border-radius:8px;margin-bottom:4px">'
+      +bestMark
+      +'<span style="font-size:12px;flex:1;font-weight:600">🏪 '+escHtml(r.x.s)+'</span>'
+      +'<strong style="font-size:12px">$'+(e.price||0).toFixed(2)+'</strong>'
+      +(r.u?'<span style="font-size:10px;color:var(--textl)">'+e.amount+' '+escHtml(r.u)+'</span>':'')
+      +upBadge
+      +'<span style="font-size:10px;color:var(--textl);min-width:60px;text-align:right">'+(e.date||'')+'</span>'
+      +'</div>';
   }).join('');
-  latestEl.innerHTML='<div style="display:flex;flex-wrap:wrap">'+latestHtml+'</div>';
+  latestEl.innerHTML=latestHtml||'';
+
   if(histEl){
     var sorted=_fdbPriceEntries.slice().sort(function(a,b){return (b.date||'')>(a.date||'')?1:-1;});
     histEl.innerHTML='<div style="border-top:1px solid #f0ece8;margin-top:4px">'+sorted.map(function(e){
-      return'<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid #f8f4f0;font-size:12px">'
+      var up=_fdbCalcUP(e);
+      var upBadge=up!==null?'<span style="font-size:10px;background:#e8f0e8;border-radius:4px;padding:1px 4px;color:#3a7a3a;font-weight:600">$'+up.toFixed(2)+'/'+escHtml(e.unit)+'</span>':'';
+      var pkgStr=(e.amount&&e.unit)?'<span style="font-size:10px;color:var(--textl)">'+e.amount+' '+escHtml(e.unit)+'</span>':'';
+      return'<div style="display:flex;align-items:center;gap:7px;padding:5px 0;border-bottom:1px solid #f8f4f0;font-size:12px">'
         +'<span style="flex:1;color:var(--textd)">🏪 '+escHtml(e.store||'—')+'</span>'
+        +pkgStr
         +'<span style="font-weight:700">$'+(e.price||0).toFixed(2)+'</span>'
-        +'<span style="color:var(--textl);font-size:11px;min-width:80px;text-align:right">'+(e.date||'')+'</span>'
+        +upBadge
+        +'<span style="color:var(--textl);font-size:11px;min-width:66px;text-align:right">'+(e.date||'')+'</span>'
         +'<button type="button" onclick="fdbDeletePriceEntry(\''+e.id+'\')" style="background:none;border:none;color:#e74c3c;cursor:pointer;font-size:15px;padding:0 2px;line-height:1">×</button>'
         +'</div>';
     }).join('')+'</div>';
@@ -22430,9 +22486,19 @@ function renderFoodDb(){
         }
         var lps={};
         es.forEach(function(e){var s=e.store||'(no store)';if(!lps[s]||(e.date||'')>=(lps[s].date||''))lps[s]=e;});
-        var keys=Object.keys(lps);
-        if(!keys.length)return'';
-        return'<div style="font-size:11px;color:var(--textl);margin-top:2px">'+keys.map(function(s){return'🏪 '+escHtml(s)+' <strong style="color:var(--textd)">$'+lps[s].price.toFixed(2)+'</strong>';}).join(' · ')+'</div>';
+        var keys=Object.keys(lps);if(!keys.length)return'';
+        var _up=function(e){return(e.amount&&e.unit)?e.price/e.amount:null;};
+        var uGroups={};var noUnit=[];
+        keys.forEach(function(s){var e=lps[s];var u=_up(e);if(u!==null){if(!uGroups[e.unit])uGroups[e.unit]=[];uGroups[e.unit].push({s:s,e:e,u:u});}else{noUnit.push({s:s,e:e});}});
+        Object.keys(uGroups).forEach(function(u){uGroups[u].sort(function(a,b){return a.u-b.u;});});
+        var parts=[];
+        Object.keys(uGroups).forEach(function(u){
+          uGroups[u].forEach(function(x,i){
+            parts.push((i===0&&uGroups[u].length>1?'★ ':'')+'🏪 '+escHtml(x.s)+' <strong style="color:var(--textd)">$'+x.e.price.toFixed(2)+'</strong> <span style="font-size:10px">($'+x.u.toFixed(2)+'/'+escHtml(u)+')</span>');
+          });
+        });
+        noUnit.forEach(function(x){parts.push('🏪 '+escHtml(x.s)+' <strong style="color:var(--textd)">$'+x.e.price.toFixed(2)+'</strong>');});
+        return'<div style="font-size:11px;color:var(--textl);margin-top:2px">'+parts.join(' · ')+'</div>';
       }())
       +(item.recipe?'<div style="font-size:11px;color:var(--lav);margin-top:2px">📖 '+escHtml(item.recipe)+'</div>':'')
       +'</div>'
