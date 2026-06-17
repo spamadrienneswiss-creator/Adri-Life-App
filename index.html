@@ -8074,6 +8074,7 @@ function openHomeTileModal(id){
   if(id==='onething'){openOneThingMode();return;}
   if(id==='workout'){goTabDirect('food');return;}
   if(id==='ministry'){goTabDirect('spirit');setTimeout(function(){var b=document.querySelector('#v-spirit .pn-btn:nth-child(3)');if(b)showSpiritSec('ministry',b);},200);return;}
+  if(id==='bible'){goTabDirect('spirit');setTimeout(function(){var b=document.querySelector('#v-spirit .pn-btn:nth-child(2)');if(b)showSpiritSec('bible',b);},200);return;}
   if(id==='grocery'){goTabDirect('grocery');return;}
   if(id==='errands'){goTabDirect('tasks');return;}
   if(id==='wigs'){goTabDirect('wigs');return;}
