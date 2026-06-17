@@ -20436,7 +20436,6 @@ function renderRecipeIngList(){
   if(!el)return;
   if(!MEAL_EDIT_INGS.length){
     el.innerHTML='<p style="color:var(--textl);font-size:12px;text-align:center;padding:8px">No ingredients added yet</p>';
-    var badge=document.getElementById('recMacroBadge');if(badge)badge.style.display='none';
     return;
   }
   el.innerHTML=MEAL_EDIT_INGS.map(function(ing,i){
@@ -20445,26 +20444,49 @@ function renderRecipeIngList(){
     var qty=parseFloat(ing.qty)||1;
     var macroLine='';
     if(dbi&&dbi.per100&&dbi.per100.cal!==undefined&&ing.svGrams){
-      var totalGrams=ing.svGrams*qty;
-      var c=Math.round(totalGrams*dbi.per100.cal/100);
-      var p=Math.round(totalGrams*dbi.per100.pro/100*10)/10;
-      macroLine='<div style="font-size:10px;color:var(--textl)">→ '+c+' cal · '+p+'g pro · '+totalGrams+'g total</div>';
+      var g=ing.svGrams*qty;
+      macroLine='→ '+Math.round(g*dbi.per100.cal/100)+' cal'+(dbi.per100.pro?' · '+Math.round(g*dbi.per100.pro/100*10)/10+'g pro':'');
     } else if(dbi&&dbi.cal){
-      macroLine='<div style="font-size:10px;color:var(--textl)">→ '+Math.round(dbi.cal*qty)+' cal · '+Math.round((dbi.pro||0)*qty*10)/10+'g pro</div>';
+      macroLine='→ '+Math.round(dbi.cal*qty)+' cal'+(dbi.pro?' · '+Math.round((dbi.pro||0)*qty*10)/10+'g pro':'');
     } else if(dbi){
-      macroLine='<div style="font-size:10px;color:#f0a020">⚠️ No nutrition in library — <a style="color:var(--blue);cursor:pointer" onclick="closeOv(\'recipeModal\');openFoodDbModal(\''+dbi.id+'\')">add it →</a></div>';
-    } else {
-      macroLine='<div style="font-size:10px;color:var(--textl)">Not in library — macros unknown</div>';
+      macroLine='⚠️ no nutrition — <a onclick="closeOv(\'recipeModal\');openFoodDbModal(\''+dbi.id+'\')" style="color:var(--blue);cursor:pointer;font-size:10px">add it →</a>';
     }
-    var svDisplay=ing.unit?(' · '+escHtml(ing.unit)):'';
-    return '<div style="display:flex;align-items:flex-start;gap:8px;padding:6px 0;border-bottom:1px solid var(--bdr)">'
+    var svHtml='';
+    if(dbi&&dbi.servings&&dbi.servings.length>1){
+      svHtml='<select onchange="editRecipeIngServing('+i+',this.value)" style="padding:3px 6px;border-radius:7px;border:1.5px solid #e8e0d8;font-family:\'Quicksand\',sans-serif;font-size:11px;background:#fff;max-width:130px">'
+        +dbi.servings.map(function(s){return'<option value="'+s.id+'"'+(s.id===ing.svId?' selected':'')+'>'+escHtml(s.label)+'</option>';}).join('')+'</select>';
+    } else {
+      svHtml='<span style="font-size:11px;color:var(--textl)">'+escHtml(ing.unit||'')+'</span>';
+    }
+    return '<div style="display:flex;align-items:flex-start;gap:8px;padding:7px 0;border-bottom:1px solid var(--bdr)">'
       +'<div style="flex:1;min-width:0">'
-      +'<div style="font-size:13px;font-weight:600;color:var(--textd)">'+qty+'×'+svDisplay+' '+escHtml(ing.name)+'</div>'
-      +macroLine
+      +'<div style="font-size:13px;font-weight:600;color:var(--textd);margin-bottom:4px">'+escHtml(ing.name)+'</div>'
+      +'<div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">'
+      +'<input type="number" value="'+qty+'" min="0.25" step="0.25" onchange="editRecipeIngQty('+i+',this.value)" style="width:58px;padding:4px 6px;border-radius:7px;border:1.5px solid #e8e0d8;font-size:12px;text-align:center;font-family:inherit">'
+      +svHtml
+      +(macroLine?'<span style="font-size:10px;color:var(--textl)">'+macroLine+'</span>':'')
       +'</div>'
-      +'<button style="background:none;border:none;color:#e74c3c;font-size:16px;cursor:pointer;flex-shrink:0;padding:2px 4px" onclick="delRecipeIng('+i+')">✕</button>'
+      +'</div>'
+      +'<button style="background:none;border:none;color:#e74c3c;font-size:16px;cursor:pointer;flex-shrink:0;padding:2px 4px;margin-top:2px" onclick="delRecipeIng('+i+')">✕</button>'
       +'</div>';
   }).join('');
+}
+
+function editRecipeIngQty(i,val){
+  MEAL_EDIT_INGS[i].qty=Math.max(0.25,parseFloat(val)||0.25);
+  renderRecipeIngList();
+  renderRecipeNutrition();
+}
+
+function editRecipeIngServing(i,svId){
+  var ing=MEAL_EDIT_INGS[i];
+  var dbi=ing.dbItemId?FOOD_DB.find(function(x){return x.id===ing.dbItemId;}):null;
+  if(!dbi||!dbi.servings)return;
+  var sv=dbi.servings.find(function(s){return s.id===svId;});
+  if(!sv)return;
+  ing.svId=sv.id;ing.svGrams=sv.grams;ing.unit=sv.label;
+  renderRecipeIngList();
+  renderRecipeNutrition();
 }
 
 function previewRecIngDb(val){
