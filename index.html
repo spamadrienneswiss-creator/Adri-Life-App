@@ -1576,6 +1576,7 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
           <button class="qa" onclick="openGroceryQuick()" style="background:linear-gradient(135deg,#e8f4e8,#fdf6ee)"><div class="qa-ic">🛒</div><div class="qa-lb">Grocery</div></button>
           <button class="qa" onclick="goTab('spirit',null);setTimeout(function(){showSpiritSec('bible',document.querySelector('#v-spirit .pn-btn:nth-child(2)'))},200)" style="background:linear-gradient(135deg,#e8f0f8,#dce8f4)"><div class="qa-ic">📖</div><div class="qa-lb">Bible</div></button>
           <button class="qa" onclick="goTab('wigs',null)" style="background:linear-gradient(135deg,#f0e8f8,#fdf0f8)"><div class="qa-ic">✂️</div><div class="qa-lb">Wigs</div></button>
+          <button class="qa" onclick="openWantToTryModal()" style="background:linear-gradient(135deg,#fef9e7,#fdf6ee)"><div class="qa-ic">⭐</div><div class="qa-lb">Try This</div></button>
         </div>
       </div>
     </div>
@@ -2550,6 +2551,7 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     <button class="pn-btn on" onclick="showMealSec('meals',this)">🍽️ Meals</button>
     <button class="pn-btn" onclick="showMealSec('inventory',this)">📦 Inventory</button>
     <button class="pn-btn" onclick="showMealSec('recipes',this)">📖 Recipes</button>
+    <button class="pn-btn" onclick="showMealSec('wantTry',this)">⭐ Want to Try</button>
     <button class="pn-btn" onclick="showMealSec('wine',this)">🍷 Wine</button>
     <button class="pn-btn" onclick="showMealSec('prices',this)">💰 Prices</button>
     <button class="pn-btn" onclick="showMealSec('database',this)">🧩 Ingredient Library</button>
@@ -2673,6 +2675,7 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
       <button class="btn sec" style="font-size:12px;padding:5px 10px" onclick="clearCheckedGrocery()">Clear checked</button>
       <button class="btn sec" style="font-size:12px;padding:5px 10px" onclick="expGrocery()">Export</button>
     </div>
+    <button class="btn" style="width:100%;margin-bottom:10px;background:linear-gradient(135deg,#fdebd7,#fdf6ee);color:#b06a2c" onclick="syncMealPlanGrocery()">🍽️ Build from this week's meal plan</button>
     <div style="display:flex;gap:6px;margin-bottom:6px;flex-wrap:wrap">
       <input id="groceryAddName" type="text" placeholder="Item name" list="groceryDbSuggest" style="flex:2;min-width:100px;padding:8px 11px;border-radius:10px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px">
       <datalist id="groceryDbSuggest"></datalist>
@@ -2684,6 +2687,7 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
       <input type="checkbox" id="groceryAddToDB" style="width:16px;height:16px;flex-shrink:0">
       <label for="groceryAddToDB" style="font-size:12px;color:var(--textl);cursor:pointer">Add to Food Database</label>
     </div>
+    <div class="bd-filter-row" id="grocSourceFilter" style="margin-bottom:8px"></div>
     <div id="groceryEstTotal" style="font-size:13px;color:var(--textl);margin-bottom:8px"></div>
     <div id="groceryListEl"></div>
   </div>
@@ -2741,6 +2745,16 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
       <button class="fchip on" onclick="setInvFilter('',this)">All</button>
     </div>
     <div id="inventoryListEl"></div>
+  </div>
+
+  <!-- WANT TO TRY section -->
+  <div id="ms-wantTry" style="display:none">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+      <span style="font-weight:700;font-size:14px;color:var(--textd)">⭐ Want to Try</span>
+      <button class="btn" onclick="openWantToTryModal()">+ Capture</button>
+    </div>
+    <div style="font-size:12px;color:var(--textl);margin-bottom:12px">Foods, meals, brands you want to try — no details needed now. Develop them into recipes or food library entries when you're ready.</div>
+    <div id="wantToTryList"></div>
   </div>
 </div>
 
@@ -5483,6 +5497,8 @@ var MEAL_PLAN = JSON.parse(localStorage.getItem('aMealPlan')||'{}');
 var GROCERY_LIST = JSON.parse(localStorage.getItem('aGroceryList')||'[]');
 var INVENTORY = JSON.parse(localStorage.getItem('aInventory')||'[]');
 // Each inventory item: {id, name, qty, unit, section, expDate, notes, addedDate, dbItemId, lastPrice, lastPriceStore, priceHistory}
+var WANT_TO_TRY = JSON.parse(localStorage.getItem('aWantToTry')||'[]');
+// Each WANT_TO_TRY item: {id, text, note, created, tried:false}
 var INV_SECTIONS = JSON.parse(localStorage.getItem('aInvSections')||'null')||['Pantry','Fridge','Freezer','Snacks','Baking','Supplements'];
 function saveInvSections(){ localStorage.setItem('aInvSections',JSON.stringify(INV_SECTIONS)); }
 function openInvSectionsModal(){
@@ -20370,7 +20386,7 @@ var GROCERY_CATS = ['Produce','Dairy','Meat & Fish','Bakery','Pantry','Frozen','
 function showMealSec(sec,btn){
   // 'plan' is an alias for 'meals' (backward compat)
   if(sec==='plan')sec='meals';
-  ['meals','recipes','database','grocery','prices','inventory','ingredients','wine'].forEach(function(s){
+  ['meals','recipes','database','grocery','prices','inventory','ingredients','wine','wantTry'].forEach(function(s){
     var el=document.getElementById('ms-'+s);
     if(el)el.style.display=(s===sec)?'':'none';
   });
@@ -20384,6 +20400,7 @@ function showMealSec(sec,btn){
   if(sec==='prices')renderPriceLog();
   if(sec==='ingredients'){renderIngredients();populateIngDatalist();}
   if(sec==='wine')renderWineReviews();
+  if(sec==='wantTry')renderWantToTry();
 }
 
 // ── Meal Log (category-based) ─────────────────
@@ -20766,12 +20783,25 @@ function renderMealPlan(){
         var val=dayData[slot]||'';
         var rec=val?RECIPES.find(function(r){return r.name===val;}):null;
         var hasPrepTime=rec&&rec.prepTime;
-        html+='<div class="meal-slot" onclick="openSlotPicker(\''+date+'\',\''+slot+'\')">';
+        var isWtt=val&&!rec&&WANT_TO_TRY.some(function(w){return w.text===val;});
+        var slotMacros=rec&&rec.macros&&rec.macros.cal?rec.macros:null;
+        html+='<div class="meal-slot" onclick="openSlotPicker(\''+date+'\',\''+slot+'\')" style="flex-direction:column;align-items:stretch;gap:3px">';
+        html+='<div style="display:flex;align-items:center;gap:4px">';
         html+='<span class="meal-slot-lbl">'+MEAL_SLOT_ICONS[slot]+' '+(MEAL_SLOT_LABELS[slot]||slot)+'</span>';
         html+='<span style="display:flex;align-items:center;gap:4px;flex:1;min-width:0">';
-        html+='<span class="meal-slot-val'+(val?'':' empty')+'" style="flex:1">'+(val||'tap to add')+'</span>';
-        if(hasPrepTime)html+='<button onclick="event.stopPropagation();addPrepTask(\''+val+'\','+rec.prepTime+')" style="background:none;border:1px solid var(--sage);border-radius:6px;padding:1px 5px;font-size:10px;color:var(--sage);cursor:pointer;flex-shrink:0">⏱ '+rec.prepTime+'m</button>';
-        html+='</span>';
+        html+='<span class="meal-slot-val'+(val?'':' empty')+'" style="flex:1">'+(val?escHtml(val):'tap to add')+'</span>';
+        if(isWtt)html+='<span style="font-size:10px;background:#fef9e7;border:1px solid #e8d88a;border-radius:6px;padding:1px 5px;color:#9a7c0a;flex-shrink:0">⭐ WTT</span>';
+        if(hasPrepTime)html+='<button onclick="event.stopPropagation();addPrepTask(\''+escHtml(val)+'\','+rec.prepTime+')" style="background:none;border:1px solid var(--sage);border-radius:6px;padding:1px 5px;font-size:10px;color:var(--sage);cursor:pointer;flex-shrink:0">⏱ '+rec.prepTime+'m</button>';
+        if(val)html+='<button onclick="event.stopPropagation();clearMealSlot(\''+date+'\',\''+slot+'\')" style="background:none;border:none;font-size:12px;cursor:pointer;color:var(--textl);padding:1px 3px;flex-shrink:0;opacity:.5" title="Clear">✕</button>';
+        html+='</span></div>';
+        if(slotMacros){
+          html+='<div style="font-size:10px;color:var(--textl);padding-left:4px;display:flex;gap:8px;flex-wrap:wrap">'
+            +'<span>🔥 '+slotMacros.cal+' cal</span>'
+            +'<span>💪 '+slotMacros.pro+'g</span>'
+            +'<span>🌾 '+slotMacros.carb+'g</span>'
+            +'<span>🫙 '+slotMacros.fat+'g</span>'
+            +'</div>';
+        }
         html+='</div>';
       });
       if(macros.cal>0){
@@ -20814,20 +20844,76 @@ function calcDayMacros(date){
   return totals;
 }
 
+var _slotPickDate='', _slotPickSlot='';
 function openSlotPicker(date,slot){
+  _slotPickDate=date; _slotPickSlot=slot;
   var current=(MEAL_PLAN[date]||{})[slot]||'';
-  var names=RECIPES.map(function(r){return r.name;});
-  var opts=names.length?'\n\nYour recipes:\n'+names.join(', '):'';
-  var slotLabel=MEAL_SLOT_LABELS[slot]||slot;
-  var val=prompt('Meal for '+slotLabel+' on '+date+':\n(Enter recipe name or any text, leave blank to clear)'+opts, current);
-  if(val===null)return;
-  if(!MEAL_PLAN[date])MEAL_PLAN[date]={};
-  if(val.trim()===''){
-    delete MEAL_PLAN[date][slot];
-  } else {
-    MEAL_PLAN[date][slot]=val.trim();
+  var slotLabel=(MEAL_SLOT_ICONS[slot]||'')+(MEAL_SLOT_LABELS[slot]||slot);
+  var el=document.getElementById('spTitle');if(el)el.textContent=slotLabel+' · '+date;
+  var inp=document.getElementById('spCustom');if(inp){inp.value=current;inp.placeholder='Type a meal name, or pick below…';}
+  var srch=document.getElementById('spSearch');if(srch)srch.value='';
+  renderSlotPickerList('');
+  showOv('ovSlotPicker');
+  setTimeout(function(){if(inp)inp.focus();},120);
+}
+
+function renderSlotPickerList(q){
+  var el=document.getElementById('spList');if(!el)return;
+  var lq=(q||'').toLowerCase().trim();
+  var recList=RECIPES.filter(function(r){return !lq||(r.name||'').toLowerCase().indexOf(lq)>=0;});
+  var wttList=WANT_TO_TRY.filter(function(w){return !w.tried&&(!lq||w.text.toLowerCase().indexOf(lq)>=0);});
+  var html='';
+  if(recList.length){
+    html+='<div style="font-size:10px;font-weight:700;color:var(--textl);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">📖 Recipes</div>';
+    recList.forEach(function(r){
+      var m=r.macros&&r.macros.cal?r.macros:null;
+      html+='<div onclick="pickMealSlot(\''+escHtml(r.name).replace(/'/g,"\\'")+'\',false)" style="padding:9px 12px;border-radius:12px;border:1.5px solid #e8e0d8;margin-bottom:6px;cursor:pointer;background:#fff;transition:background .1s" onmouseover="this.style.background=\'#fdf6ee\'" onmouseout="this.style.background=\'#fff\'">'
+        +'<div style="font-size:13px;font-weight:700;color:var(--textd)">'+escHtml(r.name)+'</div>'
+        +(m?'<div style="font-size:11px;color:var(--textl);margin-top:2px">🔥 '+m.cal+' cal · 💪 '+m.pro+'g · 🌾 '+m.carb+'g · 🫙 '+m.fat+'g <span style="font-size:10px">(per serving)</span></div>':'')
+        +(r.servings&&r.servings>1?'<div style="font-size:10px;color:var(--textl);margin-top:1px">'+r.servings+' servings</div>':'')
+        +'</div>';
+    });
   }
+  if(wttList.length){
+    html+='<div style="font-size:10px;font-weight:700;color:var(--textl);text-transform:uppercase;letter-spacing:.5px;margin:'+(recList.length?'12px':'0')+' 0 6px">⭐ Want to Try</div>';
+    wttList.forEach(function(w){
+      html+='<div onclick="pickMealSlot(\''+escHtml(w.text).replace(/'/g,"\\'")+'\',true)" style="padding:9px 12px;border-radius:12px;border:1.5px solid #e8d88a;margin-bottom:6px;cursor:pointer;background:#fefdf5;transition:background .1s" onmouseover="this.style.background=\'#fffbe8\'" onmouseout="this.style.background=\'#fefdf5\'">'
+        +'<div style="font-size:13px;font-weight:700;color:var(--textd)">⭐ '+escHtml(w.text)+'</div>'
+        +(w.note?'<div style="font-size:11px;color:var(--textl);margin-top:2px;font-style:italic">'+escHtml(w.note)+'</div>':'')
+        +'</div>';
+    });
+  }
+  if(!recList.length&&!wttList.length){
+    html='<div style="text-align:center;padding:18px;color:var(--textl);font-size:13px">'+(lq?'No matches for "'+escHtml(q)+'"':'No recipes yet — add some in Recipes tab')+'</div>';
+  }
+  el.innerHTML=html;
+}
+
+function pickMealSlot(name, fromWtt){
+  if(!_slotPickDate||!_slotPickSlot)return;
+  // If a recipe was previously here, drop its auto-ingredients (meal source) for this slot
+  removeMealGroceryForSlot(_slotPickDate,_slotPickSlot);
+  if(!MEAL_PLAN[_slotPickDate])MEAL_PLAN[_slotPickDate]={};
+  MEAL_PLAN[_slotPickDate][_slotPickSlot]=name;
   localStorage.setItem('aMealPlan',JSON.stringify(MEAL_PLAN));
+  closeOv('ovSlotPicker');
+  renderMealPlan();
+}
+
+function pickMealSlotCustom(){
+  var val=(document.getElementById('spCustom')||{}).value||'';
+  val=val.trim();
+  if(!val){clearMealSlot(_slotPickDate,_slotPickSlot);return;}
+  pickMealSlot(val,false);
+}
+
+function clearMealSlot(date,slot){
+  if(!MEAL_PLAN[date])return;
+  delete MEAL_PLAN[date][slot];
+  localStorage.setItem('aMealPlan',JSON.stringify(MEAL_PLAN));
+  // Deleting a meal removes its auto-ingredients but leaves manual items
+  removeMealGroceryForSlot(date,slot);
+  if(document.getElementById('ovSlotPicker') && document.getElementById('ovSlotPicker').classList.contains('show'))closeOv('ovSlotPicker');
   renderMealPlan();
 }
 
@@ -21422,45 +21508,12 @@ function delRecipe(id){
 }
 
 // ── Grocery list ──────────────────────────────
+// Both this (from the weekly-plan panel) and the grocery-section button
+// route through syncMealPlanGrocery so meal items carry source+planKeys.
 function genGroceryFromPlan(){
-  var dates=getMealWeekDates(MEAL_WEEK_OFFSET);
-  var ingMap={};
-  dates.forEach(function(date){
-    var dayData=MEAL_PLAN[date]||{};
-    MEAL_SLOTS.forEach(function(slot){
-      var val=dayData[slot]||'';
-      if(!val)return;
-      var rec=RECIPES.find(function(r){return r.name===val;});
-      if(!rec||!rec.ingredients)return;
-      rec.ingredients.forEach(function(ing){
-        var key=(ing.dbItemId||ing.name.toLowerCase());
-        if(!ingMap[key]){
-          var dbi=ing.dbItemId?FOOD_DB.find(function(x){return x.id===ing.dbItemId;}):FOOD_DB.find(function(x){return x.name.toLowerCase()===(ing.name||'').toLowerCase();});
-          ingMap[key]={name:ing.name,qty:String(ing.qty||'1'),unit:ing.unit||'',category:(dbi&&dbi.tags&&dbi.tags[0])||'Other',store:(dbi&&dbi.store)||'',checked:false,dbItemId:dbi?dbi.id:''};
-        }
-      });
-    });
-  });
-  var newItems=Object.values(ingMap);
-  if(!newItems.length){alert('No recipe ingredients found for this week. Make sure your meal plan has recipes with ingredients added.');return;}
-  var inInv=newItems.filter(function(it){return INVENTORY.some(function(inv){return inv.name.toLowerCase()===it.name.toLowerCase()||(it.dbItemId&&inv.dbItemId&&inv.dbItemId===it.dbItemId);});});
-  var notInInv=newItems.filter(function(it){return !INVENTORY.some(function(inv){return inv.name.toLowerCase()===it.name.toLowerCase()||(it.dbItemId&&inv.dbItemId&&inv.dbItemId===it.dbItemId);});});
-  var added=0;
-  notInInv.forEach(function(item){
-    var exists=GROCERY_LIST.some(function(g){return g.name.toLowerCase()===item.name.toLowerCase();});
-    if(!exists){GROCERY_LIST.push(item);added++;}
-  });
-  if(inInv.length){
-    inInv.forEach(function(item){
-      var exists=GROCERY_LIST.some(function(g){return g.name.toLowerCase()===item.name.toLowerCase();});
-      if(!exists){GROCERY_LIST.push(Object.assign({},item,{inStock:true}));added++;}
-    });
-  }
-  localStorage.setItem('aGroceryList',JSON.stringify(GROCERY_LIST));
+  syncMealPlanGrocery();
   var btn=document.querySelector('#v-meals .pn-btn:nth-child(1)');
-  showMealSec('grocery',btn);
-  renderGrocery();
-  showToast(added+' item'+(added!==1?'s':'')+' added'+(inInv.length?' ('+inInv.length+' already in stock — marked)':'')+'');
+  if(btn)showMealSec('grocery',btn);
 }
 
 function openRecipeToGrocery(recId){
@@ -21511,7 +21564,8 @@ function confirmRecipeToGrocery(rec){
       category:(dbi&&dbi.tags&&dbi.tags[0])||'Other',
       store:(dbi&&dbi.store)||'',
       checked:false,
-      dbItemId:dbi?dbi.id:''
+      dbItemId:dbi?dbi.id:'',
+      source:'recipe'
     });
     added++;
   });
@@ -21706,13 +21760,125 @@ function pickInventoryFood(i){
   showInvPicker();
 }
 
+// ── Grocery sources (one list, four faucets) ──
+var GROC_SOURCE_META={
+  meal:{icon:'🍽️',label:'Meal plan',color:'#c08040',bg:'#fdf0e0'},
+  manual:{icon:'✋',label:'Manual',color:'#8a7a6a',bg:'#f3efe9'},
+  inventory:{icon:'📦',label:'Inventory',color:'#4a7a9b',bg:'#e8f2fa'},
+  recipe:{icon:'🥘',label:'Recipe',color:'#3a8058',bg:'#e8f5ec'}
+};
+var _grocSourceFilter='';
+function grocSourceOf(item){return item.source||'manual';}
+
+function setGrocSourceFilter(s,btn){
+  _grocSourceFilter=s;
+  var wrap=document.getElementById('grocSourceFilter');
+  if(wrap)wrap.querySelectorAll('.bd-filter').forEach(function(b){b.classList.remove('on');});
+  if(btn)btn.classList.add('on');
+  renderGrocery();
+}
+
+// Remove meal-sourced grocery items tied to a plan slot (date|slot).
+// Leaves manual/recipe/inventory items untouched. Shared ingredients
+// stay if another planned meal still needs them.
+function removeMealGroceryForSlot(date,slot){
+  var planKey=date+'|'+slot;
+  var changed=false;
+  for(var i=GROCERY_LIST.length-1;i>=0;i--){
+    var g=GROCERY_LIST[i];
+    if(g.source!=='meal'||!g.planKeys)continue;
+    var idx=g.planKeys.indexOf(planKey);
+    if(idx<0)continue;
+    g.planKeys.splice(idx,1);
+    changed=true;
+    if(!g.planKeys.length)GROCERY_LIST.splice(i,1);
+  }
+  if(changed)localStorage.setItem('aGroceryList',JSON.stringify(GROCERY_LIST));
+  return changed;
+}
+
+// Reconcile meal-sourced grocery items with the visible plan week.
+// Adds ingredients for assigned recipes, drops items whose slot changed.
+function syncMealPlanGrocery(){
+  var weekDates=getMealWeekDates(MEAL_WEEK_OFFSET);
+  var weekSet={};weekDates.forEach(function(d){weekSet[d]=true;});
+  // Build current valid (planKey -> [ingredient names]) for this week
+  var validKeys={};
+  weekDates.forEach(function(date){
+    var dayData=MEAL_PLAN[date]||{};
+    MEAL_SLOTS.forEach(function(slot){
+      var val=dayData[slot];if(!val)return;
+      var rec=RECIPES.find(function(r){return r.name===val;});
+      if(!rec||!rec.ingredients||!rec.ingredients.length)return;
+      validKeys[date+'|'+slot]=rec.ingredients;
+    });
+  });
+  // 1. Drop stale planKeys (date in this week but slot no longer maps to that recipe)
+  for(var i=GROCERY_LIST.length-1;i>=0;i--){
+    var g=GROCERY_LIST[i];
+    if(g.source!=='meal'||!g.planKeys)continue;
+    g.planKeys=g.planKeys.filter(function(pk){
+      var d=pk.split('|')[0];
+      if(weekSet[d]&&!validKeys[pk])return false; // this week, slot changed → drop
+      return true;
+    });
+    if(!g.planKeys.length)GROCERY_LIST.splice(i,1);
+  }
+  // 2. Add/merge ingredients for valid planKeys
+  var added=0;
+  Object.keys(validKeys).forEach(function(planKey){
+    validKeys[planKey].forEach(function(ing){
+      var nm=(ing.name||'').trim();if(!nm)return;
+      var dbi=ing.dbItemId?FOOD_DB.find(function(x){return x.id===ing.dbItemId;}):FOOD_DB.find(function(x){return x.name.toLowerCase()===nm.toLowerCase();});
+      // Skip if already covered by a meal item with this planKey
+      var existing=GROCERY_LIST.find(function(g){return g.source==='meal'&&g.name.toLowerCase()===nm.toLowerCase();});
+      if(existing){
+        if(!existing.planKeys)existing.planKeys=[];
+        if(existing.planKeys.indexOf(planKey)<0){existing.planKeys.push(planKey);added++;}
+        return;
+      }
+      GROCERY_LIST.push({
+        name:nm,
+        qty:String(ing.qty||'1'),
+        unit:ing.unit||'',
+        category:(dbi&&dbi.tags&&dbi.tags[0])||'Other',
+        store:(dbi&&dbi.store)||'',
+        checked:false,
+        dbItemId:dbi?dbi.id:'',
+        source:'meal',
+        planKeys:[planKey]
+      });
+      added++;
+    });
+  });
+  localStorage.setItem('aGroceryList',JSON.stringify(GROCERY_LIST));
+  renderGrocery();
+  if(added)showToast('🍽️ '+added+' item'+(added!==1?'s':'')+' from your meal plan');
+  else showToast('Grocery list already matches your plan');
+}
+
 function renderGrocery(){
   var el=document.getElementById('groceryListEl');
   if(!el)return;
-  if(!GROCERY_LIST.length){el.innerHTML='<p style="color:var(--textl);text-align:center;padding:20px">List is empty. Generate from plan or add items manually.</p>';updateGroceryTotal();return;}
-  // Group by store
+  // Source filter chip counts
+  var counts={meal:0,manual:0,inventory:0,recipe:0};
+  GROCERY_LIST.forEach(function(g){var s=grocSourceOf(g);if(counts[s]!==undefined)counts[s]++;});
+  var fwrap=document.getElementById('grocSourceFilter');
+  if(fwrap){
+    var fhtml='<button class="bd-filter'+(_grocSourceFilter===''?' on':'')+'" onclick="setGrocSourceFilter(\'\',this)">All</button>';
+    ['meal','manual','inventory','recipe'].forEach(function(s){
+      if(!counts[s])return;
+      var m=GROC_SOURCE_META[s];
+      fhtml+='<button class="bd-filter'+(_grocSourceFilter===s?' on':'')+'" onclick="setGrocSourceFilter(\''+s+'\',this)">'+m.icon+' '+counts[s]+'</button>';
+    });
+    fwrap.innerHTML=fhtml;
+  }
+  var visible=GROCERY_LIST.filter(function(g){return !_grocSourceFilter||grocSourceOf(g)===_grocSourceFilter;});
+  if(!visible.length){el.innerHTML='<p style="color:var(--textl);text-align:center;padding:20px">'+(_grocSourceFilter?'No items from this source.':'List is empty. Tap 🍽️ Build from meal plan, or add items manually.')+'</p>';updateGroceryTotal();return;}
+  // Group by store (using original GROCERY_LIST indexes so toggle/del stay correct)
   var stores={};
   GROCERY_LIST.forEach(function(item,i){
+    if(_grocSourceFilter&&grocSourceOf(item)!==_grocSourceFilter)return;
     var store=item.store||item.category||'No store';
     if(!stores[store])stores[store]=[];
     stores[store].push({item:item,idx:i});
@@ -21729,9 +21895,12 @@ function renderGrocery(){
       var dbi=item.dbItemId?FOOD_DB.find(function(x){return x.id===item.dbItemId;}):FOOD_DB.find(function(x){return x.name.toLowerCase()===(item.name||'').toLowerCase();});
       var nutLine=dbi&&dbi.cal?'<span style="font-size:10px;color:var(--textl);margin-left:6px">'+dbi.cal+'cal'+( dbi.pro?' · '+dbi.pro+'g pro':'')+'</span>':'';
       var inStockBadge=item.inStock?'<span style="font-size:10px;background:#e8f5e8;color:var(--sage);border-radius:6px;padding:1px 5px;margin-left:4px">in stock</span>':'';
+      var sm=GROC_SOURCE_META[grocSourceOf(item)]||GROC_SOURCE_META.manual;
+      var srcBadge='<span title="'+sm.label+'" style="font-size:10px;background:'+sm.bg+';color:'+sm.color+';border-radius:6px;padding:1px 5px;margin-left:4px;flex-shrink:0">'+sm.icon+'</span>';
       html+='<div class="grocery-item'+(item.checked?' done':'')+'">'
         +'<input type="checkbox" '+(item.checked?'checked':'')+' onchange="toggleGrocery('+i+')" style="width:18px;height:18px;cursor:pointer">'
         +'<span class="grocery-name" style="flex:1;font-size:13px">'+item.name+'<span style="color:var(--textl);font-size:11px"> '+item.qty+(item.unit?' '+item.unit:'')+'</span>'+nutLine+inStockBadge+'</span>'
+        +srcBadge
         +(price?'<span style="font-size:12px;color:var(--rose);font-weight:700">$'+price.toFixed(2)+'</span>':'')
         +'<button class="btn sec" style="font-size:11px;padding:2px 7px" onclick="delGroceryItem('+i+')">✕</button>'
         +'</div>';
@@ -21786,7 +21955,7 @@ function addGroceryManual(){
   name=name.trim();
   if(!name)return;
   var dbiMatch=FOOD_DB.find(function(x){return (x.name||'').toLowerCase()===name.toLowerCase();});
-  GROCERY_LIST.push({name:name,qty:qty,unit:(dbiMatch&&dbiMatch.serving)||'',category:(dbiMatch&&dbiMatch.tags&&dbiMatch.tags[0])||'Other',store:store||(dbiMatch&&dbiMatch.store)||'',checked:false,dbItemId:dbiMatch?dbiMatch.id:''});
+  GROCERY_LIST.push({name:name,qty:qty,unit:(dbiMatch&&dbiMatch.serving)||'',category:(dbiMatch&&dbiMatch.tags&&dbiMatch.tags[0])||'Other',store:store||(dbiMatch&&dbiMatch.store)||'',checked:false,dbItemId:dbiMatch?dbiMatch.id:'',source:'manual'});
   localStorage.setItem('aGroceryList',JSON.stringify(GROCERY_LIST));
   // Create FOOD_DB entry only if checkbox checked
   var nl=name.toLowerCase();
@@ -21805,12 +21974,15 @@ function updateGroceryTotal(){
   var el=document.getElementById('groceryEstTotal');
   if(!el)return;
   var total=0;
-  var hasAny=false;
+  var priced=0, unpriced=0;
   GROCERY_LIST.forEach(function(item){
+    if(item.checked)return;
+    if(_grocSourceFilter&&grocSourceOf(item)!==_grocSourceFilter)return;
     var p=getBestPrice(item.name);
-    if(p){total+=p;hasAny=true;}
+    if(p){total+=p;priced++;}else unpriced++;
   });
-  el.textContent=hasAny?'Estimated total: $'+total.toFixed(2):'';
+  if(!priced){el.textContent='';return;}
+  el.textContent='About $'+Math.round(total)+' so far ('+priced+' priced'+(unpriced?', '+unpriced+' no price yet':'')+')';
 }
 
 function getBestPrice(itemName){
@@ -21977,6 +22149,124 @@ function grocTaskDelete(i){
   renderGroceryList();
 }
 
+// ── Want to Try ───────────────────────────────
+function saveWantToTryData(){
+  localStorage.setItem('aWantToTry',JSON.stringify(WANT_TO_TRY));
+}
+
+function openWantToTryModal(){
+  var t=document.getElementById('wttText');var n=document.getElementById('wttNote');
+  if(t)t.value='';if(n)n.value='';
+  showOv('ovWantToTry');
+  setTimeout(function(){if(t)t.focus();},120);
+}
+
+function saveWantToTryItem(){
+  var t=(document.getElementById('wttText')||{}).value||'';
+  t=t.trim();if(!t)return;
+  var note=(document.getElementById('wttNote')||{}).value||'';
+  note=note.trim();
+  WANT_TO_TRY.unshift({id:'wtt-'+Date.now(),text:t,note:note,created:todayStr(),tried:false});
+  saveWantToTryData();
+  closeOv('ovWantToTry');
+  showToast('⭐ Added to Want to Try!');
+  var el=document.getElementById('wantToTryList');if(el)renderWantToTry();
+}
+
+function wttMarkTried(id){
+  var item=WANT_TO_TRY.find(function(x){return x.id===id;});
+  if(!item)return;
+  item.tried=!item.tried;
+  if(item.tried)item.triedDate=todayStr();else delete item.triedDate;
+  saveWantToTryData();
+  renderWantToTry();
+}
+
+function wttDelete(id){
+  var idx=WANT_TO_TRY.findIndex(function(x){return x.id===id;});
+  if(idx<0)return;
+  WANT_TO_TRY.splice(idx,1);
+  saveWantToTryData();
+  renderWantToTry();
+}
+
+function wttToRecipe(id){
+  var item=WANT_TO_TRY.find(function(x){return x.id===id;});
+  if(!item)return;
+  closeOv('ovWantToTry');
+  // Mark source on the modal state so recipe modal can note the origin
+  openRecipeModal();
+  setTimeout(function(){
+    var nameEl=document.getElementById('recName');
+    if(nameEl){nameEl.value=item.text;nameEl.focus();}
+    var notesEl=document.getElementById('recNotes');
+    if(notesEl&&item.note&&!notesEl.value)notesEl.value=item.note;
+    showOv('recipeModal');
+    // Offer to remove from Want to Try after saving
+    item._pendingRecipe=true;
+  },100);
+}
+
+function wttToFoodDb(id){
+  var item=WANT_TO_TRY.find(function(x){return x.id===id;});
+  if(!item)return;
+  openFoodDbModal();
+  setTimeout(function(){
+    var nameEl=document.getElementById('fdbName');
+    if(nameEl){nameEl.value=item.text;nameEl.focus();}
+    var notesEl=document.getElementById('fdbNotes');
+    if(notesEl&&item.note&&!notesEl.value)notesEl.value=item.note;
+    showOv('foodDbModal');
+    item._pendingFoodDb=true;
+  },100);
+}
+
+function renderWantToTry(){
+  var el=document.getElementById('wantToTryList');if(!el)return;
+  var pending=WANT_TO_TRY.filter(function(x){return !x.tried;});
+  var tried=WANT_TO_TRY.filter(function(x){return x.tried;});
+  if(!WANT_TO_TRY.length){
+    el.innerHTML='<div style="text-align:center;padding:30px 16px;color:var(--textl)">'
+      +'<div style="font-size:32px;margin-bottom:10px">⭐</div>'
+      +'<div style="font-size:13px;font-weight:700;color:var(--textd);margin-bottom:6px">Your Want to Try list is empty</div>'
+      +'<div style="font-size:12px">Tap <strong>+ Capture</strong> above or use <strong>⭐ Try This</strong> on the home page to jot down foods, meals, or brands you want to try.</div>'
+      +'</div>';
+    return;
+  }
+  function renderItem(item){
+    var age=item.created?(new Date(todayStr()).getTime()-new Date(item.created).getTime())/(1000*60*60*24):0;
+    var ageStr=age<1?'today':age<2?'yesterday':Math.round(age)+' days ago';
+    return '<div style="border:1.5px solid '+(item.tried?'var(--bdr)':'#e8e0d8')+';border-radius:14px;padding:12px 14px;margin-bottom:10px;background:'+(item.tried?'#f8f8f6':'#fff')+';opacity:'+(item.tried?'.65':'1')+'">'
+      +'<div style="display:flex;align-items:flex-start;gap:10px">'
+      +'<div style="flex:1;min-width:0">'
+      +'<div style="font-size:14px;font-weight:700;color:var(--textd);'+(item.tried?'text-decoration:line-through;':'')+'word-break:break-word">'+escHtml(item.text)+'</div>'
+      +(item.note?'<div style="font-size:12px;color:var(--textl);margin-top:3px;font-style:italic">'+escHtml(item.note)+'</div>':'')
+      +'<div style="font-size:11px;color:var(--textl);margin-top:4px">'+ageStr+(item.tried&&item.triedDate?' · tried '+item.triedDate:'')+'</div>'
+      +'</div>'
+      +'<button onclick="wttDelete(\''+item.id+'\')" style="background:none;border:none;font-size:16px;cursor:pointer;color:var(--textl);padding:2px;flex-shrink:0;opacity:.5;line-height:1" title="Remove">✕</button>'
+      +'</div>'
+      +'<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:10px">'
+      +(item.tried
+        ?'<button onclick="wttMarkTried(\''+item.id+'\')" style="background:#f8f4f0;border:1.5px solid #d8d0c8;border-radius:10px;padding:5px 11px;font-size:12px;font-weight:700;color:var(--textl);cursor:pointer;font-family:\'Quicksand\',sans-serif">↩ Mark untried</button>'
+        :'<button onclick="wttMarkTried(\''+item.id+'\')" style="background:linear-gradient(135deg,var(--sage),var(--teal));border:none;border-radius:10px;padding:5px 11px;font-size:12px;font-weight:700;color:#fff;cursor:pointer;font-family:\'Quicksand\',sans-serif">✓ Tried it!</button>'
+        +'<button onclick="wttToRecipe(\''+item.id+'\')" style="background:#f0f4ff;border:1.5px solid #c8d4f0;border-radius:10px;padding:5px 11px;font-size:12px;font-weight:700;color:#4a6abf;cursor:pointer;font-family:\'Quicksand\',sans-serif">📖 → Recipe</button>'
+        +'<button onclick="wttToFoodDb(\''+item.id+'\')" style="background:#f0f8f4;border:1.5px solid #c0dcc8;border-radius:10px;padding:5px 11px;font-size:12px;font-weight:700;color:#3a8058;cursor:pointer;font-family:\'Quicksand\',sans-serif">🧩 → Food DB</button>'
+      )
+      +'</div>'
+      +'</div>';
+  }
+  var html='';
+  if(pending.length){
+    html+='<div style="font-size:11px;font-weight:700;color:var(--textl);letter-spacing:.5px;text-transform:uppercase;margin-bottom:8px">'+pending.length+' to try</div>';
+    html+=pending.map(renderItem).join('');
+  }
+  if(tried.length){
+    html+='<div style="font-size:11px;font-weight:700;color:var(--textl);letter-spacing:.5px;text-transform:uppercase;margin:14px 0 8px;border-top:1px solid var(--bdr);padding-top:12px">Tried ('+tried.length+')</div>';
+    html+=tried.map(renderItem).join('');
+  }
+  el.innerHTML=html;
+}
+
 // ── Price log ─────────────────────────────────
 function priceAutocomplete(val){
   var sug=document.getElementById('priceAutoSuggest');if(!sug)return;
@@ -22018,7 +22308,7 @@ function logPrice(){
 }
 
 function priceToGrocery(item,price,store){
-  GROCERY_LIST.push({id:'gr-'+Date.now(),name:item,qty:'1',unit:'',category:'Other',store:store||'',checked:false});
+  GROCERY_LIST.push({id:'gr-'+Date.now(),name:item,qty:'1',unit:'',category:'Other',store:store||'',checked:false,source:'inventory'});
   localStorage.setItem('aGroceryList',JSON.stringify(GROCERY_LIST));
   showToast(item+' added to grocery list!');
 }
@@ -29180,6 +29470,45 @@ function delProjInc(id){
       <button onclick="ovwPark()" style="padding:11px;border-radius:14px;border:1.5px solid #e0d8d0;background:#fff;font-family:'Quicksand',sans-serif;font-size:13px;font-weight:700;color:var(--textl);cursor:pointer">🅿️ Park it — do later</button>
       <button onclick="ovwNext()" style="padding:10px;border-radius:14px;border:none;background:#f8f4f0;font-family:'Quicksand',sans-serif;font-size:12px;font-weight:700;color:var(--textl);cursor:pointer">→ Show me a different one</button>
       <button onclick="closeOv('ovOverwhelmed')" style="padding:7px;border-radius:14px;border:none;background:none;font-family:'Quicksand',sans-serif;font-size:11px;color:var(--textl);cursor:pointer;opacity:.7">Exit to full list</button>
+    </div>
+  </div>
+</div>
+
+<!-- MEAL PLAN SLOT PICKER MODAL -->
+<div class="ov" id="ovSlotPicker" onclick="if(event.target===this)closeOv('ovSlotPicker')">
+  <div class="mod" style="max-width:420px;max-height:86vh;display:flex;flex-direction:column" onclick="event.stopPropagation()">
+    <div class="mh" style="flex-shrink:0">
+      <span class="mt" id="spTitle">Pick a meal</span>
+      <button class="mc" onclick="closeOv('ovSlotPicker')">✕</button>
+    </div>
+    <div style="padding:4px 0 10px;flex-shrink:0">
+      <input id="spCustom" type="text" style="width:100%;padding:9px 12px;border-radius:12px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px;box-sizing:border-box;margin-bottom:8px" onkeydown="if(event.key==='Enter')pickMealSlotCustom()">
+      <div style="display:flex;gap:7px;margin-bottom:10px">
+        <button class="btn" style="flex:1;font-size:12px" onclick="pickMealSlotCustom()">✓ Set meal</button>
+        <button class="btn sec" style="font-size:12px;color:#c05050" onclick="clearMealSlot(_slotPickDate,_slotPickSlot)">Clear slot</button>
+      </div>
+      <input id="spSearch" type="text" placeholder="Search recipes or want-to-try…" style="width:100%;padding:8px 12px;border-radius:10px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:12px;box-sizing:border-box" oninput="renderSlotPickerList(this.value)">
+    </div>
+    <div id="spList" style="overflow-y:auto;flex:1;padding-bottom:6px"></div>
+  </div>
+</div>
+
+<!-- WANT TO TRY CAPTURE MODAL -->
+<div class="ov" id="ovWantToTry" onclick="if(event.target===this)closeOv('ovWantToTry')">
+  <div class="mod" style="max-width:380px" onclick="event.stopPropagation()">
+    <div class="mh">
+      <span class="mt">⭐ Want to Try</span>
+      <button class="mc" onclick="closeOv('ovWantToTry')">✕</button>
+    </div>
+    <div style="padding:4px 0 2px">
+      <label style="font-size:11px;color:var(--textl);display:block;margin-bottom:5px;font-weight:700">What do you want to try?</label>
+      <input id="wttText" type="text" placeholder="e.g. Thai basil fried rice, Trader Joe's riced cauliflower…" style="width:100%;padding:10px 12px;border-radius:12px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:14px;box-sizing:border-box;margin-bottom:10px" onkeydown="if(event.key==='Enter')saveWantToTryItem()">
+      <label style="font-size:11px;color:var(--textl);display:block;margin-bottom:5px">Note (optional)</label>
+      <input id="wttNote" type="text" placeholder="Where you heard about it, why you want to try it…" style="width:100%;padding:9px 12px;border-radius:12px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px;box-sizing:border-box;margin-bottom:14px" onkeydown="if(event.key==='Enter')saveWantToTryItem()">
+      <div style="display:flex;gap:8px">
+        <button class="btn" style="flex:1" onclick="saveWantToTryItem()">⭐ Save to Try List</button>
+        <button class="btn sec" style="flex-shrink:0" onclick="closeOv('ovWantToTry')">Cancel</button>
+      </div>
     </div>
   </div>
 </div>
