@@ -1539,6 +1539,24 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     </div>
   </div>
 
+  <!-- How I Feel — Symptoms quick-log -->
+  <div class="card" style="padding:0;margin-bottom:10px">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:11px 14px;cursor:pointer" onclick="togTodaySec('todaySympBody')">
+      <span style="font-size:11px;font-weight:700;color:var(--textl);letter-spacing:.5px;text-transform:uppercase">🤕 How I Feel</span>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span id="todaySympSummary" style="font-size:11px;color:var(--textl)"></span>
+        <span class="sh-arr" id="sh-arr-todaySympBody">▸</span>
+      </div>
+    </div>
+    <div id="todaySympBody-wrap" style="display:none">
+      <div style="padding:0 14px 12px">
+        <div style="font-size:10px;color:var(--textl);margin-bottom:8px">Tap to log · tap again to clear · fine-tune in Wellness</div>
+        <div id="todaySympChips" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px"></div>
+        <button onclick="goTab('wellness',null);setTimeout(function(){showWellnessSec('symptoms',document.querySelector('#v-wellness .pn-btn:nth-child(4)'))},200)" style="font-size:11px;background:none;border:none;color:var(--lav);cursor:pointer;font-family:'Quicksand',sans-serif;font-weight:700;text-decoration:underline;padding:0">Detailed log in Wellness →</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Routine entry pills (time-aware / Opening Shift) -->
   <div id="todayRtnPills" style="display:flex;gap:8px;margin-bottom:10px"></div>
 
@@ -5717,8 +5735,16 @@ var SYM_LOG = JSON.parse(localStorage.getItem('aSymLog')||'{}');
 var SYM_TYPES = JSON.parse(localStorage.getItem('aSymTypes')||'null')||[
   {id:'energy',name:'Energy',icon:'⚡'},{id:'pain',name:'Pain',icon:'🔴'},
   {id:'brainfog',name:'Brain Fog',icon:'🌫️'},{id:'headache',name:'Headache',icon:'😵'},
-  {id:'histamine',name:'Histamine',icon:'🌿'},
+  {id:'histamine',name:'Histamine',icon:'🌿'},{id:'migraine',name:'Migraine',icon:'🤯'},
+  {id:'stomach',name:'Stomach',icon:'🤢'},
 ];
+// One-time migration: ensure Migraine + Stomach exist for existing users
+(function(){
+  var needed=[{id:'migraine',name:'Migraine',icon:'🤯'},{id:'stomach',name:'Stomach',icon:'🤢'}];
+  var changed=false;
+  needed.forEach(function(n){if(!SYM_TYPES.some(function(s){return s.id===n.id||s.name===n.name;})){SYM_TYPES.push(n);changed=true;}});
+  if(changed)localStorage.setItem('aSymTypes',JSON.stringify(SYM_TYPES));
+})();
 var EX_DB = JSON.parse(localStorage.getItem('aExDB')||'null')||[
   {id:'ex1',name:'Walking',cat:'cardio'},{id:'ex2',name:'Running',cat:'cardio'},
   {id:'ex3',name:'Cycling',cat:'cardio'},{id:'ex4',name:'Strength Training',cat:'strength'},
@@ -6444,7 +6470,7 @@ function goTabDirect(tab,btn){
   if(SECTION_VIEWS[tab]||tab==='emporium')renderHubPreviews(tab);
   var hFab=document.getElementById('hatchFab');if(hFab){hFab.style.display=(tab==='today')?'flex':'none';if(tab==='today'){hFab.style.opacity='1';hFab.style.transform='translateX(-50%) translateY(0)';hFab.style.pointerEvents='auto';_fabHidden=false;_fabScrollLast=window.scrollY||window.pageYOffset;renderFabPills();}}
   if(tab==='home'){ renderHomePage(); }
-  if(tab==='today'){ tickSpiritRun(); renderWaterBottle(); renderTodayStatsBars(); renderWeekStats(); renderTodayMoodBtns(); renderTodayPlanBar(); renderTodayWorkGlance(); renderTodayHubSubs(); renderIntentionsHome(); renderTodayRtnPills(); renderTodayMoneyCard(); renderTodayTimeGreet(); checkAndShowWhileAway(); trackLastActive(); applyTodaySlim(); }
+  if(tab==='today'){ tickSpiritRun(); renderWaterBottle(); renderTodayStatsBars(); renderWeekStats(); renderTodayMoodBtns(); renderTodayPlanBar(); renderTodayWorkGlance(); renderTodayHubSubs(); renderIntentionsHome(); renderTodayRtnPills(); renderTodayMoneyCard(); renderTodayTimeGreet(); checkAndShowWhileAway(); trackLastActive(); applyTodaySlim(); renderTodaySymptoms(); }
   if(tab==='routines'){ renderDailyRtn(_dailyRtnKey); renderOtherRtns(); }
   if(tab==='hearthside'){ renderHWHubStats(); }
   if(tab==='lighthouse'){ updateLighthouseSpiritStatus(); }
@@ -9173,6 +9199,38 @@ function renderTodayStatsBars(){
     } else {el.textContent='None today';}
   }
   el=document.getElementById('tExB');if(el)el.style.width=pct(exCount,S.gEx||3);
+}
+
+// ── Symptoms Quick-Log (Today page) ───────────
+function renderTodaySymptoms(){
+  var k=getTK();
+  var today=SYM_LOG[k]||{};
+  var el=document.getElementById('todaySympChips');
+  if(!el)return;
+  if(!SYM_TYPES.length){
+    el.innerHTML='<div style="font-size:12px;color:var(--textl)">No symptoms set up — add some in Wellness → Symptoms.</div>';
+  }else{
+    el.innerHTML=SYM_TYPES.map(function(s){
+      var val=today[s.id]||0;
+      var logged=val>0;
+      return '<button onclick="quickLogSym(\''+s.id+'\')" style="display:flex;align-items:center;gap:5px;padding:7px 12px;border-radius:18px;border:1.5px solid '+(logged?'var(--rose)':'#e8e0d8')+';background:'+(logged?'#fde8e8':'#fff')+';font-family:\'Quicksand\',sans-serif;font-size:12px;font-weight:700;color:'+(logged?'#c05050':'var(--textd)')+';cursor:pointer;white-space:nowrap">'
+        +s.icon+' '+escHtml(s.name)+(logged?' · '+val+'/5':'')+'</button>';
+    }).join('');
+  }
+  var loggedSyms=SYM_TYPES.filter(function(s){return(today[s.id]||0)>0;});
+  var sumEl=document.getElementById('todaySympSummary');
+  if(sumEl)sumEl.textContent=loggedSyms.length?loggedSyms.map(function(s){return s.icon;}).join(''):'None logged';
+}
+
+function quickLogSym(symId){
+  var k=getTK();
+  if(!SYM_LOG[k])SYM_LOG[k]={};
+  var current=SYM_LOG[k][symId]||0;
+  SYM_LOG[k][symId]=current===0?3:0;
+  localStorage.setItem('aSymLog',JSON.stringify(SYM_LOG));
+  renderTodaySymptoms();
+  var s=SYM_TYPES.find(function(t){return t.id===symId;});
+  if(SYM_LOG[k][symId]>0)showToast((s?s.icon+' '+s.name:'Symptom')+' logged');
 }
 
 // ── This Week Stats ────────────────────────────
@@ -20367,10 +20425,10 @@ function logFromLibrary(){
 function addFoodFromLib(name, cal, pro, carb, fat){
   var cat = (document.getElementById('mealLogCat')||{}).value||'main';
   var day = (document.getElementById('mealLogDay')||{}).value||'';
-  MEAL_LOG_ITEMS.unshift({id:'ml-'+Date.now(),name:name,category:cat,day:day,date:todayStr(),cal:cal,pro:pro,carb:carb,fat:fat});
-  localStorage.setItem('aMealLogItems',JSON.stringify(MEAL_LOG_ITEMS));
   var nl = name.toLowerCase();
   var dbItem = FOOD_DB.find(function(x){ return (x.name||'').toLowerCase()===nl; });
+  MEAL_LOG_ITEMS.unshift({id:'ml-'+Date.now(),name:name,category:cat,day:day,date:todayStr(),cal:cal,pro:pro,carb:carb,fat:fat,gluten:!!(dbItem&&dbItem.gluten)});
+  localStorage.setItem('aMealLogItems',JSON.stringify(MEAL_LOG_ITEMS));
   if(dbItem){ dbItem.useCount=(dbItem.useCount||0)+1; saveFoodDbData(); }
   autoFlagStaples();
   document.getElementById('mealLogDay').value='';
@@ -20409,6 +20467,11 @@ function renderMealMacroBar(){
     +row('💪 Protein',t.pro,S.gPro,'#6080c0')
     +row('🌾 Carbs',t.crb,S.gCrb,'#c09030')
     +row('🫙 Fat',t.fat,S.gFat,'#d06060')
+    +(function(){
+      var td=todayStr();
+      var hasGluten=(MEAL_LOG_ITEMS||[]).some(function(m){return m.date===td&&m.gluten;});
+      return hasGluten?'<div style="background:#fdf6e0;border-radius:8px;padding:5px 10px;margin-top:2px;font-size:11px;color:#a07820;font-weight:700">🌾 Gluten logged today</div>':'';
+    }())
     +_weeklyTrendHtml()
     +'<div style="text-align:right;margin-top:4px"><button onclick="openM(\'settingsModal\')" style="font-size:10px;background:none;border:none;color:var(--textl);cursor:pointer;font-family:inherit;text-decoration:underline">Edit goals →</button></div>';
 }
@@ -20457,7 +20520,7 @@ function renderQuickLogChips(){
   // Top foods: staples + most-used, ranked by useCount, only ones with nutrition data
   var candidates=(FOOD_DB||[]).filter(function(f){
     var hasNut=(f.per100&&f.per100.cal!=null)||f.cal;
-    return hasNut;
+    return hasNut&&!f.ick;
   });
   candidates.sort(function(a,b){
     if(!!b.staple!==!!a.staple)return b.staple?1:-1;
@@ -20525,6 +20588,7 @@ function renderMealLog(){
         html+='<div class="meal-log-item">'
           +'<span class="meal-log-name">'+escHtml(m.name)+'</span>'
           +(m.day?'<span class="meal-log-day">'+escHtml(m.day)+'</span>':'')
+          +(m.gluten?'<span title="Contains gluten" style="font-size:10px;background:#fdf6e0;border-radius:5px;padding:1px 4px;color:#a07820;flex-shrink:0">🌾</span>':'')
           +'<span style="font-size:10px;color:var(--textl);flex-shrink:0">'+m.date+'</span>'
           +'<button onclick="delMealLogItem(\''+m.id+'\')" style="background:none;border:none;font-size:12px;cursor:pointer;color:var(--textl);flex-shrink:0;padding:2px">✕</button>'
           +'</div>';
@@ -20538,6 +20602,7 @@ function renderMealLog(){
         return '<div class="meal-log-item">'
           +'<span class="meal-log-name">'+escHtml(m.name)+'</span>'
           +(m.day?'<span class="meal-log-day">'+escHtml(m.day)+'</span>':'')
+          +(m.gluten?'<span title="Contains gluten" style="font-size:10px;background:#fdf6e0;border-radius:5px;padding:1px 4px;color:#a07820;flex-shrink:0">🌾</span>':'')
           +'<span style="font-size:10px;color:var(--textl);flex-shrink:0">'+m.date+'</span>'
           +'<button onclick="delMealLogItem(\''+m.id+'\')" style="background:none;border:none;font-size:12px;cursor:pointer;color:var(--textl);flex-shrink:0;padding:2px">✕</button>'
           +'</div>';
@@ -20844,7 +20909,8 @@ function logCookIt(){
   var mealType=(document.getElementById('cookItMealType').value||'main');
   var t=_cookItEatenMacros().eaten;
   var logName=rec.name+(notes?' — '+notes:'');
-  MEAL_LOG_ITEMS.unshift({id:'ml-'+Date.now(),name:logName,category:mealType,day:'',date:todayStr(),cal:Math.round(t.cal),pro:Math.round(t.pro*10)/10,carb:Math.round(t.carb*10)/10,fat:Math.round(t.fat*10)/10,recipeId:recId});
+  var _ingGluten=_cookItIngs.some(function(ing){if(ing.omit)return false;var dbi=ing.dbItemId?FOOD_DB.find(function(x){return x.id===ing.dbItemId;}):FOOD_DB.find(function(x){return x.name.toLowerCase()===(ing.name||'').toLowerCase();});return dbi&&dbi.gluten;});
+  MEAL_LOG_ITEMS.unshift({id:'ml-'+Date.now(),name:logName,category:mealType,day:'',date:todayStr(),cal:Math.round(t.cal),pro:Math.round(t.pro*10)/10,carb:Math.round(t.carb*10)/10,fat:Math.round(t.fat*10)/10,recipeId:recId,gluten:_ingGluten});
   localStorage.setItem('aMealLogItems',JSON.stringify(MEAL_LOG_ITEMS));
   closeOv('cookItModal');renderMealLog();renderRecipes();showToast(rec.name+' logged ✨');
 }
@@ -20854,7 +20920,8 @@ function logLeftover(recId){
   var m=rec.macros||{};
   if(!m.cal){showToast('No per-serving macros yet — cook it first');return;}
   var mt=(rec.mealTypes&&rec.mealTypes[0])||rec.mealType||'main';
-  MEAL_LOG_ITEMS.unshift({id:'ml-'+Date.now(),name:rec.name+' (leftovers)',category:mt,day:'',date:todayStr(),cal:Math.round(m.cal),pro:Math.round((m.pro||0)*10)/10,carb:Math.round((m.carb||0)*10)/10,fat:Math.round((m.fat||0)*10)/10,recipeId:recId});
+  var _lftGluten=(rec.ingredients||[]).some(function(ing){var dbi=ing.dbItemId?FOOD_DB.find(function(x){return x.id===ing.dbItemId;}):FOOD_DB.find(function(x){return x.name.toLowerCase()===(ing.name||'').toLowerCase();});return dbi&&dbi.gluten;});
+  MEAL_LOG_ITEMS.unshift({id:'ml-'+Date.now(),name:rec.name+' (leftovers)',category:mt,day:'',date:todayStr(),cal:Math.round(m.cal),pro:Math.round((m.pro||0)*10)/10,carb:Math.round((m.carb||0)*10)/10,fat:Math.round((m.fat||0)*10)/10,recipeId:recId,gluten:_lftGluten});
   localStorage.setItem('aMealLogItems',JSON.stringify(MEAL_LOG_ITEMS));
   renderMealLog();renderRecipes();
   showToast('🥡 '+rec.name+' leftovers logged ✨');
@@ -20986,6 +21053,10 @@ function renderRecipes(){
     if(cooks.length&&m.cal){
       leftoverChip='<button class="recipe-macro-tag" style="background:#eef7ee;color:#5a8a5a;border:1px solid #cfe6cf;cursor:pointer;font-family:inherit" title="Log one more serving to today" onclick="event.stopPropagation();logLeftover(\''+r.id+'\')">🥡 +1 serving</button>';
     }
+    var glutenChip='';
+    if(r.ingredients&&r.ingredients.some(function(ing){var dbi=ing.dbItemId?FOOD_DB.find(function(x){return x.id===ing.dbItemId;}):FOOD_DB.find(function(x){return x.name.toLowerCase()===(ing.name||'').toLowerCase();});return dbi&&dbi.gluten;})){
+      glutenChip='<span class="recipe-macro-tag" style="background:#fdf6e0;color:#a07820" title="Contains gluten ingredients">🌾 gluten</span>';
+    }
     var ingHtml=(r.ingredients&&r.ingredients.length)?r.ingredients.map(function(i){
       var dbi=i.dbItemId?FOOD_DB.find(function(x){return x.id===i.dbItemId;}):null;
       if(!dbi)dbi=FOOD_DB.find(function(x){return x.name.toLowerCase()===(i.name||'').toLowerCase();});
@@ -21013,6 +21084,7 @@ function renderRecipes(){
       +(timeStr?'<span class="recipe-macro-tag">'+timeStr+'</span>':'')
       +cookChip
       +leftoverChip
+      +glutenChip
       +'</div>'
       +'<div class="recipe-card-macros">'
       +(m.cal?'<span class="recipe-macro-tag">🔥 '+m.cal+' cal</span>':'')
@@ -22809,8 +22881,29 @@ function toggleFoodStaple(id){
   var item=FOOD_DB.find(function(x){return x.id===id;});
   if(!item)return;
   item.staple=!item.staple;
+  if(item.staple)item.ick=false;
   saveFoodDbData();
   renderFoodDb();
+}
+
+function toggleFoodIck(id){
+  var item=FOOD_DB.find(function(x){return x.id===id;});
+  if(!item)return;
+  item.ick=!item.ick;
+  if(item.ick)item.staple=false;
+  saveFoodDbData();
+  renderFoodDb();
+  renderQuickLogChips();
+  showToast(item.ick?item.name+' marked as ick 🙅':item.name+' un-icked ✓');
+}
+
+function toggleFoodGluten(id){
+  var item=FOOD_DB.find(function(x){return x.id===id;});
+  if(!item)return;
+  item.gluten=!item.gluten;
+  saveFoodDbData();
+  renderFoodDb();
+  showToast(item.gluten?'🌾 '+item.name+' marked as gluten':'🌾 Gluten flag removed from '+item.name);
 }
 
 function addDbItemToGrocery(id){
@@ -23357,13 +23450,15 @@ function renderFoodDb(){
     var emoji=FOOD_CAT_EMOJI[tags[0]]||FOOD_CAT_EMOJI[item.cat]||'📦';
     var tagChips=tags.map(function(t){return '<span style="font-size:10px;background:#f0ece8;border-radius:6px;padding:1px 5px;color:var(--textl)">'+escHtml(t)+'</span>';}).join(' ');
     var favBtn='<button title="Favorite" onclick="toggleFoodFav(\''+item.id+'\')" style="background:none;border:none;font-size:16px;cursor:pointer;line-height:1;padding:2px">'+(item.favorite?'⭐':'☆')+'</button>';
-    var stapleBtn=item.staple?'<button title="Unflag staple" onclick="toggleFoodStaple(\''+item.id+'\')" style="background:none;border:none;font-size:13px;cursor:pointer;line-height:1;padding:2px">🏷️</button>':'';
+    var stapleBtn='<button title="'+(item.staple?'Unflag staple':'Flag as staple')+'" onclick="toggleFoodStaple(\''+item.id+'\')" style="background:none;border:none;font-size:13px;cursor:pointer;line-height:1;padding:2px;opacity:'+(item.staple?'1':'.25')+'">🏷️</button>';
+    var ickBtn='<button title="'+(item.ick?'Un-ick (tap to allow in quick-log)':'Mark as ick — hides from quick-log')+'" onclick="toggleFoodIck(\''+item.id+'\')" style="background:none;border:none;font-size:13px;cursor:pointer;line-height:1;padding:2px;opacity:'+(item.ick?'1':'.25')+'">🙅</button>';
+    var glutenBtn='<button title="'+(item.gluten?'Contains gluten (tap to toggle)':'Mark as contains gluten')+'" onclick="toggleFoodGluten(\''+item.id+'\')" style="background:none;border:none;font-size:13px;cursor:pointer;line-height:1;padding:2px;opacity:'+(item.gluten?'1':'.25')+'">🌾</button>';
     var grocBtn='<button title="Add to Grocery" onclick="addDbItemToGrocery(\''+item.id+'\')" style="background:none;border:none;font-size:15px;cursor:pointer;line-height:1;padding:2px">🛒</button>';
     return'<div style="background:#fff;border-radius:12px;padding:12px 14px;margin-bottom:8px;box-shadow:0 1px 4px rgba(0,0,0,.06)">'
       +'<div style="display:flex;align-items:flex-start;gap:10px">'
       +'<span style="font-size:20px;flex-shrink:0;margin-top:1px">'+emoji+'</span>'
       +'<div style="flex:1;min-width:0">'
-      +'<div style="font-size:13px;font-weight:700;color:var(--textd)">'+escHtml(item.name)+(item.serving?'<span style="font-weight:400;color:var(--textl);font-size:11px"> · '+escHtml(item.serving)+'</span>':'')+(item.staple?' <span style="font-size:10px;background:#fff0d0;border-radius:6px;padding:1px 5px;color:#a07020">staple</span>':'')+'</div>'
+      +'<div style="font-size:13px;font-weight:700;color:var(--textd)">'+escHtml(item.name)+(item.serving?'<span style="font-weight:400;color:var(--textl);font-size:11px"> · '+escHtml(item.serving)+'</span>':'')+(item.staple?' <span style="font-size:10px;background:#fff0d0;border-radius:6px;padding:1px 5px;color:#a07020">staple</span>':'')+(item.ick?' <span style="font-size:10px;background:#fde8e8;border-radius:6px;padding:1px 5px;color:#c05050">🙅 ick</span>':'')+(item.gluten?' <span style="font-size:10px;background:#fdf6e0;border-radius:6px;padding:1px 5px;color:#a07820">🌾 gluten</span>':'')+'</div>'
       +(tags.length?'<div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:3px">'+tagChips+'</div>':'')
       +(item.cal||item.pro?'<div style="font-size:11px;color:var(--textl);margin-top:3px">'
         +(item.cal?'<span style="margin-right:8px">🔥 '+item.cal+'cal</span>':'')
@@ -23402,7 +23497,7 @@ function renderFoodDb(){
       +(item.recipe?'<div style="font-size:11px;color:var(--lav);margin-top:2px">📖 '+escHtml(item.recipe)+'</div>':'')
       +'</div>'
       +'<div style="display:flex;flex-direction:column;gap:3px;flex-shrink:0;align-items:flex-end">'
-      +'<div style="display:flex;gap:2px">'+favBtn+stapleBtn+grocBtn+'</div>'
+      +'<div style="display:flex;gap:2px">'+favBtn+stapleBtn+ickBtn+glutenBtn+grocBtn+'</div>'
       +'<button class="btn sec" style="font-size:11px;padding:4px 9px" onclick="foodDbAddToLog(\''+escHtml(item.name)+'\','+item.cal+','+item.pro+','+item.carb+','+item.fat+')">+ Log</button>'
       +'<button class="btn sec" style="font-size:11px;padding:4px 9px" onclick="openFoodDbModal(\''+item.id+'\')">Edit</button>'
       +'</div></div></div>';
