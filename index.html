@@ -194,10 +194,16 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
 .mny-g{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
 .mny-c{background:white;border-radius:var(--r2);padding:14px;box-shadow:var(--sh2)}
 .mny-n{font-family:'Playfair Display',serif;font-size:26px;color:var(--text)}.mny-l{font-size:11px;color:var(--textl);font-weight:600;text-transform:uppercase;margin-bottom:2px}
-.er{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid #f5f0eb;font-size:13px}
+.er{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid #f5f0eb;font-size:13px;border-radius:6px;transition:background .15s}
 .er:last-child{border-bottom:none}.er-l{display:flex;flex-direction:column;gap:2px;flex:1}
 .er-d{font-weight:600;color:var(--text)}.er-m{font-size:11px;color:var(--textl)}
 .er-a{font-weight:700;color:var(--text);flex-shrink:0;margin-left:8px}.er-a.biz{color:var(--sage)}
+.exp-reconciled{opacity:0.55}
+.exp-reconciled .er-d{text-decoration:line-through;color:var(--textl)}
+.exp-reconciled .er-a{color:var(--textl)}
+.exp-recon-bar{background:#eef7ee;border-radius:10px;padding:8px 12px;margin-bottom:8px;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.er-sel-cb{width:17px;height:17px;accent-color:#5a8a5a;cursor:pointer;flex-shrink:0;margin-right:4px}
+.er.sel-active{background:#eef7ee;border-radius:6px}
 
 /* MISC */
 .exp-btn{width:100%;padding:11px;border-radius:11px;border:2px solid var(--blue);background:var(--blue-light);color:var(--blue);font-family:'Quicksand',sans-serif;font-size:14px;font-weight:700;cursor:pointer;margin-bottom:14px;display:flex;align-items:center;justify-content:center;gap:7px}
@@ -1956,6 +1962,14 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
         <button class="fchip" onclick="setExpFilter('uncleared',this)">⏳ Uncleared</button>
         <button class="fchip" onclick="setExpFilter('cleared',this)">✓ Cleared</button>
         <button class="fchip" onclick="setExpFilter('unexported',this)">📤 Not Exported</button>
+        <button class="fchip" id="expReconToggle" onclick="toggleExpSelMode()" style="margin-left:auto">🔄 Reconcile</button>
+      </div>
+      <div id="expReconBar" class="exp-recon-bar" style="display:none">
+        <span style="font-size:11px;font-weight:700;color:#3a7a3a;align-self:center">Select rows or clear by date:</span>
+        <input type="date" id="expReconDate" style="font-size:11px;border:1.5px solid #b0d8b0;border-radius:6px;padding:3px 7px;background:white;color:#3d3530;font-family:'Quicksand',sans-serif" />
+        <button onclick="clearExpBefore()" style="font-size:11px;font-weight:700;background:white;border:1.5px solid #5a8a5a;border-radius:6px;padding:4px 10px;cursor:pointer;color:#3a7a3a;font-family:'Quicksand',sans-serif">Clear before ↑</button>
+        <button id="expReconClearBtn" onclick="clearExpSelected()" style="display:none;font-size:11px;font-weight:700;background:#5a8a5a;border:none;border-radius:6px;padding:4px 10px;cursor:pointer;color:white;font-family:'Quicksand',sans-serif">✓ Clear 0 selected</button>
+        <button onclick="toggleExpSelMode()" style="font-size:11px;background:none;border:1.5px solid #b0d8b0;border-radius:6px;padding:4px 8px;cursor:pointer;color:#5a8a5a;font-family:'Quicksand',sans-serif;margin-left:auto">✕ Cancel</button>
       </div>
       <div class="fbar" style="margin-bottom:10px" id="expSortBar">
         <span style="font-size:10px;color:var(--textl);font-weight:700;align-self:center;letter-spacing:.5px">SORT</span>
@@ -11805,6 +11819,8 @@ var EXP_FILTER='all';
 var EXP_CAT_FILTER=null;
 var EXP_TY_FILTER=null;
 var EXP_SORT='date';
+var _expSelMode=false;
+var _expSel={};
 function setExpSort(s,btn){
   EXP_SORT=s;
   document.querySelectorAll('#expSortBar .fchip').forEach(function(b){b.classList.toggle('on',b.dataset.es===s);});
@@ -11928,18 +11944,20 @@ function renderE(){
   }
   if(!filtered.length){if(el)el.innerHTML='<div class="empty"><p>No expenses match this filter.</p></div>';renderIncome();renderBills();return;}
   if(el)el.innerHTML=filtered.map(function(e){
-    var isReconciled=!!(e.reconciled||(e.pending===false&&e.reconciled===undefined?false:undefined));
-    isReconciled=!!e.reconciled;
+    var isReconciled=!!e.reconciled;
     var isPend=e.pending&&!isReconciled;
     var isExported=!!e.exported;
-    return'<div class="er'+(isReconciled?' exp-reconciled':'')+'">'+
+    var isSel=!!_expSel[e.id];
+    var cls='er'+(isReconciled?' exp-reconciled':'')+(isSel?' sel-active':'');
+    return'<div class="'+cls+'" id="er-'+e.id+'">'+
+      (_expSelMode?'<input type="checkbox" class="er-sel-cb" id="esel-'+e.id+'" '+(isSel?'checked':'')+' onchange="toggleExpSel(\''+e.id+'\')" />'  :'')+
       '<div class="er-l">'+
-        '<div class="er-d">'+e.desc+(isPend?'<span style="font-size:10px;color:#c07a2a;background:#fff8e8;padding:1px 6px;border-radius:6px;margin-left:6px;font-weight:700">⏳</span>':'')+(isExported?'<span style="font-size:10px;color:#5a8a5a;background:#e8f5e8;padding:1px 6px;border-radius:6px;margin-left:4px;font-weight:700">📤</span>':'')+'</div>'+
-        '<div class="er-m">'+(e.ty==='business'?'💼':'🏠')+' '+e.cat+' • '+e.date+(_acctNameOf(e.account)?' • 🏦 '+escHtml(_acctNameOf(e.account)):'')+'</div>'+
+        '<div class="er-d">'+escHtml(e.desc)+(isPend?'<span style="font-size:10px;color:#c07a2a;background:#fff8e8;padding:1px 6px;border-radius:6px;margin-left:6px;font-weight:700">⏳</span>':'')+(isExported?'<span style="font-size:10px;color:#5a8a5a;background:#e8f5e8;padding:1px 6px;border-radius:6px;margin-left:4px;font-weight:700">📤</span>':'')+'</div>'+
+        '<div class="er-m">'+(e.ty==='business'?'💼':'🏠')+' '+escHtml(e.cat||'')+' • '+e.date+(_acctNameOf(e.account)?' • 🏦 '+escHtml(_acctNameOf(e.account)):'')+'</div>'+
       '</div>'+
-      '<button class="exp-pend-btn'+(isReconciled?' on':'')+'" onclick="toggleExpReconciled(\''+e.id+'\')" title="'+(isReconciled?'Cleared ✓ — tap to undo':'Pending — tap when it clears your bank')+'" style="font-size:11px;font-weight:700">'+(isReconciled?'✓':'⏳')+'</button>'+
+      (!_expSelMode?'<button class="exp-pend-btn'+(isReconciled?' on':'')+'" onclick="toggleExpReconciled(\''+e.id+'\')" title="'+(isReconciled?'Cleared ✓ — tap to undo':'Pending — tap when it clears your bank')+'" style="font-size:11px;font-weight:700">'+(isReconciled?'✓':'⏳')+'</button>':'')+
       '<div class="er-a '+(e.ty==='business'?'biz':'')+'">$'+e.amt.toFixed(2)+'</div>'+
-      '<button onclick="delExpense(\''+e.id+'\')" style="background:none;border:none;font-size:13px;cursor:pointer;color:var(--textl);padding:4px 6px;flex-shrink:0">🗑️</button>'+
+      (!_expSelMode?'<button onclick="delExpense(\''+e.id+'\')" style="background:none;border:none;font-size:13px;cursor:pointer;color:var(--textl);padding:4px 6px;flex-shrink:0">🗑️</button>':'')+
     '</div>';
   }).join('');
 
@@ -12000,7 +12018,61 @@ function toggleExpReconciled(id){
   var e=EXPENSES.find(function(x){return x.id===id;});
   if(!e)return;
   e.reconciled=!e.reconciled;
+  localStorage.setItem('aExpenses',JSON.stringify(EXPENSES));
   fbSave('expenses',id,e);
+  renderE();
+}
+
+function toggleExpSelMode(){
+  _expSelMode=!_expSelMode;
+  if(!_expSelMode)_expSel={};
+  var bar=document.getElementById('expReconBar');
+  var toggle=document.getElementById('expReconToggle');
+  if(bar)bar.style.display=_expSelMode?'flex':'none';
+  if(toggle)toggle.classList.toggle('on',_expSelMode);
+  renderE();
+}
+
+function toggleExpSel(id){
+  if(_expSel[id])delete _expSel[id];else _expSel[id]=true;
+  var count=Object.keys(_expSel).length;
+  var btn=document.getElementById('expReconClearBtn');
+  if(btn){btn.textContent='✓ Clear '+count+' selected';btn.style.display=count?'inline-block':'none';}
+  var row=document.getElementById('er-'+id);
+  if(row)row.classList.toggle('sel-active',!!_expSel[id]);
+  var cb=document.getElementById('esel-'+id);
+  if(cb)cb.checked=!!_expSel[id];
+}
+
+function clearExpBefore(){
+  var dateInput=document.getElementById('expReconDate');
+  if(!dateInput||!dateInput.value){showToast('Pick a date first');return;}
+  var cutoff=new Date(dateInput.value+'T23:59:59');
+  var count=0;
+  EXPENSES.forEach(function(e){
+    if(!e.reconciled){
+      var d=new Date(e.created||e.date);
+      if(!isNaN(d)&&d<=cutoff){e.reconciled=true;count++;fbSave('expenses',e.id,e);}
+    }
+  });
+  localStorage.setItem('aExpenses',JSON.stringify(EXPENSES));
+  showToast('✓ Cleared '+count+' expense'+(count===1?'':'s'));
+  _expSel={};
+  renderE();
+}
+
+function clearExpSelected(){
+  var ids=Object.keys(_expSel);
+  if(!ids.length)return;
+  ids.forEach(function(id){
+    var e=EXPENSES.find(function(x){return x.id===id;});
+    if(e){e.reconciled=true;fbSave('expenses',id,e);}
+  });
+  localStorage.setItem('aExpenses',JSON.stringify(EXPENSES));
+  showToast('✓ Cleared '+ids.length+' expense'+(ids.length===1?'':'s'));
+  _expSel={};
+  var btn=document.getElementById('expReconClearBtn');
+  if(btn){btn.textContent='✓ Clear 0 selected';btn.style.display='none';}
   renderE();
 }
 
@@ -14613,7 +14685,8 @@ function renderBills(){
   BILLS.forEach(function(b){
     var monAmt=getBillMonthAmt(b.id);
     monthlyTotal+=parseFloat(monAmt)||0;
-    if((b.billType||'monthly')==='annual'){
+    var bType=b.billType||'monthly';
+    if(bType==='annual'||bType==='oneoff'){
       yearlyTotal+=parseFloat(b.amt)||0;
     }else{
       for(var m=1;m<=12;m++){
@@ -14627,30 +14700,35 @@ function renderBills(){
     +'<div><span style="color:var(--textl)">This month</span><br><b style="color:#3d3530;font-size:14px">$'+monthlyTotal.toFixed(2)+'</b></div>'
     +'<div style="border-left:1px solid #e8ddd4;padding-left:12px"><span style="color:var(--textl)">This year</span><br><b style="color:#3d3530;font-size:14px">$'+yearlyTotal.toFixed(2)+'</b></div>'
     +'</div>';
-  el.innerHTML=totalsHtml+BILLS.map(function(b){
+  var sortedBills=BILLS.slice().sort(function(a,b){return (parseInt(a.day)||1)-(parseInt(b.day)||1);});
+  el.innerHTML=totalsHtml+sortedBills.map(function(b){
     var status=paid[b.id]||'';
     var isPosted=status==='posted';
+    var isOneOff=(b.billType||'monthly')==='oneoff';
+    var rowStyle=isPosted?'opacity:0.55':'';
     var nameStyle='font-size:14px;font-weight:600;color:var(--text)'+(isPosted?';text-decoration:line-through;color:var(--textl)':'');
-    var typeLabel={monthly:'Monthly',annual:'Annual',custom:'Custom'}[b.billType||'monthly']||'Monthly';
+    var typeLabel={monthly:'Monthly',annual:'Annual',custom:'Custom',oneoff:'One-off'}[b.billType||'monthly']||'Monthly';
     var monAmt=getBillMonthAmt(b.id);
     var isOverride=(BILL_MONTH_AMT[b.id]||{})[mon]!==undefined;
     var amtDisplay=isOverride
       ?'<span style="color:var(--lav);font-weight:700">$'+parseFloat(monAmt).toFixed(2)+' this month</span> <span style="color:var(--textl);font-size:10px">(usual $'+b.amt+')</span>'
       :'$'+b.amt;
-    return'<div class="bill-row">'+
+    var dueStr=isOneOff?'one-off':'due day '+b.day;
+    return'<div class="bill-row" style="'+rowStyle+'">'+
       '<div style="flex:1;min-width:0">'+
-        '<div style="'+nameStyle+'">'+escHtml(b.name)+'</div>'+
-        '<div style="font-size:11px;color:var(--textl)">'+amtDisplay+' • '+typeLabel+' • due day '+b.day+(function(){var _pa=b.paidWith?ACCOUNTS.find(function(a){return a.id===b.paidWith;}):null;var _pn=_pa?(_pa.isCredit?'💳 ':'💵 ')+_pa.name:(b.account||'');return _pn?' • <b>'+escHtml(_pn)+'</b>':'';})()+'</div>'+
+        '<div style="'+nameStyle+'">'+escHtml(b.name)+(isOneOff?'<span style="font-size:10px;background:#fff3e0;color:#e07820;border-radius:4px;padding:1px 5px;margin-left:5px;font-weight:700">one-off</span>':'')+'</div>'+
+        '<div style="font-size:11px;color:var(--textl)">'+amtDisplay+' • '+typeLabel+' • '+dueStr+(function(){var _pa=b.paidWith?ACCOUNTS.find(function(a){return a.id===b.paidWith;}):null;var _pn=_pa?(_pa.isCredit?'💳 ':'💵 ')+_pa.name:(b.account||'');return _pn?' • <b>'+escHtml(_pn)+'</b>':'';})()+'</div>'+
         (b.notes?'<div style="font-size:11px;color:var(--textl);font-style:italic">'+escHtml(b.notes)+'</div>':'')+
       '</div>'+
       '<div style="display:flex;align-items:center;gap:5px">'+
-        '<button onclick="promptBillMonthAmt(\''+b.id+'\')" title="Override this month\'s amount" style="background:none;border:1.5px solid #e8ddd4;border-radius:6px;font-size:10px;font-weight:700;padding:2px 7px;cursor:pointer;color:var(--textl);font-family:\'Quicksand\',sans-serif">$?</button>'+
+        (!isOneOff?'<button onclick="promptBillMonthAmt(\''+b.id+'\')" title="Override this month\'s amount" style="background:none;border:1.5px solid #e8ddd4;border-radius:6px;font-size:10px;font-weight:700;padding:2px 7px;cursor:pointer;color:var(--textl);font-family:\'Quicksand\',sans-serif">$?</button>':'')+
         '<div class="bill-status-btns">'+
           '<button class="bsb acc'+(status==='accounted'||status==='paid'||status==='posted'?' on':'')+'" onclick="setBillStatus(\''+b.id+'\',\'accounted\')" title="Money set aside">📌 Set aside</button>'+
           '<button class="bsb paid'+(status==='paid'||status==='posted'?' on':'')+'" onclick="setBillStatus(\''+b.id+'\',\'paid\')" title="Payment sent">💸 Paid</button>'+
           '<button class="bsb post'+(status==='posted'?' on':'')+'" onclick="setBillStatus(\''+b.id+'\',\'posted\')" title="Shows on account">✅ Posted</button>'+
         '</div>'+
         '<button onclick="editBill(\''+b.id+'\')" style="background:none;border:none;font-size:14px;cursor:pointer;color:var(--textl);padding:4px">✏️</button>'+
+        '<button onclick="delBillInline(\''+b.id+'\')" style="background:none;border:none;font-size:14px;cursor:pointer;color:var(--textl);padding:4px" title="Remove bill">✕</button>'+
       '</div>'+
     '</div>';
   }).join('');
@@ -14697,6 +14775,20 @@ function setBillStatus(id,status){
           showToast('💵 Deducted $'+billAmt.toFixed(2)+' from '+acct.name);
         }
       }
+    }
+  }
+  // Auto-remove one-off bills once they're posted
+  if(status==='posted'&&newStatus==='posted'){
+    var _billChk=BILLS.find(function(b){return b.id===id;});
+    if(_billChk&&_billChk.billType==='oneoff'){
+      setTimeout(function(){
+        if(confirm('"'+_billChk.name+'" is a one-off bill. Remove it from your bill list now that it\'s paid?')){
+          BILLS=BILLS.filter(function(b){return b.id!==id;});
+          localStorage.setItem('aBills',JSON.stringify(BILLS));
+          renderBills();
+        }
+      },300);
+      return;
     }
   }
   renderBills();
@@ -14760,6 +14852,16 @@ function delBillEdit(){
   BILLS=BILLS.filter(function(b){return b.id!==id;});
   localStorage.setItem('aBills',JSON.stringify(BILLS));
   closeM('billModal');renderBills();
+}
+
+function delBillInline(id){
+  var b=BILLS.find(function(x){return x.id===id;});
+  if(!b)return;
+  if(!confirm('Remove "'+b.name+'" from your bill list?'))return;
+  BILLS=BILLS.filter(function(x){return x.id!==id;});
+  localStorage.setItem('aBills',JSON.stringify(BILLS));
+  showToast('Bill removed');
+  renderBills();
 }
 
 // ═══════════════════════════════════════════════
@@ -27136,6 +27238,7 @@ function delProjInc(id){
       <button class="sb" data-g="billtype" data-v="monthly" onclick="pSB(this)">📅 Monthly</button>
       <button class="sb" data-g="billtype" data-v="annual" onclick="pSB(this)">📆 Annual</button>
       <button class="sb" data-g="billtype" data-v="custom" onclick="pSB(this)">🔧 Custom</button>
+      <button class="sb" data-g="billtype" data-v="oneoff" onclick="pSB(this)">⚡ One-off</button>
     </div>
   </div>
   <button class="ok-btn" onclick="saveBill()">Save Bill 🏦</button>
