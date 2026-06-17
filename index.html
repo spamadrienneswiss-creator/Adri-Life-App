@@ -23390,9 +23390,13 @@ function runSearch(q){
 
   // ── Tasks & Projects
   if(f==='all'||f==='tasks'){
-    (TASKS||[]).forEach(function(t){
-      if(inc(t.title)||inc(t.notes))
-        push({icon:'📋',label:t.title,sub:(t.done?'✓ Done · ':'')+( t.due?'Due '+t.due:'Task')+(t.cat?' · '+t.cat:''),action:nav+"goTab('helm',null)"});
+    flattenTasks(TASKS||[]).forEach(function(t){
+      if(inc(t.title)||inc(t.notes)){
+        var root=_findRootFor(t.id,TASKS);
+        var parentHint=root&&root.id!==t.id?' · in '+root.title:'';
+        var sub=(t.done?'✓ Done · ':'')+( t.due?'Due '+t.due.slice(0,10):'Task')+(t.cat?' · '+t.cat:'')+parentHint;
+        push({icon:'📋',label:t.title,sub:sub,action:nav+"goTab('helm',null)"});
+      }
     });
     (PROJECTS||[]).forEach(function(p){
       if(inc(p.title)||inc(p.notes)||inc(p.name))
