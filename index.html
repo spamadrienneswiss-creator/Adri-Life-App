@@ -6031,6 +6031,8 @@ function initFirebase(){
       ap('aProjIncome',function(v,r){PROJ_INCOME=v||[];_origSetItem('aProjIncome',r);});
       ap('aPriceLog',function(v,r){PRICE_LOG=v||[];_origSetItem('aPriceLog',r);});
       ap('aExpCats',function(v,r){if(v&&v.length)EXPENSE_CATS=v;_origSetItem('aExpCats',r);});
+      ap('aMoneyProjects',function(v,r){MONEY_PROJECTS=v||[];_origSetItem('aMoneyProjects',r);});
+      ap('aPayoffs',function(v,r){PAYOFFS=v||[];_origSetItem('aPayoffs',r);});
       _fbBlobPause=false;
       renderBills();renderAccounts();renderIncome();updMoneyBadge();
     }else if(group==='health'){
@@ -6207,7 +6209,7 @@ function fbDelete(col, id){
 // localStorage.setItem is intercepted to auto-save on every write.
 // ═══════════════════════════════════════════════
 var BLOB_GROUPS={
-  money:['aBills','aBillPay','aBillMonthAmt','aAccounts','aIncome','aIncGoal','aMonIncGoal','aMoneyChecks','aTaxLog','aProjIncome','aPriceLog','aExpCats'],
+  money:['aBills','aBillPay','aBillMonthAmt','aAccounts','aIncome','aIncGoal','aMonIncGoal','aMoneyChecks','aTaxLog','aProjIncome','aPriceLog','aExpCats','aMoneyProjects','aPayoffs'],
   health:['aMeds','aMedLog','aEnergyLog','aMeasLog','aMealLogItems','aMoodNotes','aWineDrinks'],
   habits:['aHabits','aHabitLog'],
   routines:['aRS','aRS2','aRH','aRTG','aRtns'],
@@ -11534,6 +11536,17 @@ function saveExp(){
   var e={id:id,amt:parseFloat(amt),desc:desc,ty:SBV.ety||'personal',cat:SBV.ecat||'other',date:new Date().toLocaleDateString(),created:new Date().toISOString(),pending:isPending,reconciled:false,account:eAcctVal};
   if(pendBtn){pendBtn.classList.remove('on');pendBtn.classList.add('on');}
   fbSave('expenses',id,e);
+  // Auto-update account balance: credit card goes up (more owed), cash goes down
+  if(eAcctVal){
+    var _ea=ACCOUNTS.find(function(a){return a.id===eAcctVal;});
+    if(_ea){
+      var _eamt=parseFloat(amt)||0;
+      if(_ea.isCredit){_ea.amount=(parseFloat(_ea.amount)||0)+_eamt;}
+      else{_ea.amount=Math.max(0,(parseFloat(_ea.amount)||0)-_eamt);}
+      _ea.updated=new Date().toISOString().slice(0,10);
+      localStorage.setItem('aAccounts',JSON.stringify(ACCOUNTS));
+    }
+  }
   var taskId=id+'_e';
   var task={id:taskId,title:'Transfer $'+amt+' '+desc+' to spreadsheet',cat:'fin',urgency:'important-not-urgent',etime:'<10min',due:'',notes:(SBV.ety==='business'?'💼 Biz':'🏠 Personal'),done:false,created:new Date().toISOString()};
   fbSave('tasks',taskId,task);
@@ -11696,6 +11709,18 @@ function renderE(){
 
 function delExpense(id){
   if(!confirm('Delete this expense?'))return;
+  var _de=EXPENSES.find(function(e){return e.id===id;});
+  // Reverse the account balance effect from when this was logged
+  if(_de&&_de.account){
+    var _da=ACCOUNTS.find(function(a){return a.id===_de.account;});
+    if(_da){
+      var _damt=parseFloat(_de.amt)||0;
+      if(_da.isCredit){_da.amount=Math.max(0,(parseFloat(_da.amount)||0)-_damt);}
+      else{_da.amount=(parseFloat(_da.amount)||0)+_damt;}
+      _da.updated=new Date().toISOString().slice(0,10);
+      localStorage.setItem('aAccounts',JSON.stringify(ACCOUNTS));
+    }
+  }
   EXPENSES=EXPENSES.filter(function(e){return e.id!==id;});
   try{if(window.db&&window.fsDoc&&window.fsDeleteDoc)window.fsDeleteDoc(window.fsDoc(window.db,'expenses',id));}catch(err){}
   renderExpenses();
