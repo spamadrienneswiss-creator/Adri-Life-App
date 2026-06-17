@@ -24475,7 +24475,7 @@ function renderWrapUpChecklist(){
 var _actualTimeTaskId=null;
 
 function showActualTimePrompt(taskId){
-  var t=TASKS.find(function(x){return x.id===taskId;});
+  var t=findTaskDeep(taskId,TASKS);
   if(!t)return;
   _actualTimeTaskId=taskId;
   var nameEl=document.getElementById('atpTaskName');
@@ -24513,11 +24513,11 @@ function saveActualTime(){
   var inp=document.getElementById('atpActualInput');
   var mins=parseInt(inp?inp.value:'');
   if(!isNaN(mins)&&mins>0&&_actualTimeTaskId){
-    var t=TASKS.find(function(x){return x.id===_actualTimeTaskId;});
+    var t=findTaskDeep(_actualTimeTaskId,TASKS);
     if(t){
       t.actualMin=mins;
       localStorage.setItem('aTasks',JSON.stringify(TASKS));
-      fbSave('tasks',t.id,t);
+      var _r=_findRootFor(_actualTimeTaskId,TASKS)||t;fbSave('tasks',_r.id,_r);
       // Store in recurring history
       if(t.repeat){
         var hKey=(t.title||'').toLowerCase().trim();
