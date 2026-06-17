@@ -7964,17 +7964,21 @@ function editT(id){
 function delTask(id){
   var t=findTaskDeep(id,TASKS);
   if(!t)return;
-  DELTED={task:JSON.parse(JSON.stringify(t))};
-  var isRoot=TASKS.some(function(x){return x.id===id;});
-  var root=_findRootFor(id,TASKS);
+  var _snap=JSON.parse(JSON.stringify(t));
+  var _isRoot=TASKS.some(function(x){return x.id===id;});
+  var _root=_findRootFor(id,TASKS);
+  var _rootSnap=_root?JSON.parse(JSON.stringify(_root)):null;
   _removeFromTree(id,TASKS);
   saveTasks();
-  if(isRoot)fbDelete('tasks',id);
-  else if(root)fbSave('tasks',root.id,root);
+  if(_isRoot)fbDelete('tasks',id);
+  else if(_root)fbSave('tasks',_root.id,_root);
   updHelmBadge();
-  renderT();
-  renderProjects();
-  renderPinned();
+  renderT();renderProjects();renderPinned();
+  DELTED={restore:function(){
+    if(_isRoot){TASKS.unshift(_snap);saveTasks();fbSave('tasks',_snap.id,_snap);}
+    else if(_rootSnap){TASKS.forEach(function(r){if(r.id===_rootSnap.id)Object.assign(r,_rootSnap);});saveTasks();fbSave('tasks',_rootSnap.id,_rootSnap);}
+    renderT();renderProjects();renderPinned();
+  }};
   showUndo('Task deleted');
 }
 
@@ -7993,14 +7997,15 @@ function showUndo(msg){
 
 function undoDel(){
   if(!DELTED)return;
-  var t=DELTED.task;
-  TASKS.unshift(t);
-  saveTasks();
-  fbSave('tasks',t.id,t);
+  if(DELTED.restore){
+    DELTED.restore();
+  } else if(DELTED.task){
+    // legacy path
+    var t=DELTED.task;TASKS.unshift(t);saveTasks();fbSave('tasks',t.id,t);renderT();
+  }
   DELTED=null;
   clearTimeout(UNDO_T);
   document.getElementById('undoToast').classList.remove('show');
-  renderT();
 }
 
 function saveTask(){
@@ -8975,10 +8980,13 @@ function deleteSleepEntry(key){
   MILLIE.sleepLog=(MILLIE.sleepLog||[]).filter(function(e){return (e.id||e.slept||'')!==key;});
   saveMillie();
   fbSave('sleeplog','log',{entries:MILLIE.sleepLog,updated:new Date().toISOString()});
-  renderSleepLog();
-  renderTodayStatsBars();
-  DELTED={sleepEntry:removed};
-  showUndo('Sleep entry deleted');
+  renderSleepLog();renderTodayStatsBars();
+  if(removed){DELTED={restore:function(){
+    MILLIE.sleepLog=(MILLIE.sleepLog||[]);MILLIE.sleepLog.push(removed);
+    MILLIE.sleepLog.sort(function(a,b){return (b.slept||'')>(a.slept||'')?1:-1;});
+    saveMillie();fbSave('sleeplog','log',{entries:MILLIE.sleepLog,updated:new Date().toISOString()});
+    renderSleepLog();renderTodayStatsBars();
+  }};showUndo('Sleep entry deleted');}
 }
 
 function clearSleepForm(){
@@ -11606,8 +11614,10 @@ function saveManualFoodLog(){
 
 function delFL(lid){
   var k=getTK();
+  var _snap=(FL[k]||[]).find(function(f){return f.lid===lid;});
   FL[k]=(FL[k]||[]).filter(function(f){return f.lid!==lid;});
   localStorage.setItem('aFL',JSON.stringify(FL));
+  if(_snap){DELTED={restore:function(){var dk=getTK();if(!FL[dk])FL[dk]=[];FL[dk].push(_snap);localStorage.setItem('aFL',JSON.stringify(FL));renderFL();updM();}};showUndo('Food entry removed');}
   renderFL();updM();
 }
 
@@ -11855,19 +11865,24 @@ function renderE(){
 function delExpense(id){
   if(!confirm('Delete this expense?'))return;
   var _de=EXPENSES.find(function(e){return e.id===id;});
-  // Reverse the account balance effect from when this was logged
-  if(_de&&_de.account){
-    var _da=ACCOUNTS.find(function(a){return a.id===_de.account;});
-    if(_da){
-      var _damt=parseFloat(_de.amt)||0;
-      if(_da.isCredit){_da.amount=Math.max(0,(parseFloat(_da.amount)||0)-_damt);}
-      else{_da.amount=(parseFloat(_da.amount)||0)+_damt;}
-      _da.updated=new Date().toISOString().slice(0,10);
-      localStorage.setItem('aAccounts',JSON.stringify(ACCOUNTS));
-    }
+  var _expSnap=_de?JSON.parse(JSON.stringify(_de)):null;
+  // Snapshot account state BEFORE balance reversal so undo can restore it
+  var _da=_de&&_de.account?ACCOUNTS.find(function(a){return a.id===_de.account;}):null;
+  var _acctSnap=_da?JSON.parse(JSON.stringify(_da)):null;
+  if(_da){
+    var _damt=parseFloat(_de.amt)||0;
+    if(_da.isCredit){_da.amount=Math.max(0,(parseFloat(_da.amount)||0)-_damt);}
+    else{_da.amount=(parseFloat(_da.amount)||0)+_damt;}
+    _da.updated=new Date().toISOString().slice(0,10);
+    localStorage.setItem('aAccounts',JSON.stringify(ACCOUNTS));
   }
   EXPENSES=EXPENSES.filter(function(e){return e.id!==id;});
   try{if(window.db&&window.fsDoc&&window.fsDeleteDoc)window.fsDeleteDoc(window.fsDoc(window.db,'expenses',id));}catch(err){}
+  if(_expSnap){DELTED={restore:function(){
+    EXPENSES.push(_expSnap);localStorage.setItem('aExpenses',JSON.stringify(EXPENSES));
+    if(_acctSnap){var ai=ACCOUNTS.findIndex(function(a){return a.id===_acctSnap.id;});if(ai>=0)ACCOUNTS[ai]=JSON.parse(JSON.stringify(_acctSnap));localStorage.setItem('aAccounts',JSON.stringify(ACCOUNTS));}
+    fbSave('expenses',_expSnap.id,_expSnap);renderExpenses();
+  }};showUndo('Expense deleted');}
   renderExpenses();
 }
 
@@ -14220,8 +14235,10 @@ function saveIncome(){
 }
 
 function delIncome(id){
+  var _snap=INCOME.find(function(i){return i.id===id;});
   INCOME=INCOME.filter(function(i){return i.id!==id;});
   localStorage.setItem('aIncome',JSON.stringify(INCOME));
+  if(_snap){DELTED={restore:function(){INCOME.push(_snap);localStorage.setItem('aIncome',JSON.stringify(INCOME));renderE();}};showUndo('Income entry deleted');}
   renderE();
 }
 
@@ -19903,8 +19920,10 @@ function renderMealLog(){
 }
 
 function delMealLogItem(id){
+  var _snap=MEAL_LOG_ITEMS.find(function(m){return m.id===id;});
   MEAL_LOG_ITEMS=MEAL_LOG_ITEMS.filter(function(m){return m.id!==id;});
   localStorage.setItem('aMealLogItems',JSON.stringify(MEAL_LOG_ITEMS));
+  if(_snap){DELTED={restore:function(){MEAL_LOG_ITEMS.push(_snap);localStorage.setItem('aMealLogItems',JSON.stringify(MEAL_LOG_ITEMS));renderMealLog();}};showUndo('Meal removed');}
   renderMealLog();
 }
 
@@ -20651,8 +20670,10 @@ function saveInvItem(){
   showToast(existing?'Updated ✨':'Added to inventory ✨');
 }
 function delInventoryById(id){
+  var _snap=INVENTORY.find(function(x){return x.id===id;});
   INVENTORY=INVENTORY.filter(function(x){return x.id!==id;});
   localStorage.setItem('aInventory',JSON.stringify(INVENTORY));
+  if(_snap){DELTED={restore:function(){INVENTORY.push(_snap);localStorage.setItem('aInventory',JSON.stringify(INVENTORY));renderInventory();}};showUndo('Inventory item removed');}
   renderInventory();
 }
 function setInvFilter(section,btn){
@@ -20671,8 +20692,10 @@ function useInventoryItem(i){
 
 function delInventoryItem(i){
   if(!confirm('Remove from inventory?'))return;
+  var _snap=INVENTORY[i];var _idx=i;
   INVENTORY.splice(i,1);
   localStorage.setItem('aInventory',JSON.stringify(INVENTORY));
+  if(_snap){DELTED={restore:function(){INVENTORY.splice(Math.min(_idx,INVENTORY.length),0,_snap);localStorage.setItem('aInventory',JSON.stringify(INVENTORY));renderInventory();}};showUndo('Inventory item removed');}
   renderInventory();
 }
 
@@ -20762,8 +20785,10 @@ function toggleGrocery(i){
 }
 
 function delGroceryItem(i){
+  var _snap=GROCERY_LIST[i];var _idx=i;
   GROCERY_LIST.splice(i,1);
   localStorage.setItem('aGroceryList',JSON.stringify(GROCERY_LIST));
+  if(_snap){DELTED={restore:function(){GROCERY_LIST.splice(Math.min(_idx,GROCERY_LIST.length),0,_snap);localStorage.setItem('aGroceryList',JSON.stringify(GROCERY_LIST));renderGrocery();}};showUndo('Grocery item removed');}
   renderGrocery();
 }
 
@@ -21049,8 +21074,10 @@ function renderPriceLog(){
 }
 
 function delPriceEntry(i){
+  var _snap=PRICE_LOG[i];var _idx=i;
   PRICE_LOG.splice(i,1);
   localStorage.setItem('aPriceLog',JSON.stringify(PRICE_LOG));
+  if(_snap){DELTED={restore:function(){PRICE_LOG.splice(Math.min(_idx,PRICE_LOG.length),0,_snap);localStorage.setItem('aPriceLog',JSON.stringify(PRICE_LOG));renderPriceLog();}};showUndo('Price entry removed');}
   renderPriceLog();
 }
 
@@ -22367,11 +22394,12 @@ function lookupBarcode(){
 
 function delFoodDb(){
   var id=document.getElementById('fdbId').value;
+  var _snap=FOOD_DB.find(function(x){return x.id===id;});
   FOOD_DB=FOOD_DB.filter(function(x){return x.id!==id;});
   saveFoodDbData();
   closeM('foodDbModal');
-  renderFoodDb();
-  renderFoodDbKitchen();
+  renderFoodDb();renderFoodDbKitchen();
+  if(_snap){DELTED={restore:function(){FOOD_DB.unshift(_snap);saveFoodDbData();renderFoodDb();renderFoodDbKitchen();}};showUndo('Food item deleted');}
 }
 
 function setFoodDbCat(cat,btn){
