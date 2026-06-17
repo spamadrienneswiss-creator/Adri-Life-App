@@ -1957,6 +1957,10 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
       <button class="fchip" id="expViewCatBtn" onclick="setExpView('cats',this)">📊 Categories</button>
     </div>
     <div id="expListWrap">
+      <div style="display:flex;gap:6px;margin-bottom:8px;align-items:center">
+        <input id="expSearch" type="text" placeholder="🔍 Search expenses…" oninput="_expSearch=this.value;renderE()" style="flex:1;padding:7px 11px;border-radius:10px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px;box-sizing:border-box">
+        <button id="expSearchClear" onclick="_expSearch='';document.getElementById('expSearch').value='';renderE()" style="display:none;background:none;border:1.5px solid #e8e0d8;border-radius:8px;padding:6px 10px;cursor:pointer;font-size:12px;color:var(--textl);font-family:'Quicksand',sans-serif">✕</button>
+      </div>
       <div class="fbar" style="margin-bottom:6px">
         <button class="fchip on" onclick="setExpFilter('all',this)">All</button>
         <button class="fchip" onclick="setExpFilter('uncleared',this)">⏳ Uncleared</button>
@@ -2533,6 +2537,8 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
 
   <!-- MEALS section (category-based log) -->
   <div id="ms-meals">
+    <!-- Daily macro summary -->
+    <div id="mealMacroCard" class="card" style="margin-bottom:10px;padding:11px 14px"></div>
     <div class="card" style="margin-bottom:10px">
       <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end">
         <div style="flex:2;min-width:130px">
@@ -11819,6 +11825,7 @@ var EXP_FILTER='all';
 var EXP_CAT_FILTER=null;
 var EXP_TY_FILTER=null;
 var EXP_SORT='date';
+var _expSearch='';
 var _expSelMode=false;
 var _expSel={};
 function setExpSort(s,btn){
@@ -11926,7 +11933,12 @@ function renderE(){
   var e3=document.getElementById('mNet');if(e3){e3.textContent=(net>=0?'+':'-')+'$'+Math.abs(net).toFixed(0);e3.style.color=net>=0?'var(--sage)':'var(--ured)';}
   var e4=document.getElementById('mInc');if(e4)e4.textContent='$'+wigInc.toFixed(0);
   if(!EXPENSES.length){if(el)el.innerHTML='<div class="empty"><div class="emj">💸</div><p>No expenses yet.</p></div>';renderIncome();renderBills();renderBudget();return;}
+  // Update search clear button visibility
+  var _scBtn=document.getElementById('expSearchClear');
+  if(_scBtn)_scBtn.style.display=_expSearch?'':'none';
+  var _sq=_expSearch.toLowerCase().trim();
   var filtered=EXPENSES.slice().sort(_expSortFn).filter(function(e){
+    if(_sq){var match=(e.desc||'').toLowerCase().includes(_sq)||(e.cat||'').toLowerCase().includes(_sq)||(e.ty||'').toLowerCase().includes(_sq);if(!match)return false;}
     if(EXP_CAT_FILTER)return e.cat===EXP_CAT_FILTER&&(!EXP_TY_FILTER||e.ty===EXP_TY_FILTER);
     if(EXP_FILTER==='uncleared')return!e.reconciled;
     if(EXP_FILTER==='cleared')return!!e.reconciled;
@@ -11938,8 +11950,9 @@ function renderE(){
     if(EXP_CAT_FILTER){
       lbl.innerHTML='<span>📊 '+escHtml(EXP_CAT_FILTER)+(EXP_TY_FILTER?' · '+EXP_TY_FILTER:'')+'</span> <button onclick="EXP_CAT_FILTER=null;EXP_TY_FILTER=null;renderE()" style="font-size:10px;padding:2px 8px;border-radius:8px;border:1.5px solid #e8ddd4;background:none;cursor:pointer;font-family:\'Quicksand\',sans-serif;font-weight:700;color:var(--textl)">✕ Clear</button>';
     }else{
-      var labels={all:'💸 Recent Expenses',uncleared:'⏳ Uncleared — tap ⏳ once it hits your bank',cleared:'✓ Cleared expenses',unexported:'📤 Not yet exported to spreadsheet'};
-      lbl.textContent=labels[EXP_FILTER]||'💸 Expenses';
+      if(_sq){lbl.textContent='🔍 Results for "'+_expSearch+'" ('+filtered.length+')';}
+      else{var labels={all:'💸 Recent Expenses',uncleared:'⏳ Uncleared — tap ⏳ once it hits your bank',cleared:'✓ Cleared expenses',unexported:'📤 Not yet exported to spreadsheet'};
+      lbl.textContent=labels[EXP_FILTER]||'💸 Expenses';}
     }
   }
   if(!filtered.length){if(el)el.innerHTML='<div class="empty"><p>No expenses match this filter.</p></div>';renderIncome();renderBills();return;}
@@ -12083,8 +12096,7 @@ function saveBudgetBuckets(){localStorage.setItem('aBudgetBuckets',JSON.stringif
 function saveBudgetMoves(){localStorage.setItem('aBudgetMoves',JSON.stringify(BUDGET_MOVES));}
 
 // spent per bucket this month: mapped cats first, Buffer (catchAll) absorbs the rest of personal spending
-function budgetSpentMap(){
-  var mon=getMonStr();
+function budgetSpentMapForMonth(mon){
   var claimed={};
   BUDGET_BUCKETS.forEach(function(b){(b.cats||[]).forEach(function(c){claimed[c]=b.id;});});
   var catchId=null;
@@ -12096,14 +12108,12 @@ function budgetSpentMap(){
     if(e.ty==='business')return;
     var cat=e.cat||'other';
     var bid=claimed[cat];
-    if(!bid){
-      if(workCats.indexOf(cat)>=0)return;
-      bid=catchId;
-    }
+    if(!bid){if(workCats.indexOf(cat)>=0)return;bid=catchId;}
     if(bid)spent[bid]=(spent[bid]||0)+(parseFloat(e.amt)||0);
   });
   return spent;
 }
+function budgetSpentMap(){return budgetSpentMapForMonth(getMonStr());}
 
 // effective target = base target +/- this month's cover-from moves (monthly total never changes)
 function budgetEffTarget(b){
@@ -12121,19 +12131,31 @@ function renderBudget(){
   var listEl=document.getElementById('bgBucketList');
   if(!listEl)return;
   var spent=budgetSpentMap();
+  // Last month's spend for delta comparison
+  var nowD=new Date();var prevD=new Date(nowD.getFullYear(),nowD.getMonth()-1,1);
+  var prevMon=prevD.getFullYear()+'-'+(String(prevD.getMonth()+1).padStart(2,'0'));
+  var prevSpent=budgetSpentMapForMonth(prevMon);
   var totTarget=0,totSpent=0;
   var rows=BUDGET_BUCKETS.map(function(b){
     var eff=budgetEffTarget(b);
     var sp=spent[b.id]||0;
+    var prevSp=prevSpent[b.id]||0;
     totTarget+=eff;totSpent+=sp;
     var rem=eff-sp;
     var pct=eff>0?Math.min(100,sp/eff*100):(sp>0?100:0);
     var over=rem<-0.005;
     var barColor=over?'var(--ured)':(pct>85?'#f0a020':'var(--sage)');
+    var delta=sp-prevSp;
+    var deltaHtml='';
+    if(prevSp>0){
+      var sign=delta>0?'+':delta<0?'-':'';
+      var deltaColor=delta>5?'var(--ured)':delta<-5?'var(--sage)':'var(--textl)';
+      deltaHtml='<span style="font-size:9px;color:'+deltaColor+';font-weight:700;margin-left:4px" title="vs last month">'+(sign)+Math.abs(Math.round(delta))+' vs last mo</span>';
+    }
     return '<div style="padding:9px 0;border-bottom:1px solid #f5efe8'+(over?';cursor:pointer':'')+'"'+(over?' onclick="openCoverFrom(\''+b.id+'\')"':'')+'>'
       +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">'
       +'<span style="font-size:13px;font-weight:700;color:var(--textd)">'+(b.protected?'🔒 ':'')+escHtml(b.name)+(b.catchAll?' <span style="font-size:9px;color:var(--textl);font-weight:600">(catches the rest)</span>':'')+'</span>'
-      +'<span style="font-size:12px;font-weight:700;color:'+(over?'var(--ured)':'var(--textd)')+'">$'+sp.toFixed(0)+' / $'+eff.toFixed(0)+'</span>'
+      +'<span style="font-size:12px;font-weight:700;color:'+(over?'var(--ured)':'var(--textd)')+'">$'+sp.toFixed(0)+' / $'+eff.toFixed(0)+deltaHtml+'</span>'
       +'</div>'
       +'<div style="height:7px;background:#f0ebe6;border-radius:4px;overflow:hidden">'
       +'<div style="height:100%;width:'+pct.toFixed(1)+'%;background:'+barColor+';transition:width .4s"></div>'
@@ -20298,7 +20320,40 @@ function addFoodFromLib(name, cal, pro, carb, fat){
 }
 // ── End Food Library Picker ──────────────────────────
 
+function renderMealMacroBar(){
+  var el=document.getElementById('mealMacroCard');if(!el)return;
+  var t=getTot();
+  var pct=function(v,g){return Math.min(100,g>0?v/g*100:0).toFixed(1)+'%';};
+  var over=function(v,g){return v>g;};
+  var row=function(label,v,g,colorClass){
+    var pv=pct(v,g);
+    var o=over(v,g);
+    var col=o?'var(--ured)':(v/g>0.85?'#f0a020':colorClass);
+    return '<div style="margin-bottom:7px">'
+      +'<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:2px">'
+      +'<span style="font-size:11px;font-weight:700;color:var(--textd)">'+label+'</span>'
+      +'<span style="font-size:11px;font-weight:700;color:'+(o?'var(--ured)':'var(--textl)')+'">'+Math.round(v)+(label.indexOf('cal')>=0?'':' g')+' / '+g+(label.indexOf('cal')>=0?'':' g')+'</span>'
+      +'</div>'
+      +'<div style="height:6px;background:#f0ebe6;border-radius:4px;overflow:hidden">'
+      +'<div style="height:100%;width:'+pv+';background:'+col+';transition:width .4s;border-radius:4px"></div>'
+      +'</div>'
+      +'</div>';
+  };
+  var leftCal=S.gCal-Math.round(t.cal);
+  var statusStr=leftCal>0?'<span style="color:var(--sage);font-weight:700">'+leftCal+' cal left</span>':'<span style="color:var(--ured);font-weight:700">'+Math.abs(leftCal)+' cal over</span>';
+  el.innerHTML='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">'
+    +'<span style="font-size:12px;font-weight:700;color:var(--textd)">📊 Today\'s Nutrition</span>'
+    +'<span style="font-size:11px">'+statusStr+'</span>'
+    +'</div>'
+    +row('🔥 Calories',t.cal,S.gCal,'#e08030')
+    +row('💪 Protein',t.pro,S.gPro,'#6080c0')
+    +row('🌾 Carbs',t.crb,S.gCrb,'#c09030')
+    +row('🫙 Fat',t.fat,S.gFat,'#d06060')
+    +'<div style="text-align:right;margin-top:4px"><button onclick="openM(\'settingsModal\')" style="font-size:10px;background:none;border:none;color:var(--textl);cursor:pointer;font-family:inherit;text-decoration:underline">Edit goals →</button></div>';
+}
+
 function renderMealLog(){
+  renderMealMacroBar();
   var el=document.getElementById('mealLogList');if(!el)return;
   var list=_mealLogFilter?MEAL_LOG_ITEMS.filter(function(m){return m.category===_mealLogFilter;}):MEAL_LOG_ITEMS;
   if(!list.length){el.innerHTML='<p style="color:var(--textl);text-align:center;padding:20px">No meals logged yet. Start tracking what you eat!</p>';return;}
