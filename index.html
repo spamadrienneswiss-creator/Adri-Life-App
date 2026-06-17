@@ -5512,14 +5512,18 @@ function renderInvSectionsModal(){
   var el=document.getElementById('invSectionsBody');
   if(!el)return;
   var DEFAULT_SECTIONS=['Pantry','Fridge','Freezer','Snacks','Baking','Supplements'];
+  var btnStyle='background:none;border:1.5px solid var(--bdr);border-radius:7px;padding:2px 7px;cursor:pointer;font-size:12px;color:var(--textl)';
   el.innerHTML=INV_SECTIONS.map(function(s,i){
     var isDefault=DEFAULT_SECTIONS.indexOf(s)>=0;
     var itemCount=INVENTORY.filter(function(inv){return (inv.section||'Pantry')===s;}).length;
-    return '<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--bdr)">'
+    var upBtn='<button onclick="moveInvSection('+i+',-1)" style="'+btnStyle+(i===0?';visibility:hidden':'')+'">↑</button>';
+    var dnBtn='<button onclick="moveInvSection('+i+',1)" style="'+btnStyle+(i===INV_SECTIONS.length-1?';visibility:hidden':'')+'">↓</button>';
+    var actionBtn=isDefault
+      ?'<span style="font-size:10px;color:var(--textl);background:var(--bg2);border-radius:6px;padding:2px 7px;white-space:nowrap">default</span>'
+      :'<button onclick="delInvSection('+i+')" style="background:none;border:none;font-size:15px;cursor:pointer;color:#e74c3c;padding:2px 4px;line-height:1">🗑️</button>';
+    return '<div style="display:flex;align-items:center;gap:6px;padding:8px 0;border-bottom:1px solid var(--bdr)">'
       +'<span style="flex:1;font-size:13px;font-weight:600;color:var(--textd)">'+escHtml(s)+(itemCount?'<span style="font-size:11px;font-weight:400;color:var(--textl)"> · '+itemCount+' item'+(itemCount===1?'':'s')+'</span>':'')+'</span>'
-      +(i>0?'<button onclick="moveInvSection('+i+',-1)" style="background:none;border:1.5px solid var(--bdr);border-radius:7px;padding:2px 7px;cursor:pointer;font-size:12px;color:var(--textl)">↑</button>':'<span style="width:28px"></span>')
-      +(i<INV_SECTIONS.length-1?'<button onclick="moveInvSection('+i+',1)" style="background:none;border:1.5px solid var(--bdr);border-radius:7px;padding:2px 7px;cursor:pointer;font-size:12px;color:var(--textl)">↓</button>':'<span style="width:28px"></span>')
-      +(isDefault?'<span style="font-size:10px;color:var(--textl);padding:0 4px">default</span>':'<button onclick="delInvSection('+i+')" style="background:none;border:none;font-size:14px;cursor:pointer;color:#e74c3c;padding:2px 4px">🗑️</button>')
+      +upBtn+dnBtn+actionBtn
       +'</div>';
   }).join('');
 }
@@ -28400,7 +28404,7 @@ function delProjInc(id){
 
 <!-- INVENTORY SECTIONS MODAL -->
 <div class="ov" id="ovInvSections" onclick="closeOv('ovInvSections')">
-  <div class="mod" onclick="event.stopPropagation()">
+  <div class="mod" style="max-width:360px;max-height:88vh;overflow-y:auto" onclick="event.stopPropagation()">
     <div class="mh"><span class="mt">⚙️ Manage Sections</span><button class="mc" onclick="closeOv('ovInvSections')">✕</button></div>
     <div id="invSectionsBody"></div>
     <div style="display:flex;gap:8px;margin-top:12px">
