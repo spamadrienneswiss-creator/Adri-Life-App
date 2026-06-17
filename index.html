@@ -2915,6 +2915,8 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
   <!-- SYMPTOMS -->
   <div id="ws-symptoms" style="display:none">
     <div class="card" id="symCard"><div style="font-size:13px;color:var(--textl)">Loading...</div></div>
+    <div class="card" id="symInsightCard" style="display:none"></div>
+    <div class="card" id="symHistoryCard" style="display:none"></div>
   </div>
 
   <!-- PERIOD -->
@@ -16038,6 +16040,93 @@ function renderSymCard(){
     +'</div>'
     +(rows||'<div style="font-size:12px;color:var(--textl);padding:8px 0">No symptoms tracked yet — tap ✏️ Edit to add some.</div>')
     +editPanel;
+  renderSymInsight();
+  renderSymHistory();
+}
+
+// Build a list of {iso, dateStr} for the last N days (today first or last?) — chronological oldest→newest
+function _symLastDays(n){
+  var out=[];
+  for(var i=n-1;i>=0;i--){
+    var d=new Date();d.setDate(d.getDate()-i);
+    out.push({iso:d.toISOString().slice(0,10),dateStr:d.toDateString(),d:d});
+  }
+  return out;
+}
+// Did this calendar day have any gluten logged? (checks MEAL_LOG_ITEMS by ISO date)
+function _glutenOnDay(iso){
+  return (MEAL_LOG_ITEMS||[]).some(function(m){return m.date===iso&&m.gluten;});
+}
+// Which symptoms flared (>0) on a given toDateString key?
+function _symsOnDay(dateStr){
+  var rec=SYM_LOG[dateStr]||{};
+  return SYM_TYPES.filter(function(s){return(rec[s.id]||0)>0;});
+}
+
+function renderSymInsight(){
+  var el=document.getElementById('symInsightCard');if(!el)return;
+  var days=_symLastDays(30);
+  var glutenDays=[],glutenFlareDays=0,noGlutenDays=[],noGlutenFlareDays=0;
+  days.forEach(function(day){
+    var hasGluten=_glutenOnDay(day.iso);
+    var flared=_symsOnDay(day.dateStr).length>0;
+    if(hasGluten){glutenDays.push(day);if(flared)glutenFlareDays++;}
+    else{noGlutenDays.push(day);if(flared)noGlutenFlareDays++;}
+  });
+  // Only show if there's any gluten data to correlate
+  if(!glutenDays.length){el.style.display='none';return;}
+  el.style.display='';
+  var gPct=Math.round(glutenFlareDays/glutenDays.length*100);
+  var ngPct=noGlutenDays.length?Math.round(noGlutenFlareDays/noGlutenDays.length*100):null;
+  var hotter=ngPct!==null&&gPct>ngPct+10;
+  var bar=function(label,pct,count,total,color){
+    return '<div style="margin-bottom:8px">'
+      +'<div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px">'
+      +'<span style="font-weight:700;color:var(--textd)">'+label+'</span>'
+      +'<span style="color:var(--textl)">'+count+'/'+total+' day'+(total!==1?'s':'')+' · '+pct+'%</span>'
+      +'</div>'
+      +'<div style="height:8px;background:#f0ebe6;border-radius:4px;overflow:hidden"><div style="height:100%;width:'+pct+'%;background:'+color+';border-radius:4px"></div></div>'
+      +'</div>';
+  };
+  el.innerHTML='<div style="font-size:13px;font-weight:700;color:var(--textd);margin-bottom:4px">🔍 Gluten &amp; Symptoms — last 30 days</div>'
+    +'<div style="font-size:11px;color:var(--textl);margin-bottom:10px">How often you had a symptom flare on days with vs. without gluten logged.</div>'
+    +bar('🌾 Days with gluten',gPct,glutenFlareDays,glutenDays.length,'#d08a40')
+    +(ngPct!==null?bar('🚫 Days without gluten',ngPct,noGlutenFlareDays,noGlutenDays.length,'#8aaa6a'):'<div style="font-size:11px;color:var(--textl)">Not enough gluten-free days yet to compare.</div>')
+    +(ngPct!==null?'<div style="font-size:11px;margin-top:8px;padding:8px 10px;border-radius:9px;background:'+(hotter?'#fdf0e0':'#eef7ee')+';color:'+(hotter?'#a06820':'#5a8a5a')+';font-weight:600">'
+      +(hotter?'⚠️ Flares were '+(gPct-ngPct)+' points more common on gluten days. Might be worth watching.':'No strong gluten link so far — flares aren\'t notably higher on gluten days.')
+      +'</div>':'')
+    +'<div style="font-size:10px;color:var(--textl);margin-top:6px;font-style:italic">Pattern only — not medical advice. Needs gluten flags on foods + symptom logs to be accurate.</div>';
+}
+
+function renderSymHistory(){
+  var el=document.getElementById('symHistoryCard');if(!el)return;
+  if(!SYM_TYPES.length){el.style.display='none';return;}
+  var days=_symLastDays(30);
+  // Only show if there's at least one logged symptom in the window
+  var anyLogged=days.some(function(day){return _symsOnDay(day.dateStr).length>0;});
+  if(!anyLogged){el.style.display='none';return;}
+  el.style.display='';
+  var cols=['#f0ebe6','#dcebd4','#cfe6c8','#fde8c8','#f8d4b0','#f2c0c0'];
+  var rows=SYM_TYPES.map(function(s){
+    var cells=days.map(function(day){
+      var rec=SYM_LOG[day.dateStr]||{};
+      var v=rec[s.id]||0;
+      var bg=v>0?cols[Math.min(5,v)]:'#f7f4f1';
+      var per=PT&&PT.some&&PT.some(function(p){return ptDate(p)===day.iso;});
+      return '<div title="'+day.iso+(v?' · '+v+'/5':'')+'" style="flex:1;height:14px;background:'+bg+';border-radius:2px'+(per?';box-shadow:inset 0 -3px 0 rgba(201,123,160,.7)':'')+'"></div>';
+    }).join('');
+    var total=days.reduce(function(sum,day){var rec=SYM_LOG[day.dateStr]||{};return sum+((rec[s.id]||0)>0?1:0);},0);
+    return '<div style="margin-bottom:7px">'
+      +'<div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:2px">'
+      +'<span style="font-weight:700;color:var(--textd)">'+s.icon+' '+escHtml(s.name)+'</span>'
+      +'<span style="color:var(--textl)">'+total+' day'+(total!==1?'s':'')+'</span>'
+      +'</div>'
+      +'<div style="display:flex;gap:2px">'+cells+'</div>'
+      +'</div>';
+  }).join('');
+  el.innerHTML='<div style="font-size:13px;font-weight:700;color:var(--textd);margin-bottom:4px">📈 Symptom history — last 30 days</div>'
+    +'<div style="font-size:10px;color:var(--textl);margin-bottom:10px">Each square is a day (oldest left → today right). Darker = higher severity.'+(PT&&PT.length?' Pink underline = period day.':'')+'</div>'
+    +rows;
 }
 
 function logSym(symId,val){
