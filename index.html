@@ -19581,9 +19581,16 @@ function noteToTask(title,notes,noteId){
 // ═══════════════════════════════════════════════
 
 function downloadBackup(){
-  var keys=['aTasks','aRout','aLists','aExps','aWigs','aBills','aIncome','aMoods','aFoodLog','aWater','aSymptoms','aExLog','aRecipes','aMealPlan','aGrocery','aPrayers','aBibleLog','aMinistryLog','aGratLog','aVbItems','aMemories','aFaves','aHabits','aHabitLog','aStudyNotes','aKEvents','aFcDecks','aFcCards','aResearch','aWplans','aWlog2','aBrainDump','aIntentions','aMeds','aMedLog','aEnergyLog','aCustomColors','aSName','aSQuote','aSBanner','aProtTabs','aStories','aSChars','aSScenes','aMixtape'];
+  // Back up EVERYTHING in localStorage so no feature's data is ever silently
+  // missed (the old hardcoded list went stale and dropped Food DB, inventory,
+  // symptoms, my-servings, budgets, etc.).
   var data={};
-  keys.forEach(function(k){var v=localStorage.getItem(k);if(v)data[k]=v;});
+  for(var i=0;i<localStorage.length;i++){
+    var k=localStorage.key(i);
+    if(k==null)continue;
+    var v=localStorage.getItem(k);
+    if(v!=null)data[k]=v;
+  }
   var blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
   var url=URL.createObjectURL(blob);
   var a=document.createElement('a');
