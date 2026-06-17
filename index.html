@@ -6371,7 +6371,7 @@ function renderHubPreviews(section){
     el=document.getElementById('helm-due-count');if(el)el.textContent=due;
     el=document.getElementById('helm-overdue-count');if(el)el.textContent=overdue;
     el=document.getElementById('helm-urgent-badge');if(el){if(urgent>0){el.textContent=urgent+' urgent';el.style.display='';}else{el.style.display='none';}}
-    var active=(PROJECTS||[]).filter(function(p){return p.status==='active';}).length;
+    var active=(PROJECTS||[]).filter(function(p){return !p.status||p.status==='active';}).length;
     el=document.getElementById('hub-projects-sub');if(el)el.textContent=active?active+' active project'+(active!==1?'s':''):'No active projects';
     el=document.getElementById('hub-lists-sub');if(el)el.textContent=(LISTS||[]).length+' list'+((LISTS||[]).length!==1?'s':'')+' saved';
     var fssQ=FOCUS_QUEUE.tasks.length;
@@ -6435,7 +6435,7 @@ function renderTodayHubSubs(){
   var el;
   var today=todayStr();
   // Projects
-  var activeProj=(PROJECTS||[]).filter(function(p){return p.status==='active';}).length;
+  var activeProj=(PROJECTS||[]).filter(function(p){return !p.status||p.status==='active';}).length;
   el=document.getElementById('hub-projects-sub');if(el)el.textContent=activeProj?activeProj+' active project'+(activeProj!==1?'s':''):'No active projects';
   // Lists
   el=document.getElementById('hub-lists-sub');if(el)el.textContent=(LISTS||[]).length+' list'+((LISTS||[]).length!==1?'s':'')+' saved';
@@ -12331,6 +12331,7 @@ function saveProj(){
   var id=document.getElementById('pmId').value||Date.now().toString();
   var existing=PROJECTS.find(function(p){return p.id===id;});
   var proj={id:id,title:title,cat:SBV.pcat||(existing&&existing.cat)||'mis',
+    status:existing?existing.status||'active':'active',
     notes:document.getElementById('pmNotes').value.trim(),
     pinned:existing?existing.pinned:false,
     steps:existing?existing.steps||[]:[],
