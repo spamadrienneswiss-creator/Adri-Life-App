@@ -3155,65 +3155,68 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
   <input type="hidden" id="editTId">
   <div class="fg"><label class="fl">What needs to get done?</label><input class="fi" id="tTit" placeholder="e.g. Message Esmee about her order"></div>
   <div class="fg"><label class="fl">Category</label>
-    <div class="bg bg3" id="taskCatBtns"></div>
+    <select id="tCat" class="fi" style="cursor:pointer"></select>
   </div>
-  <div class="fg"><label class="fl">Urgency</label>
-    <div class="bg">
-      <button class="sb" data-g="urg" data-v="urgent-important" onclick="pSB(this)" style="border-left:3px solid var(--ured)">🔴 Do Now<br><small>Urgent+Important</small></button>
-      <button class="sb" data-g="urg" data-v="important-not-urgent" onclick="pSB(this)" style="border-left:3px solid var(--uyel)">🟡 Schedule<br><small>Important, not urgent</small></button>
-      <button class="sb" data-g="urg" data-v="urgent-not-important" onclick="pSB(this)" style="border-left:3px solid var(--ublu)">🔵 Quick<br><small>Urgent, not important</small></button>
-      <button class="sb" data-g="urg" data-v="not-urgent" onclick="pSB(this)" style="border-left:3px solid var(--una)">⚪ Someday<br><small>Low priority</small></button>
-    </div>
-  </div>
-  <div class="fg"><label class="fl">Estimated Time</label>
-  <div class="bg bg4">
-    <button class="sb" data-g="etm" data-v="<10min" onclick="pSB(this);document.getElementById('etmCustomWrap').style.display='none'">⚡&lt;10m</button>
-    <button class="sb" data-g="etm" data-v="<1hr" onclick="pSB(this);document.getElementById('etmCustomWrap').style.display='none'">🕐&lt;1hr</button>
-    <button class="sb" data-g="etm" data-v="half-day" onclick="pSB(this);document.getElementById('etmCustomWrap').style.display='none'">📅Half</button>
-    <button class="sb" data-g="etm" data-v="full-day" onclick="pSB(this);document.getElementById('etmCustomWrap').style.display='none'">🗓️Full</button>
-  </div>
-  <div class="bg bg3" style="margin-top:4px">
-    <button class="sb" data-g="etm" data-v="custom" onclick="pSB(this);document.getElementById('etmCustomWrap').style.display=''">✏️ Custom</button>
-  </div>
-  <div id="etmCustomWrap" style="display:none;margin-top:6px">
-    <input class="fi" id="etmCustomVal" placeholder="e.g. 2h 30m or 45 min" style="font-size:13px;padding:7px 10px">
-  </div>
-</div>
-  <div class="fg">
-    <label class="fl">⏱️ Exact minutes <span style="font-size:10px;color:var(--textl);font-weight:500">for time tracking</span></label>
-    <div style="display:flex;align-items:center;gap:10px">
-      <input class="fi" type="number" id="tEstMin" placeholder="e.g. 30" min="1" max="9999" style="width:110px;padding:8px 12px">
-      <span style="font-size:12px;color:var(--textl);font-family:'Quicksand',sans-serif">minutes</span>
-    </div>
-    <div id="tEstMinSuggest" style="display:none;font-size:11px;color:var(--blue);margin-top:4px;font-family:'Quicksand',sans-serif;font-weight:600"></div>
-  </div>
-  <div class="fg"><label class="fl">Due Date &amp; Time (optional)</label>
-  <div style="display:flex;gap:8px">
-    <input class="fi" type="date" id="tDue" style="flex:1">
-    <input class="fi" type="time" id="tDueTime" style="width:130px">
-  </div>
-</div>
-  <div class="fg"><label class="fl">Repeat</label>
-    <div class="bg bg4">
-      <button class="sb" data-g="rep" data-v="" onclick="pSB(this);document.getElementById('repCustomWrap').style.display='none'">🚫 None</button>
-      <button class="sb" data-g="rep" data-v="daily" onclick="pSB(this);document.getElementById('repCustomWrap').style.display='none'">📅 Daily</button>
-      <button class="sb" data-g="rep" data-v="weekly" onclick="pSB(this);document.getElementById('repCustomWrap').style.display='none'">📆 Weekly</button>
-      <button class="sb" data-g="rep" data-v="monthly" onclick="pSB(this);document.getElementById('repCustomWrap').style.display='none'">🗓️ Monthly</button>
-    </div>
-    <div class="bg bg3" style="margin-top:4px">
-      <button class="sb" data-g="rep" data-v="yearly" onclick="pSB(this);document.getElementById('repCustomWrap').style.display='none'">🗓️ Yearly</button>
-      <button class="sb" data-g="rep" data-v="custom" onclick="pSB(this);document.getElementById('repCustomWrap').style.display=''">⚙️ Custom Days</button>
-    </div>
-    <div id="repCustomWrap" style="display:none;margin-top:6px;padding:8px 10px;background:var(--bg2);border-radius:8px">
-      <div style="display:flex;align-items:center;gap:8px">
-        <span style="font-size:12px;color:var(--textl)">Every</span>
-        <input class="fi" id="repCustomDays" type="number" min="1" max="365" placeholder="14" style="width:70px;padding:4px 8px;font-size:13px;margin:0">
-        <span style="font-size:12px;color:var(--textl)">days</span>
+  <button type="button" id="taskMoreBtn" onclick="togTaskMore(this)" style="width:100%;padding:9px 12px;border-radius:10px;border:1.5px dashed var(--bdr);background:none;font-family:'Quicksand',sans-serif;font-size:13px;font-weight:700;color:var(--textl);cursor:pointer;text-align:left;margin-bottom:4px">More options ▾</button>
+  <div id="taskMoreOpts" style="display:none">
+    <div class="fg"><label class="fl">Urgency</label>
+      <div class="bg">
+        <button class="sb" data-g="urg" data-v="urgent-important" onclick="pSB(this)" style="border-left:3px solid var(--ured)">🔴 Do Now<br><small>Urgent+Important</small></button>
+        <button class="sb" data-g="urg" data-v="important-not-urgent" onclick="pSB(this)" style="border-left:3px solid var(--uyel)">🟡 Schedule<br><small>Important, not urgent</small></button>
+        <button class="sb" data-g="urg" data-v="urgent-not-important" onclick="pSB(this)" style="border-left:3px solid var(--ublu)">🔵 Quick<br><small>Urgent, not important</small></button>
+        <button class="sb" data-g="urg" data-v="not-urgent" onclick="pSB(this)" style="border-left:3px solid var(--una)">⚪ Someday<br><small>Low priority</small></button>
       </div>
     </div>
+    <div class="fg"><label class="fl">Estimated Time</label>
+      <div class="bg bg4">
+        <button class="sb" data-g="etm" data-v="<10min" onclick="pSB(this);document.getElementById('etmCustomWrap').style.display='none'">⚡&lt;10m</button>
+        <button class="sb" data-g="etm" data-v="<1hr" onclick="pSB(this);document.getElementById('etmCustomWrap').style.display='none'">🕐&lt;1hr</button>
+        <button class="sb" data-g="etm" data-v="half-day" onclick="pSB(this);document.getElementById('etmCustomWrap').style.display='none'">📅Half</button>
+        <button class="sb" data-g="etm" data-v="full-day" onclick="pSB(this);document.getElementById('etmCustomWrap').style.display='none'">🗓️Full</button>
+      </div>
+      <div class="bg bg3" style="margin-top:4px">
+        <button class="sb" data-g="etm" data-v="custom" onclick="pSB(this);document.getElementById('etmCustomWrap').style.display=''">✏️ Custom</button>
+      </div>
+      <div id="etmCustomWrap" style="display:none;margin-top:6px">
+        <input class="fi" id="etmCustomVal" placeholder="e.g. 2h 30m or 45 min" style="font-size:13px;padding:7px 10px">
+      </div>
+    </div>
+    <div class="fg">
+      <label class="fl">⏱️ Exact minutes <span style="font-size:10px;color:var(--textl);font-weight:500">for time tracking</span></label>
+      <div style="display:flex;align-items:center;gap:10px">
+        <input class="fi" type="number" id="tEstMin" placeholder="e.g. 30" min="1" max="9999" style="width:110px;padding:8px 12px">
+        <span style="font-size:12px;color:var(--textl);font-family:'Quicksand',sans-serif">minutes</span>
+      </div>
+      <div id="tEstMinSuggest" style="display:none;font-size:11px;color:var(--blue);margin-top:4px;font-family:'Quicksand',sans-serif;font-weight:600"></div>
+    </div>
+    <div class="fg"><label class="fl">Due Date &amp; Time (optional)</label>
+      <div style="display:flex;gap:8px">
+        <input class="fi" type="date" id="tDue" style="flex:1">
+        <input class="fi" type="time" id="tDueTime" style="width:130px">
+      </div>
+    </div>
+    <div class="fg"><label class="fl">Repeat</label>
+      <div class="bg bg4">
+        <button class="sb" data-g="rep" data-v="" onclick="pSB(this);document.getElementById('repCustomWrap').style.display='none'">🚫 None</button>
+        <button class="sb" data-g="rep" data-v="daily" onclick="pSB(this);document.getElementById('repCustomWrap').style.display='none'">📅 Daily</button>
+        <button class="sb" data-g="rep" data-v="weekly" onclick="pSB(this);document.getElementById('repCustomWrap').style.display='none'">📆 Weekly</button>
+        <button class="sb" data-g="rep" data-v="monthly" onclick="pSB(this);document.getElementById('repCustomWrap').style.display='none'">🗓️ Monthly</button>
+      </div>
+      <div class="bg bg3" style="margin-top:4px">
+        <button class="sb" data-g="rep" data-v="yearly" onclick="pSB(this);document.getElementById('repCustomWrap').style.display='none'">🗓️ Yearly</button>
+        <button class="sb" data-g="rep" data-v="custom" onclick="pSB(this);document.getElementById('repCustomWrap').style.display=''">⚙️ Custom Days</button>
+      </div>
+      <div id="repCustomWrap" style="display:none;margin-top:6px;padding:8px 10px;background:var(--bg2);border-radius:8px">
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-size:12px;color:var(--textl)">Every</span>
+          <input class="fi" id="repCustomDays" type="number" min="1" max="365" placeholder="14" style="width:70px;padding:4px 8px;font-size:13px;margin:0">
+          <span style="font-size:12px;color:var(--textl)">days</span>
+        </div>
+      </div>
+    </div>
+    <div class="fg"><label class="fl" style="display:flex;justify-content:space-between;align-items:center">Notes <button type="button" onclick="expandNotes()" style="background:none;border:none;font-size:11px;color:var(--lav);font-weight:700;cursor:pointer;font-family:'Quicksand',sans-serif">⛶ Full Screen</button></label><textarea class="fi fi-big" id="tNotes" placeholder="Details, links, context..."></textarea></div>
+    <button type="button" id="tMeaningfulBtn" onclick="togMeaningful(this)" class="meaningful-toggle">⭐ Mark as meaningful goal</button>
   </div>
-  <div class="fg"><label class="fl" style="display:flex;justify-content:space-between;align-items:center">Notes <button type="button" onclick="expandNotes()" style="background:none;border:none;font-size:11px;color:var(--lav);font-weight:700;cursor:pointer;font-family:'Quicksand',sans-serif">⛶ Full Screen</button></label><textarea class="fi fi-big" id="tNotes" placeholder="Details, links, context..."></textarea></div>
-  <button type="button" id="tMeaningfulBtn" onclick="togMeaningful(this)" class="meaningful-toggle">⭐ Mark as meaningful goal</button>
   <div class="fg" style="padding:10px 12px;background:var(--lav-light);border-radius:10px;border:1.5px solid rgba(120,100,180,.2)">
     <button type="button" id="tIsProject" onclick="togTIsProject(this)" class="sb" style="width:auto;padding:8px 14px">📁 Make this a project</button>
     <div id="tProjNameWrap" style="display:none;margin-top:8px">
@@ -5748,6 +5751,12 @@ function togTaskPin(id){
   renderPinned();
   renderT();
 }
+function togTaskMore(btn){
+  var el=document.getElementById('taskMoreOpts');if(!el)return;
+  var open=el.style.display!=='none';
+  el.style.display=open?'none':'';
+  btn.textContent=open?'More options ▾':'Less options ▴';
+}
 function togTIsProject(btn){
   btn.classList.toggle('on');
   var isProj=btn.classList.contains('on');
@@ -5844,6 +5853,20 @@ function initFirebase(){
     snap.forEach(function(d){ WIGS.push(d.data()); });
     WIGS.sort(function(a,b){ return (b.created||'') > (a.created||'') ? 1 : -1; });
     renderW();
+  });
+
+  // Listen to category definitions
+  window.fsOnSnapshot(window.fsDoc(window.db,'settings','cats'),function(snap){
+    if(!snap.exists())return;
+    var remote=(snap.data()||{}).data;
+    if(remote&&Array.isArray(remote)&&remote.length){
+      CATS=remote;
+      localStorage.setItem('aCats',JSON.stringify(CATS));
+      buildCatMap();
+      if(typeof renderTaskCatDropdown==='function')renderTaskCatDropdown();
+      if(typeof renderCatFilters==='function')renderCatFilters();
+      if(typeof renderCatFilterChips==='function')renderCatFilterChips();
+    }
   });
 
   // Listen to projects (legacy — migration absorbs these into TASKS)
@@ -7831,9 +7854,12 @@ function editT(id){
   SBV={};
   document.querySelectorAll('[data-g]').forEach(function(b){b.classList.remove('on');});
   ['tTit','tDue','tDueTime','tNotes','etmCustomVal','tEstMin'].forEach(function(f){var el=document.getElementById(f);if(el)el.value='';});
+  var _moreWrap=document.getElementById('taskMoreOpts');var _moreBtn=document.getElementById('taskMoreBtn');
+  if(_moreWrap)_moreWrap.style.display='none';if(_moreBtn)_moreBtn.textContent='More options ▾';
   document.getElementById('tModTit').textContent='Edit Task ✏️';
   document.getElementById('editTId').value=id;
   document.getElementById('tTit').value=t.title;
+  var _tCatEl=document.getElementById('tCat');if(_tCatEl)_tCatEl.value=t.cat||'mis';
   var _dueRaw=t.due||'';
   var _dueParts=_dueRaw.split('T');
   document.getElementById('tDue').value=_dueParts[0]||'';
@@ -7853,8 +7879,9 @@ function editT(id){
   if(_pNW2)_pNW2.style.display=_isProj?'':'none';
   var _pNI2=document.getElementById('tProjectName');
   if(_pNI2)_pNI2.value=t.projectName||'';
+  var _hasMore=!!(t.urgency||t.etime||t.due||t.repeat||t.notes||t.estimatedMin||t.meaningful);
+  if(_hasMore){if(_moreWrap)_moreWrap.style.display='';if(_moreBtn)_moreBtn.textContent='Less options ▴';}
   setTimeout(function(){
-    document.querySelectorAll('[data-g="cat"]').forEach(function(b){if(b.dataset.v===t.cat){b.classList.add('on');SBV.cat=t.cat;}});
     document.querySelectorAll('[data-g="urg"]').forEach(function(b){if(b.dataset.v===t.urgency){b.classList.add('on');SBV.urg=t.urgency;}});
     document.querySelectorAll('[data-g="etm"]').forEach(function(b){if(b.dataset.v===t.etime){b.classList.add('on');SBV.etm=t.etime;}});
     document.querySelectorAll('[data-g="rep"]').forEach(function(b){if(b.dataset.v===(t.repeat||'')){b.classList.add('on');SBV.rep=t.repeat||'';}});
@@ -7932,7 +7959,7 @@ function saveTask(){
   var t={
     id:id,
     title:title,
-    cat:SBV.cat||(existing&&existing.cat)||'mis',
+    cat:(document.getElementById('tCat')||{value:''}).value||(existing&&existing.cat)||'mis',
     urgency:SBV.urg||(existing&&existing.urgency)||'important-not-urgent',
     etime:(SBV.etm==='custom'?((document.getElementById('etmCustomVal')||{}).value||'').trim()||'custom':(SBV.etm||(existing&&existing.etime)||'')),
     due:_due,
@@ -12243,6 +12270,9 @@ function openM(id){
     var _isPE=document.getElementById('tIsProject');if(_isPE)_isPE.classList.remove('on');
     var _pNW=document.getElementById('tProjNameWrap');if(_pNW)_pNW.style.display='none';
     var _pNI=document.getElementById('tProjectName');if(_pNI)_pNI.value='';
+    var _mOpts=document.getElementById('taskMoreOpts');var _mBtn=document.getElementById('taskMoreBtn');
+    if(_mOpts)_mOpts.style.display='none';if(_mBtn)_mBtn.textContent='More options ▾';
+    var _tCatEl=document.getElementById('tCat');if(_tCatEl)_tCatEl.value='mis';
   }
   if(id==='fwModal'){
     togFW('water');
@@ -12891,9 +12921,12 @@ function renderHiddenRoutines(){
 // ═══════════════════════════════════════════════
 // CATEGORIES
 // ═══════════════════════════════════════════════
-function renderTaskCatBtns(){
-  var el=document.getElementById('taskCatBtns');if(!el)return;
-  el.innerHTML=CATS.map(function(c){return'<button class="sb" data-g="cat" data-v="'+c.id+'" onclick="pSB(this)">'+c.emoji+' '+c.name+'</button>';}).join('');
+function renderTaskCatBtns(){renderTaskCatDropdown();}
+function renderTaskCatDropdown(){
+  var el=document.getElementById('tCat');if(!el)return;
+  var cur=el.value;
+  el.innerHTML=CATS.map(function(c){return'<option value="'+c.id+'">'+c.emoji+' '+c.name+'</option>';}).join('');
+  if(cur)el.value=cur;
 }
 
 function renderCatFilters(){
@@ -12953,6 +12986,7 @@ function saveCat(){
     CATS.push({id:newId,emoji:emoji,name:name,bg:col.bg,c:col.c});
   }
   localStorage.setItem('aCats',JSON.stringify(CATS));
+  if(window.db&&typeof fbSave==='function')fbSave('settings','cats',{data:CATS,updated:new Date().toISOString()});
   buildCatMap();renderCatList();renderTaskCatBtns();renderCatFilters();
   closeM('catModal');
 }
@@ -12961,6 +12995,7 @@ function delCat(){
   var id=document.getElementById('catEditId').value;
   CATS=CATS.filter(function(c){return c.id!==id;});
   localStorage.setItem('aCats',JSON.stringify(CATS));
+  if(window.db&&typeof fbSave==='function')fbSave('settings','cats',{data:CATS,updated:new Date().toISOString()});
   buildCatMap();renderCatList();renderTaskCatBtns();renderCatFilters();
   closeM('catModal');
 }
@@ -26097,13 +26132,9 @@ function openMoneyTask(){
   document.getElementById('delTBtn').style.display='none';
   var _mb=document.getElementById('tMeaningfulBtn');
   if(_mb){_mb.classList.remove('on');_mb.textContent='⭐ Mark as meaningful goal';}
-  setTimeout(function(){
-    document.querySelectorAll('[data-g="cat"]').forEach(function(b){
-      var isMatch=b.dataset.v==='money';
-      b.classList.toggle('on',isMatch);
-      if(isMatch)SBV.cat='money';
-    });
-  },50);
+  var _mOpts2=document.getElementById('taskMoreOpts');var _mBtn2=document.getElementById('taskMoreBtn');
+  if(_mOpts2)_mOpts2.style.display='none';if(_mBtn2)_mBtn2.textContent='More options ▾';
+  var _tCatM=document.getElementById('tCat');if(_tCatM)_tCatM.value='fin';
   document.getElementById('taskModal').classList.add('show');
 }
 
