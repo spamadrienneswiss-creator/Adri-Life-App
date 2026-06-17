@@ -20956,14 +20956,21 @@ function pickMealSlotCustom(){
 }
 
 function clearMealSlot(date,slot){
-  if(MEAL_PLAN[date])delete MEAL_PLAN[date][slot];
-  localStorage.setItem('aMealPlan',JSON.stringify(MEAL_PLAN));
-  delete MEAL_MY_SERVINGS[date+'|'+slot];
-  localStorage.setItem('aMealMyServings',JSON.stringify(MEAL_MY_SERVINGS));
-  // Deleting a meal removes its auto-ingredients but leaves manual items
-  removeMealGroceryForSlot(date,slot);
-  if(document.getElementById('ovSlotPicker') && document.getElementById('ovSlotPicker').classList.contains('show'))closeOv('ovSlotPicker');
-  renderMealPlan();
+  try{
+    if(MEAL_PLAN[date])delete MEAL_PLAN[date][slot];
+    localStorage.setItem('aMealPlan',JSON.stringify(MEAL_PLAN));
+    delete MEAL_MY_SERVINGS[date+'|'+slot];
+    localStorage.setItem('aMealMyServings',JSON.stringify(MEAL_MY_SERVINGS));
+    removeMealGroceryForSlot(date,slot);
+    var sp=document.getElementById('ovSlotPicker');
+    if(sp&&sp.classList.contains('show'))closeOv('ovSlotPicker');
+    renderMealPlan();
+    var flash=document.createElement('div');
+    flash.style.cssText='position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:#c05050;color:#fff;padding:8px 18px;border-radius:14px;font-size:13px;font-weight:700;z-index:99999;pointer-events:none;font-family:Quicksand,sans-serif';
+    flash.textContent='✕ Slot cleared';
+    document.body.appendChild(flash);
+    setTimeout(function(){if(flash.parentNode)flash.parentNode.removeChild(flash);},1800);
+  }catch(e){alert('clearMealSlot error: '+e.message);}
 }
 
 // ── Recipe rendering ──────────────────────────
