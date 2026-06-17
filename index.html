@@ -9044,7 +9044,7 @@ function renderWeekStats(){
     row('🔥','Calories avg',calAvg+'/day')+
     row('💪','Protein avg',proAvg+'g/day')+
     row('🌿','Fiber avg',fibAvg+'g/day')+
-    (slim?'':row('👟','Steps avg',stepAvg.toLocaleString()+'/day'))+
+    row('👟','Steps avg',stepAvg.toLocaleString()+'/day')+
     row('💸','Spending','$'+spending.toFixed(2))+
     (slim?'':row('😊','Mood avg',moodAvg?moodAvg+'/5 '+moodEmoji[Math.round(moodAvg)]:'—'));
 }
@@ -11211,7 +11211,7 @@ function renderTodayPlanBar(){
 var TODAY_FOCUS_MODE=false;
 var TODAY_SLIM=localStorage.getItem('aTodaySlim')!=='0';
 function applyTodaySlim(){
-  var ids=['todayTimeGreet','todayMoodRow','todayStepsRow','todaySleepRow','todayMinistryRow','todayMedsRow','todayWorkoutsRow','todayQuickAddCard'];
+  var ids=['todayTimeGreet','todayMoodRow','todaySleepRow','todayMinistryRow','todayMedsRow','todayWorkoutsRow','todayQuickAddCard'];
   ids.forEach(function(id){var el=document.getElementById(id);if(el)el.style.display=TODAY_SLIM?'none':'';});
   var btn=document.getElementById('todaySlimBtn');if(btn)btn.classList.toggle('on',TODAY_SLIM);
   renderWeekStats();
