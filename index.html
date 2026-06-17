@@ -20679,7 +20679,7 @@ function renderQuickLogChips(){
   // Top foods: staples + most-used, ranked by useCount, only ones with nutrition data
   var candidates=(FOOD_DB||[]).filter(function(f){
     var hasNut=(f.per100&&f.per100.cal!=null)||f.cal;
-    return hasNut&&!f.ick;
+    return hasNut&&!isItemIck(f);
   });
   candidates.sort(function(a,b){
     if(!!b.staple!==!!a.staple)return b.staple?1:-1;
@@ -23477,15 +23477,45 @@ function toggleFoodStaple(id){
   renderFoodDb();
 }
 
-function toggleFoodIck(id){
+function isItemIck(item){
+  if(!item.ick)return false;
+  if(item.ick===true||item.ick==='forever')return true;
+  return typeof item.ick==='string'&&item.ick>todayStr();
+}
+function ickLabel(item){
+  if(!isItemIck(item))return '';
+  if(item.ick===true||item.ick==='forever')return '🙅 skip forever';
+  var d=new Date(item.ick+'T12:00:00');
+  var mo=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return '🙅 until '+mo[d.getMonth()]+' '+d.getDate();
+}
+var _ickPickId='';
+function openIckPicker(id){
   var item=FOOD_DB.find(function(x){return x.id===id;});
   if(!item)return;
-  item.ick=!item.ick;
-  if(item.ick)item.staple=false;
-  saveFoodDbData();
-  renderFoodDb();
-  renderQuickLogChips();
-  showToast(item.ick?item.name+' marked as ick 🙅':item.name+' un-icked ✓');
+  if(isItemIck(item)){
+    item.ick=false;
+    saveFoodDbData();renderFoodDb();renderQuickLogChips();
+    showToast(item.name+' allowed again ✓');
+    return;
+  }
+  _ickPickId=id;
+  var el=document.getElementById('ickPickName');if(el)el.textContent=item.name;
+  showOv('ovIckPick');
+}
+function setFoodIck(weeksOrForever){
+  var item=FOOD_DB.find(function(x){return x.id===_ickPickId;});
+  if(!item){closeOv('ovIckPick');return;}
+  if(weeksOrForever==='forever'){
+    item.ick='forever';
+  }else{
+    var d=new Date();d.setDate(d.getDate()+weeksOrForever*7);
+    item.ick=d.toISOString().slice(0,10);
+  }
+  item.staple=false;
+  saveFoodDbData();closeOv('ovIckPick');
+  renderFoodDb();renderQuickLogChips();
+  showToast('🙅 '+item.name+' — '+ickLabel(item).replace('🙅 ',''));
 }
 
 function toggleFoodGluten(id){
@@ -24042,14 +24072,15 @@ function renderFoodDb(){
     var tagChips=tags.map(function(t){return '<span style="font-size:10px;background:#f0ece8;border-radius:6px;padding:1px 5px;color:var(--textl)">'+escHtml(t)+'</span>';}).join(' ');
     var favBtn='<button title="Favorite" onclick="toggleFoodFav(\''+item.id+'\')" style="background:none;border:none;font-size:16px;cursor:pointer;line-height:1;padding:2px">'+(item.favorite?'⭐':'☆')+'</button>';
     var stapleBtn='<button title="'+(item.staple?'Unflag staple':'Flag as staple')+'" onclick="toggleFoodStaple(\''+item.id+'\')" style="background:none;border:none;font-size:13px;cursor:pointer;line-height:1;padding:2px;opacity:'+(item.staple?'1':'.25')+'">🏷️</button>';
-    var ickBtn='<button title="'+(item.ick?'Un-ick (tap to allow in quick-log)':'Mark as ick — hides from quick-log')+'" onclick="toggleFoodIck(\''+item.id+'\')" style="background:none;border:none;font-size:13px;cursor:pointer;line-height:1;padding:2px;opacity:'+(item.ick?'1':'.25')+'">🙅</button>';
+    var _isIck=isItemIck(item);
+    var ickBtn='<button title="'+(_isIck?'Tap to allow again':'Skip this food for a while')+'" onclick="openIckPicker(\''+item.id+'\')" style="background:none;border:none;font-size:13px;cursor:pointer;line-height:1;padding:2px;opacity:'+(_isIck?'1':'.25')+'">🙅</button>';
     var glutenBtn='<button title="'+(item.gluten?'Contains gluten (tap to toggle)':'Mark as contains gluten')+'" onclick="toggleFoodGluten(\''+item.id+'\')" style="background:none;border:none;font-size:13px;cursor:pointer;line-height:1;padding:2px;opacity:'+(item.gluten?'1':'.25')+'">🌾</button>';
     var grocBtn='<button title="Add to Grocery" onclick="addDbItemToGrocery(\''+item.id+'\')" style="background:none;border:none;font-size:15px;cursor:pointer;line-height:1;padding:2px">🛒</button>';
     return'<div style="background:#fff;border-radius:12px;padding:12px 14px;margin-bottom:8px;box-shadow:0 1px 4px rgba(0,0,0,.06)">'
       +'<div style="display:flex;align-items:flex-start;gap:10px">'
       +'<span style="font-size:20px;flex-shrink:0;margin-top:1px">'+emoji+'</span>'
       +'<div style="flex:1;min-width:0">'
-      +'<div style="font-size:13px;font-weight:700;color:var(--textd)">'+escHtml(item.name)+(item.serving?'<span style="font-weight:400;color:var(--textl);font-size:11px"> · '+escHtml(item.serving)+'</span>':'')+(item.staple?' <span style="font-size:10px;background:#fff0d0;border-radius:6px;padding:1px 5px;color:#a07020">staple</span>':'')+(item.ick?' <span style="font-size:10px;background:#fde8e8;border-radius:6px;padding:1px 5px;color:#c05050">🙅 ick</span>':'')+(item.gluten?' <span style="font-size:10px;background:#fdf6e0;border-radius:6px;padding:1px 5px;color:#a07820">🌾 gluten</span>':'')+'</div>'
+      +'<div style="font-size:13px;font-weight:700;color:var(--textd)">'+escHtml(item.name)+(item.serving?'<span style="font-weight:400;color:var(--textl);font-size:11px"> · '+escHtml(item.serving)+'</span>':'')+(item.staple?' <span style="font-size:10px;background:#fff0d0;border-radius:6px;padding:1px 5px;color:#a07020">staple</span>':'')+(_isIck?' <span style="font-size:10px;background:#fde8e8;border-radius:6px;padding:1px 5px;color:#c05050">'+escHtml(ickLabel(item))+'</span>':'')+(item.gluten?' <span style="font-size:10px;background:#fdf6e0;border-radius:6px;padding:1px 5px;color:#a07820">🌾 gluten</span>':'')+'</div>'
       +(tags.length?'<div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:3px">'+tagChips+'</div>':'')
       +(item.cal||item.pro?'<div style="font-size:11px;color:var(--textl);margin-top:3px">'
         +(item.cal?'<span style="margin-right:8px">🔥 '+item.cal+'cal</span>':'')
@@ -29734,6 +29765,20 @@ function delProjInc(id){
         <button class="btn" style="flex:1" onclick="saveGrocEdit()">Save</button>
         <button class="btn sec" style="flex-shrink:0" onclick="closeOv('ovGrocEdit')">Cancel</button>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- ICK DURATION PICKER -->
+<div class="ov" id="ovIckPick" onclick="if(event.target===this)closeOv('ovIckPick')">
+  <div class="mod" style="max-width:320px" onclick="event.stopPropagation()">
+    <div class="mh"><span class="mt">🙅 Skip for how long?</span><button class="mc" onclick="closeOv('ovIckPick')">✕</button></div>
+    <div id="ickPickName" style="font-size:13px;font-weight:700;color:var(--textd);margin-bottom:14px;padding:0 2px"></div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <button class="btn sec" onclick="setFoodIck(2)" style="text-align:left">⏱ 2 weeks — just overdid it</button>
+      <button class="btn sec" onclick="setFoodIck(4)" style="text-align:left">📅 1 month — seasonal break</button>
+      <button class="btn sec" onclick="setFoodIck(13)" style="text-align:left">🗓 3 months — rotating out</button>
+      <button class="btn sec" onclick="setFoodIck('forever')" style="text-align:left;color:#c05050;border-color:#ecd8d8">🚫 Skip forever</button>
     </div>
   </div>
 </div>
