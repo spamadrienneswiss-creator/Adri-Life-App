@@ -6159,7 +6159,7 @@ function initFirebase(){
       ap('aTabOrder',function(v,r){if(v&&v.length){TAB_ORDER=_mergeTabOrder(v);_origSetItem('aTabOrder',r);if(typeof applyTabOrder==='function')applyTabOrder();}});
       ap('aAboutMe',function(v,r){ABOUT_ME=v||{};_origSetItem('aAboutMe',r);});
       ap('aTabFavs',function(v,r){_origSetItem('aTabFavs',r);if(typeof renderFavTabs==='function')renderFavTabs();});
-      ap('aHomeTiles2',function(v,r){if(_homeTilesSavedAt&&Date.now()-_homeTilesSavedAt<4000)return;if(v)HOME_TILES=v;_origSetItem('aHomeTiles2',r);if(document.getElementById('homeGrid'))renderHomePage();});
+      ap('aHomeTiles2',function(v,r){if(_homeTilesSavedAt&&Date.now()-_homeTilesSavedAt<6000)return;if(v)HOME_TILES=v;_origSetItem('aHomeTiles2',r);if(document.getElementById('homeGrid'))renderHomePage();});
       ap('aHomeItems',function(v,r){HOME_ITEMS=v||[];_origSetItem('aHomeItems',r);});
       _fbBlobPause=false;
     }else{
@@ -7993,7 +7993,11 @@ var HOME_TILE_DEFS = {
 };
 
 var _homeTilesSavedAt=0;
-function saveHomeTiles(){_homeTilesSavedAt=Date.now();localStorage.setItem('aHomeTiles2',JSON.stringify(HOME_TILES));}
+function saveHomeTiles(){
+  _homeTilesSavedAt=Date.now();
+  _origSetItem('aHomeTiles2',JSON.stringify(HOME_TILES)); // write directly, skip blob debounce
+  if(window.db&&typeof saveBlobGroup==='function')saveBlobGroup('settings2'); // push immediately
+}
 
 function toggleHomeEdit(){
   HOME_EDIT_MODE=!HOME_EDIT_MODE;
