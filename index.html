@@ -20336,8 +20336,18 @@ function renderRecipes(){
     return matchQ&&matchF;
   });
   if(!list.length){el.innerHTML='<p style="color:var(--textl);text-align:center;padding:20px">No recipes yet. Add one!</p>';return;}
+  var _recipesDirty=false;
   el.innerHTML=list.map(function(r){
+    // Recalculate macros live from current ingredient+Foods data; heal stale snapshots silently
     var m=r.macros||{};
+    if(r.ingredients&&r.ingredients.length){
+      var _rc=_sumIngsMacros(r.ingredients);var _sv=r.servings||1;var _t=_rc.totals;
+      var _lm={cal:Math.round(_t.cal/_sv),pro:Math.round(_t.pro/_sv*10)/10,carb:Math.round(_t.carb/_sv*10)/10,fat:Math.round(_t.fat/_sv*10)/10,fib:Math.round(_t.fib/_sv*10)/10};
+      if(_lm.cal||_lm.pro){
+        if(_lm.cal!==m.cal||_lm.pro!==m.pro||_lm.carb!==m.carb){r.macros=_lm;_recipesDirty=true;}
+        m=_lm;
+      }
+    }
     var mts=r.mealTypes||[];
     var mt=mts[0]||r.mealType||'';
     var mtColor=MEAL_TYPE_COLORS[mt]||'white';
@@ -20386,6 +20396,7 @@ function renderRecipes(){
       +'</div>'  // close outer flex row
       +'</div>';
   }).join('');
+  if(_recipesDirty)localStorage.setItem('aRecipes',JSON.stringify(RECIPES));
 }
 
 function openRecipeModal(id){
