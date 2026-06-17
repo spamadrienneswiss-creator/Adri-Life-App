@@ -1576,6 +1576,7 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
           <button class="qa" onclick="openGroceryQuick()" style="background:linear-gradient(135deg,#e8f4e8,#fdf6ee)"><div class="qa-ic">🛒</div><div class="qa-lb">Grocery</div></button>
           <button class="qa" onclick="goTab('spirit',null);setTimeout(function(){showSpiritSec('bible',document.querySelector('#v-spirit .pn-btn:nth-child(2)'))},200)" style="background:linear-gradient(135deg,#e8f0f8,#dce8f4)"><div class="qa-ic">📖</div><div class="qa-lb">Bible</div></button>
           <button class="qa" onclick="goTab('wigs',null)" style="background:linear-gradient(135deg,#f0e8f8,#fdf0f8)"><div class="qa-ic">✂️</div><div class="qa-lb">Wigs</div></button>
+          <button class="qa" onclick="openWantToTryModal()" style="background:linear-gradient(135deg,#fef9e7,#fdf6ee)"><div class="qa-ic">⭐</div><div class="qa-lb">Try This</div></button>
         </div>
       </div>
     </div>
@@ -2550,6 +2551,7 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     <button class="pn-btn on" onclick="showMealSec('meals',this)">🍽️ Meals</button>
     <button class="pn-btn" onclick="showMealSec('inventory',this)">📦 Inventory</button>
     <button class="pn-btn" onclick="showMealSec('recipes',this)">📖 Recipes</button>
+    <button class="pn-btn" onclick="showMealSec('wantTry',this)">⭐ Want to Try</button>
     <button class="pn-btn" onclick="showMealSec('wine',this)">🍷 Wine</button>
     <button class="pn-btn" onclick="showMealSec('prices',this)">💰 Prices</button>
     <button class="pn-btn" onclick="showMealSec('database',this)">🧩 Ingredient Library</button>
@@ -2741,6 +2743,16 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
       <button class="fchip on" onclick="setInvFilter('',this)">All</button>
     </div>
     <div id="inventoryListEl"></div>
+  </div>
+
+  <!-- WANT TO TRY section -->
+  <div id="ms-wantTry" style="display:none">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+      <span style="font-weight:700;font-size:14px;color:var(--textd)">⭐ Want to Try</span>
+      <button class="btn" onclick="openWantToTryModal()">+ Capture</button>
+    </div>
+    <div style="font-size:12px;color:var(--textl);margin-bottom:12px">Foods, meals, brands you want to try — no details needed now. Develop them into recipes or food library entries when you're ready.</div>
+    <div id="wantToTryList"></div>
   </div>
 </div>
 
@@ -5483,6 +5495,8 @@ var MEAL_PLAN = JSON.parse(localStorage.getItem('aMealPlan')||'{}');
 var GROCERY_LIST = JSON.parse(localStorage.getItem('aGroceryList')||'[]');
 var INVENTORY = JSON.parse(localStorage.getItem('aInventory')||'[]');
 // Each inventory item: {id, name, qty, unit, section, expDate, notes, addedDate, dbItemId, lastPrice, lastPriceStore, priceHistory}
+var WANT_TO_TRY = JSON.parse(localStorage.getItem('aWantToTry')||'[]');
+// Each WANT_TO_TRY item: {id, text, note, created, tried:false}
 var INV_SECTIONS = JSON.parse(localStorage.getItem('aInvSections')||'null')||['Pantry','Fridge','Freezer','Snacks','Baking','Supplements'];
 function saveInvSections(){ localStorage.setItem('aInvSections',JSON.stringify(INV_SECTIONS)); }
 function openInvSectionsModal(){
@@ -20370,7 +20384,7 @@ var GROCERY_CATS = ['Produce','Dairy','Meat & Fish','Bakery','Pantry','Frozen','
 function showMealSec(sec,btn){
   // 'plan' is an alias for 'meals' (backward compat)
   if(sec==='plan')sec='meals';
-  ['meals','recipes','database','grocery','prices','inventory','ingredients','wine'].forEach(function(s){
+  ['meals','recipes','database','grocery','prices','inventory','ingredients','wine','wantTry'].forEach(function(s){
     var el=document.getElementById('ms-'+s);
     if(el)el.style.display=(s===sec)?'':'none';
   });
@@ -20384,6 +20398,7 @@ function showMealSec(sec,btn){
   if(sec==='prices')renderPriceLog();
   if(sec==='ingredients'){renderIngredients();populateIngDatalist();}
   if(sec==='wine')renderWineReviews();
+  if(sec==='wantTry')renderWantToTry();
 }
 
 // ── Meal Log (category-based) ─────────────────
@@ -21975,6 +21990,124 @@ function grocTaskDelete(i){
   GROCERY_LIST.splice(i,1);
   saveGroceryList();
   renderGroceryList();
+}
+
+// ── Want to Try ───────────────────────────────
+function saveWantToTryData(){
+  localStorage.setItem('aWantToTry',JSON.stringify(WANT_TO_TRY));
+}
+
+function openWantToTryModal(){
+  var t=document.getElementById('wttText');var n=document.getElementById('wttNote');
+  if(t)t.value='';if(n)n.value='';
+  showOv('ovWantToTry');
+  setTimeout(function(){if(t)t.focus();},120);
+}
+
+function saveWantToTryItem(){
+  var t=(document.getElementById('wttText')||{}).value||'';
+  t=t.trim();if(!t)return;
+  var note=(document.getElementById('wttNote')||{}).value||'';
+  note=note.trim();
+  WANT_TO_TRY.unshift({id:'wtt-'+Date.now(),text:t,note:note,created:todayStr(),tried:false});
+  saveWantToTryData();
+  closeOv('ovWantToTry');
+  showToast('⭐ Added to Want to Try!');
+  var el=document.getElementById('wantToTryList');if(el)renderWantToTry();
+}
+
+function wttMarkTried(id){
+  var item=WANT_TO_TRY.find(function(x){return x.id===id;});
+  if(!item)return;
+  item.tried=!item.tried;
+  if(item.tried)item.triedDate=todayStr();else delete item.triedDate;
+  saveWantToTryData();
+  renderWantToTry();
+}
+
+function wttDelete(id){
+  var idx=WANT_TO_TRY.findIndex(function(x){return x.id===id;});
+  if(idx<0)return;
+  WANT_TO_TRY.splice(idx,1);
+  saveWantToTryData();
+  renderWantToTry();
+}
+
+function wttToRecipe(id){
+  var item=WANT_TO_TRY.find(function(x){return x.id===id;});
+  if(!item)return;
+  closeOv('ovWantToTry');
+  // Mark source on the modal state so recipe modal can note the origin
+  openRecipeModal();
+  setTimeout(function(){
+    var nameEl=document.getElementById('recName');
+    if(nameEl){nameEl.value=item.text;nameEl.focus();}
+    var notesEl=document.getElementById('recNotes');
+    if(notesEl&&item.note&&!notesEl.value)notesEl.value=item.note;
+    showOv('recipeModal');
+    // Offer to remove from Want to Try after saving
+    item._pendingRecipe=true;
+  },100);
+}
+
+function wttToFoodDb(id){
+  var item=WANT_TO_TRY.find(function(x){return x.id===id;});
+  if(!item)return;
+  openFoodDbModal();
+  setTimeout(function(){
+    var nameEl=document.getElementById('fdbName');
+    if(nameEl){nameEl.value=item.text;nameEl.focus();}
+    var notesEl=document.getElementById('fdbNotes');
+    if(notesEl&&item.note&&!notesEl.value)notesEl.value=item.note;
+    showOv('foodDbModal');
+    item._pendingFoodDb=true;
+  },100);
+}
+
+function renderWantToTry(){
+  var el=document.getElementById('wantToTryList');if(!el)return;
+  var pending=WANT_TO_TRY.filter(function(x){return !x.tried;});
+  var tried=WANT_TO_TRY.filter(function(x){return x.tried;});
+  if(!WANT_TO_TRY.length){
+    el.innerHTML='<div style="text-align:center;padding:30px 16px;color:var(--textl)">'
+      +'<div style="font-size:32px;margin-bottom:10px">⭐</div>'
+      +'<div style="font-size:13px;font-weight:700;color:var(--textd);margin-bottom:6px">Your Want to Try list is empty</div>'
+      +'<div style="font-size:12px">Tap <strong>+ Capture</strong> above or use <strong>⭐ Try This</strong> on the home page to jot down foods, meals, or brands you want to try.</div>'
+      +'</div>';
+    return;
+  }
+  function renderItem(item){
+    var age=item.created?(new Date(todayStr()).getTime()-new Date(item.created).getTime())/(1000*60*60*24):0;
+    var ageStr=age<1?'today':age<2?'yesterday':Math.round(age)+' days ago';
+    return '<div style="border:1.5px solid '+(item.tried?'var(--bdr)':'#e8e0d8')+';border-radius:14px;padding:12px 14px;margin-bottom:10px;background:'+(item.tried?'#f8f8f6':'#fff')+';opacity:'+(item.tried?'.65':'1')+'">'
+      +'<div style="display:flex;align-items:flex-start;gap:10px">'
+      +'<div style="flex:1;min-width:0">'
+      +'<div style="font-size:14px;font-weight:700;color:var(--textd);'+(item.tried?'text-decoration:line-through;':'')+'word-break:break-word">'+escHtml(item.text)+'</div>'
+      +(item.note?'<div style="font-size:12px;color:var(--textl);margin-top:3px;font-style:italic">'+escHtml(item.note)+'</div>':'')
+      +'<div style="font-size:11px;color:var(--textl);margin-top:4px">'+ageStr+(item.tried&&item.triedDate?' · tried '+item.triedDate:'')+'</div>'
+      +'</div>'
+      +'<button onclick="wttDelete(\''+item.id+'\')" style="background:none;border:none;font-size:16px;cursor:pointer;color:var(--textl);padding:2px;flex-shrink:0;opacity:.5;line-height:1" title="Remove">✕</button>'
+      +'</div>'
+      +'<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:10px">'
+      +(item.tried
+        ?'<button onclick="wttMarkTried(\''+item.id+'\')" style="background:#f8f4f0;border:1.5px solid #d8d0c8;border-radius:10px;padding:5px 11px;font-size:12px;font-weight:700;color:var(--textl);cursor:pointer;font-family:\'Quicksand\',sans-serif">↩ Mark untried</button>'
+        :'<button onclick="wttMarkTried(\''+item.id+'\')" style="background:linear-gradient(135deg,var(--sage),var(--teal));border:none;border-radius:10px;padding:5px 11px;font-size:12px;font-weight:700;color:#fff;cursor:pointer;font-family:\'Quicksand\',sans-serif">✓ Tried it!</button>'
+        +'<button onclick="wttToRecipe(\''+item.id+'\')" style="background:#f0f4ff;border:1.5px solid #c8d4f0;border-radius:10px;padding:5px 11px;font-size:12px;font-weight:700;color:#4a6abf;cursor:pointer;font-family:\'Quicksand\',sans-serif">📖 → Recipe</button>'
+        +'<button onclick="wttToFoodDb(\''+item.id+'\')" style="background:#f0f8f4;border:1.5px solid #c0dcc8;border-radius:10px;padding:5px 11px;font-size:12px;font-weight:700;color:#3a8058;cursor:pointer;font-family:\'Quicksand\',sans-serif">🧩 → Food DB</button>'
+      )
+      +'</div>'
+      +'</div>';
+  }
+  var html='';
+  if(pending.length){
+    html+='<div style="font-size:11px;font-weight:700;color:var(--textl);letter-spacing:.5px;text-transform:uppercase;margin-bottom:8px">'+pending.length+' to try</div>';
+    html+=pending.map(renderItem).join('');
+  }
+  if(tried.length){
+    html+='<div style="font-size:11px;font-weight:700;color:var(--textl);letter-spacing:.5px;text-transform:uppercase;margin:14px 0 8px;border-top:1px solid var(--bdr);padding-top:12px">Tried ('+tried.length+')</div>';
+    html+=tried.map(renderItem).join('');
+  }
+  el.innerHTML=html;
 }
 
 // ── Price log ─────────────────────────────────
@@ -29180,6 +29313,26 @@ function delProjInc(id){
       <button onclick="ovwPark()" style="padding:11px;border-radius:14px;border:1.5px solid #e0d8d0;background:#fff;font-family:'Quicksand',sans-serif;font-size:13px;font-weight:700;color:var(--textl);cursor:pointer">🅿️ Park it — do later</button>
       <button onclick="ovwNext()" style="padding:10px;border-radius:14px;border:none;background:#f8f4f0;font-family:'Quicksand',sans-serif;font-size:12px;font-weight:700;color:var(--textl);cursor:pointer">→ Show me a different one</button>
       <button onclick="closeOv('ovOverwhelmed')" style="padding:7px;border-radius:14px;border:none;background:none;font-family:'Quicksand',sans-serif;font-size:11px;color:var(--textl);cursor:pointer;opacity:.7">Exit to full list</button>
+    </div>
+  </div>
+</div>
+
+<!-- WANT TO TRY CAPTURE MODAL -->
+<div class="ov" id="ovWantToTry" onclick="if(event.target===this)closeOv('ovWantToTry')">
+  <div class="mod" style="max-width:380px" onclick="event.stopPropagation()">
+    <div class="mh">
+      <span class="mt">⭐ Want to Try</span>
+      <button class="mc" onclick="closeOv('ovWantToTry')">✕</button>
+    </div>
+    <div style="padding:4px 0 2px">
+      <label style="font-size:11px;color:var(--textl);display:block;margin-bottom:5px;font-weight:700">What do you want to try?</label>
+      <input id="wttText" type="text" placeholder="e.g. Thai basil fried rice, Trader Joe's riced cauliflower…" style="width:100%;padding:10px 12px;border-radius:12px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:14px;box-sizing:border-box;margin-bottom:10px" onkeydown="if(event.key==='Enter')saveWantToTryItem()">
+      <label style="font-size:11px;color:var(--textl);display:block;margin-bottom:5px">Note (optional)</label>
+      <input id="wttNote" type="text" placeholder="Where you heard about it, why you want to try it…" style="width:100%;padding:9px 12px;border-radius:12px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px;box-sizing:border-box;margin-bottom:14px" onkeydown="if(event.key==='Enter')saveWantToTryItem()">
+      <div style="display:flex;gap:8px">
+        <button class="btn" style="flex:1" onclick="saveWantToTryItem()">⭐ Save to Try List</button>
+        <button class="btn sec" style="flex-shrink:0" onclick="closeOv('ovWantToTry')">Cancel</button>
+      </div>
     </div>
   </div>
 </div>
