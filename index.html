@@ -5494,6 +5494,8 @@ var MINISTRY_LOG = JSON.parse(localStorage.getItem('aMinistryLog')||'[]');
 var GRAT_LOG = JSON.parse(localStorage.getItem('aGratLog')||'[]');
 var RECIPES = JSON.parse(localStorage.getItem('aRecipes')||'[]');
 var MEAL_PLAN = JSON.parse(localStorage.getItem('aMealPlan')||'{}');
+// My-servings per planned meal, keyed 'date|slot' → number (default 1, 0 = cooking for others)
+var MEAL_MY_SERVINGS = JSON.parse(localStorage.getItem('aMealMyServings')||'{}');
 var GROCERY_LIST = JSON.parse(localStorage.getItem('aGroceryList')||'[]');
 var INVENTORY = JSON.parse(localStorage.getItem('aInventory')||'[]');
 // Each inventory item: {id, name, qty, unit, section, expDate, notes, addedDate, dbItemId, lastPrice, lastPriceStore, priceHistory}
@@ -6196,9 +6198,13 @@ function initFirebase(){
       ap('aMealLogItems',function(v,r){MEAL_LOG_ITEMS=v||[];_origSetItem('aMealLogItems',r);});
       ap('aMoodNotes',function(v,r){MOOD_NOTES=v||{};_origSetItem('aMoodNotes',r);});
       ap('aWineDrinks',function(v,r){WINE_DRINKS=v||[];_origSetItem('aWineDrinks',r);});
+      ap('aSymLog',function(v,r){SYM_LOG=v||{};_origSetItem('aSymLog',r);});
+      ap('aSymTypes',function(v,r){if(v&&v.length)SYM_TYPES=v;_origSetItem('aSymTypes',r);});
       _fbBlobPause=false;
       if(typeof renderMeds==='function')renderMeds();
       if(typeof renderEnergyWidget==='function')renderEnergyWidget();
+      if(typeof renderSymCard==='function'&&document.getElementById('symCard'))renderSymCard();
+      if(typeof renderTodaySymptoms==='function')renderTodaySymptoms();
     }else if(group==='habits'){
       ap('aHabits',function(v,r){HABITS=v||[];_origSetItem('aHabits',r);});
       ap('aHabitLog',function(v,r){HABIT_LOG=v||{};_origSetItem('aHabitLog',r);});
@@ -6237,6 +6243,8 @@ function initFirebase(){
     }else if(group==='food'){
       ap('aRecipes',function(v,r){RECIPES=v||[];_origSetItem('aRecipes',r);});
       ap('aMealPlan',function(v,r){MEAL_PLAN=v||{};_origSetItem('aMealPlan',r);});
+      ap('aMealMyServings',function(v,r){MEAL_MY_SERVINGS=v||{};_origSetItem('aMealMyServings',r);});
+      ap('aWantToTry',function(v,r){WANT_TO_TRY=v||[];_origSetItem('aWantToTry',r);});
       ap('aGroceryList',function(v,r){GROCERY_LIST=v||[];_origSetItem('aGroceryList',r);});
       ap('aInventory',function(v,r){INVENTORY=v||[];_origSetItem('aInventory',r);});
       ap('aInvSections',function(v,r){if(v&&v.length)INV_SECTIONS=v;_origSetItem('aInvSections',r);});
@@ -6363,12 +6371,12 @@ function fbDelete(col, id){
 // ═══════════════════════════════════════════════
 var BLOB_GROUPS={
   money:['aBills','aBillPay','aBillMonthAmt','aAccounts','aIncome','aIncGoal','aMonIncGoal','aMoneyChecks','aTaxLog','aProjIncome','aPriceLog','aExpCats','aMoneyProjects','aPayoffs','aBudgetBuckets','aBudgetMoves'],
-  health:['aMeds','aMedLog','aEnergyLog','aMeasLog','aMealLogItems','aMoodNotes','aWineDrinks'],
+  health:['aMeds','aMedLog','aEnergyLog','aMeasLog','aMealLogItems','aMoodNotes','aWineDrinks','aSymLog','aSymTypes'],
   habits:['aHabits','aHabitLog'],
   routines:['aRS','aRS2','aRH','aRTG','aRtns'],
   planning:['aSOPs','aBrainDump','aIntentions','aMonthTodos','aTmpls'],
   spiritual:['aBibleLog','aBibleChapNotes','aPrayers','aGratLog','aSpiritBooks','aSpiritSettings','aSpiritRun'],
-  food:['aRecipes','aMealPlan','aGroceryList','aInventory','aInvSections','aMC','aFoodDb','aIngredients'],
+  food:['aRecipes','aMealPlan','aMealMyServings','aGroceryList','aInventory','aInvSections','aMC','aFoodDb','aIngredients','aWantToTry'],
   fitness:['aWplans','aWlog2','aMovements','aExTypes','aExDB','aExLog','aPT'],
   creative:['aStories','aSChars','aSScenes','aFaves','aMixtape','aMemories','aPlaces','aVbItems'],
   tools:['aSparkPrompts','aSparkSaved','aDispatchJournal','aHatchChaos','aHatchTransmissions','aHatchMissions','aHatchShocks','aHatchCast'],
@@ -19577,9 +19585,16 @@ function noteToTask(title,notes,noteId){
 // ═══════════════════════════════════════════════
 
 function downloadBackup(){
-  var keys=['aTasks','aRout','aLists','aExps','aWigs','aBills','aIncome','aMoods','aFoodLog','aWater','aSymptoms','aExLog','aRecipes','aMealPlan','aGrocery','aPrayers','aBibleLog','aMinistryLog','aGratLog','aVbItems','aMemories','aFaves','aHabits','aHabitLog','aStudyNotes','aKEvents','aFcDecks','aFcCards','aResearch','aWplans','aWlog2','aBrainDump','aIntentions','aMeds','aMedLog','aEnergyLog','aCustomColors','aSName','aSQuote','aSBanner','aProtTabs','aStories','aSChars','aSScenes','aMixtape'];
+  // Back up EVERYTHING in localStorage so no feature's data is ever silently
+  // missed (the old hardcoded list went stale and dropped Food DB, inventory,
+  // symptoms, my-servings, budgets, etc.).
   var data={};
-  keys.forEach(function(k){var v=localStorage.getItem(k);if(v)data[k]=v;});
+  for(var i=0;i<localStorage.length;i++){
+    var k=localStorage.key(i);
+    if(k==null)continue;
+    var v=localStorage.getItem(k);
+    if(v!=null)data[k]=v;
+  }
   var blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
   var url=URL.createObjectURL(blob);
   var a=document.createElement('a');
@@ -20785,22 +20800,29 @@ function renderMealPlan(){
         var hasPrepTime=rec&&rec.prepTime;
         var isWtt=val&&!rec&&WANT_TO_TRY.some(function(w){return w.text===val;});
         var slotMacros=rec&&rec.macros&&rec.macros.cal?rec.macros:null;
+        var sv=getMealServings(date,slot);
         html+='<div class="meal-slot" onclick="openSlotPicker(\''+date+'\',\''+slot+'\')" style="flex-direction:column;align-items:stretch;gap:3px">';
         html+='<div style="display:flex;align-items:center;gap:4px">';
         html+='<span class="meal-slot-lbl">'+MEAL_SLOT_ICONS[slot]+' '+(MEAL_SLOT_LABELS[slot]||slot)+'</span>';
         html+='<span style="display:flex;align-items:center;gap:4px;flex:1;min-width:0">';
-        html+='<span class="meal-slot-val'+(val?'':' empty')+'" style="flex:1">'+(val?escHtml(val):'tap to add')+'</span>';
+        html+='<span class="meal-slot-val'+(val?'':' empty')+'" style="flex:1">'+(val?escHtml(val):'tap to add')+(val&&slotMacros&&sv!==1?' <span style="font-size:10px;color:var(--textl)">×'+sv+'</span>':'')+'</span>';
         if(isWtt)html+='<span style="font-size:10px;background:#fef9e7;border:1px solid #e8d88a;border-radius:6px;padding:1px 5px;color:#9a7c0a;flex-shrink:0">⭐ WTT</span>';
         if(hasPrepTime)html+='<button onclick="event.stopPropagation();addPrepTask(\''+escHtml(val)+'\','+rec.prepTime+')" style="background:none;border:1px solid var(--sage);border-radius:6px;padding:1px 5px;font-size:10px;color:var(--sage);cursor:pointer;flex-shrink:0">⏱ '+rec.prepTime+'m</button>';
-        if(val)html+='<button onclick="event.stopPropagation();clearMealSlot(\''+date+'\',\''+slot+'\')" style="background:none;border:none;font-size:12px;cursor:pointer;color:var(--textl);padding:1px 3px;flex-shrink:0;opacity:.5" title="Clear">✕</button>';
+        if(val)html+='<button onclick="event.stopPropagation();clearMealSlot(\''+date+'\',\''+slot+'\')" style="background:#faf3f3;border:1px solid #ecd8d8;border-radius:7px;font-size:13px;cursor:pointer;color:#c05050;padding:3px 8px;flex-shrink:0;line-height:1" title="Clear this meal">✕</button>';
         html+='</span></div>';
         if(slotMacros){
-          html+='<div style="font-size:10px;color:var(--textl);padding-left:4px;display:flex;gap:8px;flex-wrap:wrap">'
-            +'<span>🔥 '+slotMacros.cal+' cal</span>'
-            +'<span>💪 '+slotMacros.pro+'g</span>'
-            +'<span>🌾 '+slotMacros.carb+'g</span>'
-            +'<span>🫙 '+slotMacros.fat+'g</span>'
-            +'</div>';
+          var eaten={cal:Math.round(slotMacros.cal*sv),pro:Math.round((slotMacros.pro||0)*sv*10)/10,carb:Math.round((slotMacros.carb||0)*sv*10)/10,fat:Math.round((slotMacros.fat||0)*sv*10)/10};
+          html+='<div style="font-size:10px;color:var(--textl);padding-left:4px;display:flex;gap:6px;flex-wrap:wrap;align-items:center" onclick="event.stopPropagation()">'
+            +'<span style="font-size:9px;text-transform:uppercase;letter-spacing:.4px;color:#b0a89e">my servings</span>'
+            +'<button onclick="adjMealServings(\''+date+'\',\''+slot+'\',-0.5)" style="background:#f3efe9;border:1px solid #e0d8ce;border-radius:6px;width:20px;height:20px;cursor:pointer;font-size:13px;line-height:1;color:var(--textd);padding:0">−</button>'
+            +'<span style="min-width:18px;text-align:center;font-weight:700;color:var(--textd)">'+sv+'</span>'
+            +'<button onclick="adjMealServings(\''+date+'\',\''+slot+'\',0.5)" style="background:#f3efe9;border:1px solid #e0d8ce;border-radius:6px;width:20px;height:20px;cursor:pointer;font-size:13px;line-height:1;color:var(--textd);padding:0">＋</button>';
+          if(sv>0){
+            html+='<span style="margin-left:2px">🔥 '+eaten.cal+'</span><span>💪 '+eaten.pro+'g</span><span>🌾 '+eaten.carb+'g</span><span>🫙 '+eaten.fat+'g</span>';
+          }else{
+            html+='<span style="margin-left:2px;color:#c08040">🍳 cooking for others · 0 to my macros</span>';
+          }
+          html+='</div>';
         }
         html+='</div>';
       });
@@ -20827,6 +20849,22 @@ function togMealDay(date){
   renderMealPlan();
 }
 
+// My-servings per planned meal (default 1; 0 = cooking for others, adds 0 to my macros)
+function getMealServings(date,slot){
+  var v=MEAL_MY_SERVINGS[date+'|'+slot];
+  return (v===undefined||v===null)?1:v;
+}
+function setMealServings(date,slot,n){
+  n=parseFloat(n);if(isNaN(n)||n<0)n=0;
+  MEAL_MY_SERVINGS[date+'|'+slot]=n;
+  localStorage.setItem('aMealMyServings',JSON.stringify(MEAL_MY_SERVINGS));
+}
+function adjMealServings(date,slot,delta){
+  var cur=getMealServings(date,slot);
+  setMealServings(date,slot,Math.max(0,Math.round((cur+delta)*2)/2));
+  renderMealPlan();
+}
+
 function calcDayMacros(date){
   var dayData=MEAL_PLAN[date]||{};
   var totals={cal:0,pro:0,carb:0,fat:0};
@@ -20835,12 +20873,18 @@ function calcDayMacros(date){
     if(!val)return;
     var rec=RECIPES.find(function(r){return r.name===val;});
     if(rec&&rec.macros){
-      totals.cal+=rec.macros.cal||0;
-      totals.pro+=rec.macros.pro||0;
-      totals.carb+=rec.macros.carb||0;
-      totals.fat+=rec.macros.fat||0;
+      // Count only what I personally eat: my-servings × per-serving macros
+      var sv=getMealServings(date,slot);
+      totals.cal+=(rec.macros.cal||0)*sv;
+      totals.pro+=(rec.macros.pro||0)*sv;
+      totals.carb+=(rec.macros.carb||0)*sv;
+      totals.fat+=(rec.macros.fat||0)*sv;
     }
   });
+  totals.cal=Math.round(totals.cal);
+  totals.pro=Math.round(totals.pro*10)/10;
+  totals.carb=Math.round(totals.carb*10)/10;
+  totals.fat=Math.round(totals.fat*10)/10;
   return totals;
 }
 
@@ -20851,6 +20895,7 @@ function openSlotPicker(date,slot){
   var slotLabel=(MEAL_SLOT_ICONS[slot]||'')+(MEAL_SLOT_LABELS[slot]||slot);
   var el=document.getElementById('spTitle');if(el)el.textContent=slotLabel+' · '+date;
   var inp=document.getElementById('spCustom');if(inp){inp.value=current;inp.placeholder='Type a meal name, or pick below…';}
+  var svEl=document.getElementById('spServings');if(svEl)svEl.value=getMealServings(date,slot);
   var srch=document.getElementById('spSearch');if(srch)srch.value='';
   renderSlotPickerList('');
   showOv('ovSlotPicker');
@@ -20896,6 +20941,9 @@ function pickMealSlot(name, fromWtt){
   if(!MEAL_PLAN[_slotPickDate])MEAL_PLAN[_slotPickDate]={};
   MEAL_PLAN[_slotPickDate][_slotPickSlot]=name;
   localStorage.setItem('aMealPlan',JSON.stringify(MEAL_PLAN));
+  // Apply my-servings from the picker (default 1)
+  var svEl=document.getElementById('spServings');
+  setMealServings(_slotPickDate,_slotPickSlot,svEl?svEl.value:1);
   closeOv('ovSlotPicker');
   renderMealPlan();
 }
@@ -20908,9 +20956,10 @@ function pickMealSlotCustom(){
 }
 
 function clearMealSlot(date,slot){
-  if(!MEAL_PLAN[date])return;
-  delete MEAL_PLAN[date][slot];
+  if(MEAL_PLAN[date])delete MEAL_PLAN[date][slot];
   localStorage.setItem('aMealPlan',JSON.stringify(MEAL_PLAN));
+  delete MEAL_MY_SERVINGS[date+'|'+slot];
+  localStorage.setItem('aMealMyServings',JSON.stringify(MEAL_MY_SERVINGS));
   // Deleting a meal removes its auto-ingredients but leaves manual items
   removeMealGroceryForSlot(date,slot);
   if(document.getElementById('ovSlotPicker') && document.getElementById('ovSlotPicker').classList.contains('show'))closeOv('ovSlotPicker');
@@ -21891,7 +21940,7 @@ function renderGrocery(){
     storeItems.forEach(function(entry){
       var item=entry.item;
       var i=entry.idx;
-      var price=getBestPrice(item.name);
+      var price=getBestPrice(item.name,item.dbItemId);
       var dbi=item.dbItemId?FOOD_DB.find(function(x){return x.id===item.dbItemId;}):FOOD_DB.find(function(x){return x.name.toLowerCase()===(item.name||'').toLowerCase();});
       var nutLine=dbi&&dbi.cal?'<span style="font-size:10px;color:var(--textl);margin-left:6px">'+dbi.cal+'cal'+( dbi.pro?' · '+dbi.pro+'g pro':'')+'</span>':'';
       var inStockBadge=item.inStock?'<span style="font-size:10px;background:#e8f5e8;color:var(--sage);border-radius:6px;padding:1px 5px;margin-left:4px">in stock</span>':'';
@@ -21899,10 +21948,11 @@ function renderGrocery(){
       var srcBadge='<span title="'+sm.label+'" style="font-size:10px;background:'+sm.bg+';color:'+sm.color+';border-radius:6px;padding:1px 5px;margin-left:4px;flex-shrink:0">'+sm.icon+'</span>';
       html+='<div class="grocery-item'+(item.checked?' done':'')+'">'
         +'<input type="checkbox" '+(item.checked?'checked':'')+' onchange="toggleGrocery('+i+')" style="width:18px;height:18px;cursor:pointer">'
-        +'<span class="grocery-name" style="flex:1;font-size:13px">'+item.name+'<span style="color:var(--textl);font-size:11px"> '+item.qty+(item.unit?' '+item.unit:'')+'</span>'+nutLine+inStockBadge+'</span>'
+        +'<span class="grocery-name" style="flex:1;font-size:13px;cursor:pointer" onclick="openGrocEdit('+i+')">'+item.name+'<span style="color:var(--textl);font-size:11px"> '+item.qty+(item.unit?' '+item.unit:'')+'</span>'+nutLine+inStockBadge+'</span>'
         +srcBadge
         +(price?'<span style="font-size:12px;color:var(--rose);font-weight:700">$'+price.toFixed(2)+'</span>':'')
-        +'<button class="btn sec" style="font-size:11px;padding:2px 7px" onclick="delGroceryItem('+i+')">✕</button>'
+        +'<button class="btn sec" style="font-size:12px;padding:2px 7px" onclick="openGrocEdit('+i+')" title="Edit">✎</button>'
+        +'<button class="btn sec" style="font-size:11px;padding:2px 7px" onclick="delGroceryItem('+i+')" title="Remove">✕</button>'
         +'</div>';
     });
   });
@@ -21937,6 +21987,35 @@ function delGroceryItem(i){
   GROCERY_LIST.splice(i,1);
   localStorage.setItem('aGroceryList',JSON.stringify(GROCERY_LIST));
   if(_snap){DELTED={restore:function(){GROCERY_LIST.splice(Math.min(_idx,GROCERY_LIST.length),0,_snap);localStorage.setItem('aGroceryList',JSON.stringify(GROCERY_LIST));renderGrocery();}};showUndo('Grocery item removed');}
+  renderGrocery();
+}
+
+// Edit any grocery item (manual, recipe, inventory or meal) — name/qty/unit/store
+var _grocEditIdx=-1;
+function openGrocEdit(i){
+  var g=GROCERY_LIST[i];if(!g)return;
+  _grocEditIdx=i;
+  var sm=GROC_SOURCE_META[grocSourceOf(g)]||GROC_SOURCE_META.manual;
+  var sub=document.getElementById('geSource');if(sub)sub.textContent=sm.icon+' from '+sm.label;
+  document.getElementById('geName').value=g.name||'';
+  document.getElementById('geQty').value=g.qty||'';
+  document.getElementById('geUnit').value=g.unit||'';
+  document.getElementById('geStore').value=g.store||'';
+  showOv('ovGrocEdit');
+}
+function saveGrocEdit(){
+  var g=GROCERY_LIST[_grocEditIdx];
+  if(!g){closeOv('ovGrocEdit');return;}
+  var nm=(document.getElementById('geName').value||'').trim();
+  if(nm)g.name=nm;
+  g.qty=((document.getElementById('geQty').value||'').trim())||'1';
+  g.unit=(document.getElementById('geUnit').value||'').trim();
+  g.store=(document.getElementById('geStore').value||'').trim();
+  // Re-link to a Food DB item by the (possibly new) name so prices/macros follow
+  var dbi=FOOD_DB.find(function(x){return (x.name||'').toLowerCase()===g.name.toLowerCase();});
+  if(dbi)g.dbItemId=dbi.id;
+  localStorage.setItem('aGroceryList',JSON.stringify(GROCERY_LIST));
+  closeOv('ovGrocEdit');
   renderGrocery();
 }
 
@@ -21978,19 +22057,30 @@ function updateGroceryTotal(){
   GROCERY_LIST.forEach(function(item){
     if(item.checked)return;
     if(_grocSourceFilter&&grocSourceOf(item)!==_grocSourceFilter)return;
-    var p=getBestPrice(item.name);
+    var p=getBestPrice(item.name,item.dbItemId);
     if(p){total+=p;priced++;}else unpriced++;
   });
   if(!priced){el.textContent='';return;}
   el.textContent='About $'+Math.round(total)+' so far ('+priced+' priced'+(unpriced?', '+unpriced+' no price yet':'')+')';
 }
 
-function getBestPrice(itemName){
-  var lower=itemName.toLowerCase();
-  var matches=PRICE_LOG.filter(function(p){return p.item.toLowerCase()===lower;});
-  if(!matches.length)return null;
-  matches.sort(function(a,b){return b.date.localeCompare(a.date);});
-  return parseFloat(matches[0].price)||null;
+function getBestPrice(itemName,dbItemId){
+  var lower=(itemName||'').toLowerCase();
+  var candidates=[];
+  // 1. Standalone price log entries
+  (PRICE_LOG||[]).forEach(function(p){
+    if((p.item||'').toLowerCase()===lower){var pr=parseFloat(p.price);if(pr>0)candidates.push({price:pr,date:p.date||''});}
+  });
+  // 2. Food DB price entries (where Phase-3 prices actually live), linked by id or name
+  var dbi=dbItemId?FOOD_DB.find(function(x){return x.id===dbItemId;}):FOOD_DB.find(function(x){return (x.name||'').toLowerCase()===lower;});
+  if(dbi){
+    (dbi.priceEntries||[]).forEach(function(pe){var pr=parseFloat(pe.price);if(pr>0)candidates.push({price:pr,date:pe.date||''});});
+    if((!dbi.priceEntries||!dbi.priceEntries.length)&&parseFloat(dbi.price)>0)candidates.push({price:parseFloat(dbi.price),date:dbi.created||''});
+  }
+  if(!candidates.length)return null;
+  // Most-recent known price; ties / missing dates fall back to cheapest
+  candidates.sort(function(a,b){if((b.date||'')!==(a.date||''))return (b.date||'').localeCompare(a.date||'');return a.price-b.price;});
+  return candidates[0].price;
 }
 
 function expGrocery(){
@@ -29483,6 +29573,11 @@ function delProjInc(id){
     </div>
     <div style="padding:4px 0 10px;flex-shrink:0">
       <input id="spCustom" type="text" style="width:100%;padding:9px 12px;border-radius:12px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px;box-sizing:border-box;margin-bottom:8px" onkeydown="if(event.key==='Enter')pickMealSlotCustom()">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;background:#faf7f2;border-radius:10px;padding:7px 10px">
+        <span style="font-size:12px;color:var(--textd);font-weight:700">🍽️ My servings</span>
+        <input id="spServings" type="number" min="0" step="0.5" value="1" style="width:58px;padding:5px 8px;border-radius:8px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px;text-align:center;box-sizing:border-box">
+        <span style="font-size:10px;color:var(--textl);flex:1">0 = cooking for others (counts 0 toward my macros)</span>
+      </div>
       <div style="display:flex;gap:7px;margin-bottom:10px">
         <button class="btn" style="flex:1;font-size:12px" onclick="pickMealSlotCustom()">✓ Set meal</button>
         <button class="btn sec" style="font-size:12px;color:#c05050" onclick="clearMealSlot(_slotPickDate,_slotPickSlot)">Clear slot</button>
@@ -29490,6 +29585,33 @@ function delProjInc(id){
       <input id="spSearch" type="text" placeholder="Search recipes or want-to-try…" style="width:100%;padding:8px 12px;border-radius:10px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:12px;box-sizing:border-box" oninput="renderSlotPickerList(this.value)">
     </div>
     <div id="spList" style="overflow-y:auto;flex:1;padding-bottom:6px"></div>
+  </div>
+</div>
+
+<!-- GROCERY ITEM EDIT MODAL -->
+<div class="ov" id="ovGrocEdit" onclick="if(event.target===this)closeOv('ovGrocEdit')">
+  <div class="mod" style="max-width:380px" onclick="event.stopPropagation()">
+    <div class="mh">
+      <span class="mt">✎ Edit item</span>
+      <button class="mc" onclick="closeOv('ovGrocEdit')">✕</button>
+    </div>
+    <div style="padding:4px 0 2px">
+      <div id="geSource" style="font-size:11px;color:var(--textl);margin-bottom:10px"></div>
+      <label style="font-size:11px;color:var(--textl);display:block;margin-bottom:4px">Item</label>
+      <input id="geName" type="text" style="width:100%;padding:9px 12px;border-radius:10px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px;box-sizing:border-box;margin-bottom:9px">
+      <div style="display:flex;gap:8px;margin-bottom:9px">
+        <div style="flex:1"><label style="font-size:11px;color:var(--textl);display:block;margin-bottom:4px">Qty</label>
+          <input id="geQty" type="text" style="width:100%;padding:9px 12px;border-radius:10px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px;box-sizing:border-box"></div>
+        <div style="flex:1"><label style="font-size:11px;color:var(--textl);display:block;margin-bottom:4px">Unit</label>
+          <input id="geUnit" type="text" placeholder="lb, oz, ct…" style="width:100%;padding:9px 12px;border-radius:10px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px;box-sizing:border-box"></div>
+      </div>
+      <label style="font-size:11px;color:var(--textl);display:block;margin-bottom:4px">Store</label>
+      <input id="geStore" type="text" style="width:100%;padding:9px 12px;border-radius:10px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px;box-sizing:border-box;margin-bottom:14px">
+      <div style="display:flex;gap:8px">
+        <button class="btn" style="flex:1" onclick="saveGrocEdit()">Save</button>
+        <button class="btn sec" style="flex-shrink:0" onclick="closeOv('ovGrocEdit')">Cancel</button>
+      </div>
+    </div>
   </div>
 </div>
 
