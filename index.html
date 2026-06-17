@@ -1652,6 +1652,7 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
               <option value="cat">By Category</option>
               <option value="newest">Newest First</option>
               <option value="oldest">Oldest First</option>
+              <option value="manual">My Order</option>
             </select>
             <button onclick="clearTaskFilters()" style="padding:5px 10px;border-radius:9px;border:1.5px solid var(--bdr);background:#fff;font-family:'Quicksand',sans-serif;font-size:12px;font-weight:700;color:var(--textl);cursor:pointer">Clear</button>
           </div>
@@ -5702,7 +5703,7 @@ var S = {
   appTitle:localStorage.getItem('aSAppTitle')||'✨ Adri\'s Life',
 };
 
-var SBV={}, CF='all', TASK_SORT='urgency', DELTED=null, UNDO_T=null, OPEN_PANELS={};
+var SBV={}, CF='all', TASK_SORT=localStorage.getItem('aTaskSort')||'urgency', DELTED=null, UNDO_T=null, OPEN_PANELS={};
 var firebaseLoaded = false;
 
 // ── Unified task tree helpers ─────────────────────
@@ -7666,7 +7667,15 @@ buildCatMap();
 function catTag(id){var c=catMap[id]||catMap.mis;return'<span class="ttag" style="background:'+c.bg+';color:'+c.c+'">'+c.n+'</span>';}
 
 function setTaskSort(s){
+  if(s==='manual'&&TASK_SORT!=='manual'){
+    // Freeze current display order into order field on every root task
+    var _sorted=sortTaskArr(TASKS);
+    _sorted.forEach(function(t,i){t.order=i*10;});
+    TASKS.forEach(function(t){fbSave('tasks',t.id,t);});
+    saveTasks();
+  }
   TASK_SORT=s;
+  localStorage.setItem('aTaskSort',s);
   var sel=document.getElementById('taskSortSel');
   if(sel&&sel.value!==s)sel.value=s;
   renderT();
@@ -7684,7 +7693,45 @@ function sortTaskArr(arr){
   if(s==='cat') return arr.slice().sort(function(a,b){return (a.cat||'').localeCompare(b.cat||'');});
   if(s==='newest') return arr.slice().sort(function(a,b){return (b.created||'').localeCompare(a.created||'');});
   if(s==='oldest') return arr.slice().sort(function(a,b){return (a.created||'').localeCompare(b.created||'');});
+  if(s==='manual') return arr.slice().sort(function(a,b){
+    var oa=a.order!=null?a.order:999999;
+    var ob=b.order!=null?b.order:999999;
+    return oa-ob;
+  });
   return arr;
+}
+
+function moveTask(id,dir){
+  // For root tasks swap order values; for subtasks swap array positions
+  function _findPos(id,arr,isRoot){
+    for(var i=0;i<arr.length;i++){
+      if(arr[i].id===id)return{arr:arr,idx:i,isRoot:!!isRoot};
+      var ch=arr[i].children;if(ch&&ch.length){var r=_findPos(id,ch,false);if(r)return r;}
+    }
+    return null;
+  }
+  var pos=_findPos(id,TASKS,true);if(!pos)return;
+  if(pos.isRoot){
+    var sorted=sortTaskArr(TASKS); // already in manual order
+    var si=-1;for(var i=0;i<sorted.length;i++){if(sorted[i].id===id){si=i;break;}}
+    if(si<0)return;
+    var ni=dir==='up'?si-1:si+1;
+    if(ni<0||ni>=sorted.length)return;
+    var t1=sorted[si],t2=sorted[ni];
+    var o1=t1.order!=null?t1.order:si*10;
+    var o2=t2.order!=null?t2.order:ni*10;
+    t1.order=o2;t2.order=o1;
+    saveTasks();fbSave('tasks',t1.id,t1);fbSave('tasks',t2.id,t2);
+  }else{
+    var a=pos.arr,ix=pos.idx;
+    var ni2=dir==='up'?ix-1:ix+1;
+    if(ni2<0||ni2>=a.length)return;
+    var tmp=a[ix];a[ix]=a[ni2];a[ni2]=tmp;
+    saveTasks();
+    var root=_findRootFor(id,TASKS)||_findRootFor(a[ix].id,TASKS);
+    if(root)fbSave('tasks',root.id,root);
+  }
+  renderT();
 }
 
 var TASK_FILTERS={urgs:[],cats:[]};
@@ -7730,6 +7777,7 @@ function renderCatFilterChips(){
 
 function renderT(){
   var list=document.getElementById('taskList');if(!list)return;
+  var _sel=document.getElementById('taskSortSel');if(_sel&&_sel.value!==TASK_SORT)_sel.value=TASK_SORT;
   renderCatFilterChips();
   var urgs=TASK_FILTERS.urgs;
   var cats=TASK_FILTERS.cats;
@@ -7746,7 +7794,7 @@ function renderT(){
   });
   arr=sortTaskArr(arr);
   var parkedBanner=parkedCount?'<div onclick="unparkAllTasks()" style="text-align:center;padding:8px;font-size:12px;color:var(--textl);cursor:pointer;border-bottom:1px solid var(--border)">🅿️ '+parkedCount+' task'+(parkedCount!==1?'s':'')+' parked — tap to restore</div>':'';
-  var activeTasks=parkedBanner+(arr.length?arr.map(function(t){return tHTML(t,0);}).join(''):'<div class="empty"><div class="emj">✨</div><p>No tasks match this filter.</p></div>');
+  var activeTasks=parkedBanner+(arr.length?arr.map(function(t,i){return tHTML(t,0,i,arr.length);}).join(''):'<div class="empty"><div class="emj">✨</div><p>No tasks match this filter.</p></div>');
   var doneTasks=TASKS.filter(function(t){return t.done;}).slice().sort(function(a,b){return (b.doneDate||'')>(a.doneDate||'')?1:-1;});
   var doneSection='';
   if(doneTasks.length&&!showDone){
@@ -7764,7 +7812,7 @@ function renderT(){
 }
 function togDoneSection(){_doneSectionOpen=!_doneSectionOpen;renderT();}
 
-function tHTML(t,depth){
+function tHTML(t,depth,idx,siblingsLen){
   if(!t||!t.title)return''; // skip malformed entries
   if(typeof depth!=='number'||depth<0||depth>99)depth=0;
   if(!t.id)t.id='t'+Date.now()+Math.random().toString(36).slice(2,6); // heal missing id
@@ -7795,7 +7843,12 @@ function tHTML(t,depth){
   var projBadge=t.isProject?'<span style="background:var(--lav-light);color:var(--lav);font-size:10px;font-weight:700;padding:1px 6px;border-radius:5px;margin-left:5px">📁</span>':'';
   var childrenHTML='';
   if(children.length&&!collapsed){
-    childrenHTML='<div class="tc-children">'+children.map(function(c){return tHTML(c,depth+1);}).join('')+'</div>';
+    childrenHTML='<div class="tc-children">'+children.map(function(c,ci){return tHTML(c,depth+1,ci,children.length);}).join('')+'</div>';
+  }
+  var moveHTML='';
+  if(TASK_SORT==='manual'&&typeof idx==='number'){
+    moveHTML='<button class="tact" onclick="event.stopPropagation();moveTask(\''+tid+'\',\'up\')" title="Move up"'+(idx===0?' disabled style="opacity:.25;cursor:default"':'')+'>↑</button>'+
+             '<button class="tact" onclick="event.stopPropagation();moveTask(\''+tid+'\',\'down\')" title="Move down"'+(idx===siblingsLen-1?' disabled style="opacity:.25;cursor:default"':'')+'>↓</button>';
   }
   var wrapStyle=depth>0?'margin-bottom:4px':'';
   var cardStyle=depth>0?'font-size:13px;':'';
@@ -7813,6 +7866,7 @@ function tHTML(t,depth){
         (!t.done&&t.resume?'<div style="font-size:11px;color:var(--peach);background:var(--peach-light);padding:3px 9px;border-radius:6px;margin-top:4px;display:inline-block">⏸️ '+t.resume+'</div>':'')+
       '</div>'+
       '<div class="tacts">'+
+        moveHTML+
         (children.length?'<button class="tact" onclick="event.stopPropagation();togTaskCollapse(\''+tid+'\')" title="'+(collapsed?'Expand':'Collapse')+'">'+(collapsed?'▸':'▾')+'</button>':'')+
         '<button class="tact" onclick="event.stopPropagation();togChildAdd(\''+tid+'\')" title="Add subtask">➕</button>'+
         (depth===0&&t.notes?'<button class="tact" onclick="openNotes(\''+tid+'\')">📝</button>':'')+
