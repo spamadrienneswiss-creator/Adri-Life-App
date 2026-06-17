@@ -3654,27 +3654,21 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
   <div class="mh"><span class="mt" id="fdbModalTitle">🧩 Add Ingredient</span><button class="mc" onclick="closeM('foodDbModal')">✕</button></div>
   <input type="hidden" id="fdbId">
 
-  <!-- Name + Brand -->
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
-    <div class="fg" style="margin:0"><label class="fl">Name *</label><input class="fi" id="fdbName" placeholder="e.g. Chicken Breast"></div>
-    <div class="fg" style="margin:0"><label class="fl">Brand</label><input class="fi" id="fdbBrand" placeholder="e.g. Tyson (optional)"></div>
+  <!-- Name (always visible) -->
+  <div class="fg"><label class="fl">Name *</label><input class="fi" id="fdbName" placeholder="e.g. Chicken Breast"></div>
+
+  <!-- Type (always visible) -->
+  <div class="fg">
+    <label class="fl">Type</label>
+    <select class="fi" id="fdbType" style="padding:8px 10px">
+      <option value="generic">🌿 Generic</option>
+      <option value="branded">🏷️ Branded</option>
+      <option value="restaurant">🍽️ Restaurant</option>
+      <option value="supplement">💊 Supplement</option>
+    </select>
   </div>
 
-  <!-- Type + Category row -->
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
-    <div class="fg" style="margin:0">
-      <label class="fl">Type</label>
-      <select class="fi" id="fdbType" style="padding:8px 10px">
-        <option value="generic">🌿 Generic</option>
-        <option value="branded">🏷️ Branded</option>
-        <option value="restaurant">🍽️ Restaurant</option>
-        <option value="supplement">💊 Supplement</option>
-      </select>
-    </div>
-    <div class="fg" style="margin:0"><label class="fl">Aliases</label><input class="fi" id="fdbAliases" placeholder="e.g. chickpeas (comma separated)"></div>
-  </div>
-
-  <!-- Primary Serving Size -->
+  <!-- Primary Serving Size + Nutrition (always visible) -->
   <div class="card" style="margin-bottom:10px;background:#f8f5ff;border:1.5px solid #ddd6f3">
     <div style="font-size:12px;font-weight:700;color:var(--textd);margin-bottom:8px">📏 Primary Serving Size</div>
     <div style="display:grid;grid-template-columns:1fr 100px;gap:8px;margin-bottom:8px">
@@ -3682,8 +3676,6 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
       <div class="fg" style="margin:0"><label class="fl">Weight (g)</label><input class="fi" id="fdbSvGrams" type="number" placeholder="182" step="0.1" oninput="calcFdbPer100Preview()"></div>
     </div>
     <div style="font-size:11px;color:var(--textl);margin-bottom:10px">Enter how much ONE serving weighs in grams. For whole foods (apple, egg): weigh one typical piece. For packaged: use the label.</div>
-
-    <!-- Nutrition for this serving -->
     <div style="font-size:12px;font-weight:700;color:var(--textd);margin-bottom:6px">🔢 Nutrition (for this serving)</div>
     <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:6px">
       <div class="fg" style="margin:0"><label class="fl">Calories</label><input class="fi" id="fdbCal" type="number" placeholder="0" oninput="calcFdbPer100Preview()"></div>
@@ -3697,17 +3689,7 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     <div id="fdbPer100Preview" style="font-size:11px;color:var(--textl);background:#fff;border-radius:8px;padding:6px 10px;display:none"></div>
   </div>
 
-  <!-- Additional Serving Sizes -->
-  <div class="card" style="margin-bottom:10px">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-      <span style="font-size:12px;font-weight:700;color:var(--textd)">📐 Additional Serving Sizes</span>
-      <button type="button" onclick="addFdbServing()" style="font-size:11px;padding:3px 10px;border-radius:8px;border:1.5px solid var(--lav);background:#f5f0ff;color:var(--lav);font-family:'Quicksand',sans-serif;font-weight:700;cursor:pointer">+ Add</button>
-    </div>
-    <div id="fdbServingsList" style="display:flex;flex-direction:column;gap:6px"></div>
-    <div style="font-size:10px;color:var(--textl);margin-top:4px">Add cup, tbsp, piece, bag, scoop etc. — the app calculates nutrition for each automatically.</div>
-  </div>
-
-  <!-- My Usual Amount -->
+  <!-- My Usual Amount (always visible) -->
   <div class="card" style="margin-bottom:10px;background:#f0fbf5;border:1.5px solid #c8e8d8">
     <div style="font-size:12px;font-weight:700;color:var(--textd);margin-bottom:8px">⭐ My Usual Amount</div>
     <div style="display:grid;grid-template-columns:80px 1fr;gap:8px;align-items:center">
@@ -3717,71 +3699,101 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     <div style="font-size:10px;color:var(--textl);margin-top:4px">When logging this food, it pre-fills with this amount.</div>
   </div>
 
-  <!-- Barcode -->
-  <div class="card" style="margin-bottom:10px">
-    <div style="font-size:12px;font-weight:700;color:var(--textd);margin-bottom:8px">🔢 Barcode</div>
-    <div style="display:flex;gap:8px;align-items:center;margin-bottom:6px">
-      <input class="fi" id="fdbBarcode" placeholder="UPC / EAN number" style="flex:1;margin-bottom:0">
-      <button type="button" onclick="scanBarcode()" style="padding:8px 14px;border-radius:9px;border:none;background:var(--lav);color:white;font-family:'Quicksand',sans-serif;font-size:12px;font-weight:700;cursor:pointer;flex-shrink:0">📷 Scan</button>
-      <button type="button" onclick="lookupBarcode()" style="padding:8px 14px;border-radius:9px;border:1.5px solid var(--sage);background:#f0f8f0;color:var(--sage);font-family:'Quicksand',sans-serif;font-size:12px;font-weight:700;cursor:pointer;flex-shrink:0">🔍 Look up</button>
-    </div>
-    <div id="fdbBarcodeStatus" style="font-size:11px;color:var(--textl)"></div>
-  </div>
+  <!-- More details toggle -->
+  <button type="button" id="fdbMoreBtn" onclick="togFdbMore(this)" style="width:100%;text-align:center;padding:8px 12px;border-radius:10px;border:1.5px dashed #d8d0e8;background:#f8f5ff;color:var(--lav);font-family:'Quicksand',sans-serif;font-size:12px;font-weight:700;cursor:pointer;margin-bottom:10px">More details ▾</button>
 
-  <!-- Tags -->
-  <div class="fg">
-    <label class="fl">Tags</label>
-    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px" id="fdbTagChips">
-      <button type="button" class="fchip" data-tag="protein" onclick="toggleFdbTag(this)">🥩 Protein</button>
-      <button type="button" class="fchip" data-tag="vegetable" onclick="toggleFdbTag(this)">🥦 Vegetable</button>
-      <button type="button" class="fchip" data-tag="grain" onclick="toggleFdbTag(this)">🌾 Grain</button>
-      <button type="button" class="fchip" data-tag="dairy" onclick="toggleFdbTag(this)">🥛 Dairy</button>
-      <button type="button" class="fchip" data-tag="fruit" onclick="toggleFdbTag(this)">🍎 Fruit</button>
-      <button type="button" class="fchip" data-tag="snack" onclick="toggleFdbTag(this)">🍿 Snack</button>
-      <button type="button" class="fchip" data-tag="beverage" onclick="toggleFdbTag(this)">☕ Beverage</button>
-      <button type="button" class="fchip" data-tag="condiment" onclick="toggleFdbTag(this)">🧂 Condiment</button>
-      <button type="button" class="fchip" data-tag="supplement" onclick="toggleFdbTag(this)">💊 Supplement</button>
-      <button type="button" class="fchip" data-tag="other" onclick="toggleFdbTag(this)">📦 Other</button>
-    </div>
-    <div style="display:flex;gap:6px;align-items:center">
-      <input class="fi" id="fdbCustomTag" placeholder="+ custom tag" style="flex:1;margin-bottom:0;font-size:12px;padding:6px 10px">
-      <button type="button" class="btn sec" style="font-size:11px;padding:5px 10px;flex-shrink:0" onclick="addFdbCustomTag()">Add</button>
-    </div>
-    <div id="fdbCustomTagList" style="display:flex;gap:5px;flex-wrap:wrap;margin-top:6px"></div>
-  </div>
+  <div id="fdbMoreOpts" style="display:none">
 
-  <!-- Price History -->
-  <div class="fg">
-    <label class="fl">💰 Price History</label>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:4px">
-      <div><div style="font-size:11px;color:var(--textl);margin-bottom:3px">Store</div><input class="fi" id="fdbPeStore" placeholder="Costco, Aldi…" style="margin-bottom:0"></div>
-      <div><div style="font-size:11px;color:var(--textl);margin-bottom:3px">Total Price $</div><input class="fi" id="fdbPePrice" type="number" placeholder="0.00" step="0.01" style="margin-bottom:0"></div>
+    <!-- Brand + Aliases -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
+      <div class="fg" style="margin:0"><label class="fl">Brand</label><input class="fi" id="fdbBrand" placeholder="e.g. Tyson (optional)"></div>
+      <div class="fg" style="margin:0"><label class="fl">Aliases</label><input class="fi" id="fdbAliases" placeholder="e.g. chickpeas (comma sep.)"></div>
     </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:6px">
-      <div><div style="font-size:11px;color:var(--textl);margin-bottom:3px">Pkg Size</div><input class="fi" id="fdbPeAmt" type="number" placeholder="e.g. 5" step="any" style="margin-bottom:0"></div>
-      <div><div style="font-size:11px;color:var(--textl);margin-bottom:3px">Unit</div>
-        <select class="fi" id="fdbPeUnit" style="margin-bottom:0;cursor:pointer">
-          <option value="">—</option>
-          <option value="lb">lb</option>
-          <option value="oz">oz</option>
-          <option value="g">g</option>
-          <option value="kg">kg</option>
-          <option value="each">each</option>
-          <option value="fl oz">fl oz</option>
-          <option value="mL">mL</option>
-          <option value="L">L</option>
-          <option value="ct">ct</option>
-        </select>
+
+    <!-- Additional Serving Sizes -->
+    <div class="card" style="margin-bottom:10px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+        <span style="font-size:12px;font-weight:700;color:var(--textd)">📐 Additional Serving Sizes</span>
+        <button type="button" onclick="addFdbServing()" style="font-size:11px;padding:3px 10px;border-radius:8px;border:1.5px solid var(--lav);background:#f5f0ff;color:var(--lav);font-family:'Quicksand',sans-serif;font-weight:700;cursor:pointer">+ Add</button>
       </div>
-      <div><div style="font-size:11px;color:var(--textl);margin-bottom:3px">Date</div><input class="fi" id="fdbPeDate" type="date" style="margin-bottom:0"></div>
+      <div id="fdbServingsList" style="display:flex;flex-direction:column;gap:6px"></div>
+      <div style="font-size:10px;color:var(--textl);margin-top:4px">Add cup, tbsp, piece, bag, scoop etc. — the app calculates nutrition for each automatically.</div>
     </div>
-    <button type="button" onclick="fdbAddPriceEntry()" class="btn sec" style="margin-top:6px;width:100%;font-size:12px">+ Add Price Entry</button>
-    <div id="fdbPriceLatest" style="margin-top:6px"></div>
-    <button type="button" id="fdbPriceHistoryBtn" onclick="togFdbPriceHistory()" style="display:none;font-size:11px;background:none;border:none;color:var(--textl);cursor:pointer;padding:2px 0;margin-top:2px;text-decoration:underline">▸ Show full history</button>
-    <div id="fdbPriceHistoryList" style="display:none;margin-top:4px"></div>
-  </div>
-  <div class="fg"><label class="fl">URL / Link</label><input class="fi" id="fdbUrl" placeholder="Product page, recipe link…"></div>
-  <div class="fg"><label class="fl">Notes</label><textarea class="fi" id="fdbNotes" rows="2" placeholder="Anything else…" style="resize:vertical"></textarea></div>
+
+    <!-- Barcode (no Scan button) -->
+    <div class="card" style="margin-bottom:10px">
+      <div style="font-size:12px;font-weight:700;color:var(--textd);margin-bottom:8px">🔢 Barcode</div>
+      <div style="display:flex;gap:8px;align-items:center;margin-bottom:6px">
+        <input class="fi" id="fdbBarcode" placeholder="UPC / EAN number" style="flex:1;margin-bottom:0">
+        <button type="button" onclick="lookupBarcode()" style="padding:8px 14px;border-radius:9px;border:1.5px solid var(--sage);background:#f0f8f0;color:var(--sage);font-family:'Quicksand',sans-serif;font-size:12px;font-weight:700;cursor:pointer;flex-shrink:0">🔍 Look up</button>
+      </div>
+      <div id="fdbBarcodeStatus" style="font-size:11px;color:var(--textl)"></div>
+    </div>
+
+    <!-- Tags (dropdown) -->
+    <div class="fg">
+      <label class="fl">Tags</label>
+      <button type="button" id="fdbTagDropBtn" onclick="togFdbTagDrop()" style="width:100%;display:flex;justify-content:space-between;align-items:center;padding:8px 12px;border-radius:10px;border:1.5px solid #e8e0f0;background:#fff;font-family:'Quicksand',sans-serif;font-size:12px;cursor:pointer;text-align:left">
+        <span id="fdbTagSummary" style="color:var(--textl)">None selected</span>
+        <span style="color:var(--textl);font-size:11px">▾</span>
+      </button>
+      <div id="fdbTagDropPanel" style="display:none;margin-top:6px;padding:10px;background:#f8f5ff;border-radius:10px">
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px" id="fdbTagChips">
+          <button type="button" class="fchip" data-tag="protein" onclick="toggleFdbTag(this)">🥩 Protein</button>
+          <button type="button" class="fchip" data-tag="vegetable" onclick="toggleFdbTag(this)">🥦 Vegetable</button>
+          <button type="button" class="fchip" data-tag="grain" onclick="toggleFdbTag(this)">🌾 Grain</button>
+          <button type="button" class="fchip" data-tag="dairy" onclick="toggleFdbTag(this)">🥛 Dairy</button>
+          <button type="button" class="fchip" data-tag="fruit" onclick="toggleFdbTag(this)">🍎 Fruit</button>
+          <button type="button" class="fchip" data-tag="snack" onclick="toggleFdbTag(this)">🍿 Snack</button>
+          <button type="button" class="fchip" data-tag="beverage" onclick="toggleFdbTag(this)">☕ Beverage</button>
+          <button type="button" class="fchip" data-tag="condiment" onclick="toggleFdbTag(this)">🧂 Condiment</button>
+          <button type="button" class="fchip" data-tag="supplement" onclick="toggleFdbTag(this)">💊 Supplement</button>
+          <button type="button" class="fchip" data-tag="other" onclick="toggleFdbTag(this)">📦 Other</button>
+        </div>
+        <div style="display:flex;gap:6px;align-items:center">
+          <input class="fi" id="fdbCustomTag" placeholder="+ custom tag" style="flex:1;margin-bottom:0;font-size:12px;padding:6px 10px">
+          <button type="button" class="btn sec" style="font-size:11px;padding:5px 10px;flex-shrink:0" onclick="addFdbCustomTag()">Add</button>
+        </div>
+        <div id="fdbCustomTagList" style="display:flex;gap:5px;flex-wrap:wrap;margin-top:6px"></div>
+      </div>
+    </div>
+
+    <!-- Price History -->
+    <div class="fg">
+      <label class="fl">💰 Price History</label>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:4px">
+        <div><div style="font-size:11px;color:var(--textl);margin-bottom:3px">Store</div><input class="fi" id="fdbPeStore" placeholder="Costco, Aldi…" style="margin-bottom:0"></div>
+        <div><div style="font-size:11px;color:var(--textl);margin-bottom:3px">Total Price $</div><input class="fi" id="fdbPePrice" type="number" placeholder="0.00" step="0.01" style="margin-bottom:0"></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:6px">
+        <div><div style="font-size:11px;color:var(--textl);margin-bottom:3px">Pkg Size</div><input class="fi" id="fdbPeAmt" type="number" placeholder="e.g. 5" step="any" style="margin-bottom:0"></div>
+        <div><div style="font-size:11px;color:var(--textl);margin-bottom:3px">Unit</div>
+          <select class="fi" id="fdbPeUnit" style="margin-bottom:0;cursor:pointer">
+            <option value="">—</option>
+            <option value="lb">lb</option>
+            <option value="oz">oz</option>
+            <option value="g">g</option>
+            <option value="kg">kg</option>
+            <option value="each">each</option>
+            <option value="fl oz">fl oz</option>
+            <option value="mL">mL</option>
+            <option value="L">L</option>
+            <option value="ct">ct</option>
+          </select>
+        </div>
+        <div><div style="font-size:11px;color:var(--textl);margin-bottom:3px">Date</div><input class="fi" id="fdbPeDate" type="date" style="margin-bottom:0"></div>
+      </div>
+      <button type="button" onclick="fdbAddPriceEntry()" class="btn sec" style="margin-top:6px;width:100%;font-size:12px">+ Add Price Entry</button>
+      <div id="fdbPriceLatest" style="margin-top:6px"></div>
+      <button type="button" id="fdbPriceHistoryBtn" onclick="togFdbPriceHistory()" style="display:none;font-size:11px;background:none;border:none;color:var(--textl);cursor:pointer;padding:2px 0;margin-top:2px;text-decoration:underline">▸ Show full history</button>
+      <div id="fdbPriceHistoryList" style="display:none;margin-top:4px"></div>
+    </div>
+
+    <!-- URL + Notes -->
+    <div class="fg"><label class="fl">URL / Link</label><input class="fi" id="fdbUrl" placeholder="Product page, recipe link…"></div>
+    <div class="fg"><label class="fl">Notes</label><textarea class="fi" id="fdbNotes" rows="2" placeholder="Anything else…" style="resize:vertical"></textarea></div>
+
+  </div><!-- end fdbMoreOpts -->
 
   <div style="display:flex;gap:8px;margin-top:4px">
     <button class="ok-btn" style="flex:1" onclick="saveFoodDb()">Save ✨</button>
@@ -22087,6 +22099,13 @@ function openFoodDbModal(editId){
   var typeEl=document.getElementById('fdbType');if(typeEl)typeEl.value='generic';
   _fdbServings=[];
   _fdbPriceEntries=[];
+  var _moreEl=document.getElementById('fdbMoreOpts');
+  var _moreBtn=document.getElementById('fdbMoreBtn');
+  if(_moreEl)_moreEl.style.display='none';
+  if(_moreBtn)_moreBtn.textContent='More details ▾';
+  var _tagPanel=document.getElementById('fdbTagDropPanel');if(_tagPanel)_tagPanel.style.display='none';
+  var _tagDrBtn=document.getElementById('fdbTagDropBtn');if(_tagDrBtn){var _tch=_tagDrBtn.querySelector('span:last-child');if(_tch)_tch.textContent='▾';}
+  updateFdbTagSummary();
   var del=document.getElementById('fdbDelBtn');
   if(editId){
     var item=FOOD_DB.find(function(x){return x.id===editId;});
@@ -22118,8 +22137,12 @@ function openFoodDbModal(editId){
       (item.tags||(item.cat?[item.cat]:[])).forEach(function(tag){
         var chip=document.querySelector('#fdbTagChips .fchip[data-tag="'+tag+'"]');
         if(chip)chip.classList.add('on');
-        else if(ctl&&knownTags.indexOf(tag)<0){var sp=document.createElement('span');sp.className='fchip on';sp.dataset.customTag=tag;sp.style.cursor='pointer';sp.textContent=tag;sp.onclick=function(){sp.remove();};ctl.appendChild(sp);}
+        else if(ctl&&knownTags.indexOf(tag)<0){var sp=document.createElement('span');sp.className='fchip on';sp.dataset.customTag=tag;sp.style.cursor='pointer';sp.textContent=tag;sp.onclick=function(){sp.remove();updateFdbTagSummary();};ctl.appendChild(sp);}
       });
+      updateFdbTagSummary();
+      // Auto-expand More Details if item has optional fields
+      var _hasMore=!!(item.brand||(item.aliases&&item.aliases.length)||(item.servings&&item.servings.length>1)||item.barcode||(item.priceEntries&&item.priceEntries.length)||item.url||item.notes);
+      if(_hasMore){if(_moreEl)_moreEl.style.display='';if(_moreBtn)_moreBtn.textContent='Less details ▴';}
     }
     if(del)del.style.display='';
   } else {
@@ -22380,6 +22403,7 @@ function renderFoodDbCatFilter(){
 
 function toggleFdbTag(btn){
   btn.classList.toggle('on');
+  updateFdbTagSummary();
 }
 
 function addFdbCustomTag(){
@@ -22388,7 +22412,7 @@ function addFdbCustomTag(){
   if(!val)return;
   // Check if it matches a known chip first
   var existingChip=document.querySelector('#fdbTagChips .fchip[data-tag="'+val+'"]');
-  if(existingChip){existingChip.classList.add('on');input.value='';return;}
+  if(existingChip){existingChip.classList.add('on');input.value='';updateFdbTagSummary();return;}
   var list=document.getElementById('fdbCustomTagList');
   if(!list)return;
   // Avoid duplicates
@@ -22400,9 +22424,35 @@ function addFdbCustomTag(){
   span.style.cursor='pointer';
   span.textContent=val;
   span.title='Click to remove';
-  span.onclick=function(){span.remove();};
+  span.onclick=function(){span.remove();updateFdbTagSummary();};
   list.appendChild(span);
   input.value='';
+  updateFdbTagSummary();
+}
+
+function togFdbMore(btn){
+  var el=document.getElementById('fdbMoreOpts');if(!el)return;
+  var open=el.style.display!=='none';
+  el.style.display=open?'none':'';
+  btn.textContent=open?'More details ▾':'Less details ▴';
+}
+
+function togFdbTagDrop(){
+  var panel=document.getElementById('fdbTagDropPanel');if(!panel)return;
+  var open=panel.style.display!=='none';
+  panel.style.display=open?'none':'';
+  var btn=document.getElementById('fdbTagDropBtn');
+  if(btn){var ch=btn.querySelector('span:last-child');if(ch)ch.textContent=open?'▾':'▴';}
+}
+
+function updateFdbTagSummary(){
+  var el=document.getElementById('fdbTagSummary');if(!el)return;
+  var sel=[];
+  document.querySelectorAll('#fdbTagChips .fchip.on').forEach(function(b){sel.push(b.textContent.trim());});
+  var ctl=document.getElementById('fdbCustomTagList');
+  if(ctl)ctl.querySelectorAll('[data-custom-tag]').forEach(function(s){sel.push(s.dataset.customTag);});
+  el.textContent=sel.length?sel.join(', '):'None selected';
+  el.style.color=sel.length?'var(--textd)':'var(--textl)';
 }
 
 function renderFoodDbKitchen(){
