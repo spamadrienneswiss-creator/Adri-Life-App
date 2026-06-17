@@ -6198,9 +6198,13 @@ function initFirebase(){
       ap('aMealLogItems',function(v,r){MEAL_LOG_ITEMS=v||[];_origSetItem('aMealLogItems',r);});
       ap('aMoodNotes',function(v,r){MOOD_NOTES=v||{};_origSetItem('aMoodNotes',r);});
       ap('aWineDrinks',function(v,r){WINE_DRINKS=v||[];_origSetItem('aWineDrinks',r);});
+      ap('aSymLog',function(v,r){SYM_LOG=v||{};_origSetItem('aSymLog',r);});
+      ap('aSymTypes',function(v,r){if(v&&v.length)SYM_TYPES=v;_origSetItem('aSymTypes',r);});
       _fbBlobPause=false;
       if(typeof renderMeds==='function')renderMeds();
       if(typeof renderEnergyWidget==='function')renderEnergyWidget();
+      if(typeof renderSymCard==='function'&&document.getElementById('symCard'))renderSymCard();
+      if(typeof renderTodaySymptoms==='function')renderTodaySymptoms();
     }else if(group==='habits'){
       ap('aHabits',function(v,r){HABITS=v||[];_origSetItem('aHabits',r);});
       ap('aHabitLog',function(v,r){HABIT_LOG=v||{};_origSetItem('aHabitLog',r);});
@@ -6367,7 +6371,7 @@ function fbDelete(col, id){
 // ═══════════════════════════════════════════════
 var BLOB_GROUPS={
   money:['aBills','aBillPay','aBillMonthAmt','aAccounts','aIncome','aIncGoal','aMonIncGoal','aMoneyChecks','aTaxLog','aProjIncome','aPriceLog','aExpCats','aMoneyProjects','aPayoffs','aBudgetBuckets','aBudgetMoves'],
-  health:['aMeds','aMedLog','aEnergyLog','aMeasLog','aMealLogItems','aMoodNotes','aWineDrinks'],
+  health:['aMeds','aMedLog','aEnergyLog','aMeasLog','aMealLogItems','aMoodNotes','aWineDrinks','aSymLog','aSymTypes'],
   habits:['aHabits','aHabitLog'],
   routines:['aRS','aRS2','aRH','aRTG','aRtns'],
   planning:['aSOPs','aBrainDump','aIntentions','aMonthTodos','aTmpls'],
