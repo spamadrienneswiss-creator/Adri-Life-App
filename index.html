@@ -5716,6 +5716,7 @@ function togTaskCollapse(id){
   t.collapsed=!t.collapsed;
   var root=_findRootFor(id,TASKS)||t;
   saveTasks();
+  fbSave('tasks',root.id,root);
   renderT();
 }
 function togChildAdd(id){
@@ -5739,10 +5740,11 @@ function addChildTask(taskId){
   renderT();
 }
 function togTaskPin(id){
-  var t=TASKS.find(function(x){return x.id===id;});if(!t)return;
+  var t=findTaskDeep(id,TASKS);if(!t)return;
   t.pinned=!t.pinned;
   saveTasks();
-  fbSave('tasks',id,t);
+  var root=_findRootFor(id,TASKS)||t;
+  fbSave('tasks',root.id,root);
   renderPinned();
   renderT();
 }
@@ -7795,12 +7797,13 @@ function unparkAllTasks(){
   renderT();renderTdTasks();renderThisWeek();
 }
 function parkTask(id){
-  var t=TASKS.find(function(x){return x.id===id;});if(!t)return;
+  var t=findTaskDeep(id,TASKS);if(!t)return;
   t.parked=true;
   var tom=new Date();tom.setDate(tom.getDate()+1);
   t.parkedUntil=tom.toISOString().slice(0,10);
   saveTasks();
-  fbSave('tasks',id,t);
+  var root=_findRootFor(id,TASKS)||t;
+  fbSave('tasks',root.id,root);
   if(navigator.vibrate)navigator.vibrate([30,20,30]);
   showToast('🅿️ Parked — back tomorrow');
   renderT();renderTdTasks();
@@ -13767,7 +13770,7 @@ function saveGoals(){
 var NOTES_TASK_ID='';
 
 function openNotes(taskId){
-  var t=TASKS.find(function(t){return t.id===taskId;});if(!t)return;
+  var t=findTaskDeep(taskId,TASKS);if(!t)return;
   NOTES_TASK_ID=taskId;
   document.getElementById('notesMTitle').textContent='📝 '+t.title;
   document.getElementById('notesTA').value=t.notes||'';
@@ -13787,8 +13790,8 @@ function saveNotesM(){
   var tNotesEl=document.getElementById('tNotes');
   if(tNotesEl)tNotesEl.value=notes;
   if(NOTES_TASK_ID){
-    var t=TASKS.find(function(t){return t.id===NOTES_TASK_ID;});
-    if(t){t.notes=notes;fbSave('tasks',NOTES_TASK_ID,t);}
+    var t=findTaskDeep(NOTES_TASK_ID,TASKS);
+    if(t){t.notes=notes;saveTasks();var root=_findRootFor(NOTES_TASK_ID,TASKS)||t;fbSave('tasks',root.id,root);}
   }
   document.getElementById('notesModal').classList.remove('show');
 }
@@ -16908,13 +16911,15 @@ function renderEnergyWidget(){
 
 // ── Resume Notes ──────────────────────────────
 function setResumeNote(id){
-  var t=TASKS.find(function(x){return x.id===id;});
+  var t=findTaskDeep(id,TASKS);
   if(!t)return;
   var note=prompt('Where did you leave off?\n(Leave blank to clear)',t.resume||'');
   if(note===null)return;
   t.resume=note.trim();
-  fbSave('tasks',id,t);
-  renderAllR();
+  saveTasks();
+  var root=_findRootFor(id,TASKS)||t;
+  fbSave('tasks',root.id,root);
+  renderT();
 }
 
 // ── Meds ──────────────────────────────────────
