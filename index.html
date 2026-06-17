@@ -2675,6 +2675,7 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
       <button class="btn sec" style="font-size:12px;padding:5px 10px" onclick="clearCheckedGrocery()">Clear checked</button>
       <button class="btn sec" style="font-size:12px;padding:5px 10px" onclick="expGrocery()">Export</button>
     </div>
+    <button class="btn" style="width:100%;margin-bottom:10px;background:linear-gradient(135deg,#fdebd7,#fdf6ee);color:#b06a2c" onclick="syncMealPlanGrocery()">🍽️ Build from this week's meal plan</button>
     <div style="display:flex;gap:6px;margin-bottom:6px;flex-wrap:wrap">
       <input id="groceryAddName" type="text" placeholder="Item name" list="groceryDbSuggest" style="flex:2;min-width:100px;padding:8px 11px;border-radius:10px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px">
       <datalist id="groceryDbSuggest"></datalist>
@@ -2686,6 +2687,7 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
       <input type="checkbox" id="groceryAddToDB" style="width:16px;height:16px;flex-shrink:0">
       <label for="groceryAddToDB" style="font-size:12px;color:var(--textl);cursor:pointer">Add to Food Database</label>
     </div>
+    <div class="bd-filter-row" id="grocSourceFilter" style="margin-bottom:8px"></div>
     <div id="groceryEstTotal" style="font-size:13px;color:var(--textl);margin-bottom:8px"></div>
     <div id="groceryListEl"></div>
   </div>
@@ -20889,6 +20891,8 @@ function renderSlotPickerList(q){
 
 function pickMealSlot(name, fromWtt){
   if(!_slotPickDate||!_slotPickSlot)return;
+  // If a recipe was previously here, drop its auto-ingredients (meal source) for this slot
+  removeMealGroceryForSlot(_slotPickDate,_slotPickSlot);
   if(!MEAL_PLAN[_slotPickDate])MEAL_PLAN[_slotPickDate]={};
   MEAL_PLAN[_slotPickDate][_slotPickSlot]=name;
   localStorage.setItem('aMealPlan',JSON.stringify(MEAL_PLAN));
@@ -20907,6 +20911,8 @@ function clearMealSlot(date,slot){
   if(!MEAL_PLAN[date])return;
   delete MEAL_PLAN[date][slot];
   localStorage.setItem('aMealPlan',JSON.stringify(MEAL_PLAN));
+  // Deleting a meal removes its auto-ingredients but leaves manual items
+  removeMealGroceryForSlot(date,slot);
   if(document.getElementById('ovSlotPicker') && document.getElementById('ovSlotPicker').classList.contains('show'))closeOv('ovSlotPicker');
   renderMealPlan();
 }
@@ -21502,45 +21508,12 @@ function delRecipe(id){
 }
 
 // ── Grocery list ──────────────────────────────
+// Both this (from the weekly-plan panel) and the grocery-section button
+// route through syncMealPlanGrocery so meal items carry source+planKeys.
 function genGroceryFromPlan(){
-  var dates=getMealWeekDates(MEAL_WEEK_OFFSET);
-  var ingMap={};
-  dates.forEach(function(date){
-    var dayData=MEAL_PLAN[date]||{};
-    MEAL_SLOTS.forEach(function(slot){
-      var val=dayData[slot]||'';
-      if(!val)return;
-      var rec=RECIPES.find(function(r){return r.name===val;});
-      if(!rec||!rec.ingredients)return;
-      rec.ingredients.forEach(function(ing){
-        var key=(ing.dbItemId||ing.name.toLowerCase());
-        if(!ingMap[key]){
-          var dbi=ing.dbItemId?FOOD_DB.find(function(x){return x.id===ing.dbItemId;}):FOOD_DB.find(function(x){return x.name.toLowerCase()===(ing.name||'').toLowerCase();});
-          ingMap[key]={name:ing.name,qty:String(ing.qty||'1'),unit:ing.unit||'',category:(dbi&&dbi.tags&&dbi.tags[0])||'Other',store:(dbi&&dbi.store)||'',checked:false,dbItemId:dbi?dbi.id:''};
-        }
-      });
-    });
-  });
-  var newItems=Object.values(ingMap);
-  if(!newItems.length){alert('No recipe ingredients found for this week. Make sure your meal plan has recipes with ingredients added.');return;}
-  var inInv=newItems.filter(function(it){return INVENTORY.some(function(inv){return inv.name.toLowerCase()===it.name.toLowerCase()||(it.dbItemId&&inv.dbItemId&&inv.dbItemId===it.dbItemId);});});
-  var notInInv=newItems.filter(function(it){return !INVENTORY.some(function(inv){return inv.name.toLowerCase()===it.name.toLowerCase()||(it.dbItemId&&inv.dbItemId&&inv.dbItemId===it.dbItemId);});});
-  var added=0;
-  notInInv.forEach(function(item){
-    var exists=GROCERY_LIST.some(function(g){return g.name.toLowerCase()===item.name.toLowerCase();});
-    if(!exists){GROCERY_LIST.push(item);added++;}
-  });
-  if(inInv.length){
-    inInv.forEach(function(item){
-      var exists=GROCERY_LIST.some(function(g){return g.name.toLowerCase()===item.name.toLowerCase();});
-      if(!exists){GROCERY_LIST.push(Object.assign({},item,{inStock:true}));added++;}
-    });
-  }
-  localStorage.setItem('aGroceryList',JSON.stringify(GROCERY_LIST));
+  syncMealPlanGrocery();
   var btn=document.querySelector('#v-meals .pn-btn:nth-child(1)');
-  showMealSec('grocery',btn);
-  renderGrocery();
-  showToast(added+' item'+(added!==1?'s':'')+' added'+(inInv.length?' ('+inInv.length+' already in stock — marked)':'')+'');
+  if(btn)showMealSec('grocery',btn);
 }
 
 function openRecipeToGrocery(recId){
@@ -21591,7 +21564,8 @@ function confirmRecipeToGrocery(rec){
       category:(dbi&&dbi.tags&&dbi.tags[0])||'Other',
       store:(dbi&&dbi.store)||'',
       checked:false,
-      dbItemId:dbi?dbi.id:''
+      dbItemId:dbi?dbi.id:'',
+      source:'recipe'
     });
     added++;
   });
@@ -21786,13 +21760,125 @@ function pickInventoryFood(i){
   showInvPicker();
 }
 
+// ── Grocery sources (one list, four faucets) ──
+var GROC_SOURCE_META={
+  meal:{icon:'🍽️',label:'Meal plan',color:'#c08040',bg:'#fdf0e0'},
+  manual:{icon:'✋',label:'Manual',color:'#8a7a6a',bg:'#f3efe9'},
+  inventory:{icon:'📦',label:'Inventory',color:'#4a7a9b',bg:'#e8f2fa'},
+  recipe:{icon:'🥘',label:'Recipe',color:'#3a8058',bg:'#e8f5ec'}
+};
+var _grocSourceFilter='';
+function grocSourceOf(item){return item.source||'manual';}
+
+function setGrocSourceFilter(s,btn){
+  _grocSourceFilter=s;
+  var wrap=document.getElementById('grocSourceFilter');
+  if(wrap)wrap.querySelectorAll('.bd-filter').forEach(function(b){b.classList.remove('on');});
+  if(btn)btn.classList.add('on');
+  renderGrocery();
+}
+
+// Remove meal-sourced grocery items tied to a plan slot (date|slot).
+// Leaves manual/recipe/inventory items untouched. Shared ingredients
+// stay if another planned meal still needs them.
+function removeMealGroceryForSlot(date,slot){
+  var planKey=date+'|'+slot;
+  var changed=false;
+  for(var i=GROCERY_LIST.length-1;i>=0;i--){
+    var g=GROCERY_LIST[i];
+    if(g.source!=='meal'||!g.planKeys)continue;
+    var idx=g.planKeys.indexOf(planKey);
+    if(idx<0)continue;
+    g.planKeys.splice(idx,1);
+    changed=true;
+    if(!g.planKeys.length)GROCERY_LIST.splice(i,1);
+  }
+  if(changed)localStorage.setItem('aGroceryList',JSON.stringify(GROCERY_LIST));
+  return changed;
+}
+
+// Reconcile meal-sourced grocery items with the visible plan week.
+// Adds ingredients for assigned recipes, drops items whose slot changed.
+function syncMealPlanGrocery(){
+  var weekDates=getMealWeekDates(MEAL_WEEK_OFFSET);
+  var weekSet={};weekDates.forEach(function(d){weekSet[d]=true;});
+  // Build current valid (planKey -> [ingredient names]) for this week
+  var validKeys={};
+  weekDates.forEach(function(date){
+    var dayData=MEAL_PLAN[date]||{};
+    MEAL_SLOTS.forEach(function(slot){
+      var val=dayData[slot];if(!val)return;
+      var rec=RECIPES.find(function(r){return r.name===val;});
+      if(!rec||!rec.ingredients||!rec.ingredients.length)return;
+      validKeys[date+'|'+slot]=rec.ingredients;
+    });
+  });
+  // 1. Drop stale planKeys (date in this week but slot no longer maps to that recipe)
+  for(var i=GROCERY_LIST.length-1;i>=0;i--){
+    var g=GROCERY_LIST[i];
+    if(g.source!=='meal'||!g.planKeys)continue;
+    g.planKeys=g.planKeys.filter(function(pk){
+      var d=pk.split('|')[0];
+      if(weekSet[d]&&!validKeys[pk])return false; // this week, slot changed → drop
+      return true;
+    });
+    if(!g.planKeys.length)GROCERY_LIST.splice(i,1);
+  }
+  // 2. Add/merge ingredients for valid planKeys
+  var added=0;
+  Object.keys(validKeys).forEach(function(planKey){
+    validKeys[planKey].forEach(function(ing){
+      var nm=(ing.name||'').trim();if(!nm)return;
+      var dbi=ing.dbItemId?FOOD_DB.find(function(x){return x.id===ing.dbItemId;}):FOOD_DB.find(function(x){return x.name.toLowerCase()===nm.toLowerCase();});
+      // Skip if already covered by a meal item with this planKey
+      var existing=GROCERY_LIST.find(function(g){return g.source==='meal'&&g.name.toLowerCase()===nm.toLowerCase();});
+      if(existing){
+        if(!existing.planKeys)existing.planKeys=[];
+        if(existing.planKeys.indexOf(planKey)<0){existing.planKeys.push(planKey);added++;}
+        return;
+      }
+      GROCERY_LIST.push({
+        name:nm,
+        qty:String(ing.qty||'1'),
+        unit:ing.unit||'',
+        category:(dbi&&dbi.tags&&dbi.tags[0])||'Other',
+        store:(dbi&&dbi.store)||'',
+        checked:false,
+        dbItemId:dbi?dbi.id:'',
+        source:'meal',
+        planKeys:[planKey]
+      });
+      added++;
+    });
+  });
+  localStorage.setItem('aGroceryList',JSON.stringify(GROCERY_LIST));
+  renderGrocery();
+  if(added)showToast('🍽️ '+added+' item'+(added!==1?'s':'')+' from your meal plan');
+  else showToast('Grocery list already matches your plan');
+}
+
 function renderGrocery(){
   var el=document.getElementById('groceryListEl');
   if(!el)return;
-  if(!GROCERY_LIST.length){el.innerHTML='<p style="color:var(--textl);text-align:center;padding:20px">List is empty. Generate from plan or add items manually.</p>';updateGroceryTotal();return;}
-  // Group by store
+  // Source filter chip counts
+  var counts={meal:0,manual:0,inventory:0,recipe:0};
+  GROCERY_LIST.forEach(function(g){var s=grocSourceOf(g);if(counts[s]!==undefined)counts[s]++;});
+  var fwrap=document.getElementById('grocSourceFilter');
+  if(fwrap){
+    var fhtml='<button class="bd-filter'+(_grocSourceFilter===''?' on':'')+'" onclick="setGrocSourceFilter(\'\',this)">All</button>';
+    ['meal','manual','inventory','recipe'].forEach(function(s){
+      if(!counts[s])return;
+      var m=GROC_SOURCE_META[s];
+      fhtml+='<button class="bd-filter'+(_grocSourceFilter===s?' on':'')+'" onclick="setGrocSourceFilter(\''+s+'\',this)">'+m.icon+' '+counts[s]+'</button>';
+    });
+    fwrap.innerHTML=fhtml;
+  }
+  var visible=GROCERY_LIST.filter(function(g){return !_grocSourceFilter||grocSourceOf(g)===_grocSourceFilter;});
+  if(!visible.length){el.innerHTML='<p style="color:var(--textl);text-align:center;padding:20px">'+(_grocSourceFilter?'No items from this source.':'List is empty. Tap 🍽️ Build from meal plan, or add items manually.')+'</p>';updateGroceryTotal();return;}
+  // Group by store (using original GROCERY_LIST indexes so toggle/del stay correct)
   var stores={};
   GROCERY_LIST.forEach(function(item,i){
+    if(_grocSourceFilter&&grocSourceOf(item)!==_grocSourceFilter)return;
     var store=item.store||item.category||'No store';
     if(!stores[store])stores[store]=[];
     stores[store].push({item:item,idx:i});
@@ -21809,9 +21895,12 @@ function renderGrocery(){
       var dbi=item.dbItemId?FOOD_DB.find(function(x){return x.id===item.dbItemId;}):FOOD_DB.find(function(x){return x.name.toLowerCase()===(item.name||'').toLowerCase();});
       var nutLine=dbi&&dbi.cal?'<span style="font-size:10px;color:var(--textl);margin-left:6px">'+dbi.cal+'cal'+( dbi.pro?' · '+dbi.pro+'g pro':'')+'</span>':'';
       var inStockBadge=item.inStock?'<span style="font-size:10px;background:#e8f5e8;color:var(--sage);border-radius:6px;padding:1px 5px;margin-left:4px">in stock</span>':'';
+      var sm=GROC_SOURCE_META[grocSourceOf(item)]||GROC_SOURCE_META.manual;
+      var srcBadge='<span title="'+sm.label+'" style="font-size:10px;background:'+sm.bg+';color:'+sm.color+';border-radius:6px;padding:1px 5px;margin-left:4px;flex-shrink:0">'+sm.icon+'</span>';
       html+='<div class="grocery-item'+(item.checked?' done':'')+'">'
         +'<input type="checkbox" '+(item.checked?'checked':'')+' onchange="toggleGrocery('+i+')" style="width:18px;height:18px;cursor:pointer">'
         +'<span class="grocery-name" style="flex:1;font-size:13px">'+item.name+'<span style="color:var(--textl);font-size:11px"> '+item.qty+(item.unit?' '+item.unit:'')+'</span>'+nutLine+inStockBadge+'</span>'
+        +srcBadge
         +(price?'<span style="font-size:12px;color:var(--rose);font-weight:700">$'+price.toFixed(2)+'</span>':'')
         +'<button class="btn sec" style="font-size:11px;padding:2px 7px" onclick="delGroceryItem('+i+')">✕</button>'
         +'</div>';
@@ -21866,7 +21955,7 @@ function addGroceryManual(){
   name=name.trim();
   if(!name)return;
   var dbiMatch=FOOD_DB.find(function(x){return (x.name||'').toLowerCase()===name.toLowerCase();});
-  GROCERY_LIST.push({name:name,qty:qty,unit:(dbiMatch&&dbiMatch.serving)||'',category:(dbiMatch&&dbiMatch.tags&&dbiMatch.tags[0])||'Other',store:store||(dbiMatch&&dbiMatch.store)||'',checked:false,dbItemId:dbiMatch?dbiMatch.id:''});
+  GROCERY_LIST.push({name:name,qty:qty,unit:(dbiMatch&&dbiMatch.serving)||'',category:(dbiMatch&&dbiMatch.tags&&dbiMatch.tags[0])||'Other',store:store||(dbiMatch&&dbiMatch.store)||'',checked:false,dbItemId:dbiMatch?dbiMatch.id:'',source:'manual'});
   localStorage.setItem('aGroceryList',JSON.stringify(GROCERY_LIST));
   // Create FOOD_DB entry only if checkbox checked
   var nl=name.toLowerCase();
@@ -21885,12 +21974,15 @@ function updateGroceryTotal(){
   var el=document.getElementById('groceryEstTotal');
   if(!el)return;
   var total=0;
-  var hasAny=false;
+  var priced=0, unpriced=0;
   GROCERY_LIST.forEach(function(item){
+    if(item.checked)return;
+    if(_grocSourceFilter&&grocSourceOf(item)!==_grocSourceFilter)return;
     var p=getBestPrice(item.name);
-    if(p){total+=p;hasAny=true;}
+    if(p){total+=p;priced++;}else unpriced++;
   });
-  el.textContent=hasAny?'Estimated total: $'+total.toFixed(2):'';
+  if(!priced){el.textContent='';return;}
+  el.textContent='About $'+Math.round(total)+' so far ('+priced+' priced'+(unpriced?', '+unpriced+' no price yet':'')+')';
 }
 
 function getBestPrice(itemName){
@@ -22216,7 +22308,7 @@ function logPrice(){
 }
 
 function priceToGrocery(item,price,store){
-  GROCERY_LIST.push({id:'gr-'+Date.now(),name:item,qty:'1',unit:'',category:'Other',store:store||'',checked:false});
+  GROCERY_LIST.push({id:'gr-'+Date.now(),name:item,qty:'1',unit:'',category:'Other',store:store||'',checked:false,source:'inventory'});
   localStorage.setItem('aGroceryList',JSON.stringify(GROCERY_LIST));
   showToast(item+' added to grocery list!');
 }
