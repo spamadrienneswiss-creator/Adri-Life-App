@@ -22328,6 +22328,12 @@ function syncMealPlanGrocery(){
   else showToast('Grocery list already matches your plan');
 }
 
+// Collapsed-department state — ephemeral shopping state, keyed by dept id (not persisted)
+var _grocCollapsedDepts={};
+function toggleGrocDeptCollapse(did){
+  _grocCollapsedDepts[did]=!_grocCollapsedDepts[did];
+  renderGrocery();
+}
 function renderGrocItem(item,i){
   var unitPrice=getBestPrice(item.name,item.dbItemId);
   var dbi=item.dbItemId?FOOD_DB.find(function(x){return x.id===item.dbItemId;}):FOOD_DB.find(function(x){return x.name.toLowerCase()===(item.name||'').toLowerCase();});
@@ -22368,13 +22374,23 @@ function renderGrocery(){
       var group=deptGroups[did];if(!group||!group.length)return;
       var dept=grocDeptById(did);if(!dept)return;
       var doneCount=group.filter(function(e){return e.item.checked;}).length;
-      html+='<div class="grocery-cat-hdr">'+escHtml(dept.name)+(doneCount?' <span style="font-size:10px;color:var(--sage)">'+doneCount+'/'+group.length+' ✓</span>':'')+'</div>';
-      group.forEach(function(e){html+=renderGrocItem(e.item,e.idx);});
+      var collapsed=!!_grocCollapsedDepts[did];
+      html+='<div class="grocery-cat-hdr" onclick="toggleGrocDeptCollapse(\''+did+'\')" style="cursor:pointer;display:flex;align-items:center;gap:6px">'
+        +'<span style="font-size:11px;color:var(--textl);transition:transform .15s;display:inline-block;transform:rotate('+(collapsed?'-90deg':'0deg')+')">▾</span>'
+        +'<span>'+escHtml(dept.name)+'</span>'
+        +(doneCount?'<span style="font-size:10px;color:var(--sage)">'+doneCount+'/'+group.length+' ✓</span>':'<span style="font-size:10px;color:var(--textl)">'+group.length+'</span>')
+        +'</div>';
+      if(!collapsed)group.forEach(function(e){html+=renderGrocItem(e.item,e.idx);});
     });
     if(noDept.length){
       var doneNone=noDept.filter(function(e){return e.item.checked;}).length;
-      if(html)html+='<div class="grocery-cat-hdr" style="opacity:0.6">Other'+(doneNone?' <span style="font-size:10px;color:var(--sage)">'+doneNone+'/'+noDept.length+' ✓</span>':'')+'</div>';
-      noDept.forEach(function(e){html+=renderGrocItem(e.item,e.idx);});
+      var noneCollapsed=!!_grocCollapsedDepts['__none__'];
+      if(html)html+='<div class="grocery-cat-hdr" onclick="toggleGrocDeptCollapse(\'__none__\')" style="cursor:pointer;display:flex;align-items:center;gap:6px;opacity:0.6">'
+        +'<span style="font-size:11px;color:var(--textl);transition:transform .15s;display:inline-block;transform:rotate('+(noneCollapsed?'-90deg':'0deg')+')">▾</span>'
+        +'<span>Other</span>'
+        +(doneNone?'<span style="font-size:10px;color:var(--sage)">'+doneNone+'/'+noDept.length+' ✓</span>':'<span style="font-size:10px;color:var(--textl)">'+noDept.length+'</span>')
+        +'</div>';
+      if(!noneCollapsed)noDept.forEach(function(e){html+=renderGrocItem(e.item,e.idx);});
     }
   } else {
     var stores={};
