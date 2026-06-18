@@ -2525,23 +2525,6 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
 </div>
 
 <div class="view" id="v-meals">
-  <div class="card" style="margin-bottom:10px;padding:10px 14px">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:7px">
-      <span style="font-size:13px;font-weight:700;color:var(--textd)">💧 Water Today</span>
-      <div style="display:flex;align-items:center;gap:10px">
-        <span id="eatWaterLabel" style="font-size:14px;font-weight:700;color:#2e88c8">0 oz</span>
-        <button onclick="openSubpage('sp-nutrition')" style="font-size:11px;color:var(--textl);background:none;border:none;cursor:pointer;font-family:'Quicksand',sans-serif;padding:0;text-decoration:underline">🥗 Nutrition Log →</button>
-      </div>
-    </div>
-    <div style="display:flex;gap:5px;flex-wrap:wrap;align-items:center">
-      <button onclick="addWaterOz(-8)" style="padding:5px 9px;border-radius:8px;border:1.5px solid #f0a0a0;background:#fff5f5;font-family:'Quicksand',sans-serif;font-size:12px;font-weight:700;color:#c05050;cursor:pointer">−8</button>
-      <button onclick="addWaterOz(8)" style="padding:5px 9px;border-radius:8px;border:1.5px solid #a8cceb;background:#f0f8ff;font-family:'Quicksand',sans-serif;font-size:12px;font-weight:700;color:#2e88c8;cursor:pointer">+8</button>
-      <button onclick="addWaterOz(16)" style="padding:5px 9px;border-radius:8px;border:1.5px solid #a8cceb;background:#f0f8ff;font-family:'Quicksand',sans-serif;font-size:12px;font-weight:700;color:#2e88c8;cursor:pointer">+16</button>
-      <button onclick="addWaterOz(32)" style="padding:5px 9px;border-radius:8px;border:none;background:linear-gradient(135deg,var(--lav),#5a90d0);font-family:'Quicksand',sans-serif;font-size:11px;font-weight:700;color:white;cursor:pointer">Owala</button>
-      <input type="number" id="waterCustomFoodOz" placeholder="oz" min="1" max="200" style="width:50px;padding:4px 6px;border-radius:8px;border:1.5px solid #a8cceb;font-family:'Quicksand',sans-serif;font-size:12px;text-align:center">
-      <button onclick="(function(){var v=parseInt(document.getElementById('waterCustomFoodOz').value);if(v>0){addWaterOz(v);document.getElementById('waterCustomFoodOz').value='';}})()" style="padding:5px 10px;border-radius:8px;border:1.5px solid #a8cceb;background:#f0f8ff;font-family:'Quicksand',sans-serif;font-size:12px;font-weight:700;color:#2e88c8;cursor:pointer">+</button>
-    </div>
-  </div>
   <div class="pill-nav" style="margin-bottom:12px">
     <button class="pn-btn" onclick="showMealSec('grocery',this)">🛒 Grocery</button>
     <button class="pn-btn on" onclick="showMealSec('meals',this)">🍽️ Meals</button>
@@ -2553,73 +2536,105 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     <button class="pn-btn" onclick="showMealSec('database',this)">🧩 Ingredient Library</button>
   </div>
 
-  <!-- MEALS section (category-based log) -->
+  <!-- MEALS section — two sub-tabs -->
   <div id="ms-meals">
-    <!-- Daily macro summary -->
-    <div id="mealMacroCard" class="card" style="margin-bottom:10px;padding:11px 14px"></div>
-    <!-- Quick-log chips -->
-    <div id="quickLogWrap" style="margin-bottom:10px"></div>
-    <div class="card" style="margin-bottom:10px">
-      <div style="display:flex;gap:8px;align-items:center">
-        <div style="flex:1">
-          <input id="mealLogName" type="text" list="foodDbSuggestList" placeholder="What did you eat/drink?" style="width:100%;padding:8px 11px;border-radius:10px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px;box-sizing:border-box" oninput="onMealLogNameInput(this.value)" onfocus="showMealLogExtras()">
-          <datalist id="foodDbSuggestList"></datalist>
-        </div>
-        <button class="btn sec" style="flex-shrink:0;padding:8px 13px;font-size:13px;white-space:nowrap" onclick="openFoodLibPick()">📚 Library</button>
-      </div>
-      <div id="mealLogExtras" style="display:none;margin-top:8px">
-        <div style="display:flex;gap:8px;flex-wrap:wrap">
-          <div style="flex:1;min-width:110px">
-            <label style="font-size:11px;color:var(--textl);display:block;margin-bottom:3px">Category</label>
-            <select id="mealLogCat" style="width:100%;padding:8px 10px;border-radius:10px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px;box-sizing:border-box">
-              <option value="main">🍳 Main Meal</option>
-              <option value="snack">🥨 Snack</option>
-              <option value="beverage">☕ Beverage</option>
-              <option value="treat">🍰 Treat</option>
-              <option value="supplement">💊 Supplement</option>
-            </select>
-          </div>
-          <div style="flex:1;min-width:100px">
-            <label style="font-size:11px;color:var(--textl);display:block;margin-bottom:3px">Day (optional)</label>
-            <select id="mealLogDay" style="width:100%;padding:8px 10px;border-radius:10px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px;box-sizing:border-box">
-              <option value="">No day</option>
-              <option>Monday</option><option>Tuesday</option><option>Wednesday</option>
-              <option>Thursday</option><option>Friday</option><option>Saturday</option><option>Sunday</option>
-            </select>
-          </div>
-        </div>
-        <div style="display:flex;align-items:center;gap:8px;margin-top:8px;margin-bottom:4px">
-          <input type="checkbox" id="mealLogAddToDB" style="width:16px;height:16px;flex-shrink:0">
-          <label for="mealLogAddToDB" style="font-size:12px;color:var(--textl);cursor:pointer">Add to Food Database</label>
-        </div>
-        <button class="btn" style="width:100%;margin-top:4px" onclick="addMealLogItem()">+ Log Meal</button>
-      </div>
+    <!-- Sub-tab toggle -->
+    <div style="display:flex;gap:4px;margin-bottom:12px;background:var(--bg2);border-radius:12px;padding:4px">
+      <button id="mealSubAteBtn" onclick="showMealSubTab('ate')" style="flex:1;padding:7px 0;border-radius:9px;border:none;font-family:'Quicksand',sans-serif;font-size:13px;font-weight:700;cursor:pointer;background:var(--lav);color:var(--textd);transition:background .2s">📓 What I Ate</button>
+      <button id="mealSubPlanBtn" onclick="showMealSubTab('plan')" style="flex:1;padding:7px 0;border-radius:9px;border:none;font-family:'Quicksand',sans-serif;font-size:13px;font-weight:700;cursor:pointer;background:none;color:var(--textl);transition:background .2s">📅 Meal Plan</button>
     </div>
-    <div class="bd-filter-row" id="mealLogFilter" style="margin-bottom:10px;display:none">
-      <button class="bd-filter on" onclick="setMealLogFilter('',this)">All</button>
-      <button class="bd-filter" onclick="setMealLogFilter('main',this)">🍳 Mains</button>
-      <button class="bd-filter" onclick="setMealLogFilter('snack',this)">🥨 Snacks</button>
-      <button class="bd-filter" onclick="setMealLogFilter('beverage',this)">☕ Beverages</button>
-      <button class="bd-filter" onclick="setMealLogFilter('treat',this)">🍰 Treats</button>
-      <button class="bd-filter" onclick="setMealLogFilter('supplement',this)">💊 Supps</button>
-    </div>
-    <div id="mealLogList"></div>
 
-    <!-- Collapsible weekly plan -->
-    <div style="margin-top:14px;border-top:1px solid var(--border);padding-top:10px">
-      <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer" onclick="toggleWeeklyPlan()">
-        <span style="font-weight:700;font-size:13px;color:var(--textd)">📅 Weekly Meal Plan</span>
-        <button id="weeklyPlanToggleBtn" style="background:none;border:none;font-size:16px;cursor:pointer;color:var(--textl);padding:2px 6px">▼</button>
-      </div>
-      <div id="weeklyPlanCollapsible" style="display:none;margin-top:8px">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-          <button class="btn sec" style="padding:5px 10px;font-size:12px" onclick="shiftMealWeek(-1)">◀</button>
-          <span id="mealWeekLbl" style="font-weight:700;font-size:13px;color:var(--textd)"></span>
-          <button class="btn sec" style="padding:5px 10px;font-size:12px" onclick="shiftMealWeek(1)">▶</button>
+    <!-- WHAT I ATE sub-tab -->
+    <div id="ms-sub-ate">
+      <!-- Date nav -->
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+        <button onclick="shiftEatDate(-1)" style="padding:5px 13px;border-radius:8px;border:1.5px solid var(--bdr);background:var(--bg);font-family:'Quicksand',sans-serif;font-size:14px;cursor:pointer;color:var(--textl)">◀</button>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span id="eatDateLabel" style="font-size:14px;font-weight:700;color:var(--textd)">Today</span>
+          <button id="eatTodayBtn" onclick="jumpToEatToday()" style="display:none;font-size:11px;padding:3px 10px;border-radius:8px;border:1.5px solid var(--rose);background:#fff5f5;font-family:'Quicksand',sans-serif;font-weight:700;color:var(--rose);cursor:pointer">Today</button>
         </div>
-        <div id="mealPlanGrid" class="meal-grid"></div>
-        <button class="btn" style="width:100%;margin-top:6px" onclick="genGroceryFromPlan()">🛒 Generate Grocery List from This Week</button>
+        <button onclick="shiftEatDate(1)" style="padding:5px 13px;border-radius:8px;border:1.5px solid var(--bdr);background:var(--bg);font-family:'Quicksand',sans-serif;font-size:14px;cursor:pointer;color:var(--textl)">▶</button>
       </div>
+      <!-- Water -->
+      <div class="card" style="margin-bottom:10px;padding:10px 14px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:7px">
+          <span style="font-size:13px;font-weight:700;color:var(--textd)">💧 Water</span>
+          <div style="display:flex;align-items:center;gap:10px">
+            <span id="eatWaterLabel" style="font-size:14px;font-weight:700;color:#2e88c8">0 oz</span>
+            <button onclick="openSubpage('sp-nutrition')" style="font-size:11px;color:var(--textl);background:none;border:none;cursor:pointer;font-family:'Quicksand',sans-serif;padding:0;text-decoration:underline">🥗 Nutrition Log →</button>
+          </div>
+        </div>
+        <div style="display:flex;gap:5px;flex-wrap:wrap;align-items:center">
+          <button onclick="addWaterForEatDate(-8)" style="padding:5px 9px;border-radius:8px;border:1.5px solid #f0a0a0;background:#fff5f5;font-family:'Quicksand',sans-serif;font-size:12px;font-weight:700;color:#c05050;cursor:pointer">−8</button>
+          <button onclick="addWaterForEatDate(8)" style="padding:5px 9px;border-radius:8px;border:1.5px solid #a8cceb;background:#f0f8ff;font-family:'Quicksand',sans-serif;font-size:12px;font-weight:700;color:#2e88c8;cursor:pointer">+8</button>
+          <button onclick="addWaterForEatDate(16)" style="padding:5px 9px;border-radius:8px;border:1.5px solid #a8cceb;background:#f0f8ff;font-family:'Quicksand',sans-serif;font-size:12px;font-weight:700;color:#2e88c8;cursor:pointer">+16</button>
+          <button onclick="addWaterForEatDate(32)" style="padding:5px 9px;border-radius:8px;border:none;background:linear-gradient(135deg,var(--lav),#5a90d0);font-family:'Quicksand',sans-serif;font-size:11px;font-weight:700;color:white;cursor:pointer">Owala</button>
+          <input type="number" id="waterCustomFoodOz" placeholder="oz" min="1" max="200" style="width:50px;padding:4px 6px;border-radius:8px;border:1.5px solid #a8cceb;font-family:'Quicksand',sans-serif;font-size:12px;text-align:center">
+          <button onclick="(function(){var v=parseInt(document.getElementById('waterCustomFoodOz').value);if(v>0){addWaterForEatDate(v);document.getElementById('waterCustomFoodOz').value='';}})()" style="padding:5px 10px;border-radius:8px;border:1.5px solid #a8cceb;background:#f0f8ff;font-family:'Quicksand',sans-serif;font-size:12px;font-weight:700;color:#2e88c8;cursor:pointer">+</button>
+        </div>
+      </div>
+      <!-- Daily macro summary -->
+      <div id="mealMacroCard" class="card" style="margin-bottom:10px;padding:11px 14px"></div>
+      <!-- Quick-log chips -->
+      <div id="quickLogWrap" style="margin-bottom:10px"></div>
+      <!-- Log form -->
+      <div class="card" style="margin-bottom:10px">
+        <div style="display:flex;gap:8px;align-items:center">
+          <div style="flex:1">
+            <input id="mealLogName" type="text" list="foodDbSuggestList" placeholder="What did you eat/drink?" style="width:100%;padding:8px 11px;border-radius:10px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px;box-sizing:border-box" oninput="onMealLogNameInput(this.value)" onfocus="showMealLogExtras()">
+            <datalist id="foodDbSuggestList"></datalist>
+          </div>
+          <button class="btn sec" style="flex-shrink:0;padding:8px 13px;font-size:13px;white-space:nowrap" onclick="openFoodLibPick()">📚 Library</button>
+        </div>
+        <div id="mealLogExtras" style="display:none;margin-top:8px">
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <div style="flex:1;min-width:110px">
+              <label style="font-size:11px;color:var(--textl);display:block;margin-bottom:3px">Category</label>
+              <select id="mealLogCat" style="width:100%;padding:8px 10px;border-radius:10px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px;box-sizing:border-box">
+                <option value="main">🍳 Main Meal</option>
+                <option value="snack">🥨 Snack</option>
+                <option value="beverage">☕ Beverage</option>
+                <option value="treat">🍰 Treat</option>
+                <option value="supplement">💊 Supplement</option>
+              </select>
+            </div>
+            <div style="flex:1;min-width:100px">
+              <label style="font-size:11px;color:var(--textl);display:block;margin-bottom:3px">Day (optional)</label>
+              <select id="mealLogDay" style="width:100%;padding:8px 10px;border-radius:10px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px;box-sizing:border-box">
+                <option value="">No day</option>
+                <option>Monday</option><option>Tuesday</option><option>Wednesday</option>
+                <option>Thursday</option><option>Friday</option><option>Saturday</option><option>Sunday</option>
+              </select>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;margin-top:8px;margin-bottom:4px">
+            <input type="checkbox" id="mealLogAddToDB" style="width:16px;height:16px;flex-shrink:0">
+            <label for="mealLogAddToDB" style="font-size:12px;color:var(--textl);cursor:pointer">Add to Food Database</label>
+          </div>
+          <button class="btn" style="width:100%;margin-top:4px" onclick="addMealLogItem()">+ Log Meal</button>
+        </div>
+      </div>
+      <!-- Category filter row -->
+      <div class="bd-filter-row" id="mealLogFilter" style="margin-bottom:10px;display:none">
+        <button class="bd-filter on" onclick="setMealLogFilter('',this)">All</button>
+        <button class="bd-filter" onclick="setMealLogFilter('main',this)">🍳 Mains</button>
+        <button class="bd-filter" onclick="setMealLogFilter('snack',this)">🥨 Snacks</button>
+        <button class="bd-filter" onclick="setMealLogFilter('beverage',this)">☕ Beverages</button>
+        <button class="bd-filter" onclick="setMealLogFilter('treat',this)">🍰 Treats</button>
+        <button class="bd-filter" onclick="setMealLogFilter('supplement',this)">💊 Supps</button>
+      </div>
+      <div id="mealLogList"></div>
+    </div>
+
+    <!-- MEAL PLAN sub-tab -->
+    <div id="ms-sub-plan" style="display:none">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+        <button class="btn sec" style="padding:5px 10px;font-size:12px" onclick="shiftMealWeek(-1)">◀</button>
+        <span id="mealWeekLbl" style="font-weight:700;font-size:13px;color:var(--textd)"></span>
+        <button class="btn sec" style="padding:5px 10px;font-size:12px" onclick="shiftMealWeek(1)">▶</button>
+      </div>
+      <div id="mealPlanGrid" class="meal-grid"></div>
+      <button class="btn" style="width:100%;margin-top:8px" onclick="genGroceryFromPlan()">🛒 Generate Grocery List from This Week</button>
     </div>
   </div>
 
@@ -8948,6 +8963,14 @@ function getTot(){
   });
   return base;
 }
+function getTotForDate(isoDate){
+  var tk=new Date(isoDate+'T12:00:00').toDateString();
+  var base=(FL[tk]||[]).reduce(function(a,i){a.cal+=i.cal||0;a.pro+=i.pro||0;a.fib+=i.fib||0;a.crb+=i.crb||0;a.fat+=i.fat||0;return a;},{cal:0,pro:0,fib:0,crb:0,fat:0});
+  (MEAL_LOG_ITEMS||[]).filter(function(m){return m.date===isoDate&&(m.cal||m.pro||m.carb||m.fat);}).forEach(function(m){
+    base.cal+=m.cal||0;base.pro+=m.pro||0;base.fib+=m.fiber||0;base.crb+=m.carb||0;base.fat+=m.fat||0;
+  });
+  return base;
+}
 function getW(){return WL[getTK()]||0;}
 
 function logWat(){
@@ -8975,6 +8998,24 @@ function addWaterOz(oz){
   if(oz>0)showToast('+'+oz+' oz');
 }
 
+function addWaterForEatDate(oz){
+  var k=eatLogDateTK();
+  var isToday=k===getTK();
+  var newOz=Math.max(0,(WATER_OZ_LOG[k]||0)+oz);
+  WATER_OZ_LOG[k]=newOz;
+  localStorage.setItem('aWaterOzLog',JSON.stringify(WATER_OZ_LOG));
+  fbSave('waterlog','log',{data:WATER_OZ_LOG,updated:new Date().toISOString()});
+  if(isToday){WL[k]=Math.max(0,Math.round(newOz/8));localStorage.setItem('aWL',JSON.stringify(WL));renderWaterBottle();renderWaterDrops();renderTodayStatsBars();}
+  renderEatWaterLabel();
+  if(oz>0)showToast('+'+oz+' oz');
+}
+function renderEatWaterLabel(){
+  var k=eatLogDateTK();
+  var oz=WATER_OZ_LOG[k]||0;
+  var goal=getWaterOzGoal();
+  var el=document.getElementById('eatWaterLabel');
+  if(el)el.textContent=oz+' / '+goal+' oz';
+}
 function getWaterOzGoal(){return (S.wUnit==='oz')?Math.max(1,S.gWat||64):(Math.max(1,S.gWat||8)*8);}
 
 function renderWaterBottle(){
@@ -8993,8 +9034,6 @@ function renderWaterBottle(){
     note.textContent=rem>0?rem+' oz to go':'Goal reached! 🎉';
     note.style.color=rem>0?'var(--textl)':'var(--sage)';
   }
-  var eatLbl=document.getElementById('eatWaterLabel');
-  if(eatLbl)eatLbl.textContent=oz+' / '+goal+' oz';
 }
 
 // ── Steps ─────────────────────────────────────
@@ -20457,6 +20496,45 @@ function showMealSec(sec,btn){
   if(sec==='wantTry')renderWantToTry();
 }
 
+// ── Eat-log date navigation ───────────────────
+var _eatLogDate='';
+function getEatLogDate(){if(!_eatLogDate)_eatLogDate=todayStr();return _eatLogDate;}
+function eatLogDateTK(){return new Date(getEatLogDate()+'T12:00:00').toDateString();}
+function shiftEatDate(dir){
+  var d=new Date(getEatLogDate()+'T12:00:00');
+  d.setDate(d.getDate()+dir);
+  _eatLogDate=d.toISOString().slice(0,10);
+  renderMealLog();
+}
+function jumpToEatToday(){_eatLogDate=todayStr();renderMealLog();}
+function renderEatDateNav(){
+  var iso=getEatLogDate();
+  var today=todayStr();
+  var lbl=document.getElementById('eatDateLabel');
+  if(lbl){
+    if(iso===today){lbl.textContent='Today';}
+    else{
+      var d=new Date(iso+'T12:00:00');
+      var mo=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      lbl.textContent=mo[d.getMonth()]+' '+d.getDate()+(d.getFullYear()!==new Date().getFullYear()?' '+d.getFullYear():'');
+    }
+  }
+  var todayBtn=document.getElementById('eatTodayBtn');
+  if(todayBtn)todayBtn.style.display=iso===today?'none':'';
+}
+function showMealSubTab(tab){
+  var ate=document.getElementById('ms-sub-ate');
+  var plan=document.getElementById('ms-sub-plan');
+  var ateBtn=document.getElementById('mealSubAteBtn');
+  var planBtn=document.getElementById('mealSubPlanBtn');
+  var isAte=tab==='ate';
+  if(ate)ate.style.display=isAte?'':'none';
+  if(plan)plan.style.display=isAte?'none':'';
+  if(ateBtn){ateBtn.style.background=isAte?'var(--lav)':'none';ateBtn.style.color=isAte?'var(--textd)':'var(--textl)';}
+  if(planBtn){planBtn.style.background=isAte?'none':'var(--lav)';planBtn.style.color=isAte?'var(--textl)':'var(--textd)';}
+  if(isAte)renderMealLog();else renderMealPlan();
+}
+
 // ── Meal Log (category-based) ─────────────────
 var MEAL_LOG_ITEMS=JSON.parse(localStorage.getItem('aMealLogItems')||'[]');
 var _mealLogFilter='';
@@ -20479,7 +20557,7 @@ function addMealLogItem(){
   name=name.trim();if(!name)return;
   var cat=(document.getElementById('mealLogCat')||{}).value||'main';
   var day=(document.getElementById('mealLogDay')||{}).value||'';
-  MEAL_LOG_ITEMS.unshift({id:'ml-'+Date.now(),name:name,category:cat,day:day,date:todayStr()});
+  MEAL_LOG_ITEMS.unshift({id:'ml-'+Date.now(),name:name,category:cat,day:day,date:getEatLogDate()});
   localStorage.setItem('aMealLogItems',JSON.stringify(MEAL_LOG_ITEMS));
   // Track useCount on matching FOOD_DB item; only create new entry if checkbox checked
   var nl=name.toLowerCase();
@@ -20605,7 +20683,7 @@ function addFoodFromLib(name, cal, pro, carb, fat){
 
 function renderMealMacroBar(){
   var el=document.getElementById('mealMacroCard');if(!el)return;
-  var t=getTot();
+  var t=getTotForDate(getEatLogDate());
   var pct=function(v,g){return Math.min(100,g>0?v/g*100:0).toFixed(1)+'%';};
   var over=function(v,g){return v>g;};
   var row=function(label,v,g,colorClass){
@@ -20633,7 +20711,7 @@ function renderMealMacroBar(){
     +row('🌾 Carbs',t.crb,S.gCrb,'#c09030')
     +row('🫙 Fat',t.fat,S.gFat,'#d06060')
     +(function(){
-      var td=todayStr();
+      var td=getEatLogDate();
       var hasGluten=(MEAL_LOG_ITEMS||[]).some(function(m){return m.date===td&&m.gluten;});
       return hasGluten?'<div style="background:#fdf6e0;border-radius:8px;padding:5px 10px;margin-top:2px;font-size:11px;color:#a07820;font-weight:700">🌾 Gluten logged today</div>':'';
     }())
@@ -20730,12 +20808,16 @@ function openQuickLogPortion(id){
 }
 
 function renderMealLog(){
+  renderEatDateNav();
+  renderEatWaterLabel();
   renderMealMacroBar();
   renderQuickLogChips();
+  var filterDate=getEatLogDate();
+  var dateItems=MEAL_LOG_ITEMS.filter(function(m){return m.date===filterDate;});
   var filterEl=document.getElementById('mealLogFilter');
-  if(filterEl)filterEl.style.display=MEAL_LOG_ITEMS.length?'':'none';
+  if(filterEl)filterEl.style.display=dateItems.length?'':'none';
   var el=document.getElementById('mealLogList');if(!el)return;
-  var list=_mealLogFilter?MEAL_LOG_ITEMS.filter(function(m){return m.category===_mealLogFilter;}):MEAL_LOG_ITEMS;
+  var list=_mealLogFilter?dateItems.filter(function(m){return m.category===_mealLogFilter;}):dateItems;
   if(!list.length){el.innerHTML='<p style="color:var(--textl);text-align:center;padding:20px">No meals logged yet. Start tracking what you eat!</p>';return;}
   // Group by category if showing all
   if(!_mealLogFilter){
