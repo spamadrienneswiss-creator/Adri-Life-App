@@ -7,6 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
 <style>
 :root{--cream:#fdf6ee;--sage:#8faa8b;--sage-light:#d4e4d0;--rose:#c9a0a0;--rose-light:#f2dede;--blue:#8aafc9;--blue-light:#daeaf5;--lav:#a99fc9;--lav-light:#e8e4f5;--peach:#d4a574;--peach-light:#fde8d0;--teal:#7fb5b0;--teal-light:#d5eceb;--text:#3d3530;--textl:#7a6e68;--ured:#e07070;--uyel:#d4b85a;--ublu:#7aaad0;--una:#bbb;--sh:0 4px 20px rgba(61,53,48,.08);--sh2:0 2px 10px rgba(61,53,48,.06);--r:16px;--r2:12px;--title-color:#ffffff;--coral:#F06677;--cobalt:#2475FF;--lime:#EEFFA4}
+.trip-summer{--tp-page:#FBF4EC;--tp-hdr-text:#414C12;--tp-hdr-border:#EFA9BC;--tp-tile-bg:#F8C2D1;--tp-tile-num:#7E2E43;--tp-saved-bg:#FCE0E8;--tp-bar:#F06677;--tp-bar-track:#FDD3DD;--tp-card-bg:#FFFFFF;--tp-card-border:#8CC4E8;--tp-paid-bg:#E5F0BE;--tp-paid-text:#4F6014;--tp-unpaid-bg:#FBDCE4;--tp-unpaid-text:#9A4558;--tp-muted:#9A8576}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text);min-height:100vh;overflow-x:hidden}
 
@@ -1879,6 +1880,7 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     <button class="pn-btn" data-sec="projects" onclick="showMoneySec('projects',this)">💼 Projects</button>
     <button class="pn-btn" data-sec="tax" onclick="showMoneySec('tax',this)">💸 Tax</button>
     <button class="pn-btn" data-sec="money-plan" onclick="showMoneySec('money-plan',this)">📈 Plan</button>
+    <button class="pn-btn" data-sec="trips" onclick="showMoneySec('trips',this)">✈️ Trips</button>
   </div>
   <!-- Overview -->
   <div id="ms-overview" class="money-sec">
@@ -2112,6 +2114,20 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
         <button class="btn sec" style="font-size:11px;padding:3px 10px" onclick="openMoneyTask()">＋ Task</button>
       </div>
       <div id="moneyTasksList"></div>
+    </div>
+  </div>
+  <!-- TRIPS SECTION -->
+  <div id="ms-trips" class="money-sec" style="display:none">
+    <div id="tripListView">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+        <span style="font-size:15px;font-weight:800;color:var(--textd)">✈️ Trips</span>
+        <button class="btn" style="font-size:13px;padding:7px 16px" onclick="openNewTrip(null)">+ New Trip</button>
+      </div>
+      <div id="tripListEl"></div>
+      <div id="tripArchiveToggle" style="text-align:center;margin-top:10px"></div>
+    </div>
+    <div id="tripDetailView" style="display:none">
+      <div id="tripDetailInner"></div>
     </div>
   </div>
 </div>
@@ -5649,6 +5665,11 @@ var PAYOFFS = JSON.parse(localStorage.getItem('aPayoffs')||'[]');
 var HOME_ITEMS = JSON.parse(localStorage.getItem('aHomeItems')||'[]');
 // {id, name, category, notes, photo:'', date, tags:[]}
 var MONEY_PROJECTS = JSON.parse(localStorage.getItem('aMoneyProjects')||'[]');
+// {id,name,dateStart,dateEnd,budget,saved,theme,bucketId,archived,cards:[{id,title,description,paid,lines:[{id,name,amount}]}]}
+var TRIPS = JSON.parse(localStorage.getItem('aTrips')||'[]');
+var _showArchivedTrips=false;
+var _tripDetailId='';
+var _editTripId='';
 // {id, name, goal, saved, notes, color, items:[{id,name,cat,amount,due:'',paid:false,date:''}], days:[{id,label,date,items:[{cat,amount,note}]}]}
 var TAX_LOG = JSON.parse(localStorage.getItem('aTaxLog')||'[]');
 // {id, type:'paid'|'owed'|'set-aside', amount, description, date, notes}
@@ -6210,6 +6231,7 @@ function initFirebase(){
       ap('aPriceLog',function(v,r){PRICE_LOG=v||[];_origSetItem('aPriceLog',r);});
       ap('aExpCats',function(v,r){if(v&&v.length)EXPENSE_CATS=v;_origSetItem('aExpCats',r);});
       ap('aMoneyProjects',function(v,r){MONEY_PROJECTS=v||[];_origSetItem('aMoneyProjects',r);});
+      ap('aTrips',function(v,r){TRIPS=v||[];_origSetItem('aTrips',r);});
       ap('aPayoffs',function(v,r){PAYOFFS=v||[];_origSetItem('aPayoffs',r);});
       ap('aBudgetBuckets',function(v,r){if(v&&v.length)BUDGET_BUCKETS=v;_origSetItem('aBudgetBuckets',r);});
       ap('aBudgetMoves',function(v,r){BUDGET_MOVES=v||[];_origSetItem('aBudgetMoves',r);});
@@ -6398,7 +6420,7 @@ function fbDelete(col, id){
 // localStorage.setItem is intercepted to auto-save on every write.
 // ═══════════════════════════════════════════════
 var BLOB_GROUPS={
-  money:['aBills','aBillPay','aBillMonthAmt','aAccounts','aIncome','aIncGoal','aMonIncGoal','aMoneyChecks','aTaxLog','aProjIncome','aPriceLog','aExpCats','aMoneyProjects','aPayoffs','aBudgetBuckets','aBudgetMoves'],
+  money:['aBills','aBillPay','aBillMonthAmt','aAccounts','aIncome','aIncGoal','aMonIncGoal','aMoneyChecks','aTaxLog','aProjIncome','aPriceLog','aExpCats','aMoneyProjects','aTrips','aPayoffs','aBudgetBuckets','aBudgetMoves'],
   health:['aMeds','aMedLog','aEnergyLog','aMeasLog','aMealLogItems','aMoodNotes','aWineDrinks','aSymLog','aSymTypes'],
   habits:['aHabits','aHabitLog'],
   routines:['aRS','aRS2','aRH','aRTG','aRtns'],
@@ -15891,6 +15913,271 @@ function renderMoneyProjects(){
   }).join('');
 }
 
+// ── TRIPS MODULE ─────────────────────────────────────────────────────
+function saveTrips(){localStorage.setItem('aTrips',JSON.stringify(TRIPS));}
+function tripById(id){return TRIPS.find(function(t){return t.id===id;});}
+function tripCardTotal(card){return (card.lines||[]).reduce(function(s,l){return s+(parseFloat(l.amount)||0);},0);}
+function tripPlanned(trip){return (trip.cards||[]).reduce(function(s,c){return s+tripCardTotal(c);},0);}
+function tripSpent(trip){return (trip.cards||[]).filter(function(c){return c.paid;}).reduce(function(s,c){return s+tripCardTotal(c);},0);}
+function tripLeft(trip){return (parseFloat(trip.budget)||0)-tripPlanned(trip);}
+
+function renderTrips(){
+  var el=document.getElementById('tripListEl');if(!el)return;
+  var list=TRIPS.filter(function(t){return _showArchivedTrips||!t.archived;});
+  var archivedCount=TRIPS.filter(function(t){return t.archived;}).length;
+  var tog=document.getElementById('tripArchiveToggle');
+  if(tog)tog.innerHTML=archivedCount?'<button onclick="toggleArchivedTrips()" style="background:none;border:none;font-size:12px;color:var(--textl);cursor:pointer;font-family:\'Quicksand\',sans-serif;font-weight:700;text-decoration:underline">'+(_showArchivedTrips?'Hide':'Show')+' archived ('+archivedCount+')</button>':'';
+  if(!list.length){el.innerHTML='<div class="empty"><div class="emj">✈️</div><p>'+(TRIPS.length?'All trips archived.':'No trips yet. Plan your next adventure!')+'</p></div>';return;}
+  el.innerHTML=list.map(function(trip){
+    var planned=tripPlanned(trip);var spent=tripSpent(trip);var left=tripLeft(trip);
+    var budget=parseFloat(trip.budget)||0;var saved=parseFloat(trip.saved)||0;
+    var savePct=budget?Math.min(100,Math.round(saved/budget*100)):0;
+    var dateStr=(trip.dateStart||trip.dateEnd)?((trip.dateStart||'?')+' → '+(trip.dateEnd||'?')):'';
+    return'<div class="card trip-summer" style="margin-bottom:12px;background:var(--tp-page);cursor:pointer" onclick="openTripDetail(\''+trip.id+'\')">'
+      +'<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">'
+        +'<div>'
+          +'<div style="font-size:16px;font-weight:800;color:var(--tp-hdr-text)">✈️ '+escHtml(trip.name)+'</div>'
+          +(dateStr?'<div style="font-size:11px;color:var(--tp-muted);margin-top:1px">'+dateStr+'</div>':'')
+        +'</div>'
+        +(trip.archived?'<span style="font-size:10px;font-weight:700;background:#ede8e3;color:var(--textl);border-radius:6px;padding:2px 7px">Archived</span>':'')
+      +'</div>'
+      +'<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:10px">'
+        +'<div style="background:var(--tp-tile-bg);border-radius:10px;padding:8px;text-align:center"><div style="font-size:10px;font-weight:700;color:var(--tp-muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px">Planned</div><div style="font-size:15px;font-weight:800;color:var(--tp-tile-num)">$'+planned.toFixed(0)+'</div></div>'
+        +'<div style="background:var(--tp-tile-bg);border-radius:10px;padding:8px;text-align:center"><div style="font-size:10px;font-weight:700;color:var(--tp-muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px">Spent</div><div style="font-size:15px;font-weight:800;color:var(--tp-tile-num)">$'+spent.toFixed(0)+'</div></div>'
+        +'<div style="background:'+(left<0?'var(--tp-unpaid-bg)':'var(--tp-tile-bg)')+';border-radius:10px;padding:8px;text-align:center"><div style="font-size:10px;font-weight:700;color:var(--tp-muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px">Left</div><div style="font-size:15px;font-weight:800;color:'+(left<0?'var(--tp-unpaid-text)':'var(--tp-tile-num)')+'">$'+Math.abs(left).toFixed(0)+'</div></div>'
+      +'</div>'
+      +'<div style="font-size:10px;font-weight:700;color:var(--tp-muted);margin-bottom:4px">SAVED $'+saved.toFixed(0)+' of $'+budget.toFixed(0)+'</div>'
+      +'<div style="height:7px;background:var(--tp-bar-track);border-radius:4px;overflow:hidden"><div style="height:100%;background:var(--tp-bar);border-radius:4px;width:'+savePct+'%;transition:width .4s"></div></div>'
+    +'</div>';
+  }).join('');
+}
+function toggleArchivedTrips(){_showArchivedTrips=!_showArchivedTrips;renderTrips();}
+
+function openTripDetail(id){
+  _tripDetailId=id;
+  document.getElementById('tripListView').style.display='none';
+  document.getElementById('tripDetailView').style.display='';
+  renderTripDetail();
+}
+function closeTripDetail(){
+  _tripDetailId='';
+  document.getElementById('tripDetailView').style.display='none';
+  document.getElementById('tripListView').style.display='';
+  renderTrips();
+}
+function renderTripDetail(){
+  var el=document.getElementById('tripDetailInner');if(!el)return;
+  var trip=tripById(_tripDetailId);if(!trip){closeTripDetail();return;}
+  var planned=tripPlanned(trip);var spent=tripSpent(trip);var left=tripLeft(trip);
+  var budget=parseFloat(trip.budget)||0;var saved=parseFloat(trip.saved)||0;
+  var savePct=budget?Math.min(100,Math.round(saved/budget*100)):0;
+  var dateStr=(trip.dateStart||trip.dateEnd)?((trip.dateStart||'?')+' → '+(trip.dateEnd||'?')):'';
+  var cardsHtml=(trip.cards||[]).map(function(card){
+    var ct=tripCardTotal(card);
+    var linesHtml=(card.lines||[]).map(function(line){
+      return'<div style="display:flex;align-items:center;gap:6px;padding:5px 0;border-bottom:1px solid #f5f0eb">'
+        +'<input value="'+escHtml(line.name)+'" onblur="updateTripLine(\''+trip.id+'\',\''+card.id+'\',\''+line.id+'\',\'name\',this.value)" style="flex:1;border:none;background:none;font-family:\'Quicksand\',sans-serif;font-size:13px;color:var(--text);outline:none;min-width:0" placeholder="Item">'
+        +'<div style="display:flex;align-items:center;gap:2px;flex-shrink:0"><span style="font-size:12px;color:var(--textl)">$</span>'
+          +'<input type="number" min="0" step="0.01" value="'+(line.amount||0)+'" onblur="updateTripLine(\''+trip.id+'\',\''+card.id+'\',\''+line.id+'\',\'amount\',this.value)" style="width:64px;border:none;background:none;font-family:\'Quicksand\',sans-serif;font-size:13px;font-weight:700;color:var(--text);outline:none;text-align:right"></div>'
+        +'<button onclick="deleteTripLine(\''+trip.id+'\',\''+card.id+'\',\''+line.id+'\')" style="background:none;border:none;font-size:13px;cursor:pointer;color:var(--textl);padding:0 2px;flex-shrink:0;line-height:1">✕</button>'
+      +'</div>';
+    }).join('');
+    return'<div class="trip-summer" style="background:var(--tp-card-bg);border:1.5px solid var(--tp-card-border);border-radius:14px;padding:13px;margin-bottom:10px">'
+      +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">'
+        +'<input value="'+escHtml(card.title)+'" onblur="updateTripCard(\''+trip.id+'\',\''+card.id+'\',\'title\',this.value)" style="flex:1;border:none;background:none;font-family:\'Quicksand\',sans-serif;font-size:15px;font-weight:800;color:var(--textd);outline:none;min-width:0" placeholder="Card title">'
+        +'<button onclick="toggleTripCardPaid(\''+trip.id+'\',\''+card.id+'\')" style="padding:3px 10px;border-radius:10px;border:none;font-family:\'Quicksand\',sans-serif;font-size:11px;font-weight:700;cursor:pointer;flex-shrink:0;background:'+(card.paid?'var(--tp-paid-bg)':'var(--tp-unpaid-bg)')+';color:'+(card.paid?'var(--tp-paid-text)':'var(--tp-unpaid-text)')+'">'+( card.paid?'✓ Paid':'Unpaid')+'</button>'
+        +'<button onclick="deleteTripCard(\''+trip.id+'\',\''+card.id+'\')" style="background:none;border:none;font-size:14px;cursor:pointer;color:var(--textl);padding:0 2px;flex-shrink:0;line-height:1">🗑️</button>'
+      +'</div>'
+      +'<textarea onblur="updateTripCard(\''+trip.id+'\',\''+card.id+'\',\'description\',this.value)" placeholder="Notes / itinerary…" style="width:100%;border:none;background:var(--tp-saved-bg);border-radius:8px;padding:7px 10px;font-family:\'Quicksand\',sans-serif;font-size:12px;color:var(--tp-muted);resize:vertical;min-height:36px;box-sizing:border-box;margin-bottom:8px;outline:none">'+escHtml(card.description||'')+'</textarea>'
+      +linesHtml
+      +'<div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px">'
+        +'<button onclick="addTripLine(\''+trip.id+'\',\''+card.id+'\')" style="background:none;border:1.5px dashed var(--tp-card-border);border-radius:8px;padding:4px 12px;font-family:\'Quicksand\',sans-serif;font-size:12px;font-weight:700;color:var(--tp-card-border);cursor:pointer">+ Line</button>'
+        +'<span id="tripCardTotal-'+card.id+'" style="font-size:14px;font-weight:800;color:'+(card.paid?'var(--tp-paid-text)':'var(--textd)')+'">$'+ct.toFixed(2)+'</span>'
+      +'</div>'
+    +'</div>';
+  }).join('');
+
+  el.innerHTML=
+    '<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">'
+      +'<button onclick="closeTripDetail()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--textl);padding:0;line-height:1">‹</button>'
+      +'<div style="flex:1;min-width:0">'
+        +'<input value="'+escHtml(trip.name)+'" onblur="updateTripField(\''+trip.id+'\',\'name\',this.value)" style="width:100%;border:none;background:none;font-family:\'Quicksand\',sans-serif;font-size:18px;font-weight:800;color:var(--textd);outline:none" placeholder="Trip name">'
+        +(dateStr?'<div style="font-size:11px;color:var(--textl)">'+dateStr+'</div>':'')
+      +'</div>'
+      +'<button onclick="openNewTrip(\''+trip.id+'\')" style="background:none;border:1.5px solid #e8ddd4;border-radius:8px;padding:4px 10px;font-size:12px;font-family:\'Quicksand\',sans-serif;cursor:pointer;color:var(--textl);flex-shrink:0">✎ Edit</button>'
+    +'</div>'
+    +'<div class="trip-summer" style="background:var(--tp-saved-bg);border-radius:14px;padding:12px;margin-bottom:12px">'
+      +'<div style="font-size:10px;font-weight:700;color:var(--tp-muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">Saved toward budget</div>'
+      +'<div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;flex-wrap:wrap">'
+        +'<span style="font-size:14px;color:var(--tp-muted)">$</span>'
+        +'<input type="number" min="0" value="'+saved+'" id="tripSavedInput" onblur="updateTripField(\''+trip.id+'\',\'saved\',this.value)" style="border:none;background:none;font-family:\'Quicksand\',sans-serif;font-size:22px;font-weight:800;color:var(--tp-bar);outline:none;width:110px">'
+        +'<span style="font-size:13px;color:var(--tp-muted)">of $'+budget.toFixed(0)+'</span>'
+        +'<span id="tripSaveLabel" style="font-size:12px;color:'+(saved>=budget?'var(--tp-paid-text)':'var(--tp-muted)')+'">'+( saved>=budget?'🎉 Fully funded!':'still $'+(budget-saved).toFixed(0)+' to go')+'</span>'
+      +'</div>'
+      +'<div style="height:8px;background:var(--tp-bar-track);border-radius:4px;overflow:hidden"><div id="tripSaveBar" style="height:100%;background:var(--tp-bar);border-radius:4px;width:'+savePct+'%;transition:width .4s"></div></div>'
+    +'</div>'
+    +'<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:14px">'
+      +'<div class="trip-summer" style="background:var(--tp-tile-bg);border-radius:12px;padding:10px;text-align:center"><div style="font-size:10px;font-weight:700;color:var(--tp-muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:3px">Planned</div><div id="tripDashPlanned" style="font-size:18px;font-weight:800;color:var(--tp-tile-num)">$'+planned.toFixed(0)+'</div></div>'
+      +'<div class="trip-summer" style="background:var(--tp-tile-bg);border-radius:12px;padding:10px;text-align:center"><div style="font-size:10px;font-weight:700;color:var(--tp-muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:3px">Spent</div><div id="tripDashSpent" style="font-size:18px;font-weight:800;color:var(--tp-tile-num)">$'+spent.toFixed(0)+'</div></div>'
+      +'<div class="trip-summer" style="background:'+(left<0?'var(--tp-unpaid-bg)':'var(--tp-tile-bg)')+';border-radius:12px;padding:10px;text-align:center"><div style="font-size:10px;font-weight:700;color:var(--tp-muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:3px">Left</div><div id="tripDashLeft" style="font-size:18px;font-weight:800;color:'+(left<0?'var(--tp-unpaid-text)':'var(--tp-tile-num)')+'">$'+Math.abs(left).toFixed(0)+'</div>'+(left<0?'<div style="font-size:9px;color:var(--tp-unpaid-text);font-weight:700">over budget</div>':'')+'</div>'
+    +'</div>'
+    +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">'
+      +'<span style="font-size:13px;font-weight:700;color:var(--textd)">Cards</span>'
+      +'<button onclick="addTripCard(\''+trip.id+'\')" style="background:none;border:1.5px dashed var(--tp-card-border);border-radius:8px;padding:5px 14px;font-family:\'Quicksand\',sans-serif;font-size:12px;font-weight:700;color:var(--tp-card-border);cursor:pointer">+ Add Card</button>'
+    +'</div>'
+    +cardsHtml
+    +'<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:16px;padding-top:12px;border-top:1px solid #f0ebe6">'
+      +'<button onclick="exportTrip(\''+trip.id+'\')" style="padding:7px 14px;border-radius:10px;border:1.5px solid var(--tp-card-border);background:none;font-family:\'Quicksand\',sans-serif;font-size:12px;font-weight:700;color:var(--tp-card-border);cursor:pointer">⬇ Export CSV</button>'
+      +(trip.archived
+        ?'<button onclick="unretireTrip(\''+trip.id+'\')" style="padding:7px 14px;border-radius:10px;border:1.5px solid var(--sage);background:none;font-family:\'Quicksand\',sans-serif;font-size:12px;font-weight:700;color:var(--sage);cursor:pointer">↩ Restore</button>'
+        :'<button onclick="retireTrip(\''+trip.id+'\')" style="padding:7px 14px;border-radius:10px;border:1.5px solid var(--textl);background:none;font-family:\'Quicksand\',sans-serif;font-size:12px;font-weight:700;color:var(--textl);cursor:pointer">📦 Archive</button>'
+      )
+      +'<button onclick="deleteTrip(\''+trip.id+'\')" style="padding:7px 14px;border-radius:10px;border:1.5px solid #ecd8d8;background:none;font-family:\'Quicksand\',sans-serif;font-size:12px;font-weight:700;color:var(--ured);cursor:pointer">🗑 Delete</button>'
+    +'</div>';
+}
+function _refreshTripNumbers(){
+  var trip=tripById(_tripDetailId);if(!trip)return;
+  var planned=tripPlanned(trip);var spent=tripSpent(trip);var left=tripLeft(trip);
+  var budget=parseFloat(trip.budget)||0;var saved=parseFloat(trip.saved)||0;
+  var savePct=budget?Math.min(100,Math.round(saved/budget*100)):0;
+  var ep=document.getElementById('tripDashPlanned');if(ep)ep.textContent='$'+planned.toFixed(0);
+  var es=document.getElementById('tripDashSpent');if(es)es.textContent='$'+spent.toFixed(0);
+  var el=document.getElementById('tripDashLeft');if(el){el.textContent='$'+Math.abs(left).toFixed(0)+(left<0?' ▲':'');el.style.color=left<0?'var(--tp-unpaid-text)':'var(--tp-tile-num)';}
+  var eb=document.getElementById('tripSaveBar');if(eb)eb.style.width=savePct+'%';
+  var esg=document.getElementById('tripSaveLabel');if(esg){esg.textContent=saved>=budget?'🎉 Fully funded!':'still $'+(budget-saved).toFixed(0)+' to go';esg.style.color=saved>=budget?'var(--tp-paid-text)':'var(--tp-muted)';}
+  (trip.cards||[]).forEach(function(card){var ect=document.getElementById('tripCardTotal-'+card.id);if(ect){ect.textContent='$'+tripCardTotal(card).toFixed(2);ect.style.color=card.paid?'var(--tp-paid-text)':'var(--textd)';}});
+}
+
+function updateTripField(id,field,value){
+  var trip=tripById(id);if(!trip)return;
+  if(field==='budget'||field==='saved')trip[field]=parseFloat(value)||0;
+  else trip[field]=value;
+  saveTrips();
+  updateTripBucket(trip);
+  if(field==='saved'||field==='budget')_refreshTripNumbers();
+}
+function updateTripCard(tid,cid,field,value){
+  var trip=tripById(tid);if(!trip)return;
+  var card=(trip.cards||[]).find(function(c){return c.id===cid;});if(!card)return;
+  card[field]=value;saveTrips();
+}
+function updateTripLine(tid,cid,lid,field,value){
+  var trip=tripById(tid);if(!trip)return;
+  var card=(trip.cards||[]).find(function(c){return c.id===cid;});if(!card)return;
+  var line=(card.lines||[]).find(function(l){return l.id===lid;});if(!line)return;
+  if(field==='amount')line[field]=parseFloat(value)||0;else line[field]=value;
+  saveTrips();
+  _refreshTripNumbers();
+}
+function addTripCard(tripId){
+  var trip=tripById(tripId);if(!trip)return;
+  if(!trip.cards)trip.cards=[];
+  trip.cards.push({id:'tc-'+Date.now()+Math.random().toString(36).slice(2,5),title:'',description:'',paid:false,lines:[]});
+  saveTrips();renderTripDetail();
+}
+function deleteTripCard(tripId,cardId){
+  var trip=tripById(tripId);if(!trip)return;
+  trip.cards=(trip.cards||[]).filter(function(c){return c.id!==cardId;});
+  saveTrips();renderTripDetail();
+}
+function toggleTripCardPaid(tripId,cardId){
+  var trip=tripById(tripId);if(!trip)return;
+  var card=(trip.cards||[]).find(function(c){return c.id===cardId;});if(!card)return;
+  card.paid=!card.paid;saveTrips();renderTripDetail();
+}
+function addTripLine(tripId,cardId){
+  var trip=tripById(tripId);if(!trip)return;
+  var card=(trip.cards||[]).find(function(c){return c.id===cardId;});if(!card)return;
+  if(!card.lines)card.lines=[];
+  card.lines.push({id:'tl-'+Date.now()+Math.random().toString(36).slice(2,5),name:'',amount:0});
+  saveTrips();renderTripDetail();
+}
+function deleteTripLine(tripId,cardId,lineId){
+  var trip=tripById(tripId);if(!trip)return;
+  var card=(trip.cards||[]).find(function(c){return c.id===cardId;});if(!card)return;
+  card.lines=(card.lines||[]).filter(function(l){return l.id!==lineId;});
+  saveTrips();renderTripDetail();
+}
+function updateTripBucket(trip){
+  if(!trip.bucketId)return;
+  var bucket=MONEY_PROJECTS.find(function(p){return p.id===trip.bucketId;});
+  if(!bucket)return;
+  bucket.saved=trip.saved;bucket.goal=trip.budget;bucket.name=trip.name;
+  localStorage.setItem('aMoneyProjects',JSON.stringify(MONEY_PROJECTS));
+}
+
+function openNewTrip(id){
+  _editTripId=id||'';
+  var trip=id?tripById(id):null;
+  var nm=document.getElementById('tripModalName');var ds=document.getElementById('tripModalStart');
+  var de=document.getElementById('tripModalEnd');var bg=document.getElementById('tripModalBudget');
+  var sv=document.getElementById('tripModalSaved');
+  if(nm)nm.value=trip?trip.name:'';
+  if(ds)ds.value=trip?(trip.dateStart||''):'';
+  if(de)de.value=trip?(trip.dateEnd||''):'';
+  if(bg)bg.value=trip?(trip.budget||''):'';
+  if(sv){sv.value=trip?(trip.saved||0):0;}
+  var svRow=document.getElementById('tripModalSavedRow');if(svRow)svRow.style.display=id?'':'none';
+  var title=document.getElementById('tripModalTitle');if(title)title.textContent=id?'✎ Edit Trip':'✈️ New Trip';
+  var del=document.getElementById('tripModalDel');if(del)del.style.display=id?'':'none';
+  showOv('ovNewTrip');
+}
+function saveTripModal(){
+  var name=(document.getElementById('tripModalName').value||'').trim();
+  if(!name){showToast('Give this trip a name first');return;}
+  var dateStart=document.getElementById('tripModalStart').value||'';
+  var dateEnd=document.getElementById('tripModalEnd').value||'';
+  var budget=parseFloat(document.getElementById('tripModalBudget').value)||0;
+  var sv=parseFloat(document.getElementById('tripModalSaved').value)||0;
+  if(_editTripId){
+    var trip=tripById(_editTripId);
+    if(trip){
+      trip.name=name;trip.dateStart=dateStart;trip.dateEnd=dateEnd;trip.budget=budget;
+      var svRow=document.getElementById('tripModalSavedRow');if(svRow&&svRow.style.display!=='none')trip.saved=sv;
+      saveTrips();updateTripBucket(trip);closeOv('ovNewTrip');
+      if(_tripDetailId===_editTripId)renderTripDetail();else renderTrips();
+    }
+  } else {
+    var bucketId='mp-trip-'+Date.now();
+    MONEY_PROJECTS.push({id:bucketId,name:name,goal:budget,saved:sv,notes:'✈️ Trip',color:'var(--coral)',items:[],days:[]});
+    localStorage.setItem('aMoneyProjects',JSON.stringify(MONEY_PROJECTS));
+    var newTrip={id:'tr-'+Date.now(),name:name,dateStart:dateStart,dateEnd:dateEnd,budget:budget,saved:sv,theme:'summer',bucketId:bucketId,archived:false,cards:[]};
+    TRIPS.unshift(newTrip);saveTrips();closeOv('ovNewTrip');renderTrips();
+    showToast('✈️ Trip created! Savings bucket linked in Projects.');
+  }
+}
+function retireTrip(id){
+  var trip=tripById(id);if(!trip)return;
+  trip.archived=true;saveTrips();showToast('Trip archived');closeTripDetail();
+}
+function unretireTrip(id){
+  var trip=tripById(id);if(!trip)return;
+  trip.archived=false;saveTrips();renderTripDetail();showToast('Trip restored');
+}
+function deleteTrip(id){
+  var trip=tripById(id);if(!trip)return;
+  if(!confirm('Delete "'+trip.name+'"? This can\'t be undone.'))return;
+  if(trip.bucketId){MONEY_PROJECTS=MONEY_PROJECTS.filter(function(p){return p.id!==trip.bucketId;});localStorage.setItem('aMoneyProjects',JSON.stringify(MONEY_PROJECTS));}
+  TRIPS=TRIPS.filter(function(t){return t.id!==id;});saveTrips();closeTripDetail();showToast('Trip deleted');
+}
+function exportTrip(id){
+  var trip=tripById(id);if(!trip)return;
+  var rows=[['Trip',trip.name],['Dates',(trip.dateStart||'')+(trip.dateEnd?' to '+trip.dateEnd:'')],['Budget','$'+((trip.budget||0).toFixed(2))],['Saved','$'+((trip.saved||0).toFixed(2))],['Planned','$'+tripPlanned(trip).toFixed(2)],['Spent','$'+tripSpent(trip).toFixed(2)],['Left','$'+tripLeft(trip).toFixed(2)],[]];
+  (trip.cards||[]).forEach(function(card){
+    rows.push([card.title||'Card',card.paid?'Paid':'Unpaid']);
+    if(card.description)rows.push(['Notes',card.description.replace(/[\r\n]+/g,' ')]);
+    (card.lines||[]).forEach(function(l){rows.push(['  '+l.name,'$'+(parseFloat(l.amount)||0).toFixed(2)]);});
+    rows.push(['Card Total','$'+tripCardTotal(card).toFixed(2)]);
+    rows.push([]);
+  });
+  var csv=rows.map(function(r){return r.map(function(c){return '"'+(c||'').toString().replace(/"/g,'""')+'"';}).join(',');}).join('\r\n');
+  var a=document.createElement('a');
+  a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);
+  a.download=((trip.name||'trip').replace(/\s+/g,'-'))+'-export.csv';
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
+  showToast('Exported ✓');
+}
+
 // ═══════════════════════════════════════════════
 // MONEY — EXPENSE CATEGORIES
 // ═══════════════════════════════════════════════
@@ -16727,7 +17014,7 @@ function celebrate(){
 // ═══════════════════════════════════════════════
 
 function showMoneySec(sec,btn){
-  ['overview','budget','bills','expenses','income','accounts','projects','tax','money-plan'].forEach(function(s){
+  ['overview','budget','bills','expenses','income','accounts','projects','tax','money-plan','trips'].forEach(function(s){
     var el=document.getElementById('ms-'+s);
     if(el)el.style.display=(s===sec)?'':'none';
   });
@@ -16739,6 +17026,7 @@ function showMoneySec(sec,btn){
   if(sec==='budget')renderBudget();
   if(sec==='overview')renderMoneyOverview();
   if(sec==='money-plan')renderMoneyPlan();
+  if(sec==='trips')renderTrips();
 }
 
 function showFocusSec(sec,btn){
@@ -30212,6 +30500,40 @@ function delProjInc(id){
       <input id="grocDeptMgrNew" type="text" placeholder="New department…" style="flex:1;padding:8px 11px;border-radius:10px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px;box-sizing:border-box" onkeydown="if(event.key==='Enter')addGrocDeptFromMgr()">
       <button class="ok-btn" style="margin:0;padding:8px 16px" onclick="addGrocDeptFromMgr()">+ Add</button>
     </div>
+  </div>
+</div>
+
+<!-- TRIP MODAL -->
+<div class="ov" id="ovNewTrip" onclick="if(event.target===this)closeOv('ovNewTrip')">
+  <div class="mod" style="max-width:380px" onclick="event.stopPropagation()">
+    <div class="mh">
+      <span class="mt" id="tripModalTitle">✈️ New Trip</span>
+      <button class="mc" onclick="closeOv('ovNewTrip')">✕</button>
+    </div>
+    <div class="fg">
+      <label class="fl">Trip Name</label>
+      <input id="tripModalName" class="fi" placeholder="Paris Summer 2025…">
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:14px">
+      <div class="fg" style="flex:1;margin-bottom:0">
+        <label class="fl">Start Date</label>
+        <input id="tripModalStart" type="date" class="fi">
+      </div>
+      <div class="fg" style="flex:1;margin-bottom:0">
+        <label class="fl">End Date</label>
+        <input id="tripModalEnd" type="date" class="fi">
+      </div>
+    </div>
+    <div class="fg">
+      <label class="fl">Budget</label>
+      <input id="tripModalBudget" type="number" min="0" class="fi" placeholder="3000">
+    </div>
+    <div class="fg" id="tripModalSavedRow" style="display:none">
+      <label class="fl">Saved so far</label>
+      <input id="tripModalSaved" type="number" min="0" class="fi" placeholder="0">
+    </div>
+    <button class="ok-btn" onclick="saveTripModal()">Save Trip</button>
+    <button id="tripModalDel" style="display:none" class="del-btn" onclick="deleteTrip(_editTripId);closeOv('ovNewTrip')">Delete Trip</button>
   </div>
 </div>
 
