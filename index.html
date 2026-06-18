@@ -6267,6 +6267,7 @@ function initFirebase(){
       ap('aMealMyServings',function(v,r){MEAL_MY_SERVINGS=v||{};_origSetItem('aMealMyServings',r);});
       ap('aWantToTry',function(v,r){WANT_TO_TRY=v||[];_origSetItem('aWantToTry',r);});
       ap('aGroceryList',function(v,r){GROCERY_LIST=v||[];_origSetItem('aGroceryList',r);});
+      ap('aGrocTags',function(v,r){GROC_TAGS=v||[];_origSetItem('aGrocTags',r);});
       ap('aInventory',function(v,r){INVENTORY=v||[];_origSetItem('aInventory',r);});
       ap('aInvSections',function(v,r){if(v&&v.length)INV_SECTIONS=v;_origSetItem('aInvSections',r);});
       ap('aMC',function(v,r){if(v&&v.length)MEAL_COMBOS=v;_origSetItem('aMC',r);});
@@ -6397,7 +6398,7 @@ var BLOB_GROUPS={
   routines:['aRS','aRS2','aRH','aRTG','aRtns'],
   planning:['aSOPs','aBrainDump','aIntentions','aMonthTodos','aTmpls'],
   spiritual:['aBibleLog','aBibleChapNotes','aPrayers','aGratLog','aSpiritBooks','aSpiritSettings','aSpiritRun'],
-  food:['aRecipes','aMealPlan','aMealMyServings','aGroceryList','aInventory','aInvSections','aMC','aFoodDb','aIngredients','aWantToTry'],
+  food:['aRecipes','aMealPlan','aMealMyServings','aGroceryList','aGrocTags','aInventory','aInvSections','aMC','aFoodDb','aIngredients','aWantToTry'],
   fitness:['aWplans','aWlog2','aMovements','aExTypes','aExDB','aExLog','aPT'],
   creative:['aStories','aSChars','aSScenes','aFaves','aMixtape','aMemories','aPlaces','aVbItems'],
   tools:['aSparkPrompts','aSparkSaved','aDispatchJournal','aHatchChaos','aHatchTransmissions','aHatchMissions','aHatchShocks','aHatchCast'],
@@ -22068,6 +22069,99 @@ function setGrocSourceFilter(s,btn){
   renderGrocery();
 }
 
+// ── Grocery custom tags (named tags = filtered views) ──
+var GROC_TAGS = JSON.parse(localStorage.getItem('aGrocTags')||'[]');
+function saveGrocTags(){localStorage.setItem('aGrocTags',JSON.stringify(GROC_TAGS));}
+var _grocTagFilter = []; // active tag ids (AND logic)
+var GROC_TAG_PALETTE=[
+  {bg:'#f3eefb',color:'#7a5fb0',bdr:'#d8c8f0'}, // lavender
+  {bg:'#fdf0e0',color:'#b06a2c',bdr:'#f0d8b8'}, // peach
+  {bg:'#e8f5ec',color:'#3a8058',bdr:'#bfe0cc'}, // sage
+  {bg:'#fce8e8',color:'#c05050',bdr:'#f0cccc'}, // rose
+  {bg:'#e8f2fa',color:'#4a7a9b',bdr:'#c4ddee'}, // blue
+  {bg:'#fdf6e0',color:'#a07820',bdr:'#ecdca8'}  // gold
+];
+function grocTagById(id){return GROC_TAGS.find(function(t){return t.id===id;});}
+function grocTagColor(tag){return GROC_TAG_PALETTE[(tag&&tag.ci!=null?tag.ci:0)%GROC_TAG_PALETTE.length];}
+function grocItemMatchesTags(item){
+  if(!_grocTagFilter.length)return true;
+  var tags=item.tags||[];
+  return _grocTagFilter.every(function(tid){return tags.indexOf(tid)>=0;});
+}
+function toggleGrocTagFilter(id){
+  var i=_grocTagFilter.indexOf(id);
+  if(i>=0)_grocTagFilter.splice(i,1);else _grocTagFilter.push(id);
+  renderGrocery();
+}
+function clearGrocTagFilter(){_grocTagFilter=[];renderGrocery();}
+function renderGrocTagFilterRow(){
+  var fwrap=document.getElementById('grocSourceFilter');
+  if(!fwrap)return;
+  var fhtml='';
+  GROC_TAGS.forEach(function(tag){
+    var on=_grocTagFilter.indexOf(tag.id)>=0;
+    var c=grocTagColor(tag);
+    fhtml+='<button onclick="toggleGrocTagFilter(\''+tag.id+'\')" style="padding:4px 11px;border-radius:14px;font-family:\'Quicksand\',sans-serif;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;border:1.5px solid '+c.bdr+';background:'+(on?c.color:c.bg)+';color:'+(on?'#fff':c.color)+'">'+(on?'✓ ':'')+escHtml(tag.name)+'</button>';
+  });
+  if(_grocTagFilter.length){
+    fhtml+='<button onclick="clearGrocTagFilter()" style="padding:4px 11px;border-radius:14px;font-family:\'Quicksand\',sans-serif;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;border:1.5px solid var(--bdr);background:var(--bg);color:var(--textl)">✕ Clear</button>';
+  }
+  fhtml+='<button onclick="openGrocTagMgr()" style="padding:4px 11px;border-radius:14px;font-family:\'Quicksand\',sans-serif;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;border:1.5px dashed var(--bdr);background:var(--bg);color:var(--textl)">⚙️ '+(GROC_TAGS.length?'Tags':'+ Add tags')+'</button>';
+  fwrap.innerHTML=fhtml;
+}
+function addGrocTag(name){
+  name=(name||'').trim();
+  if(!name)return null;
+  if(GROC_TAGS.some(function(t){return t.name.toLowerCase()===name.toLowerCase();})){showToast('Tag already exists');return GROC_TAGS.find(function(t){return t.name.toLowerCase()===name.toLowerCase();});}
+  var tag={id:'gt-'+Date.now()+Math.random().toString(36).slice(2,6),name:name,ci:GROC_TAGS.length%GROC_TAG_PALETTE.length};
+  GROC_TAGS.push(tag);
+  saveGrocTags();
+  return tag;
+}
+function delGrocTag(id){
+  GROC_TAGS=GROC_TAGS.filter(function(t){return t.id!==id;});
+  saveGrocTags();
+  // strip from all items
+  GROCERY_LIST.forEach(function(g){if(g.tags)g.tags=g.tags.filter(function(t){return t!==id;});});
+  localStorage.setItem('aGroceryList',JSON.stringify(GROCERY_LIST));
+  // strip from active filter + working edit set
+  _grocTagFilter=_grocTagFilter.filter(function(t){return t!==id;});
+  _geTags=_geTags.filter(function(t){return t!==id;});
+  renderGrocTagMgr();renderGrocery();
+  if(document.getElementById('ovGrocEdit').classList.contains('show'))renderGeTagChips();
+}
+function renameGrocTag(id,name){
+  var tag=grocTagById(id);if(!tag)return;
+  name=(name||'').trim();if(!name)return;
+  tag.name=name;saveGrocTags();
+  renderGrocTagMgr();renderGrocery();
+}
+function openGrocTagMgr(){renderGrocTagMgr();showOv('ovGrocTagMgr');}
+function renderGrocTagMgr(){
+  var el=document.getElementById('grocTagMgrBody');
+  if(!el)return;
+  if(!GROC_TAGS.length){
+    el.innerHTML='<div style="font-size:12px;color:var(--textl);text-align:center;padding:10px 0">No tags yet. Create store names (Costco, Aldi) or flags (This trip) below.</div>';
+    return;
+  }
+  el.innerHTML=GROC_TAGS.map(function(tag){
+    var c=grocTagColor(tag);
+    var cnt=GROCERY_LIST.filter(function(g){return (g.tags||[]).indexOf(tag.id)>=0;}).length;
+    return '<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--bdr)">'
+      +'<span style="width:14px;height:14px;border-radius:5px;background:'+c.color+';flex-shrink:0"></span>'
+      +'<input value="'+escHtml(tag.name)+'" onchange="renameGrocTag(\''+tag.id+'\',this.value)" style="flex:1;padding:5px 9px;border-radius:8px;border:1.5px solid var(--bdr);font-family:\'Quicksand\',sans-serif;font-size:13px;color:var(--textd);background:var(--bg)">'
+      +(cnt?'<span style="font-size:11px;color:var(--textl);flex-shrink:0">'+cnt+'</span>':'')
+      +'<button onclick="delGrocTag(\''+tag.id+'\')" style="background:none;border:none;font-size:15px;cursor:pointer;color:#e74c3c;padding:2px 4px;flex-shrink:0;line-height:1">🗑️</button>'
+      +'</div>';
+  }).join('');
+}
+function addGrocTagFromMgr(){
+  var inp=document.getElementById('grocTagMgrNew');
+  if(!inp)return;
+  var t=addGrocTag(inp.value);
+  if(t){inp.value='';renderGrocTagMgr();renderGrocery();}
+}
+
 // Remove meal-sourced grocery items tied to a plan slot (date|slot).
 // Leaves manual/recipe/inventory items untouched. Shared ingredients
 // stay if another planned meal still needs them.
@@ -22150,25 +22244,14 @@ function syncMealPlanGrocery(){
 function renderGrocery(){
   var el=document.getElementById('groceryListEl');
   if(!el)return;
-  // Source filter chip counts
-  var counts={meal:0,manual:0,inventory:0,recipe:0};
-  GROCERY_LIST.forEach(function(g){var s=grocSourceOf(g);if(counts[s]!==undefined)counts[s]++;});
-  var fwrap=document.getElementById('grocSourceFilter');
-  if(fwrap){
-    var fhtml='<button class="bd-filter'+(_grocSourceFilter===''?' on':'')+'" onclick="setGrocSourceFilter(\'\',this)">All</button>';
-    ['meal','manual','inventory','recipe'].forEach(function(s){
-      if(!counts[s])return;
-      var m=GROC_SOURCE_META[s];
-      fhtml+='<button class="bd-filter'+(_grocSourceFilter===s?' on':'')+'" onclick="setGrocSourceFilter(\''+s+'\',this)">'+m.icon+' '+counts[s]+'</button>';
-    });
-    fwrap.innerHTML=fhtml;
-  }
-  var visible=GROCERY_LIST.filter(function(g){return !_grocSourceFilter||grocSourceOf(g)===_grocSourceFilter;});
-  if(!visible.length){el.innerHTML='<p style="color:var(--textl);text-align:center;padding:20px">'+(_grocSourceFilter?'No items from this source.':'List is empty. Tap 🍽️ Build from meal plan, or add items manually.')+'</p>';updateGroceryTotal();return;}
+  // Named-tag filter row (replaces source pills)
+  renderGrocTagFilterRow();
+  var visible=GROCERY_LIST.filter(grocItemMatchesTags);
+  if(!visible.length){el.innerHTML='<p style="color:var(--textl);text-align:center;padding:20px">'+(_grocTagFilter.length?'No items match the active tag'+(_grocTagFilter.length>1?'s':'')+'.':'List is empty. Tap 🍽️ Build from meal plan, or add items manually.')+'</p>';updateGroceryTotal();return;}
   // Group by store (using original GROCERY_LIST indexes so toggle/del stay correct)
   var stores={};
   GROCERY_LIST.forEach(function(item,i){
-    if(_grocSourceFilter&&grocSourceOf(item)!==_grocSourceFilter)return;
+    if(!grocItemMatchesTags(item))return;
     var store=item.store||item.category||'No store';
     if(!stores[store])stores[store]=[];
     stores[store].push({item:item,idx:i});
@@ -22187,10 +22270,11 @@ function renderGrocery(){
       var inStockBadge=item.inStock?'<span style="font-size:10px;background:#e8f5e8;color:var(--sage);border-radius:6px;padding:1px 5px;margin-left:4px">in stock</span>':'';
       var sm=GROC_SOURCE_META[grocSourceOf(item)]||GROC_SOURCE_META.manual;
       var srcBadge='<span title="'+sm.label+'" style="font-size:10px;background:'+sm.bg+';color:'+sm.color+';border-radius:6px;padding:1px 5px;margin-left:4px;flex-shrink:0">'+sm.icon+'</span>';
+      var tagChips=(item.tags||[]).map(function(tid){var t=grocTagById(tid);if(!t)return '';var c=grocTagColor(t);return '<span style="font-size:9px;font-weight:700;background:'+c.bg+';color:'+c.color+';border:1px solid '+c.bdr+';border-radius:6px;padding:1px 5px;flex-shrink:0">'+escHtml(t.name)+'</span>';}).join('');
       var iq=parseFloat(item.qty);var linePrice=unitPrice?(unitPrice*(isNaN(iq)||iq<=0?1:iq)):null;
       html+='<div class="grocery-item'+(item.checked?' done':'')+'">'
         +'<input type="checkbox" '+(item.checked?'checked':'')+' onchange="toggleGrocery('+i+')" style="width:18px;height:18px;cursor:pointer">'
-        +'<span class="grocery-name" style="flex:1;font-size:13px;cursor:pointer" onclick="openGrocEdit('+i+')">'+item.name+'<span style="color:var(--textl);font-size:11px"> '+item.qty+(item.unit?' '+item.unit:'')+'</span>'+nutLine+inStockBadge+'</span>'
+        +'<span class="grocery-name" style="flex:1;font-size:13px;cursor:pointer" onclick="openGrocEdit('+i+')">'+item.name+'<span style="color:var(--textl);font-size:11px"> '+item.qty+(item.unit?' '+item.unit:'')+'</span>'+nutLine+inStockBadge+(tagChips?' '+tagChips:'')+'</span>'
         +srcBadge
         +(linePrice?'<span style="font-size:12px;color:#888;font-weight:600">~$'+linePrice.toFixed(2)+'</span>':'')
         +'<button class="btn sec" style="font-size:12px;padding:2px 7px" onclick="openGrocEdit('+i+')" title="Edit">✎</button>'
@@ -22234,16 +22318,40 @@ function delGroceryItem(i){
 
 // Edit any grocery item (manual, recipe, inventory or meal) — name/qty/unit/store
 var _grocEditIdx=-1;
+var _geTags=[]; // working tag-id set for the item being edited
 function openGrocEdit(i){
   var g=GROCERY_LIST[i];if(!g)return;
   _grocEditIdx=i;
+  _geTags=(g.tags||[]).slice();
   var sm=GROC_SOURCE_META[grocSourceOf(g)]||GROC_SOURCE_META.manual;
   var sub=document.getElementById('geSource');if(sub)sub.textContent=sm.icon+' from '+sm.label;
   document.getElementById('geName').value=g.name||'';
   document.getElementById('geQty').value=g.qty||'';
   document.getElementById('geUnit').value=g.unit||'';
   document.getElementById('geStore').value=g.store||'';
+  renderGeTagChips();
   showOv('ovGrocEdit');
+}
+function renderGeTagChips(){
+  var el=document.getElementById('geTagChips');
+  if(!el)return;
+  var html=GROC_TAGS.map(function(tag){
+    var on=_geTags.indexOf(tag.id)>=0;
+    var c=grocTagColor(tag);
+    return '<button onclick="toggleGeTag(\''+tag.id+'\')" style="padding:4px 10px;border-radius:13px;font-family:\'Quicksand\',sans-serif;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;border:1.5px solid '+c.bdr+';background:'+(on?c.color:c.bg)+';color:'+(on?'#fff':c.color)+'">'+(on?'✓ ':'')+escHtml(tag.name)+'</button>';
+  }).join('');
+  el.innerHTML=html||'<span style="font-size:11px;color:var(--textl)">No tags yet — add one below.</span>';
+}
+function toggleGeTag(id){
+  var i=_geTags.indexOf(id);
+  if(i>=0)_geTags.splice(i,1);else _geTags.push(id);
+  renderGeTagChips();
+}
+function geAddNewTag(){
+  var inp=document.getElementById('geNewTag');
+  if(!inp)return;
+  var t=addGrocTag(inp.value);
+  if(t){if(_geTags.indexOf(t.id)<0)_geTags.push(t.id);inp.value='';renderGeTagChips();}
 }
 function saveGrocEdit(){
   var g=GROCERY_LIST[_grocEditIdx];
@@ -22253,6 +22361,7 @@ function saveGrocEdit(){
   g.qty=((document.getElementById('geQty').value||'').trim())||'1';
   g.unit=(document.getElementById('geUnit').value||'').trim();
   g.store=(document.getElementById('geStore').value||'').trim();
+  g.tags=_geTags.slice();
   // Re-link to a Food DB item by the (possibly new) name so prices/macros follow
   var dbi=FOOD_DB.find(function(x){return (x.name||'').toLowerCase()===g.name.toLowerCase();});
   if(dbi)g.dbItemId=dbi.id;
@@ -22300,7 +22409,7 @@ function updateGroceryTotal(){
   var priced=0, unpriced=0;
   GROCERY_LIST.forEach(function(item){
     if(item.checked)return;
-    if(_grocSourceFilter&&grocSourceOf(item)!==_grocSourceFilter)return;
+    if(!grocItemMatchesTags(item))return;
     var p=getBestPrice(item.name,item.dbItemId);
     if(p){
       var q=parseFloat(item.qty);
@@ -29958,11 +30067,33 @@ function delProjInc(id){
           <input id="geUnit" type="text" placeholder="lb, oz, ct…" style="width:100%;padding:9px 12px;border-radius:10px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px;box-sizing:border-box"></div>
       </div>
       <label style="font-size:11px;color:var(--textl);display:block;margin-bottom:4px">Store</label>
-      <input id="geStore" type="text" style="width:100%;padding:9px 12px;border-radius:10px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px;box-sizing:border-box;margin-bottom:14px">
+      <input id="geStore" type="text" style="width:100%;padding:9px 12px;border-radius:10px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px;box-sizing:border-box;margin-bottom:12px">
+      <label style="font-size:11px;color:var(--textl);display:block;margin-bottom:6px">Tags</label>
+      <div id="geTagChips" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px"></div>
+      <div style="display:flex;gap:6px;margin-bottom:14px">
+        <input id="geNewTag" type="text" placeholder="New tag (Costco, This trip…)" style="flex:1;padding:7px 11px;border-radius:10px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:12px;box-sizing:border-box" onkeydown="if(event.key==='Enter')geAddNewTag()">
+        <button class="btn sec" style="flex-shrink:0;padding:7px 12px;font-size:12px" onclick="geAddNewTag()">+ Tag</button>
+      </div>
       <div style="display:flex;gap:8px">
         <button class="btn" style="flex:1" onclick="saveGrocEdit()">Save</button>
         <button class="btn sec" style="flex-shrink:0" onclick="closeOv('ovGrocEdit')">Cancel</button>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- GROCERY TAG MANAGER MODAL -->
+<div class="ov" id="ovGrocTagMgr" onclick="if(event.target===this)closeOv('ovGrocTagMgr')">
+  <div class="mod" style="max-width:360px" onclick="event.stopPropagation()">
+    <div class="mh">
+      <span class="mt">🏷️ Grocery Tags</span>
+      <button class="mc" onclick="closeOv('ovGrocTagMgr')">✕</button>
+    </div>
+    <div style="font-size:11px;color:var(--textl);margin-bottom:10px">Store names (Costco, Aldi) or flags (This trip). Tap a tag in the list to filter; an item can have several.</div>
+    <div id="grocTagMgrBody"></div>
+    <div style="display:flex;gap:6px;margin-top:12px">
+      <input id="grocTagMgrNew" type="text" placeholder="New tag name…" style="flex:1;padding:8px 11px;border-radius:10px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px;box-sizing:border-box" onkeydown="if(event.key==='Enter')addGrocTagFromMgr()">
+      <button class="ok-btn" style="margin:0;padding:8px 16px" onclick="addGrocTagFromMgr()">+ Add</button>
     </div>
   </div>
 </div>
