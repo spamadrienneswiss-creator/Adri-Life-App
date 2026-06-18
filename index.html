@@ -2526,8 +2526,9 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
 
 <div class="view" id="v-meals">
   <div class="pill-nav" style="margin-bottom:12px">
+    <button class="pn-btn on" onclick="showMealSec('ate',this)">📓 What I Ate</button>
+    <button class="pn-btn" onclick="showMealSec('meals',this)">📅 Meal Plan</button>
     <button class="pn-btn" onclick="showMealSec('grocery',this)">🛒 Grocery</button>
-    <button class="pn-btn on" onclick="showMealSec('meals',this)">🍽️ Meals</button>
     <button class="pn-btn" onclick="showMealSec('inventory',this)">📦 Inventory</button>
     <button class="pn-btn" onclick="showMealSec('recipes',this)">📖 Recipes</button>
     <button class="pn-btn" onclick="showMealSec('wantTry',this)">⭐ Want to Try</button>
@@ -2536,16 +2537,8 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     <button class="pn-btn" onclick="showMealSec('database',this)">🧩 Ingredient Library</button>
   </div>
 
-  <!-- MEALS section — two sub-tabs -->
-  <div id="ms-meals">
-    <!-- Sub-tab toggle -->
-    <div style="display:flex;gap:4px;margin-bottom:12px;background:var(--bg2);border-radius:12px;padding:4px">
-      <button id="mealSubAteBtn" onclick="showMealSubTab('ate')" style="flex:1;padding:7px 0;border-radius:9px;border:none;font-family:'Quicksand',sans-serif;font-size:13px;font-weight:700;cursor:pointer;background:var(--lav);color:var(--textd);transition:background .2s">📓 What I Ate</button>
-      <button id="mealSubPlanBtn" onclick="showMealSubTab('plan')" style="flex:1;padding:7px 0;border-radius:9px;border:none;font-family:'Quicksand',sans-serif;font-size:13px;font-weight:700;cursor:pointer;background:none;color:var(--textl);transition:background .2s">📅 Meal Plan</button>
-    </div>
-
-    <!-- WHAT I ATE sub-tab -->
-    <div id="ms-sub-ate">
+  <!-- WHAT I ATE section -->
+  <div id="ms-ate">
       <!-- Date nav -->
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
         <button onclick="shiftEatDate(-1)" style="padding:5px 13px;border-radius:8px;border:1.5px solid var(--bdr);background:var(--bg);font-family:'Quicksand',sans-serif;font-size:14px;cursor:pointer;color:var(--textl)">◀</button>
@@ -2624,18 +2617,17 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
         <button class="bd-filter" onclick="setMealLogFilter('supplement',this)">💊 Supps</button>
       </div>
       <div id="mealLogList"></div>
-    </div>
+  </div>
 
-    <!-- MEAL PLAN sub-tab -->
-    <div id="ms-sub-plan" style="display:none">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-        <button class="btn sec" style="padding:5px 10px;font-size:12px" onclick="shiftMealWeek(-1)">◀</button>
-        <span id="mealWeekLbl" style="font-weight:700;font-size:13px;color:var(--textd)"></span>
-        <button class="btn sec" style="padding:5px 10px;font-size:12px" onclick="shiftMealWeek(1)">▶</button>
-      </div>
-      <div id="mealPlanGrid" class="meal-grid"></div>
-      <button class="btn" style="width:100%;margin-top:8px" onclick="genGroceryFromPlan()">🛒 Generate Grocery List from This Week</button>
+  <!-- MEAL PLAN section -->
+  <div id="ms-meals" style="display:none">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+      <button class="btn sec" style="padding:5px 10px;font-size:12px" onclick="shiftMealWeek(-1)">◀</button>
+      <span id="mealWeekLbl" style="font-weight:700;font-size:13px;color:var(--textd)"></span>
+      <button class="btn sec" style="padding:5px 10px;font-size:12px" onclick="shiftMealWeek(1)">▶</button>
     </div>
+    <div id="mealPlanGrid" class="meal-grid"></div>
+    <button class="btn" style="width:100%;margin-top:8px" onclick="genGroceryFromPlan()">🛒 Generate Grocery List from This Week</button>
   </div>
 
   <!-- FOOD DATABASE section -->
@@ -20479,13 +20471,14 @@ var GROCERY_CATS = ['Produce','Dairy','Meat & Fish','Bakery','Pantry','Frozen','
 function showMealSec(sec,btn){
   // 'plan' is an alias for 'meals' (backward compat)
   if(sec==='plan')sec='meals';
-  ['meals','recipes','database','grocery','prices','inventory','ingredients','wine','wantTry'].forEach(function(s){
+  ['ate','meals','recipes','database','grocery','prices','inventory','ingredients','wine','wantTry'].forEach(function(s){
     var el=document.getElementById('ms-'+s);
     if(el)el.style.display=(s===sec)?'':'none';
   });
   document.querySelectorAll('#v-meals .pn-btn').forEach(function(b){b.classList.remove('on');});
   if(btn)btn.classList.add('on');
-  if(sec==='meals'){renderMealLog();renderMealPlan();}
+  if(sec==='ate'){renderMealLog();}
+  if(sec==='meals'){renderMealPlan();}
   if(sec==='recipes')renderRecipes();
   if(sec==='database'){renderFoodDb();renderFoodDbKitchen();}
   if(sec==='grocery'){renderGrocery();var gdl=document.getElementById('groceryDbSuggest');if(gdl)gdl.innerHTML=FOOD_DB.map(function(x){return '<option value="'+escHtml(x.name)+'">';}).join('');}
