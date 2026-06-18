@@ -22574,31 +22574,41 @@ function priceAutocomplete(val){
 }
 
 function logPrice(){
-  var item=(document.getElementById('priceItem')||{}).value||'';
+  var itemName=(document.getElementById('priceItem')||{}).value||'';
   var amt=(document.getElementById('priceAmt')||{}).value||'';
-  var store=(document.getElementById('priceStore')||{}).value||'';
-  item=item.trim();
-  if(!item||!amt)return showToast('Item and price required');
-  var entry={id:'pr-'+Date.now(),item:item,price:parseFloat(amt),store:store.trim(),date:todayStr()};
-  PRICE_LOG.push(entry);
-  localStorage.setItem('aPriceLog',JSON.stringify(PRICE_LOG));
-  // Link to inventory item with matching name
-  var inv=INVENTORY.find(function(i){return i.name.toLowerCase()===item.toLowerCase();});
+  var store=((document.getElementById('priceStore')||{}).value||'').trim();
+  itemName=itemName.trim();
+  if(!itemName||!amt)return showToast('Item and price required');
+  var price=parseFloat(amt);
+  var date=todayStr();
+  var newEntry={id:'pe-'+Date.now(),store:store,price:price,date:date};
+  // Write to FOOD_DB priceEntries — find or create item
+  var lower=itemName.toLowerCase();
+  var dbItem=FOOD_DB.find(function(x){return (x.name||'').toLowerCase()===lower;});
+  if(!dbItem){
+    dbItem={id:'fd-'+Date.now(),name:itemName,tags:['other'],cat:'other',useCount:0,staple:false,store:store,price:price,priceEntries:[],cal:0,pro:0,carb:0,fat:0,notes:'',created:date};
+    FOOD_DB.unshift(dbItem);
+  }
+  if(!dbItem.priceEntries)dbItem.priceEntries=[];
+  dbItem.priceEntries.push(newEntry);
+  dbItem.price=price;
+  if(store)dbItem.store=store;
+  saveFoodDbData();
+  // Also link to matching inventory item
+  var inv=INVENTORY.find(function(i){return (i.name||'').toLowerCase()===lower;});
   if(inv){
     if(!inv.priceHistory)inv.priceHistory=[];
-    inv.priceHistory.unshift({price:parseFloat(amt),store:store.trim(),date:todayStr()});
-    inv.lastPrice=parseFloat(amt);
-    inv.lastPriceStore=store.trim();
-    inv.lastPriceDate=todayStr();
+    inv.priceHistory.unshift({price:price,store:store,date:date});
+    inv.lastPrice=price;inv.lastPriceStore=store;inv.lastPriceDate=date;
     localStorage.setItem('aInventory',JSON.stringify(INVENTORY));
-    showToast('Price saved + linked to inventory!');
+    showToast('Price saved + linked to inventory 📦');
   } else {
     showToast('Price logged!');
   }
   document.getElementById('priceItem').value='';
   document.getElementById('priceAmt').value='';
   document.getElementById('priceStore').value='';
-  document.getElementById('priceAutoSuggest').innerHTML='';
+  var sug=document.getElementById('priceAutoSuggest');if(sug)sug.innerHTML='';
   renderPriceLog();
 }
 
@@ -22611,37 +22621,65 @@ function priceToGrocery(item,price,store){
 function renderPriceLog(){
   var el=document.getElementById('priceLogEl');
   if(!el)return;
-  if(!PRICE_LOG.length){el.innerHTML='<p style="color:var(--textl);text-align:center;padding:20px">No prices logged yet. Type an item name above — existing inventory items will auto-suggest.</p>';return;}
-  // Group by item name, show latest price per item + history
+  // Build flat list: primary source = FOOD_DB priceEntries; fallback = PRICE_LOG entries with no matching DB item
+  var allEntries=[];
+  FOOD_DB.forEach(function(dbItem){
+    (dbItem.priceEntries||[]).forEach(function(e){
+      if(!e.price)return;
+      allEntries.push({itemName:dbItem.name,dbItemId:dbItem.id,entryId:e.id,price:parseFloat(e.price),store:e.store||'',date:e.date||'',source:'fooddb'});
+    });
+  });
+  // Legacy PRICE_LOG entries for items not in FOOD_DB
+  (PRICE_LOG||[]).forEach(function(p){
+    var lower=(p.item||'').toLowerCase();
+    if(!FOOD_DB.some(function(x){return (x.name||'').toLowerCase()===lower;})){
+      allEntries.push({itemName:p.item,dbItemId:null,entryId:p.id,price:parseFloat(p.price),store:p.store||'',date:p.date||'',source:'pricelog'});
+    }
+  });
+  if(!allEntries.length){el.innerHTML='<p style="color:var(--textl);text-align:center;padding:20px">No prices logged yet. Type an item name above.</p>';return;}
+  // Group by item name
   var byItem={};
-  PRICE_LOG.forEach(function(p){
-    var k=p.item.toLowerCase();
+  allEntries.forEach(function(e){
+    var k=(e.itemName||'').toLowerCase();
     if(!byItem[k])byItem[k]=[];
-    byItem[k].push(p);
+    byItem[k].push(e);
   });
   var html='';
   Object.keys(byItem).sort().forEach(function(k){
-    var entries=byItem[k].slice().sort(function(a,b){return b.date.localeCompare(a.date);});
+    var entries=byItem[k].slice().sort(function(a,b){return (b.date||'').localeCompare(a.date||'');});
     var latest=entries[0];
-    var hasInv=!!INVENTORY.find(function(i){return i.name.toLowerCase()===k;});
+    var hasInv=!!INVENTORY.find(function(i){return (i.name||'').toLowerCase()===k;});
     html+='<div class="price-row" style="flex-direction:column;align-items:stretch;gap:4px">'
       +'<div style="display:flex;align-items:center;gap:8px">'
-      +'<span class="price-item-name" style="flex:1">'+escHtml(latest.item)+(hasInv?'<span style="font-size:10px;background:var(--peach-light);color:#8a5a20;border-radius:5px;padding:1px 6px;margin-left:5px">📦 in inventory</span>':'')+'</span>'
-      +'<span class="price-amt">$'+parseFloat(latest.price).toFixed(2)+'</span>'
-      +'<button class="btn sec" style="font-size:11px;padding:3px 9px" onclick="priceToGrocery(\''+escHtml(latest.item)+'\','+latest.price+',\''+escHtml(latest.store||'')+'\')">→ 🛒</button>'
+      +'<span class="price-item-name" style="flex:1">'+escHtml(latest.itemName)
+      +(hasInv?'<span style="font-size:10px;background:var(--peach-light);color:#8a5a20;border-radius:5px;padding:1px 6px;margin-left:5px">📦 inv</span>':'')+'</span>'
+      +'<span class="price-amt">$'+latest.price.toFixed(2)+'</span>'
+      +'<button class="btn sec" style="font-size:11px;padding:3px 9px" onclick="priceToGrocery(\''+escHtml(latest.itemName)+'\','+latest.price+',\''+escHtml(latest.store||'')+'\')">→ 🛒</button>'
+      +'<button onclick="delPriceEntry(\''+latest.source+'\',\''+escHtml(latest.dbItemId||'')+'\',\''+escHtml(latest.entryId||'')+'\''+')" style="background:none;border:none;font-size:12px;cursor:pointer;color:var(--textl);padding:2px 4px">✕</button>'
       +'</div>'
       +'<div style="font-size:10px;color:var(--textl)">Latest: '+(latest.store?latest.store+' · ':'')+latest.date+'</div>'
-      +(entries.length>1?'<div style="font-size:10px;color:var(--textl)">History: '+entries.slice(1).map(function(e){return'$'+parseFloat(e.price).toFixed(2)+(e.store?' @ '+e.store:'')+' ('+e.date+')';}).join(' · ')+'</div>':'')
+      +(entries.length>1?'<div style="font-size:10px;color:var(--textl)">History: '+entries.slice(1).map(function(e){return '$'+e.price.toFixed(2)+(e.store?' @ '+e.store:'')+' ('+e.date+')';}).join(' · ')+'</div>':'')
       +'</div>';
   });
   el.innerHTML=html;
 }
 
-function delPriceEntry(i){
-  var _snap=PRICE_LOG[i];var _idx=i;
-  PRICE_LOG.splice(i,1);
-  localStorage.setItem('aPriceLog',JSON.stringify(PRICE_LOG));
-  if(_snap){DELTED={restore:function(){PRICE_LOG.splice(Math.min(_idx,PRICE_LOG.length),0,_snap);localStorage.setItem('aPriceLog',JSON.stringify(PRICE_LOG));renderPriceLog();}};showUndo('Price entry removed');}
+function delPriceEntry(source,dbItemId,entryId){
+  if(source==='fooddb'){
+    var dbItem=FOOD_DB.find(function(x){return x.id===dbItemId;});
+    if(!dbItem||!dbItem.priceEntries)return;
+    var snap=dbItem.priceEntries.find(function(e){return e.id===entryId;});
+    dbItem.priceEntries=dbItem.priceEntries.filter(function(e){return e.id!==entryId;});
+    saveFoodDbData();
+    if(snap){DELTED={restore:function(){dbItem.priceEntries.push(snap);saveFoodDbData();renderPriceLog();}};showUndo('Price entry removed');}
+  } else {
+    var idx=PRICE_LOG.findIndex(function(p){return p.id===entryId;});
+    if(idx<0)return;
+    var snap2=PRICE_LOG[idx];
+    PRICE_LOG.splice(idx,1);
+    localStorage.setItem('aPriceLog',JSON.stringify(PRICE_LOG));
+    if(snap2){DELTED={restore:function(){PRICE_LOG.push(snap2);localStorage.setItem('aPriceLog',JSON.stringify(PRICE_LOG));renderPriceLog();}};showUndo('Price entry removed');}
+  }
   renderPriceLog();
 }
 
@@ -23525,6 +23563,26 @@ var _foodDbSort = 'fav'; // 'fav','az','store','cat'
 // Populate meal log DB suggestion datalist on startup
 setTimeout(function(){populateFoodDbDatalist();},0);
 function saveFoodDbData(){ localStorage.setItem('aFoodDb', JSON.stringify(FOOD_DB)); populateFoodDbDatalist(); }
+
+// One-time migration: copy PRICE_LOG entries into matching FOOD_DB priceEntries
+(function(){
+  if(!PRICE_LOG||!PRICE_LOG.length)return;
+  var dirty=false;
+  PRICE_LOG.forEach(function(p){
+    var lower=(p.item||'').toLowerCase();
+    var dbItem=FOOD_DB.find(function(x){return (x.name||'').toLowerCase()===lower;});
+    if(!dbItem)return;
+    if(!dbItem.priceEntries)dbItem.priceEntries=[];
+    var dup=dbItem.priceEntries.some(function(e){
+      return parseFloat(e.price)===parseFloat(p.price)&&(e.store||'')===(p.store||'')&&(e.date||'')===(p.date||'');
+    });
+    if(!dup){
+      dbItem.priceEntries.push({id:p.id||('pe-mig-'+Date.now()+Math.random().toString(36).slice(2)),store:p.store||'',price:parseFloat(p.price),date:p.date||''});
+      dirty=true;
+    }
+  });
+  if(dirty)localStorage.setItem('aFoodDb',JSON.stringify(FOOD_DB));
+})();
 
 function toggleFoodFav(id){
   var item=FOOD_DB.find(function(x){return x.id===id;});
