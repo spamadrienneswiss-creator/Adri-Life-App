@@ -1758,6 +1758,7 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
       <button class="btn" onclick="grocTaskAddItem()" style="padding:8px 16px">Add</button>
     </div>
   </div>
+  <div class="bd-filter-row" id="grocTaskFilterRow" style="margin-bottom:8px"></div>
   <div id="grocTaskListEl"></div>
 </div>
 
@@ -22100,12 +22101,10 @@ function grocItemMatchesTags(item){
 function toggleGrocTagFilter(id){
   var i=_grocTagFilter.indexOf(id);
   if(i>=0)_grocTagFilter.splice(i,1);else _grocTagFilter.push(id);
-  renderGrocery();
+  renderGrocery();renderGroceryList();
 }
-function clearGrocTagFilter(){_grocTagFilter=[];renderGrocery();}
+function clearGrocTagFilter(){_grocTagFilter=[];renderGrocery();renderGroceryList();}
 function renderGrocTagFilterRow(){
-  var fwrap=document.getElementById('grocSourceFilter');
-  if(!fwrap)return;
   var fhtml='';
   GROC_TAGS.forEach(function(tag){
     var on=_grocTagFilter.indexOf(tag.id)>=0;
@@ -22117,7 +22116,10 @@ function renderGrocTagFilterRow(){
   }
   fhtml+='<button onclick="openGrocTagMgr()" style="padding:4px 11px;border-radius:14px;font-family:\'Quicksand\',sans-serif;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;border:1.5px dashed var(--bdr);background:var(--bg);color:var(--textl)">⚙️ '+(GROC_TAGS.length?'Tags':'+ Tags')+'</button>';
   fhtml+='<button onclick="openGrocDeptMgr()" style="padding:4px 11px;border-radius:14px;font-family:\'Quicksand\',sans-serif;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;border:1.5px dashed var(--bdr);background:var(--bg);color:var(--textl)">🏪 '+(GROC_DEPTS.length?'Depts':'+ Depts')+'</button>';
-  fwrap.innerHTML=fhtml;
+  ['grocSourceFilter','grocTaskFilterRow'].forEach(function(id){
+    var el=document.getElementById(id);
+    if(el)el.innerHTML=fhtml;
+  });
 }
 function addGrocTag(name){
   name=(name||'').trim();
@@ -22332,7 +22334,7 @@ function syncMealPlanGrocery(){
 var _grocCollapsedDepts={};
 function toggleGrocDeptCollapse(did){
   _grocCollapsedDepts[did]=!_grocCollapsedDepts[did];
-  renderGrocery();
+  renderGrocery();renderGroceryList();
 }
 function renderGrocItem(item,i){
   var unitPrice=getBestPrice(item.name,item.dbItemId);
@@ -22352,12 +22354,11 @@ function renderGrocItem(item,i){
     +'<button class="btn sec" style="font-size:11px;padding:2px 7px" onclick="delGroceryItem('+i+')" title="Remove">✕</button>'
     +'</div>';
 }
-function renderGrocery(){
-  var el=document.getElementById('groceryListEl');
+function _renderGrocListBody(elId){
+  var el=document.getElementById(elId);
   if(!el)return;
-  renderGrocTagFilterRow();
   var visible=GROCERY_LIST.filter(grocItemMatchesTags);
-  if(!visible.length){el.innerHTML='<p style="color:var(--textl);text-align:center;padding:20px">'+(_grocTagFilter.length?'No items match the active tag'+(_grocTagFilter.length>1?'s':'')+'.':'List is empty. Tap 🍽️ Build from meal plan, or add items manually.')+'</p>';updateGroceryTotal();return;}
+  if(!visible.length){el.innerHTML='<p style="color:var(--textl);text-align:center;padding:20px">'+(_grocTagFilter.length?'No items match the active tag'+(_grocTagFilter.length>1?'s':'')+'.':'List is empty. Tap + Add or build from meal plan.')+'</p>';updateGroceryTotal();return;}
   var html='';
   if(GROC_DEPTS.length){
     var deptOrder=getActiveDeptOrder();
@@ -22410,6 +22411,10 @@ function renderGrocery(){
   el.innerHTML=html;
   updateGroceryTotal();
 }
+function renderGrocery(){
+  renderGrocTagFilterRow();
+  _renderGrocListBody('groceryListEl');
+}
 
 function toggleGrocery(i){
   if(!GROCERY_LIST[i])return;
@@ -22430,15 +22435,15 @@ function toggleGrocery(i){
     localStorage.setItem('aInventory',JSON.stringify(INVENTORY));
   }
   localStorage.setItem('aGroceryList',JSON.stringify(GROCERY_LIST));
-  renderGrocery();
+  renderGrocery();renderGroceryList();
 }
 
 function delGroceryItem(i){
   var _snap=GROCERY_LIST[i];var _idx=i;
   GROCERY_LIST.splice(i,1);
   localStorage.setItem('aGroceryList',JSON.stringify(GROCERY_LIST));
-  if(_snap){DELTED={restore:function(){GROCERY_LIST.splice(Math.min(_idx,GROCERY_LIST.length),0,_snap);localStorage.setItem('aGroceryList',JSON.stringify(GROCERY_LIST));renderGrocery();}};showUndo('Grocery item removed');}
-  renderGrocery();
+  if(_snap){DELTED={restore:function(){GROCERY_LIST.splice(Math.min(_idx,GROCERY_LIST.length),0,_snap);localStorage.setItem('aGroceryList',JSON.stringify(GROCERY_LIST));renderGrocery();renderGroceryList();}};showUndo('Grocery item removed');}
+  renderGrocery();renderGroceryList();
 }
 
 // Edit any grocery item (manual, recipe, inventory or meal) — name/qty/unit/store/dept
@@ -22666,62 +22671,8 @@ function grocTaskAddItem(){
 }
 
 function renderGroceryList(){
-  var el=document.getElementById('grocTaskListEl');
-  if(!el)return;
-  if(!GROCERY_LIST.length){
-    el.innerHTML='<div style="text-align:center;padding:30px 0;color:var(--textl)"><div style="font-size:32px;margin-bottom:8px">🛒</div><div style="font-size:14px">List is empty. Add items above.</div></div>';
-    return;
-  }
-  // Group by store; items with no store → "General"
-  var stores={};
-  GROCERY_LIST.forEach(function(item,i){
-    var s=item.store&&item.store.trim()?item.store.trim():'General';
-    if(!stores[s])stores[s]=[];
-    stores[s].push({item:item,idx:i});
-  });
-  // Sort stores alphabetically, "General" last
-  var storeKeys=Object.keys(stores).sort(function(a,b){
-    if(a==='General'&&b!=='General')return 1;
-    if(b==='General'&&a!=='General')return -1;
-    return a.localeCompare(b);
-  });
-  var html='';
-  storeKeys.forEach(function(store){
-    var entries=stores[store].slice().sort(function(a,b){return a.item.name.localeCompare(b.item.name);});
-    var total=entries.length;
-    var done=entries.filter(function(e){return e.item.checked;}).length;
-    html+='<div style="margin-bottom:14px">'
-      +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;padding:6px 10px;background:linear-gradient(135deg,rgba(90,138,90,.1),rgba(212,170,96,.07));border-radius:10px">'
-      +'<span style="font-size:13px;font-weight:800;color:var(--textd);flex:1">🏪 '+escHtml(store)+'</span>'
-      +'<span style="font-size:11px;color:var(--textl);font-weight:600">'+done+'/'+total+'</span>'
-      +'</div>';
-    entries.forEach(function(entry){
-      var item=entry.item;
-      var i=entry.idx;
-      var up=getBestPrice(item.name,item.dbItemId);
-      var iq=parseFloat(item.qty);var lp=up?(up*(isNaN(iq)||iq<=0?1:iq)):null;
-      html+='<div style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:#fff;border-radius:10px;margin-bottom:4px;border:1.5px solid '+(item.checked?'#d0e8d0':'#ede8e3')+';">'
-        +'<input type="checkbox" '+(item.checked?'checked':'')+' onchange="grocTaskToggle('+i+',this.checked)" style="width:18px;height:18px;cursor:pointer;flex-shrink:0">'
-        +'<span style="flex:1;font-size:13px;font-weight:600;'+(item.checked?'text-decoration:line-through;color:var(--textl)':'color:var(--textd)')+'">'+escHtml(item.name)
-        +(item.qty&&item.qty!=='1'?'<span style="font-size:11px;font-weight:400;color:var(--textl)"> '+escHtml(item.qty)+(item.unit?' '+escHtml(item.unit):'')+'</span>':'')
-        +'</span>'
-        +(lp?'<span style="font-size:11px;color:#888;font-weight:600;flex-shrink:0">~$'+lp.toFixed(2)+'</span>':'')
-        +(item.store?'<span style="font-size:10px;font-weight:700;background:var(--sage-light);color:#4a7a46;border-radius:6px;padding:2px 7px;flex-shrink:0">'+escHtml(item.store)+'</span>':'')
-        +'<button onclick="openGrocEdit('+i+')" style="background:none;border:1.5px solid #e0d8ce;border-radius:7px;font-size:12px;cursor:pointer;color:var(--textl);flex-shrink:0;padding:2px 7px;line-height:1.4" title="Edit">✎</button>'
-        +'<button onclick="grocTaskDelete('+i+')" style="background:none;border:none;font-size:16px;cursor:pointer;color:var(--textl);flex-shrink:0;padding:2px 4px;line-height:1">🗑️</button>'
-        +'</div>';
-    });
-    html+='</div>';
-  });
-  // Running total for Today page
-  var gtotal=0,gpriced=0,gunpriced=0;
-  GROCERY_LIST.filter(function(g){return !g.checked;}).forEach(function(item){
-    var p=getBestPrice(item.name,item.dbItemId);
-    var q=parseFloat(item.qty);
-    if(p){gtotal+=p*(isNaN(q)||q<=0?1:q);gpriced++;}else gunpriced++;
-  });
-  if(gpriced)html+='<div style="font-size:12px;color:var(--textl);padding:6px 4px;text-align:right">~$'+gtotal.toFixed(2)+' estimated'+(gunpriced?' · '+gunpriced+' unpriced':'')+' </div>';
-  el.innerHTML=html;
+  renderGrocTagFilterRow();
+  _renderGrocListBody('grocTaskListEl');
 }
 
 function grocTaskToggle(i, checked){
