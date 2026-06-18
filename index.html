@@ -1759,6 +1759,7 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     </div>
   </div>
   <div class="bd-filter-row" id="grocTaskFilterRow" style="margin-bottom:8px"></div>
+  <div id="grocTaskEstTotal" style="font-size:13px;color:var(--textl);margin-bottom:8px"></div>
   <div id="grocTaskListEl"></div>
 </div>
 
@@ -6536,7 +6537,7 @@ function goTabDirect(tab,btn){
 
   if(tab==='content'){ renderContentPage(); }
   if(tab==='plan'){ renderPlan(); }
-  if(tab==='grocery'){ renderGroceryList(); populateGrocTaskDatalist(); }
+  if(tab==='grocery'){ goTabDirect('meals');setTimeout(function(){var b=document.querySelector('#v-meals .pn-btn:nth-child(3)');if(b)showMealSec('grocery',b);},60);return; }
   if(tab==='guide'){ renderResearchLib(); renderGuide(); renderTmplList(); renderAppIndex(); renderMemoryItems(); renderLifeHacks(); }
   if(tab==='appindex'){ renderAppIndex(); }
   if(tab==='work-projects'){ renderWorkProjects(); }
@@ -22551,8 +22552,8 @@ function addGroceryManual(){
 }
 
 function updateGroceryTotal(){
-  var el=document.getElementById('groceryEstTotal');
-  if(!el)return;
+  var els=[document.getElementById('groceryEstTotal'),document.getElementById('grocTaskEstTotal')].filter(Boolean);
+  if(!els.length)return;
   var total=0;
   var priced=0, unpriced=0;
   GROCERY_LIST.forEach(function(item){
@@ -22565,8 +22566,8 @@ function updateGroceryTotal(){
       priced++;
     }else unpriced++;
   });
-  if(!priced){el.textContent='';return;}
-  el.innerHTML='<span style="font-weight:700;color:var(--textd)">~$'+total.toFixed(2)+'</span> estimated'+(unpriced?' <span style="color:var(--textl)">· '+unpriced+' item'+(unpriced>1?'s':'')+' unpriced</span>':'');
+  var html=priced?('<span style="font-weight:700;color:var(--textd)">~$'+total.toFixed(2)+'</span> estimated'+(unpriced?' <span style="color:var(--textl)">· '+unpriced+' item'+(unpriced>1?'s':'')+' unpriced</span>':'')):'';
+  els.forEach(function(el){el.innerHTML=html;});
 }
 
 function getBestPrice(itemName,dbItemId){
