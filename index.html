@@ -532,19 +532,29 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
 .spirit-stat-num{font-size:20px;font-weight:700;color:var(--rose)}
 .spirit-stat-lbl{font-size:10px;color:var(--textl);margin-top:2px}
 /* Meals tab */
-.meal-grid{display:grid;gap:8px;margin-bottom:12px}
-.meal-day{background:#fff;border-radius:12px;padding:12px;box-shadow:0 1px 4px rgba(0,0,0,.06)}
-.meal-day.overloaded{border:2px solid #f0c040}
-.meal-day.today{border-left:3px solid var(--rose)}
-.meal-day-hdr{font-weight:700;font-size:13px;color:var(--textd);margin-bottom:8px;display:flex;justify-content:space-between;align-items:center}
+.meal-grid{display:grid;gap:10px;margin-bottom:12px}
+.meal-day{background:var(--bg);border-radius:14px;overflow:hidden;box-shadow:0 1px 5px rgba(0,0,0,.07);border:1.5px solid var(--bdr)}
+.meal-day.overloaded{border-color:#f0c040}
+.meal-day.today{border:2px solid var(--rose);box-shadow:0 2px 12px rgba(192,80,80,.12)}
+.meal-day-hdr{font-weight:700;font-size:13px;color:var(--textd);padding:10px 12px 8px;display:flex;justify-content:space-between;align-items:center;background:var(--bg2)}
 .meal-day.overloaded .meal-day-hdr{background:#fffbe6}
-.meal-day.today .meal-day-hdr{background:var(--rose-light)}
-.meal-slot{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid #f5f0eb;cursor:pointer}
-.meal-slot:last-child{border-bottom:none}
-.meal-slot-lbl{font-size:11px;color:var(--textl);width:62px;flex-shrink:0}
+.meal-day.today .meal-day-hdr{background:linear-gradient(135deg,#fdf4f4,#fce8e8)}
+.meal-slots-wrap{padding:5px 10px 8px}
+.meal-slot{display:flex;align-items:center;gap:8px;padding:6px 7px;border-radius:9px;cursor:pointer;margin-bottom:3px;border:1.5px solid transparent;transition:background .12s}
+.meal-slot:last-child{margin-bottom:0}
+.meal-slot.has-meal{border-color:var(--bdr)}
+.meal-slot.no-meal{background:transparent}
+.meal-slot-lbl{font-size:10px;color:var(--textl);width:58px;flex-shrink:0;font-weight:700;text-transform:uppercase;letter-spacing:.3px}
 .meal-slot-val{font-size:13px;color:var(--textd);flex:1}
-.meal-slot-val.empty{color:#ccc;font-style:italic}
-.meal-macro-bar{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+.meal-slot-val.empty{color:#d0c8c0;font-style:italic;font-size:12px}
+.meal-slot-breakfast.has-meal{border-left:3px solid #d4a830;background:#fffdf0}
+.meal-slot-lunch.has-meal{border-left:3px solid #6a9e6a;background:#f5faf5}
+.meal-slot-dinner.has-meal{border-left:3px solid #6878c0;background:#f3f5fc}
+.meal-slot-snack.has-meal{border-left:3px solid #d08840;background:#fffaf0}
+.meal-slot-dessert.has-meal{border-left:3px solid #b86090;background:#fdf2f8}
+.meal-slot.assign-mode.no-meal{background:#f5fef5;border:1.5px dashed #88c888}
+.meal-slot.assign-mode.no-meal .meal-slot-val.empty{color:#70a870;font-style:normal;font-weight:600}
+.meal-macro-bar{display:flex;gap:6px;margin-top:2px;flex-wrap:wrap;padding:0 10px 8px}
 .meal-macro-pip{font-size:10px;padding:2px 7px;border-radius:20px;background:var(--cream)}
 .recipe-card{background:#fff;border-radius:12px;padding:13px;box-shadow:0 1px 4px rgba(0,0,0,.06);margin-bottom:8px;cursor:pointer}
 .recipe-card-name{font-weight:700;font-size:14px;color:var(--textd)}
@@ -2621,6 +2631,8 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
 
   <!-- MEAL PLAN section -->
   <div id="ms-meals" style="display:none">
+    <!-- Meal shelf -->
+    <div id="mealPlanShelf" style="margin-bottom:12px"></div>
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
       <button class="btn sec" style="padding:5px 10px;font-size:12px" onclick="shiftMealWeek(-1)">◀</button>
       <span id="mealWeekLbl" style="font-weight:700;font-size:13px;color:var(--textd)"></span>
@@ -20897,6 +20909,7 @@ function renderMealPlan(){
   if(lbl)lbl.textContent=fmtWeekLbl(dates);
   var grid=document.getElementById('mealPlanGrid');
   if(!grid)return;
+  renderMealShelf();
   var html='';
   var today=todayStr();
   dates.forEach(function(date,i){
@@ -20915,6 +20928,7 @@ function renderMealPlan(){
     html+='<span style="font-size:12px;color:var(--textl)">'+(isCollapsed?'▶':'▼')+'</span>';
     html+='</span></div>';
     if(!isCollapsed){
+      html+='<div class="meal-slots-wrap">';
       MEAL_SLOTS.forEach(function(slot){
         var val=dayData[slot]||'';
         var rec=val?RECIPES.find(function(r){return r.name===val;}):null;
@@ -20922,11 +20936,12 @@ function renderMealPlan(){
         var isWtt=val&&!rec&&WANT_TO_TRY.some(function(w){return w.text===val;});
         var slotMacros=rec&&rec.macros&&rec.macros.cal?rec.macros:null;
         var sv=getMealServings(date,slot);
-        html+='<div class="meal-slot" onclick="openSlotPicker(\''+date+'\',\''+slot+'\')" style="flex-direction:column;align-items:stretch;gap:3px">';
+        var slotClass='meal-slot meal-slot-'+slot+(val?' has-meal':' no-meal')+(_shelfSelected?' assign-mode':'');
+        html+='<div class="'+slotClass+'" onclick="openSlotPicker(\''+date+'\',\''+slot+'\')" style="flex-direction:column;align-items:stretch;gap:3px">';
         html+='<div style="display:flex;align-items:center;gap:4px">';
         html+='<span class="meal-slot-lbl">'+MEAL_SLOT_ICONS[slot]+' '+(MEAL_SLOT_LABELS[slot]||slot)+'</span>';
         html+='<span style="display:flex;align-items:center;gap:4px;flex:1;min-width:0">';
-        html+='<span class="meal-slot-val'+(val?'':' empty')+'" style="flex:1">'+(val?escHtml(val):'tap to add')+(val&&slotMacros&&sv!==1?' <span style="font-size:10px;color:var(--textl)">×'+sv+'</span>':'')+'</span>';
+        html+='<span class="meal-slot-val'+(val?'':' empty')+'" style="flex:1">'+(val?escHtml(val):(_shelfSelected?'tap to assign':'tap to add'))+(val&&slotMacros&&sv!==1?' <span style="font-size:10px;color:var(--textl)">×'+sv+'</span>':'')+'</span>';
         if(isWtt)html+='<span style="font-size:10px;background:#fef9e7;border:1px solid #e8d88a;border-radius:6px;padding:1px 5px;color:#9a7c0a;flex-shrink:0">⭐ WTT</span>';
         if(hasPrepTime)html+='<button onclick="event.stopPropagation();addPrepTask(\''+escHtml(val)+'\','+rec.prepTime+')" style="background:none;border:1px solid var(--sage);border-radius:6px;padding:1px 5px;font-size:10px;color:var(--sage);cursor:pointer;flex-shrink:0">⏱ '+rec.prepTime+'m</button>';
         if(val)html+='<button onclick="event.stopPropagation();clearMealSlot(\''+date+'\',\''+slot+'\')" style="background:#faf3f3;border:1px solid #ecd8d8;border-radius:7px;font-size:13px;cursor:pointer;color:#c05050;padding:3px 8px;flex-shrink:0;line-height:1" title="Clear this meal">✕</button>';
@@ -20947,6 +20962,7 @@ function renderMealPlan(){
         }
         html+='</div>';
       });
+      html+='</div>'; // meal-slots-wrap
       if(macros.cal>0){
         html+='<div class="meal-macro-bar">';
         html+='<span class="meal-macro-pip">🔥 '+macros.cal+' cal</span>';
@@ -21010,7 +21026,48 @@ function calcDayMacros(date){
 }
 
 var _slotPickDate='', _slotPickSlot='';
+var _shelfSelected=null;
+
+function selectShelfMeal(name,source){
+  _shelfSelected=(_shelfSelected&&_shelfSelected.name===name)?null:{name:name,source:source};
+  renderMealShelf();
+  renderMealPlan();
+}
+function assignShelfMeal(date,slot){
+  if(!_shelfSelected)return;
+  if(!MEAL_PLAN[date])MEAL_PLAN[date]={};
+  MEAL_PLAN[date][slot]=_shelfSelected.name;
+  localStorage.setItem('aMealPlan',JSON.stringify(MEAL_PLAN));
+  showToast(_shelfSelected.name+' → '+(MEAL_SLOT_LABELS[slot]||slot)+' 📅');
+  _shelfSelected=null;
+  renderMealPlan();
+  renderMealShelf();
+}
+function renderMealShelf(){
+  var el=document.getElementById('mealPlanShelf');
+  if(!el)return;
+  var items=[];
+  (RECIPES||[]).forEach(function(r){if(r.name)items.push({name:r.name,source:'recipe',icon:'📖'});});
+  (WANT_TO_TRY||[]).forEach(function(w){if(w.text)items.push({name:w.text,source:'wtt',icon:'⭐'});});
+  if(!items.length){
+    el.innerHTML='<div style="font-size:11px;color:var(--textl);padding:4px 0">Add Recipes or Want to Try items to populate the shelf.</div>';
+    return;
+  }
+  var prompt=_shelfSelected
+    ?'<div style="font-size:11px;color:var(--rose);font-weight:700;margin-bottom:6px;padding:4px 10px;background:#fff5f5;border-radius:8px">Tap a slot to assign "'+escHtml(_shelfSelected.name)+'" — tap the card again to cancel</div>'
+    :'<div style="font-size:11px;color:var(--textl);font-weight:700;margin-bottom:6px;letter-spacing:.2px">Shelf</div>';
+  var cards=items.map(function(item){
+    var isSel=_shelfSelected&&_shelfSelected.name===item.name;
+    var jsName=item.name.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+    return '<button onclick="selectShelfMeal(\''+jsName+'\',\''+item.source+'\')" style="flex-shrink:0;padding:6px 12px;border-radius:10px;border:1.5px solid '
+      +(isSel?'var(--rose)':'var(--bdr)')+';background:'+(isSel?'var(--rose-light)':'var(--bg)')+';font-family:\'Quicksand\',sans-serif;font-size:12px;font-weight:'+(isSel?'700':'600')+';color:'+(isSel?'var(--rose)':'var(--textd)')+';cursor:pointer;white-space:nowrap">'
+      +item.icon+' '+escHtml(item.name)+'</button>';
+  }).join('');
+  el.innerHTML=prompt+'<div style="display:flex;gap:6px;overflow-x:auto;padding-bottom:6px;-webkit-overflow-scrolling:touch;scrollbar-width:none">'+cards+'</div>';
+}
+
 function openSlotPicker(date,slot){
+  if(_shelfSelected){assignShelfMeal(date,slot);return;}
   _slotPickDate=date; _slotPickSlot=slot;
   var current=(MEAL_PLAN[date]||{})[slot]||'';
   var slotLabel=(MEAL_SLOT_ICONS[slot]||'')+(MEAL_SLOT_LABELS[slot]||slot);
