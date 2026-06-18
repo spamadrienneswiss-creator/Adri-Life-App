@@ -2525,27 +2525,23 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
 </div>
 
 <div class="view" id="v-meals">
-  <div class="card" style="margin-bottom:10px">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+  <div class="card" style="margin-bottom:10px;padding:10px 14px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:7px">
       <span style="font-size:13px;font-weight:700;color:var(--textd)">💧 Water Today</span>
-      <span id="eatWaterLabel" style="font-size:14px;font-weight:700;color:#2e88c8">0 oz</span>
+      <div style="display:flex;align-items:center;gap:10px">
+        <span id="eatWaterLabel" style="font-size:14px;font-weight:700;color:#2e88c8">0 oz</span>
+        <button onclick="openSubpage('sp-nutrition')" style="font-size:11px;color:var(--textl);background:none;border:none;cursor:pointer;font-family:'Quicksand',sans-serif;padding:0;text-decoration:underline">🥗 Nutrition Log →</button>
+      </div>
     </div>
-    <div style="display:flex;gap:6px;flex-wrap:wrap">
-      <button onclick="addWaterOz(-8)" style="padding:6px 10px;border-radius:8px;border:1.5px solid #f0a0a0;background:#fff5f5;font-family:'Quicksand',sans-serif;font-size:12px;font-weight:700;color:#c05050;cursor:pointer">−8 oz</button>
-      <button onclick="addWaterOz(8)" style="padding:6px 10px;border-radius:8px;border:1.5px solid #a8cceb;background:#f0f8ff;font-family:'Quicksand',sans-serif;font-size:12px;font-weight:700;color:#2e88c8;cursor:pointer">+8 oz</button>
-      <button onclick="addWaterOz(16)" style="padding:6px 10px;border-radius:8px;border:1.5px solid #a8cceb;background:#f0f8ff;font-family:'Quicksand',sans-serif;font-size:12px;font-weight:700;color:#2e88c8;cursor:pointer">+16 oz</button>
-      <button onclick="addWaterOz(32)" style="padding:6px 10px;border-radius:8px;border:none;background:linear-gradient(135deg,var(--lav),#5a90d0);font-family:'Quicksand',sans-serif;font-size:11px;font-weight:700;color:white;cursor:pointer">Owala 32oz</button>
-    </div>
-    <div style="display:flex;gap:6px;margin-top:6px;align-items:center">
-      <input type="number" id="waterCustomFoodOz" placeholder="oz" min="1" max="200" style="width:60px;padding:5px 8px;border-radius:8px;border:1.5px solid #a8cceb;font-family:'Quicksand',sans-serif;font-size:12px;text-align:center">
-      <button onclick="(function(){var v=parseInt(document.getElementById('waterCustomFoodOz').value);if(v>0){addWaterOz(v);document.getElementById('waterCustomFoodOz').value='';}})()" style="padding:5px 12px;border-radius:8px;border:1.5px solid #a8cceb;background:#f0f8ff;font-family:'Quicksand',sans-serif;font-size:12px;font-weight:700;color:#2e88c8;cursor:pointer">+ Custom</button>
+    <div style="display:flex;gap:5px;flex-wrap:wrap;align-items:center">
+      <button onclick="addWaterOz(-8)" style="padding:5px 9px;border-radius:8px;border:1.5px solid #f0a0a0;background:#fff5f5;font-family:'Quicksand',sans-serif;font-size:12px;font-weight:700;color:#c05050;cursor:pointer">−8</button>
+      <button onclick="addWaterOz(8)" style="padding:5px 9px;border-radius:8px;border:1.5px solid #a8cceb;background:#f0f8ff;font-family:'Quicksand',sans-serif;font-size:12px;font-weight:700;color:#2e88c8;cursor:pointer">+8</button>
+      <button onclick="addWaterOz(16)" style="padding:5px 9px;border-radius:8px;border:1.5px solid #a8cceb;background:#f0f8ff;font-family:'Quicksand',sans-serif;font-size:12px;font-weight:700;color:#2e88c8;cursor:pointer">+16</button>
+      <button onclick="addWaterOz(32)" style="padding:5px 9px;border-radius:8px;border:none;background:linear-gradient(135deg,var(--lav),#5a90d0);font-family:'Quicksand',sans-serif;font-size:11px;font-weight:700;color:white;cursor:pointer">Owala</button>
+      <input type="number" id="waterCustomFoodOz" placeholder="oz" min="1" max="200" style="width:50px;padding:4px 6px;border-radius:8px;border:1.5px solid #a8cceb;font-family:'Quicksand',sans-serif;font-size:12px;text-align:center">
+      <button onclick="(function(){var v=parseInt(document.getElementById('waterCustomFoodOz').value);if(v>0){addWaterOz(v);document.getElementById('waterCustomFoodOz').value='';}})()" style="padding:5px 10px;border-radius:8px;border:1.5px solid #a8cceb;background:#f0f8ff;font-family:'Quicksand',sans-serif;font-size:12px;font-weight:700;color:#2e88c8;cursor:pointer">+</button>
     </div>
   </div>
-  <button class="health-section-btn" style="margin-bottom:14px" onclick="openSubpage('sp-nutrition')">
-    <span class="health-section-icon">🥗</span>
-    <div class="health-section-info"><div class="health-section-name">Nutrition Log</div><div class="health-section-sub">Log food &amp; macros</div></div>
-    <span style="color:var(--textl);font-size:14px">›</span>
-  </button>
   <div class="pill-nav" style="margin-bottom:12px">
     <button class="pn-btn" onclick="showMealSec('grocery',this)">🛒 Grocery</button>
     <button class="pn-btn on" onclick="showMealSec('meals',this)">🍽️ Meals</button>
@@ -2564,41 +2560,42 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     <!-- Quick-log chips -->
     <div id="quickLogWrap" style="margin-bottom:10px"></div>
     <div class="card" style="margin-bottom:10px">
-      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end">
-        <div style="flex:2;min-width:130px">
-          <label style="font-size:11px;color:var(--textl);display:block;margin-bottom:3px">What did you eat/drink?</label>
-          <input id="mealLogName" type="text" list="foodDbSuggestList" placeholder="e.g. Oatmeal, Latte, Apple…" style="width:100%;padding:8px 11px;border-radius:10px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px;box-sizing:border-box" oninput="onMealLogNameInput(this.value)">
+      <div style="display:flex;gap:8px;align-items:center">
+        <div style="flex:1">
+          <input id="mealLogName" type="text" list="foodDbSuggestList" placeholder="What did you eat/drink?" style="width:100%;padding:8px 11px;border-radius:10px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px;box-sizing:border-box" oninput="onMealLogNameInput(this.value)" onfocus="showMealLogExtras()">
           <datalist id="foodDbSuggestList"></datalist>
         </div>
-        <div style="flex:1;min-width:110px">
-          <label style="font-size:11px;color:var(--textl);display:block;margin-bottom:3px">Category</label>
-          <select id="mealLogCat" style="width:100%;padding:8px 10px;border-radius:10px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px;box-sizing:border-box">
-            <option value="main">🍳 Main Meal</option>
-            <option value="snack">🥨 Snack</option>
-            <option value="beverage">☕ Beverage</option>
-            <option value="treat">🍰 Treat</option>
-            <option value="supplement">💊 Supplement</option>
-          </select>
-        </div>
-        <div style="flex:1;min-width:100px">
-          <label style="font-size:11px;color:var(--textl);display:block;margin-bottom:3px">Day (optional)</label>
-          <select id="mealLogDay" style="width:100%;padding:8px 10px;border-radius:10px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px;box-sizing:border-box">
-            <option value="">No day</option>
-            <option>Monday</option><option>Tuesday</option><option>Wednesday</option>
-            <option>Thursday</option><option>Friday</option><option>Saturday</option><option>Sunday</option>
-          </select>
-        </div>
+        <button class="btn sec" style="flex-shrink:0;padding:8px 13px;font-size:13px;white-space:nowrap" onclick="openFoodLibPick()">📚 Library</button>
       </div>
-      <div style="display:flex;align-items:center;gap:8px;margin-top:8px;margin-bottom:4px">
-        <input type="checkbox" id="mealLogAddToDB" style="width:16px;height:16px;flex-shrink:0">
-        <label for="mealLogAddToDB" style="font-size:12px;color:var(--textl);cursor:pointer">Add to Food Database</label>
-      </div>
-      <div style="display:flex;gap:8px;margin-top:4px">
-        <button class="btn" style="flex:1" onclick="addMealLogItem()">+ Log Meal</button>
-        <button class="btn sec" style="flex-shrink:0;padding:8px 14px;font-size:13px" onclick="openFoodLibPick()">📚 From Library</button>
+      <div id="mealLogExtras" style="display:none;margin-top:8px">
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <div style="flex:1;min-width:110px">
+            <label style="font-size:11px;color:var(--textl);display:block;margin-bottom:3px">Category</label>
+            <select id="mealLogCat" style="width:100%;padding:8px 10px;border-radius:10px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px;box-sizing:border-box">
+              <option value="main">🍳 Main Meal</option>
+              <option value="snack">🥨 Snack</option>
+              <option value="beverage">☕ Beverage</option>
+              <option value="treat">🍰 Treat</option>
+              <option value="supplement">💊 Supplement</option>
+            </select>
+          </div>
+          <div style="flex:1;min-width:100px">
+            <label style="font-size:11px;color:var(--textl);display:block;margin-bottom:3px">Day (optional)</label>
+            <select id="mealLogDay" style="width:100%;padding:8px 10px;border-radius:10px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px;box-sizing:border-box">
+              <option value="">No day</option>
+              <option>Monday</option><option>Tuesday</option><option>Wednesday</option>
+              <option>Thursday</option><option>Friday</option><option>Saturday</option><option>Sunday</option>
+            </select>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;margin-top:8px;margin-bottom:4px">
+          <input type="checkbox" id="mealLogAddToDB" style="width:16px;height:16px;flex-shrink:0">
+          <label for="mealLogAddToDB" style="font-size:12px;color:var(--textl);cursor:pointer">Add to Food Database</label>
+        </div>
+        <button class="btn" style="width:100%;margin-top:4px" onclick="addMealLogItem()">+ Log Meal</button>
       </div>
     </div>
-    <div class="bd-filter-row" id="mealLogFilter" style="margin-bottom:10px">
+    <div class="bd-filter-row" id="mealLogFilter" style="margin-bottom:10px;display:none">
       <button class="bd-filter on" onclick="setMealLogFilter('',this)">All</button>
       <button class="bd-filter" onclick="setMealLogFilter('main',this)">🍳 Mains</button>
       <button class="bd-filter" onclick="setMealLogFilter('snack',this)">🥨 Snacks</button>
@@ -5512,14 +5509,18 @@ function renderInvSectionsModal(){
   var el=document.getElementById('invSectionsBody');
   if(!el)return;
   var DEFAULT_SECTIONS=['Pantry','Fridge','Freezer','Snacks','Baking','Supplements'];
+  var btnStyle='background:none;border:1.5px solid var(--bdr);border-radius:7px;padding:2px 7px;cursor:pointer;font-size:12px;color:var(--textl)';
   el.innerHTML=INV_SECTIONS.map(function(s,i){
     var isDefault=DEFAULT_SECTIONS.indexOf(s)>=0;
     var itemCount=INVENTORY.filter(function(inv){return (inv.section||'Pantry')===s;}).length;
-    return '<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--bdr)">'
+    var upBtn='<button onclick="moveInvSection('+i+',-1)" style="'+btnStyle+(i===0?';visibility:hidden':'')+'">↑</button>';
+    var dnBtn='<button onclick="moveInvSection('+i+',1)" style="'+btnStyle+(i===INV_SECTIONS.length-1?';visibility:hidden':'')+'">↓</button>';
+    var actionBtn=isDefault
+      ?'<span style="font-size:10px;color:var(--textl);background:var(--bg2);border-radius:6px;padding:2px 7px;white-space:nowrap">default</span>'
+      :'<button onclick="delInvSection('+i+')" style="background:none;border:none;font-size:15px;cursor:pointer;color:#e74c3c;padding:2px 4px;line-height:1">🗑️</button>';
+    return '<div style="display:flex;align-items:center;gap:6px;padding:8px 0;border-bottom:1px solid var(--bdr)">'
       +'<span style="flex:1;font-size:13px;font-weight:600;color:var(--textd)">'+escHtml(s)+(itemCount?'<span style="font-size:11px;font-weight:400;color:var(--textl)"> · '+itemCount+' item'+(itemCount===1?'':'s')+'</span>':'')+'</span>'
-      +(i>0?'<button onclick="moveInvSection('+i+',-1)" style="background:none;border:1.5px solid var(--bdr);border-radius:7px;padding:2px 7px;cursor:pointer;font-size:12px;color:var(--textl)">↑</button>':'<span style="width:28px"></span>')
-      +(i<INV_SECTIONS.length-1?'<button onclick="moveInvSection('+i+',1)" style="background:none;border:1.5px solid var(--bdr);border-radius:7px;padding:2px 7px;cursor:pointer;font-size:12px;color:var(--textl)">↓</button>':'<span style="width:28px"></span>')
-      +(isDefault?'<span style="font-size:10px;color:var(--textl);padding:0 4px">default</span>':'<button onclick="delInvSection('+i+')" style="background:none;border:none;font-size:14px;cursor:pointer;color:#e74c3c;padding:2px 4px">🗑️</button>')
+      +upBtn+dnBtn+actionBtn
       +'</div>';
   }).join('');
 }
@@ -20469,6 +20470,10 @@ function setMealLogFilter(cat,btn){
   renderMealLog();
 }
 
+function showMealLogExtras(){
+  var el=document.getElementById('mealLogExtras');
+  if(el)el.style.display='';
+}
 function addMealLogItem(){
   var name=(document.getElementById('mealLogName')||{}).value||'';
   name=name.trim();if(!name)return;
@@ -20485,6 +20490,7 @@ function addMealLogItem(){
   autoFlagStaples();
   document.getElementById('mealLogName').value='';
   document.getElementById('mealLogDay').value='';
+  var _ex=document.getElementById('mealLogExtras');if(_ex)_ex.style.display='none';
   checkQuestAutoComplete('meal');
   renderMealLog();
 }
@@ -20679,7 +20685,7 @@ function renderQuickLogChips(){
   // Top foods: staples + most-used, ranked by useCount, only ones with nutrition data
   var candidates=(FOOD_DB||[]).filter(function(f){
     var hasNut=(f.per100&&f.per100.cal!=null)||f.cal;
-    return hasNut&&!f.ick;
+    return hasNut&&!isItemIck(f);
   });
   candidates.sort(function(a,b){
     if(!!b.staple!==!!a.staple)return b.staple?1:-1;
@@ -20726,6 +20732,8 @@ function openQuickLogPortion(id){
 function renderMealLog(){
   renderMealMacroBar();
   renderQuickLogChips();
+  var filterEl=document.getElementById('mealLogFilter');
+  if(filterEl)filterEl.style.display=MEAL_LOG_ITEMS.length?'':'none';
   var el=document.getElementById('mealLogList');if(!el)return;
   var list=_mealLogFilter?MEAL_LOG_ITEMS.filter(function(m){return m.category===_mealLogFilter;}):MEAL_LOG_ITEMS;
   if(!list.length){el.innerHTML='<p style="color:var(--textl);text-align:center;padding:20px">No meals logged yet. Start tracking what you eat!</p>';return;}
@@ -22041,17 +22049,18 @@ function renderGrocery(){
     storeItems.forEach(function(entry){
       var item=entry.item;
       var i=entry.idx;
-      var price=getBestPrice(item.name,item.dbItemId);
+      var unitPrice=getBestPrice(item.name,item.dbItemId);
       var dbi=item.dbItemId?FOOD_DB.find(function(x){return x.id===item.dbItemId;}):FOOD_DB.find(function(x){return x.name.toLowerCase()===(item.name||'').toLowerCase();});
       var nutLine=dbi&&dbi.cal?'<span style="font-size:10px;color:var(--textl);margin-left:6px">'+dbi.cal+'cal'+( dbi.pro?' · '+dbi.pro+'g pro':'')+'</span>':'';
       var inStockBadge=item.inStock?'<span style="font-size:10px;background:#e8f5e8;color:var(--sage);border-radius:6px;padding:1px 5px;margin-left:4px">in stock</span>':'';
       var sm=GROC_SOURCE_META[grocSourceOf(item)]||GROC_SOURCE_META.manual;
       var srcBadge='<span title="'+sm.label+'" style="font-size:10px;background:'+sm.bg+';color:'+sm.color+';border-radius:6px;padding:1px 5px;margin-left:4px;flex-shrink:0">'+sm.icon+'</span>';
+      var iq=parseFloat(item.qty);var linePrice=unitPrice?(unitPrice*(isNaN(iq)||iq<=0?1:iq)):null;
       html+='<div class="grocery-item'+(item.checked?' done':'')+'">'
         +'<input type="checkbox" '+(item.checked?'checked':'')+' onchange="toggleGrocery('+i+')" style="width:18px;height:18px;cursor:pointer">'
         +'<span class="grocery-name" style="flex:1;font-size:13px;cursor:pointer" onclick="openGrocEdit('+i+')">'+item.name+'<span style="color:var(--textl);font-size:11px"> '+item.qty+(item.unit?' '+item.unit:'')+'</span>'+nutLine+inStockBadge+'</span>'
         +srcBadge
-        +(price?'<span style="font-size:12px;color:var(--rose);font-weight:700">$'+price.toFixed(2)+'</span>':'')
+        +(linePrice?'<span style="font-size:12px;color:#888;font-weight:600">~$'+linePrice.toFixed(2)+'</span>':'')
         +'<button class="btn sec" style="font-size:12px;padding:2px 7px" onclick="openGrocEdit('+i+')" title="Edit">✎</button>'
         +'<button class="btn sec" style="font-size:11px;padding:2px 7px" onclick="delGroceryItem('+i+')" title="Remove">✕</button>'
         +'</div>';
@@ -22118,6 +22127,8 @@ function saveGrocEdit(){
   localStorage.setItem('aGroceryList',JSON.stringify(GROCERY_LIST));
   closeOv('ovGrocEdit');
   renderGrocery();
+  renderGroceryList();
+  renderGroceryQuick();
 }
 
 function clearCheckedGrocery(){
@@ -22159,10 +22170,14 @@ function updateGroceryTotal(){
     if(item.checked)return;
     if(_grocSourceFilter&&grocSourceOf(item)!==_grocSourceFilter)return;
     var p=getBestPrice(item.name,item.dbItemId);
-    if(p){total+=p;priced++;}else unpriced++;
+    if(p){
+      var q=parseFloat(item.qty);
+      total+=p*(isNaN(q)||q<=0?1:q);
+      priced++;
+    }else unpriced++;
   });
   if(!priced){el.textContent='';return;}
-  el.textContent='About $'+Math.round(total)+' so far ('+priced+' priced'+(unpriced?', '+unpriced+' no price yet':'')+')';
+  el.innerHTML='<span style="font-weight:700;color:var(--textd)">~$'+total.toFixed(2)+'</span> estimated'+(unpriced?' <span style="color:var(--textl)">· '+unpriced+' item'+(unpriced>1?'s':'')+' unpriced</span>':'');
 }
 
 function getBestPrice(itemName,dbItemId){
@@ -22299,15 +22314,29 @@ function renderGroceryList(){
     entries.forEach(function(entry){
       var item=entry.item;
       var i=entry.idx;
-      html+='<div style="display:flex;align-items:center;gap:10px;padding:8px 10px;background:#fff;border-radius:10px;margin-bottom:4px;border:1.5px solid '+(item.checked?'#d0e8d0':'#ede8e3')+';">'
+      var up=getBestPrice(item.name,item.dbItemId);
+      var iq=parseFloat(item.qty);var lp=up?(up*(isNaN(iq)||iq<=0?1:iq)):null;
+      html+='<div style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:#fff;border-radius:10px;margin-bottom:4px;border:1.5px solid '+(item.checked?'#d0e8d0':'#ede8e3')+';">'
         +'<input type="checkbox" '+(item.checked?'checked':'')+' onchange="grocTaskToggle('+i+',this.checked)" style="width:18px;height:18px;cursor:pointer;flex-shrink:0">'
-        +'<span style="flex:1;font-size:13px;font-weight:600;'+(item.checked?'text-decoration:line-through;color:var(--textl)':'color:var(--textd)')+'">'+escHtml(item.name)+'</span>'
+        +'<span style="flex:1;font-size:13px;font-weight:600;'+(item.checked?'text-decoration:line-through;color:var(--textl)':'color:var(--textd)')+'">'+escHtml(item.name)
+        +(item.qty&&item.qty!=='1'?'<span style="font-size:11px;font-weight:400;color:var(--textl)"> '+escHtml(item.qty)+(item.unit?' '+escHtml(item.unit):'')+'</span>':'')
+        +'</span>'
+        +(lp?'<span style="font-size:11px;color:#888;font-weight:600;flex-shrink:0">~$'+lp.toFixed(2)+'</span>':'')
         +(item.store?'<span style="font-size:10px;font-weight:700;background:var(--sage-light);color:#4a7a46;border-radius:6px;padding:2px 7px;flex-shrink:0">'+escHtml(item.store)+'</span>':'')
+        +'<button onclick="openGrocEdit('+i+')" style="background:none;border:1.5px solid #e0d8ce;border-radius:7px;font-size:12px;cursor:pointer;color:var(--textl);flex-shrink:0;padding:2px 7px;line-height:1.4" title="Edit">✎</button>'
         +'<button onclick="grocTaskDelete('+i+')" style="background:none;border:none;font-size:16px;cursor:pointer;color:var(--textl);flex-shrink:0;padding:2px 4px;line-height:1">🗑️</button>'
         +'</div>';
     });
     html+='</div>';
   });
+  // Running total for Today page
+  var gtotal=0,gpriced=0,gunpriced=0;
+  GROCERY_LIST.filter(function(g){return !g.checked;}).forEach(function(item){
+    var p=getBestPrice(item.name,item.dbItemId);
+    var q=parseFloat(item.qty);
+    if(p){gtotal+=p*(isNaN(q)||q<=0?1:q);gpriced++;}else gunpriced++;
+  });
+  if(gpriced)html+='<div style="font-size:12px;color:var(--textl);padding:6px 4px;text-align:right">~$'+gtotal.toFixed(2)+' estimated'+(gunpriced?' · '+gunpriced+' unpriced':'')+' </div>';
   el.innerHTML=html;
 }
 
@@ -23456,15 +23485,45 @@ function toggleFoodStaple(id){
   renderFoodDb();
 }
 
-function toggleFoodIck(id){
+function isItemIck(item){
+  if(!item.ick)return false;
+  if(item.ick===true||item.ick==='forever')return true;
+  return typeof item.ick==='string'&&item.ick>todayStr();
+}
+function ickLabel(item){
+  if(!isItemIck(item))return '';
+  if(item.ick===true||item.ick==='forever')return '🙅 skip forever';
+  var d=new Date(item.ick+'T12:00:00');
+  var mo=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return '🙅 until '+mo[d.getMonth()]+' '+d.getDate();
+}
+var _ickPickId='';
+function openIckPicker(id){
   var item=FOOD_DB.find(function(x){return x.id===id;});
   if(!item)return;
-  item.ick=!item.ick;
-  if(item.ick)item.staple=false;
-  saveFoodDbData();
-  renderFoodDb();
-  renderQuickLogChips();
-  showToast(item.ick?item.name+' marked as ick 🙅':item.name+' un-icked ✓');
+  if(isItemIck(item)){
+    item.ick=false;
+    saveFoodDbData();renderFoodDb();renderQuickLogChips();
+    showToast(item.name+' allowed again ✓');
+    return;
+  }
+  _ickPickId=id;
+  var el=document.getElementById('ickPickName');if(el)el.textContent=item.name;
+  showOv('ovIckPick');
+}
+function setFoodIck(weeksOrForever){
+  var item=FOOD_DB.find(function(x){return x.id===_ickPickId;});
+  if(!item){closeOv('ovIckPick');return;}
+  if(weeksOrForever==='forever'){
+    item.ick='forever';
+  }else{
+    var d=new Date();d.setDate(d.getDate()+weeksOrForever*7);
+    item.ick=d.toISOString().slice(0,10);
+  }
+  item.staple=false;
+  saveFoodDbData();closeOv('ovIckPick');
+  renderFoodDb();renderQuickLogChips();
+  showToast('🙅 '+item.name+' — '+ickLabel(item).replace('🙅 ',''));
 }
 
 function toggleFoodGluten(id){
@@ -24021,14 +24080,15 @@ function renderFoodDb(){
     var tagChips=tags.map(function(t){return '<span style="font-size:10px;background:#f0ece8;border-radius:6px;padding:1px 5px;color:var(--textl)">'+escHtml(t)+'</span>';}).join(' ');
     var favBtn='<button title="Favorite" onclick="toggleFoodFav(\''+item.id+'\')" style="background:none;border:none;font-size:16px;cursor:pointer;line-height:1;padding:2px">'+(item.favorite?'⭐':'☆')+'</button>';
     var stapleBtn='<button title="'+(item.staple?'Unflag staple':'Flag as staple')+'" onclick="toggleFoodStaple(\''+item.id+'\')" style="background:none;border:none;font-size:13px;cursor:pointer;line-height:1;padding:2px;opacity:'+(item.staple?'1':'.25')+'">🏷️</button>';
-    var ickBtn='<button title="'+(item.ick?'Un-ick (tap to allow in quick-log)':'Mark as ick — hides from quick-log')+'" onclick="toggleFoodIck(\''+item.id+'\')" style="background:none;border:none;font-size:13px;cursor:pointer;line-height:1;padding:2px;opacity:'+(item.ick?'1':'.25')+'">🙅</button>';
+    var _isIck=isItemIck(item);
+    var ickBtn='<button title="'+(_isIck?'Tap to allow again':'Skip this food for a while')+'" onclick="openIckPicker(\''+item.id+'\')" style="background:none;border:none;font-size:13px;cursor:pointer;line-height:1;padding:2px;opacity:'+(_isIck?'1':'.25')+'">🙅</button>';
     var glutenBtn='<button title="'+(item.gluten?'Contains gluten (tap to toggle)':'Mark as contains gluten')+'" onclick="toggleFoodGluten(\''+item.id+'\')" style="background:none;border:none;font-size:13px;cursor:pointer;line-height:1;padding:2px;opacity:'+(item.gluten?'1':'.25')+'">🌾</button>';
     var grocBtn='<button title="Add to Grocery" onclick="addDbItemToGrocery(\''+item.id+'\')" style="background:none;border:none;font-size:15px;cursor:pointer;line-height:1;padding:2px">🛒</button>';
     return'<div style="background:#fff;border-radius:12px;padding:12px 14px;margin-bottom:8px;box-shadow:0 1px 4px rgba(0,0,0,.06)">'
       +'<div style="display:flex;align-items:flex-start;gap:10px">'
       +'<span style="font-size:20px;flex-shrink:0;margin-top:1px">'+emoji+'</span>'
       +'<div style="flex:1;min-width:0">'
-      +'<div style="font-size:13px;font-weight:700;color:var(--textd)">'+escHtml(item.name)+(item.serving?'<span style="font-weight:400;color:var(--textl);font-size:11px"> · '+escHtml(item.serving)+'</span>':'')+(item.staple?' <span style="font-size:10px;background:#fff0d0;border-radius:6px;padding:1px 5px;color:#a07020">staple</span>':'')+(item.ick?' <span style="font-size:10px;background:#fde8e8;border-radius:6px;padding:1px 5px;color:#c05050">🙅 ick</span>':'')+(item.gluten?' <span style="font-size:10px;background:#fdf6e0;border-radius:6px;padding:1px 5px;color:#a07820">🌾 gluten</span>':'')+'</div>'
+      +'<div style="font-size:13px;font-weight:700;color:var(--textd)">'+escHtml(item.name)+(item.serving?'<span style="font-weight:400;color:var(--textl);font-size:11px"> · '+escHtml(item.serving)+'</span>':'')+(item.staple?' <span style="font-size:10px;background:#fff0d0;border-radius:6px;padding:1px 5px;color:#a07020">staple</span>':'')+(_isIck?' <span style="font-size:10px;background:#fde8e8;border-radius:6px;padding:1px 5px;color:#c05050">'+escHtml(ickLabel(item))+'</span>':'')+(item.gluten?' <span style="font-size:10px;background:#fdf6e0;border-radius:6px;padding:1px 5px;color:#a07820">🌾 gluten</span>':'')+'</div>'
       +(tags.length?'<div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:3px">'+tagChips+'</div>':'')
       +(item.cal||item.pro?'<div style="font-size:11px;color:var(--textl);margin-top:3px">'
         +(item.cal?'<span style="margin-right:8px">🔥 '+item.cal+'cal</span>':'')
@@ -24369,10 +24429,11 @@ function renderGroceryQuick(){
     entries.forEach(function(entry){
       var item=entry.item;
       var i=entry.idx;
-      html+='<div style="display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid #f8f5f2">'
+      html+='<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid #f8f5f2">'
         +'<input type="checkbox" '+(item.checked?'checked':'')
         +' onchange="gqmToggle('+i+',this.checked)" style="width:18px;height:18px;cursor:pointer">'
         +'<span style="flex:1;font-size:13px;'+(item.checked?'text-decoration:line-through;color:var(--textl)':'color:var(--textd)')+'">'+escHtml(item.name)+(item.qty&&item.qty!=='1'?' <span style="color:var(--textl);font-size:11px">('+escHtml(item.qty)+')</span>':'')+'</span>'
+        +'<button onclick="openGrocEdit('+i+')" style="background:none;border:1.5px solid #e0d8ce;border-radius:7px;font-size:12px;cursor:pointer;color:var(--textl);padding:1px 6px;line-height:1.4" title="Edit">✎</button>'
         +'<button onclick="gqmRemove('+i+')" style="background:none;border:none;font-size:16px;cursor:pointer;color:var(--textl);padding:2px 4px;line-height:1">✕</button>'
         +'</div>';
     });
@@ -28347,7 +28408,7 @@ function delProjInc(id){
 
 <!-- INVENTORY SECTIONS MODAL -->
 <div class="ov" id="ovInvSections" onclick="closeOv('ovInvSections')">
-  <div class="mod" onclick="event.stopPropagation()">
+  <div class="mod" style="max-width:360px;max-height:88vh;overflow-y:auto" onclick="event.stopPropagation()">
     <div class="mh"><span class="mt">⚙️ Manage Sections</span><button class="mc" onclick="closeOv('ovInvSections')">✕</button></div>
     <div id="invSectionsBody"></div>
     <div style="display:flex;gap:8px;margin-top:12px">
@@ -29712,6 +29773,20 @@ function delProjInc(id){
         <button class="btn" style="flex:1" onclick="saveGrocEdit()">Save</button>
         <button class="btn sec" style="flex-shrink:0" onclick="closeOv('ovGrocEdit')">Cancel</button>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- ICK DURATION PICKER -->
+<div class="ov" id="ovIckPick" onclick="if(event.target===this)closeOv('ovIckPick')">
+  <div class="mod" style="max-width:320px" onclick="event.stopPropagation()">
+    <div class="mh"><span class="mt">🙅 Skip for how long?</span><button class="mc" onclick="closeOv('ovIckPick')">✕</button></div>
+    <div id="ickPickName" style="font-size:13px;font-weight:700;color:var(--textd);margin-bottom:14px;padding:0 2px"></div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <button class="btn sec" onclick="setFoodIck(2)" style="text-align:left">⏱ 2 weeks — just overdid it</button>
+      <button class="btn sec" onclick="setFoodIck(4)" style="text-align:left">📅 1 month — seasonal break</button>
+      <button class="btn sec" onclick="setFoodIck(13)" style="text-align:left">🗓 3 months — rotating out</button>
+      <button class="btn sec" onclick="setFoodIck('forever')" style="text-align:left;color:#c05050;border-color:#ecd8d8">🚫 Skip forever</button>
     </div>
   </div>
 </div>
