@@ -6537,7 +6537,7 @@ function goTabDirect(tab,btn){
 
   if(tab==='content'){ renderContentPage(); }
   if(tab==='plan'){ renderPlan(); }
-  if(tab==='grocery'){ renderGroceryList(); populateGrocTaskDatalist(); }
+  if(tab==='grocery'){ goTabDirect('meals');setTimeout(function(){var b=document.querySelector('#v-meals .pn-btn:nth-child(3)');if(b)showMealSec('grocery',b);},60);return; }
   if(tab==='guide'){ renderResearchLib(); renderGuide(); renderTmplList(); renderAppIndex(); renderMemoryItems(); renderLifeHacks(); }
   if(tab==='appindex'){ renderAppIndex(); }
   if(tab==='work-projects'){ renderWorkProjects(); }
