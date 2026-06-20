@@ -15125,7 +15125,6 @@ function renderMoneyOverview(){
   var thisMonExp=EXPENSES.filter(function(e){return(e.created||'').startsWith(mon)&&!e.pending;});
   var thisMonExpAmt=thisMonExp.reduce(function(s,e){return s+(parseFloat(e.amt)||0);},0);
   var sC={pos:'#4F6014',neg:'#C2415A',accent:'#2475FF',muted:'#9A8576',sky:'#8CC4E8',pinkSoft:'#FCE0E8',limeSoft:'#E5F0BE'};
-  _migrateAccounts();
   var billPaidMap=BILL_PAY[mon]||{};
   var cash=ACCOUNTS.filter(function(a){return!a.isCredit;}).reduce(function(s,a){return s+(parseFloat(a.amount)||0);},0);
   var activeOwed=ACCOUNTS.filter(function(a){return a.isCredit&&!a.excludeFromNet;}).reduce(function(s,a){return s+(parseFloat(a.amount)||0);},0);
@@ -15146,7 +15145,7 @@ function renderMoneyOverview(){
 
   // At-a-glance dashboard
   var dashEl=document.getElementById('ovDashboard');
-  if(dashEl){
+  if(dashEl){try{
     // Budget left + days remaining (days remaining INCLUDES today)
     var totTarget=0,totSpent=0;
     try{var _sp=budgetSpentMap();BUDGET_BUCKETS.forEach(function(b){totTarget+=budgetEffTarget(b);totSpent+=(_sp[b.id]||0);});}catch(e){}
@@ -15191,7 +15190,7 @@ function renderMoneyOverview(){
     html+=tile('📈 Savings rate',savingsRate!==null?savingsRate+'%':'—',savingsRate!==null?(savingsRate>=20?'looking good':savingsRate>=0?'of income kept':'over income'):'log income to see',savingsRate===null?sC.muted:savingsRate>=20?sC.pos:savingsRate>=0?'#b07a1a':sC.neg);
     html+=tile('⏳ Uncleared',unclearedCt,unclearedCt?'tap Expenses to reconcile':'all reconciled ✓',unclearedCt?'#b07a1a':sC.pos);
     dashEl.innerHTML=html;
-  }
+  }catch(e){console.error('ovDash',e);}}
 
   // 1. What came in
   var incEl=document.getElementById('ov2IncTotal');if(incEl)incEl.textContent='$'+thisMonIncAmt.toFixed(2);
