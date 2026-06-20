@@ -6241,6 +6241,8 @@ function initFirebase(){
       ap('aBudgetMoves',function(v,r){BUDGET_MOVES=v||[];_origSetItem('aBudgetMoves',r);});
       _fbBlobPause=false;
       renderBills();renderAccounts();renderIncome();updMoneyBadge();renderBudget();
+      if(typeof renderTrips==='function')renderTrips();
+      if(typeof renderMoneyOverview==='function')renderMoneyOverview();
     }else if(group==='health'){
       ap('aMeds',function(v,r){MEDS=v||[];_origSetItem('aMeds',r);});
       ap('aMedLog',function(v,r){MED_LOG=v||{};_origSetItem('aMedLog',r);});
