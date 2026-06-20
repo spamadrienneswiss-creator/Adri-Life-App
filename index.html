@@ -15546,10 +15546,9 @@ function _migrateAccounts(){
       changed=true;
     }
   });
-  if(!anyPrimary&&!localStorage.getItem('aAcctPrimarySeeded')){
+  if(!anyPrimary){
     var p=ACCOUNTS.find(function(a){return!a.isCredit&&(a.name||'').toLowerCase().indexOf('partner')>=0;});
     if(p){p.isPrimary=true;changed=true;}
-    localStorage.setItem('aAcctPrimarySeeded','1');
   }
   if(changed)localStorage.setItem('aAccounts',JSON.stringify(ACCOUNTS));
 }
