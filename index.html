@@ -6047,16 +6047,12 @@ function initFirebase(){
   window.fsOnSnapshot(window.fsCollection(window.db,'tasks'), function(snap){
     TASKS = [];
     snap.forEach(function(d){ TASKS.push(d.data()); });
-    // One-time cleanup: remove legacy auto "Transfer $… to spreadsheet" tasks
-    if(!localStorage.getItem('aSpreadsheetTasksPurged')){
-      var _isLegacy=function(t){return /^Transfer \$.* to spreadsheet$/.test((t&&t.title)||'');};
-      var _purge=TASKS.filter(_isLegacy);
-      if(_purge.length){
-        _purge.forEach(function(t){fbDelete('tasks',t.id);});
-        TASKS=TASKS.filter(function(t){return !_isLegacy(t);});
-        saveTasks();
-      }
-      localStorage.setItem('aSpreadsheetTasksPurged','1');
+    // Purge legacy auto "Transfer $… to spreadsheet" tasks (self-terminates once clean)
+    var _purge=TASKS.filter(function(t){return /^Transfer \$.*to spreadsheet$/.test((t&&t.title)||'');});
+    if(_purge.length){
+      _purge.forEach(function(t){fbDelete('tasks',t.id);});
+      TASKS=TASKS.filter(function(t){return !/^Transfer \$.*to spreadsheet$/.test((t&&t.title)||'');});
+      saveTasks();
     }
     TASKS.sort(function(a,b){ return (b.created||'') > (a.created||'') ? 1 : -1; });
     _migrateTasksProjects();
