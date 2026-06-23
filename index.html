@@ -11982,9 +11982,6 @@ function saveExp(){
       localStorage.setItem('aAccounts',JSON.stringify(ACCOUNTS));
     }
   }
-  var taskId=id+'_e';
-  var task={id:taskId,title:'Transfer $'+amt+' '+desc+' to spreadsheet',cat:'fin',urgency:'important-not-urgent',etime:'<10min',due:'',notes:(SBV.ety==='business'?'💼 Biz':'🏠 Personal'),done:false,created:new Date().toISOString()};
-  fbSave('tasks',taskId,task);
   closeM('expModal');
 }
 
