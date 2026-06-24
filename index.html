@@ -1871,8 +1871,7 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
 <!-- MONEY -->
 <div class="view" id="v-money">
   <div class="pill-nav" style="margin-bottom:12px;flex-wrap:wrap">
-    <button class="pn-btn on" data-sec="overview" onclick="showMoneySec('overview',this)">📊 Overview</button>
-    <button class="pn-btn" data-sec="budget" onclick="showMoneySec('budget',this)">🎯 Budget</button>
+    <button class="pn-btn on" data-sec="budget" onclick="showMoneySec('budget',this)">🎯 Budget</button>
     <button class="pn-btn" data-sec="bills" onclick="showMoneySec('bills',this)">🏦 Bills</button>
     <button class="pn-btn" data-sec="expenses" onclick="showMoneySec('expenses',this)">💸 Expenses</button>
     <button class="pn-btn" data-sec="income" onclick="showMoneySec('income',this)">💰 Income</button>
@@ -1882,60 +1881,56 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     <button class="pn-btn" data-sec="money-plan" onclick="showMoneySec('money-plan',this)">📈 Plan</button>
     <button class="pn-btn" data-sec="trips" onclick="showMoneySec('trips',this)">✈️ Trips</button>
   </div>
-  <!-- Overview -->
-  <div id="ms-overview" class="money-sec">
+  <!-- Budget (home) -->
+  <div id="ms-budget" class="money-sec">
     <!-- Quick actions -->
-    <div style="display:flex;gap:8px;margin-bottom:16px">
+    <div style="display:flex;gap:8px;margin-bottom:14px">
       <button class="ok-btn" style="flex:1;margin:0;padding:10px;font-size:13px;background:linear-gradient(135deg,var(--sage),var(--teal))" onclick="openM('incModal')">💰 Log Income</button>
       <button class="ok-btn" style="flex:1;margin:0;padding:10px;font-size:13px;background:linear-gradient(135deg,#e07a5f,#c05a3f)" onclick="openM('expModal')">💸 Log Expense</button>
     </div>
-    <!-- At-a-glance dashboard -->
-    <div id="ovDashboard" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px"></div>
-    <!-- Hidden tiles kept for backward compat -->
+    <!-- Hidden backward-compat spans -->
     <span id="mThisInc" style="display:none"></span>
     <span id="mThisExp" style="display:none"></span>
     <span id="mNet" style="display:none"></span>
     <span id="mInc" style="display:none"></span>
-    <!-- 1. What came in -->
-    <div class="card" style="margin-bottom:12px">
-      <div style="font-size:11px;font-weight:700;color:var(--textl);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px">💰 What came in this month</div>
-      <div id="ov2IncTotal" style="font-size:30px;font-weight:800;color:#4F6014;margin-bottom:6px">$0</div>
-      <div style="height:6px;background:#f0ebe6;border-radius:3px;overflow:hidden;margin-bottom:4px">
-        <div id="ov2GoalFill" style="height:100%;background:linear-gradient(90deg,var(--sage),var(--teal));transition:width .6s;width:0%"></div>
+    <!-- AVAILABLE -->
+    <div class="card" style="margin-bottom:14px;text-align:center;padding:22px 16px 18px">
+      <div style="font-size:10px;font-weight:700;color:var(--textl);text-transform:uppercase;letter-spacing:1.2px;margin-bottom:8px">Available</div>
+      <div id="bgAvailNum" style="font-size:52px;font-weight:800;color:#4F6014;line-height:1">$0</div>
+      <div id="bgAvailSub" style="font-size:11px;color:var(--textl);margin-top:8px">what's yours to spend</div>
+    </div>
+    <!-- ESSENTIALS (collapsible, closed by default) -->
+    <div class="card" style="padding:0;margin-bottom:8px">
+      <div onclick="togBudgetSec('bgEssBody','bgEssArr')" style="display:flex;justify-content:space-between;align-items:center;padding:12px 14px;cursor:pointer">
+        <span style="font-size:14px;font-weight:700;color:var(--textd)">Essentials</span>
+        <span style="display:flex;align-items:center;gap:8px">
+          <span id="bgEssTot" style="font-size:11px;color:var(--textl)"></span>
+          <span id="bgEssArr" style="color:var(--textl);font-size:13px">▸</span>
+        </span>
       </div>
-      <div style="display:flex;justify-content:space-between;align-items:center;font-size:11px;color:var(--textl);margin-bottom:10px">
-        <span id="ov2GoalLabel">Tap to set a goal</span>
-        <button onclick="setMonthlyIncGoal()" style="font-size:10px;padding:1px 8px;border-radius:6px;border:1.5px solid var(--bdr);background:none;font-family:'Quicksand',sans-serif;font-weight:700;cursor:pointer;color:var(--textl)">Set goal</button>
+      <div id="bgEssBody" style="display:none;padding:0 14px 12px"></div>
+    </div>
+    <!-- NON-ESSENTIALS (collapsible, closed by default) -->
+    <div class="card" style="padding:0;margin-bottom:8px">
+      <div onclick="togBudgetSec('bgFlexBody','bgFlexArr')" style="display:flex;justify-content:space-between;align-items:center;padding:12px 14px;cursor:pointer">
+        <span style="font-size:14px;font-weight:700;color:var(--textd)">Non-Essentials</span>
+        <span style="display:flex;align-items:center;gap:8px">
+          <span id="bgFlexTot" style="font-size:11px;color:var(--textl)"></span>
+          <span id="bgFlexArr" style="color:var(--textl);font-size:13px">▸</span>
+        </span>
       </div>
-      <div id="ov2IncBreakdown"></div>
+      <div id="bgFlexBody" style="display:none;padding:0 14px 12px"></div>
     </div>
-    <!-- 2. In my accounts -->
-    <div class="card" style="margin-bottom:12px">
-      <div style="font-size:11px;font-weight:700;color:var(--textl);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px">🏦 In my accounts right now</div>
-      <div id="ov2AcctList"></div>
-      <div style="display:flex;justify-content:space-between;align-items:center;padding-top:8px;border-top:1px solid var(--border);margin-top:4px">
-        <span style="font-size:13px;font-weight:700;color:var(--textd)">🎯 Safe to spend</span>
-        <span style="font-size:22px;font-weight:800" id="ov2SafeSpend">$0</span>
-      </div>
+    <!-- Buffer -->
+    <div class="card" id="bgBufferCard" style="margin-bottom:12px"></div>
+    <!-- Moves this month -->
+    <div class="sh">🔄 Moves this month</div>
+    <div class="card" id="bgMovesLog" style="margin-bottom:12px"></div>
+    <!-- Edit targets -->
+    <div style="text-align:right;margin-bottom:16px">
+      <button onclick="openBudgetEdit()" style="font-size:11px;padding:4px 12px;border-radius:8px;border:1.5px solid var(--bdr);background:#fff;font-family:'Quicksand',sans-serif;font-weight:700;cursor:pointer;color:var(--textd)">✏️ Edit targets</button>
     </div>
-    <!-- 3. What we spent -->
-    <div class="card" style="margin-bottom:12px">
-      <div style="font-size:11px;font-weight:700;color:var(--textl);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px">💸 What we spent this month</div>
-      <div id="ov2ExpTotal" style="font-size:30px;font-weight:800;color:#C2415A;margin-bottom:10px">$0</div>
-      <div id="ov2ExpBreakdown"></div>
-    </div>
-    <!-- 4. Bills still to pay -->
-    <div class="card" style="margin-bottom:12px">
-      <div style="font-size:11px;font-weight:700;color:var(--textl);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px">📅 Bills — what we still need to pay</div>
-      <div id="ov2BillsList"></div>
-      <button onclick="showMoneySec('bills',document.querySelector('[data-sec=\'bills\']'))" style="width:100%;margin-top:10px;padding:8px;border-radius:8px;border:1.5px solid var(--bdr);background:none;font-family:'Quicksand',sans-serif;font-size:12px;font-weight:700;cursor:pointer;color:var(--textd)">Manage all bills →</button>
-    </div>
-    <!-- 5. Where to go from here -->
-    <div class="card" style="margin-bottom:12px">
-      <div style="font-size:11px;font-weight:700;color:var(--textl);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px">🎯 Where to go from here</div>
-      <div id="ov2PlanSection"></div>
-    </div>
-    <!-- Checklists (collapsed) -->
+    <!-- Daily/Weekly/Monthly checklists -->
     <div class="card" style="padding:0;margin-bottom:8px">
       <div style="display:flex;align-items:center;padding:10px 14px;cursor:pointer" onclick="togOvSec('mc-daily-wrap')">
         <span style="font-size:13px;font-weight:700;color:#3d3530;flex:1">💰 Daily Money</span>
@@ -1967,18 +1962,6 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
         <div id="mc-body-monthly"></div>
       </div>
     </div>
-  </div>
-  <!-- Budget -->
-  <div id="ms-budget" class="money-sec" style="display:none">
-    <div class="card" style="margin-bottom:12px">
-      <div style="font-size:11px;font-weight:700;color:var(--textl);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px">🎯 Left to spend this month</div>
-      <div id="bgLeftNum" style="font-size:34px;font-weight:800;color:var(--sage);margin-bottom:2px">$0</div>
-      <div id="bgLeftSub" style="font-size:11px;color:var(--textl)"></div>
-    </div>
-    <div class="sh" style="display:flex;justify-content:space-between;align-items:center"><span>💰 Buckets</span><button onclick="openBudgetEdit()" style="font-size:11px;padding:3px 10px;border-radius:8px;border:1.5px solid var(--bdr);background:#fff;font-family:'Quicksand',sans-serif;font-weight:700;cursor:pointer;color:var(--textd)">✏️ Edit targets</button></div>
-    <div class="card" id="bgBucketList" style="margin-bottom:12px"></div>
-    <div class="sh">🔄 Moves this month</div>
-    <div class="card" id="bgMovesLog"></div>
   </div>
   <!-- Bills -->
   <div id="ms-bills" class="money-sec" style="display:none">
@@ -6249,7 +6232,6 @@ function initFirebase(){
       _fbBlobPause=false;
       renderBills();renderAccounts();renderIncome();updMoneyBadge();renderBudget();
       if(typeof renderTrips==='function')renderTrips();
-      if(typeof renderMoneyOverview==='function')renderMoneyOverview();
     }else if(group==='health'){
       ap('aMeds',function(v,r){MEDS=v||[];_origSetItem('aMeds',r);});
       ap('aMedLog',function(v,r){MED_LOG=v||{};_origSetItem('aMedLog',r);});
@@ -12313,52 +12295,159 @@ function budgetEffTarget(b){
   return t;
 }
 
+function togBudgetSec(bodyId,arrId){
+  var el=document.getElementById(bodyId);if(!el)return;
+  var arr=document.getElementById(arrId);
+  var open=el.style.display==='none';
+  el.style.display=open?'':'none';
+  if(arr)arr.textContent=open?'▾':'▸';
+}
+
+var _bucketGroupsMigrated=false;
+function _migrateBucketGroups(){
+  if(_bucketGroupsMigrated)return;_bucketGroupsMigrated=true;
+  var changed=false;
+  BUDGET_BUCKETS.forEach(function(b){
+    if(b.group)return;
+    if(b.catchAll){b.group='buffer';changed=true;return;}
+    var n=(b.name||'').toLowerCase();
+    if(n.indexOf('rent')>=0||n.indexOf('bill')>=0||n.indexOf('insurance')>=0||n.indexOf('bti')>=0||
+       n.indexOf('citi')>=0||n.indexOf('debt')>=0||n.indexOf('grocer')>=0||n.indexOf('gas')>=0||
+       n.indexOf('health')>=0||n.indexOf('sub')>=0){
+      b.group='essential';changed=true;
+    }else{
+      b.group='flex';changed=true;
+    }
+  });
+  if(changed)localStorage.setItem('aBudgetBuckets',JSON.stringify(BUDGET_BUCKETS));
+}
+
+var _acctPrimaryFixedV2=localStorage.getItem('aAcctPrimaryV2')==='1';
+function _fixPrimaryAccount(){
+  if(_acctPrimaryFixedV2)return;_acctPrimaryFixedV2=true;
+  localStorage.setItem('aAcctPrimaryV2','1');
+  var cur=ACCOUNTS.find(function(a){return a.isPrimary;});
+  // If the current primary has "joint" in the name, find a better one
+  if(cur&&(cur.name||'').toLowerCase().indexOf('joint')>=0){
+    var better=ACCOUNTS.find(function(a){
+      if(a.isCredit)return false;
+      var n=(a.name||'').toLowerCase();
+      return n.indexOf('partner')>=0&&n.indexOf('joint')<0;
+    });
+    if(better){cur.isPrimary=false;better.isPrimary=true;localStorage.setItem('aAccounts',JSON.stringify(ACCOUNTS));}
+  } else if(!cur){
+    // No primary — prefer non-joint partner account
+    var p=ACCOUNTS.find(function(a){
+      if(a.isCredit)return false;
+      var n=(a.name||'').toLowerCase();
+      return n.indexOf('partner')>=0&&n.indexOf('joint')<0;
+    })||ACCOUNTS.find(function(a){return!a.isCredit;});
+    if(p){p.isPrimary=true;localStorage.setItem('aAccounts',JSON.stringify(ACCOUNTS));}
+  }
+}
+
 function renderBudget(){
-  var listEl=document.getElementById('bgBucketList');
-  if(!listEl)return;
+  _migrateBucketGroups();
+  _fixPrimaryAccount();
+  var reserve=parseFloat(localStorage.getItem('aMoneyReserve'))||0;
+  var primaryAcct=ACCOUNTS.find(function(a){return a.isPrimary&&!a.isCredit;})||null;
+  var primaryBal=primaryAcct?(parseFloat(primaryAcct.amount)||0):0;
+  var available=primaryBal-reserve;
+  var sageC='#4F6014';
+  var roseC='#C87070';
+  var amberC='#C4974A';
+
+  // AVAILABLE card
+  var availEl=document.getElementById('bgAvailNum');
+  var availSubEl=document.getElementById('bgAvailSub');
+  if(availEl){
+    availEl.textContent=(available<0?'-':'')+'$'+Math.abs(available).toFixed(0);
+    availEl.style.color=available<0?roseC:sageC;
+  }
+  if(availSubEl){
+    var sub='what\'s yours to spend';
+    if(primaryAcct)sub+=' · '+escHtml(primaryAcct.name);
+    if(reserve>0)sub+=' · $'+reserve.toFixed(0)+' reserved';
+    availSubEl.textContent=sub;
+  }
+
   var spent=budgetSpentMap();
-  // Last month's spend for delta comparison
   var nowD=new Date();var prevD=new Date(nowD.getFullYear(),nowD.getMonth()-1,1);
   var prevMon=prevD.getFullYear()+'-'+(String(prevD.getMonth()+1).padStart(2,'0'));
   var prevSpent=budgetSpentMapForMonth(prevMon);
-  var totTarget=0,totSpent=0;
-  var rows=BUDGET_BUCKETS.map(function(b){
+
+  function bucketRow(b){
     var eff=budgetEffTarget(b);
-    var roll=budgetRolloverBonus(b);
     var sp=spent[b.id]||0;
     var prevSp=prevSpent[b.id]||0;
-    totTarget+=eff;totSpent+=sp;
     var rem=eff-sp;
     var pct=eff>0?Math.min(100,sp/eff*100):(sp>0?100:0);
     var over=rem<-0.005;
-    var barColor=over?'var(--ured)':(pct>85?'#f0a020':'var(--sage)');
+    var near=!over&&pct>85;
+    var barC=over?roseC:(near?amberC:sageC);
+    var roll=budgetRolloverBonus(b);
     var delta=sp-prevSp;
-    var deltaHtml='';
-    if(prevSp>0){
-      var sign=delta>0?'+':delta<0?'-':'';
-      var deltaColor=delta>5?'var(--ured)':delta<-5?'var(--sage)':'var(--textl)';
-      deltaHtml='<span style="font-size:9px;color:'+deltaColor+';font-weight:700;margin-left:4px" title="vs last month">'+(sign)+Math.abs(Math.round(delta))+' vs last mo</span>';
-    }
+    var dHtml='';
+    if(prevSp>0){var dc=delta>5?roseC:(delta<-5?sageC:'var(--textl)');dHtml='<span style="font-size:9px;color:'+dc+';font-weight:700;margin-left:4px">'+(delta>0?'+':'')+Math.round(delta)+' vs last mo</span>';}
     return '<div style="padding:9px 0;border-bottom:1px solid #f5efe8'+(over?';cursor:pointer':'')+'"'+(over?' onclick="openCoverFrom(\''+b.id+'\')"':'')+'>'
       +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">'
-      +'<span style="font-size:13px;font-weight:700;color:var(--textd)">'+(b.protected?'🔒 ':'')+escHtml(b.name)+(b.catchAll?' <span style="font-size:9px;color:var(--textl);font-weight:600">(catches the rest)</span>':'')+'</span>'
-      +'<span style="font-size:12px;font-weight:700;color:'+(over?'var(--ured)':'var(--textd)')+'">$'+sp.toFixed(0)+' / $'+eff.toFixed(0)+deltaHtml+'</span>'
+      +'<span style="font-size:13px;font-weight:700;color:'+(over?roseC:'var(--textd)')+'">'+(b.protected?'🔒 ':'')+escHtml(b.name)+'</span>'
+      +'<span style="font-size:12px;font-weight:700;color:'+(over?roseC:'var(--textd)')+'">$'+sp.toFixed(0)+' / $'+eff.toFixed(0)+dHtml+'</span>'
       +'</div>'
-      +'<div style="height:7px;background:#f0ebe6;border-radius:4px;overflow:hidden">'
-      +'<div style="height:100%;width:'+pct.toFixed(1)+'%;background:'+barColor+';transition:width .4s"></div>'
+      +'<div style="height:6px;background:#f0ebe6;border-radius:3px;overflow:hidden">'
+      +'<div style="height:100%;width:'+pct.toFixed(1)+'%;background:'+barC+';transition:width .4s"></div>'
       +'</div>'
-      +'<div style="display:flex;justify-content:space-between;font-size:10px;color:var(--textl);margin-top:3px">'
-      +'<span>'+(over?'<span style="color:var(--ured);font-weight:700">over by $'+Math.abs(rem).toFixed(0)+' — tap to cover</span>':'$'+rem.toFixed(0)+' left')+(roll>0?' <span style="color:var(--sage);font-weight:700" title="Carried over from last month">♻️ +$'+roll.toFixed(0)+'</span>':'')+'</span>'
-      +(eff!==(parseFloat(b.target)||0)?'<span>base $'+(parseFloat(b.target)||0).toFixed(0)+'</span>':'')
+      +'<div style="font-size:10px;color:var(--textl);margin-top:3px">'
+      +(over?'<span style="color:'+roseC+';font-weight:700">over $'+Math.abs(rem).toFixed(0)+' — tap to cover</span>':'$'+rem.toFixed(0)+' left')
+      +(roll>0?' <span style="color:'+sageC+';font-weight:700">♻️ +$'+roll.toFixed(0)+'</span>':'')
       +'</div>'
       +'</div>';
-  }).join('');
-  listEl.innerHTML=rows||'<div class="empty"><p>No buckets — tap Edit targets to add some.</p></div>';
-  var left=totTarget-totSpent;
-  var numEl=document.getElementById('bgLeftNum');
-  if(numEl){numEl.textContent=(left<0?'-':'')+'$'+Math.abs(left).toFixed(0);numEl.style.color=left<0?'var(--ured)':'var(--sage)';}
-  var subEl=document.getElementById('bgLeftSub');
-  if(subEl)subEl.textContent='$'+totSpent.toFixed(0)+' spent of $'+totTarget.toFixed(0)+' budgeted · resets monthly';
+  }
+
+  var essBuckets=BUDGET_BUCKETS.filter(function(b){return b.group==='essential';});
+  var flexBuckets=BUDGET_BUCKETS.filter(function(b){return b.group==='flex';});
+  var bufBucket=BUDGET_BUCKETS.find(function(b){return b.group==='buffer'||b.catchAll;});
+
+  function groupSummary(buckets){
+    var totEff=0,totSp=0;
+    buckets.forEach(function(b){totEff+=budgetEffTarget(b);totSp+=spent[b.id]||0;});
+    var rem=totEff-totSp;
+    var over=rem<-0.005;
+    return '$'+totSp.toFixed(0)+' of $'+totEff.toFixed(0)+(over?' <span style="color:'+roseC+'"> · over</span>':' · $'+rem.toFixed(0)+' left');
+  }
+
+  var essTotEl=document.getElementById('bgEssTot');
+  var flexTotEl=document.getElementById('bgFlexTot');
+  if(essTotEl)essTotEl.innerHTML=groupSummary(essBuckets);
+  if(flexTotEl)flexTotEl.innerHTML=groupSummary(flexBuckets);
+
+  var essBodyEl=document.getElementById('bgEssBody');
+  var flexBodyEl=document.getElementById('bgFlexBody');
+  if(essBodyEl)essBodyEl.innerHTML=essBuckets.length?essBuckets.map(bucketRow).join(''):'<div style="font-size:12px;color:var(--textl);padding:8px 0">No essential buckets — edit targets to add some.</div>';
+  if(flexBodyEl)flexBodyEl.innerHTML=flexBuckets.length?flexBuckets.map(bucketRow).join(''):'<div style="font-size:12px;color:var(--textl);padding:8px 0">No flex buckets — edit targets to add some.</div>';
+
+  // Buffer card
+  var bufEl=document.getElementById('bgBufferCard');
+  if(bufEl){
+    if(bufBucket){
+      var bEff=budgetEffTarget(bufBucket);
+      var bSp=spent[bufBucket.id]||0;
+      var bRem=bEff-bSp;
+      var bOver=bRem<-0.005;
+      var bPct=bEff>0?Math.min(100,bSp/bEff*100):0;
+      bufEl.innerHTML='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">'
+        +'<span style="font-size:13px;font-weight:700;color:var(--textd)">🛟 Buffer <span style="font-size:10px;font-weight:600;color:var(--textl)">(catches overflow)</span></span>'
+        +'<span style="font-size:14px;font-weight:800;color:'+(bOver?roseC:sageC)+'">'+(bOver?'-':'')+'$'+Math.abs(bRem).toFixed(0)+' left</span>'
+        +'</div>'
+        +'<div style="height:6px;background:#f0ebe6;border-radius:3px;overflow:hidden">'
+        +'<div style="height:100%;width:'+bPct.toFixed(1)+'%;background:'+(bOver?roseC:sageC)+';transition:width .4s"></div>'
+        +'</div>'
+        +'<div style="font-size:10px;color:var(--textl);margin-top:4px">$'+bSp.toFixed(0)+' used of $'+bEff.toFixed(0)+'</div>';
+    }else{
+      bufEl.innerHTML='<div style="font-size:12px;color:var(--textl);text-align:center;padding:8px">No buffer bucket. Add one in Edit targets.</div>';
+    }
+  }
+
   // Moves log
   var logEl=document.getElementById('bgMovesLog');
   if(logEl){
@@ -12373,11 +12462,13 @@ function renderBudget(){
         return '<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #f5efe8;font-size:12px">'
           +'<span style="color:var(--textd)"><strong>'+escHtml(tb?tb.name:'?')+'</strong> ← $'+m.amt.toFixed(0)+' from <strong>'+escHtml(fb?fb.name:'?')+'</strong></span>'
           +'<span style="display:flex;align-items:center;gap:8px"><span style="color:var(--textl);font-size:10px">'+(d.getMonth()+1)+'/'+d.getDate()+'</span>'
-          +'<button onclick="undoBudgetMove(\''+m.id+'\')" style="background:none;border:none;color:var(--textl);font-size:13px;cursor:pointer;padding:2px 4px" title="Undo this move">✕</button></span>'
+          +'<button onclick="undoBudgetMove(\''+m.id+'\')" style="background:none;border:none;color:var(--textl);font-size:13px;cursor:pointer;padding:2px 4px" title="Undo">✕</button></span>'
           +'</div>';
       }).join('');
     }
   }
+
+  if(typeof renderAllMoneyChecklists==='function')renderAllMoneyChecklists();
 }
 
 function undoBudgetMove(id){
@@ -15122,7 +15213,8 @@ function togOvSec(id){
   }
 }
 
-function renderMoneyOverview(){
+function renderMoneyOverview(){renderBudget();}
+function _renderMoneyOverviewLegacy(){
   var mon=getMonStr();
   var thisMonInc=INCOME.filter(function(i){return(i.date||i.created||'').startsWith(mon);});
   var thisMonIncAmt=thisMonInc.reduce(function(s,i){return s+(parseFloat(i.amt)||0);},0);
@@ -15458,7 +15550,7 @@ function saveAccount(){
   closeM('acctModal');
   renderAccounts();
   updateEstateStrip();
-  if(typeof renderMoneyOverview==='function')renderMoneyOverview();
+  renderBudget();
   showToast('Account saved!');
 }
 
@@ -15526,7 +15618,7 @@ function savePayoff(){
   localStorage.setItem('aAccounts',JSON.stringify(ACCOUNTS));
   closeM('payoffModal');
   renderAccounts();
-  renderMoneyOverview();
+  renderBudget();
   updateEstateStrip();
   var msg=a.name+' → $'+newBal.toFixed(2)+'  ✅';
   if(sourceAcct)msg+='  ('+sourceAcct.name+' balance updated too)';
@@ -17112,7 +17204,7 @@ function celebrate(){
 // ═══════════════════════════════════════════════
 
 function showMoneySec(sec,btn){
-  ['overview','budget','bills','expenses','income','accounts','projects','tax','money-plan','trips'].forEach(function(s){
+  ['budget','bills','expenses','income','accounts','projects','tax','money-plan','trips'].forEach(function(s){
     var el=document.getElementById('ms-'+s);
     if(el)el.style.display=(s===sec)?'':'none';
   });
@@ -17122,7 +17214,6 @@ function showMoneySec(sec,btn){
   if(sec==='projects')renderMoneyProjects();
   if(sec==='tax')renderTaxSection();
   if(sec==='budget')renderBudget();
-  if(sec==='overview')renderMoneyOverview();
   if(sec==='money-plan')renderMoneyPlan();
   if(sec==='trips')renderTrips();
 }
@@ -19157,7 +19248,7 @@ function saveQuickBalances(){
   });
   localStorage.setItem('aAccounts',JSON.stringify(ACCOUNTS));
   closeOv('quickBalModal');
-  renderMoneyOverview();
+  renderBudget();
   if(!anyChanged){
     showToast('✅ All accounts perfectly reconciled!');return;
   }
