@@ -6231,6 +6231,7 @@ function initFirebase(){
       ap('aPayoffs',function(v,r){PAYOFFS=v||[];_origSetItem('aPayoffs',r);});
       ap('aBudgetBuckets',function(v,r){if(v&&v.length)BUDGET_BUCKETS=v;_origSetItem('aBudgetBuckets',r);});
       ap('aBudgetMoves',function(v,r){BUDGET_MOVES=v||[];_origSetItem('aBudgetMoves',r);});
+      ap('aMoneyReserve',function(v,r){_origSetItem('aMoneyReserve',r);});
       _fbBlobPause=false;
       renderBills();renderAccounts();renderIncome();updMoneyBadge();renderBudget();
       if(typeof renderTrips==='function')renderTrips();
@@ -6417,7 +6418,7 @@ function fbDelete(col, id){
 // localStorage.setItem is intercepted to auto-save on every write.
 // ═══════════════════════════════════════════════
 var BLOB_GROUPS={
-  money:['aBills','aBillPay','aBillMonthAmt','aAccounts','aIncome','aIncGoal','aMonIncGoal','aMoneyChecks','aTaxLog','aProjIncome','aPriceLog','aExpCats','aMoneyProjects','aTrips','aPayoffs','aBudgetBuckets','aBudgetMoves'],
+  money:['aBills','aBillPay','aBillMonthAmt','aAccounts','aIncome','aIncGoal','aMonIncGoal','aMoneyChecks','aTaxLog','aProjIncome','aPriceLog','aExpCats','aMoneyProjects','aTrips','aPayoffs','aBudgetBuckets','aBudgetMoves','aMoneyReserve'],
   health:['aMeds','aMedLog','aEnergyLog','aMeasLog','aMealLogItems','aMoodNotes','aWineDrinks','aSymLog','aSymTypes'],
   habits:['aHabits','aHabitLog'],
   routines:['aRS','aRS2','aRH','aRTG','aRtns'],
@@ -12324,28 +12325,37 @@ function _migrateBucketGroups(){
   if(changed)localStorage.setItem('aBudgetBuckets',JSON.stringify(BUDGET_BUCKETS));
 }
 
-var _acctPrimaryFixedV2=localStorage.getItem('aAcctPrimaryV2')==='1';
 function _fixPrimaryAccount(){
-  if(_acctPrimaryFixedV2)return;_acctPrimaryFixedV2=true;
-  localStorage.setItem('aAcctPrimaryV2','1');
+  // V3: only "complete" once real accounts are loaded, so an early run before
+  // Firebase sync can't lock in a wrong answer. Bumped from V2 to force a re-run
+  // for anyone whose old flag got stuck on Partners-Joint.
+  if(localStorage.getItem('aAcctPrimaryV3')==='1')return;
+  if(!ACCOUNTS||!ACCOUNTS.length)return; // accounts not synced yet — try again next render
+  // Prefer the non-joint partner cash account (Partners-A), else any non-joint partner, else any cash.
+  var partnerA=ACCOUNTS.find(function(a){
+    if(a.isCredit)return false;
+    var n=(a.name||'').toLowerCase();
+    return n.indexOf('partner')>=0&&n.indexOf('joint')<0;
+  });
   var cur=ACCOUNTS.find(function(a){return a.isPrimary;});
-  // If the current primary has "joint" in the name, find a better one
-  if(cur&&(cur.name||'').toLowerCase().indexOf('joint')>=0){
-    var better=ACCOUNTS.find(function(a){
-      if(a.isCredit)return false;
-      var n=(a.name||'').toLowerCase();
-      return n.indexOf('partner')>=0&&n.indexOf('joint')<0;
-    });
-    if(better){cur.isPrimary=false;better.isPrimary=true;localStorage.setItem('aAccounts',JSON.stringify(ACCOUNTS));}
-  } else if(!cur){
-    // No primary — prefer non-joint partner account
-    var p=ACCOUNTS.find(function(a){
-      if(a.isCredit)return false;
-      var n=(a.name||'').toLowerCase();
-      return n.indexOf('partner')>=0&&n.indexOf('joint')<0;
-    })||ACCOUNTS.find(function(a){return!a.isCredit;});
-    if(p){p.isPrimary=true;localStorage.setItem('aAccounts',JSON.stringify(ACCOUNTS));}
+  var curIsJoint=cur&&(cur.name||'').toLowerCase().indexOf('joint')>=0;
+  // Correct when there's no primary at all, or the primary is the joint account.
+  if(partnerA&&(!cur||curIsJoint)){
+    ACCOUNTS.forEach(function(a){a.isPrimary=false;});
+    partnerA.isPrimary=true;
+    localStorage.setItem('aAccounts',JSON.stringify(ACCOUNTS));
   }
+  localStorage.setItem('aAcctPrimaryV3','1');
+}
+
+function setMoneyReserve(){
+  var cur=parseFloat(localStorage.getItem('aMoneyReserve'))||0;
+  var v=prompt('Reserve — money to hold back from Available (e.g. bills, safety cushion):',cur||'');
+  if(v===null)return;
+  var n=parseFloat(v)||0;
+  localStorage.setItem('aMoneyReserve',String(n));
+  renderBudget();
+  if(typeof showToast==='function')showToast(n>0?'Reserve set to $'+n.toFixed(0):'Reserve cleared');
 }
 
 function renderBudget(){
@@ -12369,8 +12379,9 @@ function renderBudget(){
   if(availSubEl){
     var sub='what\'s yours to spend';
     if(primaryAcct)sub+=' · '+escHtml(primaryAcct.name);
-    if(reserve>0)sub+=' · $'+reserve.toFixed(0)+' reserved';
-    availSubEl.textContent=sub;
+    sub+=' · <span style="text-decoration:underline;cursor:pointer" onclick="setMoneyReserve()">'+(reserve>0?'$'+reserve.toFixed(0)+' reserved':'set reserve')+'</span>';
+    availSubEl.innerHTML=sub;
+    availSubEl.style.cursor='default';
   }
 
   var spent=budgetSpentMap();
