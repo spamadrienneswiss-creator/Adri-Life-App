@@ -1923,6 +1923,8 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     </div>
     <!-- Buffer -->
     <div class="card" id="bgBufferCard" style="margin-bottom:12px"></div>
+    <!-- Savings goals -->
+    <div class="card" id="bgSavingsCard" style="margin-bottom:12px;display:none"></div>
     <!-- Moves this month -->
     <div class="sh">🔄 Moves this month</div>
     <div class="card" id="bgMovesLog" style="margin-bottom:12px"></div>
@@ -12445,6 +12447,33 @@ function renderBudget(){
         +'<div style="font-size:10px;color:var(--textl);margin-top:4px">$'+bSp.toFixed(0)+' used of $'+bEff.toFixed(0)+'</div>';
     }else{
       bufEl.innerHTML='<div style="font-size:12px;color:var(--textl);text-align:center;padding:8px">No buffer bucket. Add one in Edit targets.</div>';
+    }
+  }
+
+  // Savings goals (from Money Projects)
+  var savEl=document.getElementById('bgSavingsCard');
+  if(savEl){
+    var goals=(typeof MONEY_PROJECTS!=='undefined'&&MONEY_PROJECTS)?MONEY_PROJECTS:[];
+    if(goals.length){
+      var savHtml='<div style="font-size:11px;font-weight:700;color:var(--textl);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px">🎯 Savings goals</div>';
+      savHtml+=goals.map(function(p){
+        var saved=parseFloat(p.saved)||0;
+        var goal=parseFloat(p.goal)||0;
+        var pct=goal>0?Math.min(100,Math.round(saved/goal*100)):0;
+        var hit=goal>0&&saved>=goal;
+        return '<div style="margin-bottom:10px">'
+          +'<div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px">'
+          +'<span style="font-weight:600;color:var(--textd)">'+escHtml(p.name||'Goal')+(hit?' ✅':'')+'</span>'
+          +'<span style="color:'+sageC+';font-weight:700">$'+saved.toFixed(0)+' / $'+goal.toFixed(0)+'</span>'
+          +'</div>'
+          +'<div style="height:6px;background:#f0ebe6;border-radius:3px;overflow:hidden">'
+          +'<div style="height:100%;border-radius:3px;width:'+pct+'%;background:'+(p.color||sageC)+';transition:width .4s"></div>'
+          +'</div></div>';
+      }).join('');
+      savEl.innerHTML=savHtml;
+      savEl.style.display='';
+    }else{
+      savEl.style.display='none';
     }
   }
 
