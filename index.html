@@ -1303,26 +1303,16 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
   <div class="hub-banner" style="background:linear-gradient(135deg,rgba(42,46,54,.1),rgba(212,168,32,.08))">
     <div class="hub-info"><h2>Money</h2></div>
   </div>
-  <!-- Financial summary strip -->
-  <div class="card" style="margin-bottom:10px;padding:10px 14px">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
-      <span style="font-size:12px;color:var(--textl)">💵 Cash on Hand</span>
-      <span style="font-size:15px;font-weight:700;color:var(--sage)" id="estate-cash-total">$0</span>
-    </div>
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
-      <span style="font-size:12px;color:var(--textl)">💳 Credit Owed</span>
-      <span style="font-size:15px;font-weight:700;color:var(--ured)" id="estate-credit-total">$0</span>
-    </div>
-    <div style="display:flex;justify-content:space-between;align-items:center;padding-top:6px;border-top:1px solid var(--border)">
-      <span style="font-size:12px;font-weight:700;color:var(--textd)">🏦 Net Position</span>
-      <span style="font-size:17px;font-weight:700" id="estate-net-total">$0</span>
-    </div>
+  <!-- Available summary (routes into Budget) -->
+  <div class="card" style="margin-bottom:10px;padding:16px 14px;text-align:center;cursor:pointer" onclick="goTab('money',null);setTimeout(function(){showMoneySec('budget',document.querySelector('#v-money .pn-btn[data-sec=budget]'))},200)">
+    <div style="font-size:10px;font-weight:700;color:#9A8576;text-transform:uppercase;letter-spacing:1.2px;margin-bottom:6px">Available</div>
+    <div id="estate-avail-total" style="font-size:36px;font-weight:800;color:#4F6014;line-height:1">$0</div>
+    <div id="estate-avail-sub" style="font-size:11px;color:#9A8576;margin-top:6px">what's yours to spend</div>
   </div>
   <div class="hub-grid">
     <div class="hub-card span2" onclick="goTab('money',null)"><div class="hub-card-ic">💰</div><div class="hub-card-name">Money</div><div class="hub-card-sub" id="hub-money-sub">Bills, budget &amp; expenses</div></div>
     <div class="hub-card" onclick="goTab('money',null);setTimeout(function(){showMoneySec('accounts',document.querySelector('#v-money .pn-btn[data-sec=accounts]'))},200)"><div class="hub-card-ic">🏦</div><div class="hub-card-name">Accounts</div><div class="hub-card-sub">Cash &amp; credit balances</div></div>
     <div class="hub-card" onclick="goTab('money',null);setTimeout(function(){showMoneySec('projects',document.querySelector('#v-money .pn-btn[data-sec=projects]'))},200)"><div class="hub-card-ic">💼</div><div class="hub-card-name">Projects</div><div class="hub-card-sub">Savings &amp; money goals</div></div>
-    <div class="hub-card" onclick="goTab('money',null);setTimeout(function(){showMoneySec('overview',document.querySelector('#v-money .pn-btn[data-sec=overview]'))},200)"><div class="hub-card-ic">📊</div><div class="hub-card-name">Overview</div><div class="hub-card-sub">Month summary</div></div>
   </div>
 </div>
 
@@ -15531,13 +15521,21 @@ function renderOvProjects(){
 }
 
 function updateEstateStrip(){
-  var cash=ACCOUNTS.filter(function(a){return!a.isCredit;}).reduce(function(s,a){return s+(parseFloat(a.amount)||0);},0);
-  var credit=ACCOUNTS.filter(function(a){return a.isCredit;}).reduce(function(s,a){return s+(parseFloat(a.amount)||0);},0);
-  var net=cash-credit;
-  var e1=document.getElementById('estate-cash-total');if(e1)e1.textContent='$'+cash.toFixed(0);
-  var e2=document.getElementById('estate-credit-total');if(e2)e2.textContent='$'+credit.toFixed(0);
-  var e3=document.getElementById('estate-net-total');
-  if(e3){e3.textContent=(net>=0?'+':'')+net.toFixed(0);e3.style.color=net>=0?'var(--sage)':'var(--ured)';}
+  if(typeof _fixPrimaryAccount==='function')_fixPrimaryAccount();
+  var reserve=parseFloat(localStorage.getItem('aMoneyReserve'))||0;
+  var primaryAcct=ACCOUNTS.find(function(a){return a.isPrimary&&!a.isCredit;})||null;
+  var primaryBal=primaryAcct?(parseFloat(primaryAcct.amount)||0):0;
+  var available=primaryBal-reserve;
+  var sageC='#4F6014',roseC='#C87070';
+  var el=document.getElementById('estate-avail-total');
+  if(el){el.textContent=(available<0?'-':'')+'$'+Math.abs(available).toFixed(0);el.style.color=available<0?roseC:sageC;}
+  var sub=document.getElementById('estate-avail-sub');
+  if(sub){
+    var t='what\'s yours to spend';
+    if(primaryAcct)t+=' · '+escHtml(primaryAcct.name);
+    if(reserve>0)t+=' · $'+reserve.toFixed(0)+' reserved';
+    sub.textContent=t;
+  }
 }
 
 // ═══════════════════════════════════════════════
