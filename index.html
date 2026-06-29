@@ -1883,6 +1883,8 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     <span id="mThisExp" style="display:none"></span>
     <span id="mNet" style="display:none"></span>
     <span id="mInc" style="display:none"></span>
+    <!-- Main accounts — check these first -->
+    <div class="card" id="bgMainAccts" style="margin-bottom:14px;padding:12px 14px;display:none"></div>
     <!-- WATERFALL: money − bills − cushion = left to spend -->
     <div class="card" style="margin-bottom:14px;padding:16px 16px 14px">
       <!-- Money we have (tap to choose which accounts count) -->
@@ -2040,25 +2042,30 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     <button class="ok-btn" style="width:100%;margin-bottom:12px" onclick="openAcctModal(null)">＋ Add Account</button>
     <div id="acctList"></div>
     <div class="card" style="margin-top:12px">
+      <div style="font-size:10px;font-weight:800;color:#4F6014;text-transform:uppercase;letter-spacing:.7px;margin-bottom:8px">Counts now</div>
       <div style="display:flex;justify-content:space-between;margin-bottom:6px">
-        <span style="font-size:13px;font-weight:700;color:var(--textd)">💵 Cash on Hand</span>
+        <span style="font-size:13px;font-weight:700;color:var(--textd)">💵 Cash (counted)</span>
         <span style="font-size:16px;font-weight:700;color:var(--sage)" id="acctCashTotal">$0</span>
       </div>
       <div style="display:flex;justify-content:space-between;margin-bottom:6px">
         <span style="font-size:13px;font-weight:700;color:var(--textd)">💳 Active Debt</span>
         <span style="font-size:16px;font-weight:700;color:var(--ured)" id="acctCreditTotal">$0</span>
       </div>
-      <div style="display:flex;justify-content:space-between;margin-bottom:6px" id="acctZeroRow">
-        <span style="font-size:12px;font-weight:700;color:#9A8576">🅿️ 0% — not counted</span>
+      <div style="display:flex;justify-content:space-between;padding-top:8px;border-top:1px solid var(--border)">
+        <span style="font-size:14px;font-weight:800;color:var(--textd)">🏦 Where I stand</span>
+        <span style="font-size:20px;font-weight:800" id="acctNetTotal">$0</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;margin-top:4px" id="acctOtherCashRow">
+        <span style="font-size:11px;font-weight:600;color:#9A8576">💵 Other cash (not counted)</span>
+        <span style="font-size:12px;font-weight:700;color:#9A8576" id="acctOtherCashTotal">$0</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding-top:8px;border-top:1px solid var(--border);margin-top:8px" id="acctZeroRow">
+        <span style="font-size:12px;font-weight:700;color:#9A8576">🅿️ Later problems <span style="font-size:9px;font-weight:600">(0% / promo)</span></span>
         <span style="font-size:14px;font-weight:700;color:#9A8576" id="acctZeroTotal">$0</span>
       </div>
-      <div style="display:flex;justify-content:space-between;padding-top:8px;border-top:1px solid var(--border)">
-        <span style="font-size:13px;font-weight:700;color:var(--textd)">🏦 Net Position <span style="font-size:10px;color:#9A8576;font-weight:600">(Cash − Active)</span></span>
-        <span style="font-size:18px;font-weight:700" id="acctNetTotal">$0</span>
-      </div>
-      <div style="display:flex;justify-content:space-between;padding-top:8px;border-top:1px solid var(--border);margin-top:6px">
-        <span style="font-size:13px;font-weight:700;color:var(--textd)">⏳ True Balance (–pending)</span>
-        <span style="font-size:18px;font-weight:700" id="acctTrueTotal">$0</span>
+      <div style="display:flex;justify-content:space-between;margin-top:6px">
+        <span style="font-size:11px;font-weight:600;color:var(--textl)">⏳ True balance (−pending)</span>
+        <span style="font-size:13px;font-weight:700;color:var(--textl)" id="acctTrueTotal">$0</span>
       </div>
     </div>
   </div>
@@ -12534,18 +12541,50 @@ function toggleSpendable(id){
   renderBudget();
   if(typeof updateEstateStrip==='function')updateEstateStrip();
 }
-// Sum of bills still owed this month — excludes both 'paid' (money already moved via the
-// pay-flow, so don't double-subtract) and 'posted'.
+// A bill whose "Paid from" is a credit card doesn't take cash now — it raises that card's
+// balance instead. Only the card's own statement payment (paid from cash) is a cash bill.
+function billPaidFromCard(b){
+  if(!b||!b.paidWith)return false;
+  var a=ACCOUNTS.find(function(x){return x.id===b.paidWith;});
+  return !!(a&&a.isCredit);
+}
+// Cash still owed this month — excludes 'paid'/'posted' AND bills charged to a credit card.
 function unpaidBillsThisMonth(){
   var mon=getMonStr();
   var paid=(typeof BILL_PAY!=='undefined'&&BILL_PAY[mon])?BILL_PAY[mon]:{};
-  return (BILLS||[]).filter(function(b){var s=paid[b.id]||'';return s!=='posted'&&s!=='paid';})
+  return (BILLS||[]).filter(function(b){var s=paid[b.id]||'';return s!=='posted'&&s!=='paid'&&!billPaidFromCard(b);})
     .reduce(function(s,b){return s+(parseFloat(getBillMonthAmt(b.id))||0);},0);
+}
+
+// Pinned "check these first" accounts at the top of Money home:
+// the counted cash accounts + any active (non-excluded) credit cards. Tap to reconcile the balance.
+function renderMainAccounts(){
+  var el=document.getElementById('bgMainAccts');if(!el)return;
+  var sageC='#4F6014',roseC='#C2415A';
+  var spendCash=ACCOUNTS.filter(function(a){return!a.isCredit&&((typeof isSpendable==='function')?isSpendable(a):a.isPrimary);});
+  var activeCards=ACCOUNTS.filter(function(a){return a.isCredit&&!a.excludeFromNet&&(parseFloat(a.amount)||0)>0;});
+  var mains=spendCash.concat(activeCards);
+  if(!mains.length){el.style.display='none';return;}
+  el.style.display='';
+  el.innerHTML='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">'
+    +'<span style="font-size:11px;font-weight:800;color:#9A8576;text-transform:uppercase;letter-spacing:.7px">🏦 Check these first</span>'
+    +'<span onclick="showMoneySec(\'accounts\',document.querySelector(\'#v-money .pn-btn[data-sec=accounts]\'))" style="font-size:11px;color:var(--textl);cursor:pointer;font-weight:700">All accounts ›</span>'
+    +'</div>'
+    +mains.map(function(a){
+      var amt=parseFloat(a.amount)||0;
+      var col=a.isCredit?roseC:sageC;
+      return '<div onclick="openAcctModal(\''+a.id+'\')" style="display:flex;justify-content:space-between;align-items:center;padding:6px 2px;border-bottom:1px solid #f5efe8;cursor:pointer">'
+        +'<span style="font-size:13px;color:var(--textd);font-weight:600">'+(a.isCredit?'💳':'💵')+' '+escHtml(a.name)+'</span>'
+        +'<span style="font-size:14px;font-weight:800;color:'+col+'">'+(a.isCredit?'-':'')+'$'+amt.toFixed(2)+'</span>'
+        +'</div>';
+    }).join('')
+    +'<div style="font-size:10px;color:#9A8576;margin-top:6px;text-align:center">tap an account to update its balance</div>';
 }
 
 function renderBudget(){
   _migrateBucketGroups();
   _fixPrimaryAccount();
+  renderMainAccounts();
   var sageC='#4F6014';
   var roseC='#C87070';
   var amberC='#C4974A';
@@ -15237,12 +15276,22 @@ function renderBills(){
       }
     }
   });
-  // Derived "set aside" glance — bills still due (not paid/posted) this month. Never stored.
+  // Derived "set aside" glance — bills still due this month, split by where they're paid from.
+  // Cash set-aside = real money to hold back. Card-charged bills just raise a card balance.
   var dueBills=BILLS.filter(function(b){var s=(paid[b.id]||'');return s!=='paid'&&s!=='posted';});
-  var setAside=dueBills.reduce(function(s,b){return s+(parseFloat(getBillMonthAmt(b.id))||0);},0);
-  var setAsideHtml='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;padding:10px 12px;background:#f4f0e6;border:1px solid #e8ddd4;border-radius:10px">'
-    +'<span style="font-size:12px;font-weight:700;color:#3d3530">🗓️ '+dueBills.length+' bill'+(dueBills.length!==1?'s':'')+' due</span>'
+  var cashDue=dueBills.filter(function(b){return !billPaidFromCard(b);});
+  var cardDue=dueBills.filter(function(b){return billPaidFromCard(b);});
+  var setAside=cashDue.reduce(function(s,b){return s+(parseFloat(getBillMonthAmt(b.id))||0);},0);
+  var onCards=cardDue.reduce(function(s,b){return s+(parseFloat(getBillMonthAmt(b.id))||0);},0);
+  var setAsideHtml='<div style="margin-bottom:10px;padding:10px 12px;background:#f4f0e6;border:1px solid #e8ddd4;border-radius:10px">'
+    +'<div style="display:flex;justify-content:space-between;align-items:center">'
+    +'<span style="font-size:12px;font-weight:700;color:#3d3530">🗓️ '+cashDue.length+' cash bill'+(cashDue.length!==1?'s':'')+' due</span>'
     +'<span style="font-size:15px;font-weight:800;color:'+(setAside>0?'#C87070':'#4F6014')+'">$'+setAside.toFixed(2)+' set aside</span>'
+    +'</div>'
+    +(cardDue.length?'<div style="display:flex;justify-content:space-between;align-items:center;margin-top:5px;padding-top:5px;border-top:1px solid #e8ddd4">'
+      +'<span style="font-size:11px;font-weight:600;color:#9A8576">💳 '+cardDue.length+' going on a card</span>'
+      +'<span style="font-size:12px;font-weight:700;color:#9A8576">$'+onCards.toFixed(2)+' → card balance</span>'
+      +'</div>':'')
     +'</div>';
   var totalsHtml='<div style="display:flex;gap:12px;margin-bottom:10px;padding:8px 12px;background:#fdf6ee;border-radius:10px;font-size:12px">'
     +'<div><span style="color:var(--textl)">This month</span><br><b style="color:#3d3530;font-size:14px">$'+monthlyTotal.toFixed(2)+'</b></div>'
@@ -15983,11 +16032,16 @@ function renderAccounts(){
       +'<span><b>$'+pendingTotal.toFixed(2)+' in pending expenses</b> — clear in Expenses once posted to your bank</span>'
       +'</div>';
   }
-  setT('acctCashTotal','$'+cash.toFixed(2),sC.pos);
+  // "Counts now" cash = only the accounts flagged spendable (matches the sheet's Total Cash).
+  var spendableCash=cashAccts.filter(function(a){return (typeof isSpendable==='function')?isSpendable(a):a.isPrimary;}).reduce(function(s,a){return s+(parseFloat(a.amount)||0);},0);
+  var otherCash=cash-spendableCash;
+  setT('acctCashTotal','$'+spendableCash.toFixed(2),sC.pos);
   setT('acctCreditTotal','-$'+activeOwed.toFixed(2),sC.neg);
+  var ocRow=document.getElementById('acctOtherCashRow');if(ocRow)ocRow.style.display=Math.abs(otherCash)>0.005?'flex':'none';
+  setT('acctOtherCashTotal','$'+otherCash.toFixed(2),sC.muted);
   var zRow=document.getElementById('acctZeroRow');if(zRow)zRow.style.display=excludedOwed>0?'flex':'none';
   setT('acctZeroTotal','$'+excludedOwed.toFixed(2),sC.muted);
-  var net=cash-activeOwed;
+  var net=spendableCash-activeOwed;
   setT('acctNetTotal',(net>=0?'+':'-')+'$'+Math.abs(net).toFixed(2),net>=0?sC.pos:sC.neg);
   var trueNet=net-pendingTotal;
   setT('acctTrueTotal',(trueNet>=0?'+':'-')+'$'+Math.abs(trueNet).toFixed(2),trueNet>=0?sC.pos:sC.neg);
