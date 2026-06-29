@@ -2000,7 +2000,7 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
         <input id="expSearch" type="text" placeholder="🔍 Search expenses…" oninput="_expSearch=this.value;renderE()" style="flex:1;padding:7px 11px;border-radius:10px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px;box-sizing:border-box">
         <button id="expSearchClear" onclick="_expSearch='';document.getElementById('expSearch').value='';renderE()" style="display:none;background:none;border:1.5px solid #e8e0d8;border-radius:8px;padding:6px 10px;cursor:pointer;font-size:12px;color:var(--textl);font-family:'Quicksand',sans-serif">✕</button>
       </div>
-      <div class="fbar" style="margin-bottom:6px">
+      <div class="fbar" style="margin-bottom:6px" id="expTopChips">
         <button class="fchip on" onclick="setExpFilter('all',this)">All</button>
         <button class="fchip" onclick="setExpFilter('uncleared',this)">⏳ Uncleared</button>
         <button class="fchip" onclick="setExpFilter('cleared',this)">✓ Cleared</button>
@@ -2014,13 +2014,14 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
         <button id="expReconClearBtn" onclick="clearExpSelected()" style="display:none;font-size:11px;font-weight:700;background:#5a8a5a;border:none;border-radius:6px;padding:4px 10px;cursor:pointer;color:white;font-family:'Quicksand',sans-serif">✓ Clear 0 selected</button>
         <button onclick="toggleExpSelMode()" style="font-size:11px;background:none;border:1.5px solid #b0d8b0;border-radius:6px;padding:4px 8px;cursor:pointer;color:#5a8a5a;font-family:'Quicksand',sans-serif;margin-left:auto">✕ Cancel</button>
       </div>
-      <div class="fbar" style="margin-bottom:10px" id="expSortBar">
-        <span style="font-size:10px;color:var(--textl);font-weight:700;align-self:center;letter-spacing:.5px">SORT</span>
-        <button class="fchip on" data-es="date" onclick="setExpSort('date',this)">📅 Date</button>
-        <button class="fchip" data-es="account" onclick="setExpSort('account',this)">🏦 Account</button>
-        <button class="fchip" data-es="type" onclick="setExpSort('type',this)">💼 Type</button>
-        <button class="fchip" data-es="cat" onclick="setExpSort('cat',this)">📊 Category</button>
+      <div class="fbar" style="margin-bottom:6px" id="expFilterBar">
+        <span style="font-size:10px;color:var(--textl);font-weight:700;align-self:center;letter-spacing:.5px">FILTER</span>
+        <button class="fchip" id="expFiltAcctBtn" onclick="toggleExpFilterMenu('account',this)">🏦 Account ▾</button>
+        <button class="fchip" id="expFiltTypeBtn" onclick="toggleExpFilterMenu('type',this)">💼 Type ▾</button>
+        <button class="fchip" id="expFiltCatBtn" onclick="toggleExpFilterMenu('cat',this)">📊 Category ▾</button>
       </div>
+      <div id="expFilterMenu" style="display:none;margin-bottom:8px"></div>
+      <div id="expActiveFilters" style="display:none;flex-wrap:wrap;gap:6px;margin-bottom:10px"></div>
       <div class="sh" id="expListLabel">💸 Recent Expenses</div>
       <div class="card"><div id="expList"><div class="empty"><div class="emj">💸</div><p>No expenses yet.</p></div></div></div>
       <div class="card" id="expCatTotals" style="margin-top:8px"></div>
@@ -12023,9 +12024,95 @@ function _expSortFn(a,b){
 function setExpFilter(f,btn){
   EXP_FILTER=f;
   EXP_CAT_FILTER=null;EXP_TY_FILTER=null;
-  document.querySelectorAll('#ms-expenses .fchip').forEach(function(b){b.classList.remove('on');});
+  document.querySelectorAll('#expTopChips .fchip').forEach(function(b){b.classList.remove('on');});
   if(btn)btn.classList.add('on');
   renderE();
+}
+
+// ── Stackable dropdown filters (Account / Type / Category) — display only ──
+var EXP_F_ACCT=null;   // account id
+var EXP_F_TYPE=null;   // type string
+var EXP_F_CAT=null;    // category string
+var _expMenuOpen=null;
+var _expMenuOpts=[];
+function toggleExpFilterMenu(kind,btn){
+  var menu=document.getElementById('expFilterMenu');
+  if(!menu)return;
+  if(_expMenuOpen===kind){menu.style.display='none';_expMenuOpen=null;return;}
+  _expMenuOpen=kind;
+  _expMenuOpts=[];
+  var rows='';
+  if(kind==='account'){
+    var seen={};
+    EXPENSES.forEach(function(e){if(e.account&&!seen[e.account])seen[e.account]=true;});
+    var accts=Object.keys(seen).map(function(id){return{id:id,name:_acctNameOf(id)||'(unknown account)'};})
+      .sort(function(a,b){return a.name.localeCompare(b.name);});
+    if(!accts.length)rows='<div style="padding:10px 12px;font-size:12px;color:var(--textl)">No accounts found in expenses.</div>';
+    else rows=accts.map(function(a){return _expMenuRow('account',a.id,'🏦 '+escHtml(a.name),EXP_F_ACCT===a.id);}).join('');
+  }else if(kind==='type'){
+    var seenT={};
+    EXPENSES.forEach(function(e){seenT[e.ty||'personal']=true;});
+    var types=Object.keys(seenT).sort();
+    rows=types.map(function(t){return _expMenuRow('type',t,(t==='business'?'💼 ':'🏠 ')+escHtml(t),EXP_F_TYPE===t);}).join('');
+  }else if(kind==='cat'){
+    var seenC={};
+    EXPENSES.forEach(function(e){seenC[e.cat||'(uncategorized)']=true;});
+    var cats=Object.keys(seenC).sort();
+    rows=cats.map(function(c){return _expMenuRow('cat',c,'📊 '+escHtml(c),EXP_F_CAT===c);}).join('');
+  }
+  menu.innerHTML='<div class="card" style="padding:6px;margin:0;max-height:280px;overflow-y:auto">'+rows+'</div>';
+  menu.style.display='';
+}
+// Index-based dispatch avoids quote-escaping issues in category/account names.
+function _expMenuRow(kind,value,label,active){
+  var idx=_expMenuOpts.length;
+  _expMenuOpts.push({kind:kind,value:value});
+  return '<div onclick="applyExpFilterByIdx('+idx+')" style="display:flex;justify-content:space-between;align-items:center;padding:8px 10px;border-radius:8px;cursor:pointer;font-size:13px;color:#3d3530'+(active?';background:#f0ebe6;font-weight:700':'')+'">'
+    +'<span>'+label+'</span>'+(active?'<span style="color:var(--sage);font-weight:800">✓</span>':'')+'</div>';
+}
+function applyExpFilterByIdx(i){
+  var o=_expMenuOpts[i];if(!o)return;
+  if(o.kind==='account')EXP_F_ACCT=(EXP_F_ACCT===o.value?null:o.value);
+  else if(o.kind==='type')EXP_F_TYPE=(EXP_F_TYPE===o.value?null:o.value);
+  else if(o.kind==='cat')EXP_F_CAT=(EXP_F_CAT===o.value?null:o.value);
+  var menu=document.getElementById('expFilterMenu');if(menu)menu.style.display='none';
+  _expMenuOpen=null;
+  renderE();
+}
+function clearExpFilter(kind){
+  if(kind==='account')EXP_F_ACCT=null;
+  else if(kind==='type')EXP_F_TYPE=null;
+  else if(kind==='cat')EXP_F_CAT=null;
+  renderE();
+}
+function clearAllExpFilters(){
+  EXP_F_ACCT=null;EXP_F_TYPE=null;EXP_F_CAT=null;
+  _expSearch='';
+  var s=document.getElementById('expSearch');if(s)s.value='';
+  EXP_FILTER='all';
+  document.querySelectorAll('#expTopChips .fchip').forEach(function(b){b.classList.remove('on');});
+  var allBtn=document.querySelector('#expTopChips .fchip');if(allBtn)allBtn.classList.add('on');
+  var menu=document.getElementById('expFilterMenu');if(menu)menu.style.display='none';_expMenuOpen=null;
+  renderE();
+}
+function renderExpActiveFilters(){
+  var el=document.getElementById('expActiveFilters');if(!el)return;
+  // Reflect active state on the filter trigger chips
+  var ab=document.getElementById('expFiltAcctBtn');if(ab)ab.classList.toggle('on',!!EXP_F_ACCT);
+  var tb=document.getElementById('expFiltTypeBtn');if(tb)tb.classList.toggle('on',!!EXP_F_TYPE);
+  var cb=document.getElementById('expFiltCatBtn');if(cb)cb.classList.toggle('on',!!EXP_F_CAT);
+  var chips=[];
+  if(EXP_F_ACCT)chips.push({k:'account',label:'🏦 '+(_acctNameOf(EXP_F_ACCT)||'Account')});
+  if(EXP_F_TYPE)chips.push({k:'type',label:(EXP_F_TYPE==='business'?'💼 ':'🏠 ')+EXP_F_TYPE});
+  if(EXP_F_CAT)chips.push({k:'cat',label:'📊 '+EXP_F_CAT});
+  if(!chips.length){el.style.display='none';el.innerHTML='';return;}
+  el.style.display='flex';
+  el.innerHTML=chips.map(function(c){
+    return '<span style="display:inline-flex;align-items:center;gap:6px;background:#f0ebe6;border:1.5px solid #e8ddd4;border-radius:14px;padding:4px 10px;font-size:12px;font-weight:700;color:#3d3530">'
+      +escHtml(c.label)
+      +'<span onclick="clearExpFilter(\''+c.k+'\')" style="cursor:pointer;color:var(--textl);font-weight:800;font-size:13px">✕</span></span>';
+  }).join('')
+  +'<button onclick="clearAllExpFilters()" style="background:none;border:1.5px solid #e8ddd4;border-radius:14px;padding:4px 12px;font-size:12px;font-weight:700;color:var(--textl);cursor:pointer;font-family:\'Quicksand\',sans-serif">Clear all</button>';
 }
 function drillExpCat(cat,ty){
   EXP_CAT_FILTER=cat;EXP_TY_FILTER=ty||null;
@@ -12112,8 +12199,13 @@ function renderE(){
   var _scBtn=document.getElementById('expSearchClear');
   if(_scBtn)_scBtn.style.display=_expSearch?'':'none';
   var _sq=_expSearch.toLowerCase().trim();
+  renderExpActiveFilters();
   var filtered=EXPENSES.slice().sort(_expSortFn).filter(function(e){
     if(_sq){var match=(e.desc||'').toLowerCase().includes(_sq)||(e.cat||'').toLowerCase().includes(_sq)||(e.ty||'').toLowerCase().includes(_sq);if(!match)return false;}
+    // Stackable dropdown filters (display only)
+    if(EXP_F_ACCT&&(e.account||'')!==EXP_F_ACCT)return false;
+    if(EXP_F_TYPE&&(e.ty||'personal')!==EXP_F_TYPE)return false;
+    if(EXP_F_CAT&&(e.cat||'(uncategorized)')!==EXP_F_CAT)return false;
     if(EXP_CAT_FILTER)return e.cat===EXP_CAT_FILTER&&(!EXP_TY_FILTER||e.ty===EXP_TY_FILTER);
     if(EXP_FILTER==='uncleared')return!e.reconciled;
     if(EXP_FILTER==='cleared')return!!e.reconciled;
