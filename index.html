@@ -3356,6 +3356,7 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
   <div class="mh"></div><div class="mtit">Log Expense 💸</div>
   <div class="fg"><label class="fl">Amount ($)</label><input class="fi" type="number" id="eAmt" placeholder="0.00" step="0.01"></div>
   <div class="fg"><label class="fl">Description</label><input class="fi" id="eDesc" placeholder="e.g. Wig supplies"></div>
+  <div class="fg"><label class="fl">Pay a bill <span style="font-weight:400;color:var(--textl);font-size:11px">(optional — fills the form, all editable)</span></label><select class="fi" id="ePayBill" style="padding:8px 10px" onchange="onPayBillSelect()"><option value="">— None (regular expense) —</option></select></div>
   <div class="fg"><label class="fl">Type</label>
     <div class="bg">
       <button class="sb" data-g="ety" data-v="business" onclick="pSB(this)">💼 Business<br><small>WWOW / L'Oréal</small></button>
@@ -11992,7 +11993,52 @@ function saveExp(){
       localStorage.setItem('aAccounts',JSON.stringify(ACCOUNTS));
     }
   }
+  // If this expense is paying a bill, mark that bill Paid for this month.
+  // No second money write — saveExp above is the only transaction. Partial amounts still mark Paid.
+  var _pbEl=document.getElementById('ePayBill');var _pbId=_pbEl?_pbEl.value:'';
+  if(_pbId){
+    var _mon=getMonStr();
+    if(!BILL_PAY[_mon])BILL_PAY[_mon]={};
+    var _cur=BILL_PAY[_mon][_pbId]||'';
+    if(_cur!=='paid'&&_cur!=='posted'){
+      BILL_PAY[_mon][_pbId]='paid';
+      localStorage.setItem('aBillPay',JSON.stringify(BILL_PAY));
+      if(typeof renderBills==='function')renderBills();
+      var _bn=(BILLS.find(function(b){return b.id===_pbId;})||{}).name||'bill';
+      if(typeof showToast==='function')showToast('✅ '+_bn+' marked paid');
+    }
+  }
   closeM('expModal');
+}
+// Build the "Pay a bill" picker: only bills still unpaid this month (not paid/posted).
+function populateExpPayBill(){
+  var sel=document.getElementById('ePayBill');if(!sel)return;
+  var mon=getMonStr();
+  var paid=BILL_PAY[mon]||{};
+  var due=(BILLS||[]).filter(function(b){var s=paid[b.id]||'';return s!=='paid'&&s!=='posted';})
+    .sort(function(a,b){return (parseInt(a.day)||1)-(parseInt(b.day)||1);});
+  sel.innerHTML='<option value="">— None (regular expense) —</option>'+due.map(function(b){
+    var amt=parseFloat(getBillMonthAmt(b.id))||0;
+    return '<option value="'+b.id+'">'+escHtml(b.name)+' — $'+amt.toFixed(2)+(b.day?' (day '+b.day+')':'')+'</option>';
+  }).join('');
+  sel.value='';
+}
+// Pre-fill the expense form from the chosen bill. All fields stay editable.
+function onPayBillSelect(){
+  var sel=document.getElementById('ePayBill');if(!sel)return;
+  var id=sel.value;if(!id)return; // None → leave the form untouched
+  var bill=BILLS.find(function(b){return b.id===id;});if(!bill)return;
+  var amtEl=document.getElementById('eAmt');if(amtEl)amtEl.value=(parseFloat(getBillMonthAmt(id))||0).toFixed(2);
+  var descEl=document.getElementById('eDesc');if(descEl)descEl.value=bill.name;
+  var acctEl=document.getElementById('eAccount');if(acctEl)acctEl.value=bill.paidWith||'';
+  _pickSB('ety','personal');
+  if(bill.cat)_pickSB('ecat',bill.cat); // no remembered category → leave it for the user to pick
+}
+// Activate a segmented-button (data-g group) by its value, reusing pSB so SBV stays in sync.
+function _pickSB(group,value){
+  if(value===undefined||value===null||value==='')return;
+  var btns=document.querySelectorAll('[data-g="'+group+'"]');
+  for(var i=0;i<btns.length;i++){if(btns[i].dataset.v===value){pSB(btns[i]);return;}}
 }
 
 function getMonStr(){var n=new Date();return n.getFullYear()+'-'+(String(n.getMonth()+1).padStart(2,'0'));}
@@ -12488,11 +12534,12 @@ function toggleSpendable(id){
   renderBudget();
   if(typeof updateEstateStrip==='function')updateEstateStrip();
 }
-// Sum of unpaid (not yet posted) bills for the current month.
+// Sum of bills still owed this month — excludes both 'paid' (money already moved via the
+// pay-flow, so don't double-subtract) and 'posted'.
 function unpaidBillsThisMonth(){
   var mon=getMonStr();
   var paid=(typeof BILL_PAY!=='undefined'&&BILL_PAY[mon])?BILL_PAY[mon]:{};
-  return (BILLS||[]).filter(function(b){return (paid[b.id]||'')!=='posted';})
+  return (BILLS||[]).filter(function(b){var s=paid[b.id]||'';return s!=='posted'&&s!=='paid';})
     .reduce(function(s,b){return s+(parseFloat(getBillMonthAmt(b.id))||0);},0);
 }
 
@@ -13256,7 +13303,7 @@ function openM(id){
     var tdmd=document.getElementById('tdMinDate');
     if(tdmd&&!tdmd.value)tdmd.value=todayStr();
   }
-  if(id==='expModal'){renderExpCatBtns();var _eacc=document.getElementById('eAccount');if(_eacc){_eacc.innerHTML='<option value="">— No account —</option>';(ACCOUNTS||[]).forEach(function(a){_eacc.innerHTML+='<option value="'+a.id+'">'+(a.isCredit?'💳 ':'💵 ')+escHtml(a.name)+'</option>';});}}
+  if(id==='expModal'){renderExpCatBtns();var _eacc=document.getElementById('eAccount');if(_eacc){_eacc.innerHTML='<option value="">— No account —</option>';(ACCOUNTS||[]).forEach(function(a){_eacc.innerHTML+='<option value="'+a.id+'">'+(a.isCredit?'💳 ':'💵 ')+escHtml(a.name)+'</option>';});}populateExpPayBill();}
   if(id==='incModal'){
     var incDateEl=document.getElementById('incDate');
     if(incDateEl&&!incDateEl.value)incDateEl.value=new Date().toISOString().slice(0,10);
@@ -15190,12 +15237,19 @@ function renderBills(){
       }
     }
   });
+  // Derived "set aside" glance — bills still due (not paid/posted) this month. Never stored.
+  var dueBills=BILLS.filter(function(b){var s=(paid[b.id]||'');return s!=='paid'&&s!=='posted';});
+  var setAside=dueBills.reduce(function(s,b){return s+(parseFloat(getBillMonthAmt(b.id))||0);},0);
+  var setAsideHtml='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;padding:10px 12px;background:#f4f0e6;border:1px solid #e8ddd4;border-radius:10px">'
+    +'<span style="font-size:12px;font-weight:700;color:#3d3530">🗓️ '+dueBills.length+' bill'+(dueBills.length!==1?'s':'')+' due</span>'
+    +'<span style="font-size:15px;font-weight:800;color:'+(setAside>0?'#C87070':'#4F6014')+'">$'+setAside.toFixed(2)+' set aside</span>'
+    +'</div>';
   var totalsHtml='<div style="display:flex;gap:12px;margin-bottom:10px;padding:8px 12px;background:#fdf6ee;border-radius:10px;font-size:12px">'
     +'<div><span style="color:var(--textl)">This month</span><br><b style="color:#3d3530;font-size:14px">$'+monthlyTotal.toFixed(2)+'</b></div>'
     +'<div style="border-left:1px solid #e8ddd4;padding-left:12px"><span style="color:var(--textl)">This year</span><br><b style="color:#3d3530;font-size:14px">$'+yearlyTotal.toFixed(2)+'</b></div>'
     +'</div>';
   var sortedBills=BILLS.slice().sort(function(a,b){return (parseInt(a.day)||1)-(parseInt(b.day)||1);});
-  el.innerHTML=totalsHtml+sortedBills.map(function(b){
+  el.innerHTML=setAsideHtml+totalsHtml+sortedBills.map(function(b){
     var status=paid[b.id]||'';
     var isPosted=status==='posted';
     var isOneOff=(b.billType||'monthly')==='oneoff';
@@ -15291,6 +15345,14 @@ function setBillStatus(id,status){
 
 function togBillPay(id){setBillStatus(id,'posted');}// backward compat
 
+// Fill the bill category dropdown from the existing EXPENSE_CATS list (optional; blank allowed)
+function _fillBillCatOptions(sel){
+  var el=document.getElementById('billCat');if(!el)return;
+  el.innerHTML='<option value="">— None set —</option>'+(EXPENSE_CATS||[]).map(function(c){
+    return '<option value="'+escHtml(c)+'"'+(c===sel?' selected':'')+'>'+escHtml(c)+'</option>';
+  }).join('');
+  el.value=sel||'';
+}
 function openAddBill(){
   document.getElementById('billModalTit').textContent='Add Bill 🏦';
   document.getElementById('billEditId').value='';
@@ -15298,6 +15360,7 @@ function openAddBill(){
   document.getElementById('billAmt').value='';
   document.getElementById('billDay').value='';
   var _bpw=document.getElementById('billPaidWith');if(_bpw){_bpw.innerHTML='<option value="">— Not tracked —</option>';(ACCOUNTS||[]).forEach(function(a){_bpw.innerHTML+='<option value="'+a.id+'">'+(a.isCredit?'💳 ':'💵 ')+escHtml(a.name)+'</option>';});}
+  _fillBillCatOptions('');
   document.getElementById('billNotes').value='';
   document.querySelectorAll('[data-g="billtype"]').forEach(function(b){b.classList.remove('on');});
   SBV.billtype=null;
@@ -15313,6 +15376,7 @@ function editBill(id){
   document.getElementById('billAmt').value=b.amt;
   document.getElementById('billDay').value=b.day;
   var _bpw2=document.getElementById('billPaidWith');if(_bpw2){_bpw2.innerHTML='<option value="">— Not tracked —</option>';(ACCOUNTS||[]).forEach(function(a){_bpw2.innerHTML+='<option value="'+a.id+'">'+(a.isCredit?'💳 ':'💵 ')+escHtml(a.name)+'</option>';});_bpw2.value=b.paidWith||'';}
+  _fillBillCatOptions(b.cat||'');
   document.getElementById('billNotes').value=b.notes||'';
   document.querySelectorAll('[data-g="billtype"]').forEach(function(btn){btn.classList.remove('on');});
   if(b.billType){var tBtn=document.querySelector('[data-g="billtype"][data-v="'+b.billType+'"]');if(tBtn)tBtn.classList.add('on');}
@@ -15327,14 +15391,15 @@ function saveBill(){
   var day=parseInt(document.getElementById('billDay').value)||1;
   if(!name||!amt){alert('Please fill in name and amount!');return;}
   var paidWith=document.getElementById('billPaidWith').value||'';
+  var billCatEl=document.getElementById('billCat');var billCat=billCatEl?billCatEl.value:'';
   var notes=document.getElementById('billNotes').value.trim();
   var billType=SBV.billtype||'monthly';
   var id=document.getElementById('billEditId').value;
   if(id){
     var b=BILLS.find(function(b){return b.id===id;});
-    if(b){b.name=name;b.amt=amt;b.day=day;b.paidWith=paidWith;b.notes=notes;b.billType=billType;}
+    if(b){b.name=name;b.amt=amt;b.day=day;b.paidWith=paidWith;b.cat=billCat;b.notes=notes;b.billType=billType;}
   }else{
-    BILLS.push({id:Date.now().toString(),name:name,amt:amt,day:day,paidWith:paidWith,notes:notes,billType:billType});
+    BILLS.push({id:Date.now().toString(),name:name,amt:amt,day:day,paidWith:paidWith,cat:billCat,notes:notes,billType:billType});
   }
   localStorage.setItem('aBills',JSON.stringify(BILLS));
   closeM('billModal');renderBills();
@@ -29302,6 +29367,7 @@ function delProjInc(id){
   <div class="fg"><label class="fl">Amount ($)</label><input class="fi" type="number" id="billAmt" placeholder="0.00" step="0.01"></div>
   <div class="fg"><label class="fl">Due Day of Month</label><input class="fi" type="number" id="billDay" placeholder="1-31" min="1" max="31"></div>
   <div class="fg"><label class="fl">Paid with (account)</label><select class="fi" id="billPaidWith"><option value="">— Not tracked —</option></select></div>
+  <div class="fg"><label class="fl">Category <span style="font-weight:400;color:var(--textl);font-size:11px">(optional — used when you pay it)</span></label><select class="fi" id="billCat" style="padding:8px 10px"><option value="">— None set —</option></select></div>
   <div class="fg"><label class="fl">Notes</label><input class="fi" id="billNotes" placeholder="Optional notes"></div>
   <div class="fg"><label class="fl">Billing Type</label>
     <div class="bg">
