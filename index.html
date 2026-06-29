@@ -1305,9 +1305,9 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
   </div>
   <!-- Available summary (routes into Budget) -->
   <div class="card" style="margin-bottom:10px;padding:16px 14px;text-align:center;cursor:pointer" onclick="goTab('money',null);setTimeout(function(){showMoneySec('budget',document.querySelector('#v-money .pn-btn[data-sec=budget]'))},200)">
-    <div style="font-size:10px;font-weight:700;color:#9A8576;text-transform:uppercase;letter-spacing:1.2px;margin-bottom:6px">Available</div>
+    <div style="font-size:10px;font-weight:700;color:#9A8576;text-transform:uppercase;letter-spacing:1.2px;margin-bottom:6px">Left to spend</div>
     <div id="estate-avail-total" style="font-size:36px;font-weight:800;color:#4F6014;line-height:1">$0</div>
-    <div id="estate-avail-sub" style="font-size:11px;color:#9A8576;margin-top:6px">what's yours to spend</div>
+    <div id="estate-avail-sub" style="font-size:11px;color:#9A8576;margin-top:6px">after bills are handled</div>
   </div>
   <div class="hub-grid">
     <div class="hub-card span2" onclick="goTab('money',null)"><div class="hub-card-ic">💰</div><div class="hub-card-name">Money</div><div class="hub-card-sub" id="hub-money-sub">Bills, budget &amp; expenses</div></div>
@@ -1883,44 +1883,71 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     <span id="mThisExp" style="display:none"></span>
     <span id="mNet" style="display:none"></span>
     <span id="mInc" style="display:none"></span>
-    <!-- AVAILABLE -->
-    <div class="card" style="margin-bottom:14px;text-align:center;padding:22px 16px 18px">
-      <div style="font-size:10px;font-weight:700;color:var(--textl);text-transform:uppercase;letter-spacing:1.2px;margin-bottom:8px">Available</div>
-      <div id="bgAvailNum" style="font-size:52px;font-weight:800;color:#4F6014;line-height:1">$0</div>
-      <div id="bgAvailSub" style="font-size:11px;color:var(--textl);margin-top:8px">what's yours to spend</div>
-    </div>
-    <!-- ESSENTIALS (collapsible, closed by default) -->
-    <div class="card" style="padding:0;margin-bottom:8px">
-      <div onclick="togBudgetSec('bgEssBody','bgEssArr')" style="display:flex;justify-content:space-between;align-items:center;padding:12px 14px;cursor:pointer">
-        <span style="font-size:14px;font-weight:700;color:var(--textd)">Essentials</span>
-        <span style="display:flex;align-items:center;gap:8px">
-          <span id="bgEssTot" style="font-size:11px;color:var(--textl)"></span>
-          <span id="bgEssArr" style="color:var(--textl);font-size:13px">▸</span>
-        </span>
+    <!-- WATERFALL: money − bills − cushion = left to spend -->
+    <div class="card" style="margin-bottom:14px;padding:16px 16px 14px">
+      <!-- Money we have (tap to choose which accounts count) -->
+      <div onclick="togBudgetSec('bgMoneyAccts','bgMoneyArr')" style="display:flex;justify-content:space-between;align-items:center;cursor:pointer;padding:4px 0">
+        <span style="font-size:13px;color:#9A8576;font-weight:700">💵 Money we have <span id="bgMoneyArr" style="font-size:10px">▸</span></span>
+        <span id="bgMoneyNum" style="font-size:17px;font-weight:800;color:#4F6014">$0</span>
       </div>
-      <div id="bgEssBody" style="display:none;padding:0 14px 12px"></div>
-    </div>
-    <!-- NON-ESSENTIALS (collapsible, closed by default) -->
-    <div class="card" style="padding:0;margin-bottom:8px">
-      <div onclick="togBudgetSec('bgFlexBody','bgFlexArr')" style="display:flex;justify-content:space-between;align-items:center;padding:12px 14px;cursor:pointer">
-        <span style="font-size:14px;font-weight:700;color:var(--textd)">Non-Essentials</span>
-        <span style="display:flex;align-items:center;gap:8px">
-          <span id="bgFlexTot" style="font-size:11px;color:var(--textl)"></span>
-          <span id="bgFlexArr" style="color:var(--textl);font-size:13px">▸</span>
-        </span>
+      <div id="bgMoneyAccts" style="display:none;padding:4px 0 8px"></div>
+      <!-- Bills still to pay -->
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-top:1px solid #f0ebe6">
+        <span style="font-size:13px;color:#9A8576;font-weight:700;cursor:pointer" onclick="showMoneySec('bills',document.querySelector('#v-money .pn-btn[data-sec=bills]'))">🏦 Bills still to pay <span style="font-size:10px">›</span></span>
+        <span id="bgBillsNum" style="font-size:17px;font-weight:800;color:#C87070">−$0</span>
       </div>
-      <div id="bgFlexBody" style="display:none;padding:0 14px 12px"></div>
+      <!-- Cushion -->
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-top:1px solid #f0ebe6">
+        <span style="font-size:13px;color:#9A8576;font-weight:700;cursor:pointer;text-decoration:underline" onclick="setMoneyReserve()">🛟 Cushion kept</span>
+        <span id="bgCushionNum" style="font-size:17px;font-weight:800;color:#9A8576">−$0</span>
+      </div>
+      <!-- Left to spend -->
+      <div style="display:flex;justify-content:space-between;align-items:flex-end;padding:12px 0 0;border-top:2px solid #e8dfd5;margin-top:4px">
+        <span style="font-size:12px;font-weight:800;color:var(--textd);text-transform:uppercase;letter-spacing:.8px">Left to spend</span>
+        <span id="bgLeftToSpend" style="font-size:36px;font-weight:800;color:#4F6014;line-height:.9">$0</span>
+      </div>
+      <div id="bgLeftSubNote" style="font-size:11px;color:#9A8576;text-align:right;margin-top:4px">after bills are handled</div>
     </div>
-    <!-- Buffer -->
-    <div class="card" id="bgBufferCard" style="margin-bottom:12px"></div>
     <!-- Savings goals -->
     <div class="card" id="bgSavingsCard" style="margin-bottom:12px;display:none"></div>
-    <!-- Moves this month -->
-    <div class="sh">🔄 Moves this month</div>
-    <div class="card" id="bgMovesLog" style="margin-bottom:12px"></div>
-    <!-- Edit targets -->
-    <div style="text-align:right;margin-bottom:16px">
-      <button onclick="openBudgetEdit()" style="font-size:11px;padding:4px 12px;border-radius:8px;border:1.5px solid var(--bdr);background:#fff;font-family:'Quicksand',sans-serif;font-weight:700;cursor:pointer;color:var(--textd)">✏️ Edit targets</button>
+    <!-- Optional: category budget targets (collapsed) -->
+    <div class="card" style="padding:0;margin-bottom:12px">
+      <div onclick="togBudgetSec('bgTargetsBody','bgTargetsArr')" style="display:flex;justify-content:space-between;align-items:center;padding:12px 14px;cursor:pointer">
+        <span style="font-size:13px;font-weight:700;color:var(--textd)">📊 Budget targets <span style="font-size:10px;color:#9A8576;font-weight:600">(optional)</span></span>
+        <span id="bgTargetsArr" style="color:var(--textl);font-size:13px">▸</span>
+      </div>
+      <div id="bgTargetsBody" style="display:none;padding:0 12px 12px">
+        <!-- ESSENTIALS -->
+        <div style="border:1px solid #f0ebe6;border-radius:10px;margin-bottom:8px;padding:0">
+          <div onclick="togBudgetSec('bgEssBody','bgEssArr')" style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;cursor:pointer">
+            <span style="font-size:13px;font-weight:700;color:var(--textd)">Essentials</span>
+            <span style="display:flex;align-items:center;gap:8px">
+              <span id="bgEssTot" style="font-size:11px;color:var(--textl)"></span>
+              <span id="bgEssArr" style="color:var(--textl);font-size:12px">▸</span>
+            </span>
+          </div>
+          <div id="bgEssBody" style="display:none;padding:0 12px 10px"></div>
+        </div>
+        <!-- NON-ESSENTIALS -->
+        <div style="border:1px solid #f0ebe6;border-radius:10px;margin-bottom:8px;padding:0">
+          <div onclick="togBudgetSec('bgFlexBody','bgFlexArr')" style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;cursor:pointer">
+            <span style="font-size:13px;font-weight:700;color:var(--textd)">Non-Essentials</span>
+            <span style="display:flex;align-items:center;gap:8px">
+              <span id="bgFlexTot" style="font-size:11px;color:var(--textl)"></span>
+              <span id="bgFlexArr" style="color:var(--textl);font-size:12px">▸</span>
+            </span>
+          </div>
+          <div id="bgFlexBody" style="display:none;padding:0 12px 10px"></div>
+        </div>
+        <!-- Buffer -->
+        <div class="card" id="bgBufferCard" style="margin-bottom:8px;box-shadow:none;border:1px solid #f0ebe6"></div>
+        <!-- Moves this month -->
+        <div style="font-size:11px;font-weight:700;color:var(--textl);text-transform:uppercase;letter-spacing:.6px;margin:4px 2px 6px">🔄 Moves this month</div>
+        <div class="card" id="bgMovesLog" style="margin-bottom:10px;box-shadow:none;border:1px solid #f0ebe6"></div>
+        <div style="text-align:right">
+          <button onclick="openBudgetEdit()" style="font-size:11px;padding:4px 12px;border-radius:8px;border:1.5px solid var(--bdr);background:#fff;font-family:'Quicksand',sans-serif;font-weight:700;cursor:pointer;color:var(--textd)">✏️ Edit targets</button>
+        </div>
+      </div>
     </div>
     <!-- Daily/Weekly/Monthly checklists -->
     <div class="card" style="padding:0;margin-bottom:8px">
@@ -12339,39 +12366,83 @@ function _fixPrimaryAccount(){
 }
 
 function setMoneyReserve(){
-  var cur=parseFloat(localStorage.getItem('aMoneyReserve'))||0;
-  var v=prompt('Reserve — money to hold back from Available (e.g. bills, safety cushion):',cur||'');
+  var cur=moneyCushion();
+  var v=prompt('Cushion — money to keep untouched after bills (a safety buffer, e.g. 200):',cur||'');
   if(v===null)return;
   var n=parseFloat(v)||0;
   localStorage.setItem('aMoneyReserve',String(n));
   renderBudget();
-  if(typeof showToast==='function')showToast(n>0?'Reserve set to $'+n.toFixed(0):'Reserve cleared');
+  if(typeof updateEstateStrip==='function')updateEstateStrip();
+  if(typeof showToast==='function')showToast(n>0?'Cushion set to $'+n.toFixed(0):'Cushion cleared');
+}
+// Cushion defaults to $200 the first time (within the user's $100–300 range), then whatever they set.
+function moneyCushion(){
+  var raw=localStorage.getItem('aMoneyReserve');
+  if(raw===null||raw===undefined||raw===''){return 200;}
+  return parseFloat(raw)||0;
+}
+// Is this account counted toward "money we have"? Default: only the primary, until toggled.
+function isSpendable(a){
+  if(a.isCredit)return false;
+  if(a.spendable===true)return true;
+  if(a.spendable===false)return false;
+  return !!a.isPrimary; // undefined → primary only
+}
+function toggleSpendable(id){
+  var a=ACCOUNTS.find(function(x){return x.id===id;});
+  if(!a)return;
+  a.spendable=!isSpendable(a);
+  localStorage.setItem('aAccounts',JSON.stringify(ACCOUNTS));
+  renderBudget();
+  if(typeof updateEstateStrip==='function')updateEstateStrip();
+}
+// Sum of unpaid (not yet posted) bills for the current month.
+function unpaidBillsThisMonth(){
+  var mon=getMonStr();
+  var paid=(typeof BILL_PAY!=='undefined'&&BILL_PAY[mon])?BILL_PAY[mon]:{};
+  return (BILLS||[]).filter(function(b){return (paid[b.id]||'')!=='posted';})
+    .reduce(function(s,b){return s+(parseFloat(getBillMonthAmt(b.id))||0);},0);
 }
 
 function renderBudget(){
   _migrateBucketGroups();
   _fixPrimaryAccount();
-  var reserve=parseFloat(localStorage.getItem('aMoneyReserve'))||0;
-  var primaryAcct=ACCOUNTS.find(function(a){return a.isPrimary&&!a.isCredit;})||null;
-  var primaryBal=primaryAcct?(parseFloat(primaryAcct.amount)||0):0;
-  var available=primaryBal-reserve;
   var sageC='#4F6014';
   var roseC='#C87070';
   var amberC='#C4974A';
 
-  // AVAILABLE card
-  var availEl=document.getElementById('bgAvailNum');
-  var availSubEl=document.getElementById('bgAvailSub');
-  if(availEl){
-    availEl.textContent=(available<0?'-':'')+'$'+Math.abs(available).toFixed(0);
-    availEl.style.color=available<0?roseC:sageC;
-  }
-  if(availSubEl){
-    var sub='what\'s yours to spend';
-    if(primaryAcct)sub+=' · '+escHtml(primaryAcct.name);
-    sub+=' · <span style="text-decoration:underline;cursor:pointer" onclick="setMoneyReserve()">'+(reserve>0?'$'+reserve.toFixed(0)+' reserved':'set reserve')+'</span>';
-    availSubEl.innerHTML=sub;
-    availSubEl.style.cursor='default';
+  // ── WATERFALL: money we have − bills − cushion = left to spend ──
+  var cushion=moneyCushion();
+  var cashAccts=ACCOUNTS.filter(function(a){return!a.isCredit;});
+  var moneyWeHave=cashAccts.filter(isSpendable).reduce(function(s,a){return s+(parseFloat(a.amount)||0);},0);
+  var billsDue=unpaidBillsThisMonth();
+  var leftToSpend=moneyWeHave-billsDue-cushion;
+
+  var mEl=document.getElementById('bgMoneyNum');
+  if(mEl)mEl.textContent='$'+moneyWeHave.toFixed(0);
+  var bEl=document.getElementById('bgBillsNum');
+  if(bEl)bEl.textContent='−$'+billsDue.toFixed(0);
+  var cEl=document.getElementById('bgCushionNum');
+  if(cEl)cEl.textContent='−$'+cushion.toFixed(0);
+  var lEl=document.getElementById('bgLeftToSpend');
+  if(lEl){lEl.textContent=(leftToSpend<0?'-':'')+'$'+Math.abs(leftToSpend).toFixed(0);lEl.style.color=leftToSpend<0?roseC:sageC;}
+  var noteEl=document.getElementById('bgLeftSubNote');
+  if(noteEl)noteEl.textContent=leftToSpend<0?'short — bills + cushion exceed your money':'after bills are handled';
+
+  // Account picker for "money we have"
+  var acctsEl=document.getElementById('bgMoneyAccts');
+  if(acctsEl){
+    if(!cashAccts.length){acctsEl.innerHTML='<div style="font-size:12px;color:var(--textl);padding:4px 0">No cash accounts yet.</div>';}
+    else{
+      acctsEl.innerHTML='<div style="font-size:10px;color:#9A8576;margin-bottom:4px">Tap an account to count it toward your money:</div>'+
+        cashAccts.map(function(a){
+          var on=isSpendable(a);
+          return '<div onclick="event.stopPropagation();toggleSpendable(\''+a.id+'\')" style="display:flex;justify-content:space-between;align-items:center;padding:6px 4px;border-bottom:1px solid #f5efe8;cursor:pointer">'
+            +'<span style="font-size:12px;color:var(--textd)">'+(on?'✅':'⬜')+' '+escHtml(a.name)+(a.isPrimary?' <span style="font-size:9px;color:#9A8576">primary</span>':'')+'</span>'
+            +'<span style="font-size:12px;font-weight:700;color:'+(on?sageC:'#c9bdb0')+'">$'+(parseFloat(a.amount)||0).toFixed(0)+'</span>'
+            +'</div>';
+        }).join('');
+    }
   }
 
   var spent=budgetSpentMap();
@@ -15522,20 +15593,17 @@ function renderOvProjects(){
 
 function updateEstateStrip(){
   if(typeof _fixPrimaryAccount==='function')_fixPrimaryAccount();
-  var reserve=parseFloat(localStorage.getItem('aMoneyReserve'))||0;
-  var primaryAcct=ACCOUNTS.find(function(a){return a.isPrimary&&!a.isCredit;})||null;
-  var primaryBal=primaryAcct?(parseFloat(primaryAcct.amount)||0):0;
-  var available=primaryBal-reserve;
+  // Same waterfall as the Budget home: money we have − bills − cushion.
+  var cushion=(typeof moneyCushion==='function')?moneyCushion():(parseFloat(localStorage.getItem('aMoneyReserve'))||0);
+  var spendableTest=(typeof isSpendable==='function')?isSpendable:function(a){return!a.isCredit&&a.isPrimary;};
+  var moneyWeHave=ACCOUNTS.filter(function(a){return!a.isCredit;}).filter(spendableTest).reduce(function(s,a){return s+(parseFloat(a.amount)||0);},0);
+  var billsDue=(typeof unpaidBillsThisMonth==='function')?unpaidBillsThisMonth():0;
+  var leftToSpend=moneyWeHave-billsDue-cushion;
   var sageC='#4F6014',roseC='#C87070';
   var el=document.getElementById('estate-avail-total');
-  if(el){el.textContent=(available<0?'-':'')+'$'+Math.abs(available).toFixed(0);el.style.color=available<0?roseC:sageC;}
+  if(el){el.textContent=(leftToSpend<0?'-':'')+'$'+Math.abs(leftToSpend).toFixed(0);el.style.color=leftToSpend<0?roseC:sageC;}
   var sub=document.getElementById('estate-avail-sub');
-  if(sub){
-    var t='what\'s yours to spend';
-    if(primaryAcct)t+=' · '+escHtml(primaryAcct.name);
-    if(reserve>0)t+=' · $'+reserve.toFixed(0)+' reserved';
-    sub.textContent=t;
-  }
+  if(sub)sub.textContent=billsDue>0?'left to spend · after $'+billsDue.toFixed(0)+' bills':'left to spend';
 }
 
 // ═══════════════════════════════════════════════
