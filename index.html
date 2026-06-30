@@ -13184,11 +13184,11 @@ function _expBuildSections(from,to,cats,onlyUnexported){
 
   if(cats.indexOf('finance')>-1){
     var exportTs=new Date().toISOString();
-    var expRows=[['Date','Description','Category','Type','Amount']];
+    var expRows=[['Date','Description','Category','Type','Amount','Account','Notes']];
     (EXPENSES||[]).forEach(function(e){
       if(onlyUnexported){if(e.exported)return;}
       else{var d=e.date||e.created||'';if(!_expInRange(d,from,to))return;}
-      expRows.push([(e.date||e.created||''),e.desc||'',e.cat||'',e.ty||'',e.amt||0]);
+      expRows.push([(e.date||e.created||''),e.desc||'',e.cat||'',e.ty||'',e.amt||0,_acctNameOf(e.account)||'',e.notes||'']);
       e.exported=exportTs;
     });
     localStorage.setItem('aExpenses',JSON.stringify(EXPENSES));
