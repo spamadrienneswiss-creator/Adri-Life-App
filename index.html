@@ -2010,12 +2010,14 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
         <button class="fchip" onclick="setExpFilter('uncleared',this)">⏳ Uncleared</button>
         <button class="fchip" onclick="setExpFilter('cleared',this)">✓ Cleared</button>
         <button class="fchip" onclick="setExpFilter('unexported',this)">📤 Not Exported</button>
+        <button class="fchip" onclick="setExpFilter('archived',this)">🗄️ Archived</button>
         <button class="fchip" id="expReconToggle" onclick="toggleExpSelMode()" style="margin-left:auto">🔄 Reconcile</button>
       </div>
       <div id="expReconBar" class="exp-recon-bar" style="display:none">
         <span style="font-size:11px;font-weight:700;color:#3a7a3a;align-self:center">Select rows or clear by date:</span>
         <input type="date" id="expReconDate" style="font-size:11px;border:1.5px solid #b0d8b0;border-radius:6px;padding:3px 7px;background:white;color:#3d3530;font-family:'Quicksand',sans-serif" />
         <button onclick="clearExpBefore()" style="font-size:11px;font-weight:700;background:white;border:1.5px solid #5a8a5a;border-radius:6px;padding:4px 10px;cursor:pointer;color:#3a7a3a;font-family:'Quicksand',sans-serif">Clear before ↑</button>
+        <button onclick="archiveExpBefore()" style="font-size:11px;font-weight:700;background:white;border:1.5px solid #9A8576;border-radius:6px;padding:4px 10px;cursor:pointer;color:#7a6a58;font-family:'Quicksand',sans-serif">🗄️ Archive before ↑</button>
         <button id="expReconClearBtn" onclick="clearExpSelected()" style="display:none;font-size:11px;font-weight:700;background:#5a8a5a;border:none;border-radius:6px;padding:4px 10px;cursor:pointer;color:white;font-family:'Quicksand',sans-serif">✓ Clear 0 selected</button>
         <button onclick="toggleExpSelMode()" style="font-size:11px;background:none;border:1.5px solid #b0d8b0;border-radius:6px;padding:4px 8px;cursor:pointer;color:#5a8a5a;font-family:'Quicksand',sans-serif;margin-left:auto">✕ Cancel</button>
       </div>
@@ -12262,6 +12264,9 @@ function renderE(){
     if(EXP_F_ACCT&&(e.account||'')!==EXP_F_ACCT)return false;
     if(EXP_F_TYPE&&(e.ty||'personal')!==EXP_F_TYPE)return false;
     if(EXP_F_CAT&&(e.cat||'(uncategorized)')!==EXP_F_CAT)return false;
+    // Archived: shown only in the Archived view; hidden everywhere else.
+    if(EXP_FILTER==='archived')return !!e.archived;
+    if(e.archived)return false;
     if(EXP_CAT_FILTER)return e.cat===EXP_CAT_FILTER&&(!EXP_TY_FILTER||e.ty===EXP_TY_FILTER);
     if(EXP_FILTER==='uncleared')return!e.reconciled;
     if(EXP_FILTER==='cleared')return!!e.reconciled;
@@ -12274,7 +12279,7 @@ function renderE(){
       lbl.innerHTML='<span>📊 '+escHtml(EXP_CAT_FILTER)+(EXP_TY_FILTER?' · '+EXP_TY_FILTER:'')+'</span> <button onclick="EXP_CAT_FILTER=null;EXP_TY_FILTER=null;renderE()" style="font-size:10px;padding:2px 8px;border-radius:8px;border:1.5px solid #e8ddd4;background:none;cursor:pointer;font-family:\'Quicksand\',sans-serif;font-weight:700;color:var(--textl)">✕ Clear</button>';
     }else{
       if(_sq){lbl.textContent='🔍 Results for "'+_expSearch+'" ('+filtered.length+')';}
-      else{var labels={all:'💸 Recent Expenses',uncleared:'⏳ Uncleared — tap ⏳ once it hits your bank',cleared:'✓ Cleared expenses',unexported:'📤 Not yet exported to spreadsheet'};
+      else{var labels={all:'💸 Recent Expenses',uncleared:'⏳ Uncleared — tap ⏳ once it hits your bank',cleared:'✓ Cleared expenses',unexported:'📤 Not yet exported to spreadsheet',archived:'🗄️ Archived — tucked away, still saved'};
       lbl.textContent=labels[EXP_FILTER]||'💸 Expenses';}
     }
   }
@@ -12293,6 +12298,7 @@ function renderE(){
       '</div>'+
       (!_expSelMode?'<button class="exp-pend-btn'+(isReconciled?' on':'')+'" onclick="toggleExpReconciled(\''+e.id+'\')" title="'+(isReconciled?'Cleared ✓ — tap to undo':'Pending — tap when it clears your bank')+'" style="font-size:11px;font-weight:700">'+(isReconciled?'✓':'⏳')+'</button>':'')+
       '<div class="er-a '+(e.ty==='business'?'biz':'')+'">$'+e.amt.toFixed(2)+'</div>'+
+      (e.archived&&!_expSelMode?'<button onclick="unarchiveExp(\''+e.id+'\')" title="Restore to active list" style="background:none;border:none;font-size:13px;cursor:pointer;color:var(--textl);padding:4px 6px;flex-shrink:0">↩️</button>':'')+
       (!_expSelMode?'<button onclick="delExpense(\''+e.id+'\')" style="background:none;border:none;font-size:13px;cursor:pointer;color:var(--textl);padding:4px 6px;flex-shrink:0">🗑️</button>':'')+
     '</div>';
   }).join('');
@@ -12394,6 +12400,38 @@ function clearExpBefore(){
   localStorage.setItem('aExpenses',JSON.stringify(EXPENSES));
   showToast('✓ Cleared '+count+' expense'+(count===1?'':'s'));
   _expSel={};
+  renderE();
+}
+
+// Manual, non-destructive archive: hides transactions on/before a date from the active list
+// but keeps them (restorable). Never automatic; warns about anything not yet exported.
+function archiveExpBefore(){
+  var dateInput=document.getElementById('expReconDate');
+  if(!dateInput||!dateInput.value){showToast('Pick a date first');return;}
+  var cutoff=new Date(dateInput.value+'T23:59:59');
+  var toArchive=EXPENSES.filter(function(e){
+    if(e.archived)return false;
+    var d=new Date(e.created||e.date);
+    return !isNaN(d)&&d<=cutoff;
+  });
+  if(!toArchive.length){showToast('Nothing to archive on/before that date');return;}
+  var notExported=toArchive.filter(function(e){return !e.exported;}).length;
+  var msg='Archive '+toArchive.length+' transaction'+(toArchive.length===1?'':'s')+' dated on/before '+dateInput.value+'?\n\nThey’ll be hidden from the list but kept and restorable — not deleted.';
+  if(notExported>0)msg+='\n\n⚠️ '+notExported+' of these have NOT been exported yet.';
+  if(!confirm(msg))return;
+  toArchive.forEach(function(e){e.archived=true;fbSave('expenses',e.id,e);});
+  localStorage.setItem('aExpenses',JSON.stringify(EXPENSES));
+  showToast('🗄️ Archived '+toArchive.length+' transaction'+(toArchive.length===1?'':'s')+' — see the Archived filter');
+  _expSel={};
+  renderE();
+}
+function unarchiveExp(id){
+  var e=EXPENSES.find(function(x){return x.id===id;});
+  if(!e)return;
+  e.archived=false;
+  fbSave('expenses',id,e);
+  localStorage.setItem('aExpenses',JSON.stringify(EXPENSES));
+  showToast('↩️ Restored to active list');
   renderE();
 }
 
