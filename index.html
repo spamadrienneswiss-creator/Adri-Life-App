@@ -1989,6 +1989,9 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     <div class="sh">🏦 Bills</div>
     <div class="card"><div id="billsList"><div class="empty"><div class="emj">🏦</div><p>No bills added.</p></div></div></div>
     <button class="add-btn" onclick="openAddBill()" style="margin-bottom:14px">➕ Add Bill</button>
+    <!-- Card balances — what you owe (context, not added to cash bills) -->
+    <div class="sh" id="billsCardHdr" style="display:none">💳 Cards — what you owe</div>
+    <div class="card" id="billsCardPayments" style="display:none;margin-bottom:14px"></div>
   </div>
   <!-- Expenses -->
   <div id="ms-expenses" class="money-sec" style="display:none">
@@ -15329,6 +15332,45 @@ function renderBills(){
       '</div>'+
     '</div>';
   }).join('');
+  renderBillsCardPayments();
+}
+
+// Card balances shown inside the pay list, for awareness. These are NOT added to the cash
+// "set aside" total — the card's statement payment is entered as its own bill, paid from cash.
+function renderBillsCardPayments(){
+  var el=document.getElementById('billsCardPayments');
+  var hdr=document.getElementById('billsCardHdr');
+  if(!el)return;
+  var sageC='#4F6014',roseC='#C2415A',muted='#9A8576';
+  var activeCards=ACCOUNTS.filter(function(a){return a.isCredit&&!a.excludeFromNet&&(parseFloat(a.amount)||0)>0;})
+    .sort(function(a,b){return (parseInt(a.minPayDate)||99)-(parseInt(b.minPayDate)||99);});
+  var laterOwed=ACCOUNTS.filter(function(a){return a.isCredit&&a.excludeFromNet&&(parseFloat(a.amount)||0)>0;})
+    .reduce(function(s,a){return s+(parseFloat(a.amount)||0);},0);
+  if(!activeCards.length&&laterOwed<=0){if(hdr)hdr.style.display='none';el.style.display='none';return;}
+  if(hdr)hdr.style.display='';
+  el.style.display='';
+  var totalOwed=activeCards.reduce(function(s,a){return s+(parseFloat(a.amount)||0);},0);
+  var totalMin=activeCards.reduce(function(s,a){return s+(parseFloat(a.minPayAmt)||0);},0);
+  var html=activeCards.map(function(a){
+    var bal=parseFloat(a.amount)||0;
+    var min=parseFloat(a.minPayAmt)||0;
+    var due=a.minPayDate?('day '+a.minPayDate):'';
+    return '<div onclick="openPayoffModal(\''+a.id+'\')" style="display:flex;justify-content:space-between;align-items:center;padding:8px 2px;border-bottom:1px solid #f5efe8;cursor:pointer">'
+      +'<div style="min-width:0">'
+        +'<div style="font-size:13px;font-weight:700;color:var(--textd)">💳 '+escHtml(a.name)+'</div>'
+        +'<div style="font-size:11px;color:'+muted+'">balance $'+bal.toFixed(2)+(min?' · min $'+min.toFixed(2):'')+(due?' · due '+due:'')+'</div>'
+      +'</div>'
+      +'<span style="font-size:11px;font-weight:700;color:'+sageC+';border:1.5px solid '+sageC+';border-radius:7px;padding:3px 9px;white-space:nowrap">💸 Pay</span>'
+      +'</div>';
+  }).join('');
+  html+='<div style="display:flex;justify-content:space-between;align-items:center;padding-top:8px;margin-top:2px;border-top:1px solid var(--border)">'
+    +'<span style="font-size:12px;font-weight:700;color:var(--textd)">Total owed on active cards</span>'
+    +'<span style="font-size:15px;font-weight:800;color:'+roseC+'">$'+totalOwed.toFixed(2)+'</span>'
+    +'</div>'
+    +(totalMin>0?'<div style="font-size:11px;color:'+muted+';text-align:right;margin-top:2px">minimums this month: $'+totalMin.toFixed(2)+'</div>':'')
+    +(laterOwed>0?'<div style="font-size:11px;color:'+muted+';text-align:right;margin-top:4px">+ $'+laterOwed.toFixed(2)+' on 0% / later-problem cards</div>':'')
+    +'<div style="font-size:10px;color:'+muted+';margin-top:6px;font-style:italic">These are your card balances. Enter each card’s statement payment as a bill (paid from cash) so it counts against Left to Spend.</div>';
+  el.innerHTML=html;
 }
 
 function promptBillMonthAmt(billId){
