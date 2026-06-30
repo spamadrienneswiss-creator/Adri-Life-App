@@ -3385,6 +3385,7 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     <span style="font-size:11px;color:var(--textl)">Auto-pending — tap ✓ in expenses list once it clears your bank</span>
   </div>
   <div class="fg"><label class="fl">Account (optional)</label><select class="fi" id="eAccount" style="padding:8px 10px"><option value="">— No account —</option></select></div>
+  <div class="fg"><label class="fl">Notes <span style="font-weight:400;color:var(--textl);font-size:11px">(the why — e.g. "Card: Nick", "return &amp; pay balance")</span></label><input class="fi" id="eNotes" placeholder="Optional — what / where / why"></div>
   <button class="ok-btn" onclick="saveExp()">Log It 💸</button>
   <button class="cn-btn" onclick="closeM('expModal')">Cancel</button>
 </div></div>
@@ -11991,7 +11992,8 @@ function saveExp(){
   var pendBtn=document.getElementById('expPendingBtn');
   var isPending=!pendBtn||pendBtn.classList.contains('on');
   var eAcctEl=document.getElementById('eAccount');var eAcctVal=eAcctEl?eAcctEl.value:'';
-  var e={id:id,amt:parseFloat(amt),desc:desc,ty:SBV.ety||'personal',cat:SBV.ecat||'other',date:new Date().toLocaleDateString(),created:new Date().toISOString(),pending:isPending,reconciled:false,account:eAcctVal};
+  var eNotesEl=document.getElementById('eNotes');var eNotesVal=eNotesEl?eNotesEl.value.trim():'';
+  var e={id:id,amt:parseFloat(amt),desc:desc,ty:SBV.ety||'personal',cat:SBV.ecat||'other',date:new Date().toLocaleDateString(),created:new Date().toISOString(),pending:isPending,reconciled:false,account:eAcctVal,notes:eNotesVal};
   if(pendBtn){pendBtn.classList.remove('on');pendBtn.classList.add('on');}
   fbSave('expenses',id,e);
   // Auto-update account balance: credit card goes up (more owed), cash goes down
@@ -12259,7 +12261,7 @@ function renderE(){
   var _sq=_expSearch.toLowerCase().trim();
   renderExpActiveFilters();
   var filtered=EXPENSES.slice().sort(_expSortFn).filter(function(e){
-    if(_sq){var match=(e.desc||'').toLowerCase().includes(_sq)||(e.cat||'').toLowerCase().includes(_sq)||(e.ty||'').toLowerCase().includes(_sq);if(!match)return false;}
+    if(_sq){var match=(e.desc||'').toLowerCase().includes(_sq)||(e.cat||'').toLowerCase().includes(_sq)||(e.ty||'').toLowerCase().includes(_sq)||(e.notes||'').toLowerCase().includes(_sq);if(!match)return false;}
     // Stackable dropdown filters (display only)
     if(EXP_F_ACCT&&(e.account||'')!==EXP_F_ACCT)return false;
     if(EXP_F_TYPE&&(e.ty||'personal')!==EXP_F_TYPE)return false;
@@ -12295,10 +12297,12 @@ function renderE(){
       '<div class="er-l">'+
         '<div class="er-d">'+escHtml(e.desc)+(isPend?'<span style="font-size:10px;color:#c07a2a;background:#fff8e8;padding:1px 6px;border-radius:6px;margin-left:6px;font-weight:700">⏳</span>':'')+(isExported?'<span style="font-size:10px;color:#5a8a5a;background:#e8f5e8;padding:1px 6px;border-radius:6px;margin-left:4px;font-weight:700">📤</span>':'')+'</div>'+
         '<div class="er-m">'+(e.ty==='business'?'💼':'🏠')+' '+escHtml(e.cat||'')+' • '+e.date+(_acctNameOf(e.account)?' • 🏦 '+escHtml(_acctNameOf(e.account)):'')+'</div>'+
+        (e.notes?'<div class="er-m" style="font-style:italic;color:var(--textl)">📝 '+escHtml(e.notes)+'</div>':'')+
       '</div>'+
       (!_expSelMode?'<button class="exp-pend-btn'+(isReconciled?' on':'')+'" onclick="toggleExpReconciled(\''+e.id+'\')" title="'+(isReconciled?'Cleared ✓ — tap to undo':'Pending — tap when it clears your bank')+'" style="font-size:11px;font-weight:700">'+(isReconciled?'✓':'⏳')+'</button>':'')+
       '<div class="er-a '+(e.ty==='business'?'biz':'')+'">$'+e.amt.toFixed(2)+'</div>'+
       (e.archived&&!_expSelMode?'<button onclick="unarchiveExp(\''+e.id+'\')" title="Restore to active list" style="background:none;border:none;font-size:13px;cursor:pointer;color:var(--textl);padding:4px 6px;flex-shrink:0">↩️</button>':'')+
+      (!_expSelMode?'<button onclick="editExpNote(\''+e.id+'\')" title="Add/edit note" style="background:none;border:none;font-size:13px;cursor:pointer;color:'+(e.notes?'#7a9a3a':'var(--textl)')+';padding:4px 6px;flex-shrink:0">📝</button>':'')+
       (!_expSelMode?'<button onclick="delExpense(\''+e.id+'\')" style="background:none;border:none;font-size:13px;cursor:pointer;color:var(--textl);padding:4px 6px;flex-shrink:0">🗑️</button>':'')+
     '</div>';
   }).join('');
@@ -12432,6 +12436,17 @@ function unarchiveExp(id){
   fbSave('expenses',id,e);
   localStorage.setItem('aExpenses',JSON.stringify(EXPENSES));
   showToast('↩️ Restored to active list');
+  renderE();
+}
+// Add/edit the "why" note on a transaction at any time (log-as-you-go or at statement time).
+function editExpNote(id){
+  var e=EXPENSES.find(function(x){return x.id===id;});
+  if(!e)return;
+  var v=prompt('Note for "'+(e.desc||'this transaction')+'" — what / where / why:',e.notes||'');
+  if(v===null)return;
+  e.notes=v.trim();
+  fbSave('expenses',id,e);
+  localStorage.setItem('aExpenses',JSON.stringify(EXPENSES));
   renderE();
 }
 
@@ -13383,7 +13398,7 @@ function openM(id){
     var tdmd=document.getElementById('tdMinDate');
     if(tdmd&&!tdmd.value)tdmd.value=todayStr();
   }
-  if(id==='expModal'){renderExpCatBtns();var _eacc=document.getElementById('eAccount');if(_eacc){_eacc.innerHTML='<option value="">— No account —</option>';(ACCOUNTS||[]).forEach(function(a){_eacc.innerHTML+='<option value="'+a.id+'">'+(a.isCredit?'💳 ':'💵 ')+escHtml(a.name)+'</option>';});}populateExpPayBill();}
+  if(id==='expModal'){renderExpCatBtns();var _eacc=document.getElementById('eAccount');if(_eacc){_eacc.innerHTML='<option value="">— No account —</option>';(ACCOUNTS||[]).forEach(function(a){_eacc.innerHTML+='<option value="'+a.id+'">'+(a.isCredit?'💳 ':'💵 ')+escHtml(a.name)+'</option>';});}var _enotes=document.getElementById('eNotes');if(_enotes)_enotes.value='';populateExpPayBill();}
   if(id==='incModal'){
     var incDateEl=document.getElementById('incDate');
     if(incDateEl&&!incDateEl.value)incDateEl.value=new Date().toISOString().slice(0,10);
