@@ -13184,21 +13184,25 @@ function _expBuildSections(from,to,cats,onlyUnexported){
 
   if(cats.indexOf('finance')>-1){
     var exportTs=new Date().toISOString();
-    var expRows=[['Date','Description','Category','Type','Amount','Account','Notes']];
+    // Column order matches the "Transactions" spreadsheet tab for direct paste.
+    // Amount is negative for expenses; Type is the literal "Expense"; Checked = x when Cleared.
+    // "Class" (personal/business) is kept as a trailing column so it isn't lost.
+    var expRows=[['Date','Amount','Type','Category','Account','To Account','Sales Tax','Checked','Description','Notes','Class']];
     (EXPENSES||[]).forEach(function(e){
       if(onlyUnexported){if(e.exported)return;}
       else{var d=e.date||e.created||'';if(!_expInRange(d,from,to))return;}
-      expRows.push([(e.date||e.created||''),e.desc||'',e.cat||'',e.ty||'',e.amt||0,_acctNameOf(e.account)||'',e.notes||'']);
+      var amtNum=parseFloat(e.amt)||0;
+      expRows.push([(e.date||e.created||''),(amtNum?-amtNum:0),'Expense',e.cat||'',_acctNameOf(e.account)||'','','',(e.reconciled?'x':''),e.desc||'',e.notes||'',e.ty||'']);
       e.exported=exportTs;
     });
     localStorage.setItem('aExpenses',JSON.stringify(EXPENSES));
     sections.push({title:'Expenses',rows:expRows,note:(expRows.length-1)+' entries'+(onlyUnexported?' (unexported only)':'')});
 
-    var incRows=[['Date','Description','Category','Amount','Source']];
+    var incRows=[['Date','Amount','Type','Category','Account','To Account','Sales Tax','Checked','Description','Notes','Class']];
     (INCOME||[]).forEach(function(i){
       if(onlyUnexported){if(i.exported)return;}
       else{if(!_expInRange(i.date||'',from,to))return;}
-      incRows.push([i.date||'',i.desc||'',i.cat||'',i.amt||0,i.source||'']);
+      incRows.push([i.date||'',(parseFloat(i.amt)||0),'Income',i.cat||'',i.source||'','','',(i.reconciled?'x':''),i.desc||'',i.notes||'','']);
       i.exported=exportTs;
     });
     localStorage.setItem('aIncome',JSON.stringify(INCOME));
