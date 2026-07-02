@@ -2738,6 +2738,8 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
       <button class="btn sec" style="font-size:12px;padding:5px 10px" onclick="clearCheckedGrocery()">Clear checked</button>
       <button class="btn sec" style="font-size:12px;padding:5px 10px" onclick="expGrocery()">Export</button>
     </div>
+    <!-- List cost vs Groceries budget — where meals meet money -->
+    <div id="grocBudgetStrip" style="display:none;margin-bottom:10px"></div>
     <button class="btn" style="width:100%;margin-bottom:10px;background:linear-gradient(135deg,#fdebd7,#fdf6ee);color:#b06a2c" onclick="syncMealPlanGrocery()">🍽️ Build from this week's meal plan</button>
     <div style="display:flex;gap:6px;margin-bottom:6px;flex-wrap:wrap">
       <input id="groceryAddName" type="text" placeholder="Item name" list="groceryDbSuggest" style="flex:2;min-width:100px;padding:8px 11px;border-radius:10px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px">
@@ -23800,6 +23802,39 @@ function _renderGrocListBody(elId){
 function renderGrocery(){
   renderGrocTagFilterRow();
   _renderGrocListBody('groceryListEl');
+  renderGrocBudgetStrip();
+}
+
+// The meals↔money handshake: estimate the unchecked list from known prices
+// (getBestPrice: PRICE_LOG + Food DB price entries) vs what's left in the
+// Groceries budget bucket this month. Estimate only — never stored.
+function renderGrocBudgetStrip(){
+  var el=document.getElementById('grocBudgetStrip');if(!el)return;
+  var open=(GROCERY_LIST||[]).filter(function(i){return!i.checked;});
+  if(!open.length){el.style.display='none';return;}
+  var est=0,unpriced=0;
+  open.forEach(function(i){
+    var p=(typeof getBestPrice==='function')?getBestPrice(i.name,i.dbItemId):null;
+    if(p&&p>0)est+=p;else unpriced++;
+  });
+  // Groceries bucket: mapped category first, then name match
+  var b=(BUDGET_BUCKETS||[]).find(function(x){return(x.cats||[]).indexOf('Groceries & Personal Care')>=0;})
+    ||(BUDGET_BUCKETS||[]).find(function(x){return/grocer/i.test(x.name||'');});
+  var leftHtml='';
+  var over=false;
+  if(b){
+    var left=budgetEffTarget(b)-((budgetSpentMap()[b.id])||0);
+    over=est>left;
+    leftHtml='<span style="font-size:12px;font-weight:800;color:'+(over?'#C87070':'#7C9A2D')+'">$'+left.toFixed(0)+' left in '+escHtml(b.name)+'</span>';
+  }
+  el.style.display='';
+  el.innerHTML='<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px 12px;background:'+(over?'#FBEDEF':'#F4F8E8')+';border:1px solid '+(over?'#F3C9D4':'#E5F0BE')+';border-radius:12px">'
+    +'<span style="font-size:12px;font-weight:700;color:var(--textd)">🛒 This list ≈ <b>$'+est.toFixed(0)+'</b>'
+    +(unpriced?' <span style="font-size:10px;font-weight:600;color:var(--textl)">+'+unpriced+' unpriced</span>':'')
+    +'</span>'
+    +leftHtml
+    +'</div>'
+    +(over?'<div style="font-size:10px;color:#C87070;font-weight:700;margin-top:3px;text-align:right">over budget — trim the list or cover from Buffer after shopping</div>':'');
 }
 
 function toggleGrocery(i){
