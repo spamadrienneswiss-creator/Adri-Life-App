@@ -1705,6 +1705,8 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
 
 <!-- ROUTINES -->
 <div class="view" id="v-routines">
+  <!-- The Guide: one dealt card — the next routine item, time-of-day aware -->
+  <div id="routinesGuideCard" style="margin-bottom:14px;display:none"></div>
   <!-- Interaction hint -->
   <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
     <span style="font-size:10px;background:#f5f0fd;color:#7a5a9a;border-radius:8px;padding:3px 8px;font-family:'Quicksand',sans-serif;font-weight:600">Tap = done ✅</span>
@@ -7266,6 +7268,7 @@ function showDailyRtnTab(key,btn){
 }
 
 function renderDailyRtn(key){
+  if(typeof renderRoutinesGuide==='function')renderRoutinesGuide();
   var el=document.getElementById('dailyRtnBody');if(!el)return;
   var g=RTN_GROUPS.find(function(x){return x.id===key;});
   var isActive=!g||(g.active!==false);
@@ -22266,19 +22269,92 @@ function renderTasksGuide(){
     +'<div style="display:flex;gap:8px;align-items:center">'+btns+'</div></div>';
 }
 
+// ── THE ROUTINES GUIDE: next item, time-of-day aware ─────────
+// Completes routine items in place via rtnSetComp — routines never become tasks.
+function _routinesGuideSkips(){
+  var t=new Date().toISOString().slice(0,10);
+  var s=JSON.parse(localStorage.getItem('aRoutinesGuideSkips')||'{}');
+  if(s.date!==t)s={date:t,skips:[]};
+  return s;
+}
+function routinesGuideSkip(key){
+  var s=_routinesGuideSkips();
+  if(s.skips.indexOf(key)<0)s.skips.push(key);
+  localStorage.setItem('aRoutinesGuideSkips',JSON.stringify(s));
+  renderRoutinesGuide();
+}
+function _routinesGuideCardObj(){
+  var skips=_routinesGuideSkips().skips;
+  var today=todayStr();
+  var hour=new Date().getHours();
+  // Morning leads with AM, afternoon with Midday, evening with PM
+  var pref=hour<11?['am','da','md']:(hour<17?['md','da','am']:['pm','da','md','am']);
+  var due=(RTN_GROUPS||[]).filter(function(g){return g.active!==false&&rtnIsDueToday(g);})
+    .sort(function(a,b){var pa=pref.indexOf(a.id),pb=pref.indexOf(b.id);return(pa<0?9:pa)-(pb<0?9:pb);});
+  for(var k=0;k<due.length;k++){
+    var g=due[k];
+    if(skips.indexOf('rtn-'+g.id)>=0)continue;
+    var items=RTNS[g.id]||[];var rh=RH[g.id]||{};var cs=rtnCompState(g,today);
+    var undone=[];
+    items.forEach(function(item,i){if(!rh[item]&&!rtnStateStr(cs[i]))undone.push({item:item,i:i});});
+    if(!undone.length)continue;
+    var nx=undone[0];
+    return {label:(g.icon||'🔁')+' '+escHtml(g.name),
+      title:escHtml(nx.item),
+      sub:undone.length>1?(undone.length-1)+' more after this':'last one — finishes the routine',
+      btn:'✓ Done',act:"rtnGuideDone('"+g.id+"',"+nx.i+")",
+      btn2:'Open routines',act2:"goTab('routines',null)",
+      skip:'rtn-'+g.id,skipLabel:'Skip today'};
+  }
+  return null;
+}
+function rtnGuideDone(gid,idx){
+  rtnSetComp(gid,todayStr(),idx,'done');
+  if(typeof _dailyRtnKey!=='undefined'&&typeof renderDailyRtn==='function')renderDailyRtn(_dailyRtnKey);
+  if(typeof renderOtherRtns==='function')renderOtherRtns();
+  renderRoutinesGuide();
+}
+function renderRoutinesGuide(){
+  var el=document.getElementById('routinesGuideCard');if(!el)return;
+  var card=_routinesGuideCardObj();
+  if(typeof renderHomeGuide==='function')renderHomeGuide();
+  el.style.display='';
+  if(!card){
+    el.innerHTML='<div class="card" style="margin:0;padding:14px 16px;background:var(--lime);border:none">'
+      +'<div style="font-size:10px;font-weight:800;color:#5A6B1A;text-transform:uppercase;letter-spacing:1px;margin-bottom:2px">All done</div>'
+      +'<div style="font-size:15px;font-weight:800;color:#3E4A10">✅ Routines handled for now</div>'
+      +'</div>';
+    return;
+  }
+  var accent='#2475FF';
+  var btns='<button onclick="'+card.act.replace(/"/g,'&quot;')+'" style="flex:1;padding:11px;border-radius:12px;border:none;background:'+accent+';color:#fff;font-family:\'Quicksand\',sans-serif;font-size:14px;font-weight:700;cursor:pointer">'+card.btn+'</button>';
+  if(card.btn2)btns+='<button onclick="'+card.act2.replace(/"/g,'&quot;')+'" style="flex:1;padding:11px;border-radius:12px;border:1.5px solid '+accent+';background:#fff;color:'+accent+';font-family:\'Quicksand\',sans-serif;font-size:13px;font-weight:700;cursor:pointer">'+card.btn2+'</button>';
+  btns+='<button onclick="routinesGuideSkip(\''+card.skip+'\')" style="padding:11px 12px;border-radius:12px;border:1.5px solid var(--bdr);background:#fff;color:var(--textl);font-family:\'Quicksand\',sans-serif;font-size:12px;font-weight:700;cursor:pointer">'+(card.skipLabel||'Later')+'</button>';
+  el.innerHTML='<div class="card" style="margin:0;padding:14px 16px;border-left:4px solid '+accent+'">'
+    +'<div style="font-size:10px;font-weight:800;color:'+accent+';text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">👉 '+card.label+'</div>'
+    +'<div style="font-size:16px;font-weight:800;color:var(--textd);margin-bottom:2px">'+card.title+'</div>'
+    +'<div style="font-size:12px;color:var(--textl);margin-bottom:10px">'+card.sub+'</div>'
+    +'<div style="display:flex;gap:8px;align-items:center">'+btns+'</div></div>';
+}
+
 // ── HOME "START HERE": the single next card across all decks ──
 function renderHomeGuide(){
   var el=document.getElementById('homeGuideCard');if(!el)return;
-  var m=null,f=null,t=null;
+  var m=null,f=null,t=null,r=null;
   try{m=(typeof _moneyGuideCardObj==='function')?_moneyGuideCardObj():null;}catch(e){}
   try{f=(typeof _mealsGuideCardObj==='function')?_mealsGuideCardObj():null;}catch(e){}
   try{t=(typeof _tasksGuideCardObj==='function')?_tasksGuideCardObj():null;}catch(e){}
+  try{r=(typeof _routinesGuideCardObj==='function')?_routinesGuideCardObj():null;}catch(e){}
   var pick=null,go='',ico='';
-  if(m){pick=m;go="goTab('money',null)";ico='💰';}
+  // Morning: routines lead the day; otherwise money first
+  var hour=new Date().getHours();
+  if(hour<11&&r){pick=r;go="goTab('routines',null)";ico='🔁';}
+  else if(m){pick=m;go="goTab('money',null)";ico='💰';}
   else if(f){pick=f;go="goTab('meals',null)";ico='🍽️';}
   else if(t){pick=t;go="goTab('tasks',null)";ico='📋';}
+  else if(r){pick=r;go="goTab('routines',null)";ico='🔁';}
   var pill=function(icon,clear){return '<span style="font-size:10px;font-weight:700;color:'+(clear?'#7C9A2D':'var(--textl)')+'">'+icon+' '+(clear?'clear ✓':'1 up')+'</span>';};
-  var statusRow='<div style="display:flex;gap:12px;margin-top:8px;padding-top:8px;border-top:1px solid #f0edf5">'+pill('💰',!m)+pill('🍽️',!f)+pill('📋',!t)+'</div>';
+  var statusRow='<div style="display:flex;gap:12px;margin-top:8px;padding-top:8px;border-top:1px solid #f0edf5">'+pill('💰',!m)+pill('🍽️',!f)+pill('📋',!t)+pill('🔁',!r)+'</div>';
   el.style.display='';
   if(!pick){
     el.innerHTML='<div class="card" style="margin:0;padding:13px 15px;background:var(--lime);border:none">'
@@ -27596,6 +27672,7 @@ function startApp(){
   updateEstateStrip();
   renderMealPlan();
   if(typeof renderTasksGuide==='function')renderTasksGuide();
+  if(typeof renderRoutinesGuide==='function')renderRoutinesGuide();
   if(typeof renderHomeGuide==='function')renderHomeGuide();
   var minDateEl=document.getElementById('minDate');
   if(minDateEl)minDateEl.value=new Date().toISOString().slice(0,10);
