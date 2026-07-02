@@ -1362,6 +1362,7 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
 <div class="view on" id="v-home">
   <div class="home-top-bar">
     <h2 id="homeGreet">Good morning ✨</h2>
+    <span id="streakChip" style="display:none;font-size:13px;font-weight:800;background:var(--lime);color:#3E4A10;border-radius:12px;padding:4px 10px;margin-left:8px"></span>
     <button class="home-edit-btn" id="homeResetBtn" onclick="resetHomeOrder()" style="display:none;margin-right:6px;font-size:12px">↺ Reset</button>
     <button class="home-edit-btn" id="homeEditBtn" onclick="toggleHomeEdit()">✏️ Edit</button>
   </div>
@@ -6340,6 +6341,7 @@ function initFirebase(){
       ap('aInvSections',function(v,r){if(v&&v.length)INV_SECTIONS=v;_origSetItem('aInvSections',r);});
       ap('aMC',function(v,r){if(v&&v.length)MEAL_COMBOS=v;_origSetItem('aMC',r);});
       ap('aFoodDb',function(v,r){FOOD_DB=v||[];_origSetItem('aFoodDb',r);});
+      ap('aFDB',function(v,r){if(v&&v.length)FDB=v;_origSetItem('aFDB',r);});
       ap('aIngredients',function(v,r){INGREDIENTS=v||[];_origSetItem('aIngredients',r);});
       _fbBlobPause=false;
       if(typeof renderRecipes==='function')renderRecipes();
@@ -6466,10 +6468,10 @@ var BLOB_GROUPS={
   routines:['aRS','aRS2','aRH','aRTG','aRtns'],
   planning:['aSOPs','aBrainDump','aIntentions','aMonthTodos','aTmpls'],
   spiritual:['aBibleLog','aBibleChapNotes','aPrayers','aGratLog','aSpiritBooks','aSpiritSettings','aSpiritRun'],
-  food:['aRecipes','aMealPlan','aMealMyServings','aGroceryList','aGrocTags','aGrocDepts','aGrocStoreDeptOrder','aInventory','aInvSections','aMC','aFoodDb','aIngredients','aWantToTry','aMacrosReviewed'],
+  food:['aRecipes','aMealPlan','aMealMyServings','aGroceryList','aGrocTags','aGrocDepts','aGrocStoreDeptOrder','aInventory','aInvSections','aMC','aFoodDb','aFDB','aIngredients','aWantToTry','aMacrosReviewed'],
   fitness:['aWplans','aWlog2','aMovements','aExTypes','aExDB','aExLog','aPT'],
   creative:['aStories','aSChars','aSScenes','aFaves','aMixtape','aMemories','aPlaces','aVbItems'],
-  tools:['aSparkPrompts','aSparkSaved','aDispatchJournal','aHatchChaos','aHatchTransmissions','aHatchMissions','aHatchShocks','aHatchCast'],
+  tools:['aSparkPrompts','aSparkSaved','aDispatchJournal','aHatchChaos','aHatchTransmissions','aHatchMissions','aHatchShocks','aHatchCast','aStreak'],
   learning:['aKEvents','aLifeHacks','aResearch','aResearchTopics','aMemoryItems','aFcDecks','aFcCards','aStudyNotes'],
   game:['aBadges','aHelmMiles','aSprintStats','aEmber','aMillie','aFishLevel','aFishLog'],
   work2:['aWigOrders','aWorkProjects'],
@@ -7063,6 +7065,7 @@ function rtnCompState(g,dateStr){
 }
 
 function rtnSetComp(gId,dateStr,idx,val){
+  if(val==='done'&&typeof bumpStreak==='function')bumpStreak();
   var g=RTN_GROUPS.find(function(x){return x.id===gId;});
   var freq=g?rtnFreq(g):'daily';
   if(freq==='daily'){
@@ -8119,7 +8122,7 @@ function togT(id){
   var t=findTaskDeep(id,TASKS);
   if(!t)return;
   t.done=!t.done;
-  if(t.done){t.doneDate=todayStr();t.parked=false;}else delete t.doneDate;
+  if(t.done){t.doneDate=todayStr();t.parked=false;if(typeof bumpStreak==='function')bumpStreak();}else delete t.doneDate;
   _autoCompleteTree(TASKS);
   saveTasks();
   var root=_findRootFor(id,TASKS)||t;
@@ -11872,8 +11875,9 @@ function addFL(id){
   if(!FL[k])FL[k]=[];
   FL[k].push(Object.assign({},food,{lid:Date.now().toString()}));
   localStorage.setItem('aFL',JSON.stringify(FL));
-  document.getElementById('foodSrch').value='';
-  document.getElementById('foodSugs').style.display='none';
+  if(typeof bumpStreak==='function')bumpStreak();
+  var _fs=document.getElementById('foodSrch');if(_fs)_fs.value='';
+  var _fg=document.getElementById('foodSugs');if(_fg)_fg.style.display='none';
   renderFL();updM();
 }
 function addFLFromLib(id){ addFLFromLibQty(id,1); }
@@ -11950,6 +11954,8 @@ function saveNF(){
   var f={id:'f'+Date.now(),name:name,sv:document.getElementById('nfS').value||'1 serving',cal:parseFloat(document.getElementById('nfC').value)||0,pro:parseFloat(document.getElementById('nfP').value)||0,fib:parseFloat(document.getElementById('nfF').value)||0,crb:parseFloat(document.getElementById('nfR').value)||0,fat:parseFloat(document.getElementById('nfA').value)||0};
   FDB.push(f);
   localStorage.setItem('aFDB',JSON.stringify(FDB));
+  var _fa=JSON.parse(localStorage.getItem('aFoodAddsDay')||'{}');var _ft=new Date().toISOString().slice(0,10);
+  localStorage.setItem('aFoodAddsDay',JSON.stringify({date:_ft,n:(_fa.date===_ft?(_fa.n||0):0)+1}));
   closeM('nfModal');addFL(f.id);
 }
 
@@ -12012,6 +12018,7 @@ function saveExp(){
   // The expenses snapshot listener rebuilds EXPENSES from the server when connected — no dupes.
   EXPENSES.unshift(e);
   localStorage.setItem('aExpenses',JSON.stringify(EXPENSES));
+  if(typeof bumpStreak==='function')bumpStreak();
   fbSave('expenses',id,e);
   // Auto-update account balance: credit card goes up (more owed), cash goes down
   if(eAcctVal){
@@ -22076,6 +22083,7 @@ function logPlannedDinner(){
     cal:m?Math.round((m.cal||0)*sv):0,pro:m?Math.round((m.pro||0)*sv*10)/10:0,carb:m?Math.round((m.carb||0)*sv*10)/10:0,fat:m?Math.round((m.fat||0)*sv*10)/10:0,
     recipeId:rec?rec.id:undefined});
   localStorage.setItem('aMealLogItems',JSON.stringify(MEAL_LOG_ITEMS));
+  if(typeof bumpStreak==='function')bumpStreak();
   if(typeof renderMealLog==='function')renderMealLog();
   if(typeof renderTodayStatsBars==='function')renderTodayStatsBars();
   mealsGuideSkip('tonight');
@@ -22137,6 +22145,19 @@ function _mealsGuideCardObj(){
       btn2:'📓 Log other food',
       act2:"var f=document.getElementById('foodSrch');if(f){f.focus();f.scrollIntoView({block:'center'});}",
       skip:'tonight',skipLabel:'Got it ✓'};
+  }
+  // 2.5) Build the food library, two a day, while it's small — her data-entry
+  // project as a dealt card instead of a chore.
+  if(!card&&skips.indexOf('fooddb')<0&&(FDB||[]).length<40){
+    var fa=JSON.parse(localStorage.getItem('aFoodAddsDay')||'{}');
+    var addsToday=(fa.date===new Date().toISOString().slice(0,10))?(fa.n||0):0;
+    if(addsToday<2){
+      card={label:'Build your food list',
+        title:addsToday===1?'One more food — today\u2019s done':'Add 2 foods you eat often',
+        sub:(FDB||[]).length+' foods so far \u00b7 a minute a day makes logging one-tap',
+        btn:'\ud83c\udf4e Add a food',act:"openM('nfModal')",
+        skip:'fooddb',skipLabel:'Not today'};
+    }
   }
   // 3) The week ahead is thin (4+ of the next 7 dinners empty)
   if(!card&&skips.indexOf('week')<0){
@@ -22355,51 +22376,52 @@ function renderRoutinesGuide(){
 }
 
 // ── HOME "START HERE": the single next card across all decks ──
+// ── STREAK: the keep-coming-back loop. Any log bumps it, once a day. ──
+function bumpStreak(){
+  var t=new Date().toISOString().slice(0,10);
+  var s=JSON.parse(localStorage.getItem('aStreak')||'{}');
+  if(s.last===t)return;
+  var y=new Date(Date.now()-86400000).toISOString().slice(0,10);
+  s.n=(s.last===y)?(s.n||0)+1:1;
+  s.last=t;
+  localStorage.setItem('aStreak',JSON.stringify(s));
+  renderStreakChip();
+  if(typeof showToast==='function'&&s.n>1)showToast('🔥 '+s.n+'-day streak!');
+}
+function renderStreakChip(){
+  var el=document.getElementById('streakChip');if(!el)return;
+  var s=JSON.parse(localStorage.getItem('aStreak')||'{}');
+  var t=new Date().toISOString().slice(0,10);
+  var y=new Date(Date.now()-86400000).toISOString().slice(0,10);
+  var live=(s.last===t||s.last===y)&&(s.n||0)>0;
+  el.style.display=live?'':'none';
+  if(live)el.textContent='🔥 '+s.n;
+}
+// Home strip covers the three things that matter daily: money, food, tasks.
+// Routines live in their own tab, for when she wants them — they never push.
 function renderHomeGuide(){
   var el=document.getElementById('homeGuideCard');if(!el)return;
-  var m=null,f=null,t=null,r=null;
+  renderStreakChip();
+  var m=null,f=null,t=null;
   try{m=(typeof _moneyGuideCardObj==='function')?_moneyGuideCardObj():null;}catch(e){}
   try{f=(typeof _mealsGuideCardObj==='function')?_mealsGuideCardObj():null;}catch(e){}
   try{t=(typeof _tasksGuideCardObj==='function')?_tasksGuideCardObj():null;}catch(e){}
-  try{r=(typeof _routinesGuideCardObj==='function')?_routinesGuideCardObj():null;}catch(e){}
   var pick=null,go='',ico='';
-  // Morning: routines lead the day; otherwise money first
-  var hour=new Date().getHours();
-  if(hour<11&&r){pick=r;go="goTab('routines',null)";ico='🔁';}
-  else if(m){pick=m;go="goTab('money',null)";ico='💰';}
+  if(m){pick=m;go="goTab('money',null)";ico='💰';}
   else if(f){pick=f;go="goTab('meals',null)";ico='🍽️';}
   else if(t){pick=t;go="goTab('tasks',null)";ico='📋';}
-  else if(r){pick=r;go="goTab('routines',null)";ico='🔁';}
-  var pill=function(icon,clear){return '<span style="font-size:10px;font-weight:700;color:'+(clear?'#7C9A2D':'var(--textl)')+'">'+icon+' '+(clear?'clear ✓':'1 up')+'</span>';};
-  var statusRow='<div style="display:flex;gap:12px;margin-top:8px;padding-top:8px;border-top:1px solid #f0edf5">'+pill('💰',!m)+pill('🍽️',!f)+pill('📋',!t)+pill('🔁',!r)+'</div>';
+  var pill=function(icon,clear){return '<span style="font-size:10px;font-weight:700;color:'+(clear?'#7C9A2D':'var(--textl)')+'">'+icon+' '+(clear?'✓':'1')+'</span>';};
+  var statusRow='<div style="display:flex;gap:12px;margin-top:8px;padding-top:8px;border-top:1px solid #f0edf5">'+pill('💰',!m)+pill('🍽️',!f)+pill('📋',!t)+'</div>';
   el.style.display='';
   if(!pick){
     el.innerHTML='<div class="card" style="margin:0;padding:13px 15px;background:var(--lime);border:none">'
-      +'<div style="font-size:14px;font-weight:800;color:#3E4A10">✅ All decks clear — nothing waiting on you</div>'
+      +'<div style="font-size:14px;font-weight:800;color:#3E4A10">✅ All clear</div>'
       +statusRow.replace('#f0edf5','rgba(90,107,26,.2)')+'</div>';
     return;
   }
   var accent=pick.setup?'#B189B4':(pick.urgent?'#F06677':'#2475FF');
-  // Routines don't point — the items ARE the buttons, right on Home.
-  if(ico==='🔁'){
-    var ng=(typeof _routinesNextGroup==='function')?_routinesNextGroup():null;
-    if(ng){
-      var btns=ng.undone.map(function(o){
-        return '<button onclick="homeRtnDone(\''+ng.g.id+'\','+o.i+')" style="padding:11px 14px;border-radius:13px;border:1.5px solid var(--bdr);background:#fff;font-family:\'Quicksand\',sans-serif;font-size:13px;font-weight:700;color:var(--textd);cursor:pointer;box-shadow:var(--sh2)">'+escHtml(o.item)+'</button>';
-      }).join('');
-      el.innerHTML='<div class="card" style="margin:0;padding:13px 15px;border-left:4px solid '+accent+'">'
-        +'<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px">'
-        +'<span style="font-size:10px;font-weight:800;color:'+accent+';text-transform:uppercase;letter-spacing:1px">👉 '+(ng.g.icon||'🔁')+' '+escHtml(ng.g.name)+' · '+ng.doneCt+'/'+ng.totalCt+'</span>'
-        +'<span onclick="'+go+'" style="font-size:11px;font-weight:700;color:var(--textl);cursor:pointer">Open ›</span>'
-        +'</div>'
-        +'<div style="display:flex;flex-wrap:wrap;gap:7px">'+btns+'</div>'
-        +'<div style="font-size:10px;color:var(--textl);margin-top:6px">tap what you\'ve done — it checks off right here</div>'
-        +statusRow+'</div>';
-      return;
-    }
-  }
   el.innerHTML='<div class="card" onclick="'+go+'" style="margin:0;padding:13px 15px;border-left:4px solid '+accent+';cursor:pointer">'
-    +'<div style="font-size:10px;font-weight:800;color:'+accent+';text-transform:uppercase;letter-spacing:1px;margin-bottom:3px">👉 Start here · '+ico+' '+pick.label+'</div>'
+    +'<div style="font-size:10px;font-weight:800;color:'+accent+';text-transform:uppercase;letter-spacing:1px;margin-bottom:3px">👉 '+ico+' '+pick.label+'</div>'
     +'<div style="display:flex;justify-content:space-between;align-items:center;gap:8px">'
     +'<div style="font-size:15px;font-weight:800;color:var(--textd)">'+pick.title+'</div>'
     +'<span style="flex-shrink:0;font-size:12px;font-weight:700;color:'+accent+'">Go ›</span>'
