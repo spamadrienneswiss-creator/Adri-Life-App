@@ -1361,6 +1361,8 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     <button class="home-edit-btn" id="homeResetBtn" onclick="resetHomeOrder()" style="display:none;margin-right:6px;font-size:12px">↺ Reset</button>
     <button class="home-edit-btn" id="homeEditBtn" onclick="toggleHomeEdit()">✏️ Edit</button>
   </div>
+  <!-- Start here: the single next card across Money / Meals / Tasks -->
+  <div id="homeGuideCard" style="margin-bottom:10px;display:none"></div>
   <div style="margin-bottom:10px">
     <button onclick="goTab('appindex',null)" style="width:100%;padding:10px 14px;border-radius:14px;border:1.5px solid rgba(143,170,139,.4);background:#fff;font-family:'Quicksand',sans-serif;font-size:13px;font-weight:700;color:var(--sage);cursor:pointer;display:flex;align-items:center;gap:8px;box-shadow:var(--sh2)"><span>🗂️</span><span>App Index — Navigate All Sections</span><span style="margin-left:auto;font-size:11px;color:var(--textl)">→</span></button>
   </div>
@@ -1644,6 +1646,8 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
 
 <!-- TASKS -->
 <div class="view" id="v-tasks">
+  <!-- The Guide: one dealt card — always the next task -->
+  <div id="tasksGuideCard" style="margin-bottom:14px;display:none"></div>
   <!-- Tasks -->
   <div class="card">
     <div class="helm-sec-hdr" onclick="togHelmSec('hs-tasklist')">
@@ -7975,6 +7979,7 @@ function renderCatFilterChips(){
 }
 
 function renderT(){
+  if(typeof renderTasksGuide==='function')renderTasksGuide();
   var list=document.getElementById('taskList');if(!list)return;
   var _sel=document.getElementById('taskSortSel');if(_sel&&_sel.value!==TASK_SORT)_sel.value=TASK_SORT;
   renderCatFilterChips();
@@ -12703,8 +12708,9 @@ function payBillNow(billId){
   var sel=document.getElementById('ePayBill');
   if(sel){sel.value=billId;onPayBillSelect();}
 }
-function renderMoneyGuide(){
-  var el=document.getElementById('moneyGuideCard');if(!el)return;
+// Rule engine only — returns the card the Money guide would deal (or null).
+// Peekable from the Home "start here" strip.
+function _moneyGuideCardObj(){
   var skips=_guideSkips().skips;
   var today=new Date();
   var todayKey=today.toISOString().slice(0,10);
@@ -12774,6 +12780,12 @@ function renderMoneyGuide(){
         skip:'recon'};
     }
   }
+  return card;
+}
+function renderMoneyGuide(){
+  var el=document.getElementById('moneyGuideCard');if(!el)return;
+  var card=_moneyGuideCardObj();
+  if(typeof renderHomeGuide==='function')renderHomeGuide();
 
   el.style.display='';
   if(!card){
@@ -22065,8 +22077,8 @@ function _macroStripHtml(){
     +'<div style="font-size:9px;color:var(--textl);text-align:right;margin-top:2px">tap to change targets</div>'
     +'</div>';
 }
-function renderMealsGuide(){
-  var el=document.getElementById('mealsGuideCard');if(!el)return;
+// Rule engine only — returns the card the Meals guide would deal (or null).
+function _mealsGuideCardObj(){
   var skips=_mealsGuideSkips().skips;
   var today=todayStr();
   var dayData=MEAL_PLAN[today]||{};
@@ -22121,6 +22133,12 @@ function renderMealsGuide(){
         skip:'week'};
     }
   }
+  return card;
+}
+function renderMealsGuide(){
+  var el=document.getElementById('mealsGuideCard');if(!el)return;
+  var card=_mealsGuideCardObj();
+  if(typeof renderHomeGuide==='function')renderHomeGuide();
 
   el.style.display='';
   if(!card){
@@ -22144,6 +22162,116 @@ function renderMealsGuide(){
     +'<div style="display:flex;gap:8px;align-items:center">'+btns+'</div>'
     +_macroStripHtml()
     +'</div>';
+}
+
+// ── THE TASKS GUIDE: deal the next task ──────────────────────
+function _tasksGuideSkips(){
+  var t=new Date().toISOString().slice(0,10);
+  var s=JSON.parse(localStorage.getItem('aTasksGuideSkips')||'{}');
+  if(s.date!==t)s={date:t,skips:[]};
+  return s;
+}
+function tasksGuideSkip(key){
+  var s=_tasksGuideSkips();
+  if(s.skips.indexOf(key)<0)s.skips.push(key);
+  localStorage.setItem('aTasksGuideSkips',JSON.stringify(s));
+  renderTasksGuide();
+}
+var _TASK_URG_ORDER={'urgent-important':0,'important-not-urgent':1,'urgent-not-important':2,'not-urgent':3};
+function _tasksGuideCardObj(){
+  var skips=_tasksGuideSkips().skips;
+  var today=new Date().toISOString().slice(0,10);
+  var open=(TASKS||[]).filter(function(t){return t&&!t.done&&!t.parked;});
+  var card=null;
+  // 1) Overdue
+  if(skips.indexOf('overdue')<0){
+    var od=open.filter(function(t){return t.due&&t.due<today;}).sort(function(a,b){return(a.due||'').localeCompare(b.due||'');});
+    if(od.length){
+      card={label:'Overdue',urgent:true,
+        title:escHtml(od[0].title||'Untitled'),
+        sub:'was due '+od[0].due+(od.length>1?' · '+(od.length-1)+' more overdue':''),
+        btn:'✓ Done',act:"togT('"+od[0].id+"')",
+        btn2:'Open tasks list',act2:"var e=document.getElementById('hs-tasklist');if(e)e.scrollIntoView({block:'start'})",
+        skip:'overdue'};
+    }
+  }
+  // 2) Due today
+  if(!card&&skips.indexOf('today')<0){
+    var dt=open.filter(function(t){return t.due===today;}).sort(function(a,b){return(_TASK_URG_ORDER[a.urgency]||9)-(_TASK_URG_ORDER[b.urgency]||9);});
+    if(dt.length){
+      card={label:'Due today',
+        title:escHtml(dt[0].title||'Untitled'),
+        sub:dt.length>1?(dt.length-1)+' more due today':'the only one due today',
+        btn:'✓ Done',act:"togT('"+dt[0].id+"')",
+        skip:'today'};
+    }
+  }
+  // 3) Next up by priority
+  if(!card&&skips.indexOf('next')<0&&open.length){
+    var nx=open.slice().sort(function(a,b){
+      var u=(_TASK_URG_ORDER[a.urgency]!==undefined?_TASK_URG_ORDER[a.urgency]:9)-(_TASK_URG_ORDER[b.urgency]!==undefined?_TASK_URG_ORDER[b.urgency]:9);
+      if(u)return u;
+      return(a.due||'9999').localeCompare(b.due||'9999');
+    })[0];
+    card={label:'Next up',
+      title:escHtml(nx.title||'Untitled'),
+      sub:(nx.urgency==='urgent-important'?'🔥 urgent + important':nx.urgency==='important-not-urgent'?'⭐ important':'top of the pile')+(nx.due?' · due '+nx.due:''),
+      btn:'✓ Done',act:"togT('"+nx.id+"')",
+      skip:'next',skipLabel:'Not now'};
+  }
+  return card;
+}
+function renderTasksGuide(){
+  var el=document.getElementById('tasksGuideCard');if(!el)return;
+  var card=_tasksGuideCardObj();
+  if(typeof renderHomeGuide==='function')renderHomeGuide();
+  el.style.display='';
+  if(!card){
+    el.innerHTML='<div class="card" style="margin:0;padding:14px 16px;background:var(--lime);border:none">'
+      +'<div style="font-size:10px;font-weight:800;color:#5A6B1A;text-transform:uppercase;letter-spacing:1px;margin-bottom:2px">All clear</div>'
+      +'<div style="font-size:15px;font-weight:800;color:#3E4A10">✅ Nothing waiting on you</div>'
+      +'</div>';
+    return;
+  }
+  var accent=card.urgent?'#F06677':'#2475FF';
+  var btns='<button onclick="'+card.act.replace(/"/g,'&quot;')+'" style="flex:1;padding:11px;border-radius:12px;border:none;background:'+accent+';color:#fff;font-family:\'Quicksand\',sans-serif;font-size:14px;font-weight:700;cursor:pointer">'+card.btn+'</button>';
+  if(card.btn2)btns+='<button onclick="'+card.act2.replace(/"/g,'&quot;')+'" style="flex:1;padding:11px;border-radius:12px;border:1.5px solid '+accent+';background:#fff;color:'+accent+';font-family:\'Quicksand\',sans-serif;font-size:13px;font-weight:700;cursor:pointer">'+card.btn2+'</button>';
+  btns+='<button onclick="tasksGuideSkip(\''+card.skip+'\')" style="padding:11px 12px;border-radius:12px;border:1.5px solid var(--bdr);background:#fff;color:var(--textl);font-family:\'Quicksand\',sans-serif;font-size:12px;font-weight:700;cursor:pointer">'+(card.skipLabel||'Later')+'</button>';
+  el.innerHTML='<div class="card" style="margin:0;padding:14px 16px;border-left:4px solid '+accent+'">'
+    +'<div style="font-size:10px;font-weight:800;color:'+accent+';text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">👉 '+card.label+'</div>'
+    +'<div style="font-size:16px;font-weight:800;color:var(--textd);margin-bottom:2px">'+card.title+'</div>'
+    +'<div style="font-size:12px;color:var(--textl);margin-bottom:10px">'+card.sub+'</div>'
+    +'<div style="display:flex;gap:8px;align-items:center">'+btns+'</div></div>';
+}
+
+// ── HOME "START HERE": the single next card across all decks ──
+function renderHomeGuide(){
+  var el=document.getElementById('homeGuideCard');if(!el)return;
+  var m=null,f=null,t=null;
+  try{m=(typeof _moneyGuideCardObj==='function')?_moneyGuideCardObj():null;}catch(e){}
+  try{f=(typeof _mealsGuideCardObj==='function')?_mealsGuideCardObj():null;}catch(e){}
+  try{t=(typeof _tasksGuideCardObj==='function')?_tasksGuideCardObj():null;}catch(e){}
+  var pick=null,go='',ico='';
+  if(m){pick=m;go="goTab('money',null)";ico='💰';}
+  else if(f){pick=f;go="goTab('meals',null)";ico='🍽️';}
+  else if(t){pick=t;go="goTab('tasks',null)";ico='📋';}
+  var pill=function(icon,clear){return '<span style="font-size:10px;font-weight:700;color:'+(clear?'#7C9A2D':'var(--textl)')+'">'+icon+' '+(clear?'clear ✓':'1 up')+'</span>';};
+  var statusRow='<div style="display:flex;gap:12px;margin-top:8px;padding-top:8px;border-top:1px solid #f0edf5">'+pill('💰',!m)+pill('🍽️',!f)+pill('📋',!t)+'</div>';
+  el.style.display='';
+  if(!pick){
+    el.innerHTML='<div class="card" style="margin:0;padding:13px 15px;background:var(--lime);border:none">'
+      +'<div style="font-size:14px;font-weight:800;color:#3E4A10">✅ All decks clear — nothing waiting on you</div>'
+      +statusRow.replace('#f0edf5','rgba(90,107,26,.2)')+'</div>';
+    return;
+  }
+  var accent=pick.setup?'#B189B4':(pick.urgent?'#F06677':'#2475FF');
+  el.innerHTML='<div class="card" onclick="'+go+'" style="margin:0;padding:13px 15px;border-left:4px solid '+accent+';cursor:pointer">'
+    +'<div style="font-size:10px;font-weight:800;color:'+accent+';text-transform:uppercase;letter-spacing:1px;margin-bottom:3px">👉 Start here · '+ico+' '+pick.label+'</div>'
+    +'<div style="display:flex;justify-content:space-between;align-items:center;gap:8px">'
+    +'<div style="font-size:15px;font-weight:800;color:var(--textd)">'+pick.title+'</div>'
+    +'<span style="flex-shrink:0;font-size:12px;font-weight:700;color:'+accent+'">Go ›</span>'
+    +'</div>'
+    +statusRow+'</div>';
 }
 
 function renderMealPlan(){
@@ -27412,6 +27540,8 @@ function startApp(){
   updMoneyBadge();
   updateEstateStrip();
   renderMealPlan();
+  if(typeof renderTasksGuide==='function')renderTasksGuide();
+  if(typeof renderHomeGuide==='function')renderHomeGuide();
   var minDateEl=document.getElementById('minDate');
   if(minDateEl)minDateEl.value=new Date().toISOString().slice(0,10);
   // One-time migration: devices still on the old default banner move to Summer Pop.
