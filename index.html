@@ -63,8 +63,12 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
 .rc{background:white;border-radius:var(--r);padding:14px;margin-bottom:12px;box-shadow:var(--sh);border-left:4px solid var(--sage)}
 .rc.pm{border-left-color:var(--lav)}.rc.day{border-left-color:var(--peach)}
 .rt{font-size:14px;font-weight:700;color:var(--text);margin-bottom:10px}
-.ri{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid #f5f0eb;cursor:pointer}
-.ri:last-child{border-bottom:none}
+.ri{display:flex;align-items:center;gap:11px;padding:13px 14px;border:1.5px solid var(--bdr);border-radius:14px;margin-bottom:8px;cursor:pointer;background:#fff;box-shadow:var(--sh2);transition:background .15s,border-color .15s,transform .1s}
+.ri:active{transform:scale(.98)}
+.ri:last-child{margin-bottom:0}
+.ri .rlb{font-size:15px;font-weight:700}
+.ri.done{background:var(--lime);border-color:#DBE9A8}
+.ri.skip{background:#FFF6E4;border-color:#F0DCA6}
 .rchk{width:22px;height:22px;border-radius:50%;border:2px solid #ddd;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:11px;transition:all .2s}
 .ri.done .rchk{background:var(--sage);border-color:var(--sage);color:white}
 .ri.done .rlb{text-decoration:line-through;color:var(--textl)}
@@ -1705,14 +1709,6 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
 
 <!-- ROUTINES -->
 <div class="view" id="v-routines">
-  <!-- The Guide: one dealt card — the next routine item, time-of-day aware -->
-  <div id="routinesGuideCard" style="margin-bottom:14px;display:none"></div>
-  <!-- Interaction hint -->
-  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
-    <span style="font-size:10px;background:#f5f0fd;color:#7a5a9a;border-radius:8px;padding:3px 8px;font-family:'Quicksand',sans-serif;font-weight:600">Tap = done ✅</span>
-    <span style="font-size:10px;background:#f0f8e8;color:#5a7a56;border-radius:8px;padding:3px 8px;font-family:'Quicksand',sans-serif;font-weight:600">Long-press / right-click = menu ⋯</span>
-    <span style="font-size:10px;background:#fff8e8;color:#8a6030;border-radius:8px;padding:3px 8px;font-family:'Quicksand',sans-serif;font-weight:600">🔵 Habits = daily · 🟣 Blocks = scheduled</span>
-  </div>
   <!-- Section tabs -->
   <div class="pill-nav" style="margin-bottom:14px">
     <button class="pn-btn on" id="rtnSecBtn-daily" onclick="showRtnSection('daily',this)">🔵 Daily Habits</button>
@@ -22283,7 +22279,8 @@ function routinesGuideSkip(key){
   localStorage.setItem('aRoutinesGuideSkips',JSON.stringify(s));
   renderRoutinesGuide();
 }
-function _routinesGuideCardObj(){
+// The routine group the deck would deal right now, with ALL its remaining items.
+function _routinesNextGroup(){
   var skips=_routinesGuideSkips().skips;
   var today=todayStr();
   var hour=new Date().getHours();
@@ -22298,15 +22295,27 @@ function _routinesGuideCardObj(){
     var undone=[];
     items.forEach(function(item,i){if(!rh[item]&&!rtnStateStr(cs[i]))undone.push({item:item,i:i});});
     if(!undone.length)continue;
-    var nx=undone[0];
-    return {label:(g.icon||'🔁')+' '+escHtml(g.name),
-      title:escHtml(nx.item),
-      sub:undone.length>1?(undone.length-1)+' more after this':'last one — finishes the routine',
-      btn:'✓ Done',act:"rtnGuideDone('"+g.id+"',"+nx.i+")",
-      btn2:'Open routines',act2:"goTab('routines',null)",
-      skip:'rtn-'+g.id,skipLabel:'Skip today'};
+    var doneCt=items.filter(function(item,i){return!rh[item]&&rtnStateStr(cs[i]);}).length;
+    return {g:g,undone:undone,doneCt:doneCt,totalCt:doneCt+undone.length};
   }
   return null;
+}
+function _routinesGuideCardObj(){
+  var ng=_routinesNextGroup();
+  if(!ng)return null;
+  var g=ng.g,nx=ng.undone[0];
+  return {label:(g.icon||'🔁')+' '+escHtml(g.name),
+    title:escHtml(nx.item),
+    sub:ng.undone.length>1?(ng.undone.length-1)+' more after this':'last one — finishes the routine',
+    btn:'✓ Done',act:"rtnGuideDone('"+g.id+"',"+nx.i+")",
+    btn2:'Open routines',act2:"goTab('routines',null)",
+    skip:'rtn-'+g.id,skipLabel:'Skip today'};
+}
+// Complete a routine item straight from the Home buttons.
+function homeRtnDone(gid,idx){
+  rtnSetComp(gid,todayStr(),idx,'done');
+  if(typeof _dailyRtnKey!=='undefined'&&typeof renderDailyRtn==='function')renderDailyRtn(_dailyRtnKey);
+  if(typeof renderHomeGuide==='function')renderHomeGuide();
 }
 function rtnGuideDone(gid,idx){
   rtnSetComp(gid,todayStr(),idx,'done');
@@ -22315,9 +22324,9 @@ function rtnGuideDone(gid,idx){
   renderRoutinesGuide();
 }
 function renderRoutinesGuide(){
+  if(typeof renderHomeGuide==='function')renderHomeGuide();
   var el=document.getElementById('routinesGuideCard');if(!el)return;
   var card=_routinesGuideCardObj();
-  if(typeof renderHomeGuide==='function')renderHomeGuide();
   el.style.display='';
   if(!card){
     el.innerHTML='<div class="card" style="margin:0;padding:14px 16px;background:var(--lime);border:none">'
@@ -22363,6 +22372,24 @@ function renderHomeGuide(){
     return;
   }
   var accent=pick.setup?'#B189B4':(pick.urgent?'#F06677':'#2475FF');
+  // Routines don't point — the items ARE the buttons, right on Home.
+  if(ico==='🔁'){
+    var ng=(typeof _routinesNextGroup==='function')?_routinesNextGroup():null;
+    if(ng){
+      var btns=ng.undone.map(function(o){
+        return '<button onclick="homeRtnDone(\''+ng.g.id+'\','+o.i+')" style="padding:11px 14px;border-radius:13px;border:1.5px solid var(--bdr);background:#fff;font-family:\'Quicksand\',sans-serif;font-size:13px;font-weight:700;color:var(--textd);cursor:pointer;box-shadow:var(--sh2)">'+escHtml(o.item)+'</button>';
+      }).join('');
+      el.innerHTML='<div class="card" style="margin:0;padding:13px 15px;border-left:4px solid '+accent+'">'
+        +'<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px">'
+        +'<span style="font-size:10px;font-weight:800;color:'+accent+';text-transform:uppercase;letter-spacing:1px">👉 '+(ng.g.icon||'🔁')+' '+escHtml(ng.g.name)+' · '+ng.doneCt+'/'+ng.totalCt+'</span>'
+        +'<span onclick="'+go+'" style="font-size:11px;font-weight:700;color:var(--textl);cursor:pointer">Open ›</span>'
+        +'</div>'
+        +'<div style="display:flex;flex-wrap:wrap;gap:7px">'+btns+'</div>'
+        +'<div style="font-size:10px;color:var(--textl);margin-top:6px">tap what you\'ve done — it checks off right here</div>'
+        +statusRow+'</div>';
+      return;
+    }
+  }
   el.innerHTML='<div class="card" onclick="'+go+'" style="margin:0;padding:13px 15px;border-left:4px solid '+accent+';cursor:pointer">'
     +'<div style="font-size:10px;font-weight:800;color:'+accent+';text-transform:uppercase;letter-spacing:1px;margin-bottom:3px">👉 Start here · '+ico+' '+pick.label+'</div>'
     +'<div style="display:flex;justify-content:space-between;align-items:center;gap:8px">'
