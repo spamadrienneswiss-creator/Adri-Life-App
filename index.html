@@ -1362,7 +1362,6 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
 <div class="view on" id="v-home">
   <div class="home-top-bar">
     <h2 id="homeGreet">Good morning ✨</h2>
-    <span id="streakChip" style="display:none;font-size:13px;font-weight:800;background:var(--lime);color:#3E4A10;border-radius:12px;padding:4px 10px;margin-left:8px"></span>
     <button class="home-edit-btn" id="homeResetBtn" onclick="resetHomeOrder()" style="display:none;margin-right:6px;font-size:12px">↺ Reset</button>
     <button class="home-edit-btn" id="homeEditBtn" onclick="toggleHomeEdit()">✏️ Edit</button>
   </div>
@@ -12656,34 +12655,34 @@ function guideSkip(key){
 // Verifies the data the money math runs on. Answering a card writes the
 // flag (synced via aAccounts / blob), so each question is asked once ever.
 function _moneySetupCard(){
-  // a) Active credit cards never sorted into "counts now" vs "later problem"
+  // a) Active credit cards never sorted into "counts now" vs "set aside for later"
   var un=ACCOUNTS.find(function(a){return a.isCredit&&!a.excludeFromNet&&!a.netReviewed&&(parseFloat(a.amount)||0)>0;});
   if(un){
-    return {label:'Setup — one time',setup:true,
-      title:'Is “'+escHtml(un.name)+'” a later problem?',
-      sub:'0% promo / pay-later cards don’t count in “Where I stand”. Balance: $'+(parseFloat(un.amount)||0).toFixed(0),
-      btn:'🅿️ Later problem',act:"acctSetupAnswer('"+un.id+"','later')",
-      btn2:'💳 Counts now',act2:"acctSetupAnswer('"+un.id+"','now')",
+    return {label:'One-time question',setup:true,
+      title:'You owe $'+(parseFloat(un.amount)||0).toFixed(0)+' on “'+escHtml(un.name)+'”. Count it against your money now?',
+      sub:'Count it now = you’re actively paying this card down, so it lowers your numbers. Set aside = it’s on a 0% promo / you’ll deal with it later, so it’s tracked but doesn’t drag your numbers down.',
+      btn:'💳 Count it now',act:"acctSetupAnswer('"+un.id+"','now')",
+      btn2:'🅿️ Set aside for later',act2:"acctSetupAnswer('"+un.id+"','later')",
       skip:'setup'};
   }
   // b) Non-primary cash accounts never marked count / don't-count
   var uc=ACCOUNTS.find(function(a){return !a.isCredit&&!a.isPrimary&&a.spendable===undefined;});
   if(uc){
-    return {label:'Setup — one time',setup:true,
-      title:'Count “'+escHtml(uc.name)+'” as spendable?',
-      sub:'Balance $'+(parseFloat(uc.amount)||0).toFixed(0)+' — only counted accounts feed “Money we have”.',
-      btn:'✅ Counts',act:"acctSetupSpendable('"+uc.id+"',true)",
-      btn2:'🚫 Don’t count',act2:"acctSetupSpendable('"+uc.id+"',false)",
+    return {label:'One-time question',setup:true,
+      title:'Do you pay for things from “'+escHtml(uc.name)+'”? (has $'+(parseFloat(uc.amount)||0).toFixed(0)+')',
+      sub:'Say yes only for accounts you actually spend from day to day. Those add up to “Money we have”. Savings, business, and other people’s money stay out.',
+      btn:'✅ Yes, I spend from it',act:"acctSetupSpendable('"+uc.id+"',true)",
+      btn2:'🚫 No, leave it out',act2:"acctSetupSpendable('"+uc.id+"',false)",
       skip:'setup'};
   }
   // c) Bills sanity check against the sheet
   if(BILLS.length&&localStorage.getItem('aBillsReviewed')!=='1'){
     var tot=BILLS.reduce(function(s,b){return s+(parseFloat(getBillMonthAmt(b.id))||0);},0);
-    return {label:'Setup — one time',setup:true,
-      title:'Are all your bills in? ('+BILLS.length+' · ~$'+tot.toFixed(0)+'/mo)',
-      sub:'“Set aside” and “Left to spend” only subtract bills that exist here — check against your sheet.',
-      btn:'✓ All there',act:"billsConfirmReviewed()",
-      btn2:'➕ Add a bill',act2:"openAddBill()",
+    return {label:'One-time question',setup:true,
+      title:'The app knows '+BILLS.length+' bills (~$'+tot.toFixed(0)+'/month). Is that every bill you pay?',
+      sub:'The app can only set money aside for bills it knows about. If one is missing, “Left to spend” will look bigger than it really is.',
+      btn:'✓ That’s all of them',act:"billsConfirmReviewed()",
+      btn2:'➕ Add a missing bill',act2:"openAddBill()",
       skip:'setup'};
   }
   return null;
@@ -12695,7 +12694,7 @@ function acctSetupAnswer(id,ans){
   localStorage.setItem('aAccounts',JSON.stringify(ACCOUNTS));
   renderBudget();
   if(typeof renderAccounts==='function')renderAccounts();
-  if(typeof showToast==='function')showToast(ans==='later'?'🅿️ Moved to later problems':'💳 Counted in Where I stand');
+  if(typeof showToast==='function')showToast(ans==='later'?'🅿️ Set aside \u2014 tracked, but not counted against you':'💳 Counted \u2014 it now lowers \u201cWhere I stand\u201d');
 }
 function acctSetupSpendable(id,yes){
   var a=ACCOUNTS.find(function(x){return x.id===id;});if(!a)return;
@@ -12703,7 +12702,7 @@ function acctSetupSpendable(id,yes){
   localStorage.setItem('aAccounts',JSON.stringify(ACCOUNTS));
   renderBudget();
   if(typeof renderAccounts==='function')renderAccounts();
-  if(typeof showToast==='function')showToast(yes?'✅ Counted as spendable':'🚫 Left out of spendable money');
+  if(typeof showToast==='function')showToast(yes?'✅ Counted \u2014 it adds to \u201cMoney we have\u201d':'🚫 Left out of \u201cMoney we have\u201d');
 }
 function billsConfirmReviewed(){
   localStorage.setItem('aBillsReviewed','1');
@@ -12739,7 +12738,7 @@ function _moneyGuideCardObj(){
       var first=stale[0];
       card={label:'Start here',
         title:'Check your balance'+(stale.length>1?'s':''),
-        sub:stale.slice(0,3).map(function(a){return escHtml(a.name);}).join(' · ')+(stale.length>3?' +'+(stale.length-3):'')+' — takes a minute, makes everything else true',
+        sub:stale.slice(0,3).map(function(a){return escHtml(a.name);}).join(' · ')+(stale.length>3?' +'+(stale.length-3):'')+' — open your bank app, look at today\u2019s balance, and type it in here. Every other number depends on this.',
         btn:'Update '+escHtml(first.name),
         act:"openAcctModal('"+first.id+"')",
         skip:'bal'};
@@ -12756,7 +12755,7 @@ function _moneyGuideCardObj(){
       var when=bd<dToday?'was due day '+bd+' — overdue':(bd===dToday?'due today':'due in '+(bd-dToday)+' day'+((bd-dToday)>1?'s':''));
       card={label:bd<dToday?'Overdue':'Due soon',
         title:'Pay '+escHtml(b0.name)+' — $'+(parseFloat(getBillMonthAmt(b0.id))||0).toFixed(0),
-        sub:when+(due.length>1?' · '+(due.length-1)+' more coming up':''),
+        sub:when+(due.length>1?' \u00b7 '+(due.length-1)+' more coming up':'')+'. The button opens the expense form already filled in \u2014 change the amount if the real charge differs, then save.',
         btn:'💸 Pay it now',
         act:"payBillNow('"+b0.id+"')",
         skip:'bills',
@@ -12769,7 +12768,7 @@ function _moneyGuideCardObj(){
     if(!loggedToday){
       card={label:'Quick check',
         title:'Spent anything today?',
-        sub:'Log it while you remember — or tap “nothing today” and you’re clear.',
+        sub:'Add anything you bought today so the totals stay true \u2014 or tap \u201cNothing today\u201d if you didn\u2019t spend.',
         btn:'💸 Log it',
         act:"openM('expModal')",
         skip:'spend',
@@ -12782,7 +12781,7 @@ function _moneyGuideCardObj(){
     if(unc>=5){
       card={label:'Tidy up',
         title:'Reconcile '+unc+' pending charges',
-        sub:'Tap ✓ on each once it shows in your bank — keeps balances honest.',
+        sub:'These are logged but not yet confirmed. Open your bank app, and tap \u2713 on each charge here that you can see there.',
         btn:'🔄 Reconcile',
         act:"showMoneySec('expenses',document.querySelector('#v-money .pn-btn[data-sec=expenses]'));var _c=document.querySelector('#expTopChips .fchip:nth-child(2)');if(_c)setExpFilter('uncleared',_c)",
         skip:'recon'};
@@ -16128,6 +16127,7 @@ function acctToggleType(){
   document.getElementById('acctMinPayFg').style.display=c?'':'none';
   document.getElementById('acctExcludeFg').style.display=c?'':'none';
   document.getElementById('acctPrimaryFg').style.display=c?'none':'';
+  var _sf=document.getElementById('acctSpendableFg');if(_sf)_sf.style.display=c?'none':'';
 }
 function openAcctModal(id){
   var a=id?ACCOUNTS.find(function(x){return x.id===id;}):null;
@@ -16141,6 +16141,7 @@ function openAcctModal(id){
   document.getElementById('acctMinPayAmt').value=a&&a.minPayAmt?a.minPayAmt:'';
   document.getElementById('acctExclude').checked=!!(a&&a.excludeFromNet);
   document.getElementById('acctPrimary').checked=!!(a&&a.isPrimary);
+  var _sp=document.getElementById('acctSpendable');if(_sp)_sp.checked=a?(typeof isSpendable==='function'?isSpendable(a):!!a.isPrimary):true;
   acctToggleType();
   document.getElementById('acctNotes').value=a?a.notes||'':'';
   document.getElementById('acctDelBtn').style.display=id?'block':'none';
@@ -16157,14 +16158,16 @@ function saveAccount(){
   var notes=document.getElementById('acctNotes').value.trim();
   var excludeFromNet=isCredit&&document.getElementById('acctExclude').checked;
   var isPrimary=!isCredit&&document.getElementById('acctPrimary').checked;
+  var _spEl=document.getElementById('acctSpendable');
+  var spendable=!isCredit&&_spEl?_spEl.checked:undefined;
   var id=document.getElementById('acctEditId').value;
   var now=new Date().toISOString().slice(0,10);
   if(isPrimary)ACCOUNTS.forEach(function(x){x.isPrimary=false;});
   if(id){
     var a=ACCOUNTS.find(function(x){return x.id===id;});
-    if(a){a.name=name;a.amount=amount;a.isCredit=isCredit;a.minPayDate=minPayDate;a.minPayAmt=minPayAmt;a.notes=notes;a.excludeFromNet=excludeFromNet;a.isPrimary=isPrimary;a.updated=now;}
+    if(a){a.name=name;a.amount=amount;a.isCredit=isCredit;a.minPayDate=minPayDate;a.minPayAmt=minPayAmt;a.notes=notes;a.excludeFromNet=excludeFromNet;a.isPrimary=isPrimary;if(!isCredit&&spendable!==undefined)a.spendable=spendable;a.updated=now;}
   }else{
-    ACCOUNTS.push({id:Date.now().toString(),name:name,amount:amount,isCredit:isCredit,minPayDate:minPayDate,minPayAmt:minPayAmt,notes:notes,excludeFromNet:excludeFromNet,isPrimary:isPrimary,updated:now});
+    ACCOUNTS.push({id:Date.now().toString(),name:name,amount:amount,isCredit:isCredit,minPayDate:minPayDate,minPayAmt:minPayAmt,notes:notes,excludeFromNet:excludeFromNet,isPrimary:isPrimary,spendable:(!isCredit&&spendable!==undefined)?spendable:undefined,updated:now});
   }
   localStorage.setItem('aAccounts',JSON.stringify(ACCOUNTS));
   closeM('acctModal');
@@ -22385,18 +22388,10 @@ function bumpStreak(){
   s.n=(s.last===y)?(s.n||0)+1:1;
   s.last=t;
   localStorage.setItem('aStreak',JSON.stringify(s));
-  renderStreakChip();
-  if(typeof showToast==='function'&&s.n>1)showToast('🔥 '+s.n+'-day streak!');
 }
-function renderStreakChip(){
-  var el=document.getElementById('streakChip');if(!el)return;
-  var s=JSON.parse(localStorage.getItem('aStreak')||'{}');
-  var t=new Date().toISOString().slice(0,10);
-  var y=new Date(Date.now()-86400000).toISOString().slice(0,10);
-  var live=(s.last===t||s.last===y)&&(s.n||0)>0;
-  el.style.display=live?'':'none';
-  if(live)el.textContent='🔥 '+s.n;
-}
+// Streak UI removed by request — data still records quietly in aStreak
+// in case she ever wants it back.
+function renderStreakChip(){}
 // Home strip covers the three things that matter daily: money, food, tasks.
 // Routines live in their own tab, for when she wants them — they never push.
 function renderHomeGuide(){
@@ -30043,7 +30038,13 @@ function delProjInc(id){
   <div class="fg" id="acctPrimaryFg" style="display:none">
     <div style="display:flex;align-items:center;gap:10px;padding:6px 0">
       <input type="checkbox" id="acctPrimary" style="width:18px;height:18px;cursor:pointer">
-      <label for="acctPrimary" style="font-size:13px;color:var(--textd);cursor:pointer">⭐ Primary spending account — basis for "Safe to Spend"</label>
+      <label for="acctPrimary" style="font-size:13px;color:var(--textd);cursor:pointer">⭐ My main spending account</label>
+    </div>
+  </div>
+  <div class="fg" id="acctSpendableFg" style="display:none">
+    <div style="display:flex;align-items:center;gap:10px;padding:6px 0">
+      <input type="checkbox" id="acctSpendable" style="width:18px;height:18px;cursor:pointer">
+      <label for="acctSpendable" style="font-size:13px;color:var(--textd);cursor:pointer">💵 I pay for things from this account — count it in “Money we have”</label>
     </div>
   </div>
   <div class="fg"><label class="fl">Notes</label><textarea class="fi" id="acctNotes" placeholder="Optional notes" style="min-height:60px"></textarea></div>
