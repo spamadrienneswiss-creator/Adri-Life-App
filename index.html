@@ -6268,6 +6268,7 @@ function initFirebase(){
       ap('aBudgetBuckets',function(v,r){if(v&&v.length)BUDGET_BUCKETS=v;_origSetItem('aBudgetBuckets',r);});
       ap('aBudgetMoves',function(v,r){BUDGET_MOVES=v||[];_origSetItem('aBudgetMoves',r);});
       ap('aMoneyReserve',function(v,r){_origSetItem('aMoneyReserve',r);});
+      ap('aBillsReviewed',function(v,r){_origSetItem('aBillsReviewed',r);});
       _fbBlobPause=false;
       renderBills();renderAccounts();renderIncome();updMoneyBadge();renderBudget();
       if(typeof renderTrips==='function')renderTrips();
@@ -6324,6 +6325,7 @@ function initFirebase(){
     }else if(group==='food'){
       ap('aRecipes',function(v,r){RECIPES=v||[];_origSetItem('aRecipes',r);});
       ap('aMealPlan',function(v,r){MEAL_PLAN=v||{};_origSetItem('aMealPlan',r);});
+      ap('aMacrosReviewed',function(v,r){_origSetItem('aMacrosReviewed',r);});
       ap('aMealMyServings',function(v,r){MEAL_MY_SERVINGS=v||{};_origSetItem('aMealMyServings',r);});
       ap('aWantToTry',function(v,r){WANT_TO_TRY=v||[];_origSetItem('aWantToTry',r);});
       ap('aGroceryList',function(v,r){GROCERY_LIST=v||[];_origSetItem('aGroceryList',r);});
@@ -6454,13 +6456,13 @@ function fbDelete(col, id){
 // localStorage.setItem is intercepted to auto-save on every write.
 // ═══════════════════════════════════════════════
 var BLOB_GROUPS={
-  money:['aBills','aBillPay','aBillMonthAmt','aAccounts','aIncome','aIncGoal','aMonIncGoal','aMoneyChecks','aTaxLog','aProjIncome','aPriceLog','aExpCats','aMoneyProjects','aTrips','aPayoffs','aBudgetBuckets','aBudgetMoves','aMoneyReserve'],
+  money:['aBills','aBillPay','aBillMonthAmt','aAccounts','aIncome','aIncGoal','aMonIncGoal','aMoneyChecks','aTaxLog','aProjIncome','aPriceLog','aExpCats','aMoneyProjects','aTrips','aPayoffs','aBudgetBuckets','aBudgetMoves','aMoneyReserve','aBillsReviewed'],
   health:['aMeds','aMedLog','aEnergyLog','aMeasLog','aMealLogItems','aMoodNotes','aWineDrinks','aSymLog','aSymTypes'],
   habits:['aHabits','aHabitLog'],
   routines:['aRS','aRS2','aRH','aRTG','aRtns'],
   planning:['aSOPs','aBrainDump','aIntentions','aMonthTodos','aTmpls'],
   spiritual:['aBibleLog','aBibleChapNotes','aPrayers','aGratLog','aSpiritBooks','aSpiritSettings','aSpiritRun'],
-  food:['aRecipes','aMealPlan','aMealMyServings','aGroceryList','aGrocTags','aGrocDepts','aGrocStoreDeptOrder','aInventory','aInvSections','aMC','aFoodDb','aIngredients','aWantToTry'],
+  food:['aRecipes','aMealPlan','aMealMyServings','aGroceryList','aGrocTags','aGrocDepts','aGrocStoreDeptOrder','aInventory','aInvSections','aMC','aFoodDb','aIngredients','aWantToTry','aMacrosReviewed'],
   fitness:['aWplans','aWlog2','aMovements','aExTypes','aExDB','aExLog','aPT'],
   creative:['aStories','aSChars','aSScenes','aFaves','aMixtape','aMemories','aPlaces','aVbItems'],
   tools:['aSparkPrompts','aSparkSaved','aDispatchJournal','aHatchChaos','aHatchTransmissions','aHatchMissions','aHatchShocks','aHatchCast'],
@@ -12637,6 +12639,64 @@ function guideSkip(key){
   localStorage.setItem('aMoneyGuideSkips',JSON.stringify(s));
   renderMoneyGuide();
 }
+// ── ONE-TIME SETUP DECK ──────────────────────────────────────
+// Verifies the data the money math runs on. Answering a card writes the
+// flag (synced via aAccounts / blob), so each question is asked once ever.
+function _moneySetupCard(){
+  // a) Active credit cards never sorted into "counts now" vs "later problem"
+  var un=ACCOUNTS.find(function(a){return a.isCredit&&!a.excludeFromNet&&!a.netReviewed&&(parseFloat(a.amount)||0)>0;});
+  if(un){
+    return {label:'Setup — one time',setup:true,
+      title:'Is “'+escHtml(un.name)+'” a later problem?',
+      sub:'0% promo / pay-later cards don’t count in “Where I stand”. Balance: $'+(parseFloat(un.amount)||0).toFixed(0),
+      btn:'🅿️ Later problem',act:"acctSetupAnswer('"+un.id+"','later')",
+      btn2:'💳 Counts now',act2:"acctSetupAnswer('"+un.id+"','now')",
+      skip:'setup'};
+  }
+  // b) Non-primary cash accounts never marked count / don't-count
+  var uc=ACCOUNTS.find(function(a){return !a.isCredit&&!a.isPrimary&&a.spendable===undefined;});
+  if(uc){
+    return {label:'Setup — one time',setup:true,
+      title:'Count “'+escHtml(uc.name)+'” as spendable?',
+      sub:'Balance $'+(parseFloat(uc.amount)||0).toFixed(0)+' — only counted accounts feed “Money we have”.',
+      btn:'✅ Counts',act:"acctSetupSpendable('"+uc.id+"',true)",
+      btn2:'🚫 Don’t count',act2:"acctSetupSpendable('"+uc.id+"',false)",
+      skip:'setup'};
+  }
+  // c) Bills sanity check against the sheet
+  if(BILLS.length&&localStorage.getItem('aBillsReviewed')!=='1'){
+    var tot=BILLS.reduce(function(s,b){return s+(parseFloat(getBillMonthAmt(b.id))||0);},0);
+    return {label:'Setup — one time',setup:true,
+      title:'Are all your bills in? ('+BILLS.length+' · ~$'+tot.toFixed(0)+'/mo)',
+      sub:'“Set aside” and “Left to spend” only subtract bills that exist here — check against your sheet.',
+      btn:'✓ All there',act:"billsConfirmReviewed()",
+      btn2:'➕ Add a bill',act2:"openAddBill()",
+      skip:'setup'};
+  }
+  return null;
+}
+function acctSetupAnswer(id,ans){
+  var a=ACCOUNTS.find(function(x){return x.id===id;});if(!a)return;
+  if(ans==='later')a.excludeFromNet=true;
+  a.netReviewed=true;
+  localStorage.setItem('aAccounts',JSON.stringify(ACCOUNTS));
+  renderBudget();
+  if(typeof renderAccounts==='function')renderAccounts();
+  if(typeof showToast==='function')showToast(ans==='later'?'🅿️ Moved to later problems':'💳 Counted in Where I stand');
+}
+function acctSetupSpendable(id,yes){
+  var a=ACCOUNTS.find(function(x){return x.id===id;});if(!a)return;
+  a.spendable=!!yes;
+  localStorage.setItem('aAccounts',JSON.stringify(ACCOUNTS));
+  renderBudget();
+  if(typeof renderAccounts==='function')renderAccounts();
+  if(typeof showToast==='function')showToast(yes?'✅ Counted as spendable':'🚫 Left out of spendable money');
+}
+function billsConfirmReviewed(){
+  localStorage.setItem('aBillsReviewed','1');
+  renderBudget();
+  if(typeof showToast==='function')showToast('✓ Bills confirmed');
+}
 // Open Add Expense with a bill already picked — the guide's "pay it now".
 function payBillNow(billId){
   openM('expModal');
@@ -12650,8 +12710,11 @@ function renderMoneyGuide(){
   var todayKey=today.toISOString().slice(0,10);
   var card=null;
 
+  // 0) One-time setup deck outranks the daily deck
+  if(skips.indexOf('setup')<0)card=_moneySetupCard();
+
   // 1) Stale balances on the accounts that matter (spendable cash + active cards)
-  if(skips.indexOf('bal')<0){
+  if(!card&&skips.indexOf('bal')<0){
     var mains=ACCOUNTS.filter(function(a){return(!a.isCredit&&isSpendable(a))||(a.isCredit&&!a.excludeFromNet&&(parseFloat(a.amount)||0)>0);});
     var stale=mains.filter(function(a){
       if(!a.updated)return true;
@@ -12725,15 +12788,15 @@ function renderMoneyGuide(){
       +'</div></div>';
     return;
   }
-  var accent=card.urgent?'#F06677':'#2475FF';
+  var accent=card.setup?'#B189B4':(card.urgent?'#F06677':'#2475FF');
+  var btns='<button onclick="'+card.act.replace(/"/g,'&quot;')+'" style="flex:1;padding:11px;border-radius:12px;border:none;background:'+accent+';color:#fff;font-family:\'Quicksand\',sans-serif;font-size:14px;font-weight:700;cursor:pointer">'+card.btn+'</button>';
+  if(card.btn2)btns+='<button onclick="'+card.act2.replace(/"/g,'&quot;')+'" style="flex:1;padding:11px;border-radius:12px;border:1.5px solid '+accent+';background:#fff;color:'+accent+';font-family:\'Quicksand\',sans-serif;font-size:13px;font-weight:700;cursor:pointer">'+card.btn2+'</button>';
+  btns+='<button onclick="guideSkip(\''+card.skip+'\')" style="padding:11px 12px;border-radius:12px;border:1.5px solid var(--bdr);background:#fff;color:var(--textl);font-family:\'Quicksand\',sans-serif;font-size:12px;font-weight:700;cursor:pointer">'+(card.skipLabel||'Later')+'</button>';
   el.innerHTML='<div class="card" style="margin:0;padding:14px 16px;border-left:4px solid '+accent+'">'
     +'<div style="font-size:10px;font-weight:800;color:'+accent+';text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">👉 '+card.label+'</div>'
     +'<div style="font-size:16px;font-weight:800;color:var(--textd);margin-bottom:2px">'+card.title+'</div>'
     +'<div style="font-size:12px;color:var(--textl);margin-bottom:10px">'+card.sub+'</div>'
-    +'<div style="display:flex;gap:8px;align-items:center">'
-    +'<button onclick="'+card.act.replace(/"/g,'&quot;')+'" style="flex:1;padding:11px;border-radius:12px;border:none;background:'+accent+';color:#fff;font-family:\'Quicksand\',sans-serif;font-size:14px;font-weight:700;cursor:pointer">'+card.btn+'</button>'
-    +'<button onclick="guideSkip(\''+card.skip+'\')" style="padding:11px 12px;border-radius:12px;border:1.5px solid var(--bdr);background:#fff;color:var(--textl);font-family:\'Quicksand\',sans-serif;font-size:12px;font-weight:700;cursor:pointer">'+(card.skipLabel||'Later')+'</button>'
-    +'</div></div>';
+    +'<div style="display:flex;gap:8px;align-items:center">'+btns+'</div></div>';
 }
 
 // Pinned "check these first" accounts at the top of Money home:
@@ -21954,9 +22017,38 @@ function setMacroTargets(){
   S.gPro=parseInt(p)||S.gPro;
   localStorage.setItem('aGCal',S.gCal);
   localStorage.setItem('aGPro',S.gPro);
+  localStorage.setItem('aMacrosReviewed','1');
   if(typeof renderTodayStatsBars==='function')renderTodayStatsBars();
   renderMealsGuide();
   if(typeof showToast==='function')showToast('Targets: '+S.gCal+' cal · '+S.gPro+'g protein');
+}
+// Two-question wizard: suggests weight-loss targets from goal weight
+// (~12 cal and ~0.8g protein per lb of goal weight — steady, protein-protective).
+function macroSetupWizard(){
+  var cur=prompt('Current weight (lb):','');
+  if(cur===null)return;
+  var goal=prompt('Goal weight (lb):',cur);
+  if(goal===null)return;
+  var gw=parseFloat(goal)||parseFloat(cur)||0;
+  if(!gw){if(typeof showToast==='function')showToast('Need a weight to compute');return;}
+  var cal=Math.round(gw*12/10)*10;
+  var pro=Math.round(gw*0.8/5)*5;
+  if(confirm('Suggested for reaching '+gw+' lb:\n\n'+cal+' cal / day\n'+pro+'g protein / day\n\nUse these? (Cancel to type your own)')){
+    S.gCal=cal;S.gPro=pro;
+    localStorage.setItem('aGCal',cal);
+    localStorage.setItem('aGPro',pro);
+    localStorage.setItem('aMacrosReviewed','1');
+    if(typeof renderTodayStatsBars==='function')renderTodayStatsBars();
+    renderMealsGuide();
+    if(typeof showToast==='function')showToast('🎯 '+cal+' cal · '+pro+'g protein');
+  }else{
+    setMacroTargets();
+  }
+}
+function macrosKeepDefaults(){
+  localStorage.setItem('aMacrosReviewed','1');
+  renderMealsGuide();
+  if(typeof showToast==='function')showToast('Keeping '+S.gCal+' cal · '+S.gPro+'g protein');
 }
 // Compact macro strip shown on every meals card — tap to edit targets.
 function _macroStripHtml(){
@@ -21980,8 +22072,18 @@ function renderMealsGuide(){
   var dayData=MEAL_PLAN[today]||{};
   var card=null;
 
+  // 0) One-time setup: make the macro targets hers, not the defaults
+  if(skips.indexOf('setup')<0&&localStorage.getItem('aMacrosReviewed')!=='1'){
+    card={label:'Setup — one time',setup:true,
+      title:'Make the macro targets yours',
+      sub:'Currently '+S.gCal+' cal · '+S.gPro+'g protein (app defaults). Two questions and they fit your weight-loss goal.',
+      btn:'🎯 Set my targets',act:"macroSetupWizard()",
+      btn2:'Keep these ✓',act2:"macrosKeepDefaults()",
+      skip:'setup'};
+  }
+
   // 1) No dinner planned tonight
-  if(skips.indexOf('dinner')<0&&!dayData.dinner){
+  if(!card&&skips.indexOf('dinner')<0&&!dayData.dinner){
     card={label:'Tonight',
       title:'No dinner planned yet',
       sub:'Pick something now and the evening runs itself.',
@@ -22031,14 +22133,15 @@ function renderMealsGuide(){
       +'</div>';
     return;
   }
-  el.innerHTML='<div class="card" style="margin:0;padding:14px 16px;border-left:4px solid #2475FF">'
-    +'<div style="font-size:10px;font-weight:800;color:#2475FF;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">👉 '+card.label+'</div>'
+  var accent=card.setup?'#B189B4':'#2475FF';
+  var btns='<button onclick="'+card.act.replace(/"/g,'&quot;')+'" style="flex:1;padding:11px;border-radius:12px;border:none;background:'+accent+';color:#fff;font-family:\'Quicksand\',sans-serif;font-size:14px;font-weight:700;cursor:pointer">'+card.btn+'</button>';
+  if(card.btn2)btns+='<button onclick="'+card.act2.replace(/"/g,'&quot;')+'" style="flex:1;padding:11px;border-radius:12px;border:1.5px solid '+accent+';background:#fff;color:'+accent+';font-family:\'Quicksand\',sans-serif;font-size:13px;font-weight:700;cursor:pointer">'+card.btn2+'</button>';
+  btns+='<button onclick="mealsGuideSkip(\''+card.skip+'\')" style="padding:11px 12px;border-radius:12px;border:1.5px solid var(--bdr);background:#fff;color:var(--textl);font-family:\'Quicksand\',sans-serif;font-size:12px;font-weight:700;cursor:pointer">'+(card.skipLabel||'Later')+'</button>';
+  el.innerHTML='<div class="card" style="margin:0;padding:14px 16px;border-left:4px solid '+accent+'">'
+    +'<div style="font-size:10px;font-weight:800;color:'+accent+';text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">👉 '+card.label+'</div>'
     +'<div style="font-size:16px;font-weight:800;color:var(--textd);margin-bottom:2px">'+card.title+'</div>'
     +'<div style="font-size:12px;color:var(--textl);margin-bottom:10px">'+card.sub+'</div>'
-    +'<div style="display:flex;gap:8px;align-items:center">'
-    +'<button onclick="'+card.act.replace(/"/g,'&quot;')+'" style="flex:1;padding:11px;border-radius:12px;border:none;background:#2475FF;color:#fff;font-family:\'Quicksand\',sans-serif;font-size:14px;font-weight:700;cursor:pointer">'+card.btn+'</button>'
-    +'<button onclick="mealsGuideSkip(\''+card.skip+'\')" style="padding:11px 12px;border-radius:12px;border:1.5px solid var(--bdr);background:#fff;color:var(--textl);font-family:\'Quicksand\',sans-serif;font-size:12px;font-weight:700;cursor:pointer">'+(card.skipLabel||'Later')+'</button>'
-    +'</div>'
+    +'<div style="display:flex;gap:8px;align-items:center">'+btns+'</div>'
     +_macroStripHtml()
     +'</div>';
 }
