@@ -2590,6 +2590,8 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
 
   <!-- WHAT I ATE section -->
   <div id="ms-ate">
+      <!-- The Guide: one dealt card — always the next food action -->
+      <div id="mealsGuideCard" style="margin-bottom:14px;display:none"></div>
       <!-- Date nav -->
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
         <button onclick="shiftEatDate(-1)" style="padding:5px 13px;border-radius:8px;border:1.5px solid var(--bdr);background:var(--bg);font-family:'Quicksand',sans-serif;font-size:14px;cursor:pointer;color:var(--textl)">◀</button>
@@ -11931,6 +11933,7 @@ function renderFL(){
   var log=getTL();
   var el=document.getElementById('foodLog');if(!el)return;
   el.innerHTML=log.length?log.map(function(f){return'<div class="fli"><div class="fli-l"><div class="fli-n">'+f.name+'</div><div class="fli-m">'+(f.sv||'1 srv')+' • P:'+f.pro+'g F:'+f.fib+'g C:'+f.crb+'g Fat:'+f.fat+'g</div></div><div style="display:flex;align-items:center;gap:7px"><div class="fli-c">'+f.cal+' cal</div><button class="fli-del" onclick="delFL(\''+f.lid+'\')">✕</button></div></div>';}).join(''):'<div class="empty"><div class="emj">🍽️</div><p>No food logged yet.</p></div>';
+  if(typeof renderMealsGuide==='function')renderMealsGuide();
 }
 
 function saveNF(){
@@ -21928,6 +21931,118 @@ function fmtWeekLbl(dates){
 var DOW=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
 
 // ── Plan rendering ────────────────────────────
+// ── THE MEALS GUIDE: deal the next food card ─────────────────
+// Same pattern as the Money guide: one prompt, one button, macros always in view.
+function _mealsGuideSkips(){
+  var t=new Date().toISOString().slice(0,10);
+  var s=JSON.parse(localStorage.getItem('aMealsGuideSkips')||'{}');
+  if(s.date!==t)s={date:t,skips:[]};
+  return s;
+}
+function mealsGuideSkip(key){
+  var s=_mealsGuideSkips();
+  if(s.skips.indexOf(key)<0)s.skips.push(key);
+  localStorage.setItem('aMealsGuideSkips',JSON.stringify(s));
+  renderMealsGuide();
+}
+function setMacroTargets(){
+  var c=prompt('Daily calorie target:',S.gCal);
+  if(c===null)return;
+  var p=prompt('Daily protein target (grams):',S.gPro);
+  if(p===null)return;
+  S.gCal=parseInt(c)||S.gCal;
+  S.gPro=parseInt(p)||S.gPro;
+  localStorage.setItem('aGCal',S.gCal);
+  localStorage.setItem('aGPro',S.gPro);
+  if(typeof renderTodayStatsBars==='function')renderTodayStatsBars();
+  renderMealsGuide();
+  if(typeof showToast==='function')showToast('Targets: '+S.gCal+' cal · '+S.gPro+'g protein');
+}
+// Compact macro strip shown on every meals card — tap to edit targets.
+function _macroStripHtml(){
+  var t=getTot();
+  var pc=Math.min(100,Math.round((t.cal||0)/S.gCal*100));
+  var pp=Math.min(100,Math.round((t.pro||0)/S.gPro*100));
+  var proColor=pp>=100?'#7C9A2D':(pp>=60?'#C4974A':'#F06677');
+  return '<div onclick="setMacroTargets()" style="cursor:pointer;margin-top:10px;padding-top:10px;border-top:1px solid #f0edf5">'
+    +'<div style="display:flex;justify-content:space-between;font-size:10px;font-weight:700;color:var(--textl);margin-bottom:3px"><span>🔥 '+Math.round(t.cal||0)+' / '+S.gCal+' cal</span><span style="color:'+proColor+'">💪 '+Math.round(t.pro||0)+' / '+S.gPro+'g protein</span></div>'
+    +'<div style="display:flex;gap:6px">'
+    +'<div style="flex:1;height:5px;background:#f0edf5;border-radius:3px;overflow:hidden"><div style="height:100%;width:'+pc+'%;background:#65B2E7"></div></div>'
+    +'<div style="flex:1;height:5px;background:#f0edf5;border-radius:3px;overflow:hidden"><div style="height:100%;width:'+pp+'%;background:'+proColor+'"></div></div>'
+    +'</div>'
+    +'<div style="font-size:9px;color:var(--textl);text-align:right;margin-top:2px">tap to change targets</div>'
+    +'</div>';
+}
+function renderMealsGuide(){
+  var el=document.getElementById('mealsGuideCard');if(!el)return;
+  var skips=_mealsGuideSkips().skips;
+  var today=todayStr();
+  var dayData=MEAL_PLAN[today]||{};
+  var card=null;
+
+  // 1) No dinner planned tonight
+  if(skips.indexOf('dinner')<0&&!dayData.dinner){
+    card={label:'Tonight',
+      title:'No dinner planned yet',
+      sub:'Pick something now and the evening runs itself.',
+      btn:'📅 Plan tonight',
+      act:"showMealSec('meals',document.querySelector('#v-meals .pn-btn:nth-child(2)')||null)",
+      skip:'dinner',skipLabel:'Leftovers / out ✓'};
+  }
+  // 2) Dinner planned → confirm + protein pace
+  if(!card&&skips.indexOf('tonight')<0&&dayData.dinner){
+    var rec=RECIPES.find(function(r){return r.name===dayData.dinner;});
+    var t=getTot();
+    var proLeft=Math.max(0,S.gPro-Math.round(t.pro||0));
+    var recPro=rec&&rec.macros?Math.round((rec.macros.pro||0)*(typeof getMealServings==='function'?getMealServings(today,'dinner'):1)):null;
+    var paceNote=proLeft<=0?'Protein target already hit 🎉':(recPro!==null?('You need '+proLeft+'g more protein — dinner brings ~'+recPro+'g'+(recPro>=proLeft?' ✓':' (light — add a side?)')):('You need '+proLeft+'g more protein today'));
+    card={label:'Tonight',
+      title:'🍽️ '+escHtml(dayData.dinner),
+      sub:paceNote,
+      btn:'📓 Log food as you eat',
+      act:"var f=document.getElementById('foodSrch');if(f){f.focus();f.scrollIntoView({block:'center'});}",
+      skip:'tonight',skipLabel:'Got it ✓'};
+  }
+  // 3) The week ahead is thin (4+ of the next 7 dinners empty)
+  if(!card&&skips.indexOf('week')<0){
+    var empty=0,d=new Date();
+    for(var i=0;i<7;i++){
+      var key=new Date(d.getFullYear(),d.getMonth(),d.getDate()+i).toISOString().slice(0,10);
+      if(!(MEAL_PLAN[key]||{}).dinner)empty++;
+    }
+    if(empty>=4){
+      card={label:'This week',
+        title:'Plan the week — '+(7-empty)+'/7 dinners set',
+        sub:'Ten minutes now saves five “what’s for dinner?” moments.',
+        btn:'📅 Plan the week',
+        act:"showMealSec('meals',document.querySelector('#v-meals .pn-btn:nth-child(2)')||null)",
+        skip:'week'};
+    }
+  }
+
+  el.style.display='';
+  if(!card){
+    var t2=getTot();
+    var done=(t2.pro||0)>=S.gPro;
+    el.innerHTML='<div class="card" style="margin:0;padding:14px 16px;background:var(--lime);border:none">'
+      +'<div style="font-size:10px;font-weight:800;color:#5A6B1A;text-transform:uppercase;letter-spacing:1px;margin-bottom:2px">All set</div>'
+      +'<div style="font-size:15px;font-weight:800;color:#3E4A10">'+(done?'✅ Protein hit — great day':'✅ Food’s planned — just log as you eat')+'</div>'
+      +_macroStripHtml()
+      +'</div>';
+    return;
+  }
+  el.innerHTML='<div class="card" style="margin:0;padding:14px 16px;border-left:4px solid #2475FF">'
+    +'<div style="font-size:10px;font-weight:800;color:#2475FF;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">👉 '+card.label+'</div>'
+    +'<div style="font-size:16px;font-weight:800;color:var(--textd);margin-bottom:2px">'+card.title+'</div>'
+    +'<div style="font-size:12px;color:var(--textl);margin-bottom:10px">'+card.sub+'</div>'
+    +'<div style="display:flex;gap:8px;align-items:center">'
+    +'<button onclick="'+card.act.replace(/"/g,'&quot;')+'" style="flex:1;padding:11px;border-radius:12px;border:none;background:#2475FF;color:#fff;font-family:\'Quicksand\',sans-serif;font-size:14px;font-weight:700;cursor:pointer">'+card.btn+'</button>'
+    +'<button onclick="mealsGuideSkip(\''+card.skip+'\')" style="padding:11px 12px;border-radius:12px;border:1.5px solid var(--bdr);background:#fff;color:var(--textl);font-family:\'Quicksand\',sans-serif;font-size:12px;font-weight:700;cursor:pointer">'+(card.skipLabel||'Later')+'</button>'
+    +'</div>'
+    +_macroStripHtml()
+    +'</div>';
+}
+
 function renderMealPlan(){
   var dates=getMealWeekDates(MEAL_WEEK_OFFSET);
   var lbl=document.getElementById('mealWeekLbl');
@@ -22003,6 +22118,7 @@ function renderMealPlan(){
     html+='</div>';
   });
   grid.innerHTML=html;
+  if(typeof renderMealsGuide==='function')renderMealsGuide();
 }
 
 var MEAL_DAY_OPEN = {};
