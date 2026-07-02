@@ -1883,6 +1883,8 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     <span id="mThisExp" style="display:none"></span>
     <span id="mNet" style="display:none"></span>
     <span id="mInc" style="display:none"></span>
+    <!-- The Guide: one dealt card — always the next action -->
+    <div id="moneyGuideCard" style="margin-bottom:14px;display:none"></div>
     <!-- Main accounts — check these first -->
     <div class="card" id="bgMainAccts" style="margin-bottom:14px;padding:12px 14px;display:none"></div>
     <!-- WATERFALL: money − bills − cushion = left to spend -->
@@ -12617,6 +12619,120 @@ function unpaidBillsThisMonth(){
     .reduce(function(s,b){return s+(parseFloat(getBillMonthAmt(b.id))||0);},0);
 }
 
+// ── THE GUIDE: deal the next card ─────────────────────────────
+// One prompt at a time, priority-ordered, each with a button that does the thing.
+// Skips are per-day, per-device (not synced — they're "not now", not data).
+function _guideSkips(){
+  var t=new Date().toISOString().slice(0,10);
+  var s=JSON.parse(localStorage.getItem('aMoneyGuideSkips')||'{}');
+  if(s.date!==t)s={date:t,skips:[]};
+  return s;
+}
+function guideSkip(key){
+  var s=_guideSkips();
+  if(s.skips.indexOf(key)<0)s.skips.push(key);
+  localStorage.setItem('aMoneyGuideSkips',JSON.stringify(s));
+  renderMoneyGuide();
+}
+// Open Add Expense with a bill already picked — the guide's "pay it now".
+function payBillNow(billId){
+  openM('expModal');
+  var sel=document.getElementById('ePayBill');
+  if(sel){sel.value=billId;onPayBillSelect();}
+}
+function renderMoneyGuide(){
+  var el=document.getElementById('moneyGuideCard');if(!el)return;
+  var skips=_guideSkips().skips;
+  var today=new Date();
+  var todayKey=today.toISOString().slice(0,10);
+  var card=null;
+
+  // 1) Stale balances on the accounts that matter (spendable cash + active cards)
+  if(skips.indexOf('bal')<0){
+    var mains=ACCOUNTS.filter(function(a){return(!a.isCredit&&isSpendable(a))||(a.isCredit&&!a.excludeFromNet&&(parseFloat(a.amount)||0)>0);});
+    var stale=mains.filter(function(a){
+      if(!a.updated)return true;
+      var d=new Date(a.updated);
+      return isNaN(d)||((today-d)/86400000)>3;
+    });
+    if(stale.length){
+      var first=stale[0];
+      card={label:'Start here',
+        title:'Check your balance'+(stale.length>1?'s':''),
+        sub:stale.slice(0,3).map(function(a){return escHtml(a.name);}).join(' · ')+(stale.length>3?' +'+(stale.length-3):'')+' — takes a minute, makes everything else true',
+        btn:'Update '+escHtml(first.name),
+        act:"openAcctModal('"+first.id+"')",
+        skip:'bal'};
+    }
+  }
+  // 2) Bills overdue or due within 3 days (not yet paid)
+  if(!card&&skips.indexOf('bills')<0){
+    var mon=getMonStr();var paid=BILL_PAY[mon]||{};
+    var dToday=today.getDate();
+    var due=(BILLS||[]).filter(function(b){var s=paid[b.id]||'';return s!=='paid'&&s!=='posted'&&(parseInt(b.day)||1)<=dToday+3;})
+      .sort(function(a,b){return(parseInt(a.day)||1)-(parseInt(b.day)||1);});
+    if(due.length){
+      var b0=due[0];var bd=parseInt(b0.day)||1;
+      var when=bd<dToday?'was due day '+bd+' — overdue':(bd===dToday?'due today':'due in '+(bd-dToday)+' day'+((bd-dToday)>1?'s':''));
+      card={label:bd<dToday?'Overdue':'Due soon',
+        title:'Pay '+escHtml(b0.name)+' — $'+(parseFloat(getBillMonthAmt(b0.id))||0).toFixed(0),
+        sub:when+(due.length>1?' · '+(due.length-1)+' more coming up':''),
+        btn:'💸 Pay it now',
+        act:"payBillNow('"+b0.id+"')",
+        skip:'bills',
+        urgent:bd<dToday};
+    }
+  }
+  // 3) Nothing logged today → quick yes/no
+  if(!card&&skips.indexOf('spend')<0){
+    var loggedToday=(EXPENSES||[]).some(function(e){return(e.created||'').slice(0,10)===todayKey;});
+    if(!loggedToday){
+      card={label:'Quick check',
+        title:'Spent anything today?',
+        sub:'Log it while you remember — or tap “nothing today” and you’re clear.',
+        btn:'💸 Log it',
+        act:"openM('expModal')",
+        skip:'spend',
+        skipLabel:'Nothing today ✓'};
+    }
+  }
+  // 4) Pending charges piling up
+  if(!card&&skips.indexOf('recon')<0){
+    var unc=(EXPENSES||[]).filter(function(e){return!e.reconciled&&!e.archived;}).length;
+    if(unc>=5){
+      card={label:'Tidy up',
+        title:'Reconcile '+unc+' pending charges',
+        sub:'Tap ✓ on each once it shows in your bank — keeps balances honest.',
+        btn:'🔄 Reconcile',
+        act:"showMoneySec('expenses',document.querySelector('#v-money .pn-btn[data-sec=expenses]'));var _c=document.querySelector('#expTopChips .fchip:nth-child(2)');if(_c)setExpFilter('uncleared',_c)",
+        skip:'recon'};
+    }
+  }
+
+  el.style.display='';
+  if(!card){
+    // The calm state — done is the reward.
+    var lts=document.getElementById('bgLeftToSpend');
+    el.innerHTML='<div class="card" style="margin:0;padding:14px 16px;background:var(--lime);border:none">'
+      +'<div style="display:flex;justify-content:space-between;align-items:center">'
+      +'<div><div style="font-size:10px;font-weight:800;color:#5A6B1A;text-transform:uppercase;letter-spacing:1px;margin-bottom:2px">All clear</div>'
+      +'<div style="font-size:15px;font-weight:800;color:#3E4A10">✅ Money’s handled for today</div></div>'
+      +'<div style="text-align:right"><div style="font-size:10px;color:#5A6B1A;font-weight:700">LEFT TO SPEND</div>'
+      +'<div style="font-size:22px;font-weight:800;color:#3E4A10">'+(lts?lts.textContent:'')+'</div></div>'
+      +'</div></div>';
+    return;
+  }
+  var accent=card.urgent?'#F06677':'#2475FF';
+  el.innerHTML='<div class="card" style="margin:0;padding:14px 16px;border-left:4px solid '+accent+'">'
+    +'<div style="font-size:10px;font-weight:800;color:'+accent+';text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">👉 '+card.label+'</div>'
+    +'<div style="font-size:16px;font-weight:800;color:var(--textd);margin-bottom:2px">'+card.title+'</div>'
+    +'<div style="font-size:12px;color:var(--textl);margin-bottom:10px">'+card.sub+'</div>'
+    +'<div style="display:flex;gap:8px;align-items:center">'
+    +'<button onclick="'+card.act.replace(/"/g,'&quot;')+'" style="flex:1;padding:11px;border-radius:12px;border:none;background:'+accent+';color:#fff;font-family:\'Quicksand\',sans-serif;font-size:14px;font-weight:700;cursor:pointer">'+card.btn+'</button>'
+    +'<button onclick="guideSkip(\''+card.skip+'\')" style="padding:11px 12px;border-radius:12px;border:1.5px solid var(--bdr);background:#fff;color:var(--textl);font-family:\'Quicksand\',sans-serif;font-size:12px;font-weight:700;cursor:pointer">'+(card.skipLabel||'Later')+'</button>'
+    +'</div></div>';
+}
+
 // Pinned "check these first" accounts at the top of Money home:
 // the counted cash accounts + any active (non-excluded) credit cards. Tap to reconcile the balance.
 function renderMainAccounts(){
@@ -12809,6 +12925,7 @@ function renderBudget(){
   }
 
   if(typeof renderAllMoneyChecklists==='function')renderAllMoneyChecklists();
+  renderMoneyGuide();
 }
 
 function undoBudgetMove(id){
