@@ -22062,6 +22062,24 @@ function macrosKeepDefaults(){
   renderMealsGuide();
   if(typeof showToast==='function')showToast('Keeping '+S.gCal+' cal · '+S.gPro+'g protein');
 }
+// One tap: log today's planned dinner as eaten (my-servings × per-serving macros),
+// same MEAL_LOG_ITEMS shape as logCookIt, then advance the deck.
+function logPlannedDinner(){
+  var today=todayStr();
+  var name=(MEAL_PLAN[today]||{}).dinner;
+  if(!name){if(typeof showToast==='function')showToast('No dinner planned today');return;}
+  var rec=RECIPES.find(function(r){return r.name===name;});
+  var sv=(typeof getMealServings==='function')?getMealServings(today,'dinner'):1;
+  var m=rec&&rec.macros?rec.macros:null;
+  MEAL_LOG_ITEMS.unshift({id:'ml-'+Date.now(),name:name+(sv!==1?' ×'+sv:''),category:'dinner',day:'',date:today,
+    cal:m?Math.round((m.cal||0)*sv):0,pro:m?Math.round((m.pro||0)*sv*10)/10:0,carb:m?Math.round((m.carb||0)*sv*10)/10:0,fat:m?Math.round((m.fat||0)*sv*10)/10:0,
+    recipeId:rec?rec.id:undefined});
+  localStorage.setItem('aMealLogItems',JSON.stringify(MEAL_LOG_ITEMS));
+  if(typeof renderMealLog==='function')renderMealLog();
+  if(typeof renderTodayStatsBars==='function')renderTodayStatsBars();
+  mealsGuideSkip('tonight');
+  if(typeof showToast==='function')showToast('🍽️ '+name+' logged'+(m?' · +'+Math.round((m.pro||0)*sv)+'g protein':' (no macros on this recipe)'));
+}
 // Compact macro strip shown on every meals card — tap to edit targets.
 function _macroStripHtml(){
   var t=getTot();
@@ -22113,8 +22131,10 @@ function _mealsGuideCardObj(){
     card={label:'Tonight',
       title:'🍽️ '+escHtml(dayData.dinner),
       sub:paceNote,
-      btn:'📓 Log food as you eat',
-      act:"var f=document.getElementById('foodSrch');if(f){f.focus();f.scrollIntoView({block:'center'});}",
+      btn:'✓ Ate it — log dinner',
+      act:"logPlannedDinner()",
+      btn2:'📓 Log other food',
+      act2:"var f=document.getElementById('foodSrch');if(f){f.focus();f.scrollIntoView({block:'center'});}",
       skip:'tonight',skipLabel:'Got it ✓'};
   }
   // 3) The week ahead is thin (4+ of the next 7 dinners empty)
