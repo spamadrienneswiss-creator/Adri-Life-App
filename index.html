@@ -22286,7 +22286,15 @@ function _routinesNextGroup(){
   var hour=new Date().getHours();
   // Morning leads with AM, afternoon with Midday, evening with PM
   var pref=hour<11?['am','da','md']:(hour<17?['md','da','am']:['pm','da','md','am']);
-  var due=(RTN_GROUPS||[]).filter(function(g){return g.active!==false&&rtnIsDueToday(g);})
+  // Time windows: a routine only deals when its part of day has arrived.
+  // AM until 1pm, Midday 10am–5pm, PM from 4pm; everything else anytime.
+  var hourOK=function(g){
+    if(g.id==='am')return hour<13;
+    if(g.id==='md')return hour>=10&&hour<17;
+    if(g.id==='pm')return hour>=16;
+    return true;
+  };
+  var due=(RTN_GROUPS||[]).filter(function(g){return g.active!==false&&rtnIsDueToday(g)&&hourOK(g);})
     .sort(function(a,b){var pa=pref.indexOf(a.id),pb=pref.indexOf(b.id);return(pa<0?9:pa)-(pb<0?9:pb);});
   for(var k=0;k<due.length;k++){
     var g=due[k];
