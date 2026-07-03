@@ -16142,6 +16142,10 @@ function openAcctModal(id){
   document.getElementById('acctExclude').checked=!!(a&&a.excludeFromNet);
   document.getElementById('acctPrimary').checked=!!(a&&a.isPrimary);
   var _sp=document.getElementById('acctSpendable');if(_sp)_sp.checked=a?(typeof isSpendable==='function'?isSpendable(a):!!a.isPrimary):true;
+  // Remember the checkbox's opening state: saveAccount only writes a.spendable when the
+  // user actually toggles it (or it was already explicitly set) — so a plain balance
+  // update never silently answers the "do you spend from this?" setup question.
+  window._acctSpendInit=_sp?_sp.checked:undefined;
   acctToggleType();
   document.getElementById('acctNotes').value=a?a.notes||'':'';
   document.getElementById('acctDelBtn').style.display=id?'block':'none';
@@ -16165,7 +16169,7 @@ function saveAccount(){
   if(isPrimary)ACCOUNTS.forEach(function(x){x.isPrimary=false;});
   if(id){
     var a=ACCOUNTS.find(function(x){return x.id===id;});
-    if(a){a.name=name;a.amount=amount;a.isCredit=isCredit;a.minPayDate=minPayDate;a.minPayAmt=minPayAmt;a.notes=notes;a.excludeFromNet=excludeFromNet;a.isPrimary=isPrimary;if(!isCredit&&spendable!==undefined)a.spendable=spendable;a.updated=now;}
+    if(a){a.name=name;a.amount=amount;a.isCredit=isCredit;a.minPayDate=minPayDate;a.minPayAmt=minPayAmt;a.notes=notes;a.excludeFromNet=excludeFromNet;a.isPrimary=isPrimary;if(!isCredit&&spendable!==undefined&&(a.spendable!==undefined||spendable!==window._acctSpendInit))a.spendable=spendable;a.updated=now;}
   }else{
     ACCOUNTS.push({id:Date.now().toString(),name:name,amount:amount,isCredit:isCredit,minPayDate:minPayDate,minPayAmt:minPayAmt,notes:notes,excludeFromNet:excludeFromNet,isPrimary:isPrimary,spendable:(!isCredit&&spendable!==undefined)?spendable:undefined,updated:now});
   }
