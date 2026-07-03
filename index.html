@@ -63,8 +63,12 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
 .rc{background:white;border-radius:var(--r);padding:14px;margin-bottom:12px;box-shadow:var(--sh);border-left:4px solid var(--sage)}
 .rc.pm{border-left-color:var(--lav)}.rc.day{border-left-color:var(--peach)}
 .rt{font-size:14px;font-weight:700;color:var(--text);margin-bottom:10px}
-.ri{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid #f5f0eb;cursor:pointer}
-.ri:last-child{border-bottom:none}
+.ri{display:flex;align-items:center;gap:11px;padding:13px 14px;border:1.5px solid var(--bdr);border-radius:14px;margin-bottom:8px;cursor:pointer;background:#fff;box-shadow:var(--sh2);transition:background .15s,border-color .15s,transform .1s}
+.ri:active{transform:scale(.98)}
+.ri:last-child{margin-bottom:0}
+.ri .rlb{font-size:15px;font-weight:700}
+.ri.done{background:var(--lime);border-color:#DBE9A8}
+.ri.skip{background:#FFF6E4;border-color:#F0DCA6}
 .rchk{width:22px;height:22px;border-radius:50%;border:2px solid #ddd;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:11px;transition:all .2s}
 .ri.done .rchk{background:var(--sage);border-color:var(--sage);color:white}
 .ri.done .rlb{text-decoration:line-through;color:var(--textl)}
@@ -1376,6 +1380,8 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     <button class="home-edit-btn" id="homeResetBtn" onclick="resetHomeOrder()" style="display:none;margin-right:6px;font-size:12px">↺ Reset</button>
     <button class="home-edit-btn" id="homeEditBtn" onclick="toggleHomeEdit()">✏️ Edit</button>
   </div>
+  <!-- Start here: the single next card across Money / Meals / Tasks -->
+  <div id="homeGuideCard" style="margin-bottom:10px;display:none"></div>
   <div style="margin-bottom:10px">
     <button onclick="goTab('appindex',null)" style="width:100%;padding:10px 14px;border-radius:14px;border:1.5px solid rgba(143,170,139,.4);background:#fff;font-family:'Quicksand',sans-serif;font-size:13px;font-weight:700;color:var(--sage);cursor:pointer;display:flex;align-items:center;gap:8px;box-shadow:var(--sh2)"><span>🗂️</span><span>App Index — Navigate All Sections</span><span style="margin-left:auto;font-size:11px;color:var(--textl)">→</span></button>
   </div>
@@ -1659,6 +1665,8 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
 
 <!-- TASKS -->
 <div class="view" id="v-tasks">
+  <!-- The Guide: one dealt card — always the next task -->
+  <div id="tasksGuideCard" style="margin-bottom:14px;display:none"></div>
   <!-- Tasks -->
   <div class="card">
     <div class="helm-sec-hdr" onclick="togHelmSec('hs-tasklist')">
@@ -1716,12 +1724,6 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
 
 <!-- ROUTINES -->
 <div class="view" id="v-routines">
-  <!-- Interaction hint -->
-  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
-    <span style="font-size:10px;background:#f5f0fd;color:#7a5a9a;border-radius:8px;padding:3px 8px;font-family:'Quicksand',sans-serif;font-weight:600">Tap = done ✅</span>
-    <span style="font-size:10px;background:#f0f8e8;color:#5a7a56;border-radius:8px;padding:3px 8px;font-family:'Quicksand',sans-serif;font-weight:600">Long-press / right-click = menu ⋯</span>
-    <span style="font-size:10px;background:#fff8e8;color:#8a6030;border-radius:8px;padding:3px 8px;font-family:'Quicksand',sans-serif;font-weight:600">🔵 Habits = daily · 🟣 Blocks = scheduled</span>
-  </div>
   <!-- Section tabs -->
   <div class="pill-nav" style="margin-bottom:14px">
     <button class="pn-btn on" id="rtnSecBtn-daily" onclick="showRtnSection('daily',this)">🔵 Daily Habits</button>
@@ -1898,6 +1900,8 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     <span id="mThisExp" style="display:none"></span>
     <span id="mNet" style="display:none"></span>
     <span id="mInc" style="display:none"></span>
+    <!-- The Guide: one dealt card — always the next action -->
+    <div id="moneyGuideCard" style="margin-bottom:14px;display:none"></div>
     <!-- Main accounts — check these first -->
     <div class="card" id="bgMainAccts" style="margin-bottom:14px;padding:12px 14px;display:none"></div>
     <!-- WATERFALL: money − bills − cushion = left to spend -->
@@ -2603,6 +2607,8 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
 
   <!-- WHAT I ATE section -->
   <div id="ms-ate">
+      <!-- The Guide: one dealt card — always the next food action -->
+      <div id="mealsGuideCard" style="margin-bottom:14px;display:none"></div>
       <!-- Date nav -->
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
         <button onclick="shiftEatDate(-1)" style="padding:5px 13px;border-radius:8px;border:1.5px solid var(--bdr);background:var(--bg);font-family:'Quicksand',sans-serif;font-size:14px;cursor:pointer;color:var(--textl)">◀</button>
@@ -2745,6 +2751,8 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
       <button class="btn sec" style="font-size:12px;padding:5px 10px" onclick="clearCheckedGrocery()">Clear checked</button>
       <button class="btn sec" style="font-size:12px;padding:5px 10px" onclick="expGrocery()">Export</button>
     </div>
+    <!-- List cost vs Groceries budget — where meals meet money -->
+    <div id="grocBudgetStrip" style="display:none;margin-bottom:10px"></div>
     <button class="btn" style="width:100%;margin-bottom:10px;background:linear-gradient(135deg,#fdebd7,#fdf6ee);color:#b06a2c" onclick="syncMealPlanGrocery()">🍽️ Build from this week's meal plan</button>
     <div style="display:flex;gap:6px;margin-bottom:6px;flex-wrap:wrap">
       <input id="groceryAddName" type="text" placeholder="Item name" list="groceryDbSuggest" style="flex:2;min-width:100px;padding:8px 11px;border-radius:10px;border:1.5px solid #e8e0d8;font-family:'Quicksand',sans-serif;font-size:13px">
@@ -6279,6 +6287,7 @@ function initFirebase(){
       ap('aBudgetBuckets',function(v,r){if(v&&v.length)BUDGET_BUCKETS=v;_origSetItem('aBudgetBuckets',r);});
       ap('aBudgetMoves',function(v,r){BUDGET_MOVES=v||[];_origSetItem('aBudgetMoves',r);});
       ap('aMoneyReserve',function(v,r){_origSetItem('aMoneyReserve',r);});
+      ap('aBillsReviewed',function(v,r){_origSetItem('aBillsReviewed',r);});
       _fbBlobPause=false;
       renderBills();renderAccounts();renderIncome();updMoneyBadge();renderBudget();
       if(typeof renderTrips==='function')renderTrips();
@@ -6335,6 +6344,7 @@ function initFirebase(){
     }else if(group==='food'){
       ap('aRecipes',function(v,r){RECIPES=v||[];_origSetItem('aRecipes',r);});
       ap('aMealPlan',function(v,r){MEAL_PLAN=v||{};_origSetItem('aMealPlan',r);});
+      ap('aMacrosReviewed',function(v,r){_origSetItem('aMacrosReviewed',r);});
       ap('aMealMyServings',function(v,r){MEAL_MY_SERVINGS=v||{};_origSetItem('aMealMyServings',r);});
       ap('aWantToTry',function(v,r){WANT_TO_TRY=v||[];_origSetItem('aWantToTry',r);});
       ap('aGroceryList',function(v,r){GROCERY_LIST=v||[];_origSetItem('aGroceryList',r);});
@@ -6345,6 +6355,7 @@ function initFirebase(){
       ap('aInvSections',function(v,r){if(v&&v.length)INV_SECTIONS=v;_origSetItem('aInvSections',r);});
       ap('aMC',function(v,r){if(v&&v.length)MEAL_COMBOS=v;_origSetItem('aMC',r);});
       ap('aFoodDb',function(v,r){FOOD_DB=v||[];_origSetItem('aFoodDb',r);});
+      ap('aFDB',function(v,r){if(v&&v.length)FDB=v;_origSetItem('aFDB',r);});
       ap('aIngredients',function(v,r){INGREDIENTS=v||[];_origSetItem('aIngredients',r);});
       _fbBlobPause=false;
       if(typeof renderRecipes==='function')renderRecipes();
@@ -6465,16 +6476,16 @@ function fbDelete(col, id){
 // localStorage.setItem is intercepted to auto-save on every write.
 // ═══════════════════════════════════════════════
 var BLOB_GROUPS={
-  money:['aBills','aBillPay','aBillMonthAmt','aAccounts','aIncome','aIncGoal','aMonIncGoal','aMoneyChecks','aTaxLog','aProjIncome','aPriceLog','aExpCats','aMoneyProjects','aTrips','aPayoffs','aBudgetBuckets','aBudgetMoves','aMoneyReserve'],
+  money:['aBills','aBillPay','aBillMonthAmt','aAccounts','aIncome','aIncGoal','aMonIncGoal','aMoneyChecks','aTaxLog','aProjIncome','aPriceLog','aExpCats','aMoneyProjects','aTrips','aPayoffs','aBudgetBuckets','aBudgetMoves','aMoneyReserve','aBillsReviewed'],
   health:['aMeds','aMedLog','aEnergyLog','aMeasLog','aMealLogItems','aMoodNotes','aWineDrinks','aSymLog','aSymTypes'],
   habits:['aHabits','aHabitLog'],
   routines:['aRS','aRS2','aRH','aRTG','aRtns'],
   planning:['aSOPs','aBrainDump','aIntentions','aMonthTodos','aTmpls'],
   spiritual:['aBibleLog','aBibleChapNotes','aPrayers','aGratLog','aSpiritBooks','aSpiritSettings','aSpiritRun'],
-  food:['aRecipes','aMealPlan','aMealMyServings','aGroceryList','aGrocTags','aGrocDepts','aGrocStoreDeptOrder','aInventory','aInvSections','aMC','aFoodDb','aIngredients','aWantToTry'],
+  food:['aRecipes','aMealPlan','aMealMyServings','aGroceryList','aGrocTags','aGrocDepts','aGrocStoreDeptOrder','aInventory','aInvSections','aMC','aFoodDb','aFDB','aIngredients','aWantToTry','aMacrosReviewed'],
   fitness:['aWplans','aWlog2','aMovements','aExTypes','aExDB','aExLog','aPT'],
   creative:['aStories','aSChars','aSScenes','aFaves','aMixtape','aMemories','aPlaces','aVbItems'],
-  tools:['aSparkPrompts','aSparkSaved','aDispatchJournal','aHatchChaos','aHatchTransmissions','aHatchMissions','aHatchShocks','aHatchCast'],
+  tools:['aSparkPrompts','aSparkSaved','aDispatchJournal','aHatchChaos','aHatchTransmissions','aHatchMissions','aHatchShocks','aHatchCast','aStreak'],
   learning:['aKEvents','aLifeHacks','aResearch','aResearchTopics','aMemoryItems','aFcDecks','aFcCards','aStudyNotes'],
   game:['aBadges','aHelmMiles','aSprintStats','aEmber','aMillie','aFishLevel','aFishLog'],
   work2:['aWigOrders','aWorkProjects'],
@@ -7068,6 +7079,7 @@ function rtnCompState(g,dateStr){
 }
 
 function rtnSetComp(gId,dateStr,idx,val){
+  if(val==='done'&&typeof bumpStreak==='function')bumpStreak();
   var g=RTN_GROUPS.find(function(x){return x.id===gId;});
   var freq=g?rtnFreq(g):'daily';
   if(freq==='daily'){
@@ -7269,6 +7281,7 @@ function showDailyRtnTab(key,btn){
 }
 
 function renderDailyRtn(key){
+  if(typeof renderRoutinesGuide==='function')renderRoutinesGuide();
   var el=document.getElementById('dailyRtnBody');if(!el)return;
   var g=RTN_GROUPS.find(function(x){return x.id===key;});
   var isActive=!g||(g.active!==false);
@@ -7984,6 +7997,7 @@ function renderCatFilterChips(){
 }
 
 function renderT(){
+  if(typeof renderTasksGuide==='function')renderTasksGuide();
   var list=document.getElementById('taskList');if(!list)return;
   var _sel=document.getElementById('taskSortSel');if(_sel&&_sel.value!==TASK_SORT)_sel.value=TASK_SORT;
   renderCatFilterChips();
@@ -8122,7 +8136,7 @@ function togT(id){
   var t=findTaskDeep(id,TASKS);
   if(!t)return;
   t.done=!t.done;
-  if(t.done){t.doneDate=todayStr();t.parked=false;}else delete t.doneDate;
+  if(t.done){t.doneDate=todayStr();t.parked=false;if(typeof bumpStreak==='function')bumpStreak();}else delete t.doneDate;
   _autoCompleteTree(TASKS);
   saveTasks();
   var root=_findRootFor(id,TASKS)||t;
@@ -12030,8 +12044,9 @@ function addFL(id){
   if(!FL[k])FL[k]=[];
   FL[k].push(Object.assign({},food,{lid:Date.now().toString()}));
   localStorage.setItem('aFL',JSON.stringify(FL));
-  document.getElementById('foodSrch').value='';
-  document.getElementById('foodSugs').style.display='none';
+  if(typeof bumpStreak==='function')bumpStreak();
+  var _fs=document.getElementById('foodSrch');if(_fs)_fs.value='';
+  var _fg=document.getElementById('foodSugs');if(_fg)_fg.style.display='none';
   renderFL();updM();
 }
 function addFLFromLib(id){ addFLFromLibQty(id,1); }
@@ -12099,6 +12114,7 @@ function renderFL(){
   var log=getTL();
   var el=document.getElementById('foodLog');if(!el)return;
   el.innerHTML=log.length?log.map(function(f){return'<div class="fli"><div class="fli-l"><div class="fli-n">'+f.name+'</div><div class="fli-m">'+(f.sv||'1 srv')+' • P:'+f.pro+'g F:'+f.fib+'g C:'+f.crb+'g Fat:'+f.fat+'g</div></div><div style="display:flex;align-items:center;gap:7px"><div class="fli-c">'+f.cal+' cal</div><button class="fli-del" onclick="delFL(\''+f.lid+'\')">✕</button></div></div>';}).join(''):'<div class="empty"><div class="emj">🍽️</div><p>No food logged yet.</p></div>';
+  if(typeof renderMealsGuide==='function')renderMealsGuide();
 }
 
 function saveNF(){
@@ -12107,6 +12123,8 @@ function saveNF(){
   var f={id:'f'+Date.now(),name:name,sv:document.getElementById('nfS').value||'1 serving',cal:parseFloat(document.getElementById('nfC').value)||0,pro:parseFloat(document.getElementById('nfP').value)||0,fib:parseFloat(document.getElementById('nfF').value)||0,crb:parseFloat(document.getElementById('nfR').value)||0,fat:parseFloat(document.getElementById('nfA').value)||0};
   FDB.push(f);
   localStorage.setItem('aFDB',JSON.stringify(FDB));
+  var _fa=JSON.parse(localStorage.getItem('aFoodAddsDay')||'{}');var _ft=new Date().toISOString().slice(0,10);
+  localStorage.setItem('aFoodAddsDay',JSON.stringify({date:_ft,n:(_fa.date===_ft?(_fa.n||0):0)+1}));
   closeM('nfModal');addFL(f.id);
 }
 
@@ -12169,6 +12187,7 @@ function saveExp(){
   // The expenses snapshot listener rebuilds EXPENSES from the server when connected — no dupes.
   EXPENSES.unshift(e);
   localStorage.setItem('aExpenses',JSON.stringify(EXPENSES));
+  if(typeof bumpStreak==='function')bumpStreak();
   fbSave('expenses',id,e);
   // Auto-update account balance: credit card goes up (more owed), cash goes down
   if(eAcctVal){
@@ -12787,6 +12806,188 @@ function unpaidBillsThisMonth(){
     .reduce(function(s,b){return s+(parseFloat(getBillMonthAmt(b.id))||0);},0);
 }
 
+// ── THE GUIDE: deal the next card ─────────────────────────────
+// One prompt at a time, priority-ordered, each with a button that does the thing.
+// Skips are per-day, per-device (not synced — they're "not now", not data).
+function _guideSkips(){
+  var t=new Date().toISOString().slice(0,10);
+  var s=JSON.parse(localStorage.getItem('aMoneyGuideSkips')||'{}');
+  if(s.date!==t)s={date:t,skips:[]};
+  return s;
+}
+function guideSkip(key){
+  var s=_guideSkips();
+  if(s.skips.indexOf(key)<0)s.skips.push(key);
+  localStorage.setItem('aMoneyGuideSkips',JSON.stringify(s));
+  renderMoneyGuide();
+}
+// ── ONE-TIME SETUP DECK ──────────────────────────────────────
+// Verifies the data the money math runs on. Answering a card writes the
+// flag (synced via aAccounts / blob), so each question is asked once ever.
+function _moneySetupCard(){
+  // a) Active credit cards never sorted into "counts now" vs "set aside for later"
+  var un=ACCOUNTS.find(function(a){return a.isCredit&&!a.excludeFromNet&&!a.netReviewed&&(parseFloat(a.amount)||0)>0;});
+  if(un){
+    return {label:'One-time question',setup:true,
+      title:'You owe $'+(parseFloat(un.amount)||0).toFixed(0)+' on “'+escHtml(un.name)+'”. Count it against your money now?',
+      sub:'Count it now = you’re actively paying this card down, so it lowers your numbers. Set aside = it’s on a 0% promo / you’ll deal with it later, so it’s tracked but doesn’t drag your numbers down.',
+      btn:'💳 Count it now',act:"acctSetupAnswer('"+un.id+"','now')",
+      btn2:'🅿️ Set aside for later',act2:"acctSetupAnswer('"+un.id+"','later')",
+      skip:'setup'};
+  }
+  // b) Non-primary cash accounts never marked count / don't-count
+  var uc=ACCOUNTS.find(function(a){return !a.isCredit&&!a.isPrimary&&a.spendable===undefined;});
+  if(uc){
+    return {label:'One-time question',setup:true,
+      title:'Do you pay for things from “'+escHtml(uc.name)+'”? (has $'+(parseFloat(uc.amount)||0).toFixed(0)+')',
+      sub:'Say yes only for accounts you actually spend from day to day. Those add up to “Money we have”. Savings, business, and other people’s money stay out.',
+      btn:'✅ Yes, I spend from it',act:"acctSetupSpendable('"+uc.id+"',true)",
+      btn2:'🚫 No, leave it out',act2:"acctSetupSpendable('"+uc.id+"',false)",
+      skip:'setup'};
+  }
+  // c) Bills sanity check against the sheet
+  if(BILLS.length&&localStorage.getItem('aBillsReviewed')!=='1'){
+    var tot=BILLS.reduce(function(s,b){return s+(parseFloat(getBillMonthAmt(b.id))||0);},0);
+    return {label:'One-time question',setup:true,
+      title:'The app knows '+BILLS.length+' bills (~$'+tot.toFixed(0)+'/month). Is that every bill you pay?',
+      sub:'The app can only set money aside for bills it knows about. If one is missing, “Left to spend” will look bigger than it really is.',
+      btn:'✓ That’s all of them',act:"billsConfirmReviewed()",
+      btn2:'➕ Add a missing bill',act2:"openAddBill()",
+      skip:'setup'};
+  }
+  return null;
+}
+function acctSetupAnswer(id,ans){
+  var a=ACCOUNTS.find(function(x){return x.id===id;});if(!a)return;
+  if(ans==='later')a.excludeFromNet=true;
+  a.netReviewed=true;
+  localStorage.setItem('aAccounts',JSON.stringify(ACCOUNTS));
+  renderBudget();
+  if(typeof renderAccounts==='function')renderAccounts();
+  if(typeof showToast==='function')showToast(ans==='later'?'🅿️ Set aside \u2014 tracked, but not counted against you':'💳 Counted \u2014 it now lowers \u201cWhere I stand\u201d');
+}
+function acctSetupSpendable(id,yes){
+  var a=ACCOUNTS.find(function(x){return x.id===id;});if(!a)return;
+  a.spendable=!!yes;
+  localStorage.setItem('aAccounts',JSON.stringify(ACCOUNTS));
+  renderBudget();
+  if(typeof renderAccounts==='function')renderAccounts();
+  if(typeof showToast==='function')showToast(yes?'✅ Counted \u2014 it adds to \u201cMoney we have\u201d':'🚫 Left out of \u201cMoney we have\u201d');
+}
+function billsConfirmReviewed(){
+  localStorage.setItem('aBillsReviewed','1');
+  renderBudget();
+  if(typeof showToast==='function')showToast('✓ Bills confirmed');
+}
+// Open Add Expense with a bill already picked — the guide's "pay it now".
+function payBillNow(billId){
+  openM('expModal');
+  var sel=document.getElementById('ePayBill');
+  if(sel){sel.value=billId;onPayBillSelect();}
+}
+// Rule engine only — returns the card the Money guide would deal (or null).
+// Peekable from the Home "start here" strip.
+function _moneyGuideCardObj(){
+  var skips=_guideSkips().skips;
+  var today=new Date();
+  var todayKey=today.toISOString().slice(0,10);
+  var card=null;
+
+  // 0) One-time setup deck outranks the daily deck
+  if(skips.indexOf('setup')<0)card=_moneySetupCard();
+
+  // 1) Stale balances on the accounts that matter (spendable cash + active cards)
+  if(!card&&skips.indexOf('bal')<0){
+    var mains=ACCOUNTS.filter(function(a){return(!a.isCredit&&isSpendable(a))||(a.isCredit&&!a.excludeFromNet&&(parseFloat(a.amount)||0)>0);});
+    var stale=mains.filter(function(a){
+      if(!a.updated)return true;
+      var d=new Date(a.updated);
+      return isNaN(d)||((today-d)/86400000)>3;
+    });
+    if(stale.length){
+      var first=stale[0];
+      card={label:'Start here',
+        title:'Check your balance'+(stale.length>1?'s':''),
+        sub:stale.slice(0,3).map(function(a){return escHtml(a.name);}).join(' · ')+(stale.length>3?' +'+(stale.length-3):'')+' — open your bank app, look at today\u2019s balance, and type it in here. Every other number depends on this.',
+        btn:'Update '+escHtml(first.name),
+        act:"openAcctModal('"+first.id+"')",
+        skip:'bal'};
+    }
+  }
+  // 2) Bills overdue or due within 3 days (not yet paid)
+  if(!card&&skips.indexOf('bills')<0){
+    var mon=getMonStr();var paid=BILL_PAY[mon]||{};
+    var dToday=today.getDate();
+    var due=(BILLS||[]).filter(function(b){var s=paid[b.id]||'';return s!=='paid'&&s!=='posted'&&(parseInt(b.day)||1)<=dToday+3;})
+      .sort(function(a,b){return(parseInt(a.day)||1)-(parseInt(b.day)||1);});
+    if(due.length){
+      var b0=due[0];var bd=parseInt(b0.day)||1;
+      var when=bd<dToday?'was due day '+bd+' — overdue':(bd===dToday?'due today':'due in '+(bd-dToday)+' day'+((bd-dToday)>1?'s':''));
+      card={label:bd<dToday?'Overdue':'Due soon',
+        title:'Pay '+escHtml(b0.name)+' — $'+(parseFloat(getBillMonthAmt(b0.id))||0).toFixed(0),
+        sub:when+(due.length>1?' \u00b7 '+(due.length-1)+' more coming up':'')+'. The button opens the expense form already filled in \u2014 change the amount if the real charge differs, then save.',
+        btn:'💸 Pay it now',
+        act:"payBillNow('"+b0.id+"')",
+        skip:'bills',
+        urgent:bd<dToday};
+    }
+  }
+  // 3) Nothing logged today → quick yes/no
+  if(!card&&skips.indexOf('spend')<0){
+    var loggedToday=(EXPENSES||[]).some(function(e){return(e.created||'').slice(0,10)===todayKey;});
+    if(!loggedToday){
+      card={label:'Quick check',
+        title:'Spent anything today?',
+        sub:'Add anything you bought today so the totals stay true \u2014 or tap \u201cNothing today\u201d if you didn\u2019t spend.',
+        btn:'💸 Log it',
+        act:"openM('expModal')",
+        skip:'spend',
+        skipLabel:'Nothing today ✓'};
+    }
+  }
+  // 4) Pending charges piling up
+  if(!card&&skips.indexOf('recon')<0){
+    var unc=(EXPENSES||[]).filter(function(e){return!e.reconciled&&!e.archived;}).length;
+    if(unc>=5){
+      card={label:'Tidy up',
+        title:'Reconcile '+unc+' pending charges',
+        sub:'These are logged but not yet confirmed. Open your bank app, and tap \u2713 on each charge here that you can see there.',
+        btn:'🔄 Reconcile',
+        act:"showMoneySec('expenses',document.querySelector('#v-money .pn-btn[data-sec=expenses]'));var _c=document.querySelector('#expTopChips .fchip:nth-child(2)');if(_c)setExpFilter('uncleared',_c)",
+        skip:'recon'};
+    }
+  }
+  return card;
+}
+function renderMoneyGuide(){
+  var el=document.getElementById('moneyGuideCard');if(!el)return;
+  var card=_moneyGuideCardObj();
+  if(typeof renderHomeGuide==='function')renderHomeGuide();
+
+  el.style.display='';
+  if(!card){
+    // The calm state — done is the reward.
+    var lts=document.getElementById('bgLeftToSpend');
+    el.innerHTML='<div class="card" style="margin:0;padding:14px 16px;background:var(--lime);border:none">'
+      +'<div style="display:flex;justify-content:space-between;align-items:center">'
+      +'<div><div style="font-size:10px;font-weight:800;color:#5A6B1A;text-transform:uppercase;letter-spacing:1px;margin-bottom:2px">All clear</div>'
+      +'<div style="font-size:15px;font-weight:800;color:#3E4A10">✅ Money’s handled for today</div></div>'
+      +'<div style="text-align:right"><div style="font-size:10px;color:#5A6B1A;font-weight:700">LEFT TO SPEND</div>'
+      +'<div style="font-size:22px;font-weight:800;color:#3E4A10">'+(lts?lts.textContent:'')+'</div></div>'
+      +'</div></div>';
+    return;
+  }
+  var accent=card.setup?'#B189B4':(card.urgent?'#F06677':'#2475FF');
+  var btns='<button onclick="'+card.act.replace(/"/g,'&quot;')+'" style="flex:1;padding:11px;border-radius:12px;border:none;background:'+accent+';color:#fff;font-family:\'Quicksand\',sans-serif;font-size:14px;font-weight:700;cursor:pointer">'+card.btn+'</button>';
+  if(card.btn2)btns+='<button onclick="'+card.act2.replace(/"/g,'&quot;')+'" style="flex:1;padding:11px;border-radius:12px;border:1.5px solid '+accent+';background:#fff;color:'+accent+';font-family:\'Quicksand\',sans-serif;font-size:13px;font-weight:700;cursor:pointer">'+card.btn2+'</button>';
+  btns+='<button onclick="guideSkip(\''+card.skip+'\')" style="padding:11px 12px;border-radius:12px;border:1.5px solid var(--bdr);background:#fff;color:var(--textl);font-family:\'Quicksand\',sans-serif;font-size:12px;font-weight:700;cursor:pointer">'+(card.skipLabel||'Later')+'</button>';
+  el.innerHTML='<div class="card" style="margin:0;padding:14px 16px;border-left:4px solid '+accent+'">'
+    +'<div style="font-size:10px;font-weight:800;color:'+accent+';text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">👉 '+card.label+'</div>'
+    +'<div style="font-size:16px;font-weight:800;color:var(--textd);margin-bottom:2px">'+card.title+'</div>'
+    +'<div style="font-size:12px;color:var(--textl);margin-bottom:10px">'+card.sub+'</div>'
+    +'<div style="display:flex;gap:8px;align-items:center">'+btns+'</div></div>';
+}
+
 // Pinned "check these first" accounts at the top of Money home:
 // the counted cash accounts + any active (non-excluded) credit cards. Tap to reconcile the balance.
 function renderMainAccounts(){
@@ -12979,6 +13180,7 @@ function renderBudget(){
   }
 
   if(typeof renderAllMoneyChecklists==='function')renderAllMoneyChecklists();
+  renderMoneyGuide();
 }
 
 function undoBudgetMove(id){
@@ -16095,6 +16297,7 @@ function acctToggleType(){
   document.getElementById('acctMinPayFg').style.display=c?'':'none';
   document.getElementById('acctExcludeFg').style.display=c?'':'none';
   document.getElementById('acctPrimaryFg').style.display=c?'none':'';
+  var _sf=document.getElementById('acctSpendableFg');if(_sf)_sf.style.display=c?'none':'';
 }
 function openAcctModal(id){
   var a=id?ACCOUNTS.find(function(x){return x.id===id;}):null;
@@ -16108,6 +16311,11 @@ function openAcctModal(id){
   document.getElementById('acctMinPayAmt').value=a&&a.minPayAmt?a.minPayAmt:'';
   document.getElementById('acctExclude').checked=!!(a&&a.excludeFromNet);
   document.getElementById('acctPrimary').checked=!!(a&&a.isPrimary);
+  var _sp=document.getElementById('acctSpendable');if(_sp)_sp.checked=a?(typeof isSpendable==='function'?isSpendable(a):!!a.isPrimary):true;
+  // Remember the checkbox's opening state: saveAccount only writes a.spendable when the
+  // user actually toggles it (or it was already explicitly set) — so a plain balance
+  // update never silently answers the "do you spend from this?" setup question.
+  window._acctSpendInit=_sp?_sp.checked:undefined;
   acctToggleType();
   document.getElementById('acctNotes').value=a?a.notes||'':'';
   document.getElementById('acctDelBtn').style.display=id?'block':'none';
@@ -16124,14 +16332,16 @@ function saveAccount(){
   var notes=document.getElementById('acctNotes').value.trim();
   var excludeFromNet=isCredit&&document.getElementById('acctExclude').checked;
   var isPrimary=!isCredit&&document.getElementById('acctPrimary').checked;
+  var _spEl=document.getElementById('acctSpendable');
+  var spendable=!isCredit&&_spEl?_spEl.checked:undefined;
   var id=document.getElementById('acctEditId').value;
   var now=new Date().toISOString().slice(0,10);
   if(isPrimary)ACCOUNTS.forEach(function(x){x.isPrimary=false;});
   if(id){
     var a=ACCOUNTS.find(function(x){return x.id===id;});
-    if(a){a.name=name;a.amount=amount;a.isCredit=isCredit;a.minPayDate=minPayDate;a.minPayAmt=minPayAmt;a.notes=notes;a.excludeFromNet=excludeFromNet;a.isPrimary=isPrimary;a.updated=now;}
+    if(a){a.name=name;a.amount=amount;a.isCredit=isCredit;a.minPayDate=minPayDate;a.minPayAmt=minPayAmt;a.notes=notes;a.excludeFromNet=excludeFromNet;a.isPrimary=isPrimary;if(!isCredit&&spendable!==undefined&&(a.spendable!==undefined||spendable!==window._acctSpendInit))a.spendable=spendable;a.updated=now;}
   }else{
-    ACCOUNTS.push({id:Date.now().toString(),name:name,amount:amount,isCredit:isCredit,minPayDate:minPayDate,minPayAmt:minPayAmt,notes:notes,excludeFromNet:excludeFromNet,isPrimary:isPrimary,updated:now});
+    ACCOUNTS.push({id:Date.now().toString(),name:name,amount:amount,isCredit:isCredit,minPayDate:minPayDate,minPayAmt:minPayAmt,notes:notes,excludeFromNet:excludeFromNet,isPrimary:isPrimary,spendable:(!isCredit&&spendable!==undefined)?spendable:undefined,updated:now});
   }
   localStorage.setItem('aAccounts',JSON.stringify(ACCOUNTS));
   closeM('acctModal');
@@ -21981,6 +22191,413 @@ function fmtWeekLbl(dates){
 var DOW=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
 
 // ── Plan rendering ────────────────────────────
+// ── THE MEALS GUIDE: deal the next food card ─────────────────
+// Same pattern as the Money guide: one prompt, one button, macros always in view.
+function _mealsGuideSkips(){
+  var t=new Date().toISOString().slice(0,10);
+  var s=JSON.parse(localStorage.getItem('aMealsGuideSkips')||'{}');
+  if(s.date!==t)s={date:t,skips:[]};
+  return s;
+}
+function mealsGuideSkip(key){
+  var s=_mealsGuideSkips();
+  if(s.skips.indexOf(key)<0)s.skips.push(key);
+  localStorage.setItem('aMealsGuideSkips',JSON.stringify(s));
+  renderMealsGuide();
+}
+function setMacroTargets(){
+  var c=prompt('Daily calorie target:',S.gCal);
+  if(c===null)return;
+  var p=prompt('Daily protein target (grams):',S.gPro);
+  if(p===null)return;
+  S.gCal=parseInt(c)||S.gCal;
+  S.gPro=parseInt(p)||S.gPro;
+  localStorage.setItem('aGCal',S.gCal);
+  localStorage.setItem('aGPro',S.gPro);
+  localStorage.setItem('aMacrosReviewed','1');
+  if(typeof renderTodayStatsBars==='function')renderTodayStatsBars();
+  renderMealsGuide();
+  if(typeof showToast==='function')showToast('Targets: '+S.gCal+' cal · '+S.gPro+'g protein');
+}
+// Two-question wizard: suggests weight-loss targets from goal weight
+// (~12 cal and ~0.8g protein per lb of goal weight — steady, protein-protective).
+function macroSetupWizard(){
+  var cur=prompt('Current weight (lb):','');
+  if(cur===null)return;
+  var goal=prompt('Goal weight (lb):',cur);
+  if(goal===null)return;
+  var gw=parseFloat(goal)||parseFloat(cur)||0;
+  if(!gw){if(typeof showToast==='function')showToast('Need a weight to compute');return;}
+  var cal=Math.round(gw*12/10)*10;
+  var pro=Math.round(gw*0.8/5)*5;
+  if(confirm('Suggested for reaching '+gw+' lb:\n\n'+cal+' cal / day\n'+pro+'g protein / day\n\nUse these? (Cancel to type your own)')){
+    S.gCal=cal;S.gPro=pro;
+    localStorage.setItem('aGCal',cal);
+    localStorage.setItem('aGPro',pro);
+    localStorage.setItem('aMacrosReviewed','1');
+    if(typeof renderTodayStatsBars==='function')renderTodayStatsBars();
+    renderMealsGuide();
+    if(typeof showToast==='function')showToast('🎯 '+cal+' cal · '+pro+'g protein');
+  }else{
+    setMacroTargets();
+  }
+}
+function macrosKeepDefaults(){
+  localStorage.setItem('aMacrosReviewed','1');
+  renderMealsGuide();
+  if(typeof showToast==='function')showToast('Keeping '+S.gCal+' cal · '+S.gPro+'g protein');
+}
+// One tap: log today's planned dinner as eaten (my-servings × per-serving macros),
+// same MEAL_LOG_ITEMS shape as logCookIt, then advance the deck.
+function logPlannedDinner(){
+  var today=todayStr();
+  var name=(MEAL_PLAN[today]||{}).dinner;
+  if(!name){if(typeof showToast==='function')showToast('No dinner planned today');return;}
+  var rec=RECIPES.find(function(r){return r.name===name;});
+  var sv=(typeof getMealServings==='function')?getMealServings(today,'dinner'):1;
+  var m=rec&&rec.macros?rec.macros:null;
+  MEAL_LOG_ITEMS.unshift({id:'ml-'+Date.now(),name:name+(sv!==1?' ×'+sv:''),category:'dinner',day:'',date:today,
+    cal:m?Math.round((m.cal||0)*sv):0,pro:m?Math.round((m.pro||0)*sv*10)/10:0,carb:m?Math.round((m.carb||0)*sv*10)/10:0,fat:m?Math.round((m.fat||0)*sv*10)/10:0,
+    recipeId:rec?rec.id:undefined});
+  localStorage.setItem('aMealLogItems',JSON.stringify(MEAL_LOG_ITEMS));
+  if(typeof bumpStreak==='function')bumpStreak();
+  if(typeof renderMealLog==='function')renderMealLog();
+  if(typeof renderTodayStatsBars==='function')renderTodayStatsBars();
+  mealsGuideSkip('tonight');
+  if(typeof showToast==='function')showToast('🍽️ '+name+' logged'+(m?' · +'+Math.round((m.pro||0)*sv)+'g protein':' (no macros on this recipe)'));
+}
+// Compact macro strip shown on every meals card — tap to edit targets.
+function _macroStripHtml(){
+  var t=getTot();
+  var pc=Math.min(100,Math.round((t.cal||0)/S.gCal*100));
+  var pp=Math.min(100,Math.round((t.pro||0)/S.gPro*100));
+  var proColor=pp>=100?'#7C9A2D':(pp>=60?'#C4974A':'#F06677');
+  return '<div onclick="setMacroTargets()" style="cursor:pointer;margin-top:10px;padding-top:10px;border-top:1px solid #f0edf5">'
+    +'<div style="display:flex;justify-content:space-between;font-size:10px;font-weight:700;color:var(--textl);margin-bottom:3px"><span>🔥 '+Math.round(t.cal||0)+' / '+S.gCal+' cal</span><span style="color:'+proColor+'">💪 '+Math.round(t.pro||0)+' / '+S.gPro+'g protein</span></div>'
+    +'<div style="display:flex;gap:6px">'
+    +'<div style="flex:1;height:5px;background:#f0edf5;border-radius:3px;overflow:hidden"><div style="height:100%;width:'+pc+'%;background:#65B2E7"></div></div>'
+    +'<div style="flex:1;height:5px;background:#f0edf5;border-radius:3px;overflow:hidden"><div style="height:100%;width:'+pp+'%;background:'+proColor+'"></div></div>'
+    +'</div>'
+    +'<div style="font-size:9px;color:var(--textl);text-align:right;margin-top:2px">tap to change targets</div>'
+    +'</div>';
+}
+// Rule engine only — returns the card the Meals guide would deal (or null).
+function _mealsGuideCardObj(){
+  var skips=_mealsGuideSkips().skips;
+  var today=todayStr();
+  var dayData=MEAL_PLAN[today]||{};
+  var card=null;
+
+  // 0) One-time setup: make the macro targets hers, not the defaults
+  if(skips.indexOf('setup')<0&&localStorage.getItem('aMacrosReviewed')!=='1'){
+    card={label:'Setup — one time',setup:true,
+      title:'Make the macro targets yours',
+      sub:'Currently '+S.gCal+' cal · '+S.gPro+'g protein (app defaults). Two questions and they fit your weight-loss goal.',
+      btn:'🎯 Set my targets',act:"macroSetupWizard()",
+      btn2:'Keep these ✓',act2:"macrosKeepDefaults()",
+      skip:'setup'};
+  }
+
+  // 1) No dinner planned tonight
+  if(!card&&skips.indexOf('dinner')<0&&!dayData.dinner){
+    card={label:'Tonight',
+      title:'No dinner planned yet',
+      sub:'Pick something now and the evening runs itself.',
+      btn:'📅 Plan tonight',
+      act:"showMealSec('meals',document.querySelector('#v-meals .pn-btn:nth-child(2)')||null)",
+      skip:'dinner',skipLabel:'Leftovers / out ✓'};
+  }
+  // 2) Dinner planned → confirm + protein pace
+  if(!card&&skips.indexOf('tonight')<0&&dayData.dinner){
+    var rec=RECIPES.find(function(r){return r.name===dayData.dinner;});
+    var t=getTot();
+    var proLeft=Math.max(0,S.gPro-Math.round(t.pro||0));
+    var recPro=rec&&rec.macros?Math.round((rec.macros.pro||0)*(typeof getMealServings==='function'?getMealServings(today,'dinner'):1)):null;
+    var paceNote=proLeft<=0?'Protein target already hit 🎉':(recPro!==null?('You need '+proLeft+'g more protein — dinner brings ~'+recPro+'g'+(recPro>=proLeft?' ✓':' (light — add a side?)')):('You need '+proLeft+'g more protein today'));
+    card={label:'Tonight',
+      title:'🍽️ '+escHtml(dayData.dinner),
+      sub:paceNote,
+      btn:'✓ Ate it — log dinner',
+      act:"logPlannedDinner()",
+      btn2:'📓 Log other food',
+      act2:"var f=document.getElementById('foodSrch');if(f){f.focus();f.scrollIntoView({block:'center'});}",
+      skip:'tonight',skipLabel:'Got it ✓'};
+  }
+  // 2.5) Build the food library, two a day, while it's small — her data-entry
+  // project as a dealt card instead of a chore.
+  if(!card&&skips.indexOf('fooddb')<0&&(FDB||[]).length<40){
+    var fa=JSON.parse(localStorage.getItem('aFoodAddsDay')||'{}');
+    var addsToday=(fa.date===new Date().toISOString().slice(0,10))?(fa.n||0):0;
+    if(addsToday<2){
+      card={label:'Build your food list',
+        title:addsToday===1?'One more food — today\u2019s done':'Add 2 foods you eat often',
+        sub:(FDB||[]).length+' foods so far \u00b7 a minute a day makes logging one-tap',
+        btn:'\ud83c\udf4e Add a food',act:"openM('nfModal')",
+        skip:'fooddb',skipLabel:'Not today'};
+    }
+  }
+  // 3) The week ahead is thin (4+ of the next 7 dinners empty)
+  if(!card&&skips.indexOf('week')<0){
+    var empty=0,d=new Date();
+    for(var i=0;i<7;i++){
+      var key=new Date(d.getFullYear(),d.getMonth(),d.getDate()+i).toISOString().slice(0,10);
+      if(!(MEAL_PLAN[key]||{}).dinner)empty++;
+    }
+    if(empty>=4){
+      card={label:'This week',
+        title:'Plan the week — '+(7-empty)+'/7 dinners set',
+        sub:'Ten minutes now saves five “what’s for dinner?” moments.',
+        btn:'📅 Plan the week',
+        act:"showMealSec('meals',document.querySelector('#v-meals .pn-btn:nth-child(2)')||null)",
+        skip:'week'};
+    }
+  }
+  return card;
+}
+function renderMealsGuide(){
+  var el=document.getElementById('mealsGuideCard');if(!el)return;
+  var card=_mealsGuideCardObj();
+  if(typeof renderHomeGuide==='function')renderHomeGuide();
+
+  el.style.display='';
+  if(!card){
+    var t2=getTot();
+    var done=(t2.pro||0)>=S.gPro;
+    el.innerHTML='<div class="card" style="margin:0;padding:14px 16px;background:var(--lime);border:none">'
+      +'<div style="font-size:10px;font-weight:800;color:#5A6B1A;text-transform:uppercase;letter-spacing:1px;margin-bottom:2px">All set</div>'
+      +'<div style="font-size:15px;font-weight:800;color:#3E4A10">'+(done?'✅ Protein hit — great day':'✅ Food’s planned — just log as you eat')+'</div>'
+      +_macroStripHtml()
+      +'</div>';
+    return;
+  }
+  var accent=card.setup?'#B189B4':'#2475FF';
+  var btns='<button onclick="'+card.act.replace(/"/g,'&quot;')+'" style="flex:1;padding:11px;border-radius:12px;border:none;background:'+accent+';color:#fff;font-family:\'Quicksand\',sans-serif;font-size:14px;font-weight:700;cursor:pointer">'+card.btn+'</button>';
+  if(card.btn2)btns+='<button onclick="'+card.act2.replace(/"/g,'&quot;')+'" style="flex:1;padding:11px;border-radius:12px;border:1.5px solid '+accent+';background:#fff;color:'+accent+';font-family:\'Quicksand\',sans-serif;font-size:13px;font-weight:700;cursor:pointer">'+card.btn2+'</button>';
+  btns+='<button onclick="mealsGuideSkip(\''+card.skip+'\')" style="padding:11px 12px;border-radius:12px;border:1.5px solid var(--bdr);background:#fff;color:var(--textl);font-family:\'Quicksand\',sans-serif;font-size:12px;font-weight:700;cursor:pointer">'+(card.skipLabel||'Later')+'</button>';
+  el.innerHTML='<div class="card" style="margin:0;padding:14px 16px;border-left:4px solid '+accent+'">'
+    +'<div style="font-size:10px;font-weight:800;color:'+accent+';text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">👉 '+card.label+'</div>'
+    +'<div style="font-size:16px;font-weight:800;color:var(--textd);margin-bottom:2px">'+card.title+'</div>'
+    +'<div style="font-size:12px;color:var(--textl);margin-bottom:10px">'+card.sub+'</div>'
+    +'<div style="display:flex;gap:8px;align-items:center">'+btns+'</div>'
+    +_macroStripHtml()
+    +'</div>';
+}
+
+// ── THE TASKS GUIDE: deal the next task ──────────────────────
+function _tasksGuideSkips(){
+  var t=new Date().toISOString().slice(0,10);
+  var s=JSON.parse(localStorage.getItem('aTasksGuideSkips')||'{}');
+  if(s.date!==t)s={date:t,skips:[]};
+  return s;
+}
+function tasksGuideSkip(key){
+  var s=_tasksGuideSkips();
+  if(s.skips.indexOf(key)<0)s.skips.push(key);
+  localStorage.setItem('aTasksGuideSkips',JSON.stringify(s));
+  renderTasksGuide();
+}
+var _TASK_URG_ORDER={'urgent-important':0,'important-not-urgent':1,'urgent-not-important':2,'not-urgent':3};
+function _tasksGuideCardObj(){
+  var skips=_tasksGuideSkips().skips;
+  var today=new Date().toISOString().slice(0,10);
+  var open=(TASKS||[]).filter(function(t){return t&&!t.done&&!t.parked;});
+  var card=null;
+  // 1) Overdue
+  if(skips.indexOf('overdue')<0){
+    var od=open.filter(function(t){return t.due&&t.due<today;}).sort(function(a,b){return(a.due||'').localeCompare(b.due||'');});
+    if(od.length){
+      card={label:'Overdue',urgent:true,
+        title:escHtml(od[0].title||'Untitled'),
+        sub:'was due '+od[0].due+(od.length>1?' · '+(od.length-1)+' more overdue':''),
+        btn:'✓ Done',act:"togT('"+od[0].id+"')",
+        btn2:'Open tasks list',act2:"var e=document.getElementById('hs-tasklist');if(e)e.scrollIntoView({block:'start'})",
+        skip:'overdue'};
+    }
+  }
+  // 2) Due today
+  if(!card&&skips.indexOf('today')<0){
+    var dt=open.filter(function(t){return t.due===today;}).sort(function(a,b){return(_TASK_URG_ORDER[a.urgency]||9)-(_TASK_URG_ORDER[b.urgency]||9);});
+    if(dt.length){
+      card={label:'Due today',
+        title:escHtml(dt[0].title||'Untitled'),
+        sub:dt.length>1?(dt.length-1)+' more due today':'the only one due today',
+        btn:'✓ Done',act:"togT('"+dt[0].id+"')",
+        skip:'today'};
+    }
+  }
+  // 3) Next up by priority
+  if(!card&&skips.indexOf('next')<0&&open.length){
+    var nx=open.slice().sort(function(a,b){
+      var u=(_TASK_URG_ORDER[a.urgency]!==undefined?_TASK_URG_ORDER[a.urgency]:9)-(_TASK_URG_ORDER[b.urgency]!==undefined?_TASK_URG_ORDER[b.urgency]:9);
+      if(u)return u;
+      return(a.due||'9999').localeCompare(b.due||'9999');
+    })[0];
+    card={label:'Next up',
+      title:escHtml(nx.title||'Untitled'),
+      sub:(nx.urgency==='urgent-important'?'🔥 urgent + important':nx.urgency==='important-not-urgent'?'⭐ important':'top of the pile')+(nx.due?' · due '+nx.due:''),
+      btn:'✓ Done',act:"togT('"+nx.id+"')",
+      skip:'next',skipLabel:'Not now'};
+  }
+  return card;
+}
+function renderTasksGuide(){
+  var el=document.getElementById('tasksGuideCard');if(!el)return;
+  var card=_tasksGuideCardObj();
+  if(typeof renderHomeGuide==='function')renderHomeGuide();
+  el.style.display='';
+  if(!card){
+    el.innerHTML='<div class="card" style="margin:0;padding:14px 16px;background:var(--lime);border:none">'
+      +'<div style="font-size:10px;font-weight:800;color:#5A6B1A;text-transform:uppercase;letter-spacing:1px;margin-bottom:2px">All clear</div>'
+      +'<div style="font-size:15px;font-weight:800;color:#3E4A10">✅ Nothing waiting on you</div>'
+      +'</div>';
+    return;
+  }
+  var accent=card.urgent?'#F06677':'#2475FF';
+  var btns='<button onclick="'+card.act.replace(/"/g,'&quot;')+'" style="flex:1;padding:11px;border-radius:12px;border:none;background:'+accent+';color:#fff;font-family:\'Quicksand\',sans-serif;font-size:14px;font-weight:700;cursor:pointer">'+card.btn+'</button>';
+  if(card.btn2)btns+='<button onclick="'+card.act2.replace(/"/g,'&quot;')+'" style="flex:1;padding:11px;border-radius:12px;border:1.5px solid '+accent+';background:#fff;color:'+accent+';font-family:\'Quicksand\',sans-serif;font-size:13px;font-weight:700;cursor:pointer">'+card.btn2+'</button>';
+  btns+='<button onclick="tasksGuideSkip(\''+card.skip+'\')" style="padding:11px 12px;border-radius:12px;border:1.5px solid var(--bdr);background:#fff;color:var(--textl);font-family:\'Quicksand\',sans-serif;font-size:12px;font-weight:700;cursor:pointer">'+(card.skipLabel||'Later')+'</button>';
+  el.innerHTML='<div class="card" style="margin:0;padding:14px 16px;border-left:4px solid '+accent+'">'
+    +'<div style="font-size:10px;font-weight:800;color:'+accent+';text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">👉 '+card.label+'</div>'
+    +'<div style="font-size:16px;font-weight:800;color:var(--textd);margin-bottom:2px">'+card.title+'</div>'
+    +'<div style="font-size:12px;color:var(--textl);margin-bottom:10px">'+card.sub+'</div>'
+    +'<div style="display:flex;gap:8px;align-items:center">'+btns+'</div></div>';
+}
+
+// ── THE ROUTINES GUIDE: next item, time-of-day aware ─────────
+// Completes routine items in place via rtnSetComp — routines never become tasks.
+function _routinesGuideSkips(){
+  var t=new Date().toISOString().slice(0,10);
+  var s=JSON.parse(localStorage.getItem('aRoutinesGuideSkips')||'{}');
+  if(s.date!==t)s={date:t,skips:[]};
+  return s;
+}
+function routinesGuideSkip(key){
+  var s=_routinesGuideSkips();
+  if(s.skips.indexOf(key)<0)s.skips.push(key);
+  localStorage.setItem('aRoutinesGuideSkips',JSON.stringify(s));
+  renderRoutinesGuide();
+}
+// The routine group the deck would deal right now, with ALL its remaining items.
+function _routinesNextGroup(){
+  var skips=_routinesGuideSkips().skips;
+  var today=todayStr();
+  var hour=new Date().getHours();
+  // Morning leads with AM, afternoon with Midday, evening with PM
+  var pref=hour<11?['am','da','md']:(hour<17?['md','da','am']:['pm','da','md','am']);
+  // Time windows: a routine only deals when its part of day has arrived.
+  // AM until 1pm, Midday 10am–5pm, PM from 4pm; everything else anytime.
+  var hourOK=function(g){
+    if(g.id==='am')return hour<13;
+    if(g.id==='md')return hour>=10&&hour<17;
+    if(g.id==='pm')return hour>=16;
+    return true;
+  };
+  var due=(RTN_GROUPS||[]).filter(function(g){return g.active!==false&&rtnIsDueToday(g)&&hourOK(g);})
+    .sort(function(a,b){var pa=pref.indexOf(a.id),pb=pref.indexOf(b.id);return(pa<0?9:pa)-(pb<0?9:pb);});
+  for(var k=0;k<due.length;k++){
+    var g=due[k];
+    if(skips.indexOf('rtn-'+g.id)>=0)continue;
+    var items=RTNS[g.id]||[];var rh=RH[g.id]||{};var cs=rtnCompState(g,today);
+    var undone=[];
+    items.forEach(function(item,i){if(!rh[item]&&!rtnStateStr(cs[i]))undone.push({item:item,i:i});});
+    if(!undone.length)continue;
+    var doneCt=items.filter(function(item,i){return!rh[item]&&rtnStateStr(cs[i]);}).length;
+    return {g:g,undone:undone,doneCt:doneCt,totalCt:doneCt+undone.length};
+  }
+  return null;
+}
+function _routinesGuideCardObj(){
+  var ng=_routinesNextGroup();
+  if(!ng)return null;
+  var g=ng.g,nx=ng.undone[0];
+  return {label:(g.icon||'🔁')+' '+escHtml(g.name),
+    title:escHtml(nx.item),
+    sub:ng.undone.length>1?(ng.undone.length-1)+' more after this':'last one — finishes the routine',
+    btn:'✓ Done',act:"rtnGuideDone('"+g.id+"',"+nx.i+")",
+    btn2:'Open routines',act2:"goTab('routines',null)",
+    skip:'rtn-'+g.id,skipLabel:'Skip today'};
+}
+// Complete a routine item straight from the Home buttons.
+function homeRtnDone(gid,idx){
+  rtnSetComp(gid,todayStr(),idx,'done');
+  if(typeof _dailyRtnKey!=='undefined'&&typeof renderDailyRtn==='function')renderDailyRtn(_dailyRtnKey);
+  if(typeof renderHomeGuide==='function')renderHomeGuide();
+}
+function rtnGuideDone(gid,idx){
+  rtnSetComp(gid,todayStr(),idx,'done');
+  if(typeof _dailyRtnKey!=='undefined'&&typeof renderDailyRtn==='function')renderDailyRtn(_dailyRtnKey);
+  if(typeof renderOtherRtns==='function')renderOtherRtns();
+  renderRoutinesGuide();
+}
+function renderRoutinesGuide(){
+  if(typeof renderHomeGuide==='function')renderHomeGuide();
+  var el=document.getElementById('routinesGuideCard');if(!el)return;
+  var card=_routinesGuideCardObj();
+  el.style.display='';
+  if(!card){
+    el.innerHTML='<div class="card" style="margin:0;padding:14px 16px;background:var(--lime);border:none">'
+      +'<div style="font-size:10px;font-weight:800;color:#5A6B1A;text-transform:uppercase;letter-spacing:1px;margin-bottom:2px">All done</div>'
+      +'<div style="font-size:15px;font-weight:800;color:#3E4A10">✅ Routines handled for now</div>'
+      +'</div>';
+    return;
+  }
+  var accent='#2475FF';
+  var btns='<button onclick="'+card.act.replace(/"/g,'&quot;')+'" style="flex:1;padding:11px;border-radius:12px;border:none;background:'+accent+';color:#fff;font-family:\'Quicksand\',sans-serif;font-size:14px;font-weight:700;cursor:pointer">'+card.btn+'</button>';
+  if(card.btn2)btns+='<button onclick="'+card.act2.replace(/"/g,'&quot;')+'" style="flex:1;padding:11px;border-radius:12px;border:1.5px solid '+accent+';background:#fff;color:'+accent+';font-family:\'Quicksand\',sans-serif;font-size:13px;font-weight:700;cursor:pointer">'+card.btn2+'</button>';
+  btns+='<button onclick="routinesGuideSkip(\''+card.skip+'\')" style="padding:11px 12px;border-radius:12px;border:1.5px solid var(--bdr);background:#fff;color:var(--textl);font-family:\'Quicksand\',sans-serif;font-size:12px;font-weight:700;cursor:pointer">'+(card.skipLabel||'Later')+'</button>';
+  el.innerHTML='<div class="card" style="margin:0;padding:14px 16px;border-left:4px solid '+accent+'">'
+    +'<div style="font-size:10px;font-weight:800;color:'+accent+';text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">👉 '+card.label+'</div>'
+    +'<div style="font-size:16px;font-weight:800;color:var(--textd);margin-bottom:2px">'+card.title+'</div>'
+    +'<div style="font-size:12px;color:var(--textl);margin-bottom:10px">'+card.sub+'</div>'
+    +'<div style="display:flex;gap:8px;align-items:center">'+btns+'</div></div>';
+}
+
+// ── HOME "START HERE": the single next card across all decks ──
+// ── STREAK: the keep-coming-back loop. Any log bumps it, once a day. ──
+function bumpStreak(){
+  var t=new Date().toISOString().slice(0,10);
+  var s=JSON.parse(localStorage.getItem('aStreak')||'{}');
+  if(s.last===t)return;
+  var y=new Date(Date.now()-86400000).toISOString().slice(0,10);
+  s.n=(s.last===y)?(s.n||0)+1:1;
+  s.last=t;
+  localStorage.setItem('aStreak',JSON.stringify(s));
+}
+// Streak UI removed by request — data still records quietly in aStreak
+// in case she ever wants it back.
+function renderStreakChip(){}
+// Home strip covers the three things that matter daily: money, food, tasks.
+// Routines live in their own tab, for when she wants them — they never push.
+function renderHomeGuide(){
+  var el=document.getElementById('homeGuideCard');if(!el)return;
+  renderStreakChip();
+  var m=null,f=null,t=null;
+  try{m=(typeof _moneyGuideCardObj==='function')?_moneyGuideCardObj():null;}catch(e){}
+  try{f=(typeof _mealsGuideCardObj==='function')?_mealsGuideCardObj():null;}catch(e){}
+  try{t=(typeof _tasksGuideCardObj==='function')?_tasksGuideCardObj():null;}catch(e){}
+  var pick=null,go='',ico='';
+  if(m){pick=m;go="goTab('money',null)";ico='💰';}
+  else if(f){pick=f;go="goTab('meals',null)";ico='🍽️';}
+  else if(t){pick=t;go="goTab('tasks',null)";ico='📋';}
+  var pill=function(icon,clear){return '<span style="font-size:10px;font-weight:700;color:'+(clear?'#7C9A2D':'var(--textl)')+'">'+icon+' '+(clear?'✓':'1')+'</span>';};
+  var statusRow='<div style="display:flex;gap:12px;margin-top:8px;padding-top:8px;border-top:1px solid #f0edf5">'+pill('💰',!m)+pill('🍽️',!f)+pill('📋',!t)+'</div>';
+  el.style.display='';
+  if(!pick){
+    el.innerHTML='<div class="card" style="margin:0;padding:13px 15px;background:var(--lime);border:none">'
+      +'<div style="font-size:14px;font-weight:800;color:#3E4A10">✅ All clear</div>'
+      +statusRow.replace('#f0edf5','rgba(90,107,26,.2)')+'</div>';
+    return;
+  }
+  var accent=pick.setup?'#B189B4':(pick.urgent?'#F06677':'#2475FF');
+  el.innerHTML='<div class="card" onclick="'+go+'" style="margin:0;padding:13px 15px;border-left:4px solid '+accent+';cursor:pointer">'
+    +'<div style="font-size:10px;font-weight:800;color:'+accent+';text-transform:uppercase;letter-spacing:1px;margin-bottom:3px">👉 '+ico+' '+pick.label+'</div>'
+    +'<div style="display:flex;justify-content:space-between;align-items:center;gap:8px">'
+    +'<div style="font-size:15px;font-weight:800;color:var(--textd)">'+pick.title+'</div>'
+    +'<span style="flex-shrink:0;font-size:12px;font-weight:700;color:'+accent+'">Go ›</span>'
+    +'</div>'
+    +statusRow+'</div>';
+}
+
 function renderMealPlan(){
   var dates=getMealWeekDates(MEAL_WEEK_OFFSET);
   var lbl=document.getElementById('mealWeekLbl');
@@ -22056,6 +22673,7 @@ function renderMealPlan(){
     html+='</div>';
   });
   grid.innerHTML=html;
+  if(typeof renderMealsGuide==='function')renderMealsGuide();
 }
 
 var MEAL_DAY_OPEN = {};
@@ -23486,6 +24104,39 @@ function _renderGrocListBody(elId){
 function renderGrocery(){
   renderGrocTagFilterRow();
   _renderGrocListBody('groceryListEl');
+  renderGrocBudgetStrip();
+}
+
+// The meals↔money handshake: estimate the unchecked list from known prices
+// (getBestPrice: PRICE_LOG + Food DB price entries) vs what's left in the
+// Groceries budget bucket this month. Estimate only — never stored.
+function renderGrocBudgetStrip(){
+  var el=document.getElementById('grocBudgetStrip');if(!el)return;
+  var open=(GROCERY_LIST||[]).filter(function(i){return!i.checked;});
+  if(!open.length){el.style.display='none';return;}
+  var est=0,unpriced=0;
+  open.forEach(function(i){
+    var p=(typeof getBestPrice==='function')?getBestPrice(i.name,i.dbItemId):null;
+    if(p&&p>0)est+=p;else unpriced++;
+  });
+  // Groceries bucket: mapped category first, then name match
+  var b=(BUDGET_BUCKETS||[]).find(function(x){return(x.cats||[]).indexOf('Groceries & Personal Care')>=0;})
+    ||(BUDGET_BUCKETS||[]).find(function(x){return/grocer/i.test(x.name||'');});
+  var leftHtml='';
+  var over=false;
+  if(b){
+    var left=budgetEffTarget(b)-((budgetSpentMap()[b.id])||0);
+    over=est>left;
+    leftHtml='<span style="font-size:12px;font-weight:800;color:'+(over?'#C87070':'#7C9A2D')+'">$'+left.toFixed(0)+' left in '+escHtml(b.name)+'</span>';
+  }
+  el.style.display='';
+  el.innerHTML='<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px 12px;background:'+(over?'#FBEDEF':'#F4F8E8')+';border:1px solid '+(over?'#F3C9D4':'#E5F0BE')+';border-radius:12px">'
+    +'<span style="font-size:12px;font-weight:700;color:var(--textd)">🛒 This list ≈ <b>$'+est.toFixed(0)+'</b>'
+    +(unpriced?' <span style="font-size:10px;font-weight:600;color:var(--textl)">+'+unpriced+' unpriced</span>':'')
+    +'</span>'
+    +leftHtml
+    +'</div>'
+    +(over?'<div style="font-size:10px;color:#C87070;font-weight:700;margin-top:3px;text-align:right">over budget — trim the list or cover from Buffer after shopping</div>':'');
 }
 
 function toggleGrocery(i){
@@ -27246,6 +27897,9 @@ function startApp(){
   updMoneyBadge();
   updateEstateStrip();
   renderMealPlan();
+  if(typeof renderTasksGuide==='function')renderTasksGuide();
+  if(typeof renderRoutinesGuide==='function')renderRoutinesGuide();
+  if(typeof renderHomeGuide==='function')renderHomeGuide();
   var minDateEl=document.getElementById('minDate');
   if(minDateEl)minDateEl.value=new Date().toISOString().slice(0,10);
   // One-time migration: devices still on the old default banner move to Summer Pop.
@@ -29558,7 +30212,13 @@ function delProjInc(id){
   <div class="fg" id="acctPrimaryFg" style="display:none">
     <div style="display:flex;align-items:center;gap:10px;padding:6px 0">
       <input type="checkbox" id="acctPrimary" style="width:18px;height:18px;cursor:pointer">
-      <label for="acctPrimary" style="font-size:13px;color:var(--textd);cursor:pointer">⭐ Primary spending account — basis for "Safe to Spend"</label>
+      <label for="acctPrimary" style="font-size:13px;color:var(--textd);cursor:pointer">⭐ My main spending account</label>
+    </div>
+  </div>
+  <div class="fg" id="acctSpendableFg" style="display:none">
+    <div style="display:flex;align-items:center;gap:10px;padding:6px 0">
+      <input type="checkbox" id="acctSpendable" style="width:18px;height:18px;cursor:pointer">
+      <label for="acctSpendable" style="font-size:13px;color:var(--textd);cursor:pointer">💵 I pay for things from this account — count it in “Money we have”</label>
     </div>
   </div>
   <div class="fg"><label class="fl">Notes</label><textarea class="fi" id="acctNotes" placeholder="Optional notes" style="min-height:60px"></textarea></div>
