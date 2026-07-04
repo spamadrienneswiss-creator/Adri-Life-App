@@ -1,0 +1,923 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Patchwork — a cozy prototype</title>
+<style>
+:root{
+  --cream:#f6efe3; --paper:#fdf8ee; --ink:#3a3128; --ink-soft:#7a6f60;
+  --copper:#b06a3b; --brass:#c9962e; --brass-dark:#9a7220;
+  --moss:#6a7f4f; --moss-dark:#4d5f38; --teal:#57b8ae; --teal-glow:#7fd8cf;
+  --rose:#c78d7a; --shadow:0 4px 18px rgba(58,49,40,.12);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:Georgia,'Times New Roman',serif;background:var(--cream);color:var(--ink);
+  min-height:100vh;line-height:1.5;
+  background-image:radial-gradient(circle at 20% 10%, rgba(201,150,46,.06), transparent 40%),
+                   radial-gradient(circle at 85% 90%, rgba(106,127,79,.07), transparent 45%);
+}
+button{font-family:inherit;cursor:pointer}
+h1,h2,h3{font-weight:normal;letter-spacing:.3px}
+.wrap{max-width:520px;margin:0 auto;padding:14px 14px 110px}
+
+/* ---------- title screen ---------- */
+#titleScreen{max-width:520px;margin:0 auto;padding:34px 18px 60px}
+.title-logo{text-align:center;margin-bottom:6px;font-size:44px;color:var(--copper);letter-spacing:2px}
+.title-sub{text-align:center;color:var(--ink-soft);font-style:italic;margin-bottom:26px;font-size:14px}
+.tcard{background:var(--paper);border:1px solid rgba(176,106,59,.25);border-radius:14px;padding:16px;box-shadow:var(--shadow);margin-bottom:16px}
+.tcard h3{color:var(--copper);font-size:15px;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:10px}
+.name-input{width:100%;padding:12px;border-radius:10px;border:1.5px solid rgba(176,106,59,.35);background:#fffdf7;font-family:inherit;font-size:16px;color:var(--ink)}
+.choice{display:block;width:100%;text-align:left;background:#fffdf7;border:1.5px solid rgba(122,111,96,.25);border-radius:12px;padding:12px 14px;margin-bottom:8px;transition:border-color .15s, background .15s}
+.choice.sel{border-color:var(--brass);background:#fbf3dd;box-shadow:0 0 0 2px rgba(201,150,46,.25)}
+.choice .cn{font-size:16px;color:var(--ink)}
+.choice .cd{font-size:12.5px;color:var(--ink-soft);margin-top:2px}
+.begin-btn{display:block;width:100%;padding:15px;border:none;border-radius:12px;background:linear-gradient(135deg,var(--copper),var(--brass));color:#fffbe9;font-size:17px;letter-spacing:1px;box-shadow:var(--shadow)}
+.begin-btn:disabled{opacity:.45;cursor:default}
+.import-link{display:block;margin:14px auto 0;background:none;border:none;color:var(--ink-soft);font-size:12.5px;text-decoration:underline}
+
+/* ---------- HUD ---------- */
+.hud{position:sticky;top:0;z-index:50;background:linear-gradient(180deg,var(--paper) 82%,rgba(253,248,238,0));padding:12px 4px 14px;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.hud .day{font-size:17px;color:var(--copper)}
+.hud .wx{font-size:12.5px;color:var(--ink-soft);font-style:italic}
+.hud-right{text-align:right;font-size:13px}
+.pips{letter-spacing:2px;font-size:12px;color:var(--brass-dark)}
+.cogs{color:var(--copper)}
+
+/* ---------- tabs ---------- */
+.tabs{display:flex;gap:6px;margin:2px 0 14px;flex-wrap:wrap}
+.tab{flex:1;min-width:70px;padding:8px 4px;border-radius:20px;border:1.5px solid rgba(176,106,59,.3);background:var(--paper);color:var(--ink-soft);font-size:12.5px}
+.tab.on{background:var(--copper);border-color:var(--copper);color:#fffbe9}
+
+/* ---------- cards ---------- */
+.card{background:var(--paper);border:1px solid rgba(122,111,96,.18);border-radius:14px;padding:14px 15px;margin-bottom:12px;box-shadow:var(--shadow)}
+.card h3{color:var(--copper);font-size:16px;margin-bottom:3px}
+.card .sub{font-size:12.5px;color:var(--ink-soft)}
+.loc-card{cursor:pointer;transition:transform .12s}
+.loc-card:active{transform:scale(.985)}
+.loc-icon{font-size:22px;margin-right:8px;vertical-align:-3px;display:inline-block}
+.spin{animation:spin 6s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.glow{text-shadow:0 0 10px var(--teal-glow),0 0 22px var(--teal-glow)}
+.bob{animation:bob 2.2s ease-in-out infinite;display:inline-block}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
+.worldnote{font-size:12px;color:var(--moss-dark);font-style:italic;margin-top:4px}
+
+/* ---------- letters ---------- */
+.letter{background:#fffdf4;border:1px solid rgba(201,150,46,.35);border-left:5px solid var(--brass);border-radius:10px;padding:12px 14px;margin-bottom:12px;box-shadow:var(--shadow)}
+.letter .from{font-size:12px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:1px;margin-bottom:5px}
+.letter .body{font-size:14px;font-style:italic}
+.steps{margin-top:9px;font-size:12.5px;color:var(--moss-dark)}
+.steps .done{text-decoration:line-through;color:var(--ink-soft)}
+.badge-done{display:inline-block;background:var(--moss);color:#fdf8ee;font-size:11px;border-radius:10px;padding:2px 9px;margin-top:8px}
+
+/* ---------- generic buttons ---------- */
+.act{display:block;width:100%;text-align:left;background:#fffdf7;border:1.5px solid rgba(106,127,79,.35);border-radius:11px;padding:11px 13px;margin-bottom:8px;font-size:14px;color:var(--ink)}
+.act .cost{float:right;color:var(--brass-dark);font-size:12.5px}
+.act:disabled{opacity:.42;cursor:default}
+.act.warm{border-color:rgba(199,141,122,.5)}
+.small-note{font-size:12px;color:var(--ink-soft);font-style:italic;margin:4px 0 10px}
+
+/* ---------- overlays ---------- */
+.overlay{position:fixed;inset:0;background:rgba(58,49,40,.45);z-index:100;display:none;align-items:flex-start;justify-content:center;overflow-y:auto;padding:26px 14px}
+.overlay.open{display:flex}
+.sheet{background:var(--paper);border-radius:18px;max-width:480px;width:100%;padding:22px 20px;box-shadow:0 12px 40px rgba(58,49,40,.35);border:1px solid rgba(201,150,46,.3)}
+.sheet h2{color:var(--copper);font-size:21px;margin-bottom:4px}
+.sheet .sub{color:var(--ink-soft);font-size:13px;font-style:italic;margin-bottom:14px}
+.sheet-close{width:100%;padding:13px;border:none;border-radius:11px;background:var(--moss);color:#fdf8ee;font-size:15px;margin-top:8px}
+.deed{font-size:13.5px;padding:5px 0;border-bottom:1px dashed rgba(122,111,96,.25)}
+.closing{margin-top:14px;padding:13px;background:#fbf3dd;border-radius:11px;font-style:italic;font-size:14px;color:var(--brass-dark);border:1px solid rgba(201,150,46,.3)}
+.wxline{padding:10px 12px;background:#eef2e4;border-radius:10px;font-size:14px;margin-bottom:12px;border:1px solid rgba(106,127,79,.3)}
+.setback{background:#f7e9df;border-color:rgba(176,106,59,.35);color:#8a5430}
+
+/* ---------- folks ---------- */
+.hearts{color:var(--rose);letter-spacing:2px;font-size:13px}
+.hearts .off{color:rgba(199,141,122,.3)}
+
+/* ---------- dream ---------- */
+.mile{display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-bottom:1px dashed rgba(122,111,96,.22)}
+.mile .dot{font-size:15px;line-height:1.4}
+.mile.done .mn{color:var(--moss-dark);text-decoration:line-through}
+.mile .mn{font-size:14px}
+.mile .mc{font-size:12px;color:var(--ink-soft)}
+.mile button{margin-left:auto;flex-shrink:0;border:1.5px solid var(--brass);background:#fbf3dd;color:var(--brass-dark);border-radius:9px;padding:6px 11px;font-size:12px}
+.mile button:disabled{opacity:.4;cursor:default}
+
+/* ---------- footer ---------- */
+.footer{position:fixed;bottom:0;left:0;right:0;padding:12px 14px 18px;background:linear-gradient(0deg,var(--cream) 70%,rgba(246,239,227,0));display:flex;justify-content:center;z-index:40}
+.sleep-btn{width:100%;max-width:492px;padding:15px;border:none;border-radius:13px;background:linear-gradient(135deg,var(--moss-dark),var(--moss));color:#fdf8ee;font-size:16px;letter-spacing:.5px;box-shadow:var(--shadow)}
+
+/* ---------- satchel ---------- */
+.res-row{display:flex;justify-content:space-between;font-size:14px;padding:6px 0;border-bottom:1px dashed rgba(122,111,96,.22)}
+.savebox{width:100%;height:74px;font-family:monospace;font-size:11px;border-radius:9px;border:1.5px solid rgba(122,111,96,.3);padding:8px;background:#fffdf7;margin-top:8px;color:var(--ink)}
+.toast{position:fixed;bottom:88px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--cream);padding:10px 18px;border-radius:22px;font-size:13.5px;z-index:200;opacity:0;transition:opacity .25s;pointer-events:none;max-width:88%;text-align:center}
+.toast.show{opacity:1}
+</style>
+</head>
+<body>
+
+<!-- ═══════════ TITLE ═══════════ -->
+<div id="titleScreen">
+  <div class="title-logo">✦ Patchwork ✦</div>
+  <div class="title-sub">a village that mends — Brindleport, some gentle century from now</div>
+
+  <div class="tcard">
+    <h3>Your name, stitched on your satchel</h3>
+    <input id="tName" class="name-input" maxlength="18" placeholder="e.g. Wren" autocomplete="off">
+  </div>
+
+  <div class="tcard">
+    <h3>Join a guild</h3>
+    <div id="tGuilds"></div>
+  </div>
+
+  <div class="tcard">
+    <h3>Choose a dream — the slow kind</h3>
+    <div id="tDreams"></div>
+  </div>
+
+  <button id="tBegin" class="begin-btn" disabled onclick="beginGame()">Wake up in Brindleport</button>
+  <button class="import-link" onclick="openImport()">…or continue from a save code</button>
+</div>
+
+<!-- ═══════════ MAIN ═══════════ -->
+<div id="gameScreen" style="display:none">
+  <div class="wrap">
+    <div class="hud">
+      <div>
+        <div class="day" id="hudDay"></div>
+        <div class="wx" id="hudWx"></div>
+      </div>
+      <div class="hud-right">
+        <div class="pips" id="hudEnergy"></div>
+        <div class="cogs" id="hudCogs"></div>
+      </div>
+    </div>
+    <div class="tabs">
+      <button class="tab on" data-t="village" onclick="goTab('village')">Village</button>
+      <button class="tab" data-t="letters" onclick="goTab('letters')">Letters</button>
+      <button class="tab" data-t="satchel" onclick="goTab('satchel')">Satchel</button>
+      <button class="tab" data-t="dream" onclick="goTab('dream')">Dream</button>
+      <button class="tab" data-t="folks" onclick="goTab('folks')">Folks</button>
+    </div>
+    <div id="content"></div>
+  </div>
+  <div class="footer"><button class="sleep-btn" onclick="endDay()">🕯 Turn in for the night</button></div>
+</div>
+
+<!-- overlays -->
+<div class="overlay" id="ovMorning"><div class="sheet" id="morningSheet"></div></div>
+<div class="overlay" id="ovEvening"><div class="sheet" id="eveningSheet"></div></div>
+<div class="overlay" id="ovModal"><div class="sheet" id="modalSheet"></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+'use strict';
+/* ════════════════════════ DATA ════════════════════════ */
+var GUILDS={
+  clock:{name:'The Clockkeepers',tool:'brass calipers',
+    desc:'Menders of mainsprings and slow time. Your calipers sometimes save a material while crafting.',
+    recipe:'regulator'},
+  wind:{name:'The Wind Engineers',tool:'sail-stitcher',
+    desc:'Tenders of turbines and patched solar sails. Mill work pays you 2 extra cogs.',
+    recipe:'bearing'},
+  tea:{name:'The Tea Growers',tool:'copper trowel',
+    desc:'Keepers of the terrace gardens. Your trowel coaxes an extra leaf from every harvest.',
+    recipe:'blend'}
+};
+var DREAMS={
+  observatory:{name:'Restore the Old Observatory',
+    desc:'The dome on the hill has been closed since before anyone argues about. Open it again.'},
+  teahouse:{name:'Open a Tea House',
+    desc:'A warm room in the lighthouse conversion where nobody is ever hurried.'},
+  workshop:{name:'Master Workshop',
+    desc:'A bench so true that broken things line up at the door just to be near it.'}
+};
+var MILESTONES={
+  observatory:[
+    {id:'o1',n:'Clear the bramble path up the hill',c:{energy:3},d:'Moss and blackberry have eaten the stairs. Someone has to be first.'},
+    {id:'o2',n:'Re-hang the dome door on a new hinge',c:{brass:2,gears:1},d:'The old hinge sheared in a storm nobody remembers.'},
+    {id:'o3',n:'Polish the small finder-lens',c:{glass:2,energy:1},d:'Under the moss-glass haze there is still a perfect curve.'},
+    {id:'o4',n:'Rewire the clockwork star-drive',c:{gears:4,thread:2},d:''},
+    {id:'o5',n:'Patch the dome shutters with sail-cloth',c:{thread:4,brass:2},d:''},
+    {id:'o6',n:'Grind the great mirror true',c:{glass:5,cogs:30},d:''},
+    {id:'o7',n:'Host a first stars-viewing for the village',c:{warmth:24},d:''},
+    {id:'o8',n:'Light the dome lamp — the observatory breathes again',c:{cogs:60},d:''}
+  ],
+  teahouse:[
+    {id:'t1',n:'Scrub the beacon kitchen till the copper shows',c:{energy:3},d:'Juno swears there is a stove under there. She is mostly right.'},
+    {id:'t2',n:'Assemble a first tea service',c:{glass:2,tea:2},d:'Mismatched cups. That is the point.'},
+    {id:'t3',n:'Hang a solar-sail awning over the door',c:{thread:3},d:'So the rain has somewhere polite to wait.'},
+    {id:'t4',n:'Build the long table from windmill planks',c:{brass:2,cogs:20},d:''},
+    {id:'t5',n:'Blend a house tea worth naming',c:{tea:6,glass:2},d:''},
+    {id:'t6',n:'A proper kettle-line with copper pipes',c:{pipe:4,gears:2},d:''},
+    {id:'t7',n:'First open afternoon — everyone comes',c:{warmth:24},d:''},
+    {id:'t8',n:'Paint the sign: THE PATIENT KETTLE',c:{cogs:60},d:''}
+  ],
+  workshop:[
+    {id:'w1',n:'True your workbench to the millimetre',c:{energy:3},d:'A bench that wobbles teaches nothing.'},
+    {id:'w2',n:'Forge a personal toolset',c:{brass:3,gears:2},d:'Handles worn to the shape of your own grip, eventually.'},
+    {id:'w3',n:'Complete your first paid masterwork',c:{cogs:20,brass:2},d:'Small, careful, signed on the underside.'},
+    {id:'w4',n:'Build a proper parts-wall of little drawers',c:{brass:4,pipe:2},d:''},
+    {id:'w5',n:'Install a wind-fed lathe',c:{thread:4,gears:3},d:''},
+    {id:'w6',n:'Take on an apprentice’s Saturday',c:{warmth:24},d:''},
+    {id:'w7',n:'Restore something everyone said was gone',c:{glass:4,cogs:30},d:''},
+    {id:'w8',n:'Hang your maker’s mark above the door',c:{cogs:60},d:''}
+  ]
+};
+var RES={brass:'scrap brass',pipe:'copper pipe',gears:'gear bits',glass:'moss-glass',tea:'tea leaves',thread:'wind-thread'};
+var CRAFT={
+  coil:{n:'Kettle Coil',need:{gears:2,pipe:1},flavor:'A heating coil wound the old way, to outlive its maker.',quest:'q_kettle'},
+  tin:{n:'Traveler’s Tin of Dawn Tea',need:{tea:3},flavor:'Packed tight enough to survive a lighthouse staircase.',quest:'q_tea'},
+  patch:{n:'Patch Kit',need:{brass:2},flavor:'Solder, shims, and stubbornness. Sells for 8 cogs.',sell:8},
+  regulator:{n:'Mainspring Regulator',need:{gears:2,brass:1},flavor:'Clockkeeper work. Sells for 12 cogs.',sell:12,guild:'clock'},
+  bearing:{n:'Storm-Damped Bearing',need:{thread:2,brass:1},flavor:'Wind Engineer work. Sells for 12 cogs.',sell:12,guild:'wind'},
+  blend:{n:'Dawn-Picked Blend',need:{tea:2},flavor:'Tea Grower work. A gift that says what you can’t. (+2 warmth as a gift)',sell:9,guild:'tea'}
+};
+var FOLKS={
+  odaline:{name:'Mrs. Odaline',role:'retired satellite operator',
+    line:'Sharp-tongued, soft-hearted; measures affection in cups of tea.',
+    greet:['“You again. Kettle’s nearly on. Sit before I change my mind.”',
+           '“The satellite over the ridge winked at six-oh-two. I still log them. Habit.”',
+           '“Pip used to whistle in B-flat, you know. Before the cough.”']},
+  bram:{name:'Bram',role:'wind engineer at the mill',
+    line:'Talks to turbines more easily than to people.',
+    greet:['“Bearing three’s running warm. Anyway. Hello.”',
+           '“Wind’s coming round easterly. The sails know before I do.”',
+           '“I don’t miss the quiet. A mill should mutter.”']},
+  juno:{name:'Juno',role:'keeper of the lighthouse conversion',
+    line:'Collects other people’s lost letters and returns them, eventually.',
+    greet:['“Found another letter in the west wall today. 1961-ish. Smells of oranges.”',
+           '“A lighthouse that guides no ships can still guide people, I figure.”',
+           '“Stay for the fog. It does something lovely to the windows.”']},
+  tobin:{name:'Tobin',role:'moss-field scavenger, age eleven-and-a-half',
+    line:'Trades in interesting bolts; believes every machine has a name.',
+    greet:['“I found a bolt with LEFT stamped on it. What was it left OF, though?”',
+           '“The moss field’s best before lunch. The dew makes the old hulls shine.”',
+           '“Don’t tell anyone, but the drainage pump is called Gerald.”']}
+};
+var QUESTS={
+  q_kettle:{from:'odaline',day:1,title:'Pip’s Cough',
+    letter:'“My kettle-bot has developed a rattle like a spoon in a bicycle wheel. Pip has boiled my water for thirty-one years and I will NOT hear talk of a new one. Bring a proper coil and fit it, would you? Biscuits are implied.” — O.',
+    steps:[{k:'have_coil',t:'Craft a Kettle Coil at the workshop (needs 2 gear bits, 1 copper pipe)'},
+           {k:'delivered',t:'Fit the coil into Pip at Mrs. Odaline’s cottage'}],
+    reward:{cogs:8,warmth:{odaline:2}},world:'pip',
+    thanks:'Pip whistles — B-flat, only slightly flat — and trundles a circle around your boots. Mrs. Odaline pretends her eyes are watering from the steam. “Biscuits,” she says, “and eight cogs. Don’t argue.”'},
+  q_blade:{from:'bram',day:1,title:'The Quiet Mill',
+    letter:'“Storm before last took blade two clean off the windmill and the moss field swallowed it. I’ve heard the mill every day of my life and the gap where the sound should be is worse than any noise. If you’ve the back for it, dig it out. I’ll do the rest.” — Bram',
+    steps:[{k:'dug3',t:'Unearth the fallen blade in the moss field (3 digs)'},
+           {k:'delivered',t:'Haul the blade to Bram at the windmill'}],
+    reward:{warmth:{bram:2},thread:2},world:'windmill',
+    thanks:'Bram fits the blade before sundown, alone, the way he likes. When it catches the wind the whole hill exhales. He hands you two spools of wind-thread and says, to the turbine, “Told you they’d manage.”'},
+  q_tea:{from:'juno',day:2,title:'First Light at the Lighthouse',
+    letter:'“The reading room is nearly ready — shelves up, chairs mismatched to perfection. All it lacks is a first pot worth remembering. Bring me a traveler’s tin of dawn tea and we’ll christen the place before the fog gets opinions.” — Juno',
+    steps:[{k:'have_tin',t:'Craft a Traveler’s Tin at the workshop (needs 3 tea leaves)'},
+           {k:'delivered',t:'Carry it up to Juno at the lighthouse'}],
+    reward:{cogs:6,warmth:{juno:2}},world:'lighthouse',
+    thanks:'Juno lights the little stove and the windows go warm teal, the color the beacon used to be. “There,” she says. “Now it guides people home the slow way.” Six cogs, and the first cup is yours.'},
+  q_letter:{from:'tobin',day:3,title:'Addressed in Fountain Pen',
+    letter:'“Okay so I was in the moss field and inside hull seven there was a TIN and inside the tin was a LETTER and it says ODALINE on it in fancy old ink. I’d deliver it myself but she makes me comb my hair. Please?” — Tobin',
+    steps:[{k:'delivered',t:'Bring the letter to Mrs. Odaline (you’re carrying it already)'}],
+    reward:{warmth:{odaline:1,tobin:1}},world:'flower',
+    thanks:'She reads it twice, says nothing for a long moment, then: “Well.” The next morning a pressed flower appears in her window box, facing the road. Tobin claims full credit and you let him.'}
+};
+var COMMISSIONS=[
+  'Polish the town-square satellite panels till the pigeons complain',
+  'Rewind Widow Carse’s music box (it plays two songs at once)',
+  'Tighten the bell tower’s chain-drive before Sunday',
+  'Re-seat the greenhouse gutter pipe',
+  'Oil the harbour crane’s elbow — it creaks in E minor'
+];
+var WEATHERS=[
+  {k:'sunny',icon:'☀️',line:'Clear and copper-bright. The solar sails are drinking it in.'},
+  {k:'breezy',icon:'🌬',line:'A busy, friendly wind. The mill will be in a talkative mood. (+2 cogs for mill work)'},
+  {k:'drizzle',icon:'🌦',line:'A soft gardener’s drizzle. The tea terraces will be generous today. (+1 leaf)'},
+  {k:'storm',icon:'⛈',line:'A proper storm walking the ridge. The moss field path is closed — an indoor sort of day.'}
+];
+var CLOSINGS=[
+  'Not everything got done. It never does. But the kettle is warmer than it was this morning.',
+  'The village is a stitch further along than it was at dawn. That is the whole job.',
+  'Some days build; some days only hold the line. Holding counts.',
+  'You didn’t finish. You moved forward. Around here, that’s the same word.',
+  'Rest now. The unfinished things will keep — that’s what makes them worth doing well.',
+  'Every mended thing remembers the hands. Today you were remembered by a few more.'
+];
+
+/* ════════════════════════ STATE ════════════════════════ */
+var S=null;
+var _selGuild=null,_selDream=null,_tab='village',_toastT=null;
+
+function newState(name,guild,dream){
+  return {v:1,name:name,guild:guild,dream:dream,
+    day:1,energy:12,maxEnergy:12,cogs:15,
+    weather:'sunny',setback:null,toolOiled:true,
+    inv:{brass:2,pipe:0,gears:0,glass:0,tea:0,thread:0},
+    made:{}, // crafted items
+    q:{},    // quest progress {status:'open'|'done', dug:n, delivered:bool}
+    warmth:{odaline:0,bram:0,juno:0,tobin:0},
+    chatted:{},gifted:{},commToday:0,
+    world:{pip:false,windmill:false,lighthouse:false,flower:false},
+    dreamDone:[],log:[],seen:{}};
+}
+
+/* ════════════════════════ HELPERS ════════════════════════ */
+function el(id){return document.getElementById(id);}
+function esc(s){return String(s).replace(/</g,'&lt;');}
+function toast(t){
+  var e=el('toast');e.textContent=t;e.classList.add('show');
+  clearTimeout(_toastT);_toastT=setTimeout(function(){e.classList.remove('show');},2600);
+}
+function spend(n){
+  if(S.energy<n){toast('Not enough energy — the day only holds so much. Sleep restores you.');return false;}
+  S.energy-=n;return true;
+}
+function log(t){S.log.push(t);}
+function warmUp(who,n){
+  S.warmth[who]=Math.min(10,S.warmth[who]+n);
+}
+function craftCostToday(){return (S.setback==='tool'&&!S.toolOiled)?2:1;}
+function questAvail(id){var q=QUESTS[id];return S.day>=q.day;}
+function questState(id){if(!S.q[id])S.q[id]={status:'open',dug:0,delivered:false};return S.q[id];}
+function questDone(id){return S.q[id]&&S.q[id].status==='done';}
+function totalWarmth(){var t=0;for(var k in S.warmth)t+=S.warmth[k];return t;}
+function canAfford(c){
+  if(c.energy&&S.energy<c.energy)return false;
+  if(c.cogs&&S.cogs<c.cogs)return false;
+  if(c.warmth&&totalWarmth()<c.warmth)return false;
+  for(var k in RES){if(c[k]&&(S.inv[k]||0)<c[k])return false;}
+  return true;
+}
+function costText(c){
+  var p=[];
+  if(c.energy)p.push(c.energy+'⚡');
+  if(c.cogs)p.push(c.cogs+' cogs');
+  if(c.warmth)p.push(c.warmth+' total warmth');
+  for(var k in RES){if(c[k])p.push(c[k]+' '+RES[k]);}
+  return p.join(' · ');
+}
+
+/* ════════════════════════ TITLE ════════════════════════ */
+function renderTitle(){
+  var g='';
+  for(var k in GUILDS){
+    g+='<button class="choice'+(_selGuild===k?' sel':'')+'" onclick="pickGuild(\''+k+'\')">'+
+       '<div class="cn">'+GUILDS[k].name+'</div><div class="cd">Starter tool: '+GUILDS[k].tool+'. '+GUILDS[k].desc+'</div></button>';
+  }
+  el('tGuilds').innerHTML=g;
+  var d='';
+  for(var k2 in DREAMS){
+    d+='<button class="choice'+(_selDream===k2?' sel':'')+'" onclick="pickDream(\''+k2+'\')">'+
+       '<div class="cn">'+DREAMS[k2].name+'</div><div class="cd">'+DREAMS[k2].desc+'</div></button>';
+  }
+  el('tDreams').innerHTML=d;
+  el('tBegin').disabled=!(_selGuild&&_selDream&&el('tName').value.trim());
+}
+function pickGuild(k){_selGuild=k;renderTitle();}
+function pickDream(k){_selDream=k;renderTitle();}
+function beginGame(){
+  S=newState(el('tName').value.trim(),_selGuild,_selDream);
+  el('titleScreen').style.display='none';
+  el('gameScreen').style.display='block';
+  startMorning(true);
+}
+
+/* ════════════════════════ MORNING ════════════════════════ */
+function rollWeather(){
+  var r=Math.random();
+  if(r<0.35)return 'sunny';if(r<0.6)return 'breezy';if(r<0.85)return 'drizzle';return 'storm';
+}
+function startMorning(first){
+  S.weather=first?'sunny':rollWeather();
+  S.setback=null;S.toolOiled=true;
+  if(!first&&S.weather!=='storm'&&Math.random()<0.25){
+    S.setback=Math.random()<0.5?'tool':'path';
+    if(S.setback==='tool')S.toolOiled=false;
+  }
+  S.chatted={};S.gifted={};S.commToday=0;S.log=[];
+  var w=WEATHERS.filter(function(x){return x.k===S.weather;})[0];
+  var h='<h2>Morning, Day '+S.day+'</h2><div class="sub">Brindleport wakes slowly, on principle.</div>';
+  h+='<div class="wxline">'+w.icon+' <b>Weather report:</b> '+w.line+'</div>';
+  if(first)h+='<div class="wxline">You are '+esc(S.name)+' of '+GUILDS[S.guild].name+', new to the village, '+
+    'your '+GUILDS[S.guild].tool+' still shop-bright on your belt. Your dream — <i>'+DREAMS[S.dream].name.toLowerCase()+'</i> — can wait. Dreams keep. Mornings don’t.</div>';
+  if(S.setback==='tool')h+='<div class="wxline setback">🔧 Your '+GUILDS[S.guild].tool+' has gone stiff overnight. Crafting costs +1⚡ today — unless you stop by the workshop to oil it (1⚡). No harm done. Tools just like attention.</div>';
+  if(S.setback==='path')h+='<div class="wxline setback">🌿 Overnight rain washed out the switchback path. The moss field is unreachable today. The moss, presumably, is delighted.</div>';
+  // letters
+  var letters=[];
+  for(var id in QUESTS){
+    if(questAvail(id)&&!questDone(id))letters.push(id);
+  }
+  if(letters.length){
+    h+='<div style="margin:14px 0 6px;font-size:13px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:1px">On your doorstep</div>';
+    letters.slice(0,3).forEach(function(id){
+      var q=QUESTS[id];
+      h+='<div class="letter"><div class="from">From '+FOLKS[q.from].name+' — “'+q.title+'”</div><div class="body">'+q.letter+'</div></div>';
+      S.seen[id]=true;
+    });
+  }else{
+    h+='<div class="letter"><div class="from">The doorstep</div><div class="body">No letters today. The village trusts you to find your own trouble.</div></div>';
+  }
+  h+='<button class="sheet-close" onclick="closeMorning()">Pull on your boots</button>';
+  el('morningSheet').innerHTML=h;
+  el('ovMorning').classList.add('open');
+  renderHud();render();
+}
+function closeMorning(){el('ovMorning').classList.remove('open');}
+
+/* ════════════════════════ EVENING ════════════════════════ */
+function endDay(){
+  var h='<h2>Evening, Day '+S.day+'</h2><div class="sub">The lamps come on one window at a time.</div>';
+  if(S.log.length){
+    h+=S.log.map(function(d){return '<div class="deed">'+d+'</div>';}).join('');
+  }else{
+    h+='<div class="deed">A quiet one. You watched the sails turn and let the day be small. That is allowed.</div>';
+  }
+  h+='<div class="closing">'+CLOSINGS[Math.floor(Math.random()*CLOSINGS.length)]+'</div>';
+  h+='<button class="sheet-close" onclick="sleepNow()">Sleep 🕯</button>';
+  el('eveningSheet').innerHTML=h;
+  el('ovEvening').classList.add('open');
+}
+function sleepNow(){
+  el('ovEvening').classList.remove('open');
+  S.day++;S.energy=S.maxEnergy;
+  startMorning(false);
+}
+
+/* ════════════════════════ HUD / TABS ════════════════════════ */
+function renderHud(){
+  el('hudDay').textContent='Day '+S.day+' — '+esc(S.name);
+  var w=WEATHERS.filter(function(x){return x.k===S.weather;})[0];
+  el('hudWx').textContent=w.icon+' '+S.weather+(S.setback==='tool'?' · tool needs oiling':'')+(S.setback==='path'?' · moss path out':'');
+  var pips='';
+  for(var i=0;i<S.maxEnergy;i++)pips+=i<S.energy?'●':'○';
+  el('hudEnergy').textContent=pips;
+  el('hudCogs').textContent='⚙ '+S.cogs+' cogs';
+}
+function goTab(t){
+  _tab=t;
+  var tabs=document.querySelectorAll('.tab');
+  for(var i=0;i<tabs.length;i++)tabs[i].classList.toggle('on',tabs[i].getAttribute('data-t')===t);
+  render();
+}
+function render(){
+  renderHud();
+  if(_tab==='village')renderVillage();
+  else if(_tab==='letters')renderLetters();
+  else if(_tab==='satchel')renderSatchel();
+  else if(_tab==='dream')renderDream();
+  else renderFolks();
+}
+
+/* ════════════════════════ VILLAGE ════════════════════════ */
+function renderVillage(){
+  var locs=[
+    {id:'square',icon:'🛰',name:'Satellite Square',sub:'The old comms dish, laid flat and flower-boxed, is the town square now. Commission board, scrap exchange, and Tobin.',
+      note:S.world.flower?'A pressed flower faces the road from Mrs. Odaline’s window box.':null},
+    {id:'workshop',icon:'🔧',name:'The Workshop',sub:'Shared benches, borrowed patience. Smells of flux and bergamot.',note:null},
+    {id:'moss',icon:'🌿',name:'The Moss Field',sub:'Where the old hulls sleep under green blankets. Good scavenging, gently done.',
+      note:S.setback==='path'||S.weather==='storm'?'Path closed today.':null},
+    {id:'mill',icon:S.world.windmill?'<span class="spin">✳</span>':'✳',name:'The Windmill',sub:S.world.windmill?'All four blades up and muttering happily. Bram’s doing, and yours.':'Three blades where there should be four. The gap hums wrong.',note:null},
+    {id:'terraces',icon:'🍃',name:'The Tea Terraces',sub:'Stepped gardens under patched solar-sail awnings.',note:null},
+    {id:'cottage',icon:'🏠',name:'Mrs. Odaline’s Cottage',sub:'Smoke at the chimney, log-books in the window.',
+      note:S.world.pip?'<span class="bob">🤖</span> Pip trundles behind her, whistling in almost-B-flat.':null},
+    {id:'lighthouse',icon:S.world.lighthouse?'<span class="glow">🗼</span>':'🗼',name:'The Lighthouse Conversion',sub:S.world.lighthouse?'The windows glow warm teal, the color the beacon used to be.':'Juno’s half-finished reading room in the old beacon tower.',note:null},
+    {id:'observatory',icon:'🔭',name:'The Old Observatory',sub:'Shuttered dome on the hill. Waiting, the way large patient things wait.',note:null}
+  ];
+  var h='';
+  locs.forEach(function(l){
+    h+='<div class="card loc-card" onclick="openLoc(\''+l.id+'\')"><h3><span class="loc-icon">'+l.icon+'</span>'+l.name+'</h3><div class="sub">'+l.sub+'</div>'+(l.note?'<div class="worldnote">'+l.note+'</div>':'')+'</div>';
+  });
+  el('content').innerHTML=h;
+}
+
+/* ── location modal ── */
+function openLoc(id){
+  var h='';
+  if(id==='square')h=locSquare();
+  else if(id==='workshop')h=locWorkshop();
+  else if(id==='moss')h=locMoss();
+  else if(id==='mill')h=locMill();
+  else if(id==='terraces')h=locTerraces();
+  else if(id==='cottage')h=locCottage();
+  else if(id==='lighthouse')h=locLighthouse();
+  else if(id==='observatory')h=locObservatory();
+  el('modalSheet').innerHTML=h+'<button class="sheet-close" onclick="closeModal()">Back to the lanes</button>';
+  el('ovModal').classList.add('open');
+}
+function closeModal(){el('ovModal').classList.remove('open');render();}
+function refreshLoc(id){openLoc(id);renderHud();}
+
+function chatBtn(who,loc){
+  var f=FOLKS[who];
+  if(S.chatted[who])return '<div class="small-note">You’ve already had your talk with '+f.name+' today. Twice would be gossip.</div>';
+  return '<button class="act warm" onclick="doChat(\''+who+'\',\''+loc+'\')">Pass the time with '+f.name+'<span class="cost">1⚡ · +warmth</span></button>';
+}
+function giftBtns(who,loc){
+  if(S.gifted[who])return '';
+  var h='';
+  if((S.inv.tea||0)>0)h+='<button class="act warm" onclick="doGift(\''+who+'\',\'tea\',\''+loc+'\')">Gift a handful of tea leaves<span class="cost">+1 warmth</span></button>';
+  if((S.inv.glass||0)>0)h+='<button class="act warm" onclick="doGift(\''+who+'\',\'glass\',\''+loc+'\')">Gift a piece of moss-glass<span class="cost">+1 warmth</span></button>';
+  if((S.made.blend||0)>0)h+='<button class="act warm" onclick="doGift(\''+who+'\',\'blend\',\''+loc+'\')">Gift the Dawn-Picked Blend<span class="cost">+2 warmth</span></button>';
+  return h;
+}
+function doChat(who,loc){
+  if(S.chatted[who]){refreshLoc(loc);return;}
+  if(!spend(1)){refreshLoc(loc);return;}
+  S.chatted[who]=true;warmUp(who,1);
+  var g=FOLKS[who].greet;
+  toast(g[Math.floor(Math.random()*g.length)]);
+  log('☕ Passed the time with '+FOLKS[who].name+'. (+1 warmth)');
+  refreshLoc(loc);
+}
+function doGift(who,what,loc){
+  if(S.gifted[who]){refreshLoc(loc);return;}
+  var w=1,label='';
+  if(what==='blend'){if(!(S.made.blend>0)){refreshLoc(loc);return;}S.made.blend--;w=2;label='the Dawn-Picked Blend';}
+  else{if(!(S.inv[what]>0)){refreshLoc(loc);return;}S.inv[what]--;label=RES[what];}
+  S.gifted[who]=true;warmUp(who,w);
+  toast(FOLKS[who].name+' turns the gift over twice, the way people do when they mean to keep it.');
+  log('🎁 Gave '+FOLKS[who].name+' '+label+'. (+'+w+' warmth)');
+  refreshLoc(loc);
+}
+
+/* ── Satellite Square ── */
+function locSquare(){
+  var h='<h2>🛰 Satellite Square</h2><div class="sub">The great dish catches rain now instead of signals, and the whole village agrees it has never been more useful.</div>';
+  if(S.commToday<2){
+    h+='<button class="act" onclick="doCommission()">Take a commission from the board<span class="cost">2⚡ → 6 cogs</span></button>';
+  }else{
+    h+='<div class="small-note">The board is picked clean for today. Small jobs, steady hands — tomorrow there’ll be more.</div>';
+  }
+  h+='<div style="margin:12px 0 4px;font-size:13px;color:var(--ink-soft)">— Scrap exchange —</div>';
+  h+='<button class="act" onclick="doBuy(\'brass\',3)">Buy scrap brass<span class="cost">3 cogs</span></button>';
+  h+='<button class="act" onclick="doBuy(\'pipe\',4)">Buy copper pipe<span class="cost">4 cogs</span></button>';
+  h+='<button class="act" onclick="doBuy(\'gears\',5)">Buy gear bits<span class="cost">5 cogs</span></button>';
+  var q=QUESTS.q_letter;
+  if(questAvail('q_letter')&&!questDone('q_letter')){
+    h+='<div class="small-note">Tobin’s letter for Mrs. Odaline crinkles in your satchel. Her cottage is up the lane.</div>';
+  }
+  h+='<div style="margin:12px 0 4px;font-size:13px;color:var(--ink-soft)">— Tobin, upside-down on the dish rim —</div>';
+  h+=chatBtn('tobin','square')+giftBtns('tobin','square');
+  return h;
+}
+function doCommission(){
+  if(S.commToday>=2)return;
+  if(!spend(2)){refreshLoc('square');return;}
+  S.commToday++;S.cogs+=6;
+  var job=COMMISSIONS[Math.floor(Math.random()*COMMISSIONS.length)];
+  toast('Done: '+job+'. 6 cogs, and a nod from whoever was watching.');
+  log('🔩 Commission: '+job+'. (+6 cogs)');
+  refreshLoc('square');
+}
+function doBuy(res,price){
+  if(S.cogs<price){toast('Not enough cogs. The exchange keeps honest ledgers.');return;}
+  S.cogs-=price;S.inv[res]=(S.inv[res]||0)+1;
+  log('🧺 Bought 1 '+RES[res]+' at the exchange. (−'+price+' cogs)');
+  refreshLoc('square');
+}
+
+/* ── Workshop ── */
+function locWorkshop(){
+  var h='<h2>🔧 The Workshop</h2><div class="sub">Benches worn smooth by four generations of elbows. Someone has left the good kettle on, as always.</div>';
+  if(S.setback==='tool'&&!S.toolOiled){
+    h+='<button class="act" onclick="doOil()">Oil your '+GUILDS[S.guild].tool+'<span class="cost">1⚡ · fixes today’s stiffness</span></button>';
+  }
+  var cc=craftCostToday();
+  h+='<div style="margin:10px 0 4px;font-size:13px;color:var(--ink-soft)">— Crafting ('+cc+'⚡ each'+(cc>1?' — stiff tool':'')+') —</div>';
+  for(var k in CRAFT){
+    var r=CRAFT[k];
+    if(r.guild&&r.guild!==S.guild)continue;
+    if(r.quest&&questDone(r.quest))continue;
+    if(r.quest&&!questAvail(r.quest))continue;
+    if(r.quest&&questState(r.quest).delivered)continue;
+    var needTxt=costText(r.need);
+    var have=canAfford(r.need);
+    h+='<button class="act" '+(have?'':'disabled')+' onclick="doCraft(\''+k+'\')">'+r.n+'<span class="cost">'+needTxt+'</span>'+
+       '<div style="font-size:12px;color:var(--ink-soft);font-style:italic;margin-top:2px">'+r.flavor+'</div></button>';
+  }
+  var sellable=['patch','regulator','bearing','blend'].filter(function(k){return (S.made[k]||0)>0&&CRAFT[k].sell;});
+  if(sellable.length){
+    h+='<div style="margin:10px 0 4px;font-size:13px;color:var(--ink-soft)">— Finished work on your bench —</div>';
+    sellable.forEach(function(k){
+      h+='<button class="act" onclick="doSell(\''+k+'\')">Sell '+CRAFT[k].n+' ×'+S.made[k]+'<span class="cost">'+CRAFT[k].sell+' cogs each</span></button>';
+    });
+  }
+  return h;
+}
+function doOil(){
+  if(!spend(1)){refreshLoc('workshop');return;}
+  S.toolOiled=true;
+  toast('Three drops of oil and a wipe with the good rag. The '+GUILDS[S.guild].tool+' sighs back into shape.');
+  log('🛢 Oiled your '+GUILDS[S.guild].tool+'.');
+  refreshLoc('workshop');
+}
+function doCraft(k){
+  var r=CRAFT[k];
+  if(!canAfford(r.need)){refreshLoc('workshop');return;}
+  if(!spend(craftCostToday())){refreshLoc('workshop');return;}
+  var saved=null;
+  for(var res in r.need){
+    var take=r.need[res];
+    if(S.guild==='clock'&&saved===null&&Math.random()<0.25){take--;saved=res;}
+    S.inv[res]-=take;
+    if(S.inv[res]<0)S.inv[res]=0;
+  }
+  S.made[k]=(S.made[k]||0)+1;
+  toast('Made: '+r.n+'.'+(saved?' Your calipers were so precise you saved a '+RES[saved]+'.':''));
+  log('🔨 Crafted '+r.n+'.'+(saved?' (calipers saved a '+RES[saved]+')':''));
+  refreshLoc('workshop');
+}
+function doSell(k){
+  if(!(S.made[k]>0))return;
+  S.made[k]--;S.cogs+=CRAFT[k].sell;
+  toast('Sold '+CRAFT[k].n+' for '+CRAFT[k].sell+' cogs. Someone will care for it. That’s the deal.');
+  log('⚙ Sold '+CRAFT[k].n+'. (+'+CRAFT[k].sell+' cogs)');
+  refreshLoc('workshop');
+}
+
+/* ── Moss Field ── */
+function locMoss(){
+  var closed=(S.setback==='path'||S.weather==='storm');
+  var h='<h2>🌿 The Moss Field</h2><div class="sub">Old hulls under green blankets. Hull seven has a rose growing out of its exhaust, which everyone agrees it earned.</div>';
+  if(closed){
+    h+='<div class="small-note">The switchback path is out today. The moss field will keep — it has kept for a hundred years.</div>';
+    return h;
+  }
+  h+='<button class="act" onclick="doForage()">Forage among the hulls<span class="cost">2⚡ · scrap &amp; oddments</span></button>';
+  var qs=questState('q_blade');
+  if(questAvail('q_blade')&&!questDone('q_blade')&&qs.dug<3){
+    h+='<button class="act" onclick="doDig()">Dig for the fallen windmill blade ('+qs.dug+'/3)<span class="cost">1⚡</span></button>';
+  }
+  if(qs.dug>=3&&!qs.delivered&&!questDone('q_blade')){
+    h+='<div class="small-note">The blade lies unearthed beside you, longer than a rowboat and lighter than it looks. Bram is waiting at the mill.</div>';
+  }
+  return h;
+}
+function doForage(){
+  if(!spend(2)){refreshLoc('moss');return;}
+  var finds=[['gears','a pocketful of gear bits'],['glass','a curve of moss-glass'],['brass','a bar of scrap brass'],['pipe','a length of copper pipe']];
+  var f=finds[Math.floor(Math.random()*finds.length)];
+  var n=1+(Math.random()<0.4?1:0);
+  S.inv[f[0]]=(S.inv[f[0]]||0)+n;
+  toast('You come up with '+f[1]+(n>1?' — two, in fact':'')+'. The moss closes politely behind you.');
+  log('🌿 Foraged the moss field: +'+n+' '+RES[f[0]]+'.');
+  refreshLoc('moss');
+}
+function doDig(){
+  var qs=questState('q_blade');
+  if(qs.dug>=3)return;
+  if(!spend(1)){refreshLoc('moss');return;}
+  qs.dug++;
+  var lines=['The moss gives up a corner of the blade, reluctantly.','Halfway there. A family of beetles files a formal complaint.','The blade comes free with a sound like a cork from a very old bottle.'];
+  toast(lines[qs.dug-1]||lines[2]);
+  log('⛏ Dug for the windmill blade ('+qs.dug+'/3).');
+  refreshLoc('moss');
+}
+
+/* ── Windmill ── */
+function locMill(){
+  var h='<h2>✳ The Windmill</h2><div class="sub">'+(S.world.windmill?'Four blades turning, the whole hill murmuring its old song again.':'It stands too quiet, like a sentence missing its verb.')+'</div>';
+  var qs=questState('q_blade');
+  if(questAvail('q_blade')&&!questDone('q_blade')&&qs.dug>=3&&!qs.delivered){
+    h+='<button class="act" onclick="doBlade()">Haul the blade up to Bram<span class="cost">2⚡ · completes “The Quiet Mill”</span></button>';
+  }
+  var pay=6+(S.weather==='breezy'?2:0)+(S.guild==='wind'?2:0);
+  h+='<button class="act" onclick="doMillWork()">Help Bram stitch and tension the sails<span class="cost">2⚡ → '+pay+' cogs + wind-thread</span></button>';
+  h+=chatBtn('bram','mill')+giftBtns('bram','mill');
+  return h;
+}
+function doMillWork(){
+  if(!spend(2)){refreshLoc('mill');return;}
+  var pay=6+(S.weather==='breezy'?2:0)+(S.guild==='wind'?2:0);
+  S.cogs+=pay;S.inv.thread=(S.inv.thread||0)+1;
+  toast('An afternoon of needles and tension gauges. '+pay+' cogs, one spool of wind-thread, and Bram almost smiles.');
+  log('🪡 Sail work at the mill. (+'+pay+' cogs, +1 wind-thread)');
+  refreshLoc('mill');
+}
+function doBlade(){
+  var qs=questState('q_blade');
+  if(qs.dug<3||qs.delivered)return;
+  if(!spend(2)){refreshLoc('mill');return;}
+  qs.delivered=true;qs.status='done';
+  S.world.windmill=true;
+  warmUp('bram',2);S.inv.thread=(S.inv.thread||0)+2;
+  el('modalSheet').innerHTML='<h2>✳ The Quiet Mill — mended</h2><div class="sub">'+QUESTS.q_blade.thanks+'</div><button class="sheet-close" onclick="closeModal()">Listen a while, then go</button>';
+  log('✳ Returned the windmill blade. The mill turns again. (+2 warmth with Bram, +2 wind-thread)');
+  renderHud();
+}
+
+/* ── Tea Terraces ── */
+function locTerraces(){
+  var h='<h2>🍃 The Tea Terraces</h2><div class="sub">Rows of green under patched solar-sail awnings, each panel a different sun-faded color, like a quilt for the hillside.</div>';
+  var yieldTxt=1+(S.weather==='drizzle'?1:0)+(S.guild==='tea'?1:0);
+  h+='<button class="act" onclick="doTea()">Pick tea, gently, row by row<span class="cost">2⚡ → ~'+yieldTxt+'–'+(yieldTxt+1)+' leaves</span></button>';
+  return h;
+}
+function doTea(){
+  if(!spend(2)){refreshLoc('terraces');return;}
+  var n=1+(Math.random()<0.5?1:0)+(S.weather==='drizzle'?1:0)+(S.guild==='tea'?1:0);
+  S.inv.tea=(S.inv.tea||0)+n;
+  toast('+'+n+' tea leaves, and the smell of rain on warm copper follows you down the hill.');
+  log('🍃 Picked '+n+' tea leaves at the terraces.');
+  refreshLoc('terraces');
+}
+
+/* ── Odaline's Cottage ── */
+function locCottage(){
+  var h='<h2>🏠 Mrs. Odaline’s Cottage</h2><div class="sub">'+(S.world.pip?'Pip answers the door now, whistling. Mrs. Odaline pretends this is a nuisance.':'Somewhere inside, a kettle-bot rattles like a spoon in a bicycle wheel.')+'</div>';
+  var qs=questState('q_kettle');
+  if(questAvail('q_kettle')&&!questDone('q_kettle')){
+    if((S.made.coil||0)>0){
+      h+='<button class="act" onclick="doKettle()">Fit the new coil into Pip<span class="cost">1⚡ · completes “Pip’s Cough”</span></button>';
+    }else{
+      h+='<div class="small-note">Pip needs a Kettle Coil — craftable at the workshop from 2 gear bits and a copper pipe.</div>';
+    }
+  }
+  var ql=questState('q_letter');
+  if(questAvail('q_letter')&&!questDone('q_letter')){
+    h+='<button class="act" onclick="doLetter()">Hand over the letter addressed in fountain pen<span class="cost">1⚡ · completes “Addressed in Fountain Pen”</span></button>';
+  }
+  h+=chatBtn('odaline','cottage')+giftBtns('odaline','cottage');
+  return h;
+}
+function doKettle(){
+  if(!(S.made.coil>0))return;
+  if(!spend(1)){refreshLoc('cottage');return;}
+  S.made.coil--;
+  var qs=questState('q_kettle');qs.delivered=true;qs.status='done';
+  S.world.pip=true;S.cogs+=8;warmUp('odaline',2);
+  el('modalSheet').innerHTML='<h2>🤖 Pip’s Cough — mended</h2><div class="sub">'+QUESTS.q_kettle.thanks+'</div><button class="sheet-close" onclick="closeModal()">Take the biscuits and go</button>';
+  log('🤖 Repaired Pip the kettle-bot. (+8 cogs, +2 warmth with Mrs. Odaline)');
+  renderHud();
+}
+function doLetter(){
+  if(!spend(1)){refreshLoc('cottage');return;}
+  var qs=questState('q_letter');qs.delivered=true;qs.status='done';
+  S.world.flower=true;warmUp('odaline',1);warmUp('tobin',1);
+  el('modalSheet').innerHTML='<h2>✉ Addressed in Fountain Pen — delivered</h2><div class="sub">'+QUESTS.q_letter.thanks+'</div><button class="sheet-close" onclick="closeModal()">Leave her to the reading</button>';
+  log('✉ Delivered the old letter to Mrs. Odaline. (+1 warmth with her and Tobin)');
+  renderHud();
+}
+
+/* ── Lighthouse ── */
+function locLighthouse(){
+  var h='<h2>🗼 The Lighthouse Conversion</h2><div class="sub">'+(S.world.lighthouse?'The reading room breathes steam and lamplight. The windows glow the old beacon-teal, visible clear from the square.':'Shelves half-up, chairs mismatched to perfection, a stove that believes in itself.')+'</div>';
+  var qs=questState('q_tea');
+  if(questAvail('q_tea')&&!questDone('q_tea')){
+    if((S.made.tin||0)>0){
+      h+='<button class="act" onclick="doTin()">Carry the Traveler’s Tin up the spiral stairs<span class="cost">1⚡ · completes “First Light at the Lighthouse”</span></button>';
+    }else{
+      h+='<div class="small-note">Juno is waiting on a Traveler’s Tin of dawn tea — craftable at the workshop from 3 tea leaves.</div>';
+    }
+  }
+  h+=chatBtn('juno','lighthouse')+giftBtns('juno','lighthouse');
+  return h;
+}
+function doTin(){
+  if(!(S.made.tin>0))return;
+  if(!spend(1)){refreshLoc('lighthouse');return;}
+  S.made.tin--;
+  var qs=questState('q_tea');qs.delivered=true;qs.status='done';
+  S.world.lighthouse=true;S.cogs+=6;warmUp('juno',2);
+  el('modalSheet').innerHTML='<h2>🗼 First Light — poured</h2><div class="sub">'+QUESTS.q_tea.thanks+'</div><button class="sheet-close" onclick="closeModal()">Drink it slowly</button>';
+  log('🫖 First pot at the lighthouse with Juno. (+6 cogs, +2 warmth)');
+  renderHud();
+}
+
+/* ── Observatory ── */
+function locObservatory(){
+  var h='<h2>🔭 The Old Observatory</h2><div class="sub">The shutters are latched from inside, which is either a mystery or a draught precaution. The dome still tracks the sky out of habit — you can hear the gears keeping faith.</div>';
+  if(S.dream==='observatory'){
+    h+='<div class="small-note">This is your dream. Its milestones live in the Dream tab — the hill isn’t going anywhere.</div>';
+  }else{
+    h+='<div class="small-note">Someone should love this place back to life someday. Perhaps a different you.</div>';
+  }
+  return h;
+}
+
+/* ════════════════════════ LETTERS TAB ════════════════════════ */
+function renderLetters(){
+  var h='',open=0;
+  for(var id in QUESTS){
+    if(!questAvail(id))continue;
+    var q=QUESTS[id],qs=questState(id);
+    var done=questDone(id);
+    if(!done)open++;
+    h+='<div class="letter'+(done?'':'')+'">'+
+       '<div class="from">From '+FOLKS[q.from].name+' — “'+q.title+'”</div>'+
+       '<div class="body">'+q.letter+'</div><div class="steps">';
+    q.steps.forEach(function(st){
+      var stDone=false;
+      if(st.k==='have_coil')stDone=(S.made.coil||0)>0||qs.delivered;
+      if(st.k==='have_tin')stDone=(S.made.tin||0)>0||qs.delivered;
+      if(st.k==='dug3')stDone=qs.dug>=3;
+      if(st.k==='delivered')stDone=qs.delivered;
+      h+='<div class="'+(stDone?'done':'')+'">'+(stDone?'✔':'☐')+' '+st.t+'</div>';
+    });
+    h+='</div>'+(done?'<div class="badge-done">Mended ✔</div>':'')+'</div>';
+  }
+  if(!h)h='<div class="card"><div class="sub">No letters yet. The village is still deciding what to make of you. Give it a morning.</div></div>';
+  el('content').innerHTML=h;
+}
+
+/* ════════════════════════ SATCHEL TAB ════════════════════════ */
+function renderSatchel(){
+  var h='<div class="card"><h3>Materials</h3>';
+  for(var k in RES)h+='<div class="res-row"><span>'+RES[k]+'</span><b>'+(S.inv[k]||0)+'</b></div>';
+  h+='</div>';
+  var madeAny=false,mh='<div class="card"><h3>Finished work</h3>';
+  for(var m in S.made){if(S.made[m]>0){madeAny=true;mh+='<div class="res-row"><span>'+CRAFT[m].n+'</span><b>'+S.made[m]+'</b></div>';}}
+  mh+='</div>';
+  if(madeAny)h+=mh;
+  h+='<div class="card"><h3>Your tool</h3><div class="sub">'+GUILDS[S.guild].tool.charAt(0).toUpperCase()+GUILDS[S.guild].tool.slice(1)+', '+GUILDS[S.guild].name+' issue. '+(S.setback==='tool'&&!S.toolOiled?'Stiff today — the workshop can fix that.':'In good temper.')+'</div></div>';
+  h+='<div class="card"><h3>Save your stitches</h3><div class="sub">Copy this code somewhere safe; paste it on the title screen to continue. (No account, no cloud — just a code, like a knitting pattern.)</div>'+
+     '<textarea class="savebox" id="saveOut" readonly onclick="this.select()">'+makeSave()+'</textarea>'+
+     '<button class="act" style="margin-top:8px" onclick="copySave()">Copy save code</button></div>';
+  el('content').innerHTML=h;
+}
+function makeSave(){
+  try{return 'PW1.'+btoa(unescape(encodeURIComponent(JSON.stringify(S))));}catch(e){return 'save error';}
+}
+function copySave(){
+  var t=el('saveOut');t.select();t.setSelectionRange(0,999999);
+  var ok=false;
+  try{ok=document.execCommand('copy');}catch(e){}
+  if(!ok&&navigator.clipboard){navigator.clipboard.writeText(t.value).then(function(){toast('Save code copied.');});return;}
+  toast(ok?'Save code copied.':'Select the code and copy it by hand — old-fashioned, like us.');
+}
+function openImport(){
+  var code=prompt('Paste your Patchwork save code:');
+  if(!code)return;
+  try{
+    if(code.indexOf('PW1.')!==0)throw 0;
+    var st=JSON.parse(decodeURIComponent(escape(atob(code.slice(4)))));
+    if(!st||!st.name||!GUILDS[st.guild])throw 0;
+    S=st;
+    el('titleScreen').style.display='none';
+    el('gameScreen').style.display='block';
+    goTab('village');renderHud();
+    toast('Welcome back to Brindleport, '+S.name+'. Day '+S.day+' remembers you.');
+  }catch(e){alert('That code didn’t take — check it copied whole, corner to corner.');}
+}
+
+/* ════════════════════════ DREAM TAB ════════════════════════ */
+function renderDream(){
+  var d=DREAMS[S.dream],ms=MILESTONES[S.dream];
+  var doneN=S.dreamDone.length;
+  var h='<div class="card"><h3>'+d.name+'</h3><div class="sub">'+d.desc+'</div>'+
+        '<div class="worldnote">'+doneN+' of '+ms.length+' small stitches made. Dreams are just chores you love in order.</div></div>';
+  h+='<div class="card">';
+  var reachedLock=false;
+  ms.forEach(function(m,i){
+    var done=S.dreamDone.indexOf(m.id)>=0;
+    var isNext=!done&&!reachedLock;
+    if(isNext)reachedLock=true;
+    h+='<div class="mile'+(done?' done':'')+'">'+
+       '<div class="dot">'+(done?'✅':(isNext?'🔸':'▫️'))+'</div>'+
+       '<div style="flex:1"><div class="mn">'+m.n+'</div>'+
+       (m.d&&(done||isNext)?'<div class="mc" style="font-style:italic">'+m.d+'</div>':'')+
+       '<div class="mc">'+costText(m.c)+'</div></div>';
+    if(isNext)h+='<button '+(canAfford(m.c)?'':'disabled')+' onclick="doMilestone(\''+m.id+'\')">stitch</button>';
+    h+='</div>';
+  });
+  h+='</div>';
+  el('content').innerHTML=h;
+}
+function doMilestone(id){
+  var ms=MILESTONES[S.dream],m=null;
+  ms.forEach(function(x){if(x.id===id)m=x;});
+  if(!m||S.dreamDone.indexOf(id)>=0||!canAfford(m.c))return;
+  if(m.c.energy&&!spend(m.c.energy))return;
+  if(m.c.cogs)S.cogs-=m.c.cogs;
+  for(var k in RES){if(m.c[k])S.inv[k]-=m.c[k];}
+  S.dreamDone.push(id);
+  toast('A stitch toward the dream: '+m.n+'.');
+  log('✨ Dream progress: '+m.n);
+  render();
+}
+
+/* ════════════════════════ FOLKS TAB ════════════════════════ */
+function renderFolks(){
+  var h='';
+  for(var k in FOLKS){
+    var f=FOLKS[k],w=S.warmth[k];
+    var hearts='';
+    for(var i=0;i<5;i++)hearts+=(i<Math.floor(w/2))?'♥':'<span class="off">♥</span>';
+    var extras=[];
+    if(k==='odaline'&&S.world.pip)extras.push('Pip trundles at her heel, mended and smug about it.');
+    if(k==='odaline'&&S.world.flower)extras.push('A pressed flower stands in her window box now.');
+    if(k==='bram'&&S.world.windmill)extras.push('He works to the mill’s murmur again, shoulders lower by an inch.');
+    if(k==='juno'&&S.world.lighthouse)extras.push('Her reading room glows beacon-teal at dusk.');
+    h+='<div class="card"><h3>'+f.name+'</h3><div class="sub">'+f.role+' — '+f.line+'</div>'+
+       '<div class="hearts" style="margin-top:6px">'+hearts+' <span style="color:var(--ink-soft);font-size:11.5px">warmth '+w+'/10</span></div>'+
+       (extras.length?'<div class="worldnote">'+extras.join(' ')+'</div>':'')+'</div>';
+  }
+  el('content').innerHTML=h;
+}
+
+/* ════════════════════════ BOOT ════════════════════════ */
+el('tName').addEventListener('input',renderTitle);
+renderTitle();
+</script>
+</body>
+</html>
