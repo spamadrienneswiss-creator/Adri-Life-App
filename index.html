@@ -8009,6 +8009,7 @@ function renderT(){
   if(typeof renderTasksGuide==='function')renderTasksGuide();
   if(typeof renderTodayRhythm==='function')renderTodayRhythm();
   if(typeof renderWeekStrip==='function')renderWeekStrip();
+  if(typeof renderWeekPlan==='function')renderWeekPlan();
   var list=document.getElementById('taskList');if(!list)return;
   var _sel=document.getElementById('taskSortSel');if(_sel&&_sel.value!==TASK_SORT)_sel.value=TASK_SORT;
   renderCatFilterChips();
@@ -22492,6 +22493,30 @@ function togWeekStrip(){
   var ch=document.getElementById('weekStripChev');if(ch)ch.textContent=open?'▾':'▸';
   if(open)renderWeekStrip();
 }
+// ── shared slot math (strip + planner agree by construction) ──
+// A day's used slots = number of BLOCKS: like tasks (same category) stack
+// into one block, max 3 per block (her batching rule).
+function _dayTasksOn(key){return (TASKS||[]).filter(function(t){return t&&!t.done&&!t.parked&&t.due===key;});}
+function _dayStacks(key){
+  var groups={};
+  _dayTasksOn(key).forEach(function(t){var c=t.cat||'mis';(groups[c]=groups[c]||[]).push(t);});
+  return groups;
+}
+function _daySlotsUsed(key){return Object.keys(_dayStacks(key)).length;}
+function _dayFreeSlots(dow){
+  var f=(RHYTHM_TPL.fixed&&RHYTHM_TPL.fixed[dow]);if(f===undefined)f=1;
+  return Math.max(0,2-Math.min(2,f));
+}
+function _weekCapacity(){
+  var free=0,used=0;
+  _weekDates().forEach(function(d){
+    var key=d.toISOString().slice(0,10);
+    var fr=_dayFreeSlots(d.getDay());
+    free+=fr;
+    used+=Math.min(_daySlotsUsed(key),fr);
+  });
+  return {free:free,used:used};
+}
 function renderWeekStrip(){
   var el=document.getElementById('weekStripBody');
   var peek=document.getElementById('weekStripPeek');
@@ -22499,30 +22524,97 @@ function renderWeekStrip(){
   var dates=_weekDates();
   var todayK=todayStr();
   var names=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-  var totalFree=0,usedAll=0;
   var rows=dates.map(function(d){
     var dow=d.getDay();
     var key=d.toISOString().slice(0,10);
-    var fixed=Math.min(2,(RHYTHM_TPL.fixed&&RHYTHM_TPL.fixed[dow])!==undefined?RHYTHM_TPL.fixed[dow]:1);
-    var assigned=(TASKS||[]).filter(function(t){return t&&!t.done&&!t.parked&&t.due===key;});
-    var free=Math.max(0,2-fixed-assigned.length);
-    totalFree+=Math.max(0,2-fixed);usedAll+=Math.min(assigned.length,Math.max(0,2-fixed));
+    var freeCap=_dayFreeSlots(dow);
+    var fixed=2-freeCap;
+    var stacks=_dayStacks(key);
+    var usedN=Object.keys(stacks).length;
     var slots='';
     for(var i=0;i<fixed;i++)slots+='<span style="width:13px;height:13px;border-radius:50%;background:#EFEDF6;border:1.5px solid #E4E0EE;flex:none"></span>';
-    assigned.slice(0,2-fixed>0?2-fixed:0).forEach(function(){slots+='<span style="width:13px;height:13px;border-radius:50%;background:#2475FF;flex:none"></span>';});
-    for(var j=0;j<free;j++)slots+='<span style="width:13px;height:13px;border-radius:50%;background:#fff;border:1.5px solid var(--bdr);flex:none"></span>';
-    var over=assigned.length>Math.max(0,2-fixed);
+    Object.keys(stacks).slice(0,freeCap).forEach(function(c){
+      var n=stacks[c].length;
+      slots+='<span style="min-width:13px;height:13px;border-radius:7px;background:#2475FF;flex:none;color:#fff;font-size:9px;font-weight:800;display:inline-flex;align-items:center;justify-content:center;padding:0 '+(n>1?'4px':'0')+'">'+(n>1?'×'+n:'')+'</span>';
+    });
+    for(var j=0;j<Math.max(0,freeCap-usedN);j++)slots+='<span style="width:13px;height:13px;border-radius:50%;background:#fff;border:1.5px solid var(--bdr);flex:none"></span>';
+    var over=usedN>freeCap;
+    var assigned=_dayTasksOn(key);
     var txt=assigned.length?assigned.map(function(t){return escHtml(t.title||'');}).join(' · ')
       :((RHYTHM_TPL.days&&RHYTHM_TPL.days[dow])||[]).map(function(a){return escHtml(a.t);}).join(' · ');
     var isToday=key===todayK;
     return '<div style="display:flex;align-items:center;gap:9px;padding:8px 0;border-top:1px solid #F0EDF5;font-size:13px">'
       +'<span style="width:34px;flex:none;font-weight:700;font-size:12px;color:'+(isToday?'#2475FF':'var(--textl)')+'">'+names[dow]+'</span>'
-      +'<span style="display:flex;gap:4px;flex:none">'+slots+'</span>'
+      +'<span style="display:flex;gap:4px;flex:none;align-items:center">'+slots+'</span>'
       +'<span style="flex:1;color:'+(assigned.length?'var(--textd)':'var(--textl)')+';font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+txt+(over?' <b style="color:#F06677">· too much</b>':'')+'</span>'
       +'</div>';
   }).join('');
   el.innerHTML=rows;
-  if(peek)peek.textContent=(totalFree-usedAll)+' of '+totalFree+' free slots open';
+  var cap=_weekCapacity();
+  if(peek)peek.textContent=(cap.free-cap.used)+' of '+cap.free+' free slots open';
+}
+// ── WEEK PLANNER (Component 3): chips, gauge, the hard block ──
+function wpFlash(msg){
+  var m=document.getElementById('wpFullMsg');if(!m)return;
+  var orig='Week is full. Adding more means removing something.';
+  m.textContent=msg||orig;m.style.display='';
+  setTimeout(function(){var cap=_weekCapacity();m.style.display=cap.used>=cap.free?'':'none';m.textContent=orig;},2000);
+}
+function wpAssign(taskId,key,dow){
+  var t=findTaskDeep(taskId,TASKS);if(!t)return;
+  if(t.due===key){
+    t.due='';
+  }else{
+    var stacks=_dayStacks(key);
+    var cat=t.cat||'mis';
+    var stackExists=!!stacks[cat];
+    var dayFull=_daySlotsUsed(key)>=_dayFreeSlots(dow);
+    var cap=_weekCapacity();
+    if(stackExists&&stacks[cat].length>=3){wpFlash('That block is getting heavy — 3 like tasks max.');return;}
+    if(!stackExists&&dayFull){wpFlash('That day is full.');return;}
+    if(!stackExists&&cap.used>=cap.free){wpFlash();return;}
+    t.due=key;
+  }
+  var root=_findRootFor(t.id,TASKS)||t;
+  saveTasks();
+  fbSave('tasks',root.id,root);
+  renderT();
+  renderWeekPlan();
+}
+function renderWeekPlan(){
+  var el=document.getElementById('wpTasks');if(!el)return;
+  var cap=_weekCapacity();
+  var u=document.getElementById('wpUsed');if(u)u.textContent=cap.used;
+  var f=document.getElementById('wpFree');if(f)f.textContent=cap.free;
+  var fill=document.getElementById('wpFill');
+  if(fill){fill.style.width=(cap.free?Math.min(100,cap.used/cap.free*100):100)+'%';fill.style.background=cap.used>=cap.free?'#F06677':'#2475FF';}
+  var fm=document.getElementById('wpFullMsg');if(fm)fm.style.display=cap.used>=cap.free?'':'none';
+  var dates=_weekDates();var todayK=todayStr();
+  var names=['S','M','T','W','T','F','S'];
+  var weekKeys=dates.map(function(d){return d.toISOString().slice(0,10);});
+  var placed=(TASKS||[]).filter(function(t){return t&&!t.done&&!t.parked&&weekKeys.indexOf(t.due)>=0;});
+  var backlog=(TASKS||[]).filter(function(t){return t&&!t.done&&!t.parked&&!t.due;})
+    .sort(function(a,b){return (_TASK_URG_ORDER[a.urgency]!==undefined?_TASK_URG_ORDER[a.urgency]:9)-(_TASK_URG_ORDER[b.urgency]!==undefined?_TASK_URG_ORDER[b.urgency]:9);});
+  var show=placed.concat(backlog.slice(0,8));
+  el.innerHTML=show.length?show.map(function(t){
+    var cat=t.cat||'mis';
+    var chips=dates.map(function(d){
+      var key=d.toISOString().slice(0,10);var dow=d.getDay();
+      var on=t.due===key;
+      var stacks=_dayStacks(key);
+      var canStack=!!stacks[cat]&&stacks[cat].length<3&&!on;
+      var dayFull=_daySlotsUsed(key)>=_dayFreeSlots(dow);
+      var past=key<todayK;
+      var disabled=past||(!on&&dayFull&&!canStack);
+      return '<button onclick="wpAssign(\''+t.id+'\',\''+key+'\','+dow+')"'+(disabled?' disabled':'')+' style="width:30px;height:27px;border-radius:8px;border:1.5px solid '+(on?'#2475FF':'var(--bdr)')+';background:'+(on?'#2475FF':(disabled?'#F5F3F8':'#fff'))+';color:'+(on?'#fff':(disabled?'#C9C4D4':'var(--textl)'))+';font-family:\'Quicksand\',sans-serif;font-size:11px;font-weight:700;cursor:'+(disabled?'default':'pointer')+'">'+names[dow]+'</button>';
+    }).join('');
+    return '<div style="padding:9px 0;border-top:1px solid #F0EDF5">'
+      +'<div style="font-size:14px;font-weight:600;color:var(--textd)">'+escHtml(t.title||'')+'</div>'
+      +'<div style="display:flex;gap:4px;margin-top:6px">'+chips+'</div>'
+      +'</div>';
+  }).join(''):'<div style="font-size:13px;color:var(--textl);padding:6px 0">Nothing to place — add tasks in the Tasks tab, then place them here on Monday.</div>';
+  var w=document.getElementById('wpWaiting');
+  if(w)w.textContent=backlog.length?backlog.length+' unplaced task'+(backlog.length===1?'':'s')+' waiting — safe in the Tasks list, not lost.':'';
 }
 function _rhythmDoneToday(){
   var t=todayStr();
@@ -27937,6 +28029,7 @@ function startApp(){
   if(typeof renderHomeGuide==='function')renderHomeGuide();
   if(typeof renderTodayRhythm==='function')renderTodayRhythm();
   if(typeof renderWeekStrip==='function')renderWeekStrip();
+  if(typeof renderWeekPlan==='function')renderWeekPlan();
   var minDateEl=document.getElementById('minDate');
   if(minDateEl)minDateEl.value=new Date().toISOString().slice(0,10);
   // One-time migration: devices still on the old default banner move to Summer Pop.
@@ -30979,6 +31072,21 @@ function delProjInc(id){
 <!-- WORLD: BRINDLEPORT BAY -->
 <!-- PLAN -->
 <div class="view" id="v-plan">
+  <!-- PLAN THE WEEK (Component 3): place tasks into slots; the week can fill -->
+  <div class="card" id="weekPlanPanel" style="margin-bottom:12px;padding:14px 15px">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px">
+      <span style="font-size:11px;font-weight:800;color:var(--textl);text-transform:uppercase;letter-spacing:.8px">Plan the week</span>
+      <span onclick="openRhythmEditor()" style="font-size:12px;font-weight:700;color:#2475FF;cursor:pointer">edit rhythm ›</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">
+      <span style="font-size:13px;color:var(--textd);white-space:nowrap"><b id="wpUsed" style="font-size:17px">0</b>/<span id="wpFree">7</span> slots</span>
+      <div style="flex:1;height:9px;background:#F0EDF5;border-radius:5px;overflow:hidden"><div id="wpFill" style="height:100%;width:0%;background:#2475FF;transition:width .25s"></div></div>
+    </div>
+    <div id="wpFullMsg" style="display:none;font-size:12px;color:#F06677;font-weight:700;margin:4px 0">Week is full. Adding more means removing something.</div>
+    <div style="font-size:11px;color:var(--textl);margin-bottom:2px">Tap a day to place a task. Like tasks share one block (up to 3). Gray days have no room.</div>
+    <div id="wpTasks" style="margin-top:4px"></div>
+    <div id="wpWaiting" style="font-size:11px;color:var(--textl);margin-top:8px"></div>
+  </div>
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
     <button onclick="prevPlanMonth()" style="padding:8px 16px;border-radius:10px;border:1.5px solid var(--bdr);background:#fff;font-size:18px;font-weight:700;cursor:pointer;color:var(--textd)">‹</button>
     <div id="planMonthTitle" style="font-size:20px;font-weight:800;font-family:'Playfair Display',serif;color:var(--textd)"></div>
