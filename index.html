@@ -1419,6 +1419,17 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     <div id="todayRhythmAssigned"></div>
     <div id="todayRhythmAmbient" style="border-top:1px solid #F0EDF5;margin-top:9px;padding-top:8px;font-size:12px;color:var(--textl)"></div>
   </div>
+  <!-- This week: collapsed strip — look Mondays (Component 2, read-only) -->
+  <div class="card" style="margin-bottom:12px;padding:0">
+    <div onclick="togWeekStrip()" style="display:flex;justify-content:space-between;align-items:center;padding:12px 15px;cursor:pointer">
+      <span style="font-size:13px;font-weight:700;color:var(--textd)">This week <span style="font-size:10px;font-weight:600;color:var(--textl)">· look Mondays</span></span>
+      <span style="display:flex;align-items:center;gap:8px">
+        <span id="weekStripPeek" style="font-size:11px;color:var(--textl)"></span>
+        <span id="weekStripChev" style="color:var(--textl);font-size:13px">▸</span>
+      </span>
+    </div>
+    <div id="weekStripBody" style="display:none;padding:0 15px 12px"></div>
+  </div>
   <!-- While Away Banner -->
   <div id="whileAwayBanner" style="display:none;background:linear-gradient(135deg,#e8f4e8,#f4f8e8);border-radius:14px;padding:11px 14px;margin-bottom:10px;border:1.5px solid rgba(143,170,139,.35)">
     <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px">
@@ -7997,6 +8008,7 @@ function renderCatFilterChips(){
 function renderT(){
   if(typeof renderTasksGuide==='function')renderTasksGuide();
   if(typeof renderTodayRhythm==='function')renderTodayRhythm();
+  if(typeof renderWeekStrip==='function')renderWeekStrip();
   var list=document.getElementById('taskList');if(!list)return;
   var _sel=document.getElementById('taskSortSel');if(_sel&&_sel.value!==TASK_SORT)_sel.value=TASK_SORT;
   renderCatFilterChips();
@@ -22457,10 +22469,61 @@ var RHYTHM_TPL=JSON.parse(localStorage.getItem('aRhythm')||'null')||{
     5:[{t:'5:30 lift',c:'lime'},{t:'fragrance work',c:'cobalt'},{t:'admin + finish hour',c:'coral'}],
     6:[{t:'spiritual → ~12',c:'purple'},{t:'Nick · fun · drift',c:'pink'}]
   },
-  ambient:'messages 2× on the walking pad · snowflake on any sale · 10:30 lights-down'
+  ambient:'messages 2× on the walking pad · snowflake on any sale · 10:30 lights-down',
+  fixed:{0:2,1:1,2:1,3:2,4:1,5:2,6:1}
 };
+// Migration: templates saved before the slot model get the default fixed map.
+if(!RHYTHM_TPL.fixed)RHYTHM_TPL.fixed={0:2,1:1,2:1,3:2,4:1,5:2,6:1};
 var RHYTHM_DONE=JSON.parse(localStorage.getItem('aRhythmDone')||'{}');
 function saveRhythm(){localStorage.setItem('aRhythm',JSON.stringify(RHYTHM_TPL));}
+// ── WEEK STRIP (Component 2): 7 days, 2 slots each, read-only ──
+// gray dot = already committed by the rhythm · colored dot = a task due that
+// day (the due date IS the assignment) · outline = free room
+function _weekDates(){
+  var out=[],now=new Date();
+  var monday=new Date(now);monday.setDate(now.getDate()-((now.getDay()+6)%7));
+  for(var i=0;i<7;i++){var d=new Date(monday);d.setDate(monday.getDate()+i);out.push(d);}
+  return out;
+}
+function togWeekStrip(){
+  var el=document.getElementById('weekStripBody');if(!el)return;
+  var open=el.style.display==='none';
+  el.style.display=open?'':'none';
+  var ch=document.getElementById('weekStripChev');if(ch)ch.textContent=open?'▾':'▸';
+  if(open)renderWeekStrip();
+}
+function renderWeekStrip(){
+  var el=document.getElementById('weekStripBody');
+  var peek=document.getElementById('weekStripPeek');
+  if(!el)return;
+  var dates=_weekDates();
+  var todayK=todayStr();
+  var names=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  var totalFree=0,usedAll=0;
+  var rows=dates.map(function(d){
+    var dow=d.getDay();
+    var key=d.toISOString().slice(0,10);
+    var fixed=Math.min(2,(RHYTHM_TPL.fixed&&RHYTHM_TPL.fixed[dow])!==undefined?RHYTHM_TPL.fixed[dow]:1);
+    var assigned=(TASKS||[]).filter(function(t){return t&&!t.done&&!t.parked&&t.due===key;});
+    var free=Math.max(0,2-fixed-assigned.length);
+    totalFree+=Math.max(0,2-fixed);usedAll+=Math.min(assigned.length,Math.max(0,2-fixed));
+    var slots='';
+    for(var i=0;i<fixed;i++)slots+='<span style="width:13px;height:13px;border-radius:50%;background:#EFEDF6;border:1.5px solid #E4E0EE;flex:none"></span>';
+    assigned.slice(0,2-fixed>0?2-fixed:0).forEach(function(){slots+='<span style="width:13px;height:13px;border-radius:50%;background:#2475FF;flex:none"></span>';});
+    for(var j=0;j<free;j++)slots+='<span style="width:13px;height:13px;border-radius:50%;background:#fff;border:1.5px solid var(--bdr);flex:none"></span>';
+    var over=assigned.length>Math.max(0,2-fixed);
+    var txt=assigned.length?assigned.map(function(t){return escHtml(t.title||'');}).join(' · ')
+      :((RHYTHM_TPL.days&&RHYTHM_TPL.days[dow])||[]).map(function(a){return escHtml(a.t);}).join(' · ');
+    var isToday=key===todayK;
+    return '<div style="display:flex;align-items:center;gap:9px;padding:8px 0;border-top:1px solid #F0EDF5;font-size:13px">'
+      +'<span style="width:34px;flex:none;font-weight:700;font-size:12px;color:'+(isToday?'#2475FF':'var(--textl)')+'">'+names[dow]+'</span>'
+      +'<span style="display:flex;gap:4px;flex:none">'+slots+'</span>'
+      +'<span style="flex:1;color:'+(assigned.length?'var(--textd)':'var(--textl)')+';font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+txt+(over?' <b style="color:#F06677">· too much</b>':'')+'</span>'
+      +'</div>';
+  }).join('');
+  el.innerHTML=rows;
+  if(peek)peek.textContent=(totalFree-usedAll)+' of '+totalFree+' free slots open';
+}
 function _rhythmDoneToday(){
   var t=todayStr();
   if(RHYTHM_DONE.date!==t){RHYTHM_DONE={date:t,done:{}};localStorage.setItem('aRhythmDone',JSON.stringify(RHYTHM_DONE));}
@@ -22530,6 +22593,21 @@ function renderRhythmEditor(){
   }).join(''):'<div style="font-size:12px;color:var(--textl);padding:8px 0">Nothing on this day yet.</div>';
   var amb=document.getElementById('rhythmAmbientInput');
   if(amb)amb.value=RHYTHM_TPL.ambient||'';
+  // how much of this day is already committed before planning (0/1/2 of 2 slots)
+  var fx=document.getElementById('rhythmFixedRow');
+  if(fx){
+    var cur=(RHYTHM_TPL.fixed&&RHYTHM_TPL.fixed[_rhythmEditDay])!==undefined?RHYTHM_TPL.fixed[_rhythmEditDay]:1;
+    var opts=[{v:0,l:'wide open'},{v:1,l:'half committed'},{v:2,l:'already full'}];
+    fx.innerHTML=opts.map(function(o){
+      var on=cur===o.v;
+      return '<button onclick="rhythmEdFixed('+o.v+')" style="flex:1;padding:8px 4px;border-radius:10px;border:1.5px solid '+(on?'#2475FF':'var(--bdr)')+';background:'+(on?'#2475FF':'#fff')+';color:'+(on?'#fff':'var(--textl)')+';font-family:\'Quicksand\',sans-serif;font-size:11px;font-weight:700;cursor:pointer">'+o.l+'</button>';
+    }).join('');
+  }
+}
+function rhythmEdFixed(v){
+  if(!RHYTHM_TPL.fixed)RHYTHM_TPL.fixed={};
+  RHYTHM_TPL.fixed[_rhythmEditDay]=v;
+  saveRhythm();renderRhythmEditor();renderWeekStrip();
 }
 function rhythmEdColor(i){
   var a=RHYTHM_TPL.days[_rhythmEditDay][i];
@@ -27858,6 +27936,7 @@ function startApp(){
   if(typeof renderRoutinesGuide==='function')renderRoutinesGuide();
   if(typeof renderHomeGuide==='function')renderHomeGuide();
   if(typeof renderTodayRhythm==='function')renderTodayRhythm();
+  if(typeof renderWeekStrip==='function')renderWeekStrip();
   var minDateEl=document.getElementById('minDate');
   if(minDateEl)minDateEl.value=new Date().toISOString().slice(0,10);
   // One-time migration: devices still on the old default banner move to Summer Pop.
@@ -30327,6 +30406,7 @@ function delProjInc(id){
     <input class="fi" id="rhythmAddInput" placeholder="Add an anchor, e.g. wigs AM" style="flex:1">
     <button onclick="rhythmEdAdd()" style="padding:8px 14px;border-radius:10px;border:none;background:#2475FF;color:#fff;font-family:'Quicksand',sans-serif;font-weight:700;cursor:pointer">Add</button>
   </div>
+  <div class="fg"><label class="fl">Before planning, this day is…</label><div id="rhythmFixedRow" style="display:flex;gap:6px"></div></div>
   <div class="fg"><label class="fl">Always-true footer line (shows under Today)</label><input class="fi" id="rhythmAmbientInput" onchange="rhythmEdSaveAmbient()" placeholder="e.g. messages 2× on the walking pad"></div>
   <button class="ok-btn" onclick="rhythmEdSaveAmbient();closeM('rhythmModal')">Done ✓</button>
 </div></div>
