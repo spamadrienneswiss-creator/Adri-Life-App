@@ -1424,6 +1424,16 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
   <div class="gbanner" id="gBanner" style="background:linear-gradient(135deg,rgba(201,160,160,.15),rgba(169,159,201,.15))">
     <p id="gQuote">The plans of the diligent lead to success. — Prov 21:5</p>
   </div>
+  <!-- Today's shape: rhythm anchors from the weekly template (aRhythm) -->
+  <div class="card" id="todayRhythmPanel" style="margin-bottom:12px;padding:14px 15px">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:9px">
+      <span style="font-size:11px;font-weight:800;color:var(--textl);text-transform:uppercase;letter-spacing:.8px" id="todayRhythmTitle">Today's shape</span>
+      <span onclick="openRhythmEditor()" style="font-size:12px;font-weight:700;color:#2475FF;cursor:pointer">edit rhythm ›</span>
+    </div>
+    <div id="todayRhythmPills"></div>
+    <div id="todayRhythmAssigned"></div>
+    <div id="todayRhythmAmbient" style="border-top:1px solid #F0EDF5;margin-top:9px;padding-top:8px;font-size:12px;color:var(--textl)"></div>
+  </div>
   <!-- While Away Banner -->
   <div id="whileAwayBanner" style="display:none;background:linear-gradient(135deg,#e8f4e8,#f4f8e8);border-radius:14px;padding:11px 14px;margin-bottom:10px;border:1.5px solid rgba(143,170,139,.35)">
     <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px">
@@ -6317,8 +6327,11 @@ function initFirebase(){
       ap('aRH',function(v,r){RH=v||{};_origSetItem('aRH',r);});
       ap('aRTG',function(v,r){if(v&&v.length)RTN_GROUPS=v;_origSetItem('aRTG',r);});
       ap('aRtns',function(v,r){if(v)RTNS=v;_origSetItem('aRtns',r);});
+      ap('aRhythm',function(v,r){if(v)RHYTHM_TPL=v;_origSetItem('aRhythm',r);});
+      ap('aRhythmDone',function(v,r){if(v)RHYTHM_DONE=v;_origSetItem('aRhythmDone',r);});
       _fbBlobPause=false;
       if(typeof renderAllR==='function')renderAllR();
+      if(typeof renderTodayRhythm==='function')renderTodayRhythm();
     }else if(group==='planning'){
       ap('aSOPs',function(v,r){if(v&&v.length)SOPS=v;_origSetItem('aSOPs',r);});
       ap('aBrainDump',function(v,r){BRAIN_DUMP=v||[];_origSetItem('aBrainDump',r);});
@@ -6479,7 +6492,7 @@ var BLOB_GROUPS={
   money:['aBills','aBillPay','aBillMonthAmt','aAccounts','aIncome','aIncGoal','aMonIncGoal','aMoneyChecks','aTaxLog','aProjIncome','aPriceLog','aExpCats','aMoneyProjects','aTrips','aPayoffs','aBudgetBuckets','aBudgetMoves','aMoneyReserve','aBillsReviewed'],
   health:['aMeds','aMedLog','aEnergyLog','aMeasLog','aMealLogItems','aMoodNotes','aWineDrinks','aSymLog','aSymTypes'],
   habits:['aHabits','aHabitLog'],
-  routines:['aRS','aRS2','aRH','aRTG','aRtns'],
+  routines:['aRS','aRS2','aRH','aRTG','aRtns','aRhythm','aRhythmDone'],
   planning:['aSOPs','aBrainDump','aIntentions','aMonthTodos','aTmpls'],
   spiritual:['aBibleLog','aBibleChapNotes','aPrayers','aGratLog','aSpiritBooks','aSpiritSettings','aSpiritRun'],
   food:['aRecipes','aMealPlan','aMealMyServings','aGroceryList','aGrocTags','aGrocDepts','aGrocStoreDeptOrder','aInventory','aInvSections','aMC','aFoodDb','aFDB','aIngredients','aWantToTry','aMacrosReviewed'],
@@ -7998,6 +8011,7 @@ function renderCatFilterChips(){
 
 function renderT(){
   if(typeof renderTasksGuide==='function')renderTasksGuide();
+  if(typeof renderTodayRhythm==='function')renderTodayRhythm();
   var list=document.getElementById('taskList');if(!list)return;
   var _sel=document.getElementById('taskSortSel');if(_sel&&_sel.value!==TASK_SORT)_sel.value=TASK_SORT;
   renderCatFilterChips();
@@ -22598,6 +22612,119 @@ function renderHomeGuide(){
     +statusRow+'</div>';
 }
 
+// ── WEEKLY RHYTHM (Component 1 of the planning system) ───────
+// One small template: what anchors each weekday always has (aRhythm).
+// Today's panel draws from it; check-off resets daily by date key.
+var RHYTHM_COLORS={lime:'#7C9A2D',cobalt:'#2475FF',coral:'#F06677',purple:'#B189B4',pink:'#F096B5'};
+var RHYTHM_COLOR_ORDER=['lime','cobalt','coral','purple','pink'];
+var RHYTHM_TPL=JSON.parse(localStorage.getItem('aRhythm')||'null')||{
+  days:{
+    0:[{t:'faith — untouchable',c:'purple'},{t:'rest · crochet',c:'purple'}],
+    1:[{t:'5:30 lift',c:'lime'},{t:'15-min week plan',c:'coral'},{t:'wigs AM',c:'cobalt'},{t:'volunteer tile PM',c:'purple'}],
+    2:[{t:'wigs AM',c:'cobalt'},{t:'volunteer tile PM',c:'purple'},{t:'evening — untouchable',c:'purple'}],
+    3:[{t:'5:30 lift',c:'lime'},{t:'money desk · 30 min',c:'coral'},{t:'fridge → shop → prep',c:'coral'},{t:'wigs PM',c:'cobalt'}],
+    4:[{t:'wigs AM',c:'cobalt'},{t:'volunteer tile PM',c:'purple'}],
+    5:[{t:'5:30 lift',c:'lime'},{t:'fragrance work',c:'cobalt'},{t:'admin + finish hour',c:'coral'}],
+    6:[{t:'spiritual → ~12',c:'purple'},{t:'Nick · fun · drift',c:'pink'}]
+  },
+  ambient:'messages 2× on the walking pad · snowflake on any sale · 10:30 lights-down'
+};
+var RHYTHM_DONE=JSON.parse(localStorage.getItem('aRhythmDone')||'{}');
+function saveRhythm(){localStorage.setItem('aRhythm',JSON.stringify(RHYTHM_TPL));}
+function _rhythmDoneToday(){
+  var t=todayStr();
+  if(RHYTHM_DONE.date!==t){RHYTHM_DONE={date:t,done:{}};localStorage.setItem('aRhythmDone',JSON.stringify(RHYTHM_DONE));}
+  return RHYTHM_DONE.done;
+}
+function togRhythmPill(i){
+  var d=_rhythmDoneToday();
+  d[i]=!d[i];
+  localStorage.setItem('aRhythmDone',JSON.stringify(RHYTHM_DONE));
+  renderTodayRhythm();
+}
+function renderTodayRhythm(){
+  var el=document.getElementById('todayRhythmPills');if(!el)return;
+  var dow=new Date().getDay();
+  var anchors=(RHYTHM_TPL.days&&RHYTHM_TPL.days[dow])||[];
+  var done=_rhythmDoneToday();
+  var title=document.getElementById('todayRhythmTitle');
+  if(title)title.textContent=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'][dow]+' — today’s shape';
+  el.innerHTML=anchors.length?anchors.map(function(a,i){
+    var isDone=!!done[i];
+    return '<div class="ri'+(isDone?' done':'')+'" onclick="togRhythmPill('+i+')">'
+      +'<div class="rchk">'+(isDone?'✓':'')+'</div>'
+      +'<span class="rlb" style="flex:1'+(isDone?';text-decoration:line-through;color:var(--textl)':'')+'">'+escHtml(a.t)+'</span>'
+      +'<span style="width:9px;height:9px;border-radius:50%;flex:none;background:'+(RHYTHM_COLORS[a.c]||'#BCB8C4')+'"></span>'
+      +'</div>';
+  }).join(''):'<div style="font-size:13px;color:var(--textl)">No anchors for today — tap “edit rhythm” to set your week’s shape.</div>';
+  // Assigned to today = tasks due today. The task's due date IS the day assignment
+  // (one list per thing — no second store).
+  var ael=document.getElementById('todayRhythmAssigned');
+  if(ael){
+    var t=todayStr();
+    var todays=(TASKS||[]).filter(function(x){return x&&!x.done&&!x.parked&&x.due===t;});
+    ael.innerHTML=todays.length?('<div style="font-size:10px;font-weight:800;color:var(--textl);text-transform:uppercase;letter-spacing:.7px;margin:8px 0 6px">Assigned to today</div>'
+      +todays.map(function(x){
+        return '<div class="ri" onclick="togT(\''+x.id+'\');renderTodayRhythm()">'
+          +'<div class="rchk"></div>'
+          +'<span class="rlb" style="flex:1">'+escHtml(x.title||'')+'</span>'
+          +'</div>';
+      }).join('')):'';
+  }
+  var amb=document.getElementById('todayRhythmAmbient');
+  if(amb){amb.textContent=RHYTHM_TPL.ambient||'';amb.style.display=RHYTHM_TPL.ambient?'':'none';}
+}
+// ── rhythm editor ──
+var _rhythmEditDay=new Date().getDay();
+function openRhythmEditor(){
+  _rhythmEditDay=new Date().getDay();
+  renderRhythmEditor();
+  openM('rhythmModal');
+}
+function rhythmEdSelDay(d){_rhythmEditDay=d;renderRhythmEditor();}
+function renderRhythmEditor(){
+  var dayRow=document.getElementById('rhythmDayRow');if(!dayRow)return;
+  var names=['Su','Mo','Tu','We','Th','Fr','Sa'];
+  var order=[1,2,3,4,5,6,0];
+  dayRow.innerHTML=order.map(function(d){
+    return '<button onclick="rhythmEdSelDay('+d+')" style="flex:1;padding:8px 0;border-radius:10px;border:1.5px solid '+(d===_rhythmEditDay?'#2475FF':'var(--bdr)')+';background:'+(d===_rhythmEditDay?'#2475FF':'#fff')+';color:'+(d===_rhythmEditDay?'#fff':'var(--textd)')+';font-family:\'Quicksand\',sans-serif;font-size:12px;font-weight:700;cursor:pointer">'+names[d]+'</button>';
+  }).join('');
+  var list=document.getElementById('rhythmAnchorList');
+  var anchors=(RHYTHM_TPL.days&&RHYTHM_TPL.days[_rhythmEditDay])||[];
+  list.innerHTML=anchors.length?anchors.map(function(a,i){
+    return '<div style="display:flex;align-items:center;gap:9px;padding:8px 2px;border-bottom:1px solid #F0EDF5">'
+      +'<span onclick="rhythmEdColor('+i+')" title="tap to change color" style="width:16px;height:16px;border-radius:50%;flex:none;cursor:pointer;background:'+(RHYTHM_COLORS[a.c]||'#BCB8C4')+'"></span>'
+      +'<span style="flex:1;font-size:14px;font-weight:600;color:var(--textd)">'+escHtml(a.t)+'</span>'
+      +'<button onclick="rhythmEdDel('+i+')" style="background:none;border:none;font-size:14px;color:var(--textl);cursor:pointer;padding:2px 6px">✕</button>'
+      +'</div>';
+  }).join(''):'<div style="font-size:12px;color:var(--textl);padding:8px 0">Nothing on this day yet.</div>';
+  var amb=document.getElementById('rhythmAmbientInput');
+  if(amb)amb.value=RHYTHM_TPL.ambient||'';
+}
+function rhythmEdColor(i){
+  var a=RHYTHM_TPL.days[_rhythmEditDay][i];
+  a.c=RHYTHM_COLOR_ORDER[(RHYTHM_COLOR_ORDER.indexOf(a.c)+1)%RHYTHM_COLOR_ORDER.length];
+  saveRhythm();renderRhythmEditor();renderTodayRhythm();
+}
+function rhythmEdDel(i){
+  RHYTHM_TPL.days[_rhythmEditDay].splice(i,1);
+  saveRhythm();renderRhythmEditor();renderTodayRhythm();
+}
+function rhythmEdAdd(){
+  var inp=document.getElementById('rhythmAddInput');
+  var v=(inp.value||'').trim();if(!v)return;
+  if(!RHYTHM_TPL.days)RHYTHM_TPL.days={};
+  if(!RHYTHM_TPL.days[_rhythmEditDay])RHYTHM_TPL.days[_rhythmEditDay]=[];
+  RHYTHM_TPL.days[_rhythmEditDay].push({t:v,c:'cobalt'});
+  inp.value='';
+  saveRhythm();renderRhythmEditor();renderTodayRhythm();
+}
+function rhythmEdSaveAmbient(){
+  var amb=document.getElementById('rhythmAmbientInput');
+  if(amb)RHYTHM_TPL.ambient=(amb.value||'').trim();
+  saveRhythm();renderTodayRhythm();
+}
+
 function renderMealPlan(){
   var dates=getMealWeekDates(MEAL_WEEK_OFFSET);
   var lbl=document.getElementById('mealWeekLbl');
@@ -27900,6 +28027,7 @@ function startApp(){
   if(typeof renderTasksGuide==='function')renderTasksGuide();
   if(typeof renderRoutinesGuide==='function')renderRoutinesGuide();
   if(typeof renderHomeGuide==='function')renderHomeGuide();
+  if(typeof renderTodayRhythm==='function')renderTodayRhythm();
   var minDateEl=document.getElementById('minDate');
   if(minDateEl)minDateEl.value=new Date().toISOString().slice(0,10);
   // One-time migration: devices still on the old default banner move to Summer Pop.
@@ -30359,6 +30487,20 @@ function delProjInc(id){
 </div></div>
 
 <!-- BILL MODAL -->
+<!-- WEEKLY RHYTHM EDITOR -->
+<div class="ov" id="rhythmModal"><div class="mod">
+  <div class="mh"></div><div class="mtit">Weekly Rhythm 📆</div>
+  <div style="font-size:12px;color:var(--textl);margin-bottom:10px">The anchors each weekday always has. Edit once — every day draws from this. Tap a color dot to change it.</div>
+  <div id="rhythmDayRow" style="display:flex;gap:5px;margin-bottom:10px"></div>
+  <div id="rhythmAnchorList" style="margin-bottom:8px"></div>
+  <div style="display:flex;gap:6px;margin-bottom:12px">
+    <input class="fi" id="rhythmAddInput" placeholder="Add an anchor, e.g. wigs AM" style="flex:1">
+    <button onclick="rhythmEdAdd()" style="padding:8px 14px;border-radius:10px;border:none;background:#2475FF;color:#fff;font-family:'Quicksand',sans-serif;font-weight:700;cursor:pointer">Add</button>
+  </div>
+  <div class="fg"><label class="fl">Always-true footer line (shows under Today)</label><input class="fi" id="rhythmAmbientInput" onchange="rhythmEdSaveAmbient()" placeholder="e.g. messages 2× on the walking pad"></div>
+  <button class="ok-btn" onclick="rhythmEdSaveAmbient();closeM('rhythmModal')">Done ✓</button>
+</div></div>
+
 <div class="ov" id="billModal"><div class="mod">
   <div class="mh"></div><div class="mtit" id="billModalTit">Add Bill 🏦</div>
   <input type="hidden" id="billEditId">
