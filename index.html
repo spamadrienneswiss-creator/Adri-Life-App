@@ -863,21 +863,6 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
 .hatch-cursor{display:inline-block;width:2px;height:20px;background:var(--rose);animation:blink .9s step-end infinite;vertical-align:middle;margin-left:4px;border-radius:1px}
 @keyframes blink{50%{opacity:0}}
 .hatch-empty{font-family:'Quicksand',sans-serif;font-size:15px;color:var(--textl);text-align:center;padding:28px 16px;line-height:1.9;font-weight:600}
-/* ── FARM GAME (THE ORCHARD) ── */
-.farm-hud{display:flex;justify-content:space-between;font-family:'Courier New',monospace;font-size:12px;color:#3fc820;margin-bottom:10px;letter-spacing:1px;text-shadow:0 0 5px rgba(63,200,32,.25)}
-.farm-grid{display:grid;grid-template-columns:repeat(8,1fr);gap:3px;margin-bottom:10px}
-.farm-tile{aspect-ratio:1;border:1px solid #142814;border-radius:3px;background:#0c140c;font-size:15px;padding:0;cursor:pointer;line-height:1;font-family:'Courier New',monospace}
-.farm-tile.tilled{background:#241708;border-color:#3a2810}
-.farm-tile.wet{background:#101c26;border-color:#1d3a55}
-.farm-msg{font-family:'Courier New',monospace;font-size:11px;color:#1a6a10;min-height:30px;margin-bottom:8px;line-height:1.5}
-.farm-seeds{display:flex;gap:6px;flex-wrap:wrap}
-.farm-seed-btn{padding:6px 10px;border-radius:3px;border:1px solid #142814;background:transparent;color:#3fc820;font-family:'Courier New',monospace;font-size:12px;cursor:pointer}
-.farm-seed-btn.on{background:rgba(63,200,32,.15);border-color:#3fc820}
-.farm-hint{font-family:'Courier New',monospace;font-size:11px;color:#1a5010}
-.farm-shop-t{font-family:'Courier New',monospace;font-size:10px;color:#1a6a10;letter-spacing:1.5px;margin:12px 0 6px}
-.farm-shop-row{display:flex;justify-content:space-between;align-items:center;gap:8px;font-family:'Courier New',monospace;font-size:11px;color:#3fc820;padding:6px 0;border-bottom:1px solid #0d200d}
-.farm-buy-btn{padding:5px 10px;border-radius:3px;border:1px solid #3fc820;background:transparent;color:#3fc820;font-family:'Courier New',monospace;font-size:10px;cursor:pointer;white-space:nowrap;flex-shrink:0}
-.farm-reset-btn{background:none;border:none;font-family:'Courier New',monospace;font-size:9px;color:#1a5010;cursor:pointer;margin-top:14px;letter-spacing:1px}
 #hatchCanvas{position:fixed;inset:0;z-index:10001;pointer-events:none;display:none}
 
 /* ── BUNKER OVERRIDE — Lost/DHARMA aesthetic scoped to #ovHatch ── */
@@ -10893,160 +10878,6 @@ function otPark(){
 }
 function otSkip(){_otIdx=(_otIdx+1)%_otPool.length;_renderOTCard();}
 
-// ─── FARM GAME (STATION 9: THE ORCHARD) ─────────
-// Plot states: {g:0}=grass  {g:1}=tilled  {g:2,c:cropKey,st:daysGrown,w:wateredToday}
-var FARM_CROPS={
-  turnip:{name:'Turnip',icon:'🟣',seed:5,sell:12,days:2},
-  bean:{name:'Green Bean',icon:'🫛',seed:12,sell:30,days:4},
-  melon:{name:'Melon',icon:'🍈',seed:25,sell:70,days:6},
-  pumpkin:{name:'Pumpkin',icon:'🎃',seed:50,sell:160,days:8},
-  starfruit:{name:'Starfruit',icon:'⭐',seed:120,sell:420,days:10}
-};
-var FARM_SIZE=8;
-var FARM=null;
-function _farmDefault(){
-  return{day:1,coins:20,energy:50,maxEnergy:50,seed:'turnip',
-    seeds:{turnip:4},barn:{},plots:[]};
-}
-function _farmLoad(){
-  if(FARM)return;
-  try{FARM=JSON.parse(localStorage.getItem('aFarmGame')||'null');}catch(e){FARM=null;}
-  if(!FARM||!FARM.plots)FARM=_farmDefault();
-  while(FARM.plots.length<FARM_SIZE*FARM_SIZE)FARM.plots.push({g:0});
-}
-function _farmSave(){localStorage.setItem('aFarmGame',JSON.stringify(FARM));}
-function _hatchFarmShow(){
-  _farmLoad();
-  var shop=document.getElementById('hFarmShop');if(shop)shop.style.display='none';
-  _farmRender();
-}
-function _farmTileIcon(p){
-  if(p.g!==2)return '';
-  var c=FARM_CROPS[p.c];
-  if(p.st>=c.days)return c.icon;
-  return p.st<c.days/2?'🌱':'🌿';
-}
-function _farmRender(){
-  var hud=document.getElementById('hFarmHud');
-  if(hud)hud.innerHTML='<span>DAY '+FARM.day+'</span><span>🪙 '+FARM.coins+'</span><span>⚡ '+FARM.energy+'/'+FARM.maxEnergy+'</span>';
-  var grid=document.getElementById('hFarmGrid');
-  if(grid){
-    grid.innerHTML='';
-    FARM.plots.forEach(function(p,i){
-      var b=document.createElement('button');
-      b.className='farm-tile'+(p.g>0?' tilled':'')+(p.g===2&&p.w?' wet':'');
-      b.textContent=_farmTileIcon(p);
-      b.onclick=function(){_farmTap(i);};
-      grid.appendChild(b);
-    });
-  }
-  var seeds=document.getElementById('hFarmSeeds');
-  if(seeds){
-    seeds.innerHTML='';
-    Object.keys(FARM_CROPS).forEach(function(k){
-      var n=FARM.seeds[k]||0;
-      if(n<=0)return;
-      var b=document.createElement('button');
-      b.className='farm-seed-btn'+(FARM.seed===k?' on':'');
-      b.textContent=FARM_CROPS[k].icon+' ×'+n;
-      b.onclick=function(){FARM.seed=k;_farmSave();_farmRender();};
-      seeds.appendChild(b);
-    });
-    if(!seeds.children.length)seeds.innerHTML='<span class="farm-hint">No seeds — buy some in the SHOP ↓</span>';
-  }
-}
-function _farmMsg(t){
-  var el=document.getElementById('hFarmMsg');if(el)el.textContent=t;
-}
-function _farmTap(i){
-  var p=FARM.plots[i];
-  if(p.g===0){
-    if(FARM.energy<2){_farmMsg('⚡ Too tired to till — SLEEP to restore energy.');return;}
-    FARM.energy-=2;FARM.plots[i]={g:1};
-    _farmMsg('Tilled the soil. Tap again to plant '+FARM_CROPS[FARM.seed].name+'.');
-  }else if(p.g===1){
-    var k=FARM.seed;
-    if((FARM.seeds[k]||0)<=0){_farmMsg('No '+FARM_CROPS[k].name+' seeds — buy some in the SHOP.');return;}
-    if(FARM.energy<1){_farmMsg('⚡ Too tired to plant — SLEEP to restore energy.');return;}
-    FARM.energy-=1;FARM.seeds[k]--;
-    FARM.plots[i]={g:2,c:k,st:0,w:false};
-    _farmMsg(FARM_CROPS[k].name+' planted 🌱 — tap to water it.');
-  }else{
-    var c=FARM_CROPS[p.c];
-    if(p.st>=c.days){
-      FARM.barn[p.c]=(FARM.barn[p.c]||0)+1;
-      FARM.plots[i]={g:1};
-      if(navigator.vibrate)navigator.vibrate(30);
-      _farmMsg(c.icon+' '+c.name+' harvested! Sell it in the SHOP.');
-    }else if(!p.w){
-      if(FARM.energy<1){_farmMsg('⚡ Too tired to water — SLEEP to restore energy.');return;}
-      FARM.energy-=1;p.w=true;
-      _farmMsg('Watered 💧 — it will grow overnight.');
-    }else{
-      _farmMsg(c.name+': day '+p.st+'/'+c.days+' — watered ✓ SLEEP to grow.');
-    }
-  }
-  _farmSave();_farmRender();
-}
-function farmSleep(){
-  var grew=0;
-  FARM.plots.forEach(function(p){
-    if(p.g===2){
-      if(p.w){p.st++;grew++;}
-      p.w=false;
-    }
-  });
-  FARM.day++;FARM.energy=FARM.maxEnergy;
-  _farmSave();_farmRender();
-  if(navigator.vibrate)navigator.vibrate([20,40,20]);
-  _farmMsg('☀️ DAY '+FARM.day+' — '+(grew?grew+' watered crop'+(grew>1?'s':'')+' grew overnight.':'nothing grew (water crops before sleeping!)'));
-}
-function farmShopToggle(){
-  var el=document.getElementById('hFarmShop');if(!el)return;
-  var open=el.style.display!=='none';
-  el.style.display=open?'none':'block';
-  if(!open)_farmShopRender();
-}
-function _farmShopRender(){
-  var el=document.getElementById('hFarmShop');if(!el)return;
-  var html='<div class="farm-shop-t">// DHARMA GENERAL STORE — SEEDS</div>';
-  Object.keys(FARM_CROPS).forEach(function(k){
-    var c=FARM_CROPS[k];
-    html+='<div class="farm-shop-row"><span>'+c.icon+' '+c.name+' — 🪙'+c.seed+' · '+c.days+'d · sells 🪙'+c.sell+'</span>'
-      +'<button class="farm-buy-btn" onclick="farmBuy(\''+k+'\')">BUY</button></div>';
-  });
-  var any=Object.keys(FARM.barn).some(function(k){return FARM.barn[k]>0;});
-  if(any){
-    html+='<div class="farm-shop-t">// YOUR HARVEST</div>';
-    Object.keys(FARM.barn).forEach(function(k){
-      if(!(FARM.barn[k]>0))return;
-      var c=FARM_CROPS[k];
-      html+='<div class="farm-shop-row"><span>'+c.icon+' '+c.name+' ×'+FARM.barn[k]+'</span>'
-        +'<button class="farm-buy-btn" onclick="farmSell(\''+k+'\')">SELL ALL 🪙'+(FARM.barn[k]*c.sell)+'</button></div>';
-    });
-  }
-  html+='<button class="farm-reset-btn" onclick="farmReset()">[ ABANDON FARM — START OVER ]</button>';
-  el.innerHTML=html;
-}
-function farmBuy(k){
-  var c=FARM_CROPS[k];
-  if(FARM.coins<c.seed){_farmMsg('Not enough coins — sell some crops first.');return;}
-  FARM.coins-=c.seed;FARM.seeds[k]=(FARM.seeds[k]||0)+1;
-  _farmSave();_farmRender();_farmShopRender();
-}
-function farmSell(k){
-  var c=FARM_CROPS[k];
-  FARM.coins+=(FARM.barn[k]||0)*c.sell;FARM.barn[k]=0;
-  if(navigator.vibrate)navigator.vibrate(30);
-  _farmSave();_farmRender();_farmShopRender();
-}
-function farmReset(){
-  if(!confirm('Abandon the farm and start over?'))return;
-  FARM=_farmDefault();
-  while(FARM.plots.length<FARM_SIZE*FARM_SIZE)FARM.plots.push({g:0});
-  _farmSave();_hatchFarmShow();
-}
-
 function openHatch(){
   var h=document.getElementById('ovHatch');if(h)h.classList.add('open');
   var bootEl=document.getElementById('hBootSeq');
@@ -11098,7 +10929,7 @@ function closeHatch(){
 }
 function hatchMode(mode){
   _clearHatchTimers();
-  ['Selector','Mission','Chaos','Transmission','Shock','Cast','Spa','Farm'].forEach(function(p){
+  ['Selector','Mission','Chaos','Transmission','Shock','Cast','Spa'].forEach(function(p){
     var el=document.getElementById('hPanel'+p);if(el)el.style.display='none';
   });
   var target=document.getElementById('hPanel'+mode.charAt(0).toUpperCase()+mode.slice(1));
@@ -11108,7 +10939,6 @@ function hatchMode(mode){
   else if(mode==='transmission')_hatchTxShow();
   else if(mode==='shock')_hatchShockShow();
   else if(mode==='cast')_hatchCastShow();
-  else if(mode==='farm')_hatchFarmShow();
 }
 
 // ─── MISSION ───────────────────────────────────
@@ -31790,10 +31620,6 @@ function delProjInc(id){
           <span class="hatch-mode-icon">🎭</span>
           <span><span class="hatch-mode-label">&gt; THE CAST</span><span class="hatch-mode-sub">Step into a character's world for a moment</span></span>
         </button>
-        <button class="hatch-mode-btn" onclick="hatchMode('farm')">
-          <span class="hatch-mode-icon">🌾</span>
-          <span><span class="hatch-mode-label">&gt; THE ORCHARD</span><span class="hatch-mode-sub">Station 9 — grow. harvest. profit.</span></span>
-        </button>
         <button class="hatch-spa-pill" onclick="hatchMode('spa')">[ SPA // GROUNDING PROTOCOL ]</button>
       </div>
 
@@ -31881,24 +31707,6 @@ function delProjInc(id){
         <div style="text-align:center;margin-top:10px">
           <button onclick="castRandom()" class="hatch-text-btn">// RANDOM CHARACTER</button>
         </div>
-      </div>
-
-      <!-- FARM / THE ORCHARD -->
-      <div id="hPanelFarm" style="display:none">
-        <div class="hatch-header">
-          <button class="hatch-back-btn" onclick="hatchMode('selector')">← Back</button>
-          <button class="hatch-close-btn" onclick="closeHatch()">✕</button>
-        </div>
-        <div class="hatch-label">🌾 STATION 9 — THE ORCHARD</div>
-        <div id="hFarmHud" class="farm-hud"></div>
-        <div id="hFarmGrid" class="farm-grid"></div>
-        <div id="hFarmMsg" class="farm-msg">Tap a tile: till → plant → water. Sleep to grow crops.</div>
-        <div id="hFarmSeeds" class="farm-seeds"></div>
-        <div class="hatch-keys" style="margin-top:10px">
-          <button class="hatch-key hatch-key-skip" onclick="farmShopToggle()">🛒 SHOP</button>
-          <button class="hatch-key hatch-key-exec" onclick="farmSleep()">🛏️ SLEEP</button>
-        </div>
-        <div id="hFarmShop" style="display:none"></div>
       </div>
 
       <!-- SPA -->
