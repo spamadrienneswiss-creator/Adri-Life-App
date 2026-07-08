@@ -1885,10 +1885,10 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
 <div class="view" id="v-money">
   <div class="pill-nav" style="margin-bottom:12px;flex-wrap:wrap">
     <button class="pn-btn on" data-sec="budget" onclick="showMoneySec('budget',this)">🎯 Budget</button>
+    <button class="pn-btn" data-sec="accounts" onclick="showMoneySec('accounts',this)">🏦 Accounts</button>
     <button class="pn-btn" data-sec="bills" onclick="showMoneySec('bills',this)">🏦 Bills</button>
     <button class="pn-btn" data-sec="expenses" onclick="showMoneySec('expenses',this)">💸 Expenses</button>
     <button class="pn-btn" data-sec="income" onclick="showMoneySec('income',this)">💰 Income</button>
-    <button class="pn-btn" data-sec="accounts" onclick="showMoneySec('accounts',this)">🏦 Accounts</button>
     <button class="pn-btn" data-sec="projects" onclick="showMoneySec('projects',this)">💼 Projects</button>
     <button class="pn-btn" data-sec="tax" onclick="showMoneySec('tax',this)">💸 Tax</button>
     <button class="pn-btn" data-sec="money-plan" onclick="showMoneySec('money-plan',this)">📈 Plan</button>
@@ -2036,15 +2036,25 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
         <button class="fchip" onclick="setExpFilter('cleared',this)">✓ Cleared</button>
         <button class="fchip" onclick="setExpFilter('unexported',this)">📤 Not Exported</button>
         <button class="fchip" onclick="setExpFilter('archived',this)">🗄️ Archived</button>
-        <button class="fchip" id="expReconToggle" onclick="toggleExpSelMode()" style="margin-left:auto">🔄 Reconcile</button>
+        <button class="fchip" id="expReconToggle" onclick="toggleExpSelMode()" style="margin-left:auto;font-weight:700">🧹 Select &amp; Clean</button>
       </div>
-      <div id="expReconBar" class="exp-recon-bar" style="display:none">
-        <span style="font-size:11px;font-weight:700;color:#3a7a3a;align-self:center">Select rows or clear by date:</span>
-        <input type="date" id="expReconDate" style="font-size:11px;border:1.5px solid #b0d8b0;border-radius:6px;padding:3px 7px;background:white;color:#3d3530;font-family:'Quicksand',sans-serif" />
-        <button onclick="clearExpBefore()" style="font-size:11px;font-weight:700;background:white;border:1.5px solid #5a8a5a;border-radius:6px;padding:4px 10px;cursor:pointer;color:#3a7a3a;font-family:'Quicksand',sans-serif">Clear before ↑</button>
-        <button onclick="archiveExpBefore()" style="font-size:11px;font-weight:700;background:white;border:1.5px solid #9A8576;border-radius:6px;padding:4px 10px;cursor:pointer;color:#7a6a58;font-family:'Quicksand',sans-serif">🗄️ Archive before ↑</button>
-        <button id="expReconClearBtn" onclick="clearExpSelected()" style="display:none;font-size:11px;font-weight:700;background:#5a8a5a;border:none;border-radius:6px;padding:4px 10px;cursor:pointer;color:white;font-family:'Quicksand',sans-serif">✓ Clear 0 selected</button>
-        <button onclick="toggleExpSelMode()" style="font-size:11px;background:none;border:1.5px solid #b0d8b0;border-radius:6px;padding:4px 8px;cursor:pointer;color:#5a8a5a;font-family:'Quicksand',sans-serif;margin-left:auto">✕ Cancel</button>
+      <div id="expReconBar" class="exp-recon-bar" style="display:none;flex-direction:column;gap:6px;align-items:stretch">
+        <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+          <span id="expSelCount" style="font-size:12px;font-weight:800;color:#3a7a3a">0 selected</span>
+          <button onclick="expSelAllShown()" style="font-size:11px;font-weight:700;background:white;border:1.5px solid #b0d8b0;border-radius:6px;padding:4px 10px;cursor:pointer;color:#3a7a3a;font-family:'Quicksand',sans-serif">Select all shown</button>
+          <button onclick="toggleExpSelMode()" style="font-size:11px;background:none;border:1.5px solid #b0d8b0;border-radius:6px;padding:4px 8px;cursor:pointer;color:#5a8a5a;font-family:'Quicksand',sans-serif;margin-left:auto">✕ Done</button>
+        </div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <button id="expSelClearedBtn" onclick="clearExpSelected()" style="font-size:11px;font-weight:700;background:#5a8a5a;border:none;border-radius:6px;padding:5px 10px;cursor:pointer;color:white;font-family:'Quicksand',sans-serif">✓ Mark cleared</button>
+          <button id="expSelArchiveBtn" onclick="archiveExpSelected()" style="font-size:11px;font-weight:700;background:white;border:1.5px solid #9A8576;border-radius:6px;padding:5px 10px;cursor:pointer;color:#7a6a58;font-family:'Quicksand',sans-serif">🗄️ Archive</button>
+          <button id="expSelDeleteBtn" onclick="deleteExpSelected()" style="font-size:11px;font-weight:700;background:white;border:1.5px solid #F06677;border-radius:6px;padding:5px 10px;cursor:pointer;color:#F06677;font-family:'Quicksand',sans-serif">🗑 Delete</button>
+        </div>
+        <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;border-top:1px dashed #b0d8b0;padding-top:6px">
+          <span style="font-size:11px;font-weight:700;color:#7a6a58">or by date:</span>
+          <input type="date" id="expReconDate" style="font-size:11px;border:1.5px solid #b0d8b0;border-radius:6px;padding:3px 7px;background:white;color:#3d3530;font-family:'Quicksand',sans-serif" />
+          <button onclick="clearExpBefore()" style="font-size:11px;font-weight:700;background:white;border:1.5px solid #5a8a5a;border-radius:6px;padding:4px 10px;cursor:pointer;color:#3a7a3a;font-family:'Quicksand',sans-serif">✓ Clear before</button>
+          <button onclick="archiveExpBefore()" style="font-size:11px;font-weight:700;background:white;border:1.5px solid #9A8576;border-radius:6px;padding:4px 10px;cursor:pointer;color:#7a6a58;font-family:'Quicksand',sans-serif">🗄️ Archive before</button>
+        </div>
       </div>
       <div class="fbar" style="margin-bottom:6px" id="expFilterBar">
         <span style="font-size:10px;color:var(--textl);font-weight:700;align-self:center;letter-spacing:.5px">FILTER</span>
@@ -12433,8 +12443,8 @@ function toggleExpSelMode(){
 function toggleExpSel(id){
   if(_expSel[id])delete _expSel[id];else _expSel[id]=true;
   var count=Object.keys(_expSel).length;
-  var btn=document.getElementById('expReconClearBtn');
-  if(btn){btn.textContent='✓ Clear '+count+' selected';btn.style.display=count?'inline-block':'none';}
+  var cl=document.getElementById('expSelCount');
+  if(cl)cl.textContent=count+' selected';
   var row=document.getElementById('er-'+id);
   if(row)row.classList.toggle('sel-active',!!_expSel[id]);
   var cb=document.getElementById('esel-'+id);
@@ -12514,6 +12524,44 @@ function clearExpSelected(){
   var btn=document.getElementById('expReconClearBtn');
   if(btn){btn.textContent='✓ Clear 0 selected';btn.style.display='none';}
   renderE();
+}
+function _expSelSyncCount(){
+  var cl=document.getElementById('expSelCount');
+  if(cl)cl.textContent=Object.keys(_expSel).length+' selected';
+}
+function expSelAllShown(){
+  document.querySelectorAll('#expList .er-sel-cb').forEach(function(cb){
+    var id=cb.id.replace('esel-','');
+    _expSel[id]=true;cb.checked=true;
+    var row=document.getElementById('er-'+id);if(row)row.classList.add('sel-active');
+  });
+  _expSelSyncCount();
+}
+function archiveExpSelected(){
+  var ids=Object.keys(_expSel);
+  if(!ids.length){showToast('Tap some rows first');return;}
+  if(!confirm('Archive '+ids.length+' transaction'+(ids.length===1?'':'s')+'?\n\nHidden from the list but kept and restorable — not deleted.'))return;
+  ids.forEach(function(id){
+    var e=EXPENSES.find(function(x){return x.id===id;});
+    if(e){e.archived=true;fbSave('expenses',e.id,e);}
+  });
+  localStorage.setItem('aExpenses',JSON.stringify(EXPENSES));
+  _expSel={};_expSelSyncCount();
+  showToast('🗄️ Archived '+ids.length);
+  renderE();
+}
+function deleteExpSelected(){
+  var ids=Object.keys(_expSel);
+  if(!ids.length){showToast('Tap some rows first');return;}
+  if(!confirm('Delete '+ids.length+' transaction'+(ids.length===1?'':'s')+' for good?\n\nThis removes the RECORDS only — account balances stay exactly as they are. (To undo a mistaken expense and fix the balance, delete it one at a time with 🗑️.)'))return;
+  ids.forEach(function(id){
+    EXPENSES=EXPENSES.filter(function(x){return x.id!==id;});
+    try{if(window.db&&window.fsDoc&&window.fsDeleteDoc)window.fsDeleteDoc(window.fsDoc(window.db,'expenses',id));}catch(err){}
+  });
+  localStorage.setItem('aExpenses',JSON.stringify(EXPENSES));
+  _expSel={};_expSelSyncCount();
+  showToast('🗑 Deleted '+ids.length+' — balances untouched');
+  renderE();renderBudget();
 }
 
 // ═══════════════════════════════════════════════
@@ -16299,6 +16347,34 @@ function _migrateAccounts(){
 }
 var _acctShowPaidOff=false;
 function _acctTogglePaid(){_acctShowPaidOff=!_acctShowPaidOff;renderAccounts();}
+// "Show its work": reconstruct the balance from the last hand-set point
+// plus every transaction logged against the account since. The starting
+// number is derived, so the math always adds up to today's balance.
+function openAcctWork(id){
+  var a=ACCOUNTS.find(function(x){return x.id===id;});if(!a)return;
+  var bal=parseFloat(a.amount)||0;
+  var upd=a.updated||'0000-00-00';
+  var lines=(EXPENSES||[]).filter(function(e){
+    return e.account===id&&!e.archived&&(e.created||'').slice(0,10)>=upd;
+  }).sort(function(x,y){return (x.created||'').localeCompare(y.created||'');});
+  var sum=lines.reduce(function(s,e){return s+(parseFloat(e.amt)||0);},0);
+  var start=a.isCredit?bal-sum:bal+sum;
+  var html='<div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1.5px solid var(--bdr)"><span>Where it started <span style="font-size:11px;color:var(--textl)">('+(a.updated?'set '+a.updated:'first entry')+')</span></span><b>$'+start.toFixed(2)+'</b></div>';
+  if(lines.length){
+    html+=lines.map(function(e){
+      return '<div style="display:flex;justify-content:space-between;gap:8px;padding:6px 0;border-bottom:1px solid #F0EDF5">'
+        +'<span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+escHtml(e.desc||'expense')+' <span style="font-size:11px;color:var(--textl)">'+(e.created||'').slice(5,10).replace('-','/')+'</span></span>'
+        +'<span style="color:'+(a.isCredit?'#C87070':'#C87070')+';font-weight:700;flex:none">'+(a.isCredit?'+':'\u2212')+' $'+(parseFloat(e.amt)||0).toFixed(2)+'</span>'
+        +'</div>';
+    }).join('');
+  } else {
+    html+='<div style="padding:8px 0;font-size:12px;color:var(--textl)">No transactions logged against this account since then.</div>';
+  }
+  html+='<div style="display:flex;justify-content:space-between;padding:8px 0;border-top:1.5px solid var(--textd);margin-top:2px"><b>Today</b><b>$'+bal.toFixed(2)+'</b></div>';
+  var t=document.getElementById('awTitle');if(t)t.textContent=(a.name||'Account')+' — the math 🧾';
+  var b=document.getElementById('awBody');if(b)b.innerHTML=html;
+  openM('acctWorkModal');
+}
 function renderAccounts(){
   _migrateAccounts();
   var el=document.getElementById('acctList');if(!el)return;
@@ -16346,6 +16422,7 @@ function renderAccounts(){
       '<div style="display:flex;justify-content:space-between;align-items:center">'+
         '<span style="font-size:11px;color:var(--textl)">Updated: '+(a.updated||'—')+'</span>'+
         '<div style="display:flex;gap:6px">'+
+          '<button onclick="openAcctWork(\''+a.id+'\')" title="See how this balance happened" style="background:none;border:1.5px solid var(--border);border-radius:7px;padding:3px 10px;cursor:pointer;font-size:12px;font-family:\'Quicksand\',sans-serif;color:var(--textl)">🧾 How?</button>'+
           (isC&&amt>0?'<button onclick="openPayoffModal(\''+a.id+'\')" style="background:none;border:1.5px solid '+sC.neg+';border-radius:7px;padding:3px 10px;cursor:pointer;font-size:12px;font-family:\'Quicksand\',sans-serif;color:'+sC.neg+';font-weight:700">💸 Pay Off</button>':'')+
           '<button onclick="openAcctModal(\''+a.id+'\')" style="background:none;border:1.5px solid var(--border);border-radius:7px;padding:3px 10px;cursor:pointer;font-size:12px;font-family:\'Quicksand\',sans-serif;color:var(--textd)">✏️ Edit</button>'+
         '</div>'+
@@ -30489,6 +30566,14 @@ function delProjInc(id){
 </div></div>
 
 <!-- BILL MODAL -->
+<!-- ACCOUNT "SHOW ITS WORK" -->
+<div class="ov" id="acctWorkModal"><div class="mod">
+  <div class="mh"></div><div class="mtit" id="awTitle">How this balance happened 🧾</div>
+  <div id="awBody" style="font-size:13px;color:var(--textd)"></div>
+  <div style="font-size:11px;color:var(--textl);margin-top:10px;line-height:1.5">The balance moves by itself when you log expenses or payoffs. If it drifts from your real bank number, tap ✏️ Edit and type today's true balance — that becomes the new starting point.</div>
+  <button class="cn-btn" onclick="closeM('acctWorkModal')" style="margin-top:10px">Close</button>
+</div></div>
+
 <!-- WEEKLY RHYTHM EDITOR -->
 <div class="ov" id="rhythmModal"><div class="mod">
   <div class="mh"></div><div class="mtit">Weekly Rhythm 📆</div>
