@@ -5820,6 +5820,14 @@ var EXPENSE_CATS = JSON.parse(localStorage.getItem('aExpCats')||JSON.stringify([
 ["Pass-Through","Payback","Personal (Nick/Adri)","WWOW Shipping","Owner Draw"].forEach(function(c){
   if(EXPENSE_CATS.indexOf(c)<0)EXPENSE_CATS.push(c);
 });
+// Transfers/draws are money MOVING, not money gone — never counted as spending.
+// (Card payments already live in the Payoff flow, not here.)
+var TRANSFER_CATS=['Owner Draw'];
+function _isTransferCat(c){return TRANSFER_CATS.indexOf(c)>=0;}
+function _monthTransferTotal(mon){
+  return (EXPENSES||[]).filter(function(e){return(e.created||'').startsWith(mon)&&_isTransferCat(e.cat)&&!e.archived;})
+    .reduce(function(s,e){return s+(parseFloat(e.amt)||0);},0);
+}
 var BILLS = JSON.parse(localStorage.getItem('aBills')||'null')||[
   {id:'b1',name:'Citi Diamond',amt:224,day:15},
   {id:'b2',name:'BankAmericard',amt:250,day:1},
@@ -12410,14 +12418,15 @@ function renderExpenses(){renderE();}
 function renderE(){
   var el=document.getElementById('expList');
   var mon=getMonStr();
-  var thisMonExp=EXPENSES.filter(function(e){return(e.created||'').startsWith(mon);});
+  var thisMonExp=EXPENSES.filter(function(e){return(e.created||'').startsWith(mon)&&!_isTransferCat(e.cat);});
   var thisMonExpAmt=thisMonExp.reduce(function(s,e){return s+e.amt;},0);
   var reconciledAmt=thisMonExp.filter(function(e){return e.reconciled;}).reduce(function(s,e){return s+e.amt;},0);
   var thisMonIncAmt=INCOME.filter(function(i){return(i.created||'').startsWith(mon);}).reduce(function(s,i){return s+i.amt;},0);
   var wigInc=INCOME.filter(function(i){return(i.created||'').startsWith(mon)&&i.cat==='Wig Commission';}).reduce(function(s,i){return s+i.amt;},0);
+  var transferAmt=_monthTransferTotal(mon);
   var net=thisMonIncAmt-thisMonExpAmt;
   var e1=document.getElementById('mThisInc');if(e1)e1.textContent='$'+thisMonIncAmt.toFixed(0);
-  var e2=document.getElementById('mThisExp');if(e2)e2.textContent='$'+thisMonExpAmt.toFixed(0)+(reconciledAmt?'  ✓$'+reconciledAmt.toFixed(0)+' recon':'');
+  var e2=document.getElementById('mThisExp');if(e2)e2.innerHTML='$'+thisMonExpAmt.toFixed(0)+(reconciledAmt?'  ✓$'+reconciledAmt.toFixed(0)+' recon':'')+(transferAmt?'<span style="font-size:10px;color:var(--textl);font-weight:600"> · +$'+transferAmt.toFixed(0)+' moved (not spent)</span>':'');
   var e3=document.getElementById('mNet');if(e3){e3.textContent=(net>=0?'+':'-')+'$'+Math.abs(net).toFixed(0);e3.style.color=net>=0?'var(--sage)':'var(--ured)';}
   var e4=document.getElementById('mInc');if(e4)e4.textContent='$'+wigInc.toFixed(0);
   if(!EXPENSES.length){if(el)el.innerHTML='<div class="empty"><div class="emj">💸</div><p>No expenses yet.</p></div>';renderIncome();renderBills();renderBudget();return;}
@@ -12687,6 +12696,7 @@ function budgetSpentMapForMonth(mon){
     if(!(e.created||'').startsWith(mon))return;
     if(e.ty==='business')return;
     var cat=e.cat||'other';
+    if(_isTransferCat(cat))return; // Owner Draw etc. — money moved, not spent
     var bid=claimed[cat];
     if(!bid){if(workCats.indexOf(cat)>=0)return;bid=catchId;}
     if(bid)spent[bid]=(spent[bid]||0)+(parseFloat(e.amt)||0);
@@ -16069,7 +16079,7 @@ function _renderMoneyOverviewLegacy(){
   var mon=getMonStr();
   var thisMonInc=INCOME.filter(function(i){return(i.date||i.created||'').startsWith(mon);});
   var thisMonIncAmt=thisMonInc.reduce(function(s,i){return s+(parseFloat(i.amt)||0);},0);
-  var thisMonExp=EXPENSES.filter(function(e){return(e.created||'').startsWith(mon)&&!e.pending;});
+  var thisMonExp=EXPENSES.filter(function(e){return(e.created||'').startsWith(mon)&&!e.pending&&!_isTransferCat(e.cat);});
   var thisMonExpAmt=thisMonExp.reduce(function(s,e){return s+(parseFloat(e.amt)||0);},0);
   var sC={pos:'#4F6014',neg:'#C2415A',accent:'#2475FF',muted:'#9A8576',sky:'#8CC4E8',pinkSoft:'#FCE0E8',limeSoft:'#E5F0BE'};
   var billPaidMap=BILL_PAY[mon]||{};
