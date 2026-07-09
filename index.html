@@ -16370,7 +16370,8 @@ function openAcctWork(id){
   } else {
     html+='<div style="padding:8px 0;font-size:12px;color:var(--textl)">No transactions logged against this account since then.</div>';
   }
-  html+='<div style="display:flex;justify-content:space-between;padding:8px 0;border-top:1.5px solid var(--textd);margin-top:2px"><b>Today</b><b>$'+bal.toFixed(2)+'</b></div>';
+  if(lines.length)html+='<div style="display:flex;justify-content:space-between;padding:6px 0;font-size:12px;color:var(--textl)"><span>Logged since'+(a.updated?' you set it':'')+'</span><span>'+(a.isCredit?'+':'−')+' $'+sum.toFixed(2)+'</span></div>';
+  html+='<div style="display:flex;justify-content:space-between;padding:8px 0;border-top:1.5px solid var(--textd);margin-top:2px"><b>Estimated now</b><b>$'+bal.toFixed(2)+'</b></div>';
   var t=document.getElementById('awTitle');if(t)t.textContent=(a.name||'Account')+' — the math 🧾';
   var b=document.getElementById('awBody');if(b)b.innerHTML=html;
   openM('acctWorkModal');
@@ -30569,8 +30570,9 @@ function delProjInc(id){
 <!-- ACCOUNT "SHOW ITS WORK" -->
 <div class="ov" id="acctWorkModal"><div class="mod">
   <div class="mh"></div><div class="mtit" id="awTitle">How this balance happened 🧾</div>
+  <div style="font-size:12px;color:var(--textl);margin-bottom:10px;line-height:1.5">This is a running <b>estimate</b> — your starting number minus what you’ve logged since. You don’t have to log everything for it to be useful.</div>
   <div id="awBody" style="font-size:13px;color:var(--textd)"></div>
-  <div style="font-size:11px;color:var(--textl);margin-top:10px;line-height:1.5">The balance moves by itself when you log expenses or payoffs. If it drifts from your real bank number, tap ✏️ Edit and type today's true balance — that becomes the new starting point.</div>
+  <div id="awReconNote" style="font-size:11px;color:var(--textl);margin-top:10px;line-height:1.5;background:#F4F8E8;border:1px solid #E5F0BE;border-radius:10px;padding:9px 11px"><b>When it doesn’t match your bank:</b> tap ✏️ Edit and type today’s real balance. That becomes a fresh starting point and the estimate resets from there — so you never have to log every transaction. A <b>big</b> gap is worth a look; a small one is just the things you didn’t log.</div>
   <button class="cn-btn" onclick="closeM('acctWorkModal')" style="margin-top:10px">Close</button>
 </div></div>
 
