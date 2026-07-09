@@ -5797,8 +5797,13 @@ var EXPENSE_CATS = JSON.parse(localStorage.getItem('aExpCats')||JSON.stringify([
   "Adrienne's Stuff","Clothing","Dining Out & Drinks","Disneyland","Donations",
   "Entertainment","Fee","Gas","Groceries & Personal Care","Health","Home and Car",
   "Hospitality & Gifts","Nick's Stuff","Vacation","Work-Adrienne","Work-Nick",
-  "Covered by Work"
+  "Covered by Work",
+  "Pass-Through","Payback","Personal (Nick/Adri)","WWOW Shipping","Owner Draw"
 ]));
+// Migration: append the June-2026 categories to any saved list that predates them.
+["Pass-Through","Payback","Personal (Nick/Adri)","WWOW Shipping","Owner Draw"].forEach(function(c){
+  if(EXPENSE_CATS.indexOf(c)<0)EXPENSE_CATS.push(c);
+});
 var BILLS = JSON.parse(localStorage.getItem('aBills')||'null')||[
   {id:'b1',name:'Citi Diamond',amt:224,day:15},
   {id:'b2',name:'BankAmericard',amt:250,day:1},
