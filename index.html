@@ -3406,7 +3406,8 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
 <div class="ov" id="expModal"><div class="mod">
   <div class="mh"></div><div class="mtit">Log Expense 💸</div>
   <div class="fg"><label class="fl">Amount ($)</label><input class="fi" type="number" id="eAmt" placeholder="0.00" step="0.01"></div>
-  <div class="fg"><label class="fl">Description</label><input class="fi" id="eDesc" placeholder="e.g. Wig supplies"></div>
+  <div class="fg"><label class="fl">Description</label><input class="fi" id="eDesc" placeholder="e.g. Wig supplies" oninput="suggestExpCat()"></div>
+  <div id="expCatSuggest" style="display:none;margin:-4px 0 8px"></div>
   <div class="fg"><label class="fl">Pay a bill <span style="font-weight:400;color:var(--textl);font-size:11px">(optional — fills the form, all editable)</span></label><select class="fi" id="ePayBill" style="padding:8px 10px" onchange="onPayBillSelect()"><option value="">— None (regular expense) —</option></select></div>
   <div class="fg"><label class="fl">Type</label>
     <div class="bg">
@@ -13803,6 +13804,63 @@ function closeM(id){var el=document.getElementById(id);if(el)el.classList.remove
 function showOv(id){var el=document.getElementById(id);if(el)el.classList.add('show');}
 function closeOv(id){var el=document.getElementById(id);if(el)el.classList.remove('show');}
 
+// ── CATEGORIZATION RULES (money spec, Component 3) ───────────
+// Gentle suggestions from the description keyword. Tap to accept — never forced.
+// {match:[keywords], cat:'Category', ask:optional hint}
+var EXP_CAT_RULES=[
+  {match:['pirate ship','pirateship','usps','stamps.com','postage','shipping label','ups ','fedex','shippo'],cat:'WWOW Shipping'},
+  {match:['owner draw','us bank','draw to partners','transfer to partners'],cat:'Owner Draw'},
+  {match:['zelle','venmo','cash app','cashapp'],cat:'Payback',ask:'or Personal (Nick/Adri) — your call'},
+  {match:['pirate','shipstation','label'],cat:'WWOW Shipping'}
+];
+function _matchExpCatRule(desc){
+  var d=(desc||'').toLowerCase();
+  for(var i=0;i<EXP_CAT_RULES.length;i++){
+    var r=EXP_CAT_RULES[i];
+    for(var j=0;j<r.match.length;j++){if(d.indexOf(r.match[j])>=0)return r;}
+  }
+  return null;
+}
+function suggestExpCat(){
+  var el=document.getElementById('expCatSuggest');if(!el)return;
+  var desc=(document.getElementById('eDesc')||{}).value||'';
+  var rule=_matchExpCatRule(desc);
+  // Don't nag if she's already picked that category
+  if(!rule||SBV.ecat===rule.cat){el.style.display='none';el.innerHTML='';return;}
+  el.style.display='';
+  el.innerHTML='<button onclick="applyExpCatSuggest(\''+rule.cat.replace(/'/g,"\\'")+'\')" style="background:#F3EAF7;border:1.5px solid #B189B4;border-radius:11px;padding:7px 11px;cursor:pointer;font-family:\'Quicksand\',sans-serif;font-size:12px;font-weight:700;color:#8a5a9a">💡 Looks like <b>'+escHtml(rule.cat)+'</b> — tap to set'+(rule.ask?'<span style="font-weight:400;color:var(--textl)"> · '+escHtml(rule.ask)+'</span>':'')+'</button>';
+}
+// Income side: PayPal in → likely WWOW (wig). Zelle from a person → ask (payback).
+var INC_SRC_RULES=[
+  {match:['paypal'],src:'wig',label:'Wig Sales',note:'PayPal usually = WWOW income'},
+  {match:['zelle','venmo','cash app','cashapp'],src:null,label:'a payback?',note:'Zelle from a person is usually a payback, not income — double-check the source'}
+];
+function suggestIncSource(){
+  var el=document.getElementById('incSrcSuggest');if(!el)return;
+  var d=((document.getElementById('incDesc')||{}).value||'').toLowerCase();
+  var rule=null;
+  for(var i=0;i<INC_SRC_RULES.length&&!rule;i++){for(var j=0;j<INC_SRC_RULES[i].match.length;j++){if(d.indexOf(INC_SRC_RULES[i].match[j])>=0){rule=INC_SRC_RULES[i];break;}}}
+  if(!rule){el.style.display='none';el.innerHTML='';return;}
+  el.style.display='';
+  if(rule.src){
+    el.innerHTML='<button onclick="applyIncSrcSuggest(\''+rule.src+'\')" style="background:#F3EAF7;border:1.5px solid #B189B4;border-radius:11px;padding:7px 11px;cursor:pointer;font-family:\'Quicksand\',sans-serif;font-size:12px;font-weight:700;color:#8a5a9a">💡 '+escHtml(rule.note)+' — set <b>'+escHtml(rule.label)+'</b></button>';
+  }else{
+    el.innerHTML='<div style="background:#FFF6E4;border:1.5px solid #F0DCA6;border-radius:11px;padding:7px 11px;font-size:12px;font-weight:700;color:#8a6030">⚠️ '+escHtml(rule.note)+'</div>';
+  }
+}
+function applyIncSrcSuggest(src){
+  var btn=document.querySelector('[data-g="incat"][data-v="'+src+'"]');
+  if(btn)pSB(btn);
+  var el=document.getElementById('incSrcSuggest');if(el){el.style.display='none';el.innerHTML='';}
+  if(typeof showToast==='function')showToast('Source set');
+}
+function applyExpCatSuggest(cat){
+  var btn=document.querySelector('#expCatBtns [data-g="ecat"][data-v="'+cat.replace(/"/g,'\\"')+'"]');
+  if(btn){pSB(btn);btn.scrollIntoView({block:'nearest',inline:'center'});}
+  else{SBV.ecat=cat;} // category exists in list; button will reflect on next open
+  var el=document.getElementById('expCatSuggest');if(el){el.style.display='none';el.innerHTML='';}
+  if(typeof showToast==='function')showToast('Category → '+cat);
+}
 function pSB(btn){
   var g=btn.dataset.g;
   document.querySelectorAll('[data-g="'+g+'"]').forEach(function(b){b.classList.remove('on');});
@@ -30480,7 +30538,8 @@ function delProjInc(id){
 <div class="ov" id="incModal"><div class="mod">
   <div class="mh"></div><div class="mtit">Log Income 💰</div>
   <div class="fg"><label class="fl">Amount ($)</label><input class="fi" type="number" id="incAmt" placeholder="0.00" step="0.01"></div>
-  <div class="fg"><label class="fl">Description</label><input class="fi" id="incDesc" placeholder="e.g. Ariel wig commission"></div>
+  <div class="fg"><label class="fl">Description</label><input class="fi" id="incDesc" placeholder="e.g. Ariel wig commission" oninput="suggestIncSource()"></div>
+  <div id="incSrcSuggest" style="display:none;margin:-4px 0 8px"></div>
   <div class="fg"><label class="fl">Source</label>
     <div class="bg bg4">
       <button class="sb" data-g="incat" data-v="wig" onclick="pSB(this)">💜 Wig Sales</button>
