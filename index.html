@@ -3426,7 +3426,22 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
   <div class="fg"><label class="fl">Account (optional)</label><select class="fi" id="eAccount" style="padding:8px 10px"><option value="">— No account —</option></select></div>
   <div class="fg"><label class="fl">Notes <span style="font-weight:400;color:var(--textl);font-size:11px">(the why — e.g. "Card: Nick", "return &amp; pay balance")</span></label><input class="fi" id="eNotes" placeholder="Optional — what / where / why"></div>
   <button class="ok-btn" onclick="saveExp()">Log It 💸</button>
+  <button onclick="openSplitFromExp()" style="width:100%;padding:11px;border-radius:13px;border:1.5px solid #B189B4;background:#fff;color:#B189B4;font-family:'Quicksand',sans-serif;font-size:14px;font-weight:700;cursor:pointer;margin-top:7px">✂️ Split into categories</button>
   <button class="cn-btn" onclick="closeM('expModal')">Cancel</button>
+</div></div>
+
+<!-- SPLIT A PAYMENT -->
+<div class="ov" id="splitModal"><div class="mod">
+  <div class="mh"></div><div class="mtit">✂️ Split this payment</div>
+  <div style="font-size:12px;color:var(--textl);margin-bottom:10px">One real payment, split across categories. The pieces must add up to the total. They stay linked as one event (shared Split ID).</div>
+  <div style="display:flex;justify-content:space-between;align-items:baseline;background:#F7F4FB;border-radius:10px;padding:9px 12px;margin-bottom:10px">
+    <span style="font-size:13px;font-weight:700;color:var(--textd)">Total $<span id="splitTotal">0.00</span></span>
+    <span id="splitRemain" style="font-size:13px;font-weight:800"></span>
+  </div>
+  <div id="splitRows"></div>
+  <button onclick="splitAddRow()" style="width:100%;padding:9px;border-radius:11px;border:1.5px dashed var(--bdr);background:#fff;color:var(--textl);font-family:'Quicksand',sans-serif;font-size:13px;font-weight:700;cursor:pointer;margin:4px 0 10px">+ Add a piece</button>
+  <button class="ok-btn" id="splitSaveBtn" onclick="saveSplit()">Save split</button>
+  <button class="cn-btn" onclick="closeM('splitModal')">Cancel</button>
 </div></div>
 
 <!-- FOOD/WATER MODAL -->
@@ -12044,6 +12059,90 @@ function advWig(id){
 // ═══════════════════════════════════════════════
 // EXPENSES (synced)
 // ═══════════════════════════════════════════════
+// ── SPLIT A PAYMENT (money spec, Component 2) ────────────────
+// One real payment → N rows, each its own category, all sharing splitId,
+// summing back to the total. Balance moves once by the total (= sum of pieces).
+var _splitCtx=null;
+var _splitRows=[];
+function openSplitFromExp(){
+  var amt=parseFloat((document.getElementById('eAmt')||{}).value)||0;
+  var desc=((document.getElementById('eDesc')||{}).value||'').trim();
+  if(!amt||!desc){alert('Enter the amount and description first, then split it.');return;}
+  var acctEl=document.getElementById('eAccount');
+  var notesEl=document.getElementById('eNotes');
+  var pendBtn=document.getElementById('expPendingBtn');
+  _splitCtx={total:amt,desc:desc,account:acctEl?acctEl.value:'',notes:notesEl?notesEl.value.trim():'',
+    ty:SBV.ety||'personal',pending:!pendBtn||pendBtn.classList.contains('on')};
+  // Seed two pieces: first grabs the whole amount so remainder starts at 0-ish
+  _splitRows=[{cat:SBV.ecat||'',amt:amt},{cat:'',amt:0}];
+  document.getElementById('splitTotal').textContent=amt.toFixed(2);
+  closeM('expModal');
+  renderSplitRows();
+  openM('splitModal');
+}
+function renderSplitRows(){
+  var el=document.getElementById('splitRows');if(!el)return;
+  el.innerHTML=_splitRows.map(function(r,i){
+    var opts='<option value="">— category —</option>'+(EXPENSE_CATS||[]).map(function(c){
+      return '<option value="'+escHtml(c)+'"'+(r.cat===c?' selected':'')+'>'+escHtml(c)+'</option>';
+    }).join('');
+    return '<div style="display:flex;gap:6px;align-items:center;margin-bottom:7px">'
+      +'<select class="fi" style="flex:1;padding:8px 9px" onchange="splitSet('+i+',\'cat\',this.value)">'+opts+'</select>'
+      +'<input class="fi" type="number" step="0.01" value="'+(r.amt||0)+'" style="width:82px;padding:8px 9px" oninput="splitSet('+i+',\'amt\',this.value)">'
+      +(_splitRows.length>2?'<button onclick="splitDelRow('+i+')" style="background:none;border:none;font-size:15px;color:var(--textl);cursor:pointer;padding:2px 4px">✕</button>':'<span style="width:20px"></span>')
+      +'</div>';
+  }).join('');
+  splitRefresh();
+}
+function splitSet(i,k,v){
+  if(!_splitRows[i])return;
+  _splitRows[i][k]=(k==='amt')?(parseFloat(v)||0):v;
+  splitRefresh();
+}
+function splitAddRow(){_splitRows.push({cat:'',amt:0});renderSplitRows();}
+function splitDelRow(i){_splitRows.splice(i,1);renderSplitRows();}
+function splitRefresh(){
+  var sum=_splitRows.reduce(function(s,r){return s+(parseFloat(r.amt)||0);},0);
+  var rem=(_splitCtx?_splitCtx.total:0)-sum;
+  var re=document.getElementById('splitRemain');
+  var ok=Math.abs(rem)<0.005;
+  if(re){re.textContent=ok?'✓ adds up':((rem>0?'$'+rem.toFixed(2)+' left':'$'+Math.abs(rem).toFixed(2)+' over'));re.style.color=ok?'#7C9A2D':'#F06677';}
+  var btn=document.getElementById('splitSaveBtn');
+  var allCats=_splitRows.every(function(r){return r.cat&&(parseFloat(r.amt)||0)>0;});
+  var valid=ok&&_splitRows.length>=2&&allCats;
+  if(btn){btn.disabled=!valid;btn.style.opacity=valid?'1':'.5';}
+}
+function saveSplit(){
+  var sum=_splitRows.reduce(function(s,r){return s+(parseFloat(r.amt)||0);},0);
+  if(Math.abs(_splitCtx.total-sum)>=0.005){alert('The pieces have to add up to $'+_splitCtx.total.toFixed(2)+'.');return;}
+  if(_splitRows.length<2){alert('A split needs at least two pieces.');return;}
+  if(!_splitRows.every(function(r){return r.cat&&(parseFloat(r.amt)||0)>0;})){alert('Give every piece a category and an amount.');return;}
+  var splitId='sp-'+Date.now();
+  var base=new Date();
+  var n=_splitRows.length;
+  _splitRows.forEach(function(r,i){
+    var e={id:(Date.now()+i)+'',amt:parseFloat(r.amt)||0,desc:_splitCtx.desc,ty:_splitCtx.ty,cat:r.cat,
+      date:base.toLocaleDateString(),created:base.toISOString(),pending:_splitCtx.pending,reconciled:false,
+      account:_splitCtx.account,notes:_splitCtx.notes,splitId:splitId,splitPart:(i+1)+'/'+n,splitTotal:_splitCtx.total};
+    EXPENSES.unshift(e);
+    fbSave('expenses',e.id,e);
+  });
+  localStorage.setItem('aExpenses',JSON.stringify(EXPENSES));
+  // Balance moves ONCE by the total (= sum of the pieces).
+  if(_splitCtx.account){
+    var a=ACCOUNTS.find(function(x){return x.id===_splitCtx.account;});
+    if(a){
+      if(a.isCredit)a.amount=(parseFloat(a.amount)||0)+_splitCtx.total;
+      else a.amount=Math.max(0,(parseFloat(a.amount)||0)-_splitCtx.total);
+      a.updated=new Date().toISOString().slice(0,10);
+      localStorage.setItem('aAccounts',JSON.stringify(ACCOUNTS));
+    }
+  }
+  if(typeof bumpStreak==='function')bumpStreak();
+  closeM('splitModal');
+  if(typeof showToast==='function')showToast('✂️ Split into '+n+' — $'+_splitCtx.total.toFixed(2));
+  renderE();renderBudget();
+}
 function saveExp(){
   var amt=document.getElementById('eAmt').value;
   var desc=document.getElementById('eDesc').value.trim();
@@ -12361,7 +12460,7 @@ function renderE(){
     return'<div class="'+cls+'" id="er-'+e.id+'">'+
       (_expSelMode?'<input type="checkbox" class="er-sel-cb" id="esel-'+e.id+'" '+(isSel?'checked':'')+' onchange="toggleExpSel(\''+e.id+'\')" />'  :'')+
       '<div class="er-l">'+
-        '<div class="er-d">'+escHtml(e.desc)+(isPend?'<span style="font-size:10px;color:#c07a2a;background:#fff8e8;padding:1px 6px;border-radius:6px;margin-left:6px;font-weight:700">⏳</span>':'')+(isExported?'<span style="font-size:10px;color:#5a8a5a;background:#e8f5e8;padding:1px 6px;border-radius:6px;margin-left:4px;font-weight:700">📤</span>':'')+'</div>'+
+        '<div class="er-d">'+(e.splitId?'<span title="Part of a split payment" style="font-size:10px;color:#8a5a9a;background:#F3EAF7;padding:1px 6px;border-radius:6px;margin-right:5px;font-weight:700">🔗 '+escHtml(e.splitPart||'split')+'</span>':'')+escHtml(e.desc)+(isPend?'<span style="font-size:10px;color:#c07a2a;background:#fff8e8;padding:1px 6px;border-radius:6px;margin-left:6px;font-weight:700">⏳</span>':'')+(isExported?'<span style="font-size:10px;color:#5a8a5a;background:#e8f5e8;padding:1px 6px;border-radius:6px;margin-left:4px;font-weight:700">📤</span>':'')+'</div>'+
         '<div class="er-m">'+(e.ty==='business'?'💼':'🏠')+' '+escHtml(e.cat||'')+' • '+e.date+(_acctNameOf(e.account)?' • 🏦 '+escHtml(_acctNameOf(e.account)):'')+'</div>'+
         (e.notes?'<div class="er-m" style="font-style:italic;color:var(--textl)">📝 '+escHtml(e.notes)+'</div>':'')+
       '</div>'+
@@ -13474,12 +13573,12 @@ function _expBuildSections(from,to,cats,onlyUnexported){
     // Column order matches the "Transactions" spreadsheet tab for direct paste.
     // Amount is negative for expenses; Type is the literal "Expense"; Checked = x when Cleared.
     // "Class" (personal/business) is kept as a trailing column so it isn't lost.
-    var expRows=[['Date','Amount','Type','Category','Account','To Account','Sales Tax','Checked','Description','Notes','Class']];
+    var expRows=[['Date','Amount','Type','Category','Account','To Account','Sales Tax','Checked','Description','Notes','Class','Split ID','Split Part']];
     (EXPENSES||[]).forEach(function(e){
       if(onlyUnexported){if(e.exported)return;}
       else{var d=e.date||e.created||'';if(!_expInRange(d,from,to))return;}
       var amtNum=parseFloat(e.amt)||0;
-      expRows.push([(e.date||e.created||''),(amtNum?-amtNum:0),'Expense',e.cat||'',_acctNameOf(e.account)||'','','',(e.reconciled?'x':''),e.desc||'',e.notes||'',e.ty||'']);
+      expRows.push([(e.date||e.created||''),(amtNum?-amtNum:0),'Expense',e.cat||'',_acctNameOf(e.account)||'','','',(e.reconciled?'x':''),e.desc||'',e.notes||'',e.ty||'',e.splitId||'',e.splitPart||'']);
       e.exported=exportTs;
     });
     localStorage.setItem('aExpenses',JSON.stringify(EXPENSES));
