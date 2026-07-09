@@ -1906,6 +1906,8 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     <span id="mThisExp" style="display:none"></span>
     <span id="mNet" style="display:none"></span>
     <span id="mInc" style="display:none"></span>
+    <!-- Pass-Through netting — what actually stuck to you -->
+    <div id="passThroughCard" style="margin-bottom:14px;display:none"></div>
     <!-- The Guide: one dealt card — always the next action -->
     <div id="moneyGuideCard" style="margin-bottom:14px;display:none"></div>
     <!-- Main accounts — check these first -->
@@ -5824,9 +5826,21 @@ var EXPENSE_CATS = JSON.parse(localStorage.getItem('aExpCats')||JSON.stringify([
 // (Card payments already live in the Payoff flow, not here.)
 var TRANSFER_CATS=['Owner Draw'];
 function _isTransferCat(c){return TRANSFER_CATS.indexOf(c)>=0;}
+// Pass-Through: money that lands with her and gets forwarded on. Received (income)
+// minus forwarded (expense) = "what actually stuck." Neither side is real
+// income/spending, so both are kept out of those totals.
+function _isPassThrough(c){return c==='Pass-Through'||c==='passthrough';}
+function _excludeFromSpend(c){return _isTransferCat(c)||_isPassThrough(c);}
 function _monthTransferTotal(mon){
   return (EXPENSES||[]).filter(function(e){return(e.created||'').startsWith(mon)&&_isTransferCat(e.cat)&&!e.archived;})
     .reduce(function(s,e){return s+(parseFloat(e.amt)||0);},0);
+}
+function _passThroughNet(mon){
+  var received=(INCOME||[]).filter(function(i){return(!mon||(i.created||'').startsWith(mon))&&_isPassThrough(i.cat);})
+    .reduce(function(s,i){return s+(parseFloat(i.amt)||0);},0);
+  var forwarded=(EXPENSES||[]).filter(function(e){return(!mon||(e.created||'').startsWith(mon))&&_isPassThrough(e.cat)&&!e.archived;})
+    .reduce(function(s,e){return s+(parseFloat(e.amt)||0);},0);
+  return {received:received,forwarded:forwarded,stuck:received-forwarded};
 }
 var BILLS = JSON.parse(localStorage.getItem('aBills')||'null')||[
   {id:'b1',name:'Citi Diamond',amt:224,day:15},
@@ -12418,10 +12432,10 @@ function renderExpenses(){renderE();}
 function renderE(){
   var el=document.getElementById('expList');
   var mon=getMonStr();
-  var thisMonExp=EXPENSES.filter(function(e){return(e.created||'').startsWith(mon)&&!_isTransferCat(e.cat);});
+  var thisMonExp=EXPENSES.filter(function(e){return(e.created||'').startsWith(mon)&&!_excludeFromSpend(e.cat);});
   var thisMonExpAmt=thisMonExp.reduce(function(s,e){return s+e.amt;},0);
   var reconciledAmt=thisMonExp.filter(function(e){return e.reconciled;}).reduce(function(s,e){return s+e.amt;},0);
-  var thisMonIncAmt=INCOME.filter(function(i){return(i.created||'').startsWith(mon);}).reduce(function(s,i){return s+i.amt;},0);
+  var thisMonIncAmt=INCOME.filter(function(i){return(i.created||'').startsWith(mon)&&!_isPassThrough(i.cat);}).reduce(function(s,i){return s+i.amt;},0);
   var wigInc=INCOME.filter(function(i){return(i.created||'').startsWith(mon)&&i.cat==='Wig Commission';}).reduce(function(s,i){return s+i.amt;},0);
   var transferAmt=_monthTransferTotal(mon);
   var net=thisMonIncAmt-thisMonExpAmt;
@@ -12696,7 +12710,7 @@ function budgetSpentMapForMonth(mon){
     if(!(e.created||'').startsWith(mon))return;
     if(e.ty==='business')return;
     var cat=e.cat||'other';
-    if(_isTransferCat(cat))return; // Owner Draw etc. — money moved, not spent
+    if(_excludeFromSpend(cat))return; // Owner Draw / Pass-Through — not her spending
     var bid=claimed[cat];
     if(!bid){if(workCats.indexOf(cat)>=0)return;bid=catchId;}
     if(bid)spent[bid]=(spent[bid]||0)+(parseFloat(e.amt)||0);
@@ -12979,8 +12993,23 @@ function _moneyGuideCardObj(){
   }
   return card;
 }
+function renderPassThroughCard(){
+  var el=document.getElementById('passThroughCard');if(!el)return;
+  var n=_passThroughNet(getMonStr());
+  if(!n.received&&!n.forwarded){el.style.display='none';return;}
+  el.style.display='';
+  var stuckColor=n.stuck>=0?'#7C9A2D':'#F06677';
+  el.innerHTML='<div class="card" style="margin:0;padding:13px 15px;border-left:4px solid #65B2E7">'
+    +'<div style="font-size:10px;font-weight:800;color:var(--textl);text-transform:uppercase;letter-spacing:.7px;margin-bottom:6px">🔁 Pass-Through · this month</div>'
+    +'<div style="display:flex;justify-content:space-between;font-size:13px;color:var(--textd);padding:2px 0"><span>Received</span><span style="font-weight:700">$'+n.received.toFixed(2)+'</span></div>'
+    +'<div style="display:flex;justify-content:space-between;font-size:13px;color:var(--textd);padding:2px 0"><span>Forwarded on</span><span style="font-weight:700">−$'+n.forwarded.toFixed(2)+'</span></div>'
+    +'<div style="display:flex;justify-content:space-between;font-size:14px;padding:6px 0 0;margin-top:4px;border-top:1.5px solid var(--textd)"><b>What stuck to you</b><b style="color:'+stuckColor+'">$'+n.stuck.toFixed(2)+'</b></div>'
+    +'<div style="font-size:10px;color:var(--textl);margin-top:4px">Doesn’t have to balance to zero — leftover is yours. Not counted as income or spending.</div>'
+    +'</div>';
+}
 function renderMoneyGuide(){
   var el=document.getElementById('moneyGuideCard');if(!el)return;
+  if(typeof renderPassThroughCard==='function')renderPassThroughCard();
   var card=_moneyGuideCardObj();
   if(typeof renderHomeGuide==='function')renderHomeGuide();
 
@@ -16079,7 +16108,7 @@ function _renderMoneyOverviewLegacy(){
   var mon=getMonStr();
   var thisMonInc=INCOME.filter(function(i){return(i.date||i.created||'').startsWith(mon);});
   var thisMonIncAmt=thisMonInc.reduce(function(s,i){return s+(parseFloat(i.amt)||0);},0);
-  var thisMonExp=EXPENSES.filter(function(e){return(e.created||'').startsWith(mon)&&!e.pending&&!_isTransferCat(e.cat);});
+  var thisMonExp=EXPENSES.filter(function(e){return(e.created||'').startsWith(mon)&&!e.pending&&!_excludeFromSpend(e.cat);});
   var thisMonExpAmt=thisMonExp.reduce(function(s,e){return s+(parseFloat(e.amt)||0);},0);
   var sC={pos:'#4F6014',neg:'#C2415A',accent:'#2475FF',muted:'#9A8576',sky:'#8CC4E8',pinkSoft:'#FCE0E8',limeSoft:'#E5F0BE'};
   var billPaidMap=BILL_PAY[mon]||{};
@@ -30555,6 +30584,7 @@ function delProjInc(id){
       <button class="sb" data-g="incat" data-v="wig" onclick="pSB(this)">💜 Wig Sales</button>
       <button class="sb" data-g="incat" data-v="loreal" onclick="pSB(this)">💄 Loreal</button>
       <button class="sb" data-g="incat" data-v="nick" onclick="pSB(this)">🪟 Nick-Window</button>
+      <button class="sb" data-g="incat" data-v="passthrough" onclick="pSB(this)">🔁 Pass-Through</button>
       <button class="sb" data-g="incat" data-v="other" onclick="pSB(this)">📦 Other</button>
     </div>
   </div>
