@@ -6208,6 +6208,7 @@ function initFirebase(){
       ap('aIntentions',function(v,r){INTENTIONS=v||{};_origSetItem('aIntentions',r);});
       ap('aMonthTodos',function(v,r){MONTH_TODOS=v||{};_origSetItem('aMonthTodos',r);});
       ap('aTmpls',function(v,r){if(v&&v.length)TMPLS=v;_origSetItem('aTmpls',r);});
+      ap('aWeekReflect',function(v,r){if(v)WEEK_REFLECT=v;_origSetItem('aWeekReflect',r);});
       _fbBlobPause=false;
       if(typeof renderDumpList==='function')renderDumpList();
       if(typeof renderIntentionList==='function')renderIntentionList();
@@ -6363,7 +6364,7 @@ var BLOB_GROUPS={
   health:['aMeds','aMedLog','aEnergyLog','aMeasLog','aMealLogItems','aMoodNotes','aWineDrinks','aSymLog','aSymTypes'],
   habits:['aHabits','aHabitLog'],
   routines:['aRS','aRS2','aRH','aRTG','aRtns','aRhythm','aRhythmDone'],
-  planning:['aSOPs','aBrainDump','aIntentions','aMonthTodos','aTmpls'],
+  planning:['aSOPs','aBrainDump','aIntentions','aMonthTodos','aTmpls','aWeekReflect'],
   spiritual:['aBibleLog','aBibleChapNotes','aPrayers','aGratLog','aSpiritBooks','aSpiritSettings','aSpiritRun'],
   food:['aRecipes','aMealPlan','aMealMyServings','aGroceryList','aGrocTags','aGrocDepts','aGrocStoreDeptOrder','aInventory','aInvSections','aMC','aFoodDb','aFDB','aIngredients','aWantToTry','aMacrosReviewed'],
   fitness:['aWplans','aWlog2','aMovements','aExTypes','aExDB','aExLog','aPT'],
@@ -21613,6 +21614,7 @@ function wpAssign(taskId,key,dow){
   renderWeekPlan();
 }
 function renderWeekPlan(){
+  if(typeof renderWeekReflect==='function')renderWeekReflect();
   var el=document.getElementById('wpTasks');if(!el)return;
   var cap=_weekCapacity();
   var u=document.getElementById('wpUsed');if(u)u.textContent=cap.used;
@@ -21646,6 +21648,54 @@ function renderWeekPlan(){
   }).join(''):'<div style="font-size:13px;color:var(--textl);padding:6px 0">Nothing to place — add tasks in the Tasks tab, then place them here on Monday.</div>';
   var w=document.getElementById('wpWaiting');
   if(w)w.textContent=backlog.length?backlog.length+' unplaced task'+(backlog.length===1?'':'s')+' waiting — safe in the Tasks list, not lost.':'';
+}
+// ── MONDAY RITUAL: close last week (rhythm brief, component 7) ──
+// Three inputs, keyed by this week's Monday. The carry becomes a real
+// task (explicit, toasted) so it lands in the planner's to-place list.
+var WEEK_REFLECT=JSON.parse(localStorage.getItem('aWeekReflect')||'{}');
+function _weekKey(){
+  var d=new Date();d.setDate(d.getDate()-((d.getDay()+6)%7));
+  return d.toISOString().slice(0,10);
+}
+function renderWeekReflect(){
+  var el=document.getElementById('weekReflectBody');if(!el)return;
+  var wk=_weekKey();
+  var r=WEEK_REFLECT[wk];
+  if(r){
+    el.innerHTML='<div style="font-size:12px;color:var(--textl);line-height:1.7">'
+      +'<b style="color:#7C9A2D">Worked:</b> '+escHtml(r.worked||'—')+'<br>'
+      +'<b style="color:#C87070">Didn\u2019t:</b> '+escHtml(r.didnt||'—')+'<br>'
+      +'<b style="color:#2475FF">Carried:</b> '+escHtml(r.carries||'—')
+      +'</div>'
+      +'<div style="font-size:11px;color:var(--textl);margin-top:6px">✓ Closed for this week. Back next Monday.</div>';
+    return;
+  }
+  el.innerHTML='<div style="font-size:12px;color:var(--textl);margin-bottom:8px">Three questions, two minutes. Then plan.</div>'
+    +'<div class="fg" style="margin-bottom:7px"><label class="fl">What worked last week?</label><input class="fi" id="wrWorked" placeholder="e.g. food day chain"></div>'
+    +'<div class="fg" style="margin-bottom:7px"><label class="fl">What didn\u2019t?</label><input class="fi" id="wrDidnt" placeholder="e.g. messages leaked into mornings"></div>'
+    +'<div class="fg" style="margin-bottom:9px"><label class="fl">What carries into this week?</label><input class="fi" id="wrCarries" placeholder="becomes a task to place above"></div>'
+    +'<button onclick="saveWeekReflect()" style="width:100%;padding:11px;border-radius:12px;border:none;background:#2475FF;color:#fff;font-family:\'Quicksand\',sans-serif;font-size:14px;font-weight:700;cursor:pointer">Save &amp; start the week ✓</button>';
+}
+function saveWeekReflect(){
+  var wk=_weekKey();
+  var worked=((document.getElementById('wrWorked')||{}).value||'').trim();
+  var didnt=((document.getElementById('wrDidnt')||{}).value||'').trim();
+  var carries=((document.getElementById('wrCarries')||{}).value||'').trim();
+  if(!worked&&!didnt&&!carries){if(typeof showToast==='function')showToast('Write at least one line — even “nothing” counts');return;}
+  WEEK_REFLECT[wk]={worked:worked,didnt:didnt,carries:carries,savedAt:new Date().toISOString()};
+  localStorage.setItem('aWeekReflect',JSON.stringify(WEEK_REFLECT));
+  if(carries){
+    var t={id:'t-'+Date.now(),title:carries,cat:'mis',urgency:'important-not-urgent',etime:'',due:'',notes:'Carried from last week',done:false,repeat:'',repeatDays:0,subs:[],created:new Date().toISOString(),meaningful:false};
+    TASKS.unshift(t);
+    saveTasks();
+    fbSave('tasks',t.id,t);
+    if(typeof showToast==='function')showToast('✓ Closed. “'+carries.slice(0,30)+'” added to your tasks — place it above.');
+  }else{
+    if(typeof showToast==='function')showToast('✓ Week closed.');
+  }
+  renderWeekReflect();
+  renderWeekPlan();
+  if(typeof renderT==='function')renderT();
 }
 function _rhythmDoneToday(){
   var t=todayStr();
@@ -29910,12 +29960,11 @@ if('serviceWorker' in navigator&&location.protocol.indexOf('http')===0){
     <div id="wpTasks" style="margin-top:4px"></div>
     <div id="wpWaiting" style="font-size:11px;color:var(--textl);margin-top:8px"></div>
   </div>
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-    <button onclick="prevPlanMonth()" style="padding:8px 16px;border-radius:10px;border:1.5px solid var(--bdr);background:#fff;font-size:18px;font-weight:700;cursor:pointer;color:var(--textd)">‹</button>
-    <div id="planMonthTitle" style="font-size:20px;font-weight:800;font-family:'Playfair Display',serif;color:var(--textd)"></div>
-    <button onclick="nextPlanMonth()" style="padding:8px 16px;border-radius:10px;border:1.5px solid var(--bdr);background:#fff;font-size:18px;font-weight:700;cursor:pointer;color:var(--textd)">›</button>
+  <!-- Monday ritual: close last week (3 questions, 2 minutes) -->
+  <div class="card" id="weekReflectPanel" style="margin-bottom:12px;padding:14px 15px">
+    <div style="font-size:11px;font-weight:800;color:var(--textl);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px">Close last week</div>
+    <div id="weekReflectBody"></div>
   </div>
-  <button onclick="scrollPlanToToday()" style="width:100%;padding:10px;border-radius:12px;border:1.5px solid var(--rose);background:#fff;font-family:'Quicksand',sans-serif;font-size:13px;font-weight:700;color:var(--rose);cursor:pointer;margin-bottom:12px">📅 Jump to Today</button>
   <!-- Month To-Do List -->
   <div class="card" style="margin-bottom:12px">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
@@ -29928,7 +29977,18 @@ if('serviceWorker' in navigator&&location.protocol.indexOf('http')===0){
     </div>
     <div id="monthTodoList"></div>
   </div>
-  <div id="planMonthBody"></div>
+  <div style="text-align:center;margin:4px 0 8px">
+    <span onclick="var w=document.getElementById('oldCalendarWrap');var on=w.style.display==='none';w.style.display=on?'':'none';this.textContent=on?'🗄 Hide old calendar':'🗄 Old calendar (retired) ›';if(on&&typeof renderPlanMonth==='function')renderPlanMonth();" style="font-size:11px;color:var(--textl);cursor:pointer;font-weight:700">🗄 Old calendar (retired) ›</span>
+  </div>
+  <div id="oldCalendarWrap" style="display:none">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+      <button onclick="prevPlanMonth()" style="padding:8px 16px;border-radius:10px;border:1.5px solid var(--bdr);background:#fff;font-size:18px;font-weight:700;cursor:pointer;color:var(--textd)">‹</button>
+      <div id="planMonthTitle" style="font-size:20px;font-weight:800;font-family:'Playfair Display',serif;color:var(--textd)"></div>
+      <button onclick="nextPlanMonth()" style="padding:8px 16px;border-radius:10px;border:1.5px solid var(--bdr);background:#fff;font-size:18px;font-weight:700;cursor:pointer;color:var(--textd)">›</button>
+    </div>
+    <button onclick="scrollPlanToToday()" style="width:100%;padding:10px;border-radius:12px;border:1.5px solid var(--rose);background:#fff;font-family:'Quicksand',sans-serif;font-size:13px;font-weight:700;color:var(--rose);cursor:pointer;margin-bottom:12px">📅 Jump to Today</button>
+    <div id="planMonthBody"></div>
+  </div>
 </div>
 
 <div class="view" id="v-archive">
