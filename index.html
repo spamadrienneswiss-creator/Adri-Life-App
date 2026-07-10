@@ -2143,6 +2143,18 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     <div id="taxList"></div>
   </div>
   <div id="ms-money-plan" class="money-sec" style="display:none">
+    <!-- Monthly snapshot — auto from transactions (money spec, C) -->
+    <div class="card" style="margin-bottom:12px;padding:14px 15px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <span style="font-size:13px;font-weight:800;color:var(--textd)">📊 Monthly Snapshot</span>
+        <span style="display:flex;align-items:center;gap:6px">
+          <button onclick="shiftSnapMonth(-1)" style="border:1.5px solid var(--bdr);background:#fff;border-radius:8px;padding:2px 9px;cursor:pointer;font-weight:700;color:var(--textd)">‹</button>
+          <span id="snapMonthLbl" style="font-size:12px;font-weight:700;color:var(--textl);min-width:74px;text-align:center"></span>
+          <button onclick="shiftSnapMonth(1)" style="border:1.5px solid var(--bdr);background:#fff;border-radius:8px;padding:2px 9px;cursor:pointer;font-weight:700;color:var(--textd)">›</button>
+        </span>
+      </div>
+      <div id="snapBody"></div>
+    </div>
     <!-- Monthly income goal -->
     <div class="card" style="margin-bottom:12px">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
@@ -30386,7 +30398,70 @@ function toggleWorkProjTask(projectId, taskId){
 // ═══════════════════════════════════════════════
 // MONEY PLAN
 // ═══════════════════════════════════════════════
+// ── MONTHLY SNAPSHOT (money spec, C) ─────────────────────────
+// Everything pulled live from transactions — mirrors the sheet's SUMIFS.
+// Reuses the same exclusions as the rest of the app: pass-through and
+// transfers/draws never count as income or spending; debt = payoffs.
+var _snapMonthOffset=0;
+function _snapMonStr(){
+  var d=new Date();d.setDate(1);d.setMonth(d.getMonth()+_snapMonthOffset);
+  return d.toISOString().slice(0,7);
+}
+function shiftSnapMonth(n){_snapMonthOffset+=n;renderMonthlySnapshot();}
+function renderMonthlySnapshot(){
+  var body=document.getElementById('snapBody');if(!body)return;
+  var mon=_snapMonStr();
+  var lbl=document.getElementById('snapMonthLbl');
+  if(lbl){var dd=new Date(mon+'-01T00:00:00');lbl.textContent=dd.toLocaleDateString('en-US',{month:'short',year:'numeric'});}
+  var inc=(INCOME||[]).filter(function(i){return(i.created||'').startsWith(mon)&&!_isPassThrough(i.cat);});
+  var moneyIn=inc.reduce(function(s,i){return s+(parseFloat(i.amt)||0);},0);
+  var exp=(EXPENSES||[]).filter(function(e){return(e.created||'').startsWith(mon)&&!e.archived&&!_excludeFromSpend(e.cat);});
+  var spent=exp.reduce(function(s,e){return s+(parseFloat(e.amt)||0);},0);
+  var net=moneyIn-spent;
+  var debt=(PAYOFFS||[]).filter(function(p){return(p.date||'').startsWith(mon);}).reduce(function(s,p){return s+(parseFloat(p.amount)||0);},0);
+  var transfers=_monthTransferTotal(mon);
+  var pt=_passThroughNet(mon);
+  var txCount=inc.length+exp.length
+    +(EXPENSES||[]).filter(function(e){return(e.created||'').startsWith(mon)&&!e.archived&&_excludeFromSpend(e.cat);}).length
+    +(INCOME||[]).filter(function(i){return(i.created||'').startsWith(mon)&&_isPassThrough(i.cat);}).length;
+  // Category breakdown of real spending
+  var byCat={};
+  exp.forEach(function(e){var c=e.cat||'other';byCat[c]=(byCat[c]||0)+(parseFloat(e.amt)||0);});
+  var cats=Object.keys(byCat).sort(function(a,b){return byCat[b]-byCat[a];});
+  var row=function(label,val,color,bold){
+    return '<div style="display:flex;justify-content:space-between;padding:'+(bold?'7px':'4px')+' 0'+(bold?';border-top:1.5px solid var(--textd);margin-top:2px':'')+'">'
+      +'<span style="font-size:'+(bold?'14px':'13px')+';color:var(--textd)'+(bold?';font-weight:800':'')+'">'+label+'</span>'
+      +'<span style="font-size:'+(bold?'15px':'13px')+';font-weight:'+(bold?'800':'700')+';color:'+(color||'var(--textd)')+'">'+val+'</span></div>';
+  };
+  var html=row('Money In','$'+moneyIn.toFixed(0),'#7C9A2D')
+    +row('Spent','$'+spent.toFixed(0),'#C87070')
+    +row('Net',(net>=0?'+':'−')+'$'+Math.abs(net).toFixed(0),net>=0?'#7C9A2D':'#F06677',true);
+  // secondary lines only when they have activity
+  var extra='';
+  if(debt)extra+=row('💳 Debt payments','$'+debt.toFixed(0),'var(--textl)');
+  if(transfers)extra+=row('🔁 Transfers out','$'+transfers.toFixed(0),'var(--textl)');
+  if(pt.received||pt.forwarded)extra+=row('🔁 Pass-through stuck',(pt.stuck>=0?'$':'−$')+Math.abs(pt.stuck).toFixed(0),'var(--textl)');
+  extra+=row('# Transactions',String(txCount),'var(--textl)');
+  html+='<div style="margin-top:8px;padding-top:6px;border-top:1px dashed var(--bdr)">'+extra+'</div>';
+  // category breakdown
+  if(cats.length){
+    html+='<div style="margin-top:10px"><div style="font-size:10px;font-weight:800;color:var(--textl);text-transform:uppercase;letter-spacing:.7px;margin-bottom:4px">Where it went</div>'
+      +cats.map(function(c){
+        var pct=spent>0?Math.round(byCat[c]/spent*100):0;
+        return '<div style="display:flex;align-items:center;gap:8px;padding:3px 0">'
+          +'<span style="flex:1;font-size:12px;color:var(--textd);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+escHtml(c)+'</span>'
+          +'<span style="font-size:11px;color:var(--textl)">'+pct+'%</span>'
+          +'<span style="font-size:12px;font-weight:700;color:var(--textd);min-width:56px;text-align:right">$'+byCat[c].toFixed(0)+'</span></div>';
+      }).join('')
+      +row('TOTAL','$'+spent.toFixed(0),'var(--textd)',true)
+      +'</div>';
+  }
+  if(!inc.length&&!exp.length&&!debt)html='<div style="font-size:13px;color:var(--textl);padding:6px 0">No activity logged for this month yet.</div>'+
+    (lbl?'':'');
+  body.innerHTML=html;
+}
 function renderMoneyPlan(){
+  if(typeof renderMonthlySnapshot==='function')renderMonthlySnapshot();
   // Goal bar
   var goal=S.monthlyIncGoal||parseFloat(localStorage.getItem('aMonIncGoal')||localStorage.getItem('aIncGoal')||'0');
   var mon=new Date().toISOString().slice(0,7);
