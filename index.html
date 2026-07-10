@@ -4,6 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>✨ Adri's Life</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Adri">
+<meta name="theme-color" content="#F096B5">
 <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
 <style>
 :root{--cream:#FFFFFF;--sage:#7C9A2D;--sage-light:#EEFFA4;--rose:#F096B5;--rose-light:#FCC5CC;--blue:#2475FF;--blue-light:#D9E6FF;--lav:#B189B4;--lav-light:#FACFFF;--peach:#BCA49C;--peach-light:#F1E7E2;--teal:#65B2E7;--teal-light:#DDF0FC;--text:#051423;--textd:#051423;--textl:#877D76;--bdr:#E9E5F0;--border:#F0EDF5;--ured:#F06677;--uyel:#d4b85a;--ublu:#65B2E7;--una:#BCB8C4;--sh:0 6px 24px rgba(5,20,35,.07);--sh2:0 2px 12px rgba(5,20,35,.05);--r:20px;--r2:14px;--title-color:#ffffff;--coral:#F06677;--cobalt:#2475FF;--lime:#EEFFA4}
@@ -1367,6 +1373,8 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
   </div>
   <!-- Start here: the single next card across Money / Meals / Tasks -->
   <div id="homeGuideCard" style="margin-bottom:10px;display:none"></div>
+  <!-- One-tap re-log of the most repeated purchases -->
+  <div id="quickLogChips" style="display:none;margin-bottom:10px"></div>
   <div style="margin-bottom:10px">
     <button onclick="goTab('appindex',null)" style="width:100%;padding:10px 14px;border-radius:14px;border:1.5px solid rgba(143,170,139,.4);background:#fff;font-family:'Quicksand',sans-serif;font-size:13px;font-weight:700;color:var(--sage);cursor:pointer;display:flex;align-items:center;gap:8px;box-shadow:var(--sh2)"><span>🗂️</span><span>App Index — Navigate All Sections</span><span style="margin-left:auto;font-size:11px;color:var(--textl)">→</span></button>
   </div>
@@ -3542,6 +3550,7 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
   <p style="font-size:13px;color:var(--textl);margin-bottom:14px">Copy and paste into your spreadsheet or Notes.</p>
   <textarea id="expTxt" style="width:100%;height:180px;border:2px solid #ede8e3;border-radius:11px;padding:11px;font-family:monospace;font-size:12px;resize:none;outline:none" readonly></textarea>
   <button class="ok-btn" onclick="cpExp()">📋 Copy to Clipboard</button>
+  <button onclick="backupAll()" style="width:100%;padding:12px;border-radius:13px;border:1.5px solid #2475FF;background:#fff;color:#2475FF;font-family:'Quicksand',sans-serif;font-size:14px;font-weight:700;cursor:pointer;margin-top:7px">💾 Download full backup (everything, one file)</button>
   <button class="cn-btn" onclick="closeM('expModal2')">Close</button>
 </div></div>
 
@@ -12394,6 +12403,51 @@ function billsConfirmReviewed(){
   renderBudget();
   if(typeof showToast==='function')showToast('✓ Bills confirmed');
 }
+// ── FULL BACKUP: everything in localStorage as one downloadable file ──
+function backupAll(){
+  var data={};
+  for(var i=0;i<localStorage.length;i++){
+    var k=localStorage.key(i);
+    data[k]=localStorage.getItem(k);
+  }
+  var payload={app:"Adri Life App",exportedAt:new Date().toISOString(),keys:Object.keys(data).length,data:data};
+  var blob=new Blob([JSON.stringify(payload)],{type:'application/json'});
+  var a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='adri-life-backup-'+new Date().toISOString().slice(0,10)+'.json';
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
+  setTimeout(function(){URL.revokeObjectURL(a.href);},4000);
+  localStorage.setItem('aLastBackup',new Date().toISOString().slice(0,10));
+  if(typeof showToast==='function')showToast('💾 Backup downloaded — keep it somewhere safe');
+  if(typeof renderMoneyGuide==='function')renderMoneyGuide();
+}
+// Autopay bills: one tap = log the expense AND mark the bill paid.
+function autopayConfirm(billId){
+  var b=BILLS.find(function(x){return x.id===billId;});if(!b)return;
+  var amt=parseFloat(getBillMonthAmt(b.id))||parseFloat(b.amt)||0;
+  var id=Date.now().toString();
+  var e={id:id,amt:amt,desc:b.name,ty:'personal',cat:b.cat||'other',
+    date:new Date().toLocaleDateString(),created:new Date().toISOString(),pending:false,reconciled:false,
+    account:b.paidWith||'',notes:'autopay'};
+  EXPENSES.unshift(e);
+  localStorage.setItem('aExpenses',JSON.stringify(EXPENSES));
+  fbSave('expenses',id,e);
+  if(e.account){
+    var a=ACCOUNTS.find(function(x){return x.id===e.account;});
+    if(a){
+      if(a.isCredit)a.amount=(parseFloat(a.amount)||0)+amt;
+      else a.amount=Math.max(0,(parseFloat(a.amount)||0)-amt);
+      localStorage.setItem('aAccounts',JSON.stringify(ACCOUNTS));
+    }
+  }
+  var mon=getMonStr();
+  if(!BILL_PAY[mon])BILL_PAY[mon]={};
+  BILL_PAY[mon][b.id]='paid';
+  localStorage.setItem('aBillPay',JSON.stringify(BILL_PAY));
+  if(typeof bumpStreak==='function')bumpStreak();
+  if(typeof showToast==='function')showToast('🔄 '+b.name+' confirmed — logged & marked paid');
+  renderE();renderBills();renderBudget();
+}
 // Open Add Expense with a bill already picked — the guide's "pay it now".
 function payBillNow(billId){
   openM('expModal');
@@ -12438,6 +12492,16 @@ function _moneyGuideCardObj(){
     if(due.length){
       var b0=due[0];var bd=parseInt(b0.day)||1;
       var when=bd<dToday?'was due day '+bd+' — overdue':(bd===dToday?'due today':'due in '+(bd-dToday)+' day'+((bd-dToday)>1?'s':''));
+      if(b0.autopay){
+        card={label:'Autopay check',
+          title:escHtml(b0.name)+' should have auto-paid — did it go through?',
+          sub:when+(due.length>1?' \u00b7 '+(due.length-1)+' more coming up':'')+'. Check your bank app. One tap logs the $'+(parseFloat(getBillMonthAmt(b0.id))||0).toFixed(0)+' and marks it paid.',
+          btn:'✓ It went through',
+          act:"autopayConfirm('"+b0.id+"')",
+          btn2:'💸 Pay manually',
+          act2:"payBillNow('"+b0.id+"')",
+          skip:'bills'};
+      }else{
       card={label:bd<dToday?'Overdue':'Due soon',
         title:'Pay '+escHtml(b0.name)+' — $'+(parseFloat(getBillMonthAmt(b0.id))||0).toFixed(0),
         sub:when+(due.length>1?' \u00b7 '+(due.length-1)+' more coming up':'')+'. The button opens the expense form already filled in \u2014 change the amount if the real charge differs, then save.',
@@ -12445,6 +12509,7 @@ function _moneyGuideCardObj(){
         act:"payBillNow('"+b0.id+"')",
         skip:'bills',
         urgent:bd<dToday};
+      }
     }
   }
   // 3) Nothing logged today → quick yes/no
@@ -12470,6 +12535,19 @@ function _moneyGuideCardObj(){
         btn:'🔄 Reconcile',
         act:"showMoneySec('expenses',document.querySelector('#v-money .pn-btn[data-sec=expenses]'));var _c=document.querySelector('#expTopChips .fchip:nth-child(2)');if(_c)setExpFilter('uncleared',_c)",
         skip:'recon'};
+    }
+  }
+  // 5) Monthly backup — a file YOU hold, in case anything ever happens to the cloud
+  if(!card&&skips.indexOf('backup')<0){
+    var lastBk=localStorage.getItem('aLastBackup')||'';
+    var stale=!lastBk||((new Date()-new Date(lastBk))/86400000)>30;
+    if(stale&&(EXPENSES||[]).length>10){
+      card={label:'Once a month',
+        title:'Download a backup of everything',
+        sub:(lastBk?'Last one was '+lastBk:'You\u2019ve never made one')+'. One tap saves a file with all your data \u2014 insurance the cloud can\u2019t give you.',
+        btn:'💾 Download backup',
+        act:"backupAll()",
+        skip:'backup'};
     }
   }
   return card;
@@ -13243,7 +13321,7 @@ function openM(id){
     var tdmd=document.getElementById('tdMinDate');
     if(tdmd&&!tdmd.value)tdmd.value=todayStr();
   }
-  if(id==='expModal'){renderExpCatBtns();var _eacc=document.getElementById('eAccount');if(_eacc){_eacc.innerHTML='<option value="">— No account —</option>';(ACCOUNTS||[]).forEach(function(a){_eacc.innerHTML+='<option value="'+a.id+'">'+(a.isCredit?'💳 ':'💵 ')+escHtml(a.name)+'</option>';});}var _enotes=document.getElementById('eNotes');if(_enotes)_enotes.value='';populateExpPayBill();}
+  if(id==='expModal'){renderExpCatBtns();var _eacc=document.getElementById('eAccount');if(_eacc){_eacc.innerHTML='<option value="">— No account —</option>';(ACCOUNTS||[]).forEach(function(a){_eacc.innerHTML+='<option value="'+a.id+'">'+(a.isCredit?'💳 ':'💵 ')+escHtml(a.name)+'</option>';});var _prim=(ACCOUNTS||[]).find(function(a){return a.isPrimary&&!a.isCredit;});if(_prim)_eacc.value=_prim.id;}var _enotes=document.getElementById('eNotes');if(_enotes)_enotes.value='';populateExpPayBill();}
   if(id==='incModal'){
     var incDateEl=document.getElementById('incDate');
     if(incDateEl&&!incDateEl.value)incDateEl.value=new Date().toISOString().slice(0,10);
@@ -15201,6 +15279,7 @@ function openAddBill(){
   var _bpw=document.getElementById('billPaidWith');if(_bpw){_bpw.innerHTML='<option value="">— Not tracked —</option>';(ACCOUNTS||[]).forEach(function(a){_bpw.innerHTML+='<option value="'+a.id+'">'+(a.isCredit?'💳 ':'💵 ')+escHtml(a.name)+'</option>';});}
   _fillBillCatOptions('');
   document.getElementById('billNotes').value='';
+  var _bap=document.getElementById('billAutopay');if(_bap)_bap.checked=false;
   document.querySelectorAll('[data-g="billtype"]').forEach(function(b){b.classList.remove('on');});
   SBV.billtype=null;
   document.getElementById('billDelBtn').style.display='none';
@@ -15217,6 +15296,7 @@ function editBill(id){
   var _bpw2=document.getElementById('billPaidWith');if(_bpw2){_bpw2.innerHTML='<option value="">— Not tracked —</option>';(ACCOUNTS||[]).forEach(function(a){_bpw2.innerHTML+='<option value="'+a.id+'">'+(a.isCredit?'💳 ':'💵 ')+escHtml(a.name)+'</option>';});_bpw2.value=b.paidWith||'';}
   _fillBillCatOptions(b.cat||'');
   document.getElementById('billNotes').value=b.notes||'';
+  var _bap2=document.getElementById('billAutopay');if(_bap2)_bap2.checked=!!b.autopay;
   document.querySelectorAll('[data-g="billtype"]').forEach(function(btn){btn.classList.remove('on');});
   if(b.billType){var tBtn=document.querySelector('[data-g="billtype"][data-v="'+b.billType+'"]');if(tBtn)tBtn.classList.add('on');}
   SBV.billtype=b.billType||null;
@@ -15232,13 +15312,14 @@ function saveBill(){
   var paidWith=document.getElementById('billPaidWith').value||'';
   var billCatEl=document.getElementById('billCat');var billCat=billCatEl?billCatEl.value:'';
   var notes=document.getElementById('billNotes').value.trim();
+  var autopay=!!(document.getElementById('billAutopay')||{}).checked;
   var billType=SBV.billtype||'monthly';
   var id=document.getElementById('billEditId').value;
   if(id){
     var b=BILLS.find(function(b){return b.id===id;});
-    if(b){b.name=name;b.amt=amt;b.day=day;b.paidWith=paidWith;b.cat=billCat;b.notes=notes;b.billType=billType;}
+    if(b){b.name=name;b.amt=amt;b.day=day;b.paidWith=paidWith;b.cat=billCat;b.notes=notes;b.billType=billType;b.autopay=autopay;}
   }else{
-    BILLS.push({id:Date.now().toString(),name:name,amt:amt,day:day,paidWith:paidWith,cat:billCat,notes:notes,billType:billType});
+    BILLS.push({id:Date.now().toString(),name:name,amt:amt,day:day,paidWith:paidWith,cat:billCat,notes:notes,billType:billType,autopay:autopay});
   }
   localStorage.setItem('aBills',JSON.stringify(BILLS));
   closeM('billModal');renderBills();
@@ -21311,6 +21392,54 @@ function renderRoutinesGuide(){
 }
 
 // ── HOME "START HERE": the single next card across all decks ──
+// ── QUICK-CHIPS: one-tap re-log of her most repeated purchases ──
+function _quickLogCandidates(){
+  var cutoff=new Date(Date.now()-90*86400000).toISOString();
+  var groups={};
+  (EXPENSES||[]).forEach(function(e){
+    if(e.archived||e.splitId)return;
+    if((e.created||'')<cutoff)return;
+    if(typeof _excludeFromSpend==='function'&&_excludeFromSpend(e.cat))return;
+    var k=(e.desc||'').trim().toLowerCase();
+    if(!k)return;
+    if(!groups[k])groups[k]={n:0,last:null};
+    groups[k].n++;
+    if(!groups[k].last||(e.created||'')>(groups[k].last.created||''))groups[k].last=e;
+  });
+  return Object.keys(groups).filter(function(k){return groups[k].n>=3;})
+    .sort(function(a,b){return groups[b].n-groups[a].n;})
+    .slice(0,5).map(function(k){return groups[k].last;});
+}
+function renderQuickChips(){
+  var el=document.getElementById('quickLogChips');if(!el)return;
+  var cands=_quickLogCandidates();
+  if(!cands.length){el.style.display='none';el.innerHTML='';return;}
+  el.style.display='';
+  el.innerHTML='<div style="display:flex;gap:7px;overflow-x:auto;padding-bottom:2px">'+cands.map(function(e){
+    return '<button onclick="quickLogRepeat(\''+e.id+'\')" style="flex:none;padding:9px 13px;border-radius:13px;border:1.5px solid var(--bdr);background:#fff;font-family:\'Quicksand\',sans-serif;font-size:12px;font-weight:700;color:var(--textd);cursor:pointer;box-shadow:var(--sh2)">💸 '+escHtml(e.desc)+' <span style="color:var(--textl)">$'+(parseFloat(e.amt)||0).toFixed(2)+'</span></button>';
+  }).join('')+'</div>';
+}
+function quickLogRepeat(srcId){
+  var src=(EXPENSES||[]).find(function(e){return e.id===srcId;});if(!src)return;
+  var id=Date.now().toString();
+  var e={id:id,amt:parseFloat(src.amt)||0,desc:src.desc,ty:src.ty||'personal',cat:src.cat||'other',
+    date:new Date().toLocaleDateString(),created:new Date().toISOString(),pending:true,reconciled:false,
+    account:src.account||'',notes:''};
+  EXPENSES.unshift(e);
+  localStorage.setItem('aExpenses',JSON.stringify(EXPENSES));
+  fbSave('expenses',id,e);
+  if(e.account){
+    var a=ACCOUNTS.find(function(x){return x.id===e.account;});
+    if(a){
+      if(a.isCredit)a.amount=(parseFloat(a.amount)||0)+e.amt;
+      else a.amount=Math.max(0,(parseFloat(a.amount)||0)-e.amt);
+      localStorage.setItem('aAccounts',JSON.stringify(ACCOUNTS));
+    }
+  }
+  if(typeof bumpStreak==='function')bumpStreak();
+  if(typeof showToast==='function')showToast('💸 '+e.desc+' — $'+e.amt.toFixed(2)+' logged');
+  renderE();renderBudget();renderQuickChips();
+}
 // ── STREAK: the keep-coming-back loop. Any log bumps it, once a day. ──
 function bumpStreak(){
   var t=new Date().toISOString().slice(0,10);
@@ -21329,6 +21458,7 @@ function renderStreakChip(){}
 function renderHomeGuide(){
   var el=document.getElementById('homeGuideCard');if(!el)return;
   renderStreakChip();
+  if(typeof renderQuickChips==='function')renderQuickChips();
   var m=null,f=null,t=null;
   try{m=(typeof _moneyGuideCardObj==='function')?_moneyGuideCardObj():null;}catch(e){}
   try{f=(typeof _mealsGuideCardObj==='function')?_mealsGuideCardObj():null;}catch(e){}
@@ -28932,6 +29062,13 @@ function delProjInc(id){
   renderMoneyPlan();
   showToast('Entry deleted');
 }
+
+// PWA: offline shell (sw.js). Only on http(s) — file:// has no SW support.
+if('serviceWorker' in navigator&&location.protocol.indexOf('http')===0){
+  window.addEventListener('load',function(){
+    navigator.serviceWorker.register('sw.js').catch(function(){});
+  });
+}
 </script>
 <!-- STEP MODAL -->
 <!-- MOVE MODAL (steps + workouts combined) -->
@@ -29195,6 +29332,10 @@ function delProjInc(id){
   <div class="fg"><label class="fl">Paid with (account)</label><select class="fi" id="billPaidWith"><option value="">— Not tracked —</option></select></div>
   <div class="fg"><label class="fl">Category <span style="font-weight:400;color:var(--textl);font-size:11px">(optional — used when you pay it)</span></label><select class="fi" id="billCat" style="padding:8px 10px"><option value="">— None set —</option></select></div>
   <div class="fg"><label class="fl">Notes</label><input class="fi" id="billNotes" placeholder="Optional notes"></div>
+  <div class="fg"><div style="display:flex;align-items:center;gap:10px;padding:6px 0">
+    <input type="checkbox" id="billAutopay" style="width:18px;height:18px;cursor:pointer">
+    <label for="billAutopay" style="font-size:13px;color:var(--textd);cursor:pointer">🔄 Pays itself (autopay) — ask me to confirm it went through instead of to pay it</label>
+  </div></div>
   <div class="fg"><label class="fl">Billing Type</label>
     <div class="bg">
       <button class="sb" data-g="billtype" data-v="monthly" onclick="pSB(this)">📅 Monthly</button>

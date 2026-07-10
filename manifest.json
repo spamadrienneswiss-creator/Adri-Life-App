@@ -1,0 +1,13 @@
+{
+  "name": "Adri's Life",
+  "short_name": "Adri",
+  "description": "Money, food, tasks — one app, stupidly easy.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#FFFFFF",
+  "theme_color": "#F096B5",
+  "icons": [
+    { "src": "icon.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
+  ]
+}
