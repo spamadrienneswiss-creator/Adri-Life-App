@@ -1045,8 +1045,9 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
   <div class="tabs" id="tabBar" style="display:none">
     <button class="tab-btn on" data-tab="home" onclick="goTab('home',this)">🏠 Home</button>
     <button class="tab-btn" data-tab="today" onclick="goTab('today',this)">Today</button>
+    <button class="tab-btn" data-tab="tasks" onclick="goTabDirect('tasks',this)">✓ Tasks</button>
     <button class="tab-btn" data-tab="plan" onclick="goTab('plan',this)">Plan</button>
-    <button class="tab-btn" data-tab="helm" onclick="goTab('helm',this)">Tasks &amp; Projects</button>
+    <button class="tab-btn" data-tab="helm" onclick="goTab('helm',this)">Projects</button>
 
     <button class="tab-btn" data-tab="lighthouse" onclick="goTab('lighthouse',this)">Spiritual</button>
     <button class="tab-btn" data-tab="conservatory" onclick="goTab('conservatory',this)">Personal Growth</button>
@@ -1683,12 +1684,6 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
   <div id="tasksGuideCard" style="margin-bottom:14px;display:none"></div>
   <!-- Sort the Net: one item at a time, five exits -->
   <button id="sortNetBtn" onclick="openSortNet()" style="width:100%;padding:12px;border-radius:14px;border:1.5px solid #2475FF;background:#fff;font-family:'Quicksand',sans-serif;font-size:14px;font-weight:700;color:#2475FF;cursor:pointer;margin-bottom:12px;display:none">🕸 Sort the Net <span id="sortNetBadge" style="background:#2475FF;color:#fff;border-radius:10px;padding:1px 8px;font-size:12px;margin-left:4px"></span></button>
-  <div id="waitingOnCard" class="card" style="margin-bottom:12px;display:none">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
-      <span style="font-size:13px;font-weight:700;color:var(--textd)">⏳ Waiting On <span id="waitingOnCount" style="font-size:11px;color:var(--textl)"></span></span>
-    </div>
-    <div id="waitingOnList"></div>
-  </div>
   <div id="notionCarryCard" class="card" style="margin-bottom:12px;display:none">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
       <span style="font-size:13px;font-weight:700;color:var(--textd)">→ Carry to Notion <span id="notionCarryCount" style="background:#B189B4;color:#fff;border-radius:10px;padding:1px 8px;font-size:11px;font-weight:800"></span></span>
@@ -6225,7 +6220,6 @@ function initFirebase(){
       ap('aMonthTodos',function(v,r){MONTH_TODOS=v||{};_origSetItem('aMonthTodos',r);});
       ap('aTmpls',function(v,r){if(v&&v.length)TMPLS=v;_origSetItem('aTmpls',r);});
       ap('aWeekReflect',function(v,r){if(v)WEEK_REFLECT=v;_origSetItem('aWeekReflect',r);});
-      ap('aWaitingOn',function(v,r){WAITING_ON=v||[];_origSetItem('aWaitingOn',r);});
       ap('aNotionCarry',function(v,r){NOTION_CARRY=v||[];_origSetItem('aNotionCarry',r);});
       _fbBlobPause=false;
       if(typeof renderDumpList==='function')renderDumpList();
@@ -6382,7 +6376,7 @@ var BLOB_GROUPS={
   health:['aMeds','aMedLog','aEnergyLog','aMeasLog','aMealLogItems','aMoodNotes','aWineDrinks','aSymLog','aSymTypes'],
   habits:['aHabits','aHabitLog'],
   routines:['aRS','aRS2','aRH','aRTG','aRtns','aRhythm','aRhythmDone'],
-  planning:['aSOPs','aBrainDump','aIntentions','aMonthTodos','aTmpls','aWeekReflect','aWaitingOn','aNotionCarry'],
+  planning:['aSOPs','aBrainDump','aIntentions','aMonthTodos','aTmpls','aWeekReflect','aNotionCarry'],
   spiritual:['aBibleLog','aBibleChapNotes','aPrayers','aGratLog','aSpiritBooks','aSpiritSettings','aSpiritRun'],
   food:['aRecipes','aMealPlan','aMealMyServings','aGroceryList','aGrocTags','aGrocDepts','aGrocStoreDeptOrder','aInventory','aInvSections','aMC','aFoodDb','aFDB','aIngredients','aWantToTry','aMacrosReviewed'],
   fitness:['aWplans','aWlog2','aMovements','aExTypes','aExDB','aExLog','aPT'],
@@ -6490,7 +6484,7 @@ function goTabDirect(tab,btn){
   else if(btn)btn.classList.add('on');
   var bc=document.getElementById('sectionBreadcrumb');
   if(bc){
-    var isSubView=(section!==tab&&SECTION_LABELS[section]);
+    var isSubView=(section!==tab&&SECTION_LABELS[section]&&tab!=='tasks');
     if(isSubView){
       bc.style.display='flex';
       bc.innerHTML='<button class="bc-btn" onclick="goTab(\''+section+'\',document.querySelector(\'[data-tab=&quot;'+section+'&quot;]\'))">← '+SECTION_LABELS[section]+'</button><span style="font-size:12px;color:var(--textl)"> / '+(TAB_LABELS[tab]||tab)+'</span>';
@@ -6508,7 +6502,7 @@ function goTabDirect(tab,btn){
   if(tab==='routines'){ renderDailyRtn(_dailyRtnKey); renderOtherRtns(); }
   if(tab==='hearthside'){ renderHWHubStats(); }
   if(tab==='lighthouse'){ updateLighthouseSpiritStatus(); }
-  if(tab==='tasks'){ updateHelmBadges(); updTaskFilterDot(); }
+  if(tab==='tasks'){ updateHelmBadges(); updTaskFilterDot(); renderT(); }
   if(tab==='projects'){ renderProjects(); renderTmplBar(); }
   if(tab==='focus-session'){ renderFocusSession(); }
   if(tab==='lists'){ goTabDirect('learn');setTimeout(function(){var b=document.querySelector('#v-learn .pn-btn:nth-child(3)');if(b)showLearnSec('lists',b);},50);return; }
@@ -21251,7 +21245,6 @@ function renderMealsGuide(){
 // Different species leave the task list: groceries to the grocery list,
 // Notion-bound to a sweep pile, blocked items to Waiting On, junk to trash.
 // Capture stays untouched — sorting is its own later moment.
-var WAITING_ON=JSON.parse(localStorage.getItem('aWaitingOn')||'[]');
 var NOTION_CARRY=JSON.parse(localStorage.getItem('aNotionCarry')||'[]');
 function _unsortedTasks(){
   return (TASKS||[]).filter(function(t){return t&&!t.done&&!t.parked&&!t.sorted;});
@@ -21287,10 +21280,7 @@ function renderSortNet(){
     +'<button onclick="sortNetAct(\'grocery\')" '+bs+'flex:1;border:1.5px solid var(--bdr);background:#fff;color:var(--textd)">🛒 Grocery</button>'
     +'<button onclick="sortNetAct(\'notion\')" '+bs+'flex:1;border:1.5px solid #B189B4;background:#fff;color:#8a5a9a">→ Notion</button>'
     +'</div>'
-    +'<div style="display:flex;gap:8px">'
-    +'<button onclick="sortNetAct(\'waiting\')" '+bs+'flex:1;border:1.5px solid var(--bdr);background:#fff;color:var(--textd)">⏳ Waiting</button>'
-    +'<button onclick="sortNetAct(\'del\')" '+bs+'flex:1;border:1.5px solid #F06677;background:#fff;color:#F06677">🗑 Delete</button>'
-    +'</div>';
+    +'<button onclick="sortNetAct(\'del\')" '+bs+'width:100%;border:1.5px solid #F06677;background:#fff;color:#F06677">🗑 Delete</button>';
 }
 function _sortRemoveTask(t){
   TASKS=TASKS.filter(function(x){return x.id!==t.id;});
@@ -21313,11 +21303,6 @@ function sortNetAct(action){
     localStorage.setItem('aNotionCarry',JSON.stringify(NOTION_CARRY));
     _sortRemoveTask(t);
     if(typeof showToast==='function')showToast('→ Notion pile (weekly Sweep)');
-  }else if(action==='waiting'){
-    WAITING_ON.unshift({id:'wo-'+Date.now(),title:t.title,created:new Date().toISOString()});
-    localStorage.setItem('aWaitingOn',JSON.stringify(WAITING_ON));
-    _sortRemoveTask(t);
-    if(typeof showToast==='function')showToast('⏳ → Waiting On');
   }else if(action==='del'){
     _sortRemoveTask(t);
     if(typeof showToast==='function')showToast('🗑 Gone');
@@ -21328,19 +21313,6 @@ function sortNetAct(action){
 }
 function renderSortLists(){
   updSortNetBadge();
-  var wc=document.getElementById('waitingOnCard');
-  if(wc){
-    wc.style.display=WAITING_ON.length?'':'none';
-    var cnt=document.getElementById('waitingOnCount');if(cnt)cnt.textContent='('+WAITING_ON.length+')';
-    var wl=document.getElementById('waitingOnList');
-    if(wl)wl.innerHTML=WAITING_ON.map(function(w){
-      return '<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-top:1px solid #F0EDF5;font-size:13px">'
-        +'<span style="flex:1;color:var(--textd)">'+escHtml(w.title)+'</span>'
-        +'<button onclick="waitingBackToTasks(\''+w.id+'\')" title="Back to tasks" style="background:none;border:1.5px solid var(--bdr);border-radius:7px;padding:3px 8px;font-size:11px;cursor:pointer;color:var(--textl);font-family:inherit">↩ task</button>'
-        +'<button onclick="waitingGotIt(\''+w.id+'\')" title="Arrived / resolved" style="background:none;border:1.5px solid var(--bdr);border-radius:7px;padding:3px 8px;font-size:11px;cursor:pointer;color:#7C9A2D;font-family:inherit">✓ got it</button>'
-        +'</div>';
-    }).join('');
-  }
   var nc=document.getElementById('notionCarryCard');
   if(nc){
     nc.style.display=NOTION_CARRY.length?'':'none';
@@ -21353,19 +21325,6 @@ function renderSortLists(){
         +'</div>';
     }).join('');
   }
-}
-function waitingGotIt(id){
-  WAITING_ON=WAITING_ON.filter(function(w){return w.id!==id;});
-  localStorage.setItem('aWaitingOn',JSON.stringify(WAITING_ON));
-  renderSortLists();
-}
-function waitingBackToTasks(id){
-  var w=WAITING_ON.find(function(x){return x.id===id;});if(!w)return;
-  var t={id:'t-'+Date.now(),title:w.title,cat:'mis',urgency:'important-not-urgent',etime:'',due:'',notes:'',done:false,repeat:'',repeatDays:0,subs:[],created:new Date().toISOString(),meaningful:false,sorted:true};
-  TASKS.unshift(t);saveTasks();fbSave('tasks',t.id,t);
-  waitingGotIt(id);
-  renderT();
-  if(typeof showToast==='function')showToast('↩ Back in tasks');
 }
 function notionSwept(id){
   NOTION_CARRY=NOTION_CARRY.filter(function(n){return n.id!==id;});
