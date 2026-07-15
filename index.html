@@ -1681,6 +1681,22 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
 <div class="view" id="v-tasks">
   <!-- The Guide: one dealt card — always the next task -->
   <div id="tasksGuideCard" style="margin-bottom:14px;display:none"></div>
+  <!-- Sort the Net: one item at a time, five exits -->
+  <button id="sortNetBtn" onclick="openSortNet()" style="width:100%;padding:12px;border-radius:14px;border:1.5px solid #2475FF;background:#fff;font-family:'Quicksand',sans-serif;font-size:14px;font-weight:700;color:#2475FF;cursor:pointer;margin-bottom:12px;display:none">🕸 Sort the Net <span id="sortNetBadge" style="background:#2475FF;color:#fff;border-radius:10px;padding:1px 8px;font-size:12px;margin-left:4px"></span></button>
+  <div id="waitingOnCard" class="card" style="margin-bottom:12px;display:none">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+      <span style="font-size:13px;font-weight:700;color:var(--textd)">⏳ Waiting On <span id="waitingOnCount" style="font-size:11px;color:var(--textl)"></span></span>
+    </div>
+    <div id="waitingOnList"></div>
+  </div>
+  <div id="notionCarryCard" class="card" style="margin-bottom:12px;display:none">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+      <span style="font-size:13px;font-weight:700;color:var(--textd)">→ Carry to Notion <span id="notionCarryCount" style="background:#B189B4;color:#fff;border-radius:10px;padding:1px 8px;font-size:11px;font-weight:800"></span></span>
+      <button onclick="notionSweepAll()" style="font-size:11px;font-weight:700;background:#fff;border:1.5px solid var(--bdr);border-radius:8px;padding:4px 10px;cursor:pointer;color:var(--textl)">✓ Swept — clear all</button>
+    </div>
+    <div style="font-size:10px;color:var(--textl);margin-bottom:6px">Read this during your weekly Sweep, copy into Notion, then clear.</div>
+    <div id="notionCarryList"></div>
+  </div>
   <!-- Tasks -->
   <div class="card">
     <div class="helm-sec-hdr" onclick="togHelmSec('hs-tasklist')">
@@ -6209,6 +6225,8 @@ function initFirebase(){
       ap('aMonthTodos',function(v,r){MONTH_TODOS=v||{};_origSetItem('aMonthTodos',r);});
       ap('aTmpls',function(v,r){if(v&&v.length)TMPLS=v;_origSetItem('aTmpls',r);});
       ap('aWeekReflect',function(v,r){if(v)WEEK_REFLECT=v;_origSetItem('aWeekReflect',r);});
+      ap('aWaitingOn',function(v,r){WAITING_ON=v||[];_origSetItem('aWaitingOn',r);});
+      ap('aNotionCarry',function(v,r){NOTION_CARRY=v||[];_origSetItem('aNotionCarry',r);});
       _fbBlobPause=false;
       if(typeof renderDumpList==='function')renderDumpList();
       if(typeof renderIntentionList==='function')renderIntentionList();
@@ -6364,7 +6382,7 @@ var BLOB_GROUPS={
   health:['aMeds','aMedLog','aEnergyLog','aMeasLog','aMealLogItems','aMoodNotes','aWineDrinks','aSymLog','aSymTypes'],
   habits:['aHabits','aHabitLog'],
   routines:['aRS','aRS2','aRH','aRTG','aRtns','aRhythm','aRhythmDone'],
-  planning:['aSOPs','aBrainDump','aIntentions','aMonthTodos','aTmpls','aWeekReflect'],
+  planning:['aSOPs','aBrainDump','aIntentions','aMonthTodos','aTmpls','aWeekReflect','aWaitingOn','aNotionCarry'],
   spiritual:['aBibleLog','aBibleChapNotes','aPrayers','aGratLog','aSpiritBooks','aSpiritSettings','aSpiritRun'],
   food:['aRecipes','aMealPlan','aMealMyServings','aGroceryList','aGrocTags','aGrocDepts','aGrocStoreDeptOrder','aInventory','aInvSections','aMC','aFoodDb','aFDB','aIngredients','aWantToTry','aMacrosReviewed'],
   fitness:['aWplans','aWlog2','aMovements','aExTypes','aExDB','aExLog','aPT'],
@@ -7831,6 +7849,7 @@ function renderCatFilterChips(){
 
 function renderT(){
   if(typeof renderTasksGuide==='function')renderTasksGuide();
+  if(typeof renderSortLists==='function')renderSortLists();
   if(typeof renderTodayRhythm==='function')renderTodayRhythm();
   if(typeof renderWeekStrip==='function')renderWeekStrip();
   if(typeof renderWeekPlan==='function')renderWeekPlan();
@@ -21228,6 +21247,139 @@ function renderMealsGuide(){
     +'</div>';
 }
 
+// ── SORT THE NET (Slice 1): one card at a time, five exits ──
+// Different species leave the task list: groceries to the grocery list,
+// Notion-bound to a sweep pile, blocked items to Waiting On, junk to trash.
+// Capture stays untouched — sorting is its own later moment.
+var WAITING_ON=JSON.parse(localStorage.getItem('aWaitingOn')||'[]');
+var NOTION_CARRY=JSON.parse(localStorage.getItem('aNotionCarry')||'[]');
+function _unsortedTasks(){
+  return (TASKS||[]).filter(function(t){return t&&!t.done&&!t.parked&&!t.sorted;});
+}
+function updSortNetBadge(){
+  var btn=document.getElementById('sortNetBtn');if(!btn)return;
+  var n=_unsortedTasks().length;
+  btn.style.display=n?'':'none';
+  var b=document.getElementById('sortNetBadge');if(b)b.textContent=n;
+}
+function openSortNet(){renderSortNet();openM('sortNetModal');}
+function renderSortNet(){
+  var el=document.getElementById('sortNetCard');if(!el)return;
+  var q=_unsortedTasks();
+  var left=document.getElementById('sortNetLeft');
+  if(left)left.textContent=q.length?q.length+' to sort':'';
+  if(!q.length){
+    el.innerHTML='<div style="text-align:center;padding:22px 8px">'
+      +'<div style="font-size:38px;margin-bottom:6px">🎉</div>'
+      +'<div style="font-size:15px;font-weight:800;color:var(--textd)">Net is clean</div>'
+      +'<div style="font-size:12px;color:var(--textl);margin-top:3px">Only real tasks remain in the list.</div>'
+      +'</div>';
+    return;
+  }
+  var t=q[0];
+  var bs='style="padding:15px 8px;border-radius:14px;font-family:\'Quicksand\',sans-serif;font-size:14px;font-weight:700;cursor:pointer;';
+  el.innerHTML='<div style="background:#F7F5FB;border-radius:14px;padding:18px 14px;margin:8px 0 12px;text-align:center">'
+    +'<div style="font-size:17px;font-weight:800;color:var(--textd);line-height:1.35">'+escHtml(t.title||'Untitled')+'</div>'
+    +(t.notes?'<div style="font-size:11px;color:var(--textl);margin-top:4px">'+escHtml(t.notes)+'</div>':'')
+    +'</div>'
+    +'<button onclick="sortNetAct(\'task\')" '+bs+'width:100%;border:none;background:#2475FF;color:#fff;margin-bottom:8px">✓ Task — keep</button>'
+    +'<div style="display:flex;gap:8px;margin-bottom:8px">'
+    +'<button onclick="sortNetAct(\'grocery\')" '+bs+'flex:1;border:1.5px solid var(--bdr);background:#fff;color:var(--textd)">🛒 Grocery</button>'
+    +'<button onclick="sortNetAct(\'notion\')" '+bs+'flex:1;border:1.5px solid #B189B4;background:#fff;color:#8a5a9a">→ Notion</button>'
+    +'</div>'
+    +'<div style="display:flex;gap:8px">'
+    +'<button onclick="sortNetAct(\'waiting\')" '+bs+'flex:1;border:1.5px solid var(--bdr);background:#fff;color:var(--textd)">⏳ Waiting</button>'
+    +'<button onclick="sortNetAct(\'del\')" '+bs+'flex:1;border:1.5px solid #F06677;background:#fff;color:#F06677">🗑 Delete</button>'
+    +'</div>';
+}
+function _sortRemoveTask(t){
+  TASKS=TASKS.filter(function(x){return x.id!==t.id;});
+  saveTasks();
+  fbDelete('tasks',t.id);
+}
+function sortNetAct(action){
+  var q=_unsortedTasks();if(!q.length)return;
+  var t=q[0];
+  if(action==='task'){
+    t.sorted=true;saveTasks();fbSave('tasks',t.id,t);
+    if(typeof showToast==='function')showToast('✓ Kept as a task');
+  }else if(action==='grocery'){
+    GROCERY_LIST.push({id:'gr-'+Date.now(),name:t.title,qty:'1',unit:'',category:'Other',checked:false,source:'sort'});
+    localStorage.setItem('aGroceryList',JSON.stringify(GROCERY_LIST));
+    _sortRemoveTask(t);
+    if(typeof showToast==='function')showToast('🛒 → Grocery list');
+  }else if(action==='notion'){
+    NOTION_CARRY.unshift({id:'nc-'+Date.now(),title:t.title,created:new Date().toISOString()});
+    localStorage.setItem('aNotionCarry',JSON.stringify(NOTION_CARRY));
+    _sortRemoveTask(t);
+    if(typeof showToast==='function')showToast('→ Notion pile (weekly Sweep)');
+  }else if(action==='waiting'){
+    WAITING_ON.unshift({id:'wo-'+Date.now(),title:t.title,created:new Date().toISOString()});
+    localStorage.setItem('aWaitingOn',JSON.stringify(WAITING_ON));
+    _sortRemoveTask(t);
+    if(typeof showToast==='function')showToast('⏳ → Waiting On');
+  }else if(action==='del'){
+    _sortRemoveTask(t);
+    if(typeof showToast==='function')showToast('🗑 Gone');
+  }
+  renderSortNet();
+  renderSortLists();
+  renderT();
+}
+function renderSortLists(){
+  updSortNetBadge();
+  var wc=document.getElementById('waitingOnCard');
+  if(wc){
+    wc.style.display=WAITING_ON.length?'':'none';
+    var cnt=document.getElementById('waitingOnCount');if(cnt)cnt.textContent='('+WAITING_ON.length+')';
+    var wl=document.getElementById('waitingOnList');
+    if(wl)wl.innerHTML=WAITING_ON.map(function(w){
+      return '<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-top:1px solid #F0EDF5;font-size:13px">'
+        +'<span style="flex:1;color:var(--textd)">'+escHtml(w.title)+'</span>'
+        +'<button onclick="waitingBackToTasks(\''+w.id+'\')" title="Back to tasks" style="background:none;border:1.5px solid var(--bdr);border-radius:7px;padding:3px 8px;font-size:11px;cursor:pointer;color:var(--textl);font-family:inherit">↩ task</button>'
+        +'<button onclick="waitingGotIt(\''+w.id+'\')" title="Arrived / resolved" style="background:none;border:1.5px solid var(--bdr);border-radius:7px;padding:3px 8px;font-size:11px;cursor:pointer;color:#7C9A2D;font-family:inherit">✓ got it</button>'
+        +'</div>';
+    }).join('');
+  }
+  var nc=document.getElementById('notionCarryCard');
+  if(nc){
+    nc.style.display=NOTION_CARRY.length?'':'none';
+    var ncnt=document.getElementById('notionCarryCount');if(ncnt)ncnt.textContent=NOTION_CARRY.length;
+    var nl=document.getElementById('notionCarryList');
+    if(nl)nl.innerHTML=NOTION_CARRY.map(function(n){
+      return '<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-top:1px solid #F0EDF5;font-size:13px">'
+        +'<span style="flex:1;color:var(--textd)">'+escHtml(n.title)+'</span>'
+        +'<button onclick="notionSwept(\''+n.id+'\')" style="background:none;border:1.5px solid var(--bdr);border-radius:7px;padding:3px 8px;font-size:11px;cursor:pointer;color:#7C9A2D;font-family:inherit">✓ swept</button>'
+        +'</div>';
+    }).join('');
+  }
+}
+function waitingGotIt(id){
+  WAITING_ON=WAITING_ON.filter(function(w){return w.id!==id;});
+  localStorage.setItem('aWaitingOn',JSON.stringify(WAITING_ON));
+  renderSortLists();
+}
+function waitingBackToTasks(id){
+  var w=WAITING_ON.find(function(x){return x.id===id;});if(!w)return;
+  var t={id:'t-'+Date.now(),title:w.title,cat:'mis',urgency:'important-not-urgent',etime:'',due:'',notes:'',done:false,repeat:'',repeatDays:0,subs:[],created:new Date().toISOString(),meaningful:false,sorted:true};
+  TASKS.unshift(t);saveTasks();fbSave('tasks',t.id,t);
+  waitingGotIt(id);
+  renderT();
+  if(typeof showToast==='function')showToast('↩ Back in tasks');
+}
+function notionSwept(id){
+  NOTION_CARRY=NOTION_CARRY.filter(function(n){return n.id!==id;});
+  localStorage.setItem('aNotionCarry',JSON.stringify(NOTION_CARRY));
+  renderSortLists();
+}
+function notionSweepAll(){
+  if(!NOTION_CARRY.length)return;
+  if(!confirm('Clear all '+NOTION_CARRY.length+' — you\u2019ve copied them into Notion?'))return;
+  NOTION_CARRY=[];
+  localStorage.setItem('aNotionCarry','[]');
+  renderSortLists();
+  if(typeof showToast==='function')showToast('✓ Sweep complete');
+}
 // ── THE TASKS GUIDE: deal the next task ──────────────────────
 function _tasksGuideSkips(){
   var t=new Date().toISOString().slice(0,10);
@@ -29356,6 +29508,17 @@ if('serviceWorker' in navigator&&location.protocol.indexOf('http')===0){
   <div id="awBody" style="font-size:13px;color:var(--textd)"></div>
   <div id="awReconNote" style="font-size:11px;color:var(--textl);margin-top:10px;line-height:1.5;background:#F4F8E8;border:1px solid #E5F0BE;border-radius:10px;padding:9px 11px"><b>When it doesn’t match your bank:</b> tap ✏️ Edit and type today’s real balance. That becomes a fresh starting point and the estimate resets from there — so you never have to log every transaction. A <b>big</b> gap is worth a look; a small one is just the things you didn’t log.</div>
   <button class="cn-btn" onclick="closeM('acctWorkModal')" style="margin-top:10px">Close</button>
+</div></div>
+
+<!-- SORT THE NET -->
+<div class="ov" id="sortNetModal"><div class="mod">
+  <div class="mh"></div>
+  <div style="display:flex;justify-content:space-between;align-items:baseline">
+    <div class="mtit">🕸 Sort the Net</div>
+    <span id="sortNetLeft" style="font-size:12px;font-weight:700;color:var(--textl)"></span>
+  </div>
+  <div id="sortNetCard"></div>
+  <button class="cn-btn" onclick="closeM('sortNetModal')" style="margin-top:6px">Done for now</button>
 </div></div>
 
 <!-- WEEKLY RHYTHM EDITOR -->
