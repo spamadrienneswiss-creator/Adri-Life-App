@@ -6181,6 +6181,7 @@ function initFirebase(){
       ap('aBudgetBuckets',function(v,r){if(v&&v.length)BUDGET_BUCKETS=v;_origSetItem('aBudgetBuckets',r);});
       ap('aBudgetMoves',function(v,r){BUDGET_MOVES=v||[];_origSetItem('aBudgetMoves',r);});
       ap('aMoneyReserve',function(v,r){_origSetItem('aMoneyReserve',r);});
+      ap('aQuickLogs',function(v,r){if(v)QUICK_LOGS=v;_origSetItem('aQuickLogs',r);});
       ap('aBillsReviewed',function(v,r){_origSetItem('aBillsReviewed',r);});
       _fbBlobPause=false;
       renderBills();renderAccounts();renderIncome();updMoneyBadge();renderBudget();
@@ -6375,7 +6376,7 @@ function fbDelete(col, id){
 // localStorage.setItem is intercepted to auto-save on every write.
 // ═══════════════════════════════════════════════
 var BLOB_GROUPS={
-  money:['aBills','aBillPay','aBillMonthAmt','aAccounts','aIncome','aIncGoal','aMonIncGoal','aMoneyChecks','aTaxLog','aProjIncome','aPriceLog','aExpCats','aMoneyProjects','aTrips','aPayoffs','aBudgetBuckets','aBudgetMoves','aMoneyReserve','aBillsReviewed'],
+  money:['aBills','aBillPay','aBillMonthAmt','aAccounts','aIncome','aIncGoal','aMonIncGoal','aMoneyChecks','aTaxLog','aProjIncome','aPriceLog','aExpCats','aMoneyProjects','aTrips','aPayoffs','aBudgetBuckets','aBudgetMoves','aMoneyReserve','aBillsReviewed','aQuickLogs'],
   health:['aMeds','aMedLog','aEnergyLog','aMeasLog','aMealLogItems','aMoodNotes','aWineDrinks','aSymLog','aSymTypes'],
   habits:['aHabits','aHabitLog'],
   routines:['aRS','aRS2','aRH','aRTG','aRtns','aRhythm','aRhythmDone'],
@@ -21632,52 +21633,78 @@ function renderRoutinesGuide(){
 
 // ── HOME "START HERE": the single next card across all decks ──
 // ── QUICK-CHIPS: one-tap re-log of her most repeated purchases ──
-function _quickLogCandidates(){
-  var cutoff=new Date(Date.now()-90*86400000).toISOString();
-  var groups={};
-  (EXPENSES||[]).forEach(function(e){
-    if(e.archived||e.splitId)return;
-    if((e.created||'')<cutoff)return;
-    if(typeof _excludeFromSpend==='function'&&_excludeFromSpend(e.cat))return;
-    var k=(e.desc||'').trim().toLowerCase();
-    if(!k)return;
-    if(!groups[k])groups[k]={n:0,last:null};
-    groups[k].n++;
-    if(!groups[k].last||(e.created||'')>(groups[k].last.created||''))groups[k].last=e;
-  });
-  return Object.keys(groups).filter(function(k){return groups[k].n>=3;})
-    .sort(function(a,b){return groups[b].n-groups[a].n;})
-    .slice(0,5).map(function(k){return groups[k].last;});
-}
+// Custom quick-log buttons — defined by her, not guessed. {id,label,amt,cat,account}
+var QUICK_LOGS=JSON.parse(localStorage.getItem('aQuickLogs')||'[]');
 function renderQuickChips(){
   var el=document.getElementById('quickLogChips');if(!el)return;
-  var cands=_quickLogCandidates();
-  if(!cands.length){el.style.display='none';el.innerHTML='';return;}
   el.style.display='';
-  el.innerHTML='<div style="display:flex;gap:7px;overflow-x:auto;padding-bottom:2px">'+cands.map(function(e){
-    return '<button onclick="quickLogRepeat(\''+e.id+'\')" style="flex:none;padding:9px 13px;border-radius:13px;border:1.5px solid var(--bdr);background:#fff;font-family:\'Quicksand\',sans-serif;font-size:12px;font-weight:700;color:var(--textd);cursor:pointer;box-shadow:var(--sh2)">💸 '+escHtml(e.desc)+' <span style="color:var(--textl)">$'+(parseFloat(e.amt)||0).toFixed(2)+'</span></button>';
-  }).join('')+'</div>';
+  var chips=(QUICK_LOGS||[]).map(function(q){
+    var amt=parseFloat(q.amt)||0;
+    return '<button onclick="quickLogFire(\''+q.id+'\')" style="flex:none;padding:9px 13px;border-radius:13px;border:1.5px solid var(--bdr);background:#fff;font-family:\'Quicksand\',sans-serif;font-size:12px;font-weight:700;color:var(--textd);cursor:pointer;box-shadow:var(--sh2)">💸 '+escHtml(q.label)+(amt?' <span style="color:var(--textl)">$'+amt.toFixed(2)+'</span>':'')+'</button>';
+  }).join('');
+  var manage='<button onclick="openQuickLogMgr()" style="flex:none;padding:9px 12px;border-radius:13px;border:1.5px dashed var(--bdr);background:#fff;font-family:\'Quicksand\',sans-serif;font-size:12px;font-weight:700;color:var(--textl);cursor:pointer">'+(QUICK_LOGS.length?'✏️':'➕ Quick buttons')+'</button>';
+  el.innerHTML='<div style="display:flex;gap:7px;overflow-x:auto;padding-bottom:2px">'+chips+manage+'</div>';
 }
-function quickLogRepeat(srcId){
-  var src=(EXPENSES||[]).find(function(e){return e.id===srcId;});if(!src)return;
+function quickLogFire(qid){
+  var q=(QUICK_LOGS||[]).find(function(x){return x.id===qid;});if(!q)return;
+  var amt=parseFloat(q.amt)||0;
+  if(!amt){ // no preset amount → open the full form prefilled so she types today's amount
+    openM('expModal');
+    var d=document.getElementById('eDesc');if(d)d.value=q.label;
+    if(q.account){var ac=document.getElementById('eAccount');if(ac)ac.value=q.account;}
+    if(q.cat&&typeof applyExpCatSuggest==='function'){SBV.ecat=q.cat;var cb=document.querySelector('#expCatBtns [data-g=\"ecat\"][data-v=\"'+q.cat.replace(/"/g,'')+'\"]');if(cb){document.querySelectorAll('[data-g=\"ecat\"]').forEach(function(b){b.classList.remove('on');});cb.classList.add('on');}}
+    var am=document.getElementById('eAmt');if(am)am.focus();
+    return;
+  }
   var id=Date.now().toString();
-  var e={id:id,amt:parseFloat(src.amt)||0,desc:src.desc,ty:src.ty||'personal',cat:src.cat||'other',
+  var e={id:id,amt:amt,desc:q.label,ty:'personal',cat:q.cat||'other',
     date:new Date().toLocaleDateString(),created:new Date().toISOString(),pending:true,reconciled:false,
-    account:src.account||'',notes:''};
+    account:q.account||'',notes:''};
   EXPENSES.unshift(e);
   localStorage.setItem('aExpenses',JSON.stringify(EXPENSES));
   fbSave('expenses',id,e);
   if(e.account){
     var a=ACCOUNTS.find(function(x){return x.id===e.account;});
     if(a){
-      if(a.isCredit)a.amount=(parseFloat(a.amount)||0)+e.amt;
-      else a.amount=Math.max(0,(parseFloat(a.amount)||0)-e.amt);
+      if(a.isCredit)a.amount=(parseFloat(a.amount)||0)+amt;
+      else a.amount=Math.max(0,(parseFloat(a.amount)||0)-amt);
       localStorage.setItem('aAccounts',JSON.stringify(ACCOUNTS));
     }
   }
   if(typeof bumpStreak==='function')bumpStreak();
-  if(typeof showToast==='function')showToast('💸 '+e.desc+' — $'+e.amt.toFixed(2)+' logged');
-  renderE();renderBudget();renderQuickChips();
+  if(typeof showToast==='function')showToast('💸 '+q.label+' — $'+amt.toFixed(2)+' logged');
+  renderE();renderBudget();
+}
+function openQuickLogMgr(){renderQuickLogMgr();openM('quickLogModal');}
+function renderQuickLogMgr(){
+  var list=document.getElementById('qlList');
+  if(list)list.innerHTML=(QUICK_LOGS||[]).length?QUICK_LOGS.map(function(q){
+    return '<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-top:1px solid #F0EDF5;font-size:13px">'
+      +'<span style="flex:1;color:var(--textd)">💸 '+escHtml(q.label)+(parseFloat(q.amt)?' · $'+(parseFloat(q.amt)).toFixed(2):' · asks amount')+(q.cat?' · '+escHtml(q.cat):'')+'</span>'
+      +'<button onclick="delQuickLog(\''+q.id+'\')" style="background:none;border:none;font-size:14px;color:var(--textl);cursor:pointer;padding:2px 6px">✕</button>'
+      +'</div>';
+  }).join(''):'<div style="font-size:12px;color:var(--textl);padding:6px 0">No quick buttons yet. Add your go-tos below.</div>';
+  var catSel=document.getElementById('qlCat');
+  if(catSel)catSel.innerHTML='<option value="">— category (optional) —</option>'+(EXPENSE_CATS||[]).map(function(c){return '<option value="'+escHtml(c)+'">'+escHtml(c)+'</option>';}).join('');
+  var acSel=document.getElementById('qlAcct');
+  if(acSel){acSel.innerHTML='<option value="">— account (optional) —</option>'+(ACCOUNTS||[]).map(function(a){return '<option value="'+a.id+'">'+(a.isCredit?'💳 ':'💵 ')+escHtml(a.name)+'</option>';}).join('');var _p=(ACCOUNTS||[]).find(function(a){return a.isPrimary&&!a.isCredit;});if(_p)acSel.value=_p.id;}
+}
+function addQuickLog(){
+  var label=((document.getElementById('qlLabel')||{}).value||'').trim();
+  if(!label){alert('Give the button a name, e.g. Gas or Coffee');return;}
+  var amt=parseFloat((document.getElementById('qlAmt')||{}).value)||0;
+  var cat=(document.getElementById('qlCat')||{}).value||'';
+  var account=(document.getElementById('qlAcct')||{}).value||'';
+  QUICK_LOGS.push({id:'ql-'+Date.now(),label:label,amt:amt,cat:cat,account:account});
+  localStorage.setItem('aQuickLogs',JSON.stringify(QUICK_LOGS));
+  document.getElementById('qlLabel').value='';document.getElementById('qlAmt').value='';
+  renderQuickLogMgr();renderQuickChips();
+  if(typeof showToast==='function')showToast('✓ Added “'+label+'”');
+}
+function delQuickLog(id){
+  QUICK_LOGS=QUICK_LOGS.filter(function(q){return q.id!==id;});
+  localStorage.setItem('aQuickLogs',JSON.stringify(QUICK_LOGS));
+  renderQuickLogMgr();renderQuickChips();
 }
 // ── STREAK: the keep-coming-back loop. Any log bumps it, once a day. ──
 function bumpStreak(){
@@ -29594,6 +29621,19 @@ if('serviceWorker' in navigator&&location.protocol.indexOf('http')===0){
   <div id="awBody" style="font-size:13px;color:var(--textd)"></div>
   <div id="awReconNote" style="font-size:11px;color:var(--textl);margin-top:10px;line-height:1.5;background:#F4F8E8;border:1px solid #E5F0BE;border-radius:10px;padding:9px 11px"><b>When it doesn’t match your bank:</b> tap ✏️ Edit and type today’s real balance. That becomes a fresh starting point and the estimate resets from there — so you never have to log every transaction. A <b>big</b> gap is worth a look; a small one is just the things you didn’t log.</div>
   <button class="cn-btn" onclick="closeM('acctWorkModal')" style="margin-top:10px">Close</button>
+</div></div>
+
+<!-- QUICK-LOG BUTTONS MANAGER -->
+<div class="ov" id="quickLogModal"><div class="mod">
+  <div class="mh"></div><div class="mtit">💸 Quick Buttons</div>
+  <div style="font-size:12px;color:var(--textl);margin-bottom:10px">One-tap expense buttons on your Home page. Set an amount for one-tap logging, or leave it blank and the button opens the form for you to type today's amount.</div>
+  <div id="qlList" style="margin-bottom:12px"></div>
+  <div class="fg"><label class="fl">Button name</label><input class="fi" id="qlLabel" placeholder="e.g. Gas, Coffee, Groceries"></div>
+  <div class="fg"><label class="fl">Amount (optional)</label><input class="fi" type="number" id="qlAmt" step="0.01" placeholder="blank = ask each time"></div>
+  <div class="fg"><label class="fl">Category</label><select class="fi" id="qlCat" style="padding:8px 10px"></select></div>
+  <div class="fg"><label class="fl">Account</label><select class="fi" id="qlAcct" style="padding:8px 10px"></select></div>
+  <button class="ok-btn" onclick="addQuickLog()">➕ Add button</button>
+  <button class="cn-btn" onclick="closeM('quickLogModal')">Done</button>
 </div></div>
 
 <!-- SORT TRANSACTIONS -->
