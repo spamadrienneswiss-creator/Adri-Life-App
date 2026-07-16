@@ -2059,7 +2059,8 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
         <button class="fchip" onclick="setExpFilter('cleared',this)">✓ Cleared</button>
         <button class="fchip" onclick="setExpFilter('unexported',this)">📤 Not Exported</button>
         <button class="fchip" onclick="setExpFilter('archived',this)">🗄️ Archived</button>
-        <button class="fchip" id="expReconToggle" onclick="toggleExpSelMode()" style="margin-left:auto;font-weight:700">🧹 Select &amp; Clean</button>
+        <button class="fchip" id="sortTxToggle" onclick="openSortTx()" style="margin-left:auto;font-weight:700;display:none">🏷 Sort <span id="sortTxCount"></span></button>
+        <button class="fchip" id="expReconToggle" onclick="toggleExpSelMode()" style="font-weight:700">🧹 Select &amp; Clean</button>
       </div>
       <div id="expReconBar" class="exp-recon-bar" style="display:none;flex-direction:column;gap:6px;align-items:stretch">
         <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
@@ -11965,6 +11966,7 @@ function renderExpCategoryView(){
 }
 function renderExpenses(){renderE();}
 function renderE(){
+  if(typeof updSortTxBadge==='function')updSortTxBadge();
   var el=document.getElementById('expList');
   var mon=getMonStr();
   var thisMonExp=EXPENSES.filter(function(e){return(e.created||'').startsWith(mon)&&!_excludeFromSpend(e.cat);});
@@ -21272,7 +21274,75 @@ function renderMealsGuide(){
     +'</div>';
 }
 
-// ── MATRIX TABS (Slice 2): clickable quadrant tabs, no swipe ──
+// ── SORT TRANSACTIONS: one card at a time, tap a category ──
+// Same one-card pattern as Sort the Net, for expenses left as "other".
+function _unsortedTx(){
+  return (EXPENSES||[]).filter(function(e){return e&&!e.archived&&(!e.cat||e.cat==='other');});
+}
+function updSortTxBadge(){
+  var btn=document.getElementById('sortTxToggle');if(!btn)return;
+  var n=_unsortedTx().length;
+  btn.style.display=n?'':'none';
+  var c=document.getElementById('sortTxCount');if(c)c.textContent=n;
+}
+var _sortTxSkipped={};
+function _sortTxCurrent(){
+  var all=_unsortedTx();
+  var fresh=all.filter(function(e){return !_sortTxSkipped[e.id];});
+  if(fresh.length)return fresh[0];
+  // everything left was skipped — loop back around for another pass
+  if(all.length){_sortTxSkipped={};return all[0];}
+  return null;
+}
+function openSortTx(){_sortTxSkipped={};renderSortTx();openM('sortTxModal');}
+function renderSortTx(){
+  var el=document.getElementById('sortTxCard');if(!el)return;
+  var q=_unsortedTx();
+  var left=document.getElementById('sortTxLeft');if(left)left.textContent=q.length?q.length+' to sort':'';
+  if(!q.length){
+    el.innerHTML='<div style="text-align:center;padding:22px 8px"><div style="font-size:38px;margin-bottom:6px">🎉</div><div style="font-size:15px;font-weight:800;color:var(--textd)">All categorized</div><div style="font-size:12px;color:var(--textl);margin-top:3px">Every transaction has a home.</div></div>';
+    return;
+  }
+  var e=_sortTxCurrent();if(!e)return;
+  // reuse the keyword rules for a highlighted suggestion
+  var sug=(typeof _matchExpCatRule==='function')?_matchExpCatRule(e.desc):null;
+  var suggestCat=sug?sug.cat:null;
+  var chips=(EXPENSE_CATS||[]).map(function(c){
+    var hot=c===suggestCat;
+    return '<button onclick="sortTxSet(\''+String(c).replace(/'/g,"\\'")+'\')" style="padding:10px 6px;border-radius:11px;border:1.5px solid '+(hot?'#2475FF':'var(--bdr)')+';background:'+(hot?'#EAF1FF':'#fff')+';color:'+(hot?'#2475FF':'var(--textd)')+';font-family:\'Quicksand\',sans-serif;font-size:12px;font-weight:700;cursor:pointer;text-align:center">'+(hot?'💡 ':'')+escHtml(c)+'</button>';
+  }).join('');
+  el.innerHTML='<div style="background:#F7F5FB;border-radius:14px;padding:16px 14px;margin:8px 0 12px;text-align:center">'
+    +'<div style="font-size:22px;font-weight:800;color:var(--textd)">$'+(parseFloat(e.amt)||0).toFixed(2)+'</div>'
+    +'<div style="font-size:15px;font-weight:700;color:var(--textd);margin-top:3px">'+escHtml(e.desc||'(no description)')+'</div>'
+    +'<div style="font-size:11px;color:var(--textl);margin-top:2px">'+escHtml(e.date||(e.created||'').slice(0,10))+(_acctNameOf(e.account)?' · '+escHtml(_acctNameOf(e.account)):'')+'</div>'
+    +'</div>'
+    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:7px">'+chips+'</div>'
+    +'<div style="display:flex;gap:8px;margin-top:10px">'
+    +'<button onclick="sortTxSkip()" style="flex:1;padding:11px;border-radius:12px;border:1.5px solid var(--bdr);background:#fff;color:var(--textl);font-family:\'Quicksand\',sans-serif;font-size:13px;font-weight:700;cursor:pointer">Skip</button>'
+    +'<button onclick="sortTxDel()" style="flex:1;padding:11px;border-radius:12px;border:1.5px solid #F06677;background:#fff;color:#F06677;font-family:\'Quicksand\',sans-serif;font-size:13px;font-weight:700;cursor:pointer">🗑 Delete</button>'
+    +'</div>';
+}
+function sortTxSet(cat){
+  var e=_sortTxCurrent();if(!e)return;
+  e.cat=cat;
+  localStorage.setItem('aExpenses',JSON.stringify(EXPENSES));
+  fbSave('expenses',e.id,e);
+  if(typeof showToast==='function')showToast('🏷 '+cat);
+  renderSortTx();updSortTxBadge();renderE();renderBudget();
+}
+function sortTxSkip(){
+  var e=_sortTxCurrent();if(!e)return;
+  _sortTxSkipped[e.id]=1;
+  renderSortTx();
+}
+function sortTxDel(){
+  var e=_sortTxCurrent();if(!e)return;
+  EXPENSES=EXPENSES.filter(function(x){return x.id!==e.id;});
+  localStorage.setItem('aExpenses',JSON.stringify(EXPENSES));
+  try{if(window.db&&window.fsDoc&&window.fsDeleteDoc)window.fsDeleteDoc(window.fsDoc(window.db,'expenses',e.id));}catch(err){}
+  renderSortTx();updSortTxBadge();renderE();renderBudget();
+}
+// ── MATRIX TABS (Slice 2): clickable quadrant tabs, no swipe ──// ── MATRIX TABS (Slice 2): clickable quadrant tabs, no swipe ──
 // Labels match her Notion. Single-select; opens on "1. Urg/Import"; All last.
 var MATRIX_TABS=[
   {v:'urgent-important',label:'1. Urg/Import',color:'#F06677'},
@@ -29524,6 +29594,17 @@ if('serviceWorker' in navigator&&location.protocol.indexOf('http')===0){
   <div id="awBody" style="font-size:13px;color:var(--textd)"></div>
   <div id="awReconNote" style="font-size:11px;color:var(--textl);margin-top:10px;line-height:1.5;background:#F4F8E8;border:1px solid #E5F0BE;border-radius:10px;padding:9px 11px"><b>When it doesn’t match your bank:</b> tap ✏️ Edit and type today’s real balance. That becomes a fresh starting point and the estimate resets from there — so you never have to log every transaction. A <b>big</b> gap is worth a look; a small one is just the things you didn’t log.</div>
   <button class="cn-btn" onclick="closeM('acctWorkModal')" style="margin-top:10px">Close</button>
+</div></div>
+
+<!-- SORT TRANSACTIONS -->
+<div class="ov" id="sortTxModal"><div class="mod">
+  <div class="mh"></div>
+  <div style="display:flex;justify-content:space-between;align-items:baseline">
+    <div class="mtit">🏷 Sort transactions</div>
+    <span id="sortTxLeft" style="font-size:12px;font-weight:700;color:var(--textl)"></span>
+  </div>
+  <div id="sortTxCard"></div>
+  <button class="cn-btn" onclick="closeM('sortTxModal')" style="margin-top:6px">Done for now</button>
 </div></div>
 
 <!-- SORT THE NET -->
