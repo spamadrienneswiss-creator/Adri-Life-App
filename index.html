@@ -7749,9 +7749,29 @@ function setTaskSort(s){
   renderT();
 }
 
+// Slice 3: days until due (null if none/undated). <0 overdue, <=7 = "soon".
+function _daysToDue(t){
+  if(!t||!t.due)return null;
+  var d=new Date((t.due.slice(0,10))+'T23:59:59');
+  if(isNaN(d))return null;
+  var now=new Date();now.setHours(0,0,0,0);
+  return Math.floor((d-now)/86400000);
+}
+function _dueSoon(t){var d=_daysToDue(t);return d!==null&&d<=7;}
 function sortTaskArr(arr){
   var urgOrder={'urgent-important':0,'important-not-urgent':1,'urgent-not-important':2,'not-urgent':3,'':4};
   var s=TASK_SORT||'urgency';
+  // Slice 3: items due within 7 days (and overdue) bubble to the top, soonest
+  // first, ahead of whatever the normal sort would do.
+  var soon=arr.filter(_dueSoon).slice().sort(function(a,b){return _daysToDue(a)-_daysToDue(b);});
+  if(soon.length){
+    var soonIds={};soon.forEach(function(t){soonIds[t.id]=1;});
+    var rest=_sortRest(arr.filter(function(t){return !soonIds[t.id];}),s,urgOrder);
+    return soon.concat(rest);
+  }
+  return _sortRest(arr,s,urgOrder);
+}
+function _sortRest(arr,s,urgOrder){
   if(s==='urgency') return arr.slice().sort(function(a,b){return (urgOrder[a.urgency||'']||4)-(urgOrder[b.urgency||'']||4);});
   if(s==='due') return arr.slice().sort(function(a,b){
     if(!a.due&&!b.due)return 0;if(!a.due)return 1;if(!b.due)return -1;
@@ -7926,11 +7946,19 @@ function tHTML(t,depth,idx,siblingsLen){
   }
   var wrapStyle=depth>0?'margin-bottom:4px':'';
   var cardStyle=depth>0?'font-size:13px;':'';
+  // Slice 3: due-soon color cue (overdue=coral, ≤7 days=amber)
+  var _dd=_daysToDue(t);var _soonStripe='';var _soonBadge='';
+  if(!t.done&&_dd!==null&&_dd<=7){
+    var _c=_dd<0?'#F06677':'#C4974A';
+    _soonStripe='box-shadow:inset 4px 0 0 '+_c+';';
+    var _txt=_dd<0?Math.abs(_dd)+'d overdue':(_dd===0?'due today':(_dd===1?'due tomorrow':'due in '+_dd+'d'));
+    _soonBadge='<span style="display:inline-block;font-size:10px;font-weight:800;color:#fff;background:'+_c+';border-radius:7px;padding:1px 7px;margin-left:6px">'+_txt+'</span>';
+  }
   return'<div class="tc-wrap"'+(wrapStyle?' style="'+wrapStyle+'"':'')+'>'+
-    '<div class="tc '+(t.done?'done':'')+'" data-u="'+(t.urgency||'')+'" id="tc-'+t.id+'"'+(cardStyle?' style="'+cardStyle+'"':'')+' onclick="revealTActs(event,\''+tid+'\')">'+
+    '<div class="tc '+(t.done?'done':'')+'" data-u="'+(t.urgency||'')+'" id="tc-'+t.id+'" style="'+_soonStripe+cardStyle+'" onclick="revealTActs(event,\''+tid+'\')">'+
       '<div class="tchk" onclick="event.stopPropagation();togT(\''+tid+'\')">'+(t.done?'✓':'')+'</div>'+
       '<div class="tb" onclick="event.stopPropagation();editT(\''+tid+'\')">'+
-        '<div class="tt">'+t.title+(t.repeat?'<span class="rep-badge">'+repIco[t.repeat]+'</span>':'')+projBadge+'</div>'+
+        '<div class="tt">'+t.title+_soonBadge+(t.repeat?'<span class="rep-badge">'+repIco[t.repeat]+'</span>':'')+projBadge+'</div>'+
         '<div class="tm">'+catTag(t.cat)+
           (t.etime?'<span class="ttime">'+etm[t.etime]+'</span>':'')+
           (t.due?'<span class="tnote">📅 '+t.due.slice(0,10)+'</span>':'')+
