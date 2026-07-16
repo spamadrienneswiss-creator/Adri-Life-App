@@ -1742,6 +1742,8 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
         </div>
         <div style="display:flex;flex-wrap:wrap;gap:5px" id="catFilterChips"></div>
       </div>
+      <!-- Slice 2: matrix tabs (clickable, no swipe) — labels match Notion -->
+      <div id="matrixTabs" style="display:flex;gap:5px;overflow-x:auto;margin-bottom:10px;padding-bottom:2px"></div>
       <div id="taskList"></div>
     </div>
   </div>
@@ -6502,7 +6504,7 @@ function goTabDirect(tab,btn){
   if(tab==='routines'){ renderDailyRtn(_dailyRtnKey); renderOtherRtns(); }
   if(tab==='hearthside'){ renderHWHubStats(); }
   if(tab==='lighthouse'){ updateLighthouseSpiritStatus(); }
-  if(tab==='tasks'){ updateHelmBadges(); updTaskFilterDot(); renderT(); }
+  if(tab==='tasks'){ updateHelmBadges(); if(typeof MATRIX_TAB!=='undefined'){TASK_FILTERS.urgs=(MATRIX_TAB==='__all__')?[]:[MATRIX_TAB];} updTaskFilterDot(); renderT(); }
   if(tab==='projects'){ renderProjects(); renderTmplBar(); }
   if(tab==='focus-session'){ renderFocusSession(); }
   if(tab==='lists'){ goTabDirect('learn');setTimeout(function(){var b=document.querySelector('#v-learn .pn-btn:nth-child(3)');if(b)showLearnSec('lists',b);},50);return; }
@@ -7844,6 +7846,7 @@ function renderCatFilterChips(){
 function renderT(){
   if(typeof renderTasksGuide==='function')renderTasksGuide();
   if(typeof renderSortLists==='function')renderSortLists();
+  if(typeof renderMatrixTabs==='function')renderMatrixTabs();
   if(typeof renderTodayRhythm==='function')renderTodayRhythm();
   if(typeof renderWeekStrip==='function')renderWeekStrip();
   if(typeof renderWeekPlan==='function')renderWeekPlan();
@@ -21241,7 +21244,33 @@ function renderMealsGuide(){
     +'</div>';
 }
 
-// ── SORT THE NET (Slice 1): one card at a time, five exits ──
+// ── MATRIX TABS (Slice 2): clickable quadrant tabs, no swipe ──
+// Labels match her Notion. Single-select; opens on "1. Urg/Import"; All last.
+var MATRIX_TABS=[
+  {v:'urgent-important',label:'1. Urg/Import',color:'#F06677'},
+  {v:'important-not-urgent',label:'2. NoUrg/Import',color:'#2475FF'},
+  {v:'urgent-not-important',label:'3. Urg/NoImport',color:'#C4974A'},
+  {v:'not-urgent',label:'4. Eventually',color:'#BCB8C4'},
+  {v:'__all__',label:'All',color:'#7C9A2D'}
+];
+var MATRIX_TAB=localStorage.getItem('aMatrixTab')||'urgent-important';
+function setMatrixTab(v){
+  MATRIX_TAB=v;
+  localStorage.setItem('aMatrixTab',v);
+  // drive the existing urgency filter: single quadrant, or clear for All
+  TASK_FILTERS.urgs=(v==='__all__')?[]:[v];
+  renderT();
+}
+function renderMatrixTabs(){
+  var el=document.getElementById('matrixTabs');if(!el)return;
+  var open=(TASKS||[]).filter(function(t){return t&&!t.done&&!t.parked;});
+  el.innerHTML=MATRIX_TABS.map(function(m){
+    var n=(m.v==='__all__')?open.length:open.filter(function(t){return (t.urgency||'')===m.v;}).length;
+    var on=MATRIX_TAB===m.v;
+    return '<button onclick="setMatrixTab(\''+m.v+'\')" style="flex:none;padding:8px 12px;border-radius:11px;border:1.5px solid '+(on?m.color:'var(--bdr)')+';background:'+(on?m.color:'#fff')+';color:'+(on?'#fff':'var(--textd)')+';font-family:\'Quicksand\',sans-serif;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap">'+m.label+(n?' <span style="opacity:.85">'+n+'</span>':'')+'</button>';
+  }).join('');
+}
+// ── SORT THE NET (Slice 1): one card at a time, five exits ──// ── SORT THE NET (Slice 1): one card at a time, five exits ──
 // Different species leave the task list: groceries to the grocery list,
 // Notion-bound to a sweep pile, blocked items to Waiting On, junk to trash.
 // Capture stays untouched — sorting is its own later moment.
