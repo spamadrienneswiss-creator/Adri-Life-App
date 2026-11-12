@@ -30074,7 +30074,8 @@ function flLogIt(){
 //   Supply drop: pressing the Button lands one crate. Open it for a collectible.
 //   The Basement: where the collectibles live. Shelf 01 has ten. More shelves later.
 // State lives in localStorage 'aHatchSwan' (synced with the other Hatch data).
-// The older protocols (Mission, Chaos, Transmission, Shock, Cast, Spa) are untouched.
+// The older protocols (Mission, Chaos, Transmission, Shock, Cast, Spa) are off the menu.
+// Their panels, code and saved prompts are still in the file, dormant.
 // ═══════════════════════════════════════════════
 var HS_SEQ=[4,8,15,16,23,42];
 var HS_PAL={k:'#0b0f1a',w:'#f4f1e8',g:'#7dff9a',p:'#ff5fa2',c:'#4fd8ff',y:'#ffd84a',o:'#ff8a3c',r:'#ff4d4d',v:'#9b7bff',s:'#8a93a6',d:'#4a5266',b:'#2b6cff'};
@@ -31966,27 +31967,6 @@ setInterval(function(){try{hsDoorUpdate();}catch(e){}},20000);
           <span class="hatch-mode-icon">📼</span>
           <span><span class="hatch-mode-label">&gt; THE BASEMENT</span><span class="hatch-mode-sub" id="hsSelBaseSub" style="color:#2f9a1c">Everything the supply drops brought</span></span>
         </button>
-        <button class="hatch-mode-btn" onclick="hatchMode('mission')">
-          <span class="hatch-mode-icon">🎯</span>
-          <span><span class="hatch-mode-label">&gt; MISSION BRIEFING</span><span class="hatch-mode-sub">Random challenge — accept or skip</span></span>
-        </button>
-        <button class="hatch-mode-btn" onclick="hatchMode('chaos')">
-          <span class="hatch-mode-icon">🎲</span>
-          <span><span class="hatch-mode-label">&gt; CHAOS PROTOCOL</span><span class="hatch-mode-sub">Spin the wheel — lands on a life area</span></span>
-        </button>
-        <button class="hatch-mode-btn" onclick="hatchMode('transmission')">
-          <span class="hatch-mode-icon">📻</span>
-          <span><span class="hatch-mode-label">&gt; INCOMING TRANSMISSION</span><span class="hatch-mode-sub">Signal received from Brindleport…</span></span>
-        </button>
-        <button class="hatch-mode-btn" onclick="hatchMode('shock')">
-          <span class="hatch-mode-icon">⚡</span>
-          <span><span class="hatch-mode-label">&gt; SHOCK SEQUENCE</span><span class="hatch-mode-sub">60 seconds. Physical only. Go.</span></span>
-        </button>
-        <button class="hatch-mode-btn" onclick="hatchMode('cast')">
-          <span class="hatch-mode-icon">🎭</span>
-          <span><span class="hatch-mode-label">&gt; THE CAST</span><span class="hatch-mode-sub">Step into a character's world for a moment</span></span>
-        </button>
-        <button class="hatch-spa-pill" onclick="hatchMode('spa')">[ SPA // GROUNDING PROTOCOL ]</button>
       </div>
 
       <!-- MISSION -->
