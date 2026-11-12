@@ -1004,6 +1004,136 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
 .shift-task-row{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--border)}
 .shift-task-row:last-child{border-bottom:none}
 .shift-task-title{flex:1;font-size:13px;font-weight:700;color:var(--textd)}
+
+/* ══════════════════════════════════════════════
+   FOOD MODE — food-only home, Log a food, Convert (Nov 2026)
+   One job per color: cobalt = the "Left today" card, coral = the one main
+   action, lime = selected / result, pale pink = "your food stuff".
+   ══════════════════════════════════════════════ */
+#v-home.food-mode > :not(#foodHome){display:none!important}
+#foodHome{display:none}
+#v-home.food-mode #foodHome{display:flex}
+body.food-mode .tab-btn[data-tab="tasks"],body.food-mode .tab-btn[data-tab="estate"],
+body.food-mode .fav-tab-btn[data-tab="tasks"],body.food-mode .fav-tab-btn[data-tab="helm"],body.food-mode .fav-tab-btn[data-tab="estate"],body.food-mode .fav-tab-btn[data-tab="money"]{display:none}
+.fdm{display:flex;flex-direction:column;gap:14px;margin:-14px -14px -110px;padding:20px 20px 120px;min-height:100vh;background:#FFF8F3;color:#051423;font-family:'Quicksand',sans-serif}
+.fdm > *{width:100%;max-width:520px;margin-left:auto;margin-right:auto}
+.fdm button,.fdm input{font-family:inherit}
+.fdm-h1{font-family:'Playfair Display',serif;font-size:26px;line-height:30px;font-weight:700;color:#051423}
+.fdm-date{font-size:13px;line-height:18px;font-weight:600;color:#6B625C;margin-top:2px}
+.fdm-hero{border-radius:20px;padding:17px 19px;display:flex;flex-direction:column;gap:8px;background:#2475FF;border:3px solid #EEFFA4}
+.fdm-hero-lbl{font-size:12px;line-height:16px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:#FFFFFF}
+.fdm-hero-row{display:flex;align-items:baseline;gap:8px}
+.fdm-hero-num{font-family:'Playfair Display',serif;font-size:44px;line-height:44px;font-weight:700;color:#FFF8F3}
+.fdm-hero-unit{font-size:16px;font-weight:700;color:#FFF8F3}
+.fdm-bar{height:8px;border-radius:4px;background:rgba(5,20,35,.35);overflow:hidden}
+.fdm-bar > div{height:8px;min-width:8px;border-radius:4px;background:#EEFFA4}
+.fdm-hero-cap{font-size:17px;line-height:22px;font-weight:600;color:#FFFFFF}
+.fdm-macros{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.fdm-macro{background:#FFFFFF;border-radius:12px;padding:8px 10px;display:flex;flex-direction:column;gap:2px;min-width:0}
+.fdm-macro-l{font-size:11px;line-height:14px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:#6B625C}
+.fdm-macro-v{font-size:15px;line-height:20px;font-weight:700;color:#051423;white-space:nowrap}
+.fdm-macro-v small{font-size:11px;font-weight:600;color:#6B625C}
+.fdm-card{border:1px solid #F1E7E2;box-shadow:0 2px 12px rgba(5,20,35,.05);background:#FFFFFF;color:#051423;cursor:pointer}
+.fdm-block{display:flex;flex-direction:column;gap:8px}
+.fdm-logbox{display:flex;align-items:center;justify-content:space-between;width:100%;height:52px;padding:0 7px 0 17px;border-radius:16px;text-align:left}
+.fdm-logbox > span:first-child{font-size:16px;font-weight:600;color:#6B625C}
+.fdm-logpill{display:flex;align-items:center;height:38px;padding:0 18px;border-radius:12px;background:#F06677;color:#051423;font-size:15px;font-weight:700}
+.fdm-2col{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.fdm-3col{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.fdm-sec{height:44px;display:flex;align-items:center;justify-content:center;gap:8px;border-radius:14px;font-size:14px;font-weight:700}
+.fdm-h2{font-size:12px;line-height:18px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:#6B625C}
+.fdm-usual{height:52px;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:0 15px;border-radius:14px;font-size:14px;font-weight:700;text-align:left;min-width:0}
+.fdm-usual > span:first-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.fdm-usual > span:last-child{font-size:12px;font-weight:600;color:#6B625C;flex-shrink:0;white-space:nowrap}
+.fdm-tile{height:72px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;border-radius:16px;font-size:13px;font-weight:700}
+.fdm-dot{display:flex;align-items:center;justify-content:center;width:34px;height:34px;border:1px solid #FACFFF;border-radius:17px;background:#FFEFFB}
+.fdm-link{min-height:44px;border:none;background:none;font-size:13px;font-weight:600;color:#6B625C;cursor:pointer;text-decoration:underline}
+.fdm-empty{font-size:13px;line-height:19px;font-weight:600;color:#6B625C;background:#FFFFFF;border:1px dashed #F1E7E2;border-radius:14px;padding:12px 14px}
+/* Log a food */
+.fdm-log{gap:16px}
+.fdm-top{display:flex;align-items:center;gap:8px;height:44px}
+.fdm-back{display:flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:14px;flex-shrink:0}
+.fdm-h1s{font-family:'Playfair Display',serif;font-size:24px;line-height:30px;font-weight:700;color:#051423}
+.fdm-input{height:52px;width:100%;padding:0 17px;border:1px solid #F1E7E2;box-shadow:0 2px 12px rgba(5,20,35,.05);border-radius:16px;font-size:16px;font-weight:600;color:#051423;background:#FFFFFF;outline:none}
+.fdm-input:focus,.fdm-num:focus{border-color:#051423}
+.fdm-dyn{display:flex;flex-direction:column;gap:16px}
+.fdm-found{border:1px solid #FACFFF;box-shadow:0 2px 12px rgba(5,20,35,.05);border-radius:16px;padding:13px 15px;display:flex;flex-direction:column;gap:4px;background:#FFEFFB}
+.fdm-found-l{font-size:12px;line-height:16px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:#6B625C}
+.fdm-found-n{font-size:17px;line-height:22px;font-weight:700;color:#051423}
+.fdm-found-s{font-size:13px;line-height:18px;font-weight:600;color:#6B625C}
+.fdm-found-b{font-size:13px;line-height:18px;font-weight:700;color:#051423}
+.fdm-port{width:100%;height:60px;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:2px;padding:0 15px;border-radius:14px;text-align:left}
+.fdm-port b{font-size:15px;font-weight:700;display:block}
+.fdm-port small{font-size:12px;font-weight:600;color:#6B625C;display:block}
+.fdm-port.on{flex-direction:row;align-items:center;justify-content:space-between;gap:8px;background:#EEFFA4}
+.fdm-port.on small{color:#051423}
+.fdm-row{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:48px}
+.fdm-row label{font-size:14px;font-weight:700;color:#051423}
+.fdm-row-r{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:700;flex-shrink:0}
+.fdm-num{width:96px;height:44px;padding:0 13px;border-radius:12px;font-size:16px;font-weight:700;text-align:right;outline:none;cursor:text}
+.fdm-result{background:#EEFFA4;border-radius:20px;padding:16px 18px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.fdm-result-l{display:flex;align-items:baseline;gap:8px}
+.fdm-result-n{font-family:'Playfair Display',serif;font-size:40px;line-height:44px;font-weight:700}
+.fdm-result-u{font-size:15px;font-weight:700}
+.fdm-result-p{font-size:14px;font-weight:700;text-align:right}
+.fdm-go{display:flex;align-items:center;justify-content:center;height:54px;width:100%;border:none;border-radius:16px;background:#F06677;color:#051423;font-size:17px;font-weight:700;cursor:pointer}
+.fdm-go:disabled{opacity:.45;cursor:default}
+.fdm-chips{display:flex;flex-wrap:wrap;gap:8px}
+.fdm-chip{min-height:40px;padding:0 14px;border-radius:12px;font-size:13px;font-weight:700;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fdm-check{display:flex;align-items:center;gap:10px;min-height:44px;font-size:14px;font-weight:600;color:#051423;cursor:pointer}
+.fdm-check input{width:20px;height:20px;accent-color:#051423;flex-shrink:0}
+/* Convert */
+.fdm-cv{background:#FFFFFF;border:1px solid #F1E7E2;box-shadow:0 2px 12px rgba(5,20,35,.05);border-radius:16px;padding:6px 15px}
+.fdm-cv div{display:flex;justify-content:space-between;gap:12px;padding:9px 0;font-size:14px;font-weight:600;color:#051423;border-bottom:1px solid #F1E7E2}
+.fdm-cv div:last-child{border-bottom:none}
+.fdm-cv div span:last-child{font-weight:700;text-align:right}
+.fdm-note{font-size:13px;line-height:19px;font-weight:600;color:#6B625C}
+
+/* ══ HATCH REVAMP, slice 1 — the Button, the supply drop, Basement Shelf 01 (Nov 2026) ══ */
+#ovHatch .hs-timer{font-family:'Courier New',monospace;font-size:50px;letter-spacing:2px;line-height:1.1;text-align:center;padding:6px 0 2px;color:#3fc820;text-shadow:0 0 14px rgba(63,200,32,.5)}
+#ovHatch .hs-timer.urgent{color:#e85050;text-shadow:0 0 14px rgba(232,80,80,.6);animation:htpulse .65s ease-in-out infinite}
+#ovHatch .hs-sub{font-family:'Courier New',monospace;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;text-align:center;color:#2f9a1c;margin-top:8px}
+#ovHatch .hs-slots{display:flex;gap:6px;justify-content:center;margin:14px 0}
+#ovHatch .hs-slot{flex:1;max-width:52px;height:42px;border:1px solid #1a5010;border-radius:3px;display:flex;align-items:center;justify-content:center;font-family:'Courier New',monospace;font-size:16px;color:#3fc820;background:#0c140c;text-shadow:0 0 6px rgba(63,200,32,.35)}
+#ovHatch .hs-slot.bad{border-color:#a03030;color:#e85050;background:#140606}
+#ovHatch .hs-pad{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:10px}
+#ovHatch .hs-num{height:56px;border:1px solid #1a5010;border-radius:4px;background:#0c140c;color:#3fc820;font-family:'Courier New',monospace;font-size:21px;cursor:pointer;text-shadow:0 0 6px rgba(63,200,32,.35)}
+#ovHatch .hs-num:active{background:rgba(63,200,32,.16)}
+#ovHatch .hs-exec{width:100%;height:58px;border-radius:4px;border:1px solid #1a5010;background:#0c140c;color:#2f9a1c;font-family:'Courier New',monospace;font-size:15px;letter-spacing:4px;cursor:default}
+#ovHatch .hs-exec.ready{background:linear-gradient(135deg,#143a08,#0a2a0c);color:#8dff6a;border-color:#3fc820;box-shadow:0 0 18px rgba(63,200,32,.4);cursor:pointer;animation:htpulse 1.1s ease-in-out infinite}
+#ovHatch .hs-stats{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;font-family:'Courier New',monospace;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:#2f9a1c;margin:14px 0}
+#ovHatch .hs-lines{font-family:'Courier New',monospace;font-size:13px;line-height:1.7;color:#3fc820;min-height:44px;margin-top:10px;text-shadow:0 0 5px rgba(63,200,32,.25)}
+#ovHatch .hs-lines .dim{color:#2f9a1c}
+#ovHatch .hs-fail{border:1px solid #6a1414;background:#140606;border-radius:6px;padding:16px 18px;margin-bottom:14px;font-family:'Courier New',monospace;color:#e85050;animation:hsShake .5s linear 2}
+#ovHatch .hs-fail b{display:block;font-size:17px;letter-spacing:3px;margin-bottom:8px;text-shadow:0 0 10px rgba(232,80,80,.6)}
+#ovHatch .hs-fail span{display:block;font-size:12px;line-height:1.7;color:#d07070}
+@keyframes hsShake{0%,100%{transform:translateX(0)}20%{transform:translateX(-5px)}40%{transform:translateX(5px)}60%{transform:translateX(-3px)}80%{transform:translateX(3px)}}
+#ovHatch .hs-glitch{animation:hsShake .35s linear 2}
+#ovHatch .hs-crate{border:1px dashed #8a6a1c;background:#12100a;border-radius:6px;padding:16px 18px;margin-bottom:14px;font-family:'Courier New',monospace;color:#e6b84a;text-align:center}
+#ovHatch .hs-crate.gold{border-style:solid;border-color:#e6b84a;box-shadow:0 0 16px rgba(230,184,74,.25)}
+#ovHatch .hs-crate-t{font-size:14px;letter-spacing:2px;margin:4px 0 12px;text-shadow:0 0 8px rgba(230,184,74,.4)}
+#ovHatch .hs-crate-n{font-size:15px;letter-spacing:.5px;margin:10px 0 4px;color:#ffe9a8}
+#ovHatch .hs-crate-f{font-size:12px;line-height:1.6;color:#c9a352;margin-bottom:12px}
+#ovHatch .hs-tag{display:inline-block;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;padding:2px 8px;border:1px solid currentColor;border-radius:3px;margin-bottom:6px}
+#ovHatch .hs-tag.common{color:#8a93a6}#ovHatch .hs-tag.uncommon{color:#4fd8ff}#ovHatch .hs-tag.rare{color:#ff5fa2}
+#ovHatch .hs-btn{width:100%;min-height:48px;border-radius:4px;border:1px solid #8a6a1c;background:#1a1508;color:#ffd978;font-family:'Courier New',monospace;font-size:13px;letter-spacing:2px;cursor:pointer}
+#ovHatch .hs-btn:active{background:#2a2210}
+#ovHatch .hs-btn:disabled{opacity:.4;cursor:default}
+#ovHatch .hs-pop{animation:hsPop .45s ease-out}
+@keyframes hsPop{0%{transform:scale(.4);opacity:0}70%{transform:scale(1.08);opacity:1}100%{transform:scale(1)}}
+/* The Basement */
+#ovHatch .hs-neon{font-family:'Courier New',monospace;font-size:22px;letter-spacing:6px;text-align:center;color:#ff7ab5;text-shadow:0 0 8px rgba(255,95,162,.85),0 0 24px rgba(255,95,162,.45);margin:2px 0 4px}
+#ovHatch .hs-shelf-h{font-family:'Courier New',monospace;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:#4fd8ff;display:flex;justify-content:space-between;gap:8px;margin:16px 0 6px}
+#ovHatch .hs-shelf{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;padding:10px 8px 8px;background:linear-gradient(180deg,#0b0f1a,#111830);border:1px solid #1a2238;border-bottom:7px solid #4a3320;border-radius:4px 4px 2px 2px;margin-bottom:12px}
+#ovHatch .hs-cell{position:relative;aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;border:1px solid #1a2238;border-radius:4px;background:#0b0f1a;padding:3px;cursor:pointer}
+#ovHatch .hs-cell svg{width:100%;height:100%}
+#ovHatch .hs-cell.sel{border-color:#4fd8ff;box-shadow:0 0 10px rgba(79,216,255,.45)}
+#ovHatch .hs-cell.ghost{cursor:default}
+#ovHatch .hs-x{position:absolute;right:2px;bottom:1px;font-family:'Courier New',monospace;font-size:9px;color:#ffd978}
+#ovHatch .hs-detail{border:1px solid #1a2238;background:#0b0f1a;border-radius:6px;padding:14px 16px;margin-bottom:12px;font-family:'Courier New',monospace;display:flex;gap:14px;align-items:center}
+#ovHatch .hs-detail-n{font-size:14px;color:#e8f6ff;margin-bottom:4px}
+#ovHatch .hs-detail-f{font-size:12px;line-height:1.6;color:#8fb6c8}
+#ovHatch .hs-note{font-family:'Courier New',monospace;font-size:11px;line-height:1.7;color:#6f86a8;margin:10px 0}
 </style>
 </head>
 <body>
@@ -1026,7 +1156,10 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
   <div class="hdr-top">
     <div class="app-title" id="appTitleEl" ondblclick="editAppTitle()" title="Double-tap to rename">✨ Adri's Life</div>
     <div class="hdr-r">
-      <button onclick="openSearch()" style="background:rgba(255,255,255,.2);border:none;border-radius:8px;padding:4px 8px;cursor:pointer;font-size:15px;color:#fff;line-height:1" title="Search">🔍</button>
+      <div style="display:flex;gap:6px;align-items:center">
+        <button id="hsDoor" onclick="openHatch()" style="background:rgba(255,255,255,.2);border:none;border-radius:8px;padding:5px 8px;cursor:pointer;font-family:'Courier New',monospace;font-size:13px;font-weight:700;color:#fff;line-height:1.2;white-space:nowrap" title="The Hatch">⚡</button>
+        <button onclick="openSearch()" style="background:rgba(255,255,255,.2);border:none;border-radius:8px;padding:4px 8px;cursor:pointer;font-size:15px;color:#fff;line-height:1" title="Search">🔍</button>
+      </div>
       <div class="ddate" id="dDate"></div>
       <div class="dstatus" id="dStatus">Loading...</div>
       <div class="sync-status" id="syncStatus">🔄 Syncing...</div>
@@ -1367,8 +1500,10 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
 
 <!-- HOME -->
 <div class="view on" id="v-home">
+  <div id="foodHome" class="fdm"></div>
   <div class="home-top-bar">
     <h2 id="homeGreet">Good morning ✨</h2>
+    <button class="home-edit-btn" id="homeFoodModeBtn" onclick="fhSetMode(true)" style="display:none;margin-right:6px;font-size:12px">🍽 Food only</button>
     <button class="home-edit-btn" id="homeResetBtn" onclick="resetHomeOrder()" style="display:none;margin-right:6px;font-size:12px">↺ Reset</button>
     <button class="home-edit-btn" id="homeEditBtn" onclick="toggleHomeEdit()">✏️ Edit</button>
   </div>
@@ -1380,6 +1515,78 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     <button onclick="goTab('appindex',null)" style="width:100%;padding:10px 14px;border-radius:14px;border:1.5px solid rgba(143,170,139,.4);background:#fff;font-family:'Quicksand',sans-serif;font-size:13px;font-weight:700;color:var(--sage);cursor:pointer;display:flex;align-items:center;gap:8px;box-shadow:var(--sh2)"><span>🗂️</span><span>App Index — Navigate All Sections</span><span style="margin-left:auto;font-size:11px;color:var(--textl)">→</span></button>
   </div>
   <div class="home-grid" id="homeGrid"></div>
+</div>
+
+<!-- FOOD MODE: LOG A FOOD (direct child of .pg) -->
+<div class="view" id="v-foodlog">
+  <div class="fdm fdm-log">
+    <div class="fdm-top">
+      <button class="fdm-card fdm-back" onclick="fhGoHome()" aria-label="Back to home"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#051423" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"></path></svg></button>
+      <h2 class="fdm-h1s" id="flTitle">Log a food</h2>
+    </div>
+    <input class="fdm-input" id="flQuery" placeholder="What did you eat?" autocomplete="off" autocapitalize="off" enterkeyhint="done" oninput="flOnQuery()" aria-label="What did you eat?">
+    <div class="fdm-dyn" id="flDyn"></div>
+  </div>
+</div>
+
+<!-- FOOD MODE: CONVERT (direct child of .pg) -->
+<div class="view" id="v-convert">
+  <div class="fdm fdm-log">
+    <div class="fdm-top">
+      <button class="fdm-card fdm-back" onclick="fhGoHome()" aria-label="Back to home"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#051423" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"></path></svg></button>
+      <h2 class="fdm-h1s">Convert</h2>
+    </div>
+    <div class="fdm-block">
+      <h3 class="fdm-h2">Spoons and cups</h3>
+      <div class="fdm-cv">
+        <div><span>3 teaspoons</span><span>1 tablespoon</span></div>
+        <div><span>2 tablespoons</span><span>1 fl oz</span></div>
+        <div><span>4 tablespoons</span><span>¼ cup</span></div>
+        <div><span>5 tablespoons + 1 teaspoon</span><span>⅓ cup</span></div>
+        <div><span>8 tablespoons</span><span>½ cup</span></div>
+        <div><span>16 tablespoons</span><span>1 cup</span></div>
+        <div><span>1 cup</span><span>8 fl oz</span></div>
+        <div><span>2 cups</span><span>1 pint</span></div>
+        <div><span>4 cups</span><span>1 quart</span></div>
+      </div>
+    </div>
+    <div class="fdm-block">
+      <h3 class="fdm-h2">To milliliters</h3>
+      <div class="fdm-cv">
+        <div><span>1 teaspoon</span><span>about 5 ml</span></div>
+        <div><span>1 tablespoon</span><span>about 15 ml</span></div>
+        <div><span>1 fl oz</span><span>about 30 ml</span></div>
+        <div><span>¼ cup</span><span>about 60 ml</span></div>
+        <div><span>½ cup</span><span>about 120 ml</span></div>
+        <div><span>1 cup</span><span>about 240 ml</span></div>
+      </div>
+    </div>
+    <div class="fdm-block">
+      <h3 class="fdm-h2">Weight</h3>
+      <div class="fdm-cv">
+        <div><span>1 oz</span><span>about 28 g</span></div>
+        <div><span>4 oz (¼ lb)</span><span>about 113 g</span></div>
+        <div><span>8 oz (½ lb)</span><span>about 227 g</span></div>
+        <div><span>16 oz (1 lb)</span><span>about 454 g</span></div>
+        <div><span>100 g</span><span>about 3.5 oz</span></div>
+        <div><span>1 kg</span><span>about 2.2 lb</span></div>
+      </div>
+    </div>
+    <div class="fdm-block">
+      <h3 class="fdm-h2">One cup weighs about</h3>
+      <div class="fdm-cv">
+        <div><span>Water or milk</span><span>240 g</span></div>
+        <div><span>All-purpose flour</span><span>120 g</span></div>
+        <div><span>White sugar</span><span>200 g</span></div>
+        <div><span>Brown sugar, packed</span><span>215 g</span></div>
+        <div><span>Butter (2 sticks)</span><span>227 g</span></div>
+        <div><span>Honey</span><span>340 g</span></div>
+        <div><span>Rolled oats</span><span>90 g</span></div>
+        <div><span>Rice, uncooked</span><span>185 g</span></div>
+      </div>
+      <p class="fdm-note">Cups to grams depends on the food, so these are close-enough kitchen numbers. Foods saved in your food library carry their own gram weights.</p>
+    </div>
+  </div>
 </div>
 
 <!-- APP INDEX PAGE -->
@@ -3669,7 +3876,6 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
       <div class="color-grid" id="colorPickerGrid"></div>
       <button class="btn sec" style="font-size:12px;padding:5px 14px;margin-bottom:10px" onclick="resetColors()">Reset to defaults</button>
       <button class="btn sec" style="font-size:12px;padding:5px 14px;margin-bottom:10px;margin-left:6px" onclick="saveCurrentAsTheme()">💾 Save as Theme</button>
-      <div class="set-row" style="margin-top:8px"><div><div class="set-lbl">🐱 Show Millie</div><div class="set-sub">Virtual pet in corner</div></div><button class="tog" id="millieTogBtn" onclick="togMillieVis(this)"></button></div>
       <button class="ok-btn" style="margin-top:4px" onclick="saveAppearance()">Save Appearance ✨</button>
     </div>
   </div>
@@ -6446,7 +6652,7 @@ var BLOB_GROUPS={
   food:['aRecipes','aMealPlan','aMealMyServings','aGroceryList','aGrocTags','aGrocDepts','aGrocStoreDeptOrder','aInventory','aInvSections','aMC','aFoodDb','aFDB','aIngredients','aWantToTry','aMacrosReviewed'],
   fitness:['aWplans','aWlog2','aMovements','aExTypes','aExDB','aExLog','aPT'],
   creative:['aStories','aSChars','aSScenes','aFaves','aMixtape','aMemories','aPlaces','aVbItems'],
-  tools:['aSparkPrompts','aSparkSaved','aDispatchJournal','aHatchChaos','aHatchTransmissions','aHatchMissions','aHatchShocks','aHatchCast','aStreak'],
+  tools:['aSparkPrompts','aSparkSaved','aDispatchJournal','aHatchChaos','aHatchTransmissions','aHatchMissions','aHatchShocks','aHatchCast','aStreak','aHatchSwan'],
   learning:['aKEvents','aLifeHacks','aResearch','aResearchTopics','aMemoryItems','aFcDecks','aFcCards','aStudyNotes'],
   game:['aBadges','aHelmMiles','aSprintStats','aEmber','aMillie','aFishLevel','aFishLog'],
   work2:['aWigOrders','aWorkProjects'],
@@ -6586,6 +6792,7 @@ function goTabDirect(tab,btn){
   if(tab==='food'){ setTimeout(function(){ renderExLog(); updExWeek(); renderWplanList(); updM(); },50); }
   if(tab==='wellness'){ setTimeout(function(){ showWellnessSec('mood',document.querySelector('#v-wellness .pn-btn:nth-child(1)')); },50); }
   if(tab==='workshop'){ renderWSProjects(); }
+  if(typeof fhAfterTab==='function')fhAfterTab(tab);
 }
 
 function renderHubPreviews(section){
@@ -8959,6 +9166,7 @@ function getHomeTileBadge(id){
 }
 
 function renderHomePage(){
+  if(typeof renderFoodHome==='function')renderFoodHome();
   var grid=document.getElementById('homeGrid');if(!grid)return;
   grid.className='home-grid'+(HOME_EDIT_MODE?' home-edit-mode':'');
   grid.innerHTML=HOME_TILES.map(function(tile,idx){
@@ -10707,7 +10915,7 @@ function openHatch(){
       bootEl.style.opacity='1';
       bootEl.style.transition='';
       if(wrap)wrap.style.visibility='visible';
-      hatchMode('selector');
+      hatchMode(typeof hsLanding==='function'?hsLanding():'selector');
     },360);
   },1750);
 }
@@ -10718,7 +10926,7 @@ function closeHatch(){
 }
 function hatchMode(mode){
   _clearHatchTimers();
-  ['Selector','Mission','Chaos','Transmission','Shock','Cast','Spa'].forEach(function(p){
+  ['Selector','Mission','Chaos','Transmission','Shock','Cast','Spa','Button','Basement'].forEach(function(p){
     var el=document.getElementById('hPanel'+p);if(el)el.style.display='none';
   });
   var target=document.getElementById('hPanel'+mode.charAt(0).toUpperCase()+mode.slice(1));
@@ -10728,6 +10936,9 @@ function hatchMode(mode){
   else if(mode==='transmission')_hatchTxShow();
   else if(mode==='shock')_hatchShockShow();
   else if(mode==='cast')_hatchCastShow();
+  else if(mode==='button')hsRenderButton();
+  else if(mode==='basement')hsRenderBasement();
+  else if(mode==='selector'&&typeof hsRenderSelector==='function')hsRenderSelector();
 }
 
 // ─── MISSION ───────────────────────────────────
@@ -14335,7 +14546,7 @@ function tickMillie(){
 function renderMillieWidget(){
   var w=document.getElementById('millieWidget');
   if(!w)return;
-  if(S.hideMillie){w.style.display='none';return;}
+  w.style.display='none';return; // Millie removed Nov 2026. To bring her back, restore: if(S.hideMillie){w.style.display='none';return;}
   w.style.display='';
   var mode=millieMode();
   var cls='millie-widget '+(mode==='sleeping'?'sleeping':mode);
@@ -19654,7 +19865,7 @@ function renderKEvents(){
 // SPIRITUAL HABITS
 // ═══════════════════════════════════════════════
 
-function todayStr(){return new Date().toISOString().slice(0,10);}
+function todayStr(){var d=new Date();return d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)+'-'+('0'+d.getDate()).slice(-2);} // local day (was UTC: rolled over at 4pm Pacific)
 
 function habitStreak(id){
   var log=HABIT_LOG[id]||[];
@@ -27279,7 +27490,7 @@ function startApp(){
   renderTodayTimeGreet();
   renderFavTabs();
   trackLastActive();
-  var hFab=document.getElementById('hatchFab');if(hFab)hFab.style.display='flex';
+  var hFab=document.getElementById('hatchFab');if(hFab)hFab.style.display=((document.querySelector('.view.on')||{}).id==='v-today')?'flex':'none';
   renderFabPills();
   initFabScroll();
   initFabModalHide();
@@ -29452,6 +29663,715 @@ if('serviceWorker' in navigator&&location.protocol.indexOf('http')===0){
     navigator.serviceWorker.register('sw.js').catch(function(){});
   });
 }
+
+// ═══════════════════════════════════════════════
+// FOOD MODE — food-only home, Log a food, Convert (Nov 2026)
+// While this is on, the classic home tiles plus the Tasks and Money tabs are
+// hidden. Nothing is deleted: fhSetMode(false) brings everything back.
+// Logging writes to MEAL_LOG_ITEMS (same list as What I Ate) and reads
+// nutrition from FOOD_DB (the Ingredient Library), so there is still one
+// food database with different views on it.
+// ═══════════════════════════════════════════════
+function fhMode(){return localStorage.getItem('aFoodMode')!=='0';}
+function fhSetMode(on){localStorage.setItem('aFoodMode',on?'1':'0');renderHomePage();window.scrollTo(0,0);}
+function fhApplyMode(){
+  var on=fhMode();
+  var v=document.getElementById('v-home');if(v)v.classList.toggle('food-mode',on);
+  document.body.classList.toggle('food-mode',on);
+  var b=document.getElementById('homeFoodModeBtn');if(b)b.style.display=on?'none':'';
+}
+function fhIcon(k,size,sw){
+  var P={
+    hash:'<path d="M9 4L7 20M17 4l-2 16M4 9h16M3 15h16"></path>',
+    barcode:'<path d="M4 6v12M8 6v12M11 6v12M15 6v12M18 6v12M21 6v12"></path>',
+    list:'<path d="M9 6h11M9 12h11M9 18h11M4 6h1M4 12h1M4 18h1"></path>',
+    lib:'<ellipse cx="12" cy="6" rx="7" ry="3"></ellipse><path d="M5 6v12c0 1.7 3.1 3 7 3s7-1.3 7-3V6"></path><path d="M5 12c0 1.7 3.1 3 7 3s7-1.3 7-3"></path>',
+    book:'<path d="M4 5h6a2 2 0 0 1 2 2v12a2 2 0 0 0-2-2H4z"></path><path d="M20 5h-6a2 2 0 0 0-2 2v12a2 2 0 0 1 2-2h6z"></path>',
+    box:'<rect x="4" y="9" width="16" height="10" rx="2"></rect><path d="M6 9V7a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v2"></path><path d="M4 13h16"></path>',
+    basket:'<path d="M4 9h16l-1.5 9a2 2 0 0 1-2 1.7h-9a2 2 0 0 1-2-1.7z"></path><path d="M9 9l3-5 3 5"></path>',
+    swap:'<path d="M4 8h14l-3-3"></path><path d="M20 16H6l3 3"></path>',
+    check:'<path d="M5 12.5l4.5 4.5L19 7.5"></path>'
+  };
+  return '<svg aria-hidden="true" width="'+size+'" height="'+size+'" viewBox="0 0 24 24" fill="none" stroke="#051423" stroke-width="'+(sw||2)+'" stroke-linecap="round" stroke-linejoin="round">'+(P[k]||'')+'</svg>';
+}
+function fhNum(n){return Math.round(n||0).toLocaleString('en-US');}
+function fhR1(n){return Math.round((parseFloat(n)||0)*10)/10;}
+function fhNorm(s){return String(s||'').trim().toLowerCase().replace(/\s+×[\d.]+$/,'').replace(/\s+/g,' ');}
+function fhBucket(h){return (h>=4&&h<11)?'morning':(h>=11&&h<16)?'midday':'evening';}
+function fhItemTime(m){var ts=parseInt(String((m&&m.id)||'').replace('ml-',''),10);return ts>1e12?new Date(ts):null;}
+function fhFindDb(name){var k=fhNorm(name);if(!k)return null;return (FOOD_DB||[]).find(function(x){return fhNorm(x.name)===k;})||null;}
+
+// What you've logged before, grouped by name: how often, at what time of day, and the usual calories.
+function fhHistory(){
+  var map={};
+  (MEAL_LOG_ITEMS||[]).forEach(function(m){
+    if(!m||m.calOnly)return;
+    var k=fhNorm(m.name);if(!k)return;
+    var e=map[k]||(map[k]={key:k,name:m.name,count:0,n:0,cal:0,pro:0,carb:0,fat:0,b:{morning:0,midday:0,evening:0},last:0});
+    e.count++;
+    var d=fhItemTime(m);
+    if(d){e.b[fhBucket(d.getHours())]++;if(d.getTime()>e.last){e.last=d.getTime();e.name=String(m.name).replace(/\s+×[\d.]+$/,'');}}
+    if(m.cal>0){e.n++;e.cal+=m.cal||0;e.pro+=m.pro||0;e.carb+=m.carb||0;e.fat+=m.fat||0;}
+  });
+  return map;
+}
+function fhAvgNut(e){return {cal:Math.round(e.cal/e.n),pro:fhR1(e.pro/e.n),carb:fhR1(e.carb/e.n),fat:fhR1(e.fat/e.n)};}
+
+// A library food's usual serving (My Usual if set, otherwise its first serving).
+function flDbBase(item){
+  var sv=(item.servings&&item.servings.length)?item.servings[0]:null;
+  if(item.myUsual&&item.myUsual.svId){var ms=(item.servings||[]).find(function(s){return s.id===item.myUsual.svId;});if(ms)sv=ms;}
+  var qty=(item.myUsual&&parseFloat(item.myUsual.qty))||1;
+  var per100=!!(item.per100&&item.per100.cal!=null);
+  var g=sv?(parseFloat(sv.grams)||0):0;
+  return {sv:sv,qty:qty,per100:per100,hasG:g>0,grams:per100?((g||100)*qty):0};
+}
+function flDbNut(item,mult){
+  var b=flDbBase(item);
+  return b.per100?calcNutFromLib(item,b.grams,mult):calcNutFromLib(item,0,b.qty*mult);
+}
+function fhUsualNut(e){
+  if(e&&e.n)return fhAvgNut(e);
+  var it=e?fhFindDb(e.key):null;
+  if(it){var n=flDbNut(it,1);if(n.cal>0)return n;}
+  return null;
+}
+// Up to four one-tap foods: what you log most at this time of day, then your overall favorites.
+function fhUsuals(){
+  var map=fhHistory(),bk=fhBucket(new Date().getHours());
+  var arr=Object.keys(map).map(function(k){return map[k];});
+  var inB=arr.filter(function(e){return e.b[bk]>0;}).sort(function(a,b){return (b.b[bk]-a.b[bk])||(b.last-a.last);});
+  var rest=arr.filter(function(e){return !(e.b[bk]>0);}).sort(function(a,b){return (b.count-a.count)||(b.last-a.last);});
+  var out=[],seen={};
+  inB.concat(rest).forEach(function(e){if(out.length>=4||seen[e.key])return;seen[e.key]=1;out.push({name:e.name,key:e.key,nut:fhUsualNut(e)});});
+  if(out.length<4){
+    var c=(FOOD_DB||[]).filter(function(f){
+      var hasNut=(f.per100&&f.per100.cal!=null)||f.cal;
+      return hasNut&&(f.staple||(f.useCount||0)>0)&&!(typeof isItemIck==='function'&&isItemIck(f));
+    });
+    c.sort(function(a,b){if(!!b.staple!==!!a.staple)return b.staple?1:-1;return (b.useCount||0)-(a.useCount||0);});
+    c.forEach(function(f){var k=fhNorm(f.name);if(out.length>=4||seen[k])return;seen[k]=1;var n=flDbNut(f,1);out.push({name:f.name,key:k,nut:n.cal>0?n:null});});
+  }
+  return out;
+}
+var _fhUsualsCache=[];
+// Keeps the food home current when data arrives from the cloud or the day/time of day changes.
+var _fhSig='';
+function fhSig(){
+  var t=getTot(),h=new Date().getHours();
+  return todayStr()+'|'+fhBucket(h)+'|'+(h<12?0:h<17?1:2)+'|'+(MEAL_LOG_ITEMS||[]).length+'|'+Math.round(t.cal||0)+'|'+(FOOD_DB||[]).length+'|'+(S.gCal||0)+'|'+(S.gPro||0);
+}
+setInterval(function(){
+  try{
+    if(!fhMode())return;
+    var v=document.getElementById('v-home');if(!v||!v.classList.contains('on'))return;
+    if(fhSig()!==_fhSig)renderFoodHome();
+  }catch(e){}
+},4000);
+
+function renderFoodHome(){
+  fhApplyMode();
+  var el=document.getElementById('foodHome');if(!el||!fhMode())return;
+  _fhSig=fhSig();
+  var now=new Date(),h=now.getHours();
+  var greet=h<12?'Good morning':h<17?'Good afternoon':'Good evening';
+  var dateStr=now.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
+  var t=getTot();
+  var goal=S.gCal||1900,eaten=Math.round(t.cal||0),left=goal-eaten;
+  var pct=Math.max(0,Math.min(100,goal?eaten/goal*100:0));
+  var macro=function(lbl,val,g){return '<div class="fdm-macro"><div class="fdm-macro-l">'+lbl+'</div><div class="fdm-macro-v">'+Math.round(val||0)+(g?' <small>/ '+g+' g</small>':' g')+'</div></div>';};
+  var bk=fhBucket(h);
+  _fhUsualsCache=fhUsuals();
+  var usuals=_fhUsualsCache.length
+    ?'<div class="fdm-2col">'+_fhUsualsCache.map(function(u,i){
+        return '<button class="fdm-card fdm-usual" onclick="fhLogUsual('+i+')"><span>'+escHtml(u.name)+'</span><span>'+(u.nut?fhNum(u.nut.cal):'add cal')+'</span></button>';
+      }).join('')+'</div>'
+    :'<div class="fdm-empty">Nothing here yet. Log a few foods and the ones you eat most at this time of day will show up as one-tap buttons.</div>';
+  var tile=function(icon,label,fn){return '<button class="fdm-card fdm-tile" onclick="'+fn+'"><span class="fdm-dot">'+fhIcon(icon,20,1.8)+'</span>'+label+'</button>';};
+  el.innerHTML=
+    '<div><h2 class="fdm-h1">'+greet+'</h2><div class="fdm-date">'+dateStr+'</div></div>'
+    +'<div class="fdm-hero">'
+      +'<div class="fdm-hero-lbl">'+(left>=0?'Left today':'Over today')+'</div>'
+      +'<div class="fdm-hero-row"><div class="fdm-hero-num">'+fhNum(Math.abs(left))+'</div><div class="fdm-hero-unit">calories</div></div>'
+      +'<div class="fdm-bar"><div style="width:'+pct+'%"></div></div>'
+      +'<div class="fdm-hero-cap">'+fhNum(eaten)+' eaten so far. Goal '+fhNum(goal)+'.</div>'
+      +'<div class="fdm-macros">'+macro('Protein',t.pro,S.gPro)+macro('Carbs',t.crb,S.gCrb)+macro('Fat',t.fat,S.gFat)+'</div>'
+    +'</div>'
+    +'<div class="fdm-block">'
+      +'<button class="fdm-card fdm-logbox" onclick="fhOpenLog(\'find\')"><span>What did you eat?</span><span class="fdm-logpill">Log</span></button>'
+      +'<div class="fdm-2col">'
+        +'<button class="fdm-card fdm-sec" onclick="fhOpenLog(\'cal\')">'+fhIcon('hash',18,2)+'Just calories</button>'
+        +'<button class="fdm-card fdm-sec" onclick="fhBarcode()">'+fhIcon('barcode',18,2)+'Barcode lookup</button>'
+      +'</div>'
+    +'</div>'
+    +'<div class="fdm-block"><h3 class="fdm-h2">Your '+bk+' usuals, one tap</h3>'+usuals+'</div>'
+    +'<div class="fdm-block"><h3 class="fdm-h2">Food</h3><div class="fdm-3col">'
+      +tile('list','What I ate','fhGoMeals(\'ate\')')
+      +tile('lib','Food library','fhGoMeals(\'database\')')
+      +tile('book','Recipes','fhGoMeals(\'recipes\')')
+      +tile('box','Meal prep','fhGoMeals(\'meals\')')
+      +tile('basket','Grocery','fhGoMeals(\'grocery\')')
+      +tile('swap','Convert','fhGoConvert()')
+    +'</div></div>'
+    +'<button class="fdm-link" onclick="fhSetMode(false)">Tasks and money are archived. Bring them back</button>';
+}
+
+// Adds one entry to What I Ate. Every food-mode log goes through here.
+function fhCommit(name,n,opts){
+  opts=opts||{};
+  var it={id:'ml-'+Date.now(),name:name,category:'main',day:'',date:todayStr(),cal:Math.round(n.cal||0),pro:fhR1(n.pro),carb:fhR1(n.carb),fat:fhR1(n.fat)};
+  if(opts.est)it.est=true;
+  if(opts.calOnly)it.calOnly=true;
+  var db=fhFindDb(name);
+  if(db&&db.gluten)it.gluten=true;
+  MEAL_LOG_ITEMS.unshift(it);
+  localStorage.setItem('aMealLogItems',JSON.stringify(MEAL_LOG_ITEMS));
+  if(db){db.useCount=(db.useCount||0)+1;saveFoodDbData();}
+  try{if(typeof autoFlagStaples==='function')autoFlagStaples();}catch(e){}
+  try{if(typeof checkQuestAutoComplete==='function')checkQuestAutoComplete('meal');}catch(e){}
+  try{if(typeof renderTodayStatsBars==='function')renderTodayStatsBars();}catch(e){}
+  DELTED={restore:function(){
+    MEAL_LOG_ITEMS=MEAL_LOG_ITEMS.filter(function(x){return x.id!==it.id;});
+    localStorage.setItem('aMealLogItems',JSON.stringify(MEAL_LOG_ITEMS));
+    if(db){db.useCount=Math.max(0,(db.useCount||1)-1);saveFoodDbData();}
+    renderFoodHome();
+  }};
+  showUndo(name+' logged · '+fhNum(it.cal)+' cal');
+  renderFoodHome();
+}
+function fhLogUsual(i){
+  var u=_fhUsualsCache[i];if(!u)return;
+  if(!u.nut){fhOpenLog('find',u.name);return;}
+  fhCommit(u.name,u.nut,{});
+}
+function fhGoHome(){goTab('home',document.querySelector('[data-tab="home"]'));window.scrollTo(0,0);}
+function fhGoMeals(sec){
+  goTab('meals',null);
+  setTimeout(function(){
+    var b=null;
+    document.querySelectorAll('#v-meals .pn-btn').forEach(function(x){if((x.getAttribute('onclick')||'').indexOf("'"+sec+"'")>=0)b=x;});
+    showMealSec(sec,b);
+    window.scrollTo(0,0);
+  },90);
+}
+function fhGoConvert(){goTab('convert',null);window.scrollTo(0,0);}
+function fhBarcode(){
+  openFoodDbModal();
+  var more=document.getElementById('fdbMoreOpts'),btn=document.getElementById('fdbMoreBtn');
+  if(more)more.style.display='';
+  if(btn)btn.textContent='Less details ▴';
+  var bc=document.getElementById('fdbBarcode');
+  if(bc){try{bc.scrollIntoView({block:'center'});bc.focus();}catch(e){}}
+}
+// In food mode, the Eat pages get a one-tap way back to the food home.
+function fhAfterTab(tab){
+  if(!fhMode()||tab!=='meals')return;
+  var bc=document.getElementById('sectionBreadcrumb');
+  if(bc){bc.style.display='flex';bc.innerHTML='<button class="bc-btn" onclick="fhGoHome()">← Food home</button>';}
+}
+
+// ── Log a food ────────────────────────────────
+var FL_STATE=null;
+function flState(){if(!FL_STATE)FL_STATE={mode:'find',sel:null,cands:[],recents:[],grams:0,mult:1,guess:0,calOnly:0};return FL_STATE;}
+function fhOpenLog(mode,prefill){
+  FL_STATE={mode:mode==='cal'?'cal':'find',sel:null,cands:[],recents:[],grams:0,mult:1,guess:0,calOnly:0};
+  goTab('foodlog',null);
+  var q=document.getElementById('flQuery');
+  if(q){q.value=prefill||'';q.placeholder=FL_STATE.mode==='cal'?'What was it? (optional)':'What did you eat?';}
+  var t=document.getElementById('flTitle');if(t)t.textContent=FL_STATE.mode==='cal'?'Just calories':'Log a food';
+  if(FL_STATE.mode==='cal')flRender();else flOnQuery();
+  window.scrollTo(0,0);
+  var f=FL_STATE.mode==='cal'?document.getElementById('flCalOnly'):q;
+  if(f){try{f.focus();}catch(e){}}
+}
+function flCand(item,hist){
+  if(item){
+    var b=flDbBase(item);
+    if(b.per100||parseFloat(item.cal)>0)return {kind:b.per100?'lib-g':'lib-s',name:item.name,item:item,base:b};
+    if(hist&&hist.n)return {kind:'hist',name:item.name,item:item,hist:hist};
+    return {kind:'new',name:item.name,item:item};
+  }
+  return {kind:'hist',name:hist.name,hist:hist};
+}
+function flSearch(q){
+  q=fhNorm(q);if(!q)return [];
+  var out=[],seen={},hist=fhHistory();
+  (FOOD_DB||[]).forEach(function(x){
+    var nm=fhNorm(x.name);if(!nm)return;
+    var al=(x.aliases||[]).map(fhNorm);
+    var score=nm===q?0:nm.indexOf(q)===0?1:nm.indexOf(q)>=0?2:(al.some(function(a){return a&&a.indexOf(q)>=0;})?3:-1);
+    if(score<0)return;
+    seen[nm]=1;
+    var c=flCand(x,hist[nm]);c.score=score;c.use=x.useCount||0;out.push(c);
+  });
+  Object.keys(hist).forEach(function(k){
+    if(seen[k])return;
+    var e=hist[k];if(!e.n)return;
+    var score=k===q?0:k.indexOf(q)===0?1:k.indexOf(q)>=0?2:-1;
+    if(score<0)return;
+    var c=flCand(null,e);c.score=score;c.use=e.count;out.push(c);
+  });
+  out.sort(function(a,b){return (a.score-b.score)||((a.kind==='new'?1:0)-(b.kind==='new'?1:0))||(b.use-a.use);});
+  return out.slice(0,5);
+}
+function flOnQuery(){
+  var st=flState();
+  if(st.mode==='cal'){if(!document.getElementById('flCalOnly'))flRender();return;}
+  var q=((document.getElementById('flQuery')||{}).value||'').trim();
+  st.cands=flSearch(q);
+  flSelect(st.cands.length?st.cands[0]:(q?{kind:'new',name:q}:null));
+}
+function flSelect(c){
+  var st=flState();
+  st.sel=c;st.mult=1;st.grams=(c&&c.kind==='lib-g')?c.base.grams:0;
+  flRender();
+}
+function flPick(i){var st=flState();if(st.cands[i])flSelect(st.cands[i]);}
+function flPickNew(){var q=((document.getElementById('flQuery')||{}).value||'').trim();if(q)flSelect({kind:'new',name:q});}
+function flPickRecent(i){
+  var st=flState(),r=st.recents[i];if(!r)return;
+  var q=document.getElementById('flQuery');if(q)q.value=r;
+  flOnQuery();
+}
+function flCurrentNut(){
+  var st=flState(),z={cal:0,pro:0,carb:0,fat:0};
+  if(st.mode==='cal')return {cal:st.calOnly||0,pro:0,carb:0,fat:0};
+  var c=st.sel;if(!c)return z;
+  if(c.kind==='lib-g')return st.grams>0?calcNutFromLib(c.item,st.grams,1):z;
+  if(c.kind==='lib-s')return calcNutFromLib(c.item,0,c.base.qty*st.mult);
+  if(c.kind==='hist'){var a=fhAvgNut(c.hist);return {cal:Math.round(a.cal*st.mult),pro:fhR1(a.pro*st.mult),carb:fhR1(a.carb*st.mult),fat:fhR1(a.fat*st.mult)};}
+  return {cal:st.guess||0,pro:0,carb:0,fat:0};
+}
+function flPortsHtml(){
+  var st=flState(),c=st.sel;if(!c||c.kind==='new')return '';
+  var defs=[[0.25,'¼ serving'],[0.5,'½ serving'],[1,'1 serving'],[2,'2 servings']];
+  return defs.map(function(d){
+    var m=d[0],on,sub;
+    if(c.kind==='lib-g'){
+      var g=c.base.grams*m;
+      on=Math.abs(st.grams-g)<0.01;
+      sub=(Math.round(g)===g?'':'about ')+Math.round(g)+' g';
+    }else{
+      on=st.mult===m;
+      var n=c.kind==='lib-s'?calcNutFromLib(c.item,0,c.base.qty*m):{cal:Math.round(fhAvgNut(c.hist).cal*m)};
+      sub='about '+fhNum(n.cal)+' cal';
+    }
+    return '<button class="fdm-card fdm-port'+(on?' on':'')+'" aria-pressed="'+(on?'true':'false')+'" onclick="flSetPort('+m+')">'
+      +(on?'<span><b>'+d[1]+'</b><small>'+sub+'</small></span>'+fhIcon('check',20,3):'<b>'+d[1]+'</b><small>'+sub+'</small>')
+      +'</button>';
+  }).join('');
+}
+function flUpdate(){
+  var n=flCurrentNut();
+  var p=document.getElementById('flPorts');if(p)p.innerHTML=flPortsHtml();
+  var r=document.getElementById('flResult');
+  if(r)r.innerHTML='<div class="fdm-result-l"><span class="fdm-result-n">'+fhNum(n.cal)+'</span><span class="fdm-result-u">calories</span></div>'
+    +(n.pro>0?'<div class="fdm-result-p">'+Math.round(n.pro)+' g protein</div>':'');
+  var go=document.getElementById('flGo');if(go)go.disabled=!(n.cal>0);
+}
+function flSetPort(m){
+  var st=flState(),c=st.sel;if(!c)return;
+  if(c.kind==='lib-g'){
+    st.grams=c.base.grams*m;
+    var gi=document.getElementById('flGrams');if(gi)gi.value=fhR1(st.grams);
+  }else{st.mult=m;}
+  flUpdate();
+}
+function flOnGrams(){flState().grams=Math.max(0,parseFloat((document.getElementById('flGrams')||{}).value)||0);flUpdate();}
+function flOnGuess(){flState().guess=Math.max(0,parseFloat((document.getElementById('flGuess')||{}).value)||0);flUpdate();}
+function flOnCalOnly(){flState().calOnly=Math.max(0,parseFloat((document.getElementById('flCalOnly')||{}).value)||0);flUpdate();}
+function flRender(){
+  var st=flState(),el=document.getElementById('flDyn');if(!el)return;
+  var q=((document.getElementById('flQuery')||{}).value||'').trim();
+  var h='';
+  if(st.mode==='cal'){
+    el.innerHTML='<div class="fdm-row"><label for="flCalOnly">Calories</label><div class="fdm-row-r"><input id="flCalOnly" class="fdm-card fdm-num" type="number" inputmode="numeric" min="0" placeholder="0" oninput="flOnCalOnly()"'+(st.calOnly?' value="'+st.calOnly+'"':'')+'><span>cal</span></div></div>'
+      +'<div class="fdm-result" id="flResult"></div>'
+      +'<button class="fdm-go" id="flGo" onclick="flLogIt()">Log it</button>'
+      +'<button class="fdm-link" onclick="fhOpenLog(\'find\',document.getElementById(\'flQuery\').value)">Look up a food instead</button>';
+    flUpdate();return;
+  }
+  var c=st.sel;
+  if(!c){
+    var hist=fhHistory();
+    st.recents=Object.keys(hist).map(function(k){return hist[k];}).sort(function(a,b){return b.last-a.last;}).slice(0,6).map(function(e){return e.name;});
+    h='<div class="fdm-empty">Type what you ate. If it is in your food library, Cal fills in the calories. If it is new, you can give it your best guess and save it for next time.</div>';
+    if(st.recents.length){
+      h+='<div class="fdm-block"><h3 class="fdm-h2">Lately</h3><div class="fdm-chips">'
+        +st.recents.map(function(r,i){return '<button class="fdm-card fdm-chip" onclick="flPickRecent('+i+')">'+escHtml(r)+'</button>';}).join('')
+        +'</div></div>';
+    }
+    h+='<button class="fdm-link" onclick="fhOpenLog(\'cal\')">Skip the details, just log calories</button>';
+    el.innerHTML=h;return;
+  }
+  // The pink card: what Cal knows about this food
+  h+='<div class="fdm-found">';
+  if(c.kind==='lib-g'){
+    var p=c.item.per100,b=c.base,lbl=b.sv&&b.sv.label?String(b.sv.label):'';
+    var gTxt=fhR1(b.grams)+' g';
+    var svTxt=(!lbl||!b.hasG||/^\s*[\d.]+\s*g\s*$/i.test(lbl))?gTxt:((b.qty!==1?b.qty+' × ':'')+escHtml(lbl)+', about '+gTxt);
+    h+='<div class="fdm-found-l">Found in your food library</div><div class="fdm-found-n">'+escHtml(c.name)+'</div>'
+      +'<div class="fdm-found-s">'+fhNum(p.cal)+' calories'+(p.pro>0?' and '+fhR1(p.pro)+' g protein':'')+' per 100 g</div>'
+      +'<div class="fdm-found-b">1 serving is '+svTxt+'</div>';
+  }else if(c.kind==='lib-s'){
+    var n1=calcNutFromLib(c.item,0,c.base.qty);
+    h+='<div class="fdm-found-l">Found in your food library</div><div class="fdm-found-n">'+escHtml(c.name)+'</div>'
+      +'<div class="fdm-found-s">'+fhNum(n1.cal)+' calories'+(n1.pro>0?' and '+fhR1(n1.pro)+' g protein':'')+' per serving</div>'
+      +(c.item.estimate?'<div class="fdm-found-b">Saved from your own estimate</div>':'');
+  }else if(c.kind==='hist'){
+    var a=fhAvgNut(c.hist);
+    h+='<div class="fdm-found-l">You have logged this before</div><div class="fdm-found-n">'+escHtml(c.name)+'</div>'
+      +'<div class="fdm-found-s">Usually about '+fhNum(a.cal)+' calories</div>'
+      +'<div class="fdm-found-b">Your average over '+c.hist.n+' time'+(c.hist.n!==1?'s':'')+'</div>';
+  }else{
+    h+='<div class="fdm-found-l">New to Cal</div><div class="fdm-found-n">'+escHtml(c.name)+'</div>'
+      +'<div class="fdm-found-s">Not in your food library yet. Give it your best guess.</div>';
+  }
+  h+='</div>';
+  if(c.kind==='new'){
+    h+='<div class="fdm-row"><label for="flGuess">Calories, your best guess</label><div class="fdm-row-r"><input id="flGuess" class="fdm-card fdm-num" type="number" inputmode="numeric" min="0" placeholder="0" oninput="flOnGuess()"'+(st.guess?' value="'+st.guess+'"':'')+'><span>cal</span></div></div>'
+      +'<label class="fdm-check"><input type="checkbox" id="flSave" checked>Save it so Cal remembers next time</label>';
+  }else{
+    h+='<div class="fdm-block"><h3 class="fdm-h2">How much did you have?</h3><div class="fdm-2col" id="flPorts"></div></div>';
+    if(c.kind==='lib-g'){
+      h+='<div class="fdm-row"><label for="flGrams">Or type the grams</label><div class="fdm-row-r"><input id="flGrams" class="fdm-card fdm-num" type="number" inputmode="decimal" min="0" value="'+fhR1(st.grams)+'" oninput="flOnGrams()"><span>g</span></div></div>';
+    }
+  }
+  h+='<div class="fdm-result" id="flResult"></div><button class="fdm-go" id="flGo" onclick="flLogIt()">Log it</button>';
+  // Other matches, plus a way to add what was typed as a new food
+  var others=[];
+  st.cands.forEach(function(o,i){if(o!==c)others.push('<button class="fdm-card fdm-chip" onclick="flPick('+i+')">'+escHtml(o.name)+'</button>');});
+  if(q&&c.kind!=='new'&&fhNorm(q)!==fhNorm(c.name))others.push('<button class="fdm-card fdm-chip" onclick="flPickNew()">Add “'+escHtml(q)+'” as new</button>');
+  if(others.length)h+='<div class="fdm-block"><h3 class="fdm-h2">Not it?</h3><div class="fdm-chips">'+others.join('')+'</div></div>';
+  h+='<button class="fdm-link" onclick="fhOpenLog(\'cal\',document.getElementById(\'flQuery\').value)">Skip the details, just log calories</button>';
+  el.innerHTML=h;
+  flUpdate();
+}
+function flLogIt(){
+  var st=flState(),n=flCurrentNut();if(!(n.cal>0))return;
+  var q=((document.getElementById('flQuery')||{}).value||'').trim();
+  if(st.mode==='cal'){fhCommit(q||'Calories only',{cal:n.cal},{est:true,calOnly:!q});fhGoHome();return;}
+  var c=st.sel;if(!c)return;
+  var opts={};
+  if(c.kind==='new'){
+    opts.est=true;
+    if((document.getElementById('flSave')||{}).checked){
+      if(c.item){c.item.cal=Math.round(n.cal);c.item.estimate=true;}
+      else{FOOD_DB.unshift({id:'fd-'+Date.now(),name:c.name,tags:['other'],useCount:0,staple:false,store:'',price:0,priceEntries:[],cal:Math.round(n.cal),pro:0,carb:0,fat:0,notes:'Calorie estimate saved from a quick log',estimate:true,created:todayStr()});}
+      saveFoodDbData();
+    }
+  }
+  fhCommit(c.name,n,opts);
+  fhGoHome();
+}
+
+
+// ═══════════════════════════════════════════════
+// HATCH REVAMP — slice 1 (Nov 2026): the Button, the supply drop, Basement Shelf 01
+// Pure play, nothing to do with tasks or food.
+//   The Button: punch in 4 8 15 16 23 42 once a day. "Days held" is the streak.
+//     Miss a day and an Incident is logged; the streak restarts, lifetime count stays.
+//   Supply drop: pressing the Button lands one crate. Open it for a collectible.
+//   The Basement: where the collectibles live. Shelf 01 has ten. More shelves later.
+// State lives in localStorage 'aHatchSwan' (synced with the other Hatch data).
+// The older protocols (Mission, Chaos, Transmission, Shock, Cast, Spa) are off the menu.
+// Their panels, code and saved prompts are still in the file, dormant.
+// ═══════════════════════════════════════════════
+var HS_SEQ=[4,8,15,16,23,42];
+var HS_PAL={k:'#0b0f1a',w:'#f4f1e8',g:'#7dff9a',p:'#ff5fa2',c:'#4fd8ff',y:'#ffd84a',o:'#ff8a3c',r:'#ff4d4d',v:'#9b7bff',s:'#8a93a6',d:'#4a5266',b:'#2b6cff'};
+var HS_SHELF_NAME='Shelf 01 // Den essentials';
+var HS_ITEMS=[
+  {id:'tape',name:'Mixtape, Side B',rarity:'common',text:'Someone wrote DO NOT TAPE OVER on it. Someone taped over it.',art:[
+    '................','................','................','.kkkkkkkkkkkkkk.','.kssssssssssssk.','.kswwwwwwwwwwsk.','.kswppppppppwsk.','.kswwwwwwwwwwsk.',
+    '.kssdddssdddssk.','.kssdkdssdkdssk.','.kssdddssdddssk.','.kssssssssssssk.','.kkkkkkkkkkkkkk.','................','................','................']},
+  {id:'floppy',name:'Floppy Disk, Unlabelled',rarity:'common',text:'1.44 megabytes of mystery. Probably a book report.',art:[
+    '................','..kkkkkkkkkkkk..','..kbbsssssbbbk..','..kbbsssksbbbk..','..kbbsssksbbbk..','..kbbsssssbbbk..','..kbbbbbbbbbbk..','..kbbbbbbbbbbk..',
+    '..kbwwwwwwwwbk..','..kbwddddddwbk..','..kbwwwwwwwwbk..','..kbwddddddwbk..','..kbwwwwwwwwbk..','..kkkkkkkkkkkk..','................','................']},
+  {id:'cart',name:'Game Cartridge',rarity:'common',text:'Works first time, every time, after you blow on it four times.',art:[
+    '................','...kkkkkkkkkk...','...kssssssssk...','...kdsdsdsdsk...','...kssssssssk...','...kyyyyyyyyk...','...kyppyyccyk...','...kyppyyccyk...',
+    '...kyyyyyyyyk...','...kssssssssk...','...kssssssssk...','...kssssssssk...','....kddddddk....','....kkkkkkkk....','................','................']},
+  {id:'token',name:'Arcade Token',rarity:'common',text:'Good for one game. No cash value. Enormous sentimental value.',art:[
+    '................','................','.....kkkkkk.....','...kkyyyyyykk...','..kyyooooooyyk..','.kyyoyyyyyyoyyk.','.kyoyyykkyyyoyk.','.kyoykkkkkkyoyk.',
+    '.kyoykkkkkkyoyk.','.kyoyyykkyyyoyk.','.kyyoyyyyyyoyyk.','..kyyooooooyyk..','...kkyyyyyykk...','.....kkkkkk.....','................','................']},
+  {id:'cola',name:'Station Cola',rarity:'common',text:'Best before a date that has already happened. Still fizzy. Suspicious.',art:[
+    '................','.....kkkkkk.....','....kssssssk....','....kkkkkkkk....','....kcccccck....','....kcccccck....','....kwwwwwwk....','....kcwccwck....',
+    '....kwwwwwwk....','....kcccccck....','....kcccccck....','....kcccccck....','....kkkkkkkk....','....kssssssk....','.....kkkkkk.....','................']},
+  {id:'stick',name:'Joystick, Slightly Sticky',rarity:'uncommon',text:'Left works. Right works. Up is more of a suggestion.',art:[
+    '................','......kkkk......','.....krrrrk.....','.....krrrrk.....','......kkkk......','.......ss.......','.......ss.......','.......ss.......',
+    '.......ss.......','..kkkkkkkkkkkk..','..kddddddddyyk..','..kddddddddyyk..','..kddddddddddk..','..kkkkkkkkkkkk..','................','................']},
+  {id:'walkie',name:'Walkie-Talkie, One of a Pair',rarity:'uncommon',text:'The other one is out there somewhere. It has not called.',art:[
+    '....s...........','....s...........','....s...........','....kkkkkkkk....','....kddddddk....','....kdggggdk....','....kdggggdk....','....kddddddk....',
+    '....kdsdsddk....','....kddddddk....','....kdsdsddk....','....kddddddk....','....kdddoodk....','....kddddddk....','....kkkkkkkk....','................']},
+  {id:'lava',name:'Lava Lamp',rarity:'uncommon',text:'Takes forty minutes to warm up. Worth it.',art:[
+    '......kkkk......','......kssk......','.....kssssk.....','.....kkkkkk.....','.....kvvvvk.....','....kvvppvvk....','....kvppppvk....','....kvvppvvk....',
+    '....kvvvvvvk....','....kvpvvvvk....','....kvppvvvk....','.....kvpvvk.....','.....kkkkkk.....','....kssssssk....','...kssssssssk...','...kkkkkkkkkk...']},
+  {id:'d20',name:'Twenty-Sided Die',rarity:'rare',text:'Always lands on 4. Nobody has asked why.',art:[
+    '................','.......kk.......','.....kkggkk.....','...kkggggggkk...','..kggggggggggk..','..kggggggggggk..','..kgggwgwggggk..','..kgggwgwggggk..',
+    '..kgggwwwggggk..','..kgggggwggggk..','..kgggggwggggk..','..kggggggggggk..','...kkggggggkk...','.....kkggkk.....','.......kk.......','................']},
+  {id:'tv',name:'Portable TV, Tuned to Nothing',rarity:'rare',text:'Only gets one channel. It is static, and it is very good static.',art:[
+    '...s........s...','....s......s....','.....s....s.....','.kkkkkkkkkkkkkk.','.kddddddddddddk.','.kdkkkkkkkkkddk.','.kdkwswwswskdyk.','.kdkswswwswkddk.',
+    '.kdkwwswswskdyk.','.kdkswwswwskddk.','.kdkkkkkkkkkddk.','.kddddddddddddk.','.kkkkkkkkkkkkkk.','..kk........kk..','................','................']}
+];
+
+function hsLoad(){
+  var s=null;try{s=JSON.parse(localStorage.getItem('aHatchSwan')||'null');}catch(e){}
+  if(!s||typeof s!=='object')s={};
+  s.last=s.last||'';s.streak=s.streak||0;s.best=s.best||0;s.total=s.total||0;
+  s.incidents=s.incidents||[];s.inv=s.inv||{};s.dupes=s.dupes||0;s.pity=s.pity||0;s.log=s.log||[];
+  s.crate=s.crate||null;
+  return s;
+}
+function hsSave(s){localStorage.setItem('aHatchSwan',JSON.stringify(s));}
+function hsDayDiff(a,b){
+  var pa=String(a).split('-'),pb=String(b).split('-');
+  return Math.round((Date.UTC(+pb[0],pb[1]-1,+pb[2])-Date.UTC(+pa[0],pa[1]-1,+pa[2]))/86400000);
+}
+function hsLeft(){var n=new Date(),m=new Date(n.getFullYear(),n.getMonth(),n.getDate()+1);return Math.max(0,Math.floor((m-n)/1000));}
+function hsFmt(sec,withSec){
+  var h=Math.floor(sec/3600),m=Math.floor(sec%3600/60),x=sec%60,p=function(v){return (v<10?'0':'')+v;};
+  return p(h)+':'+p(m)+(withSec?':'+p(x):'');
+}
+function hsOwned(s){return HS_ITEMS.filter(function(it){return s.inv[it.id]>0;}).length;}
+function hsItem(id){return HS_ITEMS.find(function(it){return it.id===id;})||null;}
+function hsMilestone(n){return [4,8,15,16,23,42,108].indexOf(n)>=0||(n>42&&n%42===0);}
+
+// A missed day: log it once, restart the streak, keep everything else.
+function hsCheckIncident(s){
+  if(!s.last||s.streak<=0)return null;
+  var gap=hsDayDiff(s.last,todayStr());
+  if(gap<=1)return null;
+  var inc={date:todayStr(),missed:gap-1,streak:s.streak};
+  s.incidents.unshift(inc);if(s.incidents.length>50)s.incidents.length=50;
+  s.streak=0;
+  hsSave(s);
+  return inc;
+}
+// Today's press. Returns what happened so the screen can react.
+function hsPress(){
+  var s=hsLoad(),today=todayStr();
+  if(s.last===today)return null;
+  var first=!s.total;
+  var gap=s.last?hsDayDiff(s.last,today):0;
+  s.streak=(s.last&&gap===1)?s.streak+1:1;
+  s.last=today;s.total++;
+  if(s.streak>s.best)s.best=s.streak;
+  var gold=hsMilestone(s.streak);
+  s.crate={date:today,opened:false,gold:gold};
+  hsSave(s);
+  var r=Math.random(),kind=first?'first':r<0.55?'calm':r<0.70?'glitch':r<0.80?'symbols':'tx';
+  try{hsDoorUpdate();}catch(e){}
+  return {streak:s.streak,gold:gold,kind:kind};
+}
+// Picks one collectible. Rarity decides the odds; two duplicates in a row guarantees something new.
+function hsDraw(s,mode){
+  var unowned=HS_ITEMS.filter(function(it){return !s.inv[it.id];});
+  var wantNew=(mode==='new'||mode==='gold'||s.pity>=2)&&unowned.length;
+  var pool=wantNew?unowned:HS_ITEMS;
+  var W=mode==='gold'?{common:10,uncommon:30,rare:60}:{common:60,uncommon:30,rare:10};
+  var per={};pool.forEach(function(it){per[it.rarity]=(per[it.rarity]||0)+1;});
+  var tot=0,ws=pool.map(function(it){var w=W[it.rarity]/per[it.rarity];tot+=w;return w;});
+  var roll=Math.random()*tot,pick=pool[pool.length-1];
+  for(var i=0;i<pool.length;i++){roll-=ws[i];if(roll<=0){pick=pool[i];break;}}
+  var isNew=!s.inv[pick.id];
+  s.inv[pick.id]=(s.inv[pick.id]||0)+1;
+  if(isNew){s.pity=0;}else{s.pity++;s.dupes++;}
+  s.log.unshift({d:todayStr(),id:pick.id});if(s.log.length>30)s.log.length=30;
+  return {item:pick,isNew:isNew};
+}
+function hsOpenCrate(){
+  var s=hsLoad();
+  if(!s.crate||s.crate.opened)return null;
+  var res=hsDraw(s,s.crate.gold?'gold':'');
+  s.crate.opened=true;s.crate.item=res.item.id;s.crate.isNew=res.isNew;
+  hsSave(s);
+  return res;
+}
+
+function hsSprite(it,px,ghost){
+  var out='';
+  for(var y=0;y<it.art.length;y++){
+    var row=it.art[y],x=0;
+    while(x<row.length){
+      var ch=row.charAt(x);
+      if(ch==='.'){x++;continue;}
+      var x2=x;while(x2<row.length&&row.charAt(x2)===ch)x2++;
+      out+='<rect x="'+x+'" y="'+y+'" width="'+(x2-x)+'" height="1" fill="'+(ghost?'#1c2740':(HS_PAL[ch]||'#ffffff'))+'"/>';
+      x=x2;
+    }
+  }
+  return '<svg width="'+px+'" height="'+px+'" viewBox="0 0 16 16" shape-rendering="crispEdges" role="img" aria-label="'+(ghost?'Not found yet':escHtml(it.name))+'">'+out+'</svg>';
+}
+function hsStatsHtml(s){
+  return '<div class="hs-stats"><span>Days held: '+s.streak+'</span><span>Best: '+s.best+'</span><span>Total: '+s.total+'</span><span>Incidents: '+s.incidents.length+'</span></div>';
+}
+
+// ── The Button ────────────────────────────────
+var _hsEntry=[],_hsFresh=null,_hsRevealed=false;
+function hsRenderButton(){
+  var el=document.getElementById('hsButtonBody');if(!el)return;
+  var s=hsLoad();
+  var inc=hsCheckIncident(s);
+  if(s.last===todayStr()){hsRenderHolding(el,s);return;}
+  _hsEntry=[];
+  var h='';
+  if(inc){
+    h+='<div class="hs-fail"><b>SYSTEM FAILURE</b><span>The counter reached zero '+inc.missed+' day'+(inc.missed!==1?'s':'')+' ago, after '+inc.streak+' day'+(inc.streak!==1?'s':'')+' held. Incident #'+s.incidents.length+' has been logged.</span><span>The island is still here. Mostly. Enter the numbers to start again.</span></div>';
+  }
+  h+='<div class="hatch-card"><div class="hatch-label">Station 3 : The Swan // Countdown</div><div class="hs-timer" id="hsTimer"></div><div class="hs-sub">Enter the numbers before midnight</div></div>'
+    +'<div class="hs-slots" id="hsSlots"></div>'
+    +'<div class="hs-pad">'+HS_SEQ.map(function(n){return '<button class="hs-num" onclick="hsKey('+n+')">'+n+'</button>';}).join('')+'</div>'
+    +'<button class="hs-exec" id="hsExec" onclick="hsExecute()" disabled>EXECUTE</button>'
+    +hsStatsHtml(s);
+  el.innerHTML=h;
+  hsDrawSlots();hsTick();
+  _hatchTimerInt=setInterval(hsTick,1000);
+}
+function hsTick(){
+  var t=document.getElementById('hsTimer');if(!t)return;
+  var left=hsLeft();
+  t.textContent=hsFmt(left,true);
+  t.classList.toggle('urgent',left<3600);
+}
+function hsDrawSlots(bad){
+  var el=document.getElementById('hsSlots');if(!el)return;
+  el.innerHTML=HS_SEQ.map(function(n,i){return '<div class="hs-slot'+(bad?' bad':'')+'">'+(bad?'X':(_hsEntry[i]!=null?_hsEntry[i]:'_'))+'</div>';}).join('');
+  var ex=document.getElementById('hsExec');
+  if(ex){var ready=_hsEntry.length===HS_SEQ.length;ex.disabled=!ready;ex.classList.toggle('ready',ready);}
+}
+function hsKey(n){
+  var want=HS_SEQ[_hsEntry.length];
+  if(want===undefined)return;
+  if(n!==want){
+    if(navigator.vibrate)navigator.vibrate(80);
+    _hsEntry=[];hsDrawSlots(true);
+    setTimeout(function(){hsDrawSlots();},450);
+    return;
+  }
+  if(navigator.vibrate)navigator.vibrate(15);
+  _hsEntry.push(n);hsDrawSlots();
+}
+function hsExecute(){
+  if(_hsEntry.length!==HS_SEQ.length)return;
+  _hsFresh=hsPress();
+  _hsRevealed=false;
+  if(navigator.vibrate)navigator.vibrate([40,30,90]);
+  _clearHatchTimers();
+  hsRenderButton();
+}
+function hsRenderHolding(el,s){
+  var fresh=_hsFresh;_hsFresh=null;
+  var h='<div class="hatch-card'+(fresh&&fresh.kind==='glitch'?' hs-glitch':'')+'"><div class="hatch-label">Countdown reset</div><div class="hs-timer">108:00</div><div class="hs-lines" id="hsLines"></div></div>'
+    +hsStatsHtml(s);
+  var c=s.crate;
+  if(c&&c.date===todayStr()){
+    if(!c.opened){
+      h+='<div class="hs-crate'+(c.gold?' gold':'')+'"><div class="hatch-label" style="color:#8a6a1c">Supply drop</div><div class="hs-crate-t">'+(c.gold?'PRIORITY PALLET ON THE GROUND':'PALLET ON THE GROUND')+'</div><button class="hs-btn" onclick="hsOpenCrateUI()">[ OPEN THE CRATE ]</button></div>';
+    }else{
+      var it=hsItem(c.item);
+      if(it){
+        h+='<div class="hs-crate'+(c.gold?' gold':'')+'"><div class="hatch-label" style="color:#8a6a1c">Today&#39;s drop</div>'
+          +'<div'+(_hsRevealed?' class="hs-pop"':'')+'>'+hsSprite(it,96)+'</div>'
+          +'<div class="hs-crate-n">'+escHtml(it.name)+'</div>'
+          +'<div class="hs-tag '+it.rarity+'">'+it.rarity+'</div>'
+          +'<div class="hs-crate-f">'+escHtml(it.text)+'<br>'+(c.isNew?'New. It has a spot on the shelf.':'A duplicate. That is '+s.dupes+' toward a re-roll (3 needed).')+'</div>'
+          +'<button class="hs-btn" onclick="hatchMode(\'basement\')">[ GO TO THE BASEMENT ]</button></div>';
+      }
+    }
+  }
+  el.innerHTML=h;
+  _hsRevealed=false;
+  hsTypeLines(fresh,s);
+}
+function hsTypeLines(fresh,s){
+  var lines;
+  if(!fresh){lines=['HOLDING.','<span class="dim">Next window opens at midnight.</span>'];}
+  else{
+    if(fresh.kind==='first')lines=['RESET CONFIRMED.','WELCOME, OPERATOR.','<span class="dim">The last one left in a hurry.</span>'];
+    else if(fresh.kind==='glitch')lines=['R#S%T C0NF!RM&amp;D','<span class="dim">...never mind.</span>','RESET CONFIRMED.'];
+    else if(fresh.kind==='symbols')lines=['<span style="color:#e85050">▚▞▙▟▜▛▚▞▙▟</span>','<span class="dim">False alarm. Probably.</span>','RESET CONFIRMED.'];
+    else if(fresh.kind==='tx'){
+      var list=[];try{list=_hd().transmissions||[];}catch(e){}
+      lines=['RESET CONFIRMED.'];
+      if(list.length)lines.push('<span class="dim">STRAY SIGNAL INTERCEPTED:</span>',escHtml(list[Math.floor(Math.random()*list.length)]));
+      else lines.push('<span class="dim">Electromagnetic containment nominal.</span>');
+    }
+    else lines=['RESET CONFIRMED.','<span class="dim">'+['Countdown restored.','Electromagnetic containment nominal.','All stations online.','Nothing happened. That is the idea.'][Math.floor(Math.random()*4)]+'</span>'];
+    lines.push(fresh.gold?'DAY '+fresh.streak+'. THE NUMBERS NOTICED. PRIORITY PALLET INBOUND.':'DAYS HELD: '+fresh.streak+'. SUPPLY DROP INBOUND.');
+  }
+  var add=function(l){
+    var box=document.getElementById('hsLines');if(!box)return;
+    var d=document.createElement('div');d.innerHTML=l;box.appendChild(d);
+  };
+  lines.forEach(function(l,i){
+    if(!fresh)add(l);
+    else setTimeout(function(){add(l);},260*i+150);
+  });
+}
+function hsOpenCrateUI(){
+  var res=hsOpenCrate();if(!res)return;
+  if(navigator.vibrate)navigator.vibrate([30,40,30]);
+  _hsRevealed=true;
+  _hsSel=res.item.id;
+  hsRenderButton();
+}
+
+// ── The Basement ──────────────────────────────
+var _hsSel='';
+function hsRenderBasement(){
+  var el=document.getElementById('hsBasementBody');if(!el)return;
+  var s=hsLoad(),owned=hsOwned(s);
+  var h='<div class="hs-neon">THE BASEMENT</div>'
+    +'<div class="hs-shelf-h"><span>'+HS_SHELF_NAME+'</span><span>'+owned+' / '+HS_ITEMS.length+'</span></div>'
+    +'<div class="hs-shelf">'+HS_ITEMS.map(function(it){
+      var n=s.inv[it.id]||0;
+      if(!n)return '<div class="hs-cell ghost">'+hsSprite(it,48,true)+'</div>';
+      return '<button class="hs-cell'+(_hsSel===it.id?' sel':'')+'" onclick="hsSelect(\''+it.id+'\')" aria-label="'+escHtml(it.name)+'">'+hsSprite(it,48)+(n>1?'<span class="hs-x">×'+n+'</span>':'')+'</button>';
+    }).join('')+'</div>';
+  var sel=hsItem(_hsSel);
+  if(sel&&s.inv[sel.id]>0){
+    h+='<div class="hs-detail"><div style="flex-shrink:0">'+hsSprite(sel,72)+'</div><div><div class="hs-tag '+sel.rarity+'">'+sel.rarity+'</div><div class="hs-detail-n">'+escHtml(sel.name)+(s.inv[sel.id]>1?' ×'+s.inv[sel.id]:'')+'</div><div class="hs-detail-f">'+escHtml(sel.text)+'</div></div></div>';
+  }else if(!owned){
+    h+='<div class="hs-note">Empty shelves. Press the Button, open the crate, and the first thing you find goes here.</div>';
+  }else{
+    h+='<div class="hs-note">Tap anything on the shelf to read about it.</div>';
+  }
+  var canTrade=s.dupes>=3&&owned<HS_ITEMS.length;
+  h+='<button class="hs-btn" onclick="hsTrade()"'+(canTrade?'':' disabled')+'>[ TRADE 3 DUPES FOR A RE-ROLL ]</button>'
+    +'<div class="hs-note">Duplicates on hand: '+s.dupes+'. '+(owned>=HS_ITEMS.length?'Shelf 01 is complete. Nine more shelves are still in their boxes.':'A re-roll always finds something you do not have yet. Nine more shelves are still in their boxes.')+'</div>';
+  el.innerHTML=h;
+}
+function hsSelect(id){_hsSel=id;hsRenderBasement();}
+function hsTrade(){
+  var s=hsLoad();
+  if(s.dupes<3||hsOwned(s)>=HS_ITEMS.length)return;
+  s.dupes-=3;
+  var res=hsDraw(s,'new');
+  hsSave(s);
+  _hsSel=res.item.id;
+  if(navigator.vibrate)navigator.vibrate([30,40,30]);
+  hsRenderBasement();
+  if(typeof showToast==='function')showToast('Re-roll: '+res.item.name);
+}
+
+// ── Menu lines, landing screen, and the door in the top bar ──
+function hsRenderSelector(){
+  var s=hsLoad(),pressed=s.last===todayStr();
+  var a=document.getElementById('hsSelBtnSub');
+  if(a)a.textContent=pressed?'Holding. Days held: '+s.streak:hsFmt(hsLeft(),false)+' left today. Enter the numbers.';
+  var b=document.getElementById('hsSelBaseSub');
+  if(b)b.textContent=hsOwned(s)+' / '+HS_ITEMS.length+' on Shelf 01';
+}
+function hsLanding(){return hsLoad().last===todayStr()?'selector':'button';}
+function hsDoorUpdate(){
+  var b=document.getElementById('hsDoor');if(!b)return;
+  var s=hsLoad(),pressed=s.last===todayStr(),left=hsLeft();
+  b.textContent=pressed?'⚡':'⚡ '+hsFmt(left,false);
+  b.style.background=(!pressed&&left<3600)?'rgba(224,74,74,.8)':'rgba(255,255,255,.2)';
+  b.title=pressed?'The Hatch':'The Hatch: the Button is waiting';
+}
+try{hsDoorUpdate();}catch(e){}
+setInterval(function(){try{hsDoorUpdate();}catch(e){}},20000);
+
 </script>
 <!-- STEP MODAL -->
 <!-- MOVE MODAL (steps + workouts combined) -->
@@ -31020,7 +31940,7 @@ if('serviceWorker' in navigator&&location.protocol.indexOf('http')===0){
 
 <!-- HATCH SCREEN -->
 <canvas id="hatchCanvas"></canvas>
-<div id="ovHatch" style="position:relative">
+<div id="ovHatch">
   <!-- Boot sequence overlay -->
   <div id="hBootSeq" style="display:none">
     <div id="hBootLines"></div>
@@ -31039,27 +31959,14 @@ if('serviceWorker' in navigator&&location.protocol.indexOf('http')===0){
           </div>
           <button class="hatch-close-btn" onclick="closeHatch()">[ X ]</button>
         </div>
-        <button class="hatch-mode-btn" onclick="hatchMode('mission')">
-          <span class="hatch-mode-icon">🎯</span>
-          <span><span class="hatch-mode-label">&gt; MISSION BRIEFING</span><span class="hatch-mode-sub">Random challenge — accept or skip</span></span>
+        <button class="hatch-mode-btn" onclick="hatchMode('button')">
+          <span class="hatch-mode-icon">🔘</span>
+          <span><span class="hatch-mode-label">&gt; THE BUTTON</span><span class="hatch-mode-sub" id="hsSelBtnSub" style="color:#2f9a1c">Enter the numbers. Every day.</span></span>
         </button>
-        <button class="hatch-mode-btn" onclick="hatchMode('chaos')">
-          <span class="hatch-mode-icon">🎲</span>
-          <span><span class="hatch-mode-label">&gt; CHAOS PROTOCOL</span><span class="hatch-mode-sub">Spin the wheel — lands on a life area</span></span>
+        <button class="hatch-mode-btn" onclick="hatchMode('basement')">
+          <span class="hatch-mode-icon">📼</span>
+          <span><span class="hatch-mode-label">&gt; THE BASEMENT</span><span class="hatch-mode-sub" id="hsSelBaseSub" style="color:#2f9a1c">Everything the supply drops brought</span></span>
         </button>
-        <button class="hatch-mode-btn" onclick="hatchMode('transmission')">
-          <span class="hatch-mode-icon">📻</span>
-          <span><span class="hatch-mode-label">&gt; INCOMING TRANSMISSION</span><span class="hatch-mode-sub">Signal received from Brindleport…</span></span>
-        </button>
-        <button class="hatch-mode-btn" onclick="hatchMode('shock')">
-          <span class="hatch-mode-icon">⚡</span>
-          <span><span class="hatch-mode-label">&gt; SHOCK SEQUENCE</span><span class="hatch-mode-sub">60 seconds. Physical only. Go.</span></span>
-        </button>
-        <button class="hatch-mode-btn" onclick="hatchMode('cast')">
-          <span class="hatch-mode-icon">🎭</span>
-          <span><span class="hatch-mode-label">&gt; THE CAST</span><span class="hatch-mode-sub">Step into a character's world for a moment</span></span>
-        </button>
-        <button class="hatch-spa-pill" onclick="hatchMode('spa')">[ SPA // GROUNDING PROTOCOL ]</button>
       </div>
 
       <!-- MISSION -->
@@ -31160,6 +32067,24 @@ if('serviceWorker' in navigator&&location.protocol.indexOf('http')===0){
         <button class="hatch-spa-item" onclick="hatchSpaGround()"><span style="font-size:20px">🌿</span>5-4-3-2-1 Grounding</button>
         <button class="hatch-spa-item" onclick="hatchSpaBreathe()"><span style="font-size:20px">🌬️</span>60-sec breathing</button>
         <div id="hSpaContent" style="margin-top:12px"></div>
+      </div>
+
+      <!-- THE BUTTON (Hatch revamp, slice 1) -->
+      <div id="hPanelButton" style="display:none">
+        <div class="hatch-header">
+          <button class="hatch-back-btn" onclick="hatchMode('selector')">← Back</button>
+          <button class="hatch-close-btn" onclick="closeHatch()">✕</button>
+        </div>
+        <div id="hsButtonBody"></div>
+      </div>
+
+      <!-- THE BASEMENT (Hatch revamp, slice 1) -->
+      <div id="hPanelBasement" style="display:none">
+        <div class="hatch-header">
+          <button class="hatch-back-btn" onclick="hatchMode('selector')">← Back</button>
+          <button class="hatch-close-btn" onclick="closeHatch()">✕</button>
+        </div>
+        <div id="hsBasementBody"></div>
       </div>
 
     </div>
