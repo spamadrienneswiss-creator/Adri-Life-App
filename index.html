@@ -1134,6 +1134,41 @@ body.food-mode .fav-tab-btn[data-tab="tasks"],body.food-mode .fav-tab-btn[data-t
 #ovHatch .hs-detail-n{font-size:14px;color:#e8f6ff;margin-bottom:4px}
 #ovHatch .hs-detail-f{font-size:12px;line-height:1.6;color:#8fb6c8}
 #ovHatch .hs-note{font-family:'Courier New',monospace;font-size:11px;line-height:1.7;color:#6f86a8;margin:10px 0}
+
+/* ══ WHAT I ATE — revamp (Nov 2026). Same look and color jobs as the food home. ══
+   The older What I Ate controls are still in the page, hidden, so nothing that reads them breaks. */
+#ms-ate > :not(#fdmAte){display:none!important}
+.fdm.fdm-page{margin:0 -14px -110px;padding:16px 20px 120px;min-height:0}
+.fdm-datenav{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.fdm-navbtn{display:flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:14px;flex-shrink:0}
+.fdm-datelbl{display:flex;flex-direction:column;align-items:center;gap:0;min-width:0}
+.fdm-datelbl b{font-family:'Playfair Display',serif;font-size:22px;line-height:28px;font-weight:700;color:#051423}
+.fdm-datelbl button{border:none;background:none;font-size:12px;font-weight:700;color:#6B625C;text-decoration:underline;cursor:pointer;min-height:24px;padding:0 8px}
+.fdm-list{display:flex;flex-direction:column;gap:8px}
+.fdm-item{width:100%;min-height:56px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 15px;border-radius:14px;text-align:left}
+.fdm-item-l{display:flex;flex-direction:column;gap:2px;min-width:0}
+.fdm-item-l b{font-size:15px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fdm-item-l small{font-size:12px;font-weight:600;color:#6B625C}
+.fdm-item-r{font-size:15px;font-weight:700;flex-shrink:0;white-space:nowrap}
+.fdm-item-r small{font-size:12px;font-weight:600;color:#6B625C}
+.fdm-item-r.none{font-size:12px;font-weight:600;color:#6B625C;text-decoration:underline}
+.fdm-water{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:10px 15px;border-radius:14px;cursor:default}
+.fdm-water-l{display:flex;flex-direction:column;gap:2px;font-size:15px;font-weight:700}
+.fdm-water-l small{font-size:12px;font-weight:600;color:#6B625C}
+.fdm-water-b{display:flex;gap:6px}
+.fdm-wbtn{min-width:46px;height:40px;padding:0 10px;border-radius:12px;border:1px solid #F1E7E2;background:#FFF8F3;font-size:13px;font-weight:700;color:#051423;cursor:pointer}
+.fdm-trend{display:flex;align-items:flex-end;gap:6px;height:96px;padding:12px 15px 8px;border-radius:14px;cursor:default}
+.fdm-trend button{flex:1;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:4px;border:none;background:none;padding:0;font-size:11px;font-weight:700;color:#6B625C;cursor:pointer}
+.fdm-trend i{display:block;width:70%;min-height:3px;border-radius:4px 4px 0 0;background:#DDD2CA}
+.fdm-trend button.on{color:#051423}
+.fdm-trend button.on i{background:#051423}
+/* Fix-an-entry sheet */
+.fdm-ov{display:none;position:fixed;inset:0;z-index:350;background:rgba(5,20,35,.45);align-items:flex-end;justify-content:center}
+.fdm-ov.show{display:flex}
+.fdm-sheet{width:100%;max-width:520px;max-height:92vh;overflow-y:auto;background:#FFF8F3;border-radius:22px 22px 0 0;padding:18px 20px calc(22px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:14px;font-family:'Quicksand',sans-serif;color:#051423}
+.fdm-sheet button,.fdm-sheet input{font-family:inherit}
+.fdm-sheet-top{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.fdm-sheet-top h3{font-family:'Playfair Display',serif;font-size:20px;line-height:26px;font-weight:700}
 </style>
 </head>
 <body>
@@ -1521,7 +1556,7 @@ body.food-mode .fav-tab-btn[data-tab="tasks"],body.food-mode .fav-tab-btn[data-t
 <div class="view" id="v-foodlog">
   <div class="fdm fdm-log">
     <div class="fdm-top">
-      <button class="fdm-card fdm-back" onclick="fhGoHome()" aria-label="Back to home"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#051423" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"></path></svg></button>
+      <button class="fdm-card fdm-back" onclick="flDone()" aria-label="Back"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#051423" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"></path></svg></button>
       <h2 class="fdm-h1s" id="flTitle">Log a food</h2>
     </div>
     <input class="fdm-input" id="flQuery" placeholder="What did you eat?" autocomplete="off" autocapitalize="off" enterkeyhint="done" oninput="flOnQuery()" aria-label="What did you eat?">
@@ -1586,6 +1621,24 @@ body.food-mode .fav-tab-btn[data-tab="tasks"],body.food-mode .fav-tab-btn[data-t
       </div>
       <p class="fdm-note">Cups to grams depends on the food, so these are close-enough kitchen numbers. Foods saved in your food library carry their own gram weights.</p>
     </div>
+  </div>
+</div>
+
+<!-- FOOD MODE: fix or delete one logged entry -->
+<div class="fdm-ov" id="fdmEditOv" onclick="if(event.target===this)fdmAteEditClose()">
+  <div class="fdm-sheet" role="dialog" aria-label="Fix this entry">
+    <div class="fdm-sheet-top">
+      <h3>Fix this entry</h3>
+      <button class="fdm-card fdm-back" onclick="fdmAteEditClose()" aria-label="Close"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#051423" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"></path></svg></button>
+    </div>
+    <input class="fdm-input" id="fdmEdName" autocomplete="off" aria-label="Name">
+    <div class="fdm-row"><label for="fdmEdCal">Calories</label><div class="fdm-row-r"><input id="fdmEdCal" class="fdm-card fdm-num" type="number" inputmode="numeric" min="0" placeholder="0"><span>cal</span></div></div>
+    <div class="fdm-2col">
+      <button class="fdm-card fdm-sec" onclick="fdmAteScale(0.5)">Half of that</button>
+      <button class="fdm-card fdm-sec" onclick="fdmAteScale(2)">Double it</button>
+    </div>
+    <button class="fdm-go" onclick="fdmAteSave()">Save</button>
+    <button class="fdm-link" onclick="fdmAteDelete()">Delete this entry</button>
   </div>
 </div>
 
@@ -2866,6 +2919,7 @@ body.food-mode .fav-tab-btn[data-tab="tasks"],body.food-mode .fav-tab-btn[data-t
 
   <!-- WHAT I ATE section -->
   <div id="ms-ate">
+      <div id="fdmAte" class="fdm fdm-page"></div>
       <!-- The Guide: one dealt card — always the next food action -->
       <div id="mealsGuideCard" style="margin-bottom:14px;display:none"></div>
       <!-- Date nav -->
@@ -21276,6 +21330,7 @@ function openQuickLogPortion(id){
 }
 
 function renderMealLog(){
+  if(typeof renderFdmAte==='function')renderFdmAte();
   renderEatDateNav();
   renderEatWaterLabel();
   renderMealMacroBar();
@@ -29819,7 +29874,7 @@ function renderFoodHome(){
 // Adds one entry to What I Ate. Every food-mode log goes through here.
 function fhCommit(name,n,opts){
   opts=opts||{};
-  var it={id:'ml-'+Date.now(),name:name,category:'main',day:'',date:todayStr(),cal:Math.round(n.cal||0),pro:fhR1(n.pro),carb:fhR1(n.carb),fat:fhR1(n.fat)};
+  var it={id:'ml-'+Date.now(),name:name,category:'main',day:'',date:(opts.date||todayStr()),cal:Math.round(n.cal||0),pro:fhR1(n.pro),carb:fhR1(n.carb),fat:fhR1(n.fat)};
   if(opts.est)it.est=true;
   if(opts.calOnly)it.calOnly=true;
   var db=fhFindDb(name);
@@ -29834,10 +29889,10 @@ function fhCommit(name,n,opts){
     MEAL_LOG_ITEMS=MEAL_LOG_ITEMS.filter(function(x){return x.id!==it.id;});
     localStorage.setItem('aMealLogItems',JSON.stringify(MEAL_LOG_ITEMS));
     if(db){db.useCount=Math.max(0,(db.useCount||1)-1);saveFoodDbData();}
-    renderFoodHome();
+    renderFoodHome();fdmAteRefresh();
   }};
   showUndo(name+' logged · '+fhNum(it.cal)+' cal');
-  renderFoodHome();
+  renderFoodHome();fdmAteRefresh();
 }
 function fhLogUsual(i){
   var u=_fhUsualsCache[i];if(!u)return;
@@ -29845,7 +29900,8 @@ function fhLogUsual(i){
   fhCommit(u.name,u.nut,{});
 }
 function fhGoHome(){goTab('home',document.querySelector('[data-tab="home"]'));window.scrollTo(0,0);}
-function fhGoMeals(sec){
+function fhGoMeals(sec,keepDate){
+  if(sec==='ate'&&!keepDate)_eatLogDate=todayStr();
   goTab('meals',null);
   setTimeout(function(){
     var b=null;
@@ -29873,12 +29929,15 @@ function fhAfterTab(tab){
 // ── Log a food ────────────────────────────────
 var FL_STATE=null;
 function flState(){if(!FL_STATE)FL_STATE={mode:'find',sel:null,cands:[],recents:[],grams:0,mult:1,guess:0,calOnly:0};return FL_STATE;}
-function fhOpenLog(mode,prefill){
-  FL_STATE={mode:mode==='cal'?'cal':'find',sel:null,cands:[],recents:[],grams:0,mult:1,guess:0,calOnly:0};
+function fhOpenLog(mode,prefill,ctx){
+  // ctx: {date, back}. Switching between Log a food and Just calories keeps the day and the way back.
+  var prev=FL_STATE,vl=document.getElementById('v-foodlog');
+  if(!ctx)ctx=(prev&&vl&&vl.classList.contains('on'))?{date:prev.date,back:prev.back}:{};
+  FL_STATE={mode:mode==='cal'?'cal':'find',sel:null,cands:[],recents:[],grams:0,mult:1,guess:0,calOnly:0,date:ctx.date||'',back:ctx.back||''};
   goTab('foodlog',null);
   var q=document.getElementById('flQuery');
   if(q){q.value=prefill||'';q.placeholder=FL_STATE.mode==='cal'?'What was it? (optional)':'What did you eat?';}
-  var t=document.getElementById('flTitle');if(t)t.textContent=FL_STATE.mode==='cal'?'Just calories':'Log a food';
+  var t=document.getElementById('flTitle');if(t)t.textContent=(FL_STATE.mode==='cal'?'Just calories':'Log a food')+((FL_STATE.date&&FL_STATE.date!==todayStr())?' · '+fdmDateLabel(FL_STATE.date):'');
   if(FL_STATE.mode==='cal')flRender();else flOnQuery();
   window.scrollTo(0,0);
   var f=FL_STATE.mode==='cal'?document.getElementById('flCalOnly'):q;
@@ -30050,9 +30109,9 @@ function flRender(){
 function flLogIt(){
   var st=flState(),n=flCurrentNut();if(!(n.cal>0))return;
   var q=((document.getElementById('flQuery')||{}).value||'').trim();
-  if(st.mode==='cal'){fhCommit(q||'Calories only',{cal:n.cal},{est:true,calOnly:!q});fhGoHome();return;}
+  if(st.mode==='cal'){fhCommit(q||'Calories only',{cal:n.cal},{est:true,calOnly:!q,date:st.date});flDone();return;}
   var c=st.sel;if(!c)return;
-  var opts={};
+  var opts={date:st.date};
   if(c.kind==='new'){
     opts.est=true;
     if((document.getElementById('flSave')||{}).checked){
@@ -30062,7 +30121,7 @@ function flLogIt(){
     }
   }
   fhCommit(c.name,n,opts);
-  fhGoHome();
+  flDone();
 }
 
 
@@ -30371,6 +30430,162 @@ function hsDoorUpdate(){
 }
 try{hsDoorUpdate();}catch(e){}
 setInterval(function(){try{hsDoorUpdate();}catch(e){}},20000);
+
+
+// ═══════════════════════════════════════════════
+// WHAT I ATE — revamp (Nov 2026)
+// One day at a time: what is left, what was eaten, each entry with its calories.
+// Reads and writes the same MEAL_LOG_ITEMS list as before. The older What I Ate
+// controls are still in the page (hidden), so everything that used them still runs.
+// renderMealLog() calls renderFdmAte() first, so every existing refresh updates this too.
+// ═══════════════════════════════════════════════
+function fdmIso(d){return d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)+'-'+('0'+d.getDate()).slice(-2);}
+function fdmDateLabel(iso){
+  if(iso===todayStr())return 'Today';
+  var y=new Date();y.setDate(y.getDate()-1);
+  if(iso===fdmIso(y))return 'Yesterday';
+  var d=new Date(iso+'T12:00:00');
+  return d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})+(d.getFullYear()!==new Date().getFullYear()?', '+d.getFullYear():'');
+}
+function fdmAteRefresh(){try{if(document.getElementById('fdmAte'))renderMealLog();}catch(e){}}
+function fdmAteShift(dir){
+  var d=new Date(getEatLogDate()+'T12:00:00');d.setDate(d.getDate()+dir);
+  _eatLogDate=fdmIso(d);renderMealLog();
+}
+function fdmAteJump(iso){_eatLogDate=iso;renderMealLog();window.scrollTo(0,0);}
+function fdmAteLog(mode){fhOpenLog(mode,'',{date:getEatLogDate(),back:'ate'});}
+function fdmAteWater(oz){addWaterForEatDate(oz);renderFdmAte();}
+function flDone(){
+  var st=FL_STATE||{};
+  if(st.back==='ate')fhGoMeals('ate',true);else fhGoHome();
+}
+// Last seven days, ending today. Tap a bar to open that day.
+function fdmTrendHtml(viewIso){
+  var days=[],letters=['S','M','T','W','T','F','S'];
+  for(var i=6;i>=0;i--){
+    var d=new Date();d.setDate(d.getDate()-i);
+    var iso=fdmIso(d);
+    days.push({iso:iso,dow:letters[d.getDay()],cal:Math.round(getTotForDate(iso).cal||0)});
+  }
+  var logged=days.filter(function(x){return x.cal>0;});
+  if(logged.length<2)return '';
+  var avg=Math.round(logged.reduce(function(s,x){return s+x.cal;},0)/logged.length);
+  var top=Math.max(S.gCal||1900,days.reduce(function(m,x){return Math.max(m,x.cal);},0));
+  return '<div class="fdm-block"><h3 class="fdm-h2">Last 7 days</h3><div class="fdm-card fdm-trend">'
+    +days.map(function(x){
+      var h=x.cal>0?Math.max(5,Math.round(x.cal/top*52)):3;
+      return '<button'+(x.iso===viewIso?' class="on"':'')+' onclick="fdmAteJump(\''+x.iso+'\')" aria-label="'+fdmDateLabel(x.iso)+', '+fhNum(x.cal)+' calories"><i style="height:'+h+'px"></i>'+x.dow+'</button>';
+    }).join('')
+    +'</div><p class="fdm-note">Average on the days you logged: '+fhNum(avg)+' calories.</p></div>';
+}
+function renderFdmAte(){
+  var el=document.getElementById('fdmAte');if(!el)return;
+  var iso=getEatLogDate(),isToday=iso===todayStr();
+  var t=getTotForDate(iso),goal=S.gCal||1900,eaten=Math.round(t.cal||0),left=goal-eaten;
+  var pct=Math.max(0,Math.min(100,goal?eaten/goal*100:0));
+  var macro=function(lbl,val,g){return '<div class="fdm-macro"><div class="fdm-macro-l">'+lbl+'</div><div class="fdm-macro-v">'+Math.round(val||0)+(g?' <small>/ '+g+' g</small>':' g')+'</div></div>';};
+  var arrow=function(dir){return '<svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#051423" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="'+(dir<0?'M15 5l-7 7 7 7':'M9 5l7 7-7 7')+'"></path></svg>';};
+  // entries for this day, in the order they were eaten
+  var order=['night','morning','midday','evening','later'];
+  var names={night:'Late night',morning:'Morning',midday:'Midday',evening:'Evening',later:'Added later'};
+  var groups={night:[],morning:[],midday:[],evening:[],later:[]};
+  (MEAL_LOG_ITEMS||[]).forEach(function(m){
+    if(!m||m.date!==iso)return;
+    var d=fhItemTime(m);
+    if(d&&fdmIso(d)===iso){var h=d.getHours();groups[h<4?'night':h<11?'morning':h<16?'midday':'evening'].push({m:m,d:d});}
+    else groups.later.push({m:m,d:null});
+  });
+  var count=0,list='';
+  order.forEach(function(k){
+    var g=groups[k];if(!g.length)return;
+    g.sort(function(a,b){return (a.d?a.d.getTime():0)-(b.d?b.d.getTime():0);});
+    list+='<div class="fdm-block"><h3 class="fdm-h2">'+names[k]+'</h3><div class="fdm-list">'
+      +g.map(function(x){
+        var m=x.m,bits=[];count++;
+        if(x.d)bits.push(x.d.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'}));
+        if(m.est)bits.push('estimate');
+        if(m.gluten)bits.push('gluten');
+        return '<button class="fdm-card fdm-item" onclick="fdmAteEdit(\''+String(m.id).replace(/[^A-Za-z0-9_-]/g,'')+'\')">'
+          +'<span class="fdm-item-l"><b>'+escHtml(m.name)+'</b>'+(bits.length?'<small>'+bits.join(' · ')+'</small>':'')+'</span>'
+          +(m.cal>0?'<span class="fdm-item-r">'+fhNum(m.cal)+'<small> cal</small></span>':'<span class="fdm-item-r none">add calories</span>')
+          +'</button>';
+      }).join('')+'</div></div>';
+  });
+  if(!count)list='<div class="fdm-empty">Nothing logged for '+(isToday?'today':'this day')+' yet.</div>';
+  // calories that came from the older Nutrition Log are counted above but are not in this list
+  var listed=0;(MEAL_LOG_ITEMS||[]).forEach(function(m){if(m&&m.date===iso)listed+=m.cal||0;});
+  var extra=Math.round((t.cal||0)-listed);
+  if(extra>0)list+='<p class="fdm-note">Plus '+fhNum(extra)+' calories from the older Nutrition Log. <button class="fdm-link" style="min-height:0" onclick="openSubpage(\'sp-nutrition\')">Open it</button></p>';
+  var wk=eatLogDateTK(),oz=(typeof WATER_OZ_LOG==='object'&&WATER_OZ_LOG&&WATER_OZ_LOG[wk])||0;
+  el.innerHTML=
+    '<div class="fdm-datenav">'
+      +'<button class="fdm-card fdm-navbtn" onclick="fdmAteShift(-1)" aria-label="Previous day">'+arrow(-1)+'</button>'
+      +'<div class="fdm-datelbl"><b>'+fdmDateLabel(iso)+'</b>'+(isToday?'':'<button onclick="jumpToEatToday()">Back to today</button>')+'</div>'
+      +'<button class="fdm-card fdm-navbtn" onclick="fdmAteShift(1)" aria-label="Next day">'+arrow(1)+'</button>'
+    +'</div>'
+    +'<div class="fdm-hero">'
+      +'<div class="fdm-hero-lbl">'+(left>=0?(isToday?'Left today':'Left that day'):(isToday?'Over today':'Over that day'))+'</div>'
+      +'<div class="fdm-hero-row"><div class="fdm-hero-num">'+fhNum(Math.abs(left))+'</div><div class="fdm-hero-unit">calories</div></div>'
+      +'<div class="fdm-bar"><div style="width:'+pct+'%"></div></div>'
+      +'<div class="fdm-hero-cap">'+fhNum(eaten)+' eaten. Goal '+fhNum(goal)+'.</div>'
+      +'<div class="fdm-macros">'+macro('Protein',t.pro,S.gPro)+macro('Carbs',t.crb,S.gCrb)+macro('Fat',t.fat,S.gFat)+'</div>'
+    +'</div>'
+    +'<div class="fdm-block">'
+      +'<button class="fdm-card fdm-logbox" onclick="fdmAteLog(\'find\')"><span>What did you eat?</span><span class="fdm-logpill">Log</span></button>'
+      +'<button class="fdm-card fdm-sec" onclick="fdmAteLog(\'cal\')">'+fhIcon('hash',18,2)+'Just calories</button>'
+    +'</div>'
+    +list
+    +'<div class="fdm-block"><h3 class="fdm-h2">Water</h3><div class="fdm-card fdm-water">'
+      +'<span class="fdm-water-l">'+oz+' oz<small>of '+getWaterOzGoal()+' oz</small></span>'
+      +'<span class="fdm-water-b">'
+        +'<button class="fdm-wbtn" onclick="fdmAteWater(-8)" aria-label="Remove 8 ounces">−8</button>'
+        +'<button class="fdm-wbtn" onclick="fdmAteWater(8)" aria-label="Add 8 ounces">+8</button>'
+        +'<button class="fdm-wbtn" onclick="fdmAteWater(16)" aria-label="Add 16 ounces">+16</button>'
+        +'<button class="fdm-wbtn" onclick="fdmAteWater(32)" aria-label="Add one Owala, 32 ounces">Owala</button>'
+      +'</span></div></div>'
+    +fdmTrendHtml(iso)
+    +'<button class="fdm-link" onclick="openM(\'settingsModal\')">Change my goals</button>';
+}
+
+// ── Fix or delete one entry ───────────────────
+var _fdmEditId='';
+function fdmAteEdit(id){
+  var m=(MEAL_LOG_ITEMS||[]).find(function(x){return String(x.id)===id;});if(!m)return;
+  _fdmEditId=String(m.id);
+  var n=document.getElementById('fdmEdName'),c=document.getElementById('fdmEdCal');
+  if(n)n.value=m.name||'';
+  if(c)c.value=m.cal>0?Math.round(m.cal):'';
+  var ov=document.getElementById('fdmEditOv');if(ov)ov.classList.add('show');
+  if(!(m.cal>0)&&c){try{c.focus();}catch(e){}}
+}
+function fdmAteEditClose(){var ov=document.getElementById('fdmEditOv');if(ov)ov.classList.remove('show');_fdmEditId='';}
+function fdmAteScale(f){
+  var c=document.getElementById('fdmEdCal');if(!c)return;
+  var v=parseFloat(c.value)||0;if(v>0)c.value=Math.round(v*f);
+}
+function fdmAteSave(){
+  var m=(MEAL_LOG_ITEMS||[]).find(function(x){return String(x.id)===_fdmEditId;});
+  if(!m){fdmAteEditClose();return;}
+  var name=((document.getElementById('fdmEdName')||{}).value||'').trim();
+  var cal=Math.max(0,Math.round(parseFloat((document.getElementById('fdmEdCal')||{}).value)||0));
+  var old=m.cal||0;
+  if(name&&name!==m.name){m.name=name;if(m.calOnly)delete m.calOnly;}
+  if(cal!==Math.round(old)){
+    if(old>0){var f=cal/old;m.pro=fhR1((m.pro||0)*f);m.carb=fhR1((m.carb||0)*f);m.fat=fhR1((m.fat||0)*f);if(m.fiber)m.fiber=fhR1(m.fiber*f);}
+    m.cal=cal;
+  }
+  localStorage.setItem('aMealLogItems',JSON.stringify(MEAL_LOG_ITEMS));
+  fdmAteEditClose();
+  try{if(typeof renderTodayStatsBars==='function')renderTodayStatsBars();}catch(e){}
+  renderMealLog();
+  if(typeof showToast==='function')showToast('Saved');
+}
+function fdmAteDelete(){
+  var id=_fdmEditId;if(!id)return;
+  var m=(MEAL_LOG_ITEMS||[]).find(function(x){return String(x.id)===id;});
+  fdmAteEditClose();
+  if(m)delMealLogItem(m.id);
+}
 
 </script>
 <!-- STEP MODAL -->
