@@ -3827,7 +3827,6 @@ body.food-mode .fav-tab-btn[data-tab="tasks"],body.food-mode .fav-tab-btn[data-t
       <div class="color-grid" id="colorPickerGrid"></div>
       <button class="btn sec" style="font-size:12px;padding:5px 14px;margin-bottom:10px" onclick="resetColors()">Reset to defaults</button>
       <button class="btn sec" style="font-size:12px;padding:5px 14px;margin-bottom:10px;margin-left:6px" onclick="saveCurrentAsTheme()">💾 Save as Theme</button>
-      <div class="set-row" style="margin-top:8px"><div><div class="set-lbl">🐱 Show Millie</div><div class="set-sub">Virtual pet in corner</div></div><button class="tog" id="millieTogBtn" onclick="togMillieVis(this)"></button></div>
       <button class="ok-btn" style="margin-top:4px" onclick="saveAppearance()">Save Appearance ✨</button>
     </div>
   </div>
@@ -14495,7 +14494,7 @@ function tickMillie(){
 function renderMillieWidget(){
   var w=document.getElementById('millieWidget');
   if(!w)return;
-  if(S.hideMillie){w.style.display='none';return;}
+  w.style.display='none';return; // Millie removed Nov 2026. To bring her back, restore: if(S.hideMillie){w.style.display='none';return;}
   w.style.display='';
   var mode=millieMode();
   var cls='millie-widget '+(mode==='sleeping'?'sleeping':mode);
