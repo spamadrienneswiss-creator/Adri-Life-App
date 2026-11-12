@@ -1088,6 +1088,52 @@ body.food-mode .fav-tab-btn[data-tab="tasks"],body.food-mode .fav-tab-btn[data-t
 .fdm-cv div:last-child{border-bottom:none}
 .fdm-cv div span:last-child{font-weight:700;text-align:right}
 .fdm-note{font-size:13px;line-height:19px;font-weight:600;color:#6B625C}
+
+/* ══ HATCH REVAMP, slice 1 — the Button, the supply drop, Basement Shelf 01 (Nov 2026) ══ */
+#ovHatch .hs-timer{font-family:'Courier New',monospace;font-size:50px;letter-spacing:2px;line-height:1.1;text-align:center;padding:6px 0 2px;color:#3fc820;text-shadow:0 0 14px rgba(63,200,32,.5)}
+#ovHatch .hs-timer.urgent{color:#e85050;text-shadow:0 0 14px rgba(232,80,80,.6);animation:htpulse .65s ease-in-out infinite}
+#ovHatch .hs-sub{font-family:'Courier New',monospace;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;text-align:center;color:#2f9a1c;margin-top:8px}
+#ovHatch .hs-slots{display:flex;gap:6px;justify-content:center;margin:14px 0}
+#ovHatch .hs-slot{flex:1;max-width:52px;height:42px;border:1px solid #1a5010;border-radius:3px;display:flex;align-items:center;justify-content:center;font-family:'Courier New',monospace;font-size:16px;color:#3fc820;background:#0c140c;text-shadow:0 0 6px rgba(63,200,32,.35)}
+#ovHatch .hs-slot.bad{border-color:#a03030;color:#e85050;background:#140606}
+#ovHatch .hs-pad{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:10px}
+#ovHatch .hs-num{height:56px;border:1px solid #1a5010;border-radius:4px;background:#0c140c;color:#3fc820;font-family:'Courier New',monospace;font-size:21px;cursor:pointer;text-shadow:0 0 6px rgba(63,200,32,.35)}
+#ovHatch .hs-num:active{background:rgba(63,200,32,.16)}
+#ovHatch .hs-exec{width:100%;height:58px;border-radius:4px;border:1px solid #1a5010;background:#0c140c;color:#2f9a1c;font-family:'Courier New',monospace;font-size:15px;letter-spacing:4px;cursor:default}
+#ovHatch .hs-exec.ready{background:linear-gradient(135deg,#143a08,#0a2a0c);color:#8dff6a;border-color:#3fc820;box-shadow:0 0 18px rgba(63,200,32,.4);cursor:pointer;animation:htpulse 1.1s ease-in-out infinite}
+#ovHatch .hs-stats{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;font-family:'Courier New',monospace;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:#2f9a1c;margin:14px 0}
+#ovHatch .hs-lines{font-family:'Courier New',monospace;font-size:13px;line-height:1.7;color:#3fc820;min-height:44px;margin-top:10px;text-shadow:0 0 5px rgba(63,200,32,.25)}
+#ovHatch .hs-lines .dim{color:#2f9a1c}
+#ovHatch .hs-fail{border:1px solid #6a1414;background:#140606;border-radius:6px;padding:16px 18px;margin-bottom:14px;font-family:'Courier New',monospace;color:#e85050;animation:hsShake .5s linear 2}
+#ovHatch .hs-fail b{display:block;font-size:17px;letter-spacing:3px;margin-bottom:8px;text-shadow:0 0 10px rgba(232,80,80,.6)}
+#ovHatch .hs-fail span{display:block;font-size:12px;line-height:1.7;color:#d07070}
+@keyframes hsShake{0%,100%{transform:translateX(0)}20%{transform:translateX(-5px)}40%{transform:translateX(5px)}60%{transform:translateX(-3px)}80%{transform:translateX(3px)}}
+#ovHatch .hs-glitch{animation:hsShake .35s linear 2}
+#ovHatch .hs-crate{border:1px dashed #8a6a1c;background:#12100a;border-radius:6px;padding:16px 18px;margin-bottom:14px;font-family:'Courier New',monospace;color:#e6b84a;text-align:center}
+#ovHatch .hs-crate.gold{border-style:solid;border-color:#e6b84a;box-shadow:0 0 16px rgba(230,184,74,.25)}
+#ovHatch .hs-crate-t{font-size:14px;letter-spacing:2px;margin:4px 0 12px;text-shadow:0 0 8px rgba(230,184,74,.4)}
+#ovHatch .hs-crate-n{font-size:15px;letter-spacing:.5px;margin:10px 0 4px;color:#ffe9a8}
+#ovHatch .hs-crate-f{font-size:12px;line-height:1.6;color:#c9a352;margin-bottom:12px}
+#ovHatch .hs-tag{display:inline-block;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;padding:2px 8px;border:1px solid currentColor;border-radius:3px;margin-bottom:6px}
+#ovHatch .hs-tag.common{color:#8a93a6}#ovHatch .hs-tag.uncommon{color:#4fd8ff}#ovHatch .hs-tag.rare{color:#ff5fa2}
+#ovHatch .hs-btn{width:100%;min-height:48px;border-radius:4px;border:1px solid #8a6a1c;background:#1a1508;color:#ffd978;font-family:'Courier New',monospace;font-size:13px;letter-spacing:2px;cursor:pointer}
+#ovHatch .hs-btn:active{background:#2a2210}
+#ovHatch .hs-btn:disabled{opacity:.4;cursor:default}
+#ovHatch .hs-pop{animation:hsPop .45s ease-out}
+@keyframes hsPop{0%{transform:scale(.4);opacity:0}70%{transform:scale(1.08);opacity:1}100%{transform:scale(1)}}
+/* The Basement */
+#ovHatch .hs-neon{font-family:'Courier New',monospace;font-size:22px;letter-spacing:6px;text-align:center;color:#ff7ab5;text-shadow:0 0 8px rgba(255,95,162,.85),0 0 24px rgba(255,95,162,.45);margin:2px 0 4px}
+#ovHatch .hs-shelf-h{font-family:'Courier New',monospace;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:#4fd8ff;display:flex;justify-content:space-between;gap:8px;margin:16px 0 6px}
+#ovHatch .hs-shelf{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;padding:10px 8px 8px;background:linear-gradient(180deg,#0b0f1a,#111830);border:1px solid #1a2238;border-bottom:7px solid #4a3320;border-radius:4px 4px 2px 2px;margin-bottom:12px}
+#ovHatch .hs-cell{position:relative;aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;border:1px solid #1a2238;border-radius:4px;background:#0b0f1a;padding:3px;cursor:pointer}
+#ovHatch .hs-cell svg{width:100%;height:100%}
+#ovHatch .hs-cell.sel{border-color:#4fd8ff;box-shadow:0 0 10px rgba(79,216,255,.45)}
+#ovHatch .hs-cell.ghost{cursor:default}
+#ovHatch .hs-x{position:absolute;right:2px;bottom:1px;font-family:'Courier New',monospace;font-size:9px;color:#ffd978}
+#ovHatch .hs-detail{border:1px solid #1a2238;background:#0b0f1a;border-radius:6px;padding:14px 16px;margin-bottom:12px;font-family:'Courier New',monospace;display:flex;gap:14px;align-items:center}
+#ovHatch .hs-detail-n{font-size:14px;color:#e8f6ff;margin-bottom:4px}
+#ovHatch .hs-detail-f{font-size:12px;line-height:1.6;color:#8fb6c8}
+#ovHatch .hs-note{font-family:'Courier New',monospace;font-size:11px;line-height:1.7;color:#6f86a8;margin:10px 0}
 </style>
 </head>
 <body>
@@ -1110,7 +1156,10 @@ body.food-mode .fav-tab-btn[data-tab="tasks"],body.food-mode .fav-tab-btn[data-t
   <div class="hdr-top">
     <div class="app-title" id="appTitleEl" ondblclick="editAppTitle()" title="Double-tap to rename">✨ Adri's Life</div>
     <div class="hdr-r">
-      <button onclick="openSearch()" style="background:rgba(255,255,255,.2);border:none;border-radius:8px;padding:4px 8px;cursor:pointer;font-size:15px;color:#fff;line-height:1" title="Search">🔍</button>
+      <div style="display:flex;gap:6px;align-items:center">
+        <button id="hsDoor" onclick="openHatch()" style="background:rgba(255,255,255,.2);border:none;border-radius:8px;padding:5px 8px;cursor:pointer;font-family:'Courier New',monospace;font-size:13px;font-weight:700;color:#fff;line-height:1.2;white-space:nowrap" title="The Hatch">⚡</button>
+        <button onclick="openSearch()" style="background:rgba(255,255,255,.2);border:none;border-radius:8px;padding:4px 8px;cursor:pointer;font-size:15px;color:#fff;line-height:1" title="Search">🔍</button>
+      </div>
       <div class="ddate" id="dDate"></div>
       <div class="dstatus" id="dStatus">Loading...</div>
       <div class="sync-status" id="syncStatus">🔄 Syncing...</div>
@@ -6603,7 +6652,7 @@ var BLOB_GROUPS={
   food:['aRecipes','aMealPlan','aMealMyServings','aGroceryList','aGrocTags','aGrocDepts','aGrocStoreDeptOrder','aInventory','aInvSections','aMC','aFoodDb','aFDB','aIngredients','aWantToTry','aMacrosReviewed'],
   fitness:['aWplans','aWlog2','aMovements','aExTypes','aExDB','aExLog','aPT'],
   creative:['aStories','aSChars','aSScenes','aFaves','aMixtape','aMemories','aPlaces','aVbItems'],
-  tools:['aSparkPrompts','aSparkSaved','aDispatchJournal','aHatchChaos','aHatchTransmissions','aHatchMissions','aHatchShocks','aHatchCast','aStreak'],
+  tools:['aSparkPrompts','aSparkSaved','aDispatchJournal','aHatchChaos','aHatchTransmissions','aHatchMissions','aHatchShocks','aHatchCast','aStreak','aHatchSwan'],
   learning:['aKEvents','aLifeHacks','aResearch','aResearchTopics','aMemoryItems','aFcDecks','aFcCards','aStudyNotes'],
   game:['aBadges','aHelmMiles','aSprintStats','aEmber','aMillie','aFishLevel','aFishLog'],
   work2:['aWigOrders','aWorkProjects'],
@@ -10866,7 +10915,7 @@ function openHatch(){
       bootEl.style.opacity='1';
       bootEl.style.transition='';
       if(wrap)wrap.style.visibility='visible';
-      hatchMode('selector');
+      hatchMode(typeof hsLanding==='function'?hsLanding():'selector');
     },360);
   },1750);
 }
@@ -10877,7 +10926,7 @@ function closeHatch(){
 }
 function hatchMode(mode){
   _clearHatchTimers();
-  ['Selector','Mission','Chaos','Transmission','Shock','Cast','Spa'].forEach(function(p){
+  ['Selector','Mission','Chaos','Transmission','Shock','Cast','Spa','Button','Basement'].forEach(function(p){
     var el=document.getElementById('hPanel'+p);if(el)el.style.display='none';
   });
   var target=document.getElementById('hPanel'+mode.charAt(0).toUpperCase()+mode.slice(1));
@@ -10887,6 +10936,9 @@ function hatchMode(mode){
   else if(mode==='transmission')_hatchTxShow();
   else if(mode==='shock')_hatchShockShow();
   else if(mode==='cast')_hatchCastShow();
+  else if(mode==='button')hsRenderButton();
+  else if(mode==='basement')hsRenderBasement();
+  else if(mode==='selector'&&typeof hsRenderSelector==='function')hsRenderSelector();
 }
 
 // ─── MISSION ───────────────────────────────────
@@ -27438,7 +27490,7 @@ function startApp(){
   renderTodayTimeGreet();
   renderFavTabs();
   trackLastActive();
-  var hFab=document.getElementById('hatchFab');if(hFab)hFab.style.display='flex';
+  var hFab=document.getElementById('hatchFab');if(hFab)hFab.style.display=((document.querySelector('.view.on')||{}).id==='v-today')?'flex':'none';
   renderFabPills();
   initFabScroll();
   initFabModalHide();
@@ -30014,6 +30066,311 @@ function flLogIt(){
 }
 
 
+// ═══════════════════════════════════════════════
+// HATCH REVAMP — slice 1 (Nov 2026): the Button, the supply drop, Basement Shelf 01
+// Pure play, nothing to do with tasks or food.
+//   The Button: punch in 4 8 15 16 23 42 once a day. "Days held" is the streak.
+//     Miss a day and an Incident is logged; the streak restarts, lifetime count stays.
+//   Supply drop: pressing the Button lands one crate. Open it for a collectible.
+//   The Basement: where the collectibles live. Shelf 01 has ten. More shelves later.
+// State lives in localStorage 'aHatchSwan' (synced with the other Hatch data).
+// The older protocols (Mission, Chaos, Transmission, Shock, Cast, Spa) are untouched.
+// ═══════════════════════════════════════════════
+var HS_SEQ=[4,8,15,16,23,42];
+var HS_PAL={k:'#0b0f1a',w:'#f4f1e8',g:'#7dff9a',p:'#ff5fa2',c:'#4fd8ff',y:'#ffd84a',o:'#ff8a3c',r:'#ff4d4d',v:'#9b7bff',s:'#8a93a6',d:'#4a5266',b:'#2b6cff'};
+var HS_SHELF_NAME='Shelf 01 // Den essentials';
+var HS_ITEMS=[
+  {id:'tape',name:'Mixtape, Side B',rarity:'common',text:'Someone wrote DO NOT TAPE OVER on it. Someone taped over it.',art:[
+    '................','................','................','.kkkkkkkkkkkkkk.','.kssssssssssssk.','.kswwwwwwwwwwsk.','.kswppppppppwsk.','.kswwwwwwwwwwsk.',
+    '.kssdddssdddssk.','.kssdkdssdkdssk.','.kssdddssdddssk.','.kssssssssssssk.','.kkkkkkkkkkkkkk.','................','................','................']},
+  {id:'floppy',name:'Floppy Disk, Unlabelled',rarity:'common',text:'1.44 megabytes of mystery. Probably a book report.',art:[
+    '................','..kkkkkkkkkkkk..','..kbbsssssbbbk..','..kbbsssksbbbk..','..kbbsssksbbbk..','..kbbsssssbbbk..','..kbbbbbbbbbbk..','..kbbbbbbbbbbk..',
+    '..kbwwwwwwwwbk..','..kbwddddddwbk..','..kbwwwwwwwwbk..','..kbwddddddwbk..','..kbwwwwwwwwbk..','..kkkkkkkkkkkk..','................','................']},
+  {id:'cart',name:'Game Cartridge',rarity:'common',text:'Works first time, every time, after you blow on it four times.',art:[
+    '................','...kkkkkkkkkk...','...kssssssssk...','...kdsdsdsdsk...','...kssssssssk...','...kyyyyyyyyk...','...kyppyyccyk...','...kyppyyccyk...',
+    '...kyyyyyyyyk...','...kssssssssk...','...kssssssssk...','...kssssssssk...','....kddddddk....','....kkkkkkkk....','................','................']},
+  {id:'token',name:'Arcade Token',rarity:'common',text:'Good for one game. No cash value. Enormous sentimental value.',art:[
+    '................','................','.....kkkkkk.....','...kkyyyyyykk...','..kyyooooooyyk..','.kyyoyyyyyyoyyk.','.kyoyyykkyyyoyk.','.kyoykkkkkkyoyk.',
+    '.kyoykkkkkkyoyk.','.kyoyyykkyyyoyk.','.kyyoyyyyyyoyyk.','..kyyooooooyyk..','...kkyyyyyykk...','.....kkkkkk.....','................','................']},
+  {id:'cola',name:'Station Cola',rarity:'common',text:'Best before a date that has already happened. Still fizzy. Suspicious.',art:[
+    '................','.....kkkkkk.....','....kssssssk....','....kkkkkkkk....','....kcccccck....','....kcccccck....','....kwwwwwwk....','....kcwccwck....',
+    '....kwwwwwwk....','....kcccccck....','....kcccccck....','....kcccccck....','....kkkkkkkk....','....kssssssk....','.....kkkkkk.....','................']},
+  {id:'stick',name:'Joystick, Slightly Sticky',rarity:'uncommon',text:'Left works. Right works. Up is more of a suggestion.',art:[
+    '................','......kkkk......','.....krrrrk.....','.....krrrrk.....','......kkkk......','.......ss.......','.......ss.......','.......ss.......',
+    '.......ss.......','..kkkkkkkkkkkk..','..kddddddddyyk..','..kddddddddyyk..','..kddddddddddk..','..kkkkkkkkkkkk..','................','................']},
+  {id:'walkie',name:'Walkie-Talkie, One of a Pair',rarity:'uncommon',text:'The other one is out there somewhere. It has not called.',art:[
+    '....s...........','....s...........','....s...........','....kkkkkkkk....','....kddddddk....','....kdggggdk....','....kdggggdk....','....kddddddk....',
+    '....kdsdsddk....','....kddddddk....','....kdsdsddk....','....kddddddk....','....kdddoodk....','....kddddddk....','....kkkkkkkk....','................']},
+  {id:'lava',name:'Lava Lamp',rarity:'uncommon',text:'Takes forty minutes to warm up. Worth it.',art:[
+    '......kkkk......','......kssk......','.....kssssk.....','.....kkkkkk.....','.....kvvvvk.....','....kvvppvvk....','....kvppppvk....','....kvvppvvk....',
+    '....kvvvvvvk....','....kvpvvvvk....','....kvppvvvk....','.....kvpvvk.....','.....kkkkkk.....','....kssssssk....','...kssssssssk...','...kkkkkkkkkk...']},
+  {id:'d20',name:'Twenty-Sided Die',rarity:'rare',text:'Always lands on 4. Nobody has asked why.',art:[
+    '................','.......kk.......','.....kkggkk.....','...kkggggggkk...','..kggggggggggk..','..kggggggggggk..','..kgggwgwggggk..','..kgggwgwggggk..',
+    '..kgggwwwggggk..','..kgggggwggggk..','..kgggggwggggk..','..kggggggggggk..','...kkggggggkk...','.....kkggkk.....','.......kk.......','................']},
+  {id:'tv',name:'Portable TV, Tuned to Nothing',rarity:'rare',text:'Only gets one channel. It is static, and it is very good static.',art:[
+    '...s........s...','....s......s....','.....s....s.....','.kkkkkkkkkkkkkk.','.kddddddddddddk.','.kdkkkkkkkkkddk.','.kdkwswwswskdyk.','.kdkswswwswkddk.',
+    '.kdkwwswswskdyk.','.kdkswwswwskddk.','.kdkkkkkkkkkddk.','.kddddddddddddk.','.kkkkkkkkkkkkkk.','..kk........kk..','................','................']}
+];
+
+function hsLoad(){
+  var s=null;try{s=JSON.parse(localStorage.getItem('aHatchSwan')||'null');}catch(e){}
+  if(!s||typeof s!=='object')s={};
+  s.last=s.last||'';s.streak=s.streak||0;s.best=s.best||0;s.total=s.total||0;
+  s.incidents=s.incidents||[];s.inv=s.inv||{};s.dupes=s.dupes||0;s.pity=s.pity||0;s.log=s.log||[];
+  s.crate=s.crate||null;
+  return s;
+}
+function hsSave(s){localStorage.setItem('aHatchSwan',JSON.stringify(s));}
+function hsDayDiff(a,b){
+  var pa=String(a).split('-'),pb=String(b).split('-');
+  return Math.round((Date.UTC(+pb[0],pb[1]-1,+pb[2])-Date.UTC(+pa[0],pa[1]-1,+pa[2]))/86400000);
+}
+function hsLeft(){var n=new Date(),m=new Date(n.getFullYear(),n.getMonth(),n.getDate()+1);return Math.max(0,Math.floor((m-n)/1000));}
+function hsFmt(sec,withSec){
+  var h=Math.floor(sec/3600),m=Math.floor(sec%3600/60),x=sec%60,p=function(v){return (v<10?'0':'')+v;};
+  return p(h)+':'+p(m)+(withSec?':'+p(x):'');
+}
+function hsOwned(s){return HS_ITEMS.filter(function(it){return s.inv[it.id]>0;}).length;}
+function hsItem(id){return HS_ITEMS.find(function(it){return it.id===id;})||null;}
+function hsMilestone(n){return [4,8,15,16,23,42,108].indexOf(n)>=0||(n>42&&n%42===0);}
+
+// A missed day: log it once, restart the streak, keep everything else.
+function hsCheckIncident(s){
+  if(!s.last||s.streak<=0)return null;
+  var gap=hsDayDiff(s.last,todayStr());
+  if(gap<=1)return null;
+  var inc={date:todayStr(),missed:gap-1,streak:s.streak};
+  s.incidents.unshift(inc);if(s.incidents.length>50)s.incidents.length=50;
+  s.streak=0;
+  hsSave(s);
+  return inc;
+}
+// Today's press. Returns what happened so the screen can react.
+function hsPress(){
+  var s=hsLoad(),today=todayStr();
+  if(s.last===today)return null;
+  var first=!s.total;
+  var gap=s.last?hsDayDiff(s.last,today):0;
+  s.streak=(s.last&&gap===1)?s.streak+1:1;
+  s.last=today;s.total++;
+  if(s.streak>s.best)s.best=s.streak;
+  var gold=hsMilestone(s.streak);
+  s.crate={date:today,opened:false,gold:gold};
+  hsSave(s);
+  var r=Math.random(),kind=first?'first':r<0.55?'calm':r<0.70?'glitch':r<0.80?'symbols':'tx';
+  try{hsDoorUpdate();}catch(e){}
+  return {streak:s.streak,gold:gold,kind:kind};
+}
+// Picks one collectible. Rarity decides the odds; two duplicates in a row guarantees something new.
+function hsDraw(s,mode){
+  var unowned=HS_ITEMS.filter(function(it){return !s.inv[it.id];});
+  var wantNew=(mode==='new'||mode==='gold'||s.pity>=2)&&unowned.length;
+  var pool=wantNew?unowned:HS_ITEMS;
+  var W=mode==='gold'?{common:10,uncommon:30,rare:60}:{common:60,uncommon:30,rare:10};
+  var per={};pool.forEach(function(it){per[it.rarity]=(per[it.rarity]||0)+1;});
+  var tot=0,ws=pool.map(function(it){var w=W[it.rarity]/per[it.rarity];tot+=w;return w;});
+  var roll=Math.random()*tot,pick=pool[pool.length-1];
+  for(var i=0;i<pool.length;i++){roll-=ws[i];if(roll<=0){pick=pool[i];break;}}
+  var isNew=!s.inv[pick.id];
+  s.inv[pick.id]=(s.inv[pick.id]||0)+1;
+  if(isNew){s.pity=0;}else{s.pity++;s.dupes++;}
+  s.log.unshift({d:todayStr(),id:pick.id});if(s.log.length>30)s.log.length=30;
+  return {item:pick,isNew:isNew};
+}
+function hsOpenCrate(){
+  var s=hsLoad();
+  if(!s.crate||s.crate.opened)return null;
+  var res=hsDraw(s,s.crate.gold?'gold':'');
+  s.crate.opened=true;s.crate.item=res.item.id;s.crate.isNew=res.isNew;
+  hsSave(s);
+  return res;
+}
+
+function hsSprite(it,px,ghost){
+  var out='';
+  for(var y=0;y<it.art.length;y++){
+    var row=it.art[y],x=0;
+    while(x<row.length){
+      var ch=row.charAt(x);
+      if(ch==='.'){x++;continue;}
+      var x2=x;while(x2<row.length&&row.charAt(x2)===ch)x2++;
+      out+='<rect x="'+x+'" y="'+y+'" width="'+(x2-x)+'" height="1" fill="'+(ghost?'#1c2740':(HS_PAL[ch]||'#ffffff'))+'"/>';
+      x=x2;
+    }
+  }
+  return '<svg width="'+px+'" height="'+px+'" viewBox="0 0 16 16" shape-rendering="crispEdges" role="img" aria-label="'+(ghost?'Not found yet':escHtml(it.name))+'">'+out+'</svg>';
+}
+function hsStatsHtml(s){
+  return '<div class="hs-stats"><span>Days held: '+s.streak+'</span><span>Best: '+s.best+'</span><span>Total: '+s.total+'</span><span>Incidents: '+s.incidents.length+'</span></div>';
+}
+
+// ── The Button ────────────────────────────────
+var _hsEntry=[],_hsFresh=null,_hsRevealed=false;
+function hsRenderButton(){
+  var el=document.getElementById('hsButtonBody');if(!el)return;
+  var s=hsLoad();
+  var inc=hsCheckIncident(s);
+  if(s.last===todayStr()){hsRenderHolding(el,s);return;}
+  _hsEntry=[];
+  var h='';
+  if(inc){
+    h+='<div class="hs-fail"><b>SYSTEM FAILURE</b><span>The counter reached zero '+inc.missed+' day'+(inc.missed!==1?'s':'')+' ago, after '+inc.streak+' day'+(inc.streak!==1?'s':'')+' held. Incident #'+s.incidents.length+' has been logged.</span><span>The island is still here. Mostly. Enter the numbers to start again.</span></div>';
+  }
+  h+='<div class="hatch-card"><div class="hatch-label">Station 3 : The Swan // Countdown</div><div class="hs-timer" id="hsTimer"></div><div class="hs-sub">Enter the numbers before midnight</div></div>'
+    +'<div class="hs-slots" id="hsSlots"></div>'
+    +'<div class="hs-pad">'+HS_SEQ.map(function(n){return '<button class="hs-num" onclick="hsKey('+n+')">'+n+'</button>';}).join('')+'</div>'
+    +'<button class="hs-exec" id="hsExec" onclick="hsExecute()" disabled>EXECUTE</button>'
+    +hsStatsHtml(s);
+  el.innerHTML=h;
+  hsDrawSlots();hsTick();
+  _hatchTimerInt=setInterval(hsTick,1000);
+}
+function hsTick(){
+  var t=document.getElementById('hsTimer');if(!t)return;
+  var left=hsLeft();
+  t.textContent=hsFmt(left,true);
+  t.classList.toggle('urgent',left<3600);
+}
+function hsDrawSlots(bad){
+  var el=document.getElementById('hsSlots');if(!el)return;
+  el.innerHTML=HS_SEQ.map(function(n,i){return '<div class="hs-slot'+(bad?' bad':'')+'">'+(bad?'X':(_hsEntry[i]!=null?_hsEntry[i]:'_'))+'</div>';}).join('');
+  var ex=document.getElementById('hsExec');
+  if(ex){var ready=_hsEntry.length===HS_SEQ.length;ex.disabled=!ready;ex.classList.toggle('ready',ready);}
+}
+function hsKey(n){
+  var want=HS_SEQ[_hsEntry.length];
+  if(want===undefined)return;
+  if(n!==want){
+    if(navigator.vibrate)navigator.vibrate(80);
+    _hsEntry=[];hsDrawSlots(true);
+    setTimeout(function(){hsDrawSlots();},450);
+    return;
+  }
+  if(navigator.vibrate)navigator.vibrate(15);
+  _hsEntry.push(n);hsDrawSlots();
+}
+function hsExecute(){
+  if(_hsEntry.length!==HS_SEQ.length)return;
+  _hsFresh=hsPress();
+  _hsRevealed=false;
+  if(navigator.vibrate)navigator.vibrate([40,30,90]);
+  _clearHatchTimers();
+  hsRenderButton();
+}
+function hsRenderHolding(el,s){
+  var fresh=_hsFresh;_hsFresh=null;
+  var h='<div class="hatch-card'+(fresh&&fresh.kind==='glitch'?' hs-glitch':'')+'"><div class="hatch-label">Countdown reset</div><div class="hs-timer">108:00</div><div class="hs-lines" id="hsLines"></div></div>'
+    +hsStatsHtml(s);
+  var c=s.crate;
+  if(c&&c.date===todayStr()){
+    if(!c.opened){
+      h+='<div class="hs-crate'+(c.gold?' gold':'')+'"><div class="hatch-label" style="color:#8a6a1c">Supply drop</div><div class="hs-crate-t">'+(c.gold?'PRIORITY PALLET ON THE GROUND':'PALLET ON THE GROUND')+'</div><button class="hs-btn" onclick="hsOpenCrateUI()">[ OPEN THE CRATE ]</button></div>';
+    }else{
+      var it=hsItem(c.item);
+      if(it){
+        h+='<div class="hs-crate'+(c.gold?' gold':'')+'"><div class="hatch-label" style="color:#8a6a1c">Today&#39;s drop</div>'
+          +'<div'+(_hsRevealed?' class="hs-pop"':'')+'>'+hsSprite(it,96)+'</div>'
+          +'<div class="hs-crate-n">'+escHtml(it.name)+'</div>'
+          +'<div class="hs-tag '+it.rarity+'">'+it.rarity+'</div>'
+          +'<div class="hs-crate-f">'+escHtml(it.text)+'<br>'+(c.isNew?'New. It has a spot on the shelf.':'A duplicate. That is '+s.dupes+' toward a re-roll (3 needed).')+'</div>'
+          +'<button class="hs-btn" onclick="hatchMode(\'basement\')">[ GO TO THE BASEMENT ]</button></div>';
+      }
+    }
+  }
+  el.innerHTML=h;
+  _hsRevealed=false;
+  hsTypeLines(fresh,s);
+}
+function hsTypeLines(fresh,s){
+  var lines;
+  if(!fresh){lines=['HOLDING.','<span class="dim">Next window opens at midnight.</span>'];}
+  else{
+    if(fresh.kind==='first')lines=['RESET CONFIRMED.','WELCOME, OPERATOR.','<span class="dim">The last one left in a hurry.</span>'];
+    else if(fresh.kind==='glitch')lines=['R#S%T C0NF!RM&amp;D','<span class="dim">...never mind.</span>','RESET CONFIRMED.'];
+    else if(fresh.kind==='symbols')lines=['<span style="color:#e85050">▚▞▙▟▜▛▚▞▙▟</span>','<span class="dim">False alarm. Probably.</span>','RESET CONFIRMED.'];
+    else if(fresh.kind==='tx'){
+      var list=[];try{list=_hd().transmissions||[];}catch(e){}
+      lines=['RESET CONFIRMED.'];
+      if(list.length)lines.push('<span class="dim">STRAY SIGNAL INTERCEPTED:</span>',escHtml(list[Math.floor(Math.random()*list.length)]));
+      else lines.push('<span class="dim">Electromagnetic containment nominal.</span>');
+    }
+    else lines=['RESET CONFIRMED.','<span class="dim">'+['Countdown restored.','Electromagnetic containment nominal.','All stations online.','Nothing happened. That is the idea.'][Math.floor(Math.random()*4)]+'</span>'];
+    lines.push(fresh.gold?'DAY '+fresh.streak+'. THE NUMBERS NOTICED. PRIORITY PALLET INBOUND.':'DAYS HELD: '+fresh.streak+'. SUPPLY DROP INBOUND.');
+  }
+  var add=function(l){
+    var box=document.getElementById('hsLines');if(!box)return;
+    var d=document.createElement('div');d.innerHTML=l;box.appendChild(d);
+  };
+  lines.forEach(function(l,i){
+    if(!fresh)add(l);
+    else setTimeout(function(){add(l);},260*i+150);
+  });
+}
+function hsOpenCrateUI(){
+  var res=hsOpenCrate();if(!res)return;
+  if(navigator.vibrate)navigator.vibrate([30,40,30]);
+  _hsRevealed=true;
+  _hsSel=res.item.id;
+  hsRenderButton();
+}
+
+// ── The Basement ──────────────────────────────
+var _hsSel='';
+function hsRenderBasement(){
+  var el=document.getElementById('hsBasementBody');if(!el)return;
+  var s=hsLoad(),owned=hsOwned(s);
+  var h='<div class="hs-neon">THE BASEMENT</div>'
+    +'<div class="hs-shelf-h"><span>'+HS_SHELF_NAME+'</span><span>'+owned+' / '+HS_ITEMS.length+'</span></div>'
+    +'<div class="hs-shelf">'+HS_ITEMS.map(function(it){
+      var n=s.inv[it.id]||0;
+      if(!n)return '<div class="hs-cell ghost">'+hsSprite(it,48,true)+'</div>';
+      return '<button class="hs-cell'+(_hsSel===it.id?' sel':'')+'" onclick="hsSelect(\''+it.id+'\')" aria-label="'+escHtml(it.name)+'">'+hsSprite(it,48)+(n>1?'<span class="hs-x">×'+n+'</span>':'')+'</button>';
+    }).join('')+'</div>';
+  var sel=hsItem(_hsSel);
+  if(sel&&s.inv[sel.id]>0){
+    h+='<div class="hs-detail"><div style="flex-shrink:0">'+hsSprite(sel,72)+'</div><div><div class="hs-tag '+sel.rarity+'">'+sel.rarity+'</div><div class="hs-detail-n">'+escHtml(sel.name)+(s.inv[sel.id]>1?' ×'+s.inv[sel.id]:'')+'</div><div class="hs-detail-f">'+escHtml(sel.text)+'</div></div></div>';
+  }else if(!owned){
+    h+='<div class="hs-note">Empty shelves. Press the Button, open the crate, and the first thing you find goes here.</div>';
+  }else{
+    h+='<div class="hs-note">Tap anything on the shelf to read about it.</div>';
+  }
+  var canTrade=s.dupes>=3&&owned<HS_ITEMS.length;
+  h+='<button class="hs-btn" onclick="hsTrade()"'+(canTrade?'':' disabled')+'>[ TRADE 3 DUPES FOR A RE-ROLL ]</button>'
+    +'<div class="hs-note">Duplicates on hand: '+s.dupes+'. '+(owned>=HS_ITEMS.length?'Shelf 01 is complete. Nine more shelves are still in their boxes.':'A re-roll always finds something you do not have yet. Nine more shelves are still in their boxes.')+'</div>';
+  el.innerHTML=h;
+}
+function hsSelect(id){_hsSel=id;hsRenderBasement();}
+function hsTrade(){
+  var s=hsLoad();
+  if(s.dupes<3||hsOwned(s)>=HS_ITEMS.length)return;
+  s.dupes-=3;
+  var res=hsDraw(s,'new');
+  hsSave(s);
+  _hsSel=res.item.id;
+  if(navigator.vibrate)navigator.vibrate([30,40,30]);
+  hsRenderBasement();
+  if(typeof showToast==='function')showToast('Re-roll: '+res.item.name);
+}
+
+// ── Menu lines, landing screen, and the door in the top bar ──
+function hsRenderSelector(){
+  var s=hsLoad(),pressed=s.last===todayStr();
+  var a=document.getElementById('hsSelBtnSub');
+  if(a)a.textContent=pressed?'Holding. Days held: '+s.streak:hsFmt(hsLeft(),false)+' left today. Enter the numbers.';
+  var b=document.getElementById('hsSelBaseSub');
+  if(b)b.textContent=hsOwned(s)+' / '+HS_ITEMS.length+' on Shelf 01';
+}
+function hsLanding(){return hsLoad().last===todayStr()?'selector':'button';}
+function hsDoorUpdate(){
+  var b=document.getElementById('hsDoor');if(!b)return;
+  var s=hsLoad(),pressed=s.last===todayStr(),left=hsLeft();
+  b.textContent=pressed?'⚡':'⚡ '+hsFmt(left,false);
+  b.style.background=(!pressed&&left<3600)?'rgba(224,74,74,.8)':'rgba(255,255,255,.2)';
+  b.title=pressed?'The Hatch':'The Hatch: the Button is waiting';
+}
+try{hsDoorUpdate();}catch(e){}
+setInterval(function(){try{hsDoorUpdate();}catch(e){}},20000);
+
 </script>
 <!-- STEP MODAL -->
 <!-- MOVE MODAL (steps + workouts combined) -->
@@ -31582,7 +31939,7 @@ function flLogIt(){
 
 <!-- HATCH SCREEN -->
 <canvas id="hatchCanvas"></canvas>
-<div id="ovHatch" style="position:relative">
+<div id="ovHatch">
   <!-- Boot sequence overlay -->
   <div id="hBootSeq" style="display:none">
     <div id="hBootLines"></div>
@@ -31601,6 +31958,14 @@ function flLogIt(){
           </div>
           <button class="hatch-close-btn" onclick="closeHatch()">[ X ]</button>
         </div>
+        <button class="hatch-mode-btn" onclick="hatchMode('button')">
+          <span class="hatch-mode-icon">🔘</span>
+          <span><span class="hatch-mode-label">&gt; THE BUTTON</span><span class="hatch-mode-sub" id="hsSelBtnSub" style="color:#2f9a1c">Enter the numbers. Every day.</span></span>
+        </button>
+        <button class="hatch-mode-btn" onclick="hatchMode('basement')">
+          <span class="hatch-mode-icon">📼</span>
+          <span><span class="hatch-mode-label">&gt; THE BASEMENT</span><span class="hatch-mode-sub" id="hsSelBaseSub" style="color:#2f9a1c">Everything the supply drops brought</span></span>
+        </button>
         <button class="hatch-mode-btn" onclick="hatchMode('mission')">
           <span class="hatch-mode-icon">🎯</span>
           <span><span class="hatch-mode-label">&gt; MISSION BRIEFING</span><span class="hatch-mode-sub">Random challenge — accept or skip</span></span>
@@ -31722,6 +32087,24 @@ function flLogIt(){
         <button class="hatch-spa-item" onclick="hatchSpaGround()"><span style="font-size:20px">🌿</span>5-4-3-2-1 Grounding</button>
         <button class="hatch-spa-item" onclick="hatchSpaBreathe()"><span style="font-size:20px">🌬️</span>60-sec breathing</button>
         <div id="hSpaContent" style="margin-top:12px"></div>
+      </div>
+
+      <!-- THE BUTTON (Hatch revamp, slice 1) -->
+      <div id="hPanelButton" style="display:none">
+        <div class="hatch-header">
+          <button class="hatch-back-btn" onclick="hatchMode('selector')">← Back</button>
+          <button class="hatch-close-btn" onclick="closeHatch()">✕</button>
+        </div>
+        <div id="hsButtonBody"></div>
+      </div>
+
+      <!-- THE BASEMENT (Hatch revamp, slice 1) -->
+      <div id="hPanelBasement" style="display:none">
+        <div class="hatch-header">
+          <button class="hatch-back-btn" onclick="hatchMode('selector')">← Back</button>
+          <button class="hatch-close-btn" onclick="closeHatch()">✕</button>
+        </div>
+        <div id="hsBasementBody"></div>
       </div>
 
     </div>
