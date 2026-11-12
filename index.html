@@ -1004,6 +1004,90 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
 .shift-task-row{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--border)}
 .shift-task-row:last-child{border-bottom:none}
 .shift-task-title{flex:1;font-size:13px;font-weight:700;color:var(--textd)}
+
+/* ══════════════════════════════════════════════
+   FOOD MODE — food-only home, Log a food, Convert (Nov 2026)
+   One job per color: cobalt = the "Left today" card, coral = the one main
+   action, lime = selected / result, pale pink = "your food stuff".
+   ══════════════════════════════════════════════ */
+#v-home.food-mode > :not(#foodHome){display:none!important}
+#foodHome{display:none}
+#v-home.food-mode #foodHome{display:flex}
+body.food-mode .tab-btn[data-tab="tasks"],body.food-mode .tab-btn[data-tab="estate"],
+body.food-mode .fav-tab-btn[data-tab="tasks"],body.food-mode .fav-tab-btn[data-tab="helm"],body.food-mode .fav-tab-btn[data-tab="estate"],body.food-mode .fav-tab-btn[data-tab="money"]{display:none}
+.fdm{display:flex;flex-direction:column;gap:14px;margin:-14px -14px -110px;padding:20px 20px 120px;min-height:100vh;background:#FFF8F3;color:#051423;font-family:'Quicksand',sans-serif}
+.fdm > *{width:100%;max-width:520px;margin-left:auto;margin-right:auto}
+.fdm button,.fdm input{font-family:inherit}
+.fdm-h1{font-family:'Playfair Display',serif;font-size:26px;line-height:30px;font-weight:700;color:#051423}
+.fdm-date{font-size:13px;line-height:18px;font-weight:600;color:#6B625C;margin-top:2px}
+.fdm-hero{border-radius:20px;padding:17px 19px;display:flex;flex-direction:column;gap:8px;background:#2475FF;border:3px solid #EEFFA4}
+.fdm-hero-lbl{font-size:12px;line-height:16px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:#FFFFFF}
+.fdm-hero-row{display:flex;align-items:baseline;gap:8px}
+.fdm-hero-num{font-family:'Playfair Display',serif;font-size:44px;line-height:44px;font-weight:700;color:#FFF8F3}
+.fdm-hero-unit{font-size:16px;font-weight:700;color:#FFF8F3}
+.fdm-bar{height:8px;border-radius:4px;background:rgba(5,20,35,.35);overflow:hidden}
+.fdm-bar > div{height:8px;min-width:8px;border-radius:4px;background:#EEFFA4}
+.fdm-hero-cap{font-size:17px;line-height:22px;font-weight:600;color:#FFFFFF}
+.fdm-macros{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.fdm-macro{background:#FFFFFF;border-radius:12px;padding:8px 10px;display:flex;flex-direction:column;gap:2px;min-width:0}
+.fdm-macro-l{font-size:11px;line-height:14px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:#6B625C}
+.fdm-macro-v{font-size:15px;line-height:20px;font-weight:700;color:#051423;white-space:nowrap}
+.fdm-macro-v small{font-size:11px;font-weight:600;color:#6B625C}
+.fdm-card{border:1px solid #F1E7E2;box-shadow:0 2px 12px rgba(5,20,35,.05);background:#FFFFFF;color:#051423;cursor:pointer}
+.fdm-block{display:flex;flex-direction:column;gap:8px}
+.fdm-logbox{display:flex;align-items:center;justify-content:space-between;width:100%;height:52px;padding:0 7px 0 17px;border-radius:16px;text-align:left}
+.fdm-logbox > span:first-child{font-size:16px;font-weight:600;color:#6B625C}
+.fdm-logpill{display:flex;align-items:center;height:38px;padding:0 18px;border-radius:12px;background:#F06677;color:#051423;font-size:15px;font-weight:700}
+.fdm-2col{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.fdm-3col{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.fdm-sec{height:44px;display:flex;align-items:center;justify-content:center;gap:8px;border-radius:14px;font-size:14px;font-weight:700}
+.fdm-h2{font-size:12px;line-height:18px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:#6B625C}
+.fdm-usual{height:52px;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:0 15px;border-radius:14px;font-size:14px;font-weight:700;text-align:left;min-width:0}
+.fdm-usual > span:first-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.fdm-usual > span:last-child{font-size:12px;font-weight:600;color:#6B625C;flex-shrink:0;white-space:nowrap}
+.fdm-tile{height:72px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;border-radius:16px;font-size:13px;font-weight:700}
+.fdm-dot{display:flex;align-items:center;justify-content:center;width:34px;height:34px;border:1px solid #FACFFF;border-radius:17px;background:#FFEFFB}
+.fdm-link{min-height:44px;border:none;background:none;font-size:13px;font-weight:600;color:#6B625C;cursor:pointer;text-decoration:underline}
+.fdm-empty{font-size:13px;line-height:19px;font-weight:600;color:#6B625C;background:#FFFFFF;border:1px dashed #F1E7E2;border-radius:14px;padding:12px 14px}
+/* Log a food */
+.fdm-log{gap:16px}
+.fdm-top{display:flex;align-items:center;gap:8px;height:44px}
+.fdm-back{display:flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:14px;flex-shrink:0}
+.fdm-h1s{font-family:'Playfair Display',serif;font-size:24px;line-height:30px;font-weight:700;color:#051423}
+.fdm-input{height:52px;width:100%;padding:0 17px;border:1px solid #F1E7E2;box-shadow:0 2px 12px rgba(5,20,35,.05);border-radius:16px;font-size:16px;font-weight:600;color:#051423;background:#FFFFFF;outline:none}
+.fdm-input:focus,.fdm-num:focus{border-color:#051423}
+.fdm-dyn{display:flex;flex-direction:column;gap:16px}
+.fdm-found{border:1px solid #FACFFF;box-shadow:0 2px 12px rgba(5,20,35,.05);border-radius:16px;padding:13px 15px;display:flex;flex-direction:column;gap:4px;background:#FFEFFB}
+.fdm-found-l{font-size:12px;line-height:16px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:#6B625C}
+.fdm-found-n{font-size:17px;line-height:22px;font-weight:700;color:#051423}
+.fdm-found-s{font-size:13px;line-height:18px;font-weight:600;color:#6B625C}
+.fdm-found-b{font-size:13px;line-height:18px;font-weight:700;color:#051423}
+.fdm-port{width:100%;height:60px;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:2px;padding:0 15px;border-radius:14px;text-align:left}
+.fdm-port b{font-size:15px;font-weight:700;display:block}
+.fdm-port small{font-size:12px;font-weight:600;color:#6B625C;display:block}
+.fdm-port.on{flex-direction:row;align-items:center;justify-content:space-between;gap:8px;background:#EEFFA4}
+.fdm-port.on small{color:#051423}
+.fdm-row{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:48px}
+.fdm-row label{font-size:14px;font-weight:700;color:#051423}
+.fdm-row-r{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:700;flex-shrink:0}
+.fdm-num{width:96px;height:44px;padding:0 13px;border-radius:12px;font-size:16px;font-weight:700;text-align:right;outline:none;cursor:text}
+.fdm-result{background:#EEFFA4;border-radius:20px;padding:16px 18px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.fdm-result-l{display:flex;align-items:baseline;gap:8px}
+.fdm-result-n{font-family:'Playfair Display',serif;font-size:40px;line-height:44px;font-weight:700}
+.fdm-result-u{font-size:15px;font-weight:700}
+.fdm-result-p{font-size:14px;font-weight:700;text-align:right}
+.fdm-go{display:flex;align-items:center;justify-content:center;height:54px;width:100%;border:none;border-radius:16px;background:#F06677;color:#051423;font-size:17px;font-weight:700;cursor:pointer}
+.fdm-go:disabled{opacity:.45;cursor:default}
+.fdm-chips{display:flex;flex-wrap:wrap;gap:8px}
+.fdm-chip{min-height:40px;padding:0 14px;border-radius:12px;font-size:13px;font-weight:700;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fdm-check{display:flex;align-items:center;gap:10px;min-height:44px;font-size:14px;font-weight:600;color:#051423;cursor:pointer}
+.fdm-check input{width:20px;height:20px;accent-color:#051423;flex-shrink:0}
+/* Convert */
+.fdm-cv{background:#FFFFFF;border:1px solid #F1E7E2;box-shadow:0 2px 12px rgba(5,20,35,.05);border-radius:16px;padding:6px 15px}
+.fdm-cv div{display:flex;justify-content:space-between;gap:12px;padding:9px 0;font-size:14px;font-weight:600;color:#051423;border-bottom:1px solid #F1E7E2}
+.fdm-cv div:last-child{border-bottom:none}
+.fdm-cv div span:last-child{font-weight:700;text-align:right}
+.fdm-note{font-size:13px;line-height:19px;font-weight:600;color:#6B625C}
 </style>
 </head>
 <body>
@@ -1367,8 +1451,10 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
 
 <!-- HOME -->
 <div class="view on" id="v-home">
+  <div id="foodHome" class="fdm"></div>
   <div class="home-top-bar">
     <h2 id="homeGreet">Good morning ✨</h2>
+    <button class="home-edit-btn" id="homeFoodModeBtn" onclick="fhSetMode(true)" style="display:none;margin-right:6px;font-size:12px">🍽 Food only</button>
     <button class="home-edit-btn" id="homeResetBtn" onclick="resetHomeOrder()" style="display:none;margin-right:6px;font-size:12px">↺ Reset</button>
     <button class="home-edit-btn" id="homeEditBtn" onclick="toggleHomeEdit()">✏️ Edit</button>
   </div>
@@ -1380,6 +1466,78 @@ body{font-family:'Quicksand',sans-serif;background:var(--cream);color:var(--text
     <button onclick="goTab('appindex',null)" style="width:100%;padding:10px 14px;border-radius:14px;border:1.5px solid rgba(143,170,139,.4);background:#fff;font-family:'Quicksand',sans-serif;font-size:13px;font-weight:700;color:var(--sage);cursor:pointer;display:flex;align-items:center;gap:8px;box-shadow:var(--sh2)"><span>🗂️</span><span>App Index — Navigate All Sections</span><span style="margin-left:auto;font-size:11px;color:var(--textl)">→</span></button>
   </div>
   <div class="home-grid" id="homeGrid"></div>
+</div>
+
+<!-- FOOD MODE: LOG A FOOD (direct child of .pg) -->
+<div class="view" id="v-foodlog">
+  <div class="fdm fdm-log">
+    <div class="fdm-top">
+      <button class="fdm-card fdm-back" onclick="fhGoHome()" aria-label="Back to home"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#051423" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"></path></svg></button>
+      <h2 class="fdm-h1s" id="flTitle">Log a food</h2>
+    </div>
+    <input class="fdm-input" id="flQuery" placeholder="What did you eat?" autocomplete="off" autocapitalize="off" enterkeyhint="done" oninput="flOnQuery()" aria-label="What did you eat?">
+    <div class="fdm-dyn" id="flDyn"></div>
+  </div>
+</div>
+
+<!-- FOOD MODE: CONVERT (direct child of .pg) -->
+<div class="view" id="v-convert">
+  <div class="fdm fdm-log">
+    <div class="fdm-top">
+      <button class="fdm-card fdm-back" onclick="fhGoHome()" aria-label="Back to home"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#051423" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"></path></svg></button>
+      <h2 class="fdm-h1s">Convert</h2>
+    </div>
+    <div class="fdm-block">
+      <h3 class="fdm-h2">Spoons and cups</h3>
+      <div class="fdm-cv">
+        <div><span>3 teaspoons</span><span>1 tablespoon</span></div>
+        <div><span>2 tablespoons</span><span>1 fl oz</span></div>
+        <div><span>4 tablespoons</span><span>¼ cup</span></div>
+        <div><span>5 tablespoons + 1 teaspoon</span><span>⅓ cup</span></div>
+        <div><span>8 tablespoons</span><span>½ cup</span></div>
+        <div><span>16 tablespoons</span><span>1 cup</span></div>
+        <div><span>1 cup</span><span>8 fl oz</span></div>
+        <div><span>2 cups</span><span>1 pint</span></div>
+        <div><span>4 cups</span><span>1 quart</span></div>
+      </div>
+    </div>
+    <div class="fdm-block">
+      <h3 class="fdm-h2">To milliliters</h3>
+      <div class="fdm-cv">
+        <div><span>1 teaspoon</span><span>about 5 ml</span></div>
+        <div><span>1 tablespoon</span><span>about 15 ml</span></div>
+        <div><span>1 fl oz</span><span>about 30 ml</span></div>
+        <div><span>¼ cup</span><span>about 60 ml</span></div>
+        <div><span>½ cup</span><span>about 120 ml</span></div>
+        <div><span>1 cup</span><span>about 240 ml</span></div>
+      </div>
+    </div>
+    <div class="fdm-block">
+      <h3 class="fdm-h2">Weight</h3>
+      <div class="fdm-cv">
+        <div><span>1 oz</span><span>about 28 g</span></div>
+        <div><span>4 oz (¼ lb)</span><span>about 113 g</span></div>
+        <div><span>8 oz (½ lb)</span><span>about 227 g</span></div>
+        <div><span>16 oz (1 lb)</span><span>about 454 g</span></div>
+        <div><span>100 g</span><span>about 3.5 oz</span></div>
+        <div><span>1 kg</span><span>about 2.2 lb</span></div>
+      </div>
+    </div>
+    <div class="fdm-block">
+      <h3 class="fdm-h2">One cup weighs about</h3>
+      <div class="fdm-cv">
+        <div><span>Water or milk</span><span>240 g</span></div>
+        <div><span>All-purpose flour</span><span>120 g</span></div>
+        <div><span>White sugar</span><span>200 g</span></div>
+        <div><span>Brown sugar, packed</span><span>215 g</span></div>
+        <div><span>Butter (2 sticks)</span><span>227 g</span></div>
+        <div><span>Honey</span><span>340 g</span></div>
+        <div><span>Rolled oats</span><span>90 g</span></div>
+        <div><span>Rice, uncooked</span><span>185 g</span></div>
+      </div>
+      <p class="fdm-note">Cups to grams depends on the food, so these are close-enough kitchen numbers. Foods saved in your food library carry their own gram weights.</p>
+    </div>
+  </div>
 </div>
 
 <!-- APP INDEX PAGE -->
@@ -6586,6 +6744,7 @@ function goTabDirect(tab,btn){
   if(tab==='food'){ setTimeout(function(){ renderExLog(); updExWeek(); renderWplanList(); updM(); },50); }
   if(tab==='wellness'){ setTimeout(function(){ showWellnessSec('mood',document.querySelector('#v-wellness .pn-btn:nth-child(1)')); },50); }
   if(tab==='workshop'){ renderWSProjects(); }
+  if(typeof fhAfterTab==='function')fhAfterTab(tab);
 }
 
 function renderHubPreviews(section){
@@ -8959,6 +9118,7 @@ function getHomeTileBadge(id){
 }
 
 function renderHomePage(){
+  if(typeof renderFoodHome==='function')renderFoodHome();
   var grid=document.getElementById('homeGrid');if(!grid)return;
   grid.className='home-grid'+(HOME_EDIT_MODE?' home-edit-mode':'');
   grid.innerHTML=HOME_TILES.map(function(tile,idx){
@@ -19654,7 +19814,7 @@ function renderKEvents(){
 // SPIRITUAL HABITS
 // ═══════════════════════════════════════════════
 
-function todayStr(){return new Date().toISOString().slice(0,10);}
+function todayStr(){var d=new Date();return d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)+'-'+('0'+d.getDate()).slice(-2);} // local day (was UTC: rolled over at 4pm Pacific)
 
 function habitStreak(id){
   var log=HABIT_LOG[id]||[];
@@ -29452,6 +29612,409 @@ if('serviceWorker' in navigator&&location.protocol.indexOf('http')===0){
     navigator.serviceWorker.register('sw.js').catch(function(){});
   });
 }
+
+// ═══════════════════════════════════════════════
+// FOOD MODE — food-only home, Log a food, Convert (Nov 2026)
+// While this is on, the classic home tiles plus the Tasks and Money tabs are
+// hidden. Nothing is deleted: fhSetMode(false) brings everything back.
+// Logging writes to MEAL_LOG_ITEMS (same list as What I Ate) and reads
+// nutrition from FOOD_DB (the Ingredient Library), so there is still one
+// food database with different views on it.
+// ═══════════════════════════════════════════════
+function fhMode(){return localStorage.getItem('aFoodMode')!=='0';}
+function fhSetMode(on){localStorage.setItem('aFoodMode',on?'1':'0');renderHomePage();window.scrollTo(0,0);}
+function fhApplyMode(){
+  var on=fhMode();
+  var v=document.getElementById('v-home');if(v)v.classList.toggle('food-mode',on);
+  document.body.classList.toggle('food-mode',on);
+  var b=document.getElementById('homeFoodModeBtn');if(b)b.style.display=on?'none':'';
+}
+function fhIcon(k,size,sw){
+  var P={
+    hash:'<path d="M9 4L7 20M17 4l-2 16M4 9h16M3 15h16"></path>',
+    barcode:'<path d="M4 6v12M8 6v12M11 6v12M15 6v12M18 6v12M21 6v12"></path>',
+    list:'<path d="M9 6h11M9 12h11M9 18h11M4 6h1M4 12h1M4 18h1"></path>',
+    lib:'<ellipse cx="12" cy="6" rx="7" ry="3"></ellipse><path d="M5 6v12c0 1.7 3.1 3 7 3s7-1.3 7-3V6"></path><path d="M5 12c0 1.7 3.1 3 7 3s7-1.3 7-3"></path>',
+    book:'<path d="M4 5h6a2 2 0 0 1 2 2v12a2 2 0 0 0-2-2H4z"></path><path d="M20 5h-6a2 2 0 0 0-2 2v12a2 2 0 0 1 2-2h6z"></path>',
+    box:'<rect x="4" y="9" width="16" height="10" rx="2"></rect><path d="M6 9V7a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v2"></path><path d="M4 13h16"></path>',
+    basket:'<path d="M4 9h16l-1.5 9a2 2 0 0 1-2 1.7h-9a2 2 0 0 1-2-1.7z"></path><path d="M9 9l3-5 3 5"></path>',
+    swap:'<path d="M4 8h14l-3-3"></path><path d="M20 16H6l3 3"></path>',
+    check:'<path d="M5 12.5l4.5 4.5L19 7.5"></path>'
+  };
+  return '<svg aria-hidden="true" width="'+size+'" height="'+size+'" viewBox="0 0 24 24" fill="none" stroke="#051423" stroke-width="'+(sw||2)+'" stroke-linecap="round" stroke-linejoin="round">'+(P[k]||'')+'</svg>';
+}
+function fhNum(n){return Math.round(n||0).toLocaleString('en-US');}
+function fhR1(n){return Math.round((parseFloat(n)||0)*10)/10;}
+function fhNorm(s){return String(s||'').trim().toLowerCase().replace(/\s+×[\d.]+$/,'').replace(/\s+/g,' ');}
+function fhBucket(h){return (h>=4&&h<11)?'morning':(h>=11&&h<16)?'midday':'evening';}
+function fhItemTime(m){var ts=parseInt(String((m&&m.id)||'').replace('ml-',''),10);return ts>1e12?new Date(ts):null;}
+function fhFindDb(name){var k=fhNorm(name);if(!k)return null;return (FOOD_DB||[]).find(function(x){return fhNorm(x.name)===k;})||null;}
+
+// What you've logged before, grouped by name: how often, at what time of day, and the usual calories.
+function fhHistory(){
+  var map={};
+  (MEAL_LOG_ITEMS||[]).forEach(function(m){
+    if(!m||m.calOnly)return;
+    var k=fhNorm(m.name);if(!k)return;
+    var e=map[k]||(map[k]={key:k,name:m.name,count:0,n:0,cal:0,pro:0,carb:0,fat:0,b:{morning:0,midday:0,evening:0},last:0});
+    e.count++;
+    var d=fhItemTime(m);
+    if(d){e.b[fhBucket(d.getHours())]++;if(d.getTime()>e.last){e.last=d.getTime();e.name=String(m.name).replace(/\s+×[\d.]+$/,'');}}
+    if(m.cal>0){e.n++;e.cal+=m.cal||0;e.pro+=m.pro||0;e.carb+=m.carb||0;e.fat+=m.fat||0;}
+  });
+  return map;
+}
+function fhAvgNut(e){return {cal:Math.round(e.cal/e.n),pro:fhR1(e.pro/e.n),carb:fhR1(e.carb/e.n),fat:fhR1(e.fat/e.n)};}
+
+// A library food's usual serving (My Usual if set, otherwise its first serving).
+function flDbBase(item){
+  var sv=(item.servings&&item.servings.length)?item.servings[0]:null;
+  if(item.myUsual&&item.myUsual.svId){var ms=(item.servings||[]).find(function(s){return s.id===item.myUsual.svId;});if(ms)sv=ms;}
+  var qty=(item.myUsual&&parseFloat(item.myUsual.qty))||1;
+  var per100=!!(item.per100&&item.per100.cal!=null);
+  var g=sv?(parseFloat(sv.grams)||0):0;
+  return {sv:sv,qty:qty,per100:per100,hasG:g>0,grams:per100?((g||100)*qty):0};
+}
+function flDbNut(item,mult){
+  var b=flDbBase(item);
+  return b.per100?calcNutFromLib(item,b.grams,mult):calcNutFromLib(item,0,b.qty*mult);
+}
+function fhUsualNut(e){
+  if(e&&e.n)return fhAvgNut(e);
+  var it=e?fhFindDb(e.key):null;
+  if(it){var n=flDbNut(it,1);if(n.cal>0)return n;}
+  return null;
+}
+// Up to four one-tap foods: what you log most at this time of day, then your overall favorites.
+function fhUsuals(){
+  var map=fhHistory(),bk=fhBucket(new Date().getHours());
+  var arr=Object.keys(map).map(function(k){return map[k];});
+  var inB=arr.filter(function(e){return e.b[bk]>0;}).sort(function(a,b){return (b.b[bk]-a.b[bk])||(b.last-a.last);});
+  var rest=arr.filter(function(e){return !(e.b[bk]>0);}).sort(function(a,b){return (b.count-a.count)||(b.last-a.last);});
+  var out=[],seen={};
+  inB.concat(rest).forEach(function(e){if(out.length>=4||seen[e.key])return;seen[e.key]=1;out.push({name:e.name,key:e.key,nut:fhUsualNut(e)});});
+  if(out.length<4){
+    var c=(FOOD_DB||[]).filter(function(f){
+      var hasNut=(f.per100&&f.per100.cal!=null)||f.cal;
+      return hasNut&&(f.staple||(f.useCount||0)>0)&&!(typeof isItemIck==='function'&&isItemIck(f));
+    });
+    c.sort(function(a,b){if(!!b.staple!==!!a.staple)return b.staple?1:-1;return (b.useCount||0)-(a.useCount||0);});
+    c.forEach(function(f){var k=fhNorm(f.name);if(out.length>=4||seen[k])return;seen[k]=1;var n=flDbNut(f,1);out.push({name:f.name,key:k,nut:n.cal>0?n:null});});
+  }
+  return out;
+}
+var _fhUsualsCache=[];
+// Keeps the food home current when data arrives from the cloud or the day/time of day changes.
+var _fhSig='';
+function fhSig(){
+  var t=getTot(),h=new Date().getHours();
+  return todayStr()+'|'+fhBucket(h)+'|'+(h<12?0:h<17?1:2)+'|'+(MEAL_LOG_ITEMS||[]).length+'|'+Math.round(t.cal||0)+'|'+(FOOD_DB||[]).length+'|'+(S.gCal||0)+'|'+(S.gPro||0);
+}
+setInterval(function(){
+  try{
+    if(!fhMode())return;
+    var v=document.getElementById('v-home');if(!v||!v.classList.contains('on'))return;
+    if(fhSig()!==_fhSig)renderFoodHome();
+  }catch(e){}
+},4000);
+
+function renderFoodHome(){
+  fhApplyMode();
+  var el=document.getElementById('foodHome');if(!el||!fhMode())return;
+  _fhSig=fhSig();
+  var now=new Date(),h=now.getHours();
+  var greet=h<12?'Good morning':h<17?'Good afternoon':'Good evening';
+  var dateStr=now.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
+  var t=getTot();
+  var goal=S.gCal||1900,eaten=Math.round(t.cal||0),left=goal-eaten;
+  var pct=Math.max(0,Math.min(100,goal?eaten/goal*100:0));
+  var macro=function(lbl,val,g){return '<div class="fdm-macro"><div class="fdm-macro-l">'+lbl+'</div><div class="fdm-macro-v">'+Math.round(val||0)+(g?' <small>/ '+g+' g</small>':' g')+'</div></div>';};
+  var bk=fhBucket(h);
+  _fhUsualsCache=fhUsuals();
+  var usuals=_fhUsualsCache.length
+    ?'<div class="fdm-2col">'+_fhUsualsCache.map(function(u,i){
+        return '<button class="fdm-card fdm-usual" onclick="fhLogUsual('+i+')"><span>'+escHtml(u.name)+'</span><span>'+(u.nut?fhNum(u.nut.cal):'add cal')+'</span></button>';
+      }).join('')+'</div>'
+    :'<div class="fdm-empty">Nothing here yet. Log a few foods and the ones you eat most at this time of day will show up as one-tap buttons.</div>';
+  var tile=function(icon,label,fn){return '<button class="fdm-card fdm-tile" onclick="'+fn+'"><span class="fdm-dot">'+fhIcon(icon,20,1.8)+'</span>'+label+'</button>';};
+  el.innerHTML=
+    '<div><h2 class="fdm-h1">'+greet+'</h2><div class="fdm-date">'+dateStr+'</div></div>'
+    +'<div class="fdm-hero">'
+      +'<div class="fdm-hero-lbl">'+(left>=0?'Left today':'Over today')+'</div>'
+      +'<div class="fdm-hero-row"><div class="fdm-hero-num">'+fhNum(Math.abs(left))+'</div><div class="fdm-hero-unit">calories</div></div>'
+      +'<div class="fdm-bar"><div style="width:'+pct+'%"></div></div>'
+      +'<div class="fdm-hero-cap">'+fhNum(eaten)+' eaten so far. Goal '+fhNum(goal)+'.</div>'
+      +'<div class="fdm-macros">'+macro('Protein',t.pro,S.gPro)+macro('Carbs',t.crb,S.gCrb)+macro('Fat',t.fat,S.gFat)+'</div>'
+    +'</div>'
+    +'<div class="fdm-block">'
+      +'<button class="fdm-card fdm-logbox" onclick="fhOpenLog(\'find\')"><span>What did you eat?</span><span class="fdm-logpill">Log</span></button>'
+      +'<div class="fdm-2col">'
+        +'<button class="fdm-card fdm-sec" onclick="fhOpenLog(\'cal\')">'+fhIcon('hash',18,2)+'Just calories</button>'
+        +'<button class="fdm-card fdm-sec" onclick="fhBarcode()">'+fhIcon('barcode',18,2)+'Barcode lookup</button>'
+      +'</div>'
+    +'</div>'
+    +'<div class="fdm-block"><h3 class="fdm-h2">Your '+bk+' usuals, one tap</h3>'+usuals+'</div>'
+    +'<div class="fdm-block"><h3 class="fdm-h2">Food</h3><div class="fdm-3col">'
+      +tile('list','What I ate','fhGoMeals(\'ate\')')
+      +tile('lib','Food library','fhGoMeals(\'database\')')
+      +tile('book','Recipes','fhGoMeals(\'recipes\')')
+      +tile('box','Meal prep','fhGoMeals(\'meals\')')
+      +tile('basket','Grocery','fhGoMeals(\'grocery\')')
+      +tile('swap','Convert','fhGoConvert()')
+    +'</div></div>'
+    +'<button class="fdm-link" onclick="fhSetMode(false)">Tasks and money are archived. Bring them back</button>';
+}
+
+// Adds one entry to What I Ate. Every food-mode log goes through here.
+function fhCommit(name,n,opts){
+  opts=opts||{};
+  var it={id:'ml-'+Date.now(),name:name,category:'main',day:'',date:todayStr(),cal:Math.round(n.cal||0),pro:fhR1(n.pro),carb:fhR1(n.carb),fat:fhR1(n.fat)};
+  if(opts.est)it.est=true;
+  if(opts.calOnly)it.calOnly=true;
+  var db=fhFindDb(name);
+  if(db&&db.gluten)it.gluten=true;
+  MEAL_LOG_ITEMS.unshift(it);
+  localStorage.setItem('aMealLogItems',JSON.stringify(MEAL_LOG_ITEMS));
+  if(db){db.useCount=(db.useCount||0)+1;saveFoodDbData();}
+  try{if(typeof autoFlagStaples==='function')autoFlagStaples();}catch(e){}
+  try{if(typeof checkQuestAutoComplete==='function')checkQuestAutoComplete('meal');}catch(e){}
+  try{if(typeof renderTodayStatsBars==='function')renderTodayStatsBars();}catch(e){}
+  DELTED={restore:function(){
+    MEAL_LOG_ITEMS=MEAL_LOG_ITEMS.filter(function(x){return x.id!==it.id;});
+    localStorage.setItem('aMealLogItems',JSON.stringify(MEAL_LOG_ITEMS));
+    if(db){db.useCount=Math.max(0,(db.useCount||1)-1);saveFoodDbData();}
+    renderFoodHome();
+  }};
+  showUndo(name+' logged · '+fhNum(it.cal)+' cal');
+  renderFoodHome();
+}
+function fhLogUsual(i){
+  var u=_fhUsualsCache[i];if(!u)return;
+  if(!u.nut){fhOpenLog('find',u.name);return;}
+  fhCommit(u.name,u.nut,{});
+}
+function fhGoHome(){goTab('home',document.querySelector('[data-tab="home"]'));window.scrollTo(0,0);}
+function fhGoMeals(sec){
+  goTab('meals',null);
+  setTimeout(function(){
+    var b=null;
+    document.querySelectorAll('#v-meals .pn-btn').forEach(function(x){if((x.getAttribute('onclick')||'').indexOf("'"+sec+"'")>=0)b=x;});
+    showMealSec(sec,b);
+    window.scrollTo(0,0);
+  },90);
+}
+function fhGoConvert(){goTab('convert',null);window.scrollTo(0,0);}
+function fhBarcode(){
+  openFoodDbModal();
+  var more=document.getElementById('fdbMoreOpts'),btn=document.getElementById('fdbMoreBtn');
+  if(more)more.style.display='';
+  if(btn)btn.textContent='Less details ▴';
+  var bc=document.getElementById('fdbBarcode');
+  if(bc){try{bc.scrollIntoView({block:'center'});bc.focus();}catch(e){}}
+}
+// In food mode, the Eat pages get a one-tap way back to the food home.
+function fhAfterTab(tab){
+  if(!fhMode()||tab!=='meals')return;
+  var bc=document.getElementById('sectionBreadcrumb');
+  if(bc){bc.style.display='flex';bc.innerHTML='<button class="bc-btn" onclick="fhGoHome()">← Food home</button>';}
+}
+
+// ── Log a food ────────────────────────────────
+var FL_STATE=null;
+function flState(){if(!FL_STATE)FL_STATE={mode:'find',sel:null,cands:[],recents:[],grams:0,mult:1,guess:0,calOnly:0};return FL_STATE;}
+function fhOpenLog(mode,prefill){
+  FL_STATE={mode:mode==='cal'?'cal':'find',sel:null,cands:[],recents:[],grams:0,mult:1,guess:0,calOnly:0};
+  goTab('foodlog',null);
+  var q=document.getElementById('flQuery');
+  if(q){q.value=prefill||'';q.placeholder=FL_STATE.mode==='cal'?'What was it? (optional)':'What did you eat?';}
+  var t=document.getElementById('flTitle');if(t)t.textContent=FL_STATE.mode==='cal'?'Just calories':'Log a food';
+  if(FL_STATE.mode==='cal')flRender();else flOnQuery();
+  window.scrollTo(0,0);
+  var f=FL_STATE.mode==='cal'?document.getElementById('flCalOnly'):q;
+  if(f){try{f.focus();}catch(e){}}
+}
+function flCand(item,hist){
+  if(item){
+    var b=flDbBase(item);
+    if(b.per100||parseFloat(item.cal)>0)return {kind:b.per100?'lib-g':'lib-s',name:item.name,item:item,base:b};
+    if(hist&&hist.n)return {kind:'hist',name:item.name,item:item,hist:hist};
+    return {kind:'new',name:item.name,item:item};
+  }
+  return {kind:'hist',name:hist.name,hist:hist};
+}
+function flSearch(q){
+  q=fhNorm(q);if(!q)return [];
+  var out=[],seen={},hist=fhHistory();
+  (FOOD_DB||[]).forEach(function(x){
+    var nm=fhNorm(x.name);if(!nm)return;
+    var al=(x.aliases||[]).map(fhNorm);
+    var score=nm===q?0:nm.indexOf(q)===0?1:nm.indexOf(q)>=0?2:(al.some(function(a){return a&&a.indexOf(q)>=0;})?3:-1);
+    if(score<0)return;
+    seen[nm]=1;
+    var c=flCand(x,hist[nm]);c.score=score;c.use=x.useCount||0;out.push(c);
+  });
+  Object.keys(hist).forEach(function(k){
+    if(seen[k])return;
+    var e=hist[k];if(!e.n)return;
+    var score=k===q?0:k.indexOf(q)===0?1:k.indexOf(q)>=0?2:-1;
+    if(score<0)return;
+    var c=flCand(null,e);c.score=score;c.use=e.count;out.push(c);
+  });
+  out.sort(function(a,b){return (a.score-b.score)||((a.kind==='new'?1:0)-(b.kind==='new'?1:0))||(b.use-a.use);});
+  return out.slice(0,5);
+}
+function flOnQuery(){
+  var st=flState();
+  if(st.mode==='cal'){if(!document.getElementById('flCalOnly'))flRender();return;}
+  var q=((document.getElementById('flQuery')||{}).value||'').trim();
+  st.cands=flSearch(q);
+  flSelect(st.cands.length?st.cands[0]:(q?{kind:'new',name:q}:null));
+}
+function flSelect(c){
+  var st=flState();
+  st.sel=c;st.mult=1;st.grams=(c&&c.kind==='lib-g')?c.base.grams:0;
+  flRender();
+}
+function flPick(i){var st=flState();if(st.cands[i])flSelect(st.cands[i]);}
+function flPickNew(){var q=((document.getElementById('flQuery')||{}).value||'').trim();if(q)flSelect({kind:'new',name:q});}
+function flPickRecent(i){
+  var st=flState(),r=st.recents[i];if(!r)return;
+  var q=document.getElementById('flQuery');if(q)q.value=r;
+  flOnQuery();
+}
+function flCurrentNut(){
+  var st=flState(),z={cal:0,pro:0,carb:0,fat:0};
+  if(st.mode==='cal')return {cal:st.calOnly||0,pro:0,carb:0,fat:0};
+  var c=st.sel;if(!c)return z;
+  if(c.kind==='lib-g')return st.grams>0?calcNutFromLib(c.item,st.grams,1):z;
+  if(c.kind==='lib-s')return calcNutFromLib(c.item,0,c.base.qty*st.mult);
+  if(c.kind==='hist'){var a=fhAvgNut(c.hist);return {cal:Math.round(a.cal*st.mult),pro:fhR1(a.pro*st.mult),carb:fhR1(a.carb*st.mult),fat:fhR1(a.fat*st.mult)};}
+  return {cal:st.guess||0,pro:0,carb:0,fat:0};
+}
+function flPortsHtml(){
+  var st=flState(),c=st.sel;if(!c||c.kind==='new')return '';
+  var defs=[[0.25,'¼ serving'],[0.5,'½ serving'],[1,'1 serving'],[2,'2 servings']];
+  return defs.map(function(d){
+    var m=d[0],on,sub;
+    if(c.kind==='lib-g'){
+      var g=c.base.grams*m;
+      on=Math.abs(st.grams-g)<0.01;
+      sub=(Math.round(g)===g?'':'about ')+Math.round(g)+' g';
+    }else{
+      on=st.mult===m;
+      var n=c.kind==='lib-s'?calcNutFromLib(c.item,0,c.base.qty*m):{cal:Math.round(fhAvgNut(c.hist).cal*m)};
+      sub='about '+fhNum(n.cal)+' cal';
+    }
+    return '<button class="fdm-card fdm-port'+(on?' on':'')+'" aria-pressed="'+(on?'true':'false')+'" onclick="flSetPort('+m+')">'
+      +(on?'<span><b>'+d[1]+'</b><small>'+sub+'</small></span>'+fhIcon('check',20,3):'<b>'+d[1]+'</b><small>'+sub+'</small>')
+      +'</button>';
+  }).join('');
+}
+function flUpdate(){
+  var n=flCurrentNut();
+  var p=document.getElementById('flPorts');if(p)p.innerHTML=flPortsHtml();
+  var r=document.getElementById('flResult');
+  if(r)r.innerHTML='<div class="fdm-result-l"><span class="fdm-result-n">'+fhNum(n.cal)+'</span><span class="fdm-result-u">calories</span></div>'
+    +(n.pro>0?'<div class="fdm-result-p">'+Math.round(n.pro)+' g protein</div>':'');
+  var go=document.getElementById('flGo');if(go)go.disabled=!(n.cal>0);
+}
+function flSetPort(m){
+  var st=flState(),c=st.sel;if(!c)return;
+  if(c.kind==='lib-g'){
+    st.grams=c.base.grams*m;
+    var gi=document.getElementById('flGrams');if(gi)gi.value=fhR1(st.grams);
+  }else{st.mult=m;}
+  flUpdate();
+}
+function flOnGrams(){flState().grams=Math.max(0,parseFloat((document.getElementById('flGrams')||{}).value)||0);flUpdate();}
+function flOnGuess(){flState().guess=Math.max(0,parseFloat((document.getElementById('flGuess')||{}).value)||0);flUpdate();}
+function flOnCalOnly(){flState().calOnly=Math.max(0,parseFloat((document.getElementById('flCalOnly')||{}).value)||0);flUpdate();}
+function flRender(){
+  var st=flState(),el=document.getElementById('flDyn');if(!el)return;
+  var q=((document.getElementById('flQuery')||{}).value||'').trim();
+  var h='';
+  if(st.mode==='cal'){
+    el.innerHTML='<div class="fdm-row"><label for="flCalOnly">Calories</label><div class="fdm-row-r"><input id="flCalOnly" class="fdm-card fdm-num" type="number" inputmode="numeric" min="0" placeholder="0" oninput="flOnCalOnly()"'+(st.calOnly?' value="'+st.calOnly+'"':'')+'><span>cal</span></div></div>'
+      +'<div class="fdm-result" id="flResult"></div>'
+      +'<button class="fdm-go" id="flGo" onclick="flLogIt()">Log it</button>'
+      +'<button class="fdm-link" onclick="fhOpenLog(\'find\',document.getElementById(\'flQuery\').value)">Look up a food instead</button>';
+    flUpdate();return;
+  }
+  var c=st.sel;
+  if(!c){
+    var hist=fhHistory();
+    st.recents=Object.keys(hist).map(function(k){return hist[k];}).sort(function(a,b){return b.last-a.last;}).slice(0,6).map(function(e){return e.name;});
+    h='<div class="fdm-empty">Type what you ate. If it is in your food library, Cal fills in the calories. If it is new, you can give it your best guess and save it for next time.</div>';
+    if(st.recents.length){
+      h+='<div class="fdm-block"><h3 class="fdm-h2">Lately</h3><div class="fdm-chips">'
+        +st.recents.map(function(r,i){return '<button class="fdm-card fdm-chip" onclick="flPickRecent('+i+')">'+escHtml(r)+'</button>';}).join('')
+        +'</div></div>';
+    }
+    h+='<button class="fdm-link" onclick="fhOpenLog(\'cal\')">Skip the details, just log calories</button>';
+    el.innerHTML=h;return;
+  }
+  // The pink card: what Cal knows about this food
+  h+='<div class="fdm-found">';
+  if(c.kind==='lib-g'){
+    var p=c.item.per100,b=c.base,lbl=b.sv&&b.sv.label?String(b.sv.label):'';
+    var gTxt=fhR1(b.grams)+' g';
+    var svTxt=(!lbl||!b.hasG||/^\s*[\d.]+\s*g\s*$/i.test(lbl))?gTxt:((b.qty!==1?b.qty+' × ':'')+escHtml(lbl)+', about '+gTxt);
+    h+='<div class="fdm-found-l">Found in your food library</div><div class="fdm-found-n">'+escHtml(c.name)+'</div>'
+      +'<div class="fdm-found-s">'+fhNum(p.cal)+' calories'+(p.pro>0?' and '+fhR1(p.pro)+' g protein':'')+' per 100 g</div>'
+      +'<div class="fdm-found-b">1 serving is '+svTxt+'</div>';
+  }else if(c.kind==='lib-s'){
+    var n1=calcNutFromLib(c.item,0,c.base.qty);
+    h+='<div class="fdm-found-l">Found in your food library</div><div class="fdm-found-n">'+escHtml(c.name)+'</div>'
+      +'<div class="fdm-found-s">'+fhNum(n1.cal)+' calories'+(n1.pro>0?' and '+fhR1(n1.pro)+' g protein':'')+' per serving</div>'
+      +(c.item.estimate?'<div class="fdm-found-b">Saved from your own estimate</div>':'');
+  }else if(c.kind==='hist'){
+    var a=fhAvgNut(c.hist);
+    h+='<div class="fdm-found-l">You have logged this before</div><div class="fdm-found-n">'+escHtml(c.name)+'</div>'
+      +'<div class="fdm-found-s">Usually about '+fhNum(a.cal)+' calories</div>'
+      +'<div class="fdm-found-b">Your average over '+c.hist.n+' time'+(c.hist.n!==1?'s':'')+'</div>';
+  }else{
+    h+='<div class="fdm-found-l">New to Cal</div><div class="fdm-found-n">'+escHtml(c.name)+'</div>'
+      +'<div class="fdm-found-s">Not in your food library yet. Give it your best guess.</div>';
+  }
+  h+='</div>';
+  if(c.kind==='new'){
+    h+='<div class="fdm-row"><label for="flGuess">Calories, your best guess</label><div class="fdm-row-r"><input id="flGuess" class="fdm-card fdm-num" type="number" inputmode="numeric" min="0" placeholder="0" oninput="flOnGuess()"'+(st.guess?' value="'+st.guess+'"':'')+'><span>cal</span></div></div>'
+      +'<label class="fdm-check"><input type="checkbox" id="flSave" checked>Save it so Cal remembers next time</label>';
+  }else{
+    h+='<div class="fdm-block"><h3 class="fdm-h2">How much did you have?</h3><div class="fdm-2col" id="flPorts"></div></div>';
+    if(c.kind==='lib-g'){
+      h+='<div class="fdm-row"><label for="flGrams">Or type the grams</label><div class="fdm-row-r"><input id="flGrams" class="fdm-card fdm-num" type="number" inputmode="decimal" min="0" value="'+fhR1(st.grams)+'" oninput="flOnGrams()"><span>g</span></div></div>';
+    }
+  }
+  h+='<div class="fdm-result" id="flResult"></div><button class="fdm-go" id="flGo" onclick="flLogIt()">Log it</button>';
+  // Other matches, plus a way to add what was typed as a new food
+  var others=[];
+  st.cands.forEach(function(o,i){if(o!==c)others.push('<button class="fdm-card fdm-chip" onclick="flPick('+i+')">'+escHtml(o.name)+'</button>');});
+  if(q&&c.kind!=='new'&&fhNorm(q)!==fhNorm(c.name))others.push('<button class="fdm-card fdm-chip" onclick="flPickNew()">Add “'+escHtml(q)+'” as new</button>');
+  if(others.length)h+='<div class="fdm-block"><h3 class="fdm-h2">Not it?</h3><div class="fdm-chips">'+others.join('')+'</div></div>';
+  h+='<button class="fdm-link" onclick="fhOpenLog(\'cal\',document.getElementById(\'flQuery\').value)">Skip the details, just log calories</button>';
+  el.innerHTML=h;
+  flUpdate();
+}
+function flLogIt(){
+  var st=flState(),n=flCurrentNut();if(!(n.cal>0))return;
+  var q=((document.getElementById('flQuery')||{}).value||'').trim();
+  if(st.mode==='cal'){fhCommit(q||'Calories only',{cal:n.cal},{est:true,calOnly:!q});fhGoHome();return;}
+  var c=st.sel;if(!c)return;
+  var opts={};
+  if(c.kind==='new'){
+    opts.est=true;
+    if((document.getElementById('flSave')||{}).checked){
+      if(c.item){c.item.cal=Math.round(n.cal);c.item.estimate=true;}
+      else{FOOD_DB.unshift({id:'fd-'+Date.now(),name:c.name,tags:['other'],useCount:0,staple:false,store:'',price:0,priceEntries:[],cal:Math.round(n.cal),pro:0,carb:0,fat:0,notes:'Calorie estimate saved from a quick log',estimate:true,created:todayStr()});}
+      saveFoodDbData();
+    }
+  }
+  fhCommit(c.name,n,opts);
+  fhGoHome();
+}
+
+
 </script>
 <!-- STEP MODAL -->
 <!-- MOVE MODAL (steps + workouts combined) -->
