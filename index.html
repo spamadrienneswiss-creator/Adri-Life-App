@@ -1169,6 +1169,27 @@ body.food-mode .fav-tab-btn[data-tab="tasks"],body.food-mode .fav-tab-btn[data-t
 .fdm-sheet button,.fdm-sheet input{font-family:inherit}
 .fdm-sheet-top{display:flex;align-items:center;justify-content:space-between;gap:8px}
 .fdm-sheet-top h3{font-family:'Playfair Display',serif;font-size:20px;line-height:26px;font-weight:700}
+
+/* ══ FOOD LIBRARY — revamp (Nov 2026). Same look and color jobs as the food home. ══
+   The older library controls are still in the page, hidden, so nothing that reads them breaks. */
+#ms-database > :not(#fdmLib){display:none!important}
+.fdm-libhead{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
+.fdm-libhead b{font-family:'Playfair Display',serif;font-size:22px;line-height:28px;font-weight:700;color:#051423}
+.fdm-libhead span{font-size:13px;font-weight:600;color:#6B625C;white-space:nowrap}
+.fdm-fchips{display:flex;gap:8px;overflow-x:auto;padding:2px 0 4px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.fdm-fchips::-webkit-scrollbar{display:none}
+.fdm-fchip{flex-shrink:0;min-height:40px;padding:0 14px;border-radius:12px;font-size:13px;font-weight:700;white-space:nowrap}
+.fdm-fchip.on{background:#EEFFA4}
+.fdm-field{display:flex;flex-direction:column;gap:4px;min-width:0}
+.fdm-field label{font-size:12px;font-weight:700;color:#6B625C}
+.fdm-field input{height:46px;width:100%;padding:0 13px;border:1px solid #F1E7E2;box-shadow:0 2px 12px rgba(5,20,35,.05);border-radius:12px;font-size:16px;font-weight:700;color:#051423;background:#FFFFFF;outline:none}
+.fdm-field input:focus{border-color:#051423}
+.fdm-tog{min-height:44px;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:0 13px;border-radius:14px;font-size:13px;font-weight:700;text-align:left}
+.fdm-tog.on{background:#EEFFA4}
+.fdm-links{display:flex;flex-direction:column;align-items:center;gap:0}
+.fdm-links .fdm-link{min-height:40px}
+/* a tall sheet scrolls; its rows must keep their height instead of being squeezed */
+.fdm-sheet > *{flex-shrink:0}
 </style>
 </head>
 <body>
@@ -1639,6 +1660,31 @@ body.food-mode .fav-tab-btn[data-tab="tasks"],body.food-mode .fav-tab-btn[data-t
     </div>
     <button class="fdm-go" onclick="fdmAteSave()">Save</button>
     <button class="fdm-link" onclick="fdmAteDelete()">Delete this entry</button>
+  </div>
+</div>
+
+<!-- FOOD MODE: add or fix one food in the library -->
+<div class="fdm-ov" id="fdmLibOv" onclick="if(event.target===this)fdmLibClose()">
+  <div class="fdm-sheet" role="dialog" aria-label="Food details">
+    <div class="fdm-sheet-top">
+      <h3 id="fdmLbTitle">Fix this food</h3>
+      <button class="fdm-card fdm-back" onclick="fdmLibClose()" aria-label="Close"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#051423" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"></path></svg></button>
+    </div>
+    <div class="fdm-field"><label for="fdmLbName">Name</label><input id="fdmLbName" autocomplete="off"></div>
+    <div class="fdm-2col">
+      <div class="fdm-field"><label for="fdmLbSv">One serving is</label><input id="fdmLbSv" autocomplete="off" placeholder="1 cup"></div>
+      <div class="fdm-field"><label for="fdmLbG">It weighs (grams)</label><input id="fdmLbG" type="number" inputmode="decimal" min="0" placeholder="optional"></div>
+    </div>
+    <div class="fdm-2col">
+      <div class="fdm-field"><label for="fdmLbCal">Calories</label><input id="fdmLbCal" type="number" inputmode="numeric" min="0" placeholder="0"></div>
+      <div class="fdm-field"><label for="fdmLbPro">Protein (g)</label><input id="fdmLbPro" type="number" inputmode="decimal" min="0" placeholder="0"></div>
+      <div class="fdm-field"><label for="fdmLbCarb">Carbs (g)</label><input id="fdmLbCarb" type="number" inputmode="decimal" min="0" placeholder="0"></div>
+      <div class="fdm-field"><label for="fdmLbFat">Fat (g)</label><input id="fdmLbFat" type="number" inputmode="decimal" min="0" placeholder="0"></div>
+    </div>
+    <p class="fdm-note" id="fdmLbHint"></p>
+    <div class="fdm-2col" id="fdmLbToggles"></div>
+    <button class="fdm-go" onclick="fdmLibSave()">Save</button>
+    <div class="fdm-links" id="fdmLbLinks"></div>
   </div>
 </div>
 
@@ -3017,6 +3063,7 @@ body.food-mode .fav-tab-btn[data-tab="tasks"],body.food-mode .fav-tab-btn[data-t
 
   <!-- FOOD DATABASE section -->
   <div id="ms-database" style="display:none">
+      <div id="fdmLib" class="fdm fdm-page"></div>
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
       <span style="font-size:13px;font-weight:700;color:var(--textd)">🍲 Food Database</span>
       <button class="btn" onclick="openFoodDbModal()">+ Add Food</button>
@@ -21160,7 +21207,7 @@ function updateFlpCalc(){
 function calcNutFromLib(item, svGrams, qty){
   var q = parseFloat(qty)||1;
   var g = parseFloat(svGrams)||100;
-  if(item.per100 && item.per100.cal!=null){
+  if(fdmHasPer100(item)){
     return {
       cal: Math.round(item.per100.cal * g * q / 100),
       pro: Math.round((item.per100.pro||0) * g * q / 100 * 10)/10,
@@ -25798,6 +25845,7 @@ function setFoodDbSort(val){
 }
 
 function renderFoodDb(){
+  if(typeof renderFdmLib==='function')renderFdmLib();
   var el=document.getElementById('foodDbList');
   if(!el)return;
   renderFoodDbKitchen();
@@ -29777,7 +29825,7 @@ function flDbBase(item){
   var sv=(item.servings&&item.servings.length)?item.servings[0]:null;
   if(item.myUsual&&item.myUsual.svId){var ms=(item.servings||[]).find(function(s){return s.id===item.myUsual.svId;});if(ms)sv=ms;}
   var qty=(item.myUsual&&parseFloat(item.myUsual.qty))||1;
-  var per100=!!(item.per100&&item.per100.cal!=null);
+  var per100=fdmHasPer100(item);
   var g=sv?(parseFloat(sv.grams)||0):0;
   return {sv:sv,qty:qty,per100:per100,hasG:g>0,grams:per100?((g||100)*qty):0};
 }
@@ -29801,7 +29849,7 @@ function fhUsuals(){
   inB.concat(rest).forEach(function(e){if(out.length>=4||seen[e.key])return;seen[e.key]=1;out.push({name:e.name,key:e.key,nut:fhUsualNut(e)});});
   if(out.length<4){
     var c=(FOOD_DB||[]).filter(function(f){
-      var hasNut=(f.per100&&f.per100.cal!=null)||f.cal;
+      var hasNut=fdmHasPer100(f)||f.cal;
       return hasNut&&(f.staple||(f.useCount||0)>0)&&!(typeof isItemIck==='function'&&isItemIck(f));
     });
     c.sort(function(a,b){if(!!b.staple!==!!a.staple)return b.staple?1:-1;return (b.useCount||0)-(a.useCount||0);});
@@ -30585,6 +30633,204 @@ function fdmAteDelete(){
   var m=(MEAL_LOG_ITEMS||[]).find(function(x){return String(x.id)===id;});
   fdmAteEditClose();
   if(m)delMealLogItem(m.id);
+}
+
+
+// ═══════════════════════════════════════════════
+// FOOD LIBRARY — revamp (Nov 2026)
+// One list of every food, with its calories. Tap a food to fix it.
+// Reads and writes the same FOOD_DB as before. The older library controls are
+// still in the page (hidden). renderFoodDb() calls renderFdmLib() first, so every
+// existing refresh updates this too. Stores, prices and barcode stay in the full
+// form, reachable from "More details".
+// ═══════════════════════════════════════════════
+var FDM_PREP_TAG='meal prep';
+var _fdmLibFilter='all',_fdmLibEd=null;
+// True only when a food really has per-100 g numbers. The full form saves an
+// all-zero per100 block when no gram weight is given, and that must not count.
+function fdmHasPer100(item){
+  var p=item&&item.per100;
+  return !!(p&&((parseFloat(p.cal)||0)>0||(parseFloat(p.pro)||0)>0||(parseFloat(p.carb)||0)>0||(parseFloat(p.fat)||0)>0));
+}
+function fdmLibTags(item){return item.tags||(item.cat?[item.cat]:[]);}
+function fdmLibIsPrep(item){return fdmLibTags(item).indexOf(FDM_PREP_TAG)>=0;}
+function fdmLibHasCal(item){return fdmHasPer100(item)||(parseFloat(item.cal)||0)>0;}
+// What one usual serving of this food is, in words and numbers.
+function fdmLibServing(item){
+  var b=flDbBase(item),n=flDbNut(item,1);
+  var lbl=b.sv&&b.sv.label?String(b.sv.label):'';
+  var txt;
+  if(b.per100)txt=(lbl&&b.hasG&&!/^\s*[\d.]+\s*g\s*$/i.test(lbl))?((b.qty!==1?b.qty+' × ':'')+lbl+', '+fhR1(b.grams)+' g'):fhR1(b.grams)+' g';
+  else txt=lbl?((b.qty!==1?b.qty+' × ':'')+lbl):'1 serving';
+  return {nut:n,text:txt};
+}
+function renderFdmLib(){
+  var el=document.getElementById('fdmLib');if(!el)return;
+  if(!document.getElementById('fdmLibQ')){
+    el.innerHTML='<div class="fdm-libhead"><b>Food library</b><span id="fdmLibCount"></span></div>'
+      +'<input class="fdm-input" id="fdmLibQ" placeholder="Search your foods" autocomplete="off" autocapitalize="off" oninput="fdmLibDraw()" aria-label="Search your foods">'
+      +'<div class="fdm-fchips" id="fdmLibChips"></div>'
+      +'<button class="fdm-card fdm-sec" onclick="fdmLibOpen(\'\')">Add a food</button>'
+      +'<div class="fdm-list" id="fdmLibList"></div>';
+  }
+  fdmLibDraw();
+}
+function fdmLibSetFilter(f){_fdmLibFilter=f;fdmLibDraw();}
+function fdmLibDraw(){
+  var listEl=document.getElementById('fdmLibList');if(!listEl)return;
+  var q=fhNorm((document.getElementById('fdmLibQ')||{}).value||'');
+  var all=FOOD_DB||[];
+  var chips=[['all','All'],['fav','Favorites'],['prep','Meal prep'],['guess','My guesses'],['nocal','No calories yet']];
+  var tests={
+    all:function(){return true;},
+    fav:function(i){return !!i.favorite;},
+    prep:fdmLibIsPrep,
+    guess:function(i){return !!i.estimate;},
+    nocal:function(i){return !fdmLibHasCal(i);}
+  };
+  var ch=document.getElementById('fdmLibChips');
+  if(ch)ch.innerHTML=chips.map(function(c){
+    var n=all.filter(tests[c[0]]).length;
+    return '<button class="fdm-card fdm-fchip'+(_fdmLibFilter===c[0]?' on':'')+'" aria-pressed="'+(_fdmLibFilter===c[0]?'true':'false')+'" onclick="fdmLibSetFilter(\''+c[0]+'\')">'+c[1]+(c[0]!=='all'?' · '+n:'')+'</button>';
+  }).join('');
+  var list=all.filter(function(i){
+    if(!i||!i.name)return false;
+    if(!(tests[_fdmLibFilter]||tests.all)(i))return false;
+    if(!q)return true;
+    var hay=[i.name,i.brand||''].concat(i.aliases||[]).concat(fdmLibTags(i)).map(fhNorm).join(' | ');
+    return hay.indexOf(q)>=0;
+  });
+  list=list.slice().sort(function(a,b){
+    return ((b.favorite?1:0)-(a.favorite?1:0))||((b.useCount||0)-(a.useCount||0))||String(a.name).localeCompare(String(b.name));
+  });
+  var cnt=document.getElementById('fdmLibCount');
+  if(cnt)cnt.textContent=(list.length===all.length?all.length+' food'+(all.length!==1?'s':''):list.length+' of '+all.length);
+  if(!list.length){
+    listEl.innerHTML='<div class="fdm-empty">'+(all.length?'Nothing matches. Try a different word, or switch the filter back to All.':'Your library is empty. Foods you log with a guess get saved here, or tap Add a food.')+'</div>';
+    return;
+  }
+  listEl.innerHTML=list.map(function(i){
+    var has=fdmLibHasCal(i),sv=has?fdmLibServing(i):null,bits=[];
+    if(has)bits.push('per '+escHtml(sv.text));
+    if(i.estimate)bits.push('your guess');
+    if(i.favorite)bits.push('favorite');
+    if(fdmLibIsPrep(i))bits.push('meal prep');
+    return '<button class="fdm-card fdm-item" onclick="fdmLibOpen(\''+String(i.id).replace(/[^A-Za-z0-9_.-]/g,'')+'\')">'
+      +'<span class="fdm-item-l"><b>'+escHtml(i.name)+'</b>'+(bits.length?'<small>'+bits.join(' · ')+'</small>':'')+'</span>'
+      +(has?'<span class="fdm-item-r">'+fhNum(sv.nut.cal)+'<small> cal</small></span>':'<span class="fdm-item-r none">add calories</span>')
+      +'</button>';
+  }).join('');
+}
+
+// ── Add or fix one food ───────────────────────
+function fdmLibFind(id){return (FOOD_DB||[]).find(function(x){return String(x.id).replace(/[^A-Za-z0-9_.-]/g,'')===String(id);})||null;}
+function fdmLibOpen(id){
+  var item=id?fdmLibFind(id):null;
+  var set=function(k,v){var e=document.getElementById(k);if(e)e.value=(v==null||v===0||v==='')?'':v;};
+  _fdmLibEd={id:item?item.id:'',fav:!!(item&&item.favorite),prep:!!(item&&fdmLibIsPrep(item)),staple:!!(item&&item.staple),gluten:!!(item&&item.gluten),guess:!!(item&&item.estimate)};
+  var t=document.getElementById('fdmLbTitle');if(t)t.textContent=item?'Fix this food':'Add a food';
+  var sv=item&&item.servings&&item.servings.length?item.servings[0]:null;
+  var g=sv?(parseFloat(sv.grams)||0):0,per=item&&fdmHasPer100(item);
+  if(per&&!g)g=100;
+  set('fdmLbName',item?item.name:((document.getElementById('fdmLibQ')||{}).value||'').trim());
+  set('fdmLbSv',sv&&sv.label?sv.label:(per&&!sv?'100 g':''));
+  set('fdmLbG',g);
+  // numbers for one (primary) serving
+  var n=item?(per?calcNutFromLib(item,g,1):{cal:parseFloat(item.cal)||0,pro:parseFloat(item.pro)||0,carb:parseFloat(item.carb)||0,fat:parseFloat(item.fat)||0}):{cal:0,pro:0,carb:0,fat:0};
+  set('fdmLbCal',Math.round(n.cal));set('fdmLbPro',fhR1(n.pro));set('fdmLbCarb',fhR1(n.carb));set('fdmLbFat',fhR1(n.fat));
+  _fdmLibEd.init={cal:Math.round(n.cal),pro:fhR1(n.pro),carb:fhR1(n.carb),fat:fhR1(n.fat),g:g};
+  var hint=document.getElementById('fdmLbHint');
+  if(hint)hint.textContent='The numbers are for one serving. Add the weight in grams and you can log this food by the gram.';
+  fdmLibDrawSheet();
+  var ov=document.getElementById('fdmLibOv');if(ov)ov.classList.add('show');
+  if(!item){var nm=document.getElementById('fdmLbName');if(nm){try{nm.focus();}catch(e){}}}
+}
+function fdmLibDrawSheet(){
+  var ed=_fdmLibEd;if(!ed)return;
+  var tg=document.getElementById('fdmLbToggles');
+  var tog=function(k,label){return '<button class="fdm-card fdm-tog'+(ed[k]?' on':'')+'" aria-pressed="'+(ed[k]?'true':'false')+'" onclick="fdmLibToggle(\''+k+'\')"><span>'+label+'</span>'+(ed[k]?fhIcon('check',18,3):'')+'</button>';};
+  if(tg)tg.innerHTML=tog('fav','Favorite')+tog('prep','Good for meal prep')+tog('staple','Staple')+tog('gluten','Contains gluten')+tog('guess','It is a guess');
+  var lk=document.getElementById('fdmLbLinks');if(!lk)return;
+  var item=ed.id?(FOOD_DB||[]).find(function(x){return x.id===ed.id;}):null;
+  if(!item){lk.innerHTML='<button class="fdm-link" onclick="fdmLibFullForm()">Look it up online or by barcode</button>';return;}
+  var ick=(typeof isItemIck==='function')&&isItemIck(item);
+  lk.innerHTML='<button class="fdm-link" onclick="fdmLibLogNow()">Log this now</button>'
+    +'<button class="fdm-link" onclick="fdmLibGrocery()">Add to grocery list</button>'
+    +'<button class="fdm-link" onclick="fdmLibSkip()">'+(ick?'Allow this food again':'Skip this food for a while')+'</button>'
+    +'<button class="fdm-link" onclick="fdmLibFullForm()">More details: stores, prices, barcode</button>'
+    +'<button class="fdm-link" onclick="fdmLibDelete()">Delete this food</button>';
+}
+function fdmLibToggle(k){if(_fdmLibEd){_fdmLibEd[k]=!_fdmLibEd[k];fdmLibDrawSheet();}}
+function fdmLibClose(){var ov=document.getElementById('fdmLibOv');if(ov)ov.classList.remove('show');_fdmLibEd=null;}
+function fdmLibSave(){
+  var ed=_fdmLibEd;if(!ed)return;
+  var val=function(k){return ((document.getElementById(k)||{}).value||'').trim();};
+  var num=function(k){return Math.max(0,parseFloat(val(k))||0);};
+  var name=val('fdmLbName');
+  if(!name){var nm=document.getElementById('fdmLbName');if(nm){try{nm.focus();}catch(e){}}if(typeof showToast==='function')showToast('Give it a name first');return;}
+  var item=ed.id?(FOOD_DB||[]).find(function(x){return x.id===ed.id;}):null;
+  var isNew=!item;
+  if(isNew){
+    item={id:'fd-'+Date.now(),name:name,tags:['other'],cat:'other',useCount:0,staple:false,store:'',price:0,priceEntries:[],notes:'',created:todayStr()};
+    FOOD_DB.unshift(item);
+  }
+  item.name=name;
+  var cal=Math.round(num('fdmLbCal')),pro=fhR1(num('fdmLbPro')),carb=fhR1(num('fdmLbCarb')),fat=fhR1(num('fdmLbFat'));
+  var g=num('fdmLbG'),lbl=val('fdmLbSv');
+  // Only touch the nutrition when a number actually changed, so an untouched Save cannot drift it.
+  var init=ed.init||{};
+  var changed=isNew||cal!==init.cal||pro!==init.pro||carb!==init.carb||fat!==init.fat||g!==init.g;
+  if(!item.servings)item.servings=[];
+  if(changed){
+    item.cal=cal;item.pro=pro;item.carb=carb;item.fat=fat;
+    if(lbl||g>0){
+      if(!item.servings.length)item.servings.push({id:'sv-'+Date.now(),label:lbl||(g+' g'),grams:g});
+      else{item.servings[0].grams=g;if(lbl)item.servings[0].label=lbl;else if(!item.servings[0].label)item.servings[0].label=g+' g';}
+    }else if(item.servings.length){item.servings[0].grams=0;}
+    // per-100 g numbers follow from the serving weight, the same way the full form does it
+    var fib=parseFloat(item.fiber)||0;
+    item.per100=g>0?{cal:fhR1(cal/g*100),pro:fhR1(pro/g*100),carb:fhR1(carb/g*100),fat:fhR1(fat/g*100),fib:fhR1(fib/g*100)}:{cal:0,pro:0,carb:0,fat:0,fib:0};
+  }else if(lbl){
+    if(!item.servings.length)item.servings.push({id:'sv-'+Date.now(),label:lbl,grams:0});
+    else item.servings[0].label=lbl;
+  }
+  if(item.servings.length)item.serving=item.servings[0].label;
+  // flags
+  item.favorite=ed.fav;
+  item.staple=ed.staple;if(item.staple)item.ick=false;
+  item.gluten=ed.gluten;
+  if(ed.guess)item.estimate=true;else delete item.estimate;
+  var tags=fdmLibTags(item).slice(),has=tags.indexOf(FDM_PREP_TAG);
+  if(ed.prep&&has<0)tags.push(FDM_PREP_TAG);
+  if(!ed.prep&&has>=0)tags.splice(has,1);
+  if(!tags.length)tags=['other'];
+  item.tags=tags;
+  saveFoodDbData();
+  fdmLibClose();
+  renderFoodDb();
+  try{renderFoodHome();}catch(e){}
+  if(typeof showToast==='function')showToast(isNew?'Added to your library':'Saved');
+}
+function fdmLibCurrent(){var ed=_fdmLibEd;return ed&&ed.id?((FOOD_DB||[]).find(function(x){return x.id===ed.id;})||null):null;}
+function fdmLibLogNow(){var it=fdmLibCurrent();if(!it)return;fdmLibClose();fhOpenLog('find',it.name,{});}
+function fdmLibGrocery(){var it=fdmLibCurrent();if(!it)return;addDbItemToGrocery(it.id);}
+function fdmLibSkip(){var it=fdmLibCurrent();if(!it)return;fdmLibClose();openIckPicker(it.id);}
+function fdmLibFullForm(){
+  var it=fdmLibCurrent(),typed=((document.getElementById('fdmLbName')||{}).value||'').trim();
+  fdmLibClose();
+  if(it){openFoodDbModal(it.id);return;}
+  openFoodDbModal();
+  var nm=document.getElementById('fdbName');if(nm&&typed)nm.value=typed;
+}
+function fdmLibDelete(){
+  var it=fdmLibCurrent();if(!it)return;
+  var idx=FOOD_DB.indexOf(it);
+  FOOD_DB.splice(idx,1);
+  saveFoodDbData();
+  fdmLibClose();
+  renderFoodDb();
+  DELTED={restore:function(){FOOD_DB.splice(Math.min(idx,FOOD_DB.length),0,it);saveFoodDbData();renderFoodDb();}};
+  showUndo(it.name+' deleted');
 }
 
 </script>
