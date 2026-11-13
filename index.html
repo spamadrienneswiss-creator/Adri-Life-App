@@ -1190,6 +1190,23 @@ body.food-mode .fav-tab-btn[data-tab="tasks"],body.food-mode .fav-tab-btn[data-t
 .fdm-links .fdm-link{min-height:40px}
 /* a tall sheet scrolls; its rows must keep their height instead of being squeezed */
 .fdm-sheet > *{flex-shrink:0}
+
+/* ══ FOOD MODE — calm top banner (Nov 2026). Applies only while food mode is on;
+   the saved banner color or image comes back when food mode is turned off. ══ */
+body.food-mode #mainHdr{background:#FFFFFF!important;box-shadow:none;border-bottom:1px solid #F1E7E2}
+body.food-mode #mainHdr .app-title{color:#051423}
+body.food-mode #mainHdr .ddate{color:#051423}
+body.food-mode #mainHdr .sync-status{color:#6B625C}
+body.food-mode #dStatus{display:none}
+body.food-mode #mainHdr .hdr-r button{background:#FFFFFF!important;color:#051423!important;border:1px solid #F1E7E2!important;box-shadow:0 2px 12px rgba(5,20,35,.05)}
+body.food-mode .fav-tab-btn{border:1px solid #F1E7E2;color:#051423}
+/* sections switched off in Settings */
+.tab-hidden{display:none!important}
+.tab-order-item.off{opacity:.6}
+/* the banner is one line shorter without the task count; keep the navigation strip tucking under it the same way when the page scrolls */
+body.food-mode #tabBarWrap{top:71px!important}
+/* the Hatch countdown still warns when under an hour is left */
+body.food-mode #mainHdr .hdr-r button.hs-urgent{background:#FDE3E6!important;border-color:#F06677!important}
 </style>
 </head>
 <body>
@@ -1685,6 +1702,23 @@ body.food-mode .fav-tab-btn[data-tab="tasks"],body.food-mode .fav-tab-btn[data-t
     <div class="fdm-2col" id="fdmLbToggles"></div>
     <button class="fdm-go" onclick="fdmLibSave()">Save</button>
     <div class="fdm-links" id="fdmLbLinks"></div>
+  </div>
+</div>
+
+<!-- FOOD MODE: daily goals -->
+<div class="fdm-ov" id="fdmGoalOv" onclick="if(event.target===this)fhGoalsClose()">
+  <div class="fdm-sheet" role="dialog" aria-label="My daily goals">
+    <div class="fdm-sheet-top">
+      <h3>My daily goals</h3>
+      <button class="fdm-card fdm-back" onclick="fhGoalsClose()" aria-label="Close"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#051423" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"></path></svg></button>
+    </div>
+    <div class="fdm-2col">
+      <div class="fdm-field"><label for="fdmGlCal">Calories</label><input id="fdmGlCal" type="number" inputmode="numeric" min="0"></div>
+      <div class="fdm-field"><label for="fdmGlPro">Protein (g)</label><input id="fdmGlPro" type="number" inputmode="numeric" min="0"></div>
+      <div class="fdm-field"><label for="fdmGlCarb">Carbs (g)</label><input id="fdmGlCarb" type="number" inputmode="numeric" min="0"></div>
+      <div class="fdm-field"><label for="fdmGlFat">Fat (g)</label><input id="fdmGlFat" type="number" inputmode="numeric" min="0"></div>
+    </div>
+    <button class="fdm-go" onclick="fhGoalsSave()">Save</button>
   </div>
 </div>
 
@@ -3989,11 +4023,12 @@ body.food-mode .fav-tab-btn[data-tab="tasks"],body.food-mode .fav-tab-btn[data-t
     </div>
   </div>
   <div class="card">
-    <div class="set-sec-t" onclick="togSetSec('sc-taborder',this)">🗂️ Section Order <span class="sst-arr">▶</span></div>
+    <div class="set-sec-t" onclick="togSetSec('sc-taborder',this)">🗂️ Sections: show, hide, reorder <span class="sst-arr">▶</span></div>
     <div id="sc-taborder" style="display:none">
-      <div style="font-size:12px;color:var(--textl);margin-bottom:10px">Drag sections into the order you want them to appear in the navigation bar.</div>
+      <div style="font-size:12px;color:var(--textl);margin-bottom:10px">Switch a section off to hide it from the navigation bar and the quick row at the top. Nothing is deleted. Drag to change the order.</div>
       <div id="tabOrderList"></div>
-      <button onclick="resetTabOrder()" class="btn sec" style="font-size:12px;padding:5px 14px;margin-top:6px">↺ Reset to default</button>
+      <button onclick="tabShowAll()" class="btn sec" style="font-size:12px;padding:5px 14px;margin-top:6px">Show all sections</button>
+      <button onclick="resetTabOrder()" class="btn sec" style="font-size:12px;padding:5px 14px;margin-top:6px">↺ Reset order</button>
     </div>
   </div>
   <div class="card">
@@ -6703,6 +6738,7 @@ function initFirebase(){
       ap('aTabOrder',function(v,r){if(v&&v.length){TAB_ORDER=_mergeTabOrder(v);_origSetItem('aTabOrder',r);if(typeof applyTabOrder==='function')applyTabOrder();}});
       ap('aAboutMe',function(v,r){ABOUT_ME=v||{};_origSetItem('aAboutMe',r);});
       ap('aTabFavs',function(v,r){_origSetItem('aTabFavs',r);if(typeof renderFavTabs==='function')renderFavTabs();});
+      ap('aHiddenTabs',function(v,r){_origSetItem('aHiddenTabs',r);if(typeof tabHideRefresh==='function')tabHideRefresh();});
       ap('aHomeTiles2',function(v,r){if(_homeTilesSavedAt&&Date.now()-_homeTilesSavedAt<6000)return;if(v)HOME_TILES=v;_origSetItem('aHomeTiles2',r);if(document.getElementById('homeGrid'))renderHomePage();});
       ap('aHomeItems',function(v,r){HOME_ITEMS=v||[];_origSetItem('aHomeItems',r);});
       _fbBlobPause=false;
@@ -6760,7 +6796,7 @@ var BLOB_GROUPS={
   game:['aBadges','aHelmMiles','aSprintStats','aEmber','aMillie','aFishLevel','aFishLog'],
   work2:['aWigOrders','aWorkProjects'],
   content2:['aContentItems','aScrCards','aFeelingCards','aDailyQuests'],
-  settings2:['aPIN','aProtTabs','aWUnit','aHideMillie','aSavedThemes','aTabOrder','aAboutMe','aTabFavs','aHomeTiles2','aHomeItems'],
+  settings2:['aPIN','aProtTabs','aWUnit','aHideMillie','aSavedThemes','aTabOrder','aHiddenTabs','aAboutMe','aTabFavs','aHomeTiles2','aHomeItems'],
 };
 var BLOB_KEY_GROUP={};
 (function(){Object.keys(BLOB_GROUPS).forEach(function(g){BLOB_GROUPS[g].forEach(function(k){BLOB_KEY_GROUP[k]=g;});});})();
@@ -11772,7 +11808,7 @@ function loadFavTabs(){
 function saveFavTabs(favs){localStorage.setItem('aTabFavs',JSON.stringify(favs));}
 function renderFavTabs(){
   var row=document.getElementById('favTabsRow');if(!row)return;
-  var favs=loadFavTabs();
+  var favs=loadFavTabs().filter(function(t){return !tabIsHidden(t);});
   row.innerHTML=favs.map(function(tab){
     return '<button class="fav-tab-btn" data-tab="'+tab+'" onclick="goTabDirect(\''+tab+'\')" title="'+tab+'">'+((TAB_LABEL_MAP[tab])||tab)+'</button>';
   }).join('')+'<button onclick="openFavTabEdit()" class="fav-tab-btn" style="opacity:.55;min-width:32px;padding:5px 7px" title="Customize favorites">⭐</button>';
@@ -14924,7 +14960,7 @@ function applyTabOrder(){
     if(btn)bar.appendChild(btn);
   });
 }
-function renderTabOrderList(){
+function renderTabOrderListOld(){
   var el=document.getElementById('tabOrderList');
   if(!el)return;
   el.innerHTML=TAB_ORDER.map(function(tab){
@@ -21287,7 +21323,7 @@ function renderMealMacroBar(){
       return hasGluten?'<div style="background:#fdf6e0;border-radius:8px;padding:5px 10px;margin-top:2px;font-size:11px;color:#a07820;font-weight:700">🌾 Gluten logged today</div>':'';
     }())
     +_weeklyTrendHtml()
-    +'<div style="text-align:right;margin-top:4px"><button onclick="openM(\'settingsModal\')" style="font-size:10px;background:none;border:none;color:var(--textl);cursor:pointer;font-family:inherit;text-decoration:underline">Edit goals →</button></div>';
+    +'<div style="text-align:right;margin-top:4px"><button onclick="fhGoals()" style="font-size:10px;background:none;border:none;color:var(--textl);cursor:pointer;font-family:inherit;text-decoration:underline">Edit goals →</button></div>';
 }
 
 // 7-day calorie trend sparkline (last 7 days incl. today)
@@ -29846,6 +29882,7 @@ function fhApplyMode(){
   var v=document.getElementById('v-home');if(v)v.classList.toggle('food-mode',on);
   document.body.classList.toggle('food-mode',on);
   var b=document.getElementById('homeFoodModeBtn');if(b)b.style.display=on?'none':'';
+  try{applyHiddenTabs();renderFavTabs();}catch(e){}
 }
 function fhIcon(k,size,sw){
   var P={
@@ -30538,6 +30575,7 @@ function hsDoorUpdate(){
   var s=hsLoad(),pressed=s.last===todayStr(),left=hsLeft();
   b.textContent=pressed?'⚡':'⚡ '+hsFmt(left,false);
   b.style.background=(!pressed&&left<3600)?'rgba(224,74,74,.8)':'rgba(255,255,255,.2)';
+  b.classList.toggle('hs-urgent',!pressed&&left<3600);
   b.title=pressed?'The Hatch':'The Hatch: the Button is waiting';
 }
 try{hsDoorUpdate();}catch(e){}
@@ -30656,7 +30694,7 @@ function renderFdmAte(){
         +'<button class="fdm-wbtn" onclick="fdmAteWater(32)" aria-label="Add one Owala, 32 ounces">Owala</button>'
       +'</span></div></div>'
     +fdmTrendHtml(iso)
-    +'<button class="fdm-link" onclick="openM(\'settingsModal\')">Change my goals</button>';
+    +'<button class="fdm-link" onclick="fhGoals()">Change my goals</button>';
 }
 
 // ── Fix or delete one entry ───────────────────
@@ -30895,6 +30933,78 @@ function fdmLibDelete(){
   renderFoodDb();
   DELTED={restore:function(){FOOD_DB.splice(Math.min(idx,FOOD_DB.length),0,it);saveFoodDbData();renderFoodDb();}};
   showUndo(it.name+' deleted');
+}
+
+
+// ═══════════════════════════════════════════════
+// SECTIONS: show / hide (Nov 2026)
+// A section switched off in Settings leaves the navigation bar and the quick row.
+// Nothing is deleted and the section still opens from anywhere else that links to it.
+// Until a choice is saved, food mode shows only Home, Health & Wellness and Settings.
+// ═══════════════════════════════════════════════
+// (functions, not variables: the quick row is drawn at startup before this part of the script has run)
+function hideTabDefault(){return ['today','tasks','plan','helm','lighthouse','conservatory','workshop','estate','myhome','emporium','archives','archive'];}
+function hideTabLocked(tab){return tab==='home'||tab==='settings';}
+function hideTabName(tab){return TAB_LABELS[tab]||({tasks:'Tasks',myhome:'Home Items',settings:'Settings'})[tab]||tab;}
+function hiddenTabs(){
+  var raw=localStorage.getItem('aHiddenTabs');
+  if(raw==null||raw==='')return fhMode()?hideTabDefault():[];
+  try{var v=JSON.parse(raw);return Array.isArray(v)?v.filter(function(t){return !hideTabLocked(t);}):[];}catch(e){return [];}
+}
+function tabIsHidden(tab){return hiddenTabs().indexOf(tab)>-1;}
+function applyHiddenTabs(){
+  var h=hiddenTabs();
+  document.querySelectorAll('#tabBar .tab-btn').forEach(function(b){b.classList.toggle('tab-hidden',h.indexOf(b.getAttribute('data-tab'))>-1);});
+}
+function tabHideRefresh(){
+  applyHiddenTabs();
+  try{renderTabOrderList();}catch(e){}
+  try{renderFavTabs();}catch(e){}
+}
+function tabHideToggle(tab){
+  if(hideTabLocked(tab))return;
+  var h=hiddenTabs(),i=h.indexOf(tab);
+  if(i>-1)h.splice(i,1);else h.push(tab);
+  localStorage.setItem('aHiddenTabs',JSON.stringify(h));
+  tabHideRefresh();
+}
+function tabShowAll(){localStorage.setItem('aHiddenTabs','[]');tabHideRefresh();}
+function renderTabOrderList(){
+  var el=document.getElementById('tabOrderList');
+  if(!el)return;
+  var hid=hiddenTabs();
+  var row=function(tab,drag){
+    var locked=hideTabLocked(tab),off=hid.indexOf(tab)>-1,label=hideTabName(tab);
+    return '<div class="tab-order-item'+(off?' off':'')+'" data-tab="'+tab+'"'
+      +(drag?' draggable="true" ondragstart="tabDragStart(event,\''+tab+'\')" ondragover="tabDragOver(event)" ondrop="tabDrop(event,\''+tab+'\')" ondragend="tabDragEnd()"':' style="cursor:default"')+'>'
+      +'<span class="tab-order-handle">'+(drag?'⠿':'&nbsp;&nbsp;')+'</span>'
+      +'<span style="flex:1">'+label+(off?' <span style="font-weight:600;color:var(--textl)">· hidden</span>':'')+'</span>'
+      +(locked?'<span style="font-size:11px;font-weight:600;color:var(--textl)">always on</span>'
+              :'<button class="tog'+(off?'':' on')+'" onclick="event.stopPropagation();tabHideToggle(\''+tab+'\')" aria-label="'+(off?'Show ':'Hide ')+label+'"></button>')
+      +'</div>';
+  };
+  el.innerHTML=TAB_ORDER.map(function(t){return row(t,true);}).join('')+(TAB_ORDER.indexOf('tasks')<0?row('tasks',false):'');
+}
+try{applyHiddenTabs();}catch(e){}
+
+// ── Daily goals, from the food screens ─────────
+function fhGoals(){
+  var set=function(id,v){var e=document.getElementById(id);if(e)e.value=v;};
+  set('fdmGlCal',S.gCal);set('fdmGlPro',S.gPro);set('fdmGlCarb',S.gCrb);set('fdmGlFat',S.gFat);
+  var ov=document.getElementById('fdmGoalOv');if(ov)ov.classList.add('show');
+}
+function fhGoalsClose(){var ov=document.getElementById('fdmGoalOv');if(ov)ov.classList.remove('show');}
+function fhGoalsSave(){
+  var num=function(id,cur){var v=parseInt((document.getElementById(id)||{}).value,10);return v>0?v:cur;};
+  S.gCal=num('fdmGlCal',S.gCal);S.gPro=num('fdmGlPro',S.gPro);S.gCrb=num('fdmGlCarb',S.gCrb);S.gFat=num('fdmGlFat',S.gFat);
+  localStorage.setItem('aGCal',S.gCal);localStorage.setItem('aGPro',S.gPro);
+  localStorage.setItem('aGCrb',S.gCrb);localStorage.setItem('aGFat',S.gFat);
+  try{if(typeof fbSave==='function')fbSave('settings','goals',{gCal:S.gCal,gPro:S.gPro,gFib:S.gFib,gCrb:S.gCrb,gFat:S.gFat,gWat:S.gWat,gEx:S.gEx,gSleep:S.gSleep,updated:new Date().toISOString()});}catch(e){}
+  fhGoalsClose();
+  try{renderFoodHome();}catch(e){}
+  try{fdmAteRefresh();}catch(e){}
+  try{if(typeof renderTodayStatsBars==='function')renderTodayStatsBars();}catch(e){}
+  if(typeof showToast==='function')showToast('Goals saved');
 }
 
 </script>
