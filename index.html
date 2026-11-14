@@ -1224,6 +1224,24 @@ body.food-mode #mainHdr .hdr-r button.hs-urgent{background:#FDE3E6!important;bor
 .fdm-ate.done{background:#EEFFA4;border:1px solid #EEFFA4;color:#051423;cursor:default}
 .fdm-prow.done .fdm-item-l b{color:#6B625C}
 .fdm-added{display:inline-flex;align-items:center;height:24px;padding:0 8px;margin-left:8px;border-radius:8px;background:#EEFFA4;font-size:12px;font-weight:700;color:#051423}
+
+/* ══ FOOD MODE — the row of page buttons on the Eat pages (Nov 2026).
+   Calm buttons, lime for the page you are on, same order as the food home.
+   Inventory, Want to Try, Wine and Prices are hidden while food mode is on. ══ */
+body.food-mode #v-meals .pill-nav{gap:8px;padding:2px 0 6px;flex-wrap:wrap;overflow-x:visible}
+body.food-mode #v-meals .pn-btn{min-height:40px;padding:0 14px;border-radius:12px;border:1px solid #F1E7E2;background:#FFFFFF;color:#051423;font-size:13px;box-shadow:0 2px 12px rgba(5,20,35,.05)}
+body.food-mode #v-meals .pn-btn.on{background:#EEFFA4;border-color:#F1E7E2;color:#051423;box-shadow:0 2px 12px rgba(5,20,35,.05)}
+body.food-mode #v-meals .pn-btn .pn-emo{display:none}
+body.food-mode #v-meals .pn-btn[onclick*="'inventory'"],
+body.food-mode #v-meals .pn-btn[onclick*="'wantTry'"],
+body.food-mode #v-meals .pn-btn[onclick*="'wine'"],
+body.food-mode #v-meals .pn-btn[onclick*="'prices'"]{display:none}
+body.food-mode #v-meals .pn-btn[onclick*="'ate'"]{order:1}
+body.food-mode #v-meals .pn-btn[onclick*="'database'"]{order:2}
+body.food-mode #v-meals .pn-btn[onclick*="'recipes'"]{order:3}
+body.food-mode #v-meals .pn-btn[onclick*="'meals'"]{order:4}
+body.food-mode #v-meals .pn-btn[onclick*="'grocery'"]{order:5}
+body.food-mode #sectionBreadcrumb .bc-btn{color:#051423}
 </style>
 </head>
 <body>
@@ -3036,15 +3054,15 @@ body.food-mode #mainHdr .hdr-r button.hs-urgent{background:#FDE3E6!important;bor
 
 <div class="view" id="v-meals">
   <div class="pill-nav" style="margin-bottom:12px">
-    <button class="pn-btn on" onclick="showMealSec('ate',this)">📓 What I Ate</button>
-    <button class="pn-btn" onclick="showMealSec('meals',this)">📅 Meal Plan</button>
-    <button class="pn-btn" onclick="showMealSec('grocery',this)">🛒 Grocery</button>
+    <button class="pn-btn on" onclick="showMealSec('ate',this)"><span class="pn-emo">📓 </span>What I Ate</button>
+    <button class="pn-btn" onclick="showMealSec('meals',this)"><span class="pn-emo">📅 </span>Meal Plan</button>
+    <button class="pn-btn" onclick="showMealSec('grocery',this)"><span class="pn-emo">🛒 </span>Grocery</button>
     <button class="pn-btn" onclick="showMealSec('inventory',this)">📦 Inventory</button>
-    <button class="pn-btn" onclick="showMealSec('recipes',this)">📖 Recipes</button>
+    <button class="pn-btn" onclick="showMealSec('recipes',this)"><span class="pn-emo">📖 </span>Recipes</button>
     <button class="pn-btn" onclick="showMealSec('wantTry',this)">⭐ Want to Try</button>
     <button class="pn-btn" onclick="showMealSec('wine',this)">🍷 Wine</button>
     <button class="pn-btn" onclick="showMealSec('prices',this)">💰 Prices</button>
-    <button class="pn-btn" onclick="showMealSec('database',this)">🧩 Ingredient Library</button>
+    <button class="pn-btn" onclick="showMealSec('database',this)"><span class="pn-emo">🧩 </span>Food Library</button>
   </div>
 
   <!-- WHAT I ATE section -->
@@ -30017,7 +30035,7 @@ var _fhUsualsCache=[];
 var _fhSig='';
 function fhSig(){
   var t=getTot(),h=new Date().getHours();
-  return todayStr()+'|'+fhBucket(h)+'|'+(h<12?0:h<17?1:2)+'|'+(MEAL_LOG_ITEMS||[]).length+'|'+Math.round(t.cal||0)+'|'+(FOOD_DB||[]).length+'|'+(S.gCal||0)+'|'+(S.gPro||0);
+  return todayStr()+'|'+fhBucket(h)+'|'+(h<12?0:h<17?1:2)+'|'+(MEAL_LOG_ITEMS||[]).length+'|'+Math.round(t.cal||0)+'|'+(FOOD_DB||[]).length+'|'+(S.gCal||0)+'|'+(S.gPro||0)+'|'+fhPlanLeft().length;
 }
 setInterval(function(){
   try{
@@ -30063,6 +30081,7 @@ function renderFoodHome(){
       +'</div>'
     +'</div>'
     +'<div class="fdm-block"><h3 class="fdm-h2">Your '+bk+' usuals, one tap</h3>'+usuals+'</div>'
+    +fhPlanBlockHtml()
     +'<div class="fdm-block"><h3 class="fdm-h2">Food</h3><div class="fdm-3col">'
       +tile('list','What I ate','fhGoMeals(\'ate\')')
       +tile('lib','Food library','fhGoMeals(\'database\')')
@@ -31208,19 +31227,20 @@ function renderFdmPlan(){
 }
 
 // ── Ate it: log a planned food on its day ─────
-function fdmPlanAte(id){
+function fdmPlanAte(id,from){
   var iso=fdmPlanDate(),p=fdmPlanFind(iso,id);
   if(!p||iso>todayStr()||fdmPlanEaten(iso,p))return;
   if(!(p.cal>0)){
-    if(p.legacy)fhOpenLog('cal',p.name,{date:iso,back:'plan'});   // no numbers on the recipe: ask once
+    if(p.legacy)fhOpenLog('cal',p.name,{date:iso,back:from==='home'?'':'plan'});   // no numbers on the recipe: ask once
     else fdmPlanItemOpen(id,true);
     return;
   }
   fhCommit(p.name,{cal:p.cal,pro:p.pro,carb:p.carb,fat:p.fat},{date:iso,est:!!p.est});
   var logged=MEAL_LOG_ITEMS[0];
   if(!p.legacy&&logged){p.logId=logged.id;fdmPlanSave();}
-  if(DELTED&&DELTED.restore){var r=DELTED.restore;DELTED={restore:function(){r();if(!p.legacy){delete p.logId;fdmPlanSave();}renderFdmPlan();}};}
+  if(DELTED&&DELTED.restore){var r=DELTED.restore;DELTED={restore:function(){r();if(!p.legacy){delete p.logId;fdmPlanSave();}renderFdmPlan();try{renderFoodHome();}catch(e){}}};}
   renderFdmPlan();
+  try{renderFoodHome();}catch(e){}
 }
 
 // ── Add sheet ─────────────────────────────────
@@ -31369,6 +31389,33 @@ function fdmPlanClear(){
   delete FDM_PLAN[iso];fdmPlanSave();renderFdmPlan();
   DELTED={restore:function(){FDM_PLAN[iso]=before;fdmPlanSave();renderFdmPlan();}};
   showUndo(fdmPlanDayLabel(iso)+'’s plan cleared');
+}
+
+
+// ═══════════════════════════════════════════════
+// TODAY'S PLAN ON THE FOOD HOME (Nov 2026)
+// Planned foods for today that are not eaten yet, as one-tap buttons under the usuals.
+// Tap = "Ate it": the same action as on the Meal Plan page.
+// ═══════════════════════════════════════════════
+var _fhPlanCache=[];
+function fhPlanLeft(){
+  try{var iso=todayStr();return fdmPlanItems(iso).filter(function(p){return !fdmPlanEaten(iso,p);});}catch(e){return [];}
+}
+function fhPlanBlockHtml(){
+  var left=fhPlanLeft();
+  _fhPlanCache=left.slice(0,6);
+  if(!left.length)return '';
+  return '<div class="fdm-block" id="fhPlanBlock"><h3 class="fdm-h2">On today’s plan, tap when eaten</h3><div class="fdm-2col">'
+    +_fhPlanCache.map(function(p,i){
+      return '<button class="fdm-card fdm-usual" onclick="fhPlanAte('+i+')" aria-label="Ate it: '+escHtml(p.name)+'"><span>'+escHtml(p.name)+'</span><span>'+(p.cal>0?fhNum(p.cal):'add cal')+'</span></button>';
+    }).join('')+'</div>'
+    +(left.length>6?'<button class="fdm-link" style="min-height:32px" onclick="fhGoMeals(\'meals\')">'+(left.length-6)+' more on the plan</button>':'')
+    +'</div>';
+}
+function fhPlanAte(i){
+  var p=_fhPlanCache[i];if(!p)return;
+  _fdmPlanDate='';
+  fdmPlanAte(fdmPlanSafeId(p.id),'home');
 }
 
 </script>
