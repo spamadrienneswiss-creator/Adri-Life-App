@@ -1207,6 +1207,23 @@ body.food-mode .fav-tab-btn{border:1px solid #F1E7E2;color:#051423}
 body.food-mode #tabBarWrap{top:71px!important}
 /* the Hatch countdown still warns when under an hour is left */
 body.food-mode #mainHdr .hdr-r button.hs-urgent{background:#FDE3E6!important;border-color:#F06677!important}
+
+/* ══ MEAL PLAN — revamp (Nov 2026). Same look and color jobs as the food home. ══
+   The older weekly planner is still in the page: hidden by default, one link away. */
+#ms-meals:not(.fdm-legacy) > :not(#fdmPlan){display:none!important}
+#ms-meals.fdm-legacy > #fdmPlan{display:none!important}
+.fdm-days{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}
+.fdm-day{height:62px;border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;padding:0;font-size:12px;line-height:16px;font-weight:700;min-width:0}
+.fdm-day b{font-size:15px;line-height:19px;font-weight:700}
+.fdm-day small{font-size:10px;line-height:13px;font-weight:600;color:#6B625C;white-space:nowrap}
+.fdm-day.on{background:#EEFFA4}
+.fdm-day.on small{color:#051423}
+.fdm-prow{display:flex;align-items:stretch;gap:8px}
+.fdm-prow .fdm-item{flex:1;min-width:0}
+.fdm-ate{flex-shrink:0;min-width:72px;display:flex;align-items:center;justify-content:center;padding:0 12px;border-radius:14px;font-size:13px;font-weight:700;white-space:nowrap}
+.fdm-ate.done{background:#EEFFA4;border:1px solid #EEFFA4;color:#051423;cursor:default}
+.fdm-prow.done .fdm-item-l b{color:#6B625C}
+.fdm-added{display:inline-flex;align-items:center;height:24px;padding:0 8px;margin-left:8px;border-radius:8px;background:#EEFFA4;font-size:12px;font-weight:700;color:#051423}
 </style>
 </head>
 <body>
@@ -1719,6 +1736,39 @@ body.food-mode #mainHdr .hdr-r button.hs-urgent{background:#FDE3E6!important;bor
       <div class="fdm-field"><label for="fdmGlFat">Fat (g)</label><input id="fdmGlFat" type="number" inputmode="numeric" min="0"></div>
     </div>
     <button class="fdm-go" onclick="fhGoalsSave()">Save</button>
+  </div>
+</div>
+
+<!-- FOOD MODE: add foods to a planned day -->
+<div class="fdm-ov" id="fdmPlanAddOv" onclick="if(event.target===this)fdmPlanAddClose()">
+  <div class="fdm-sheet" role="dialog" aria-label="Add to the plan" style="min-height:72vh">
+    <div class="fdm-sheet-top">
+      <h3 id="fdmPaTitle">Add to today</h3>
+      <button class="fdm-card fdm-back" onclick="fdmPlanAddClose()" aria-label="Close"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#051423" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"></path></svg></button>
+    </div>
+    <input class="fdm-input" id="fdmPaQ" autocomplete="off" autocapitalize="off" placeholder="Search your foods" aria-label="Search your foods" oninput="fdmPlanAddDraw()">
+    <div class="fdm-list" id="fdmPaList"></div>
+    <button class="fdm-card fdm-sec" onclick="fdmPlanAddClose()">Done</button>
+  </div>
+</div>
+<!-- FOOD MODE: fix, move or remove one planned item -->
+<div class="fdm-ov" id="fdmPlanItemOv" onclick="if(event.target===this)fdmPlanItemClose()">
+  <div class="fdm-sheet" role="dialog" aria-label="Plan item">
+    <div class="fdm-sheet-top">
+      <h3 id="fdmPiTitle">Fix this plan item</h3>
+      <button class="fdm-card fdm-back" onclick="fdmPlanItemClose()" aria-label="Close"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#051423" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"></path></svg></button>
+    </div>
+    <div class="fdm-block" id="fdmPiFields">
+      <div class="fdm-field"><label for="fdmPiName">Name</label><input id="fdmPiName" autocomplete="off"></div>
+      <div class="fdm-field"><label for="fdmPiCal">Calories</label><input id="fdmPiCal" type="number" inputmode="numeric" min="0" placeholder="0"></div>
+      <div class="fdm-2col">
+        <button class="fdm-card fdm-sec" onclick="fdmPlanItemScale(0.5)">Half of that</button>
+        <button class="fdm-card fdm-sec" onclick="fdmPlanItemScale(2)">Double</button>
+      </div>
+      <button class="fdm-go" id="fdmPiGo" onclick="fdmPlanItemSave()">Save</button>
+    </div>
+    <p class="fdm-note" id="fdmPiNote"></p>
+    <div class="fdm-links" id="fdmPiLinks"></div>
   </div>
 </div>
 
@@ -3084,6 +3134,8 @@ body.food-mode #mainHdr .hdr-r button.hs-urgent{background:#FDE3E6!important;bor
 
   <!-- MEAL PLAN section -->
   <div id="ms-meals" style="display:none">
+    <div id="fdmPlan" class="fdm fdm-page"></div>
+    <button id="fdmPlanBack" class="btn sec" style="width:100%;margin-bottom:12px" onclick="fdmPlanLegacy(false)">← Back to the new Meal Plan</button>
     <!-- Meal shelf -->
     <div id="mealPlanShelf" style="margin-bottom:12px"></div>
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
@@ -6647,6 +6699,7 @@ function initFirebase(){
     }else if(group==='food'){
       ap('aRecipes',function(v,r){RECIPES=v||[];_origSetItem('aRecipes',r);});
       ap('aMealPlan',function(v,r){MEAL_PLAN=v||{};_origSetItem('aMealPlan',r);});
+      ap('aFdmPlan',function(v,r){FDM_PLAN=(v&&typeof v==='object'&&!Array.isArray(v))?v:{};_origSetItem('aFdmPlan',r);try{renderFdmPlan();}catch(e){}});
       ap('aMacrosReviewed',function(v,r){_origSetItem('aMacrosReviewed',r);});
       ap('aMealMyServings',function(v,r){MEAL_MY_SERVINGS=v||{};_origSetItem('aMealMyServings',r);});
       ap('aWantToTry',function(v,r){WANT_TO_TRY=v||[];_origSetItem('aWantToTry',r);});
@@ -6788,7 +6841,7 @@ var BLOB_GROUPS={
   routines:['aRS','aRS2','aRH','aRTG','aRtns','aRhythm','aRhythmDone'],
   planning:['aSOPs','aBrainDump','aIntentions','aMonthTodos','aTmpls','aWeekReflect','aNotionCarry'],
   spiritual:['aBibleLog','aBibleChapNotes','aPrayers','aGratLog','aSpiritBooks','aSpiritSettings','aSpiritRun'],
-  food:['aRecipes','aMealPlan','aMealMyServings','aGroceryList','aGrocTags','aGrocDepts','aGrocStoreDeptOrder','aInventory','aInvSections','aMC','aFoodDb','aFDB','aIngredients','aWantToTry','aMacrosReviewed','aFoodSeeded'],
+  food:['aRecipes','aMealPlan','aMealMyServings','aGroceryList','aGrocTags','aGrocDepts','aGrocStoreDeptOrder','aInventory','aInvSections','aMC','aFoodDb','aFDB','aIngredients','aWantToTry','aMacrosReviewed','aFoodSeeded','aFdmPlan'],
   fitness:['aWplans','aWlog2','aMovements','aExTypes','aExDB','aExLog','aPT'],
   creative:['aStories','aSChars','aSScenes','aFaves','aMixtape','aMemories','aPlaces','aVbItems'],
   tools:['aSparkPrompts','aSparkSaved','aDispatchJournal','aHatchChaos','aHatchTransmissions','aHatchMissions','aHatchShocks','aHatchCast','aStreak','aHatchSwan'],
@@ -22491,6 +22544,7 @@ function rhythmEdSaveAmbient(){
 }
 
 function renderMealPlan(){
+  try{renderFdmPlan();}catch(e){}
   var dates=getMealWeekDates(MEAL_WEEK_OFFSET);
   var lbl=document.getElementById('mealWeekLbl');
   if(lbl)lbl.textContent=fmtWeekLbl(dates);
@@ -30051,6 +30105,7 @@ function fhLogUsual(i){
 function fhGoHome(){goTab('home',document.querySelector('[data-tab="home"]'));window.scrollTo(0,0);}
 function fhGoMeals(sec,keepDate){
   if(sec==='ate'&&!keepDate)_eatLogDate=todayStr();
+  if(sec==='meals'&&!keepDate)fdmPlanReset();
   goTab('meals',null);
   setTimeout(function(){
     var b=null;
@@ -30607,7 +30662,7 @@ function fdmAteLog(mode){fhOpenLog(mode,'',{date:getEatLogDate(),back:'ate'});}
 function fdmAteWater(oz){addWaterForEatDate(oz);renderFdmAte();}
 function flDone(){
   var st=FL_STATE||{};
-  if(st.back==='ate')fhGoMeals('ate',true);else fhGoHome();
+  if(st.back==='ate')fhGoMeals('ate',true);else if(st.back==='plan')fhGoMeals('meals',true);else fhGoHome();
 }
 // Last seven days, ending today. Tap a bar to open that day.
 function fdmTrendHtml(viewIso){
@@ -31005,6 +31060,315 @@ function fhGoalsSave(){
   try{fdmAteRefresh();}catch(e){}
   try{if(typeof renderTodayStatsBars==='function')renderTodayStatsBars();}catch(e){}
   if(typeof showToast==='function')showToast('Goals saved');
+}
+
+
+// ═══════════════════════════════════════════════
+// MEAL PLAN — revamp (Nov 2026)
+// One day at a time: foods from the library (meal-prep ones first), the planned
+// calories against the goal, and "Ate it" to log a planned food without retyping.
+// Planned food does not count toward the day until it is marked eaten.
+// New plan items live in FDM_PLAN (aFdmPlan): { 'YYYY-MM-DD': [ {id,name,cal,pro,carb,fat,est?,sv?,logId?} ] }.
+// Meals placed in the older weekly planner (MEAL_PLAN) show on their day too, and that
+// planner is still in the page: renderMealPlan() calls renderFdmPlan() first.
+// ═══════════════════════════════════════════════
+var FDM_PLAN=(function(){try{var v=JSON.parse(localStorage.getItem('aFdmPlan')||'{}');return (v&&typeof v==='object'&&!Array.isArray(v))?v:{};}catch(e){return {};}})();
+var _fdmPlanDate='',_fdmPi=null,_fdmPaCands=[],_fdmPaAdded={},_fdmPrep=[];
+function fdmPlanSave(){localStorage.setItem('aFdmPlan',JSON.stringify(FDM_PLAN));}
+function fdmPlanDate(){return _fdmPlanDate||todayStr();}
+function fdmPlanShiftIso(iso,n){var d=new Date(iso+'T12:00:00');d.setDate(d.getDate()+n);return fdmIso(d);}
+function fdmPlanDayLabel(iso){return iso===fdmPlanShiftIso(todayStr(),1)?'Tomorrow':fdmDateLabel(iso);}
+function fdmPlanLower(lbl){return /^(Today|Tomorrow|Yesterday)$/.test(lbl)?lbl.toLowerCase():lbl;}
+function fdmPlanSafeId(id){return String(id).replace(/[^A-Za-z0-9_-]/g,'');}
+// Everything planned for a day: older weekly-planner meals first, then foods added here.
+function fdmPlanItems(iso){
+  var out=[],day=(typeof MEAL_PLAN==='object'&&MEAL_PLAN&&MEAL_PLAN[iso])||{};
+  (MEAL_SLOTS||[]).forEach(function(slot){
+    var val=day[slot];if(!val)return;
+    var rec=(RECIPES||[]).find(function(r){return r.name===val;}),m=(rec&&rec.macros&&rec.macros.cal)?rec.macros:null;
+    var sv=m?getMealServings(iso,slot):1;
+    out.push({legacy:true,slot:slot,id:'old-'+slot,name:String(val),cal:m?Math.round(m.cal*sv):0,pro:m?fhR1((m.pro||0)*sv):0,carb:m?fhR1((m.carb||0)*sv):0,fat:m?fhR1((m.fat||0)*sv):0});
+  });
+  (Array.isArray(FDM_PLAN[iso])?FDM_PLAN[iso]:[]).forEach(function(p){if(p&&p.name)out.push(p);});
+  return out;
+}
+function fdmPlanFind(iso,id){return fdmPlanItems(iso).find(function(p){return fdmPlanSafeId(p.id)===id;})||null;}
+function fdmPlanEaten(iso,p){
+  var log=MEAL_LOG_ITEMS||[];
+  if(p.logId)return log.some(function(m){return m&&m.id===p.logId;});
+  if(p.legacy){var k=fhNorm(p.name);return log.some(function(m){return m&&m.date===iso&&fhNorm(m.name)===k;});}
+  return false;
+}
+function fdmPlanTotals(iso){
+  var t={cal:0,pro:0,carb:0,fat:0,n:0};
+  fdmPlanItems(iso).forEach(function(p){t.cal+=p.cal||0;t.pro+=p.pro||0;t.carb+=p.carb||0;t.fat+=p.fat||0;t.n++;});
+  return t;
+}
+function fdmPlanOwn(iso){return Array.isArray(FDM_PLAN[iso])?FDM_PLAN[iso]:[];}
+function fdmPlanAdd(name,nut,opts){
+  opts=opts||{};nut=nut||{};
+  var iso=opts.date||fdmPlanDate();
+  var p={id:'pl-'+Date.now()+'-'+Math.floor(Math.random()*900+100),name:name,cal:Math.round(nut.cal||0),pro:fhR1(nut.pro),carb:fhR1(nut.carb),fat:fhR1(nut.fat)};
+  if(opts.est)p.est=true;
+  if(opts.sv)p.sv=opts.sv;
+  if(!Array.isArray(FDM_PLAN[iso]))FDM_PLAN[iso]=[];
+  FDM_PLAN[iso].push(p);fdmPlanSave();
+  return p;
+}
+function fdmPlanShift(dir){_fdmPlanDate=fdmPlanShiftIso(fdmPlanDate(),dir);renderFdmPlan();}
+function fdmPlanJump(iso){_fdmPlanDate=iso;renderFdmPlan();}
+function fdmPlanToday(){_fdmPlanDate='';renderFdmPlan();}
+// The home button always opens the new page on today.
+function fdmPlanReset(){_fdmPlanDate='';var s=document.getElementById('ms-meals');if(s)s.classList.remove('fdm-legacy');}
+function fdmPlanLegacy(on){
+  var s=document.getElementById('ms-meals');if(!s)return;
+  s.classList.toggle('fdm-legacy',!!on);
+  renderMealPlan();window.scrollTo(0,0);
+}
+// Foods tagged "Good for meal prep" in the library, most used first.
+function fdmPlanPrepFoods(){
+  return (FOOD_DB||[]).filter(function(x){return x&&x.name&&fdmLibIsPrep(x)&&!(typeof isItemIck==='function'&&isItemIck(x));})
+    .sort(function(a,b){return ((b.favorite?1:0)-(a.favorite?1:0))||((b.useCount||0)-(a.useCount||0))||String(a.name).localeCompare(String(b.name));});
+}
+function fdmPlanFoodInfo(x,hist){
+  var has=fdmLibHasCal(x),sv=has?fdmLibServing(x):null,h=hist?hist[fhNorm(x.name)]:null;
+  var nut=sv?sv.nut:((h&&h.n)?fhAvgNut(h):null);
+  return {name:x.name,nut:nut,sub:sv?sv.text:(nut?'your usual':''),est:!!x.estimate||(!sv&&!!nut),prep:fdmLibIsPrep(x),fav:!!x.favorite,use:x.useCount||0};
+}
+function fdmPlanPrepPick(i){
+  var c=_fdmPrep[i];if(!c)return;
+  fdmPlanAdd(c.name,c.nut,{est:c.est,sv:c.sub});
+  renderFdmPlan();
+  if(typeof showToast==='function')showToast(c.name+' added to '+fdmPlanLower(fdmPlanDayLabel(fdmPlanDate())));
+}
+function renderFdmPlan(){
+  var el=document.getElementById('fdmPlan');if(!el)return;
+  var iso=fdmPlanDate(),today=todayStr(),isToday=iso===today,lbl=fdmPlanDayLabel(iso);
+  var items=fdmPlanItems(iso),t=fdmPlanTotals(iso),goal=S.gCal||1900,planned=Math.round(t.cal);
+  var pct=Math.max(0,Math.min(100,goal?planned/goal*100:0));
+  var macro=function(l,val,g){return '<div class="fdm-macro"><div class="fdm-macro-l">'+l+'</div><div class="fdm-macro-v">'+Math.round(val||0)+(g?' <small>/ '+g+' g</small>':' g')+'</div></div>';};
+  var arrow=function(dir){return '<svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#051423" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="'+(dir<0?'M15 5l-7 7 7 7':'M9 5l7 7-7 7')+'"></path></svg>';};
+  // seven days: from today, or from the chosen day when it is outside that week
+  var start=(iso>=today&&iso<=fdmPlanShiftIso(today,6))?today:iso,strip='';
+  for(var i=0;i<7;i++){
+    var di=fdmPlanShiftIso(start,i),dd=new Date(di+'T12:00:00'),dc=Math.round(fdmPlanTotals(di).cal),dn=fdmPlanItems(di).length;
+    strip+='<button class="fdm-card fdm-day'+(di===iso?' on':'')+'" aria-pressed="'+(di===iso?'true':'false')+'" onclick="fdmPlanJump(\''+di+'\')" aria-label="'+fdmPlanDayLabel(di)+', '+(dn?fhNum(dc)+' calories planned':'nothing planned')+'">'
+      +dd.toLocaleDateString('en-US',{weekday:'short'})+'<b>'+dd.getDate()+'</b><small>'+(dn?(dc>0?fhNum(dc):dn+' item'+(dn!==1?'s':'')):'·')+'</small></button>';
+  }
+  var cap=!items.length?'Nothing planned yet. Goal '+fhNum(goal)+'.'
+    :(planned<=goal?fhNum(goal-planned)+' under your goal of '+fhNum(goal)+'.':fhNum(planned-goal)+' over your goal of '+fhNum(goal)+'.');
+  // meal-prep foods, one tap each
+  var hist=fhHistory();
+  _fdmPrep=fdmPlanPrepFoods().slice(0,8).map(function(x){return fdmPlanFoodInfo(x,hist);});
+  var prep=_fdmPrep.length
+    ?'<div class="fdm-chips">'+_fdmPrep.map(function(c,i){return '<button class="fdm-card fdm-chip" onclick="fdmPlanPrepPick('+i+')">'+escHtml(c.name)+(c.nut&&c.nut.cal>0?' · '+fhNum(c.nut.cal):'')+'</button>';}).join('')+'</div>'
+    :'<p class="fdm-note">Mark a food “Good for meal prep” in your Food library and it shows up here, one tap to plan. <button class="fdm-link" style="min-height:0" onclick="fhGoMeals(\'database\')">Open the library</button></p>';
+  // the plan
+  var canEat=iso<=today,eatenN=0,list='';
+  items.forEach(function(p){
+    var done=fdmPlanEaten(iso,p),bits=[],id=fdmPlanSafeId(p.id);
+    if(done)eatenN++;
+    if(p.legacy)bits.push(MEAL_SLOT_LABELS[p.slot]||p.slot);
+    if(p.sv)bits.push(escHtml(p.sv));
+    if(p.est)bits.push('estimate');
+    list+='<div class="fdm-prow'+(done?' done':'')+'">'
+      +'<button class="fdm-card fdm-item" onclick="fdmPlanItemOpen(\''+id+'\')">'
+        +'<span class="fdm-item-l"><b>'+escHtml(p.name)+'</b>'+(bits.length?'<small>'+bits.join(' · ')+'</small>':'')+'</span>'
+        +(p.cal>0?'<span class="fdm-item-r">'+fhNum(p.cal)+'<small> cal</small></span>':'<span class="fdm-item-r none">add calories</span>')
+      +'</button>'
+      +(done?'<span class="fdm-ate done">Eaten</span>':(canEat?'<button class="fdm-card fdm-ate" onclick="fdmPlanAte(\''+id+'\')" aria-label="Ate it: '+escHtml(p.name)+'">Ate it</button>':''))
+      +'</div>';
+  });
+  var own=fdmPlanOwn(iso).length,prev=fdmPlanShiftIso(iso,-1),next=fdmPlanShiftIso(iso,1);
+  if(!items.length){
+    list='<div class="fdm-empty">Nothing planned for '+fdmPlanLower(lbl)+' yet. Add a food, or tap a meal-prep food below.</div>'
+      +(fdmPlanOwn(prev).length?'<button class="fdm-card fdm-sec" onclick="fdmPlanCopy(\''+prev+'\',\''+iso+'\')">Copy the plan from '+fdmPlanLower(fdmPlanDayLabel(prev))+'</button>':'');
+  }
+  el.innerHTML=
+    '<div class="fdm-datenav">'
+      +'<button class="fdm-card fdm-navbtn" onclick="fdmPlanShift(-1)" aria-label="Previous day">'+arrow(-1)+'</button>'
+      +'<div class="fdm-datelbl"><b>'+lbl+'</b>'+(isToday?'':'<button onclick="fdmPlanToday()">Back to today</button>')+'</div>'
+      +'<button class="fdm-card fdm-navbtn" onclick="fdmPlanShift(1)" aria-label="Next day">'+arrow(1)+'</button>'
+    +'</div>'
+    +'<div class="fdm-days">'+strip+'</div>'
+    +'<div class="fdm-hero">'
+      +'<div class="fdm-hero-lbl">Planned '+fdmPlanLower(lbl)+'</div>'
+      +'<div class="fdm-hero-row"><div class="fdm-hero-num">'+fhNum(planned)+'</div><div class="fdm-hero-unit">calories</div></div>'
+      +'<div class="fdm-bar"><div style="width:'+pct+'%"></div></div>'
+      +'<div class="fdm-hero-cap">'+cap+'</div>'
+      +'<div class="fdm-macros">'+macro('Protein',t.pro,S.gPro)+macro('Carbs',t.carb,S.gCrb)+macro('Fat',t.fat,S.gFat)+'</div>'
+    +'</div>'
+    +'<button class="fdm-card fdm-logbox" onclick="fdmPlanAddOpen()"><span>Add a food to this day</span><span class="fdm-logpill">Add</span></button>'
+    +'<div class="fdm-block"><h3 class="fdm-h2">On the plan'+(items.length&&canEat?' · '+eatenN+' of '+items.length+' eaten':'')+'</h3><div class="fdm-list">'+list+'</div>'
+      +(own?'<div class="fdm-2col"><button class="fdm-card fdm-sec" onclick="fdmPlanCopy(\''+iso+'\',\''+next+'\')">Copy to '+fdmPlanLower(fdmPlanDayLabel(next))+'</button><button class="fdm-card fdm-sec" onclick="fdmPlanClear()">Clear this day</button></div>':'')
+    +'</div>'
+    +'<div class="fdm-block"><h3 class="fdm-h2">Good for meal prep, one tap</h3>'+prep+'</div>'
+    +'<p class="fdm-note">Planned food does not count toward your day until you tap Ate it.</p>'
+    +'<button class="fdm-link" onclick="fdmPlanLegacy(true)">Open the older weekly planner (recipes and grocery list)</button>';
+}
+
+// ── Ate it: log a planned food on its day ─────
+function fdmPlanAte(id){
+  var iso=fdmPlanDate(),p=fdmPlanFind(iso,id);
+  if(!p||iso>todayStr()||fdmPlanEaten(iso,p))return;
+  if(!(p.cal>0)){
+    if(p.legacy)fhOpenLog('cal',p.name,{date:iso,back:'plan'});   // no numbers on the recipe: ask once
+    else fdmPlanItemOpen(id,true);
+    return;
+  }
+  fhCommit(p.name,{cal:p.cal,pro:p.pro,carb:p.carb,fat:p.fat},{date:iso,est:!!p.est});
+  var logged=MEAL_LOG_ITEMS[0];
+  if(!p.legacy&&logged){p.logId=logged.id;fdmPlanSave();}
+  if(DELTED&&DELTED.restore){var r=DELTED.restore;DELTED={restore:function(){r();if(!p.legacy){delete p.logId;fdmPlanSave();}renderFdmPlan();}};}
+  renderFdmPlan();
+}
+
+// ── Add sheet ─────────────────────────────────
+function fdmPlanAddOpen(){
+  _fdmPaAdded={};
+  var q=document.getElementById('fdmPaQ');if(q)q.value='';
+  var t=document.getElementById('fdmPaTitle');if(t)t.textContent='Add to '+fdmPlanLower(fdmPlanDayLabel(fdmPlanDate()));
+  fdmPlanAddDraw();
+  var ov=document.getElementById('fdmPlanAddOv');if(ov)ov.classList.add('show');
+}
+function fdmPlanAddClose(){var ov=document.getElementById('fdmPlanAddOv');if(ov)ov.classList.remove('show');renderFdmPlan();}
+function fdmPlanAddDraw(){
+  var listEl=document.getElementById('fdmPaList');if(!listEl)return;
+  var raw=((document.getElementById('fdmPaQ')||{}).value||'').trim(),q=fhNorm(raw);
+  var hist=fhHistory(),out=[],seen={};
+  (FOOD_DB||[]).forEach(function(x){
+    if(!x||!x.name)return;
+    if(typeof isItemIck==='function'&&isItemIck(x))return;
+    var nm=fhNorm(x.name);
+    if(q){
+      var hay=[x.name,x.brand||''].concat(x.aliases||[]).concat(fdmLibTags(x)).map(fhNorm).join(' | ');
+      if(hay.indexOf(q)<0)return;
+    }
+    seen[nm]=1;
+    var c=fdmPlanFoodInfo(x,hist);c.key=nm;c.rank=q?(nm===q?0:nm.indexOf(q)===0?1:nm.indexOf(q)>=0?2:3):0;out.push(c);
+  });
+  // things you have logged before that are not in the library
+  if(q)Object.keys(hist).forEach(function(k){
+    var e=hist[k];if(seen[k]||!e.n||k.indexOf(q)<0)return;
+    out.push({name:e.name,key:k,nut:fhAvgNut(e),sub:'your usual',est:true,prep:false,fav:false,use:e.count,rank:k===q?0:k.indexOf(q)===0?1:2});
+  });
+  out.sort(function(a,b){return (a.rank-b.rank)||((b.prep?1:0)-(a.prep?1:0))||((b.fav?1:0)-(a.fav?1:0))||(b.use-a.use)||String(a.name).localeCompare(String(b.name));});
+  _fdmPaCands=out.slice(0,12);
+  var html=_fdmPaCands.map(function(c,i){
+    var bits=[];if(c.sub)bits.push(escHtml(c.sub));if(c.prep)bits.push('meal prep');if(c.est)bits.push('estimate');
+    var n=_fdmPaAdded[c.key]||0;
+    return '<button class="fdm-card fdm-item" onclick="fdmPlanAddPick('+i+')">'
+      +'<span class="fdm-item-l"><b>'+escHtml(c.name)+'</b>'+(bits.length?'<small>'+bits.join(' · ')+'</small>':'')+'</span>'
+      +'<span class="fdm-item-r'+(c.nut&&c.nut.cal>0?'':' none')+'">'+(c.nut&&c.nut.cal>0?fhNum(c.nut.cal)+'<small> cal</small>':'no calories yet')+(n?'<span class="fdm-added">×'+n+' added</span>':'')+'</span>'
+      +'</button>';
+  }).join('');
+  var exact=q&&out.some(function(c){return c.key===q;});
+  if(q&&!exact)html+='<button class="fdm-card fdm-sec" onclick="fdmPlanAddTyped()">Add “'+escHtml(raw)+'” as typed'+(_fdmPaAdded['typed:'+q]?'<span class="fdm-added">added</span>':'')+'</button>';
+  if(!html)html='<div class="fdm-empty">Your library is empty. Type what you want to plan and add it as typed.</div>';
+  else if(!q&&out.length>12)html+='<p class="fdm-note">Showing 12 of '+out.length+'. Type to search the rest.</p>';
+  listEl.innerHTML=html;
+}
+function fdmPlanAddPick(i){
+  var c=_fdmPaCands[i];if(!c)return;
+  fdmPlanAdd(c.name,c.nut,{est:c.est,sv:c.sub==='your usual'?'':c.sub});
+  _fdmPaAdded[c.key]=(_fdmPaAdded[c.key]||0)+1;
+  fdmPlanAddDraw();
+}
+function fdmPlanAddTyped(){
+  var raw=((document.getElementById('fdmPaQ')||{}).value||'').trim();if(!raw)return;
+  fdmPlanAdd(raw,{},{});
+  _fdmPaAdded['typed:'+fhNorm(raw)]=1;
+  fdmPlanAddDraw();
+}
+
+// ── Fix, move or remove one planned item ──────
+function fdmPlanItemOpen(id,thenAte){
+  var iso=fdmPlanDate(),p=fdmPlanFind(iso,id);if(!p)return;
+  _fdmPi={id:id,iso:iso,legacy:!!p.legacy,slot:p.slot||'',thenAte:!!thenAte};
+  var set=function(k,v){var e=document.getElementById(k);if(e)e.value=v;};
+  var show=function(k,on){var e=document.getElementById(k);if(e)e.style.display=on?'':'none';};
+  var txt=function(k,v){var e=document.getElementById(k);if(e)e.textContent=v;};
+  txt('fdmPiTitle',p.legacy?p.name:(thenAte?'How many calories?':'Fix this plan item'));
+  show('fdmPiFields',!p.legacy);
+  set('fdmPiName',p.name||'');set('fdmPiCal',p.cal>0?Math.round(p.cal):'');
+  txt('fdmPiGo',thenAte?'Save and log it':'Save');
+  var eaten=fdmPlanEaten(iso,p);
+  txt('fdmPiNote',p.legacy?'This came from the older weekly planner'+(p.cal>0?', '+fhNum(p.cal)+' calories for your servings.':'. Its recipe has no calories yet.')
+    :(eaten?'Already logged. Changing it here does not change What I Ate.':''));
+  show('fdmPiNote',p.legacy||eaten);
+  var links=document.getElementById('fdmPiLinks');
+  if(links)links.innerHTML=(p.legacy?'':'<button class="fdm-link" onclick="fdmPlanItemMove()">Move to '+fdmPlanLower(fdmPlanDayLabel(fdmPlanShiftIso(iso,1)))+'</button>')
+    +'<button class="fdm-link" onclick="fdmPlanItemRemove()">Remove from the plan</button>';
+  var ov=document.getElementById('fdmPlanItemOv');if(ov)ov.classList.add('show');
+  if(thenAte){var c=document.getElementById('fdmPiCal');if(c){try{c.focus();}catch(e){}}}
+}
+function fdmPlanItemClose(){var ov=document.getElementById('fdmPlanItemOv');if(ov)ov.classList.remove('show');_fdmPi=null;}
+function fdmPlanItemScale(f){
+  var c=document.getElementById('fdmPiCal');if(!c)return;
+  var v=parseFloat(c.value)||0;if(v>0)c.value=Math.round(v*f);
+}
+function fdmPlanItemOwn(){
+  var s=_fdmPi;if(!s||s.legacy)return null;
+  return fdmPlanOwn(s.iso).find(function(p){return fdmPlanSafeId(p.id)===s.id;})||null;
+}
+function fdmPlanItemSave(){
+  var s=_fdmPi,p=fdmPlanItemOwn();
+  if(!s||!p){fdmPlanItemClose();return;}
+  var name=((document.getElementById('fdmPiName')||{}).value||'').trim();
+  var cal=Math.max(0,Math.round(parseFloat((document.getElementById('fdmPiCal')||{}).value)||0));
+  var old=p.cal||0;
+  if(name)p.name=name;
+  if(cal!==Math.round(old)){
+    if(old>0){var f=cal/old;p.pro=fhR1((p.pro||0)*f);p.carb=fhR1((p.carb||0)*f);p.fat=fhR1((p.fat||0)*f);}
+    else p.est=true;
+    p.cal=cal;
+  }
+  fdmPlanSave();
+  var then=s.thenAte&&p.cal>0,id=s.id;
+  fdmPlanItemClose();
+  if(then)fdmPlanAte(id);
+  else{renderFdmPlan();if(typeof showToast==='function')showToast('Saved');}
+}
+function fdmPlanItemMove(){
+  var s=_fdmPi,p=fdmPlanItemOwn();
+  if(!s||!p){fdmPlanItemClose();return;}
+  var to=fdmPlanShiftIso(s.iso,1);
+  FDM_PLAN[s.iso]=fdmPlanOwn(s.iso).filter(function(x){return x!==p;});
+  if(!FDM_PLAN[s.iso].length)delete FDM_PLAN[s.iso];
+  delete p.logId;
+  if(!Array.isArray(FDM_PLAN[to]))FDM_PLAN[to]=[];
+  FDM_PLAN[to].push(p);fdmPlanSave();
+  fdmPlanItemClose();renderFdmPlan();
+  if(typeof showToast==='function')showToast('Moved to '+fdmPlanLower(fdmPlanDayLabel(to)));
+}
+function fdmPlanItemRemove(){
+  var s=_fdmPi;if(!s){fdmPlanItemClose();return;}
+  if(s.legacy){var iso=s.iso,slot=s.slot;fdmPlanItemClose();clearMealSlot(iso,slot);return;}
+  var p=fdmPlanItemOwn(),from=s.iso;
+  fdmPlanItemClose();
+  if(!p)return;
+  var before=fdmPlanOwn(from).slice();
+  FDM_PLAN[from]=before.filter(function(x){return x!==p;});
+  if(!FDM_PLAN[from].length)delete FDM_PLAN[from];
+  fdmPlanSave();renderFdmPlan();
+  DELTED={restore:function(){FDM_PLAN[from]=before;fdmPlanSave();renderFdmPlan();}};
+  showUndo(p.name+' removed from the plan');
+}
+
+// ── Whole-day actions ─────────────────────────
+function fdmPlanCopy(from,to){
+  var src=fdmPlanOwn(from);if(!src.length)return;
+  var before=fdmPlanOwn(to).slice();
+  src.forEach(function(p){fdmPlanAdd(p.name,{cal:p.cal,pro:p.pro,carb:p.carb,fat:p.fat},{date:to,est:p.est,sv:p.sv});});
+  renderFdmPlan();
+  DELTED={restore:function(){if(before.length)FDM_PLAN[to]=before;else delete FDM_PLAN[to];fdmPlanSave();renderFdmPlan();}};
+  showUndo(src.length+' item'+(src.length!==1?'s':'')+' copied to '+fdmPlanLower(fdmPlanDayLabel(to)));
+}
+function fdmPlanClear(){
+  var iso=fdmPlanDate(),before=fdmPlanOwn(iso).slice();if(!before.length)return;
+  delete FDM_PLAN[iso];fdmPlanSave();renderFdmPlan();
+  DELTED={restore:function(){FDM_PLAN[iso]=before;fdmPlanSave();renderFdmPlan();}};
+  showUndo(fdmPlanDayLabel(iso)+'’s plan cleared');
 }
 
 </script>
