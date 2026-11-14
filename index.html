@@ -1172,7 +1172,7 @@ body.food-mode .fav-tab-btn[data-tab="tasks"],body.food-mode .fav-tab-btn[data-t
 
 /* ══ FOOD LIBRARY — revamp (Nov 2026). Same look and color jobs as the food home. ══
    The older library controls are still in the page, hidden, so nothing that reads them breaks. */
-#ms-database > :not(#fdmLib){display:none!important}
+#ms-database > :not(#fdmLib):not(#fdmFood){display:none!important}
 .fdm-libhead{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
 .fdm-libhead b{font-family:'Playfair Display',serif;font-size:22px;line-height:28px;font-weight:700;color:#051423}
 .fdm-libhead span{font-size:13px;font-weight:600;color:#6B625C;white-space:nowrap}
@@ -1242,6 +1242,11 @@ body.food-mode #v-meals .pn-btn[onclick*="'recipes'"]{order:3}
 body.food-mode #v-meals .pn-btn[onclick*="'meals'"]{order:4}
 body.food-mode #v-meals .pn-btn[onclick*="'grocery'"]{order:5}
 body.food-mode #sectionBreadcrumb .bc-btn{color:#051423}
+
+/* ══ FOOD PAGE + PRICE COMPARISON (Nov 2026). One page per food, opened from the library. ══ */
+#ms-database.fdm-onfood > #fdmLib,#ms-database:not(.fdm-onfood) > #fdmFood{display:none!important}
+.fdm-item.fdm-best{background:#EEFFA4}
+.fdm-item.fdm-best .fdm-item-l small,.fdm-item.fdm-best .fdm-item-r small{color:#051423}
 </style>
 </head>
 <body>
@@ -1787,6 +1792,25 @@ body.food-mode #sectionBreadcrumb .bc-btn{color:#051423}
     </div>
     <p class="fdm-note" id="fdmPiNote"></p>
     <div class="fdm-links" id="fdmPiLinks"></div>
+  </div>
+</div>
+
+<!-- FOOD MODE: add or fix one price for a food -->
+<div class="fdm-ov" id="fdmPriceOv" onclick="if(event.target===this)fdmPriceClose()">
+  <div class="fdm-sheet" role="dialog" aria-label="Price">
+    <div class="fdm-sheet-top">
+      <h3 id="fdmPrTitle">Add a price</h3>
+      <button class="fdm-card fdm-back" onclick="fdmPriceClose()" aria-label="Close"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#051423" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"></path></svg></button>
+    </div>
+    <div class="fdm-field"><label for="fdmPrStore">Store or brand</label><input id="fdmPrStore" autocomplete="off" list="fdmPrStores" placeholder="Trader Joe’s"><datalist id="fdmPrStores"></datalist></div>
+    <div class="fdm-2col">
+      <div class="fdm-field"><label for="fdmPrPrice">Price ($)</label><input id="fdmPrPrice" type="number" inputmode="decimal" min="0" step="0.01" placeholder="0.00"></div>
+      <div class="fdm-field"><label for="fdmPrSize">Size of the package</label><input id="fdmPrSize" type="number" inputmode="decimal" min="0" step="any" placeholder="24"></div>
+    </div>
+    <div class="fdm-fchips" id="fdmPrUnits" role="group" aria-label="Size is in"></div>
+    <p class="fdm-note">The size lets Cal work out the price per ounce, so a bulk pack compares fairly with a small one.</p>
+    <button class="fdm-go" onclick="fdmPriceSave()">Save</button>
+    <div class="fdm-links" id="fdmPrLinks"></div>
   </div>
 </div>
 
@@ -3168,6 +3192,7 @@ body.food-mode #sectionBreadcrumb .bc-btn{color:#051423}
   <!-- FOOD DATABASE section -->
   <div id="ms-database" style="display:none">
       <div id="fdmLib" class="fdm fdm-page"></div>
+    <div id="fdmFood" class="fdm fdm-page"></div>
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
       <span style="font-size:13px;font-weight:700;color:var(--textd)">🍲 Food Database</span>
       <button class="btn" onclick="openFoodDbModal()">+ Add Food</button>
@@ -30125,6 +30150,7 @@ function fhGoHome(){goTab('home',document.querySelector('[data-tab="home"]'));wi
 function fhGoMeals(sec,keepDate){
   if(sec==='ate'&&!keepDate)_eatLogDate=todayStr();
   if(sec==='meals'&&!keepDate)fdmPlanReset();
+  if(sec==='database'&&!keepDate)fdmFoodReset();
   goTab('meals',null);
   setTimeout(function(){
     var b=null;
@@ -30841,6 +30867,7 @@ function fdmLibServing(item){
   return {nut:n,text:txt};
 }
 function renderFdmLib(){
+  try{renderFdmFood();}catch(e){}
   var el=document.getElementById('fdmLib');if(!el)return;
   if(!document.getElementById('fdmLibQ')){
     el.innerHTML='<div class="fdm-libhead"><b>Food library</b><span id="fdmLibCount"></span></div>'
@@ -30856,11 +30883,12 @@ function fdmLibDraw(){
   var listEl=document.getElementById('fdmLibList');if(!listEl)return;
   var q=fhNorm((document.getElementById('fdmLibQ')||{}).value||'');
   var all=FOOD_DB||[];
-  var chips=[['all','All'],['fav','Favorites'],['prep','Meal prep'],['guess','My guesses'],['nocal','No calories yet']];
+  var chips=[['all','All'],['fav','Favorites'],['prep','Meal prep'],['priced','With prices'],['guess','My guesses'],['nocal','No calories yet']];
   var tests={
     all:function(){return true;},
     fav:function(i){return !!i.favorite;},
     prep:fdmLibIsPrep,
+    priced:function(i){return fdmPriceCount(i)>0;},
     guess:function(i){return !!i.estimate;},
     nocal:function(i){return !fdmLibHasCal(i);}
   };
@@ -30891,7 +30919,8 @@ function fdmLibDraw(){
     if(i.estimate)bits.push('your guess');
     if(i.favorite)bits.push('favorite');
     if(fdmLibIsPrep(i))bits.push('meal prep');
-    return '<button class="fdm-card fdm-item" onclick="fdmLibOpen(\''+String(i.id).replace(/[^A-Za-z0-9_.-]/g,'')+'\')">'
+    var pc=fdmPriceCount(i);if(pc)bits.push(pc+' price'+(pc!==1?'s':''));
+    return '<button class="fdm-card fdm-item" onclick="fdmFoodOpen(\''+String(i.id).replace(/[^A-Za-z0-9_.-]/g,'')+'\')">'
       +'<span class="fdm-item-l"><b>'+escHtml(i.name)+'</b>'+(bits.length?'<small>'+bits.join(' · ')+'</small>':'')+'</span>'
       +(has?'<span class="fdm-item-r">'+fhNum(sv.nut.cal)+'<small> cal</small></span>':'<span class="fdm-item-r none">add calories</span>')
       +'</button>';
@@ -30933,7 +30962,7 @@ function fdmLibDrawSheet(){
   lk.innerHTML='<button class="fdm-link" onclick="fdmLibLogNow()">Log this now</button>'
     +'<button class="fdm-link" onclick="fdmLibGrocery()">Add to grocery list</button>'
     +'<button class="fdm-link" onclick="fdmLibSkip()">'+(ick?'Allow this food again':'Skip this food for a while')+'</button>'
-    +'<button class="fdm-link" onclick="fdmLibFullForm()">More details: stores, prices, barcode</button>'
+    +'<button class="fdm-link" onclick="fdmLibFullForm()">More details: brand, barcode, other servings</button>'
     +'<button class="fdm-link" onclick="fdmLibDelete()">Delete this food</button>';
 }
 function fdmLibToggle(k){if(_fdmLibEd){_fdmLibEd[k]=!_fdmLibEd[k];fdmLibDrawSheet();}}
@@ -30986,6 +31015,7 @@ function fdmLibSave(){
   renderFoodDb();
   try{renderFoodHome();}catch(e){}
   if(typeof showToast==='function')showToast(isNew?'Added to your library':'Saved');
+  if(isNew){try{fdmFoodOpen(item.id);}catch(e){}}
 }
 function fdmLibCurrent(){var ed=_fdmLibEd;return ed&&ed.id?((FOOD_DB||[]).find(function(x){return x.id===ed.id;})||null):null;}
 function fdmLibLogNow(){var it=fdmLibCurrent();if(!it)return;fdmLibClose();fhOpenLog('find',it.name,{});}
@@ -31416,6 +31446,201 @@ function fhPlanAte(i){
   var p=_fhPlanCache[i];if(!p)return;
   _fdmPlanDate='';
   fdmPlanAte(fdmPlanSafeId(p.id),'home');
+}
+
+
+// ═══════════════════════════════════════════════
+// FOOD PAGE + PRICE COMPARISON (Nov 2026)
+// Tapping a food in the library opens its own page: nutrition, then prices by store or
+// brand, compared per ounce (or per fluid ounce, or each) with the cheapest marked.
+// Prices are the food's existing priceEntries list; each entry may now also carry a
+// package size and unit: {id,store,price,date,size?,unit?}. Entries logged the old way
+// (no size) still show; they just cannot be compared per ounce until a size is added.
+// ═══════════════════════════════════════════════
+var _fdmFoodId='',_fdmFoodScroll=0,_fdmPrc=null;
+function fdmFoodSafe(id){return String(id).replace(/[^A-Za-z0-9_.-]/g,'');}
+function fdmFoodItem(){return _fdmFoodId?fdmLibFind(_fdmFoodId):null;}
+function fdmFoodOpen(id){
+  id=fdmFoodSafe(id);
+  if(!fdmLibFind(id))return;
+  _fdmFoodScroll=window.pageYOffset||0;_fdmFoodId=id;
+  var s=document.getElementById('ms-database');if(s)s.classList.add('fdm-onfood');
+  renderFdmFood();window.scrollTo(0,0);
+}
+function fdmFoodReset(){_fdmFoodId='';var s=document.getElementById('ms-database');if(s)s.classList.remove('fdm-onfood');}
+function fdmFoodBack(){var y=_fdmFoodScroll;fdmFoodReset();fdmLibDraw();window.scrollTo(0,y||0);}
+function fdmFoodFix(){if(_fdmFoodId)fdmLibOpen(_fdmFoodId);}
+function fdmFoodLog(){var it=fdmFoodItem();if(it)fhOpenLog('find',it.name,{});}
+
+// ── price maths ───────────────────────────────
+function fdmPriceUnits(){return [['oz','oz'],['lb','lb'],['g','g'],['floz','fl oz'],['each','each']];}
+// A package size in comparable terms: weight in ounces, liquid in fluid ounces, or a count.
+function fdmPriceBase(e){
+  var s=parseFloat(e&&e.size)||0;if(!(s>0))return null;
+  switch(e.unit){
+    case 'oz':return {dim:'w',qty:s,per:'oz'};
+    case 'lb':return {dim:'w',qty:s*16,per:'oz'};
+    case 'g':return {dim:'w',qty:s/28.3495,per:'oz'};
+    case 'kg':return {dim:'w',qty:s*1000/28.3495,per:'oz'};
+    case 'floz':return {dim:'v',qty:s,per:'fl oz'};
+    case 'ml':return {dim:'v',qty:s/29.5735,per:'fl oz'};
+    case 'l':return {dim:'v',qty:s*1000/29.5735,per:'fl oz'};
+    case 'each':return {dim:'c',qty:s,per:'each'};
+  }
+  return null;
+}
+function fdmPriceMoney(n){return '$'+(Math.round((parseFloat(n)||0)*100)/100).toFixed(2);}
+function fdmPriceUnitText(u,per){
+  if(per==='each')return fdmPriceMoney(u)+' each';
+  return (u<1?(Math.round(u*1000)/10)+'¢':fdmPriceMoney(u))+' / '+per;
+}
+function fdmPriceSizeText(e){
+  var s=parseFloat(e.size)||0,u={oz:'oz',lb:'lb',g:'g',kg:'kg',floz:'fl oz',ml:'ml',l:'l',each:(s===1?'item':'items')}[e.unit]||'';
+  return (Math.round(s*100)/100)+' '+u;
+}
+function fdmPriceDate(iso){
+  if(!/^\d{4}-\d{2}-\d{2}/.test(String(iso||'')))return '';
+  if(iso.slice(0,10)===todayStr())return 'today';
+  var d=new Date(iso.slice(0,10)+'T12:00:00');
+  return d.toLocaleDateString('en-US',{month:'short',day:'numeric'})+(d.getFullYear()!==new Date().getFullYear()?' '+d.getFullYear():'');
+}
+function fdmPriceEntries(item){
+  var es=(item.priceEntries||[]).filter(function(e){return e&&parseFloat(e.price)>0;});
+  // a food saved the older way has one store and price and no list
+  if(!es.length&&parseFloat(item.price)>0)es=[{id:'_single',store:item.store||'',price:parseFloat(item.price),date:item.created||item.added||'',single:true}];
+  return es;
+}
+// One row per store or brand (its latest price), cheapest per unit first.
+function fdmPriceRows(item){
+  var es=fdmPriceEntries(item),groups={},order=[];
+  es.forEach(function(e,i){var k=fhNorm(e.store)||'_none';if(!groups[k]){groups[k]=[];order.push(k);}groups[k].push({e:e,i:i});});
+  var rows=order.map(function(k){
+    var g=groups[k].slice().sort(function(a,b){return String(b.e.date||'').localeCompare(String(a.e.date||''))||(b.i-a.i);});
+    var cur=g[0].e,prev=null;
+    for(var j=1;j<g.length;j++){if(parseFloat(g[j].e.price)!==parseFloat(cur.price)){prev=g[j].e;break;}}
+    var base=fdmPriceBase(cur);
+    return {key:k,label:String(cur.store||'').trim()||'No store named',e:cur,prev:prev,base:base,unit:base?parseFloat(cur.price)/base.qty:0};
+  });
+  var dims={w:0,v:0,c:0};rows.forEach(function(r){if(r.base)dims[r.base.dim]++;});
+  var main=(dims.w>=dims.v&&dims.w>=dims.c)?'w':(dims.v>=dims.c?'v':'c');
+  if(!dims[main])main='';
+  var rank=function(r){return r.base?(r.base.dim===main?0:1):2;};
+  rows.sort(function(a,b){return (rank(a)-rank(b))||(rank(a)<2?(a.unit-b.unit):(parseFloat(a.e.price)-parseFloat(b.e.price)));});
+  var comp=rows.filter(function(r){return r.base&&r.base.dim===main;});
+  var best=comp.length>=2?comp[0]:null;
+  rows.forEach(function(r){
+    r.best=r===best;
+    r.more=(best&&r!==best&&r.base&&r.base.dim===main&&best.unit>0)?Math.round((r.unit/best.unit-1)*100):null;
+  });
+  return {rows:rows,best:best,main:main,mixed:((dims.w>0?1:0)+(dims.v>0?1:0)+(dims.c>0?1:0))>1,unsized:rows.filter(function(r){return !r.base;}).length};
+}
+function fdmPriceCount(item){return item?fdmPriceRows(item).rows.length:0;}
+
+// ── the page ──────────────────────────────────
+function renderFdmFood(){
+  var el=document.getElementById('fdmFood');if(!el||!_fdmFoodId)return;
+  var item=fdmFoodItem();
+  if(!item){fdmFoodReset();return;}
+  var has=fdmLibHasCal(item),sv=has?fdmLibServing(item):null;
+  var line=function(a,b){return '<div><span>'+a+'</span><span>'+b+'</span></div>';};
+  var nutr=has
+    ?'<div class="fdm-cv">'+line('One serving',escHtml(sv.text))+line('Calories',fhNum(sv.nut.cal))+line('Protein',fhR1(sv.nut.pro)+' g')+line('Carbs',fhR1(sv.nut.carb)+' g')+line('Fat',fhR1(sv.nut.fat)+' g')+'</div>'
+    :'<div class="fdm-empty">No calories for this food yet. Tap Fix this food to add them.</div>';
+  var flags=[];
+  if(item.favorite)flags.push('Favorite');
+  if(fdmLibIsPrep(item))flags.push('Good for meal prep');
+  if(item.staple)flags.push('Staple');
+  if(item.estimate)flags.push('Your guess');
+  if(item.gluten)flags.push('Contains gluten');
+  var pr=fdmPriceRows(item),per={w:'ounce',v:'fluid ounce',c:'item'}[pr.main]||'ounce';
+  var rows=pr.rows.map(function(r){
+    var e=r.e,bits=[];
+    bits.push(fdmPriceMoney(e.price)+(r.base?' for '+fdmPriceSizeText(e):''));
+    var d=fdmPriceDate(e.date);if(d)bits.push(d);
+    if(r.prev)bits.push('was '+fdmPriceMoney(r.prev.price));
+    if(r.best)bits.push('cheapest');
+    else if(r.more!==null)bits.push(r.more>0?r.more+'% more':'same price');
+    return '<button class="fdm-card fdm-item'+(r.best?' fdm-best':'')+'" onclick="fdmPriceOpen(\''+fdmFoodSafe(e.id||'')+'\')">'
+      +'<span class="fdm-item-l"><b>'+escHtml(r.label)+'</b><small>'+bits.join(' · ')+'</small></span>'
+      +(r.base?'<span class="fdm-item-r">'+fdmPriceUnitText(r.unit,r.base.per)+'</span>':'<span class="fdm-item-r none">add the size</span>')
+      +'</button>';
+  }).join('');
+  var note='';
+  if(!pr.rows.length)rows='<div class="fdm-empty">No prices yet. Add one for each store or brand, with the package size, and they line up here cheapest first.</div>';
+  else if(pr.best)note='Cheapest per '+per+': '+escHtml(pr.best.label)+'.';
+  else if(pr.rows.length>=2)note='Add the package size to at least two of these and Cal will say which is cheapest.';
+  if(pr.mixed)note+=(note?' ':'')+'Some sizes are by weight and some by volume or count, so only the ones measured the same way are compared.';
+  el.innerHTML=
+    '<div class="fdm-top"><button class="fdm-card fdm-back" onclick="fdmFoodBack()" aria-label="Back to the library"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#051423" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"></path></svg></button>'
+      +'<h2 class="fdm-h1s" id="fdmFoodName">'+escHtml(item.name)+'</h2></div>'
+    +'<div class="fdm-block"><h3 class="fdm-h2">Nutrition</h3>'+nutr
+      +(flags.length?'<p class="fdm-note">'+flags.join(' · ')+'</p>':'')
+      +(item.notes?'<p class="fdm-note">'+escHtml(item.notes)+'</p>':'')
+      +'<div class="fdm-2col"><button class="fdm-card fdm-sec" onclick="fdmFoodFix()">Fix this food</button><button class="fdm-card fdm-sec" onclick="fdmFoodLog()">Log this now</button></div>'
+    +'</div>'
+    +'<div class="fdm-block"><h3 class="fdm-h2">Prices'+(pr.rows.length?' · '+pr.rows.length:'')+'</h3>'
+      +'<button class="fdm-card fdm-logbox" onclick="fdmPriceOpen(\'\')"><span>Add a price for this food</span><span class="fdm-logpill">Add</span></button>'
+      +'<div class="fdm-list" id="fdmFoodPrices">'+rows+'</div>'
+      +(note?'<p class="fdm-note" id="fdmFoodPriceNote">'+note+'</p>':'')
+    +'</div>';
+}
+
+// ── add, fix or remove a price ────────────────
+function fdmPriceFind(item,id){return fdmPriceEntries(item).find(function(e){return fdmFoodSafe(e.id||'')===id;})||null;}
+function fdmPriceOpen(id){
+  var item=fdmFoodItem();if(!item)return;
+  var e=id?fdmPriceFind(item,id):null,all=fdmPriceEntries(item);
+  var lastUnit='oz';all.forEach(function(x){if(x.unit)lastUnit=x.unit;});
+  _fdmPrc={id:e?id:'',unit:(e&&e.unit)||lastUnit};
+  var set=function(k,v){var el=document.getElementById(k);if(el)el.value=(v==null||v===''||v===0)?'':v;};
+  set('fdmPrStore',e?e.store:'');set('fdmPrPrice',e?(Math.round(parseFloat(e.price)*100)/100).toFixed(2):'');set('fdmPrSize',e&&parseFloat(e.size)>0?e.size:'');
+  var t=document.getElementById('fdmPrTitle');if(t)t.textContent=e?'Fix this price':'Add a price';
+  // stores and brands already used anywhere in the library
+  var seen={},names=[];
+  (FOOD_DB||[]).forEach(function(f){fdmPriceEntries(f).forEach(function(x){var n=String(x.store||'').trim(),k=fhNorm(n);if(k&&!seen[k]){seen[k]=1;names.push(n);}});});
+  var dl=document.getElementById('fdmPrStores');if(dl)dl.innerHTML=names.slice(0,40).map(function(n){return '<option value="'+escHtml(n)+'">';}).join('');
+  var lk=document.getElementById('fdmPrLinks');if(lk)lk.innerHTML=e?'<button class="fdm-link" onclick="fdmPriceRemove()">Remove this store’s price</button>':'';
+  fdmPriceDrawUnits();
+  var ov=document.getElementById('fdmPriceOv');if(ov)ov.classList.add('show');
+  var f=document.getElementById(e?'fdmPrPrice':'fdmPrStore');if(f){try{f.focus();}catch(err){}}
+}
+function fdmPriceDrawUnits(){
+  var el=document.getElementById('fdmPrUnits');if(!el||!_fdmPrc)return;
+  el.innerHTML=fdmPriceUnits().map(function(u){var on=_fdmPrc.unit===u[0];return '<button class="fdm-card fdm-fchip'+(on?' on':'')+'" aria-pressed="'+(on?'true':'false')+'" onclick="fdmPriceSetUnit(\''+u[0]+'\')">'+u[1]+'</button>';}).join('');
+}
+function fdmPriceSetUnit(u){if(_fdmPrc){_fdmPrc.unit=u;fdmPriceDrawUnits();}}
+function fdmPriceClose(){var ov=document.getElementById('fdmPriceOv');if(ov)ov.classList.remove('show');_fdmPrc=null;}
+function fdmPriceSave(){
+  var st=_fdmPrc,item=fdmFoodItem();
+  if(!st||!item){fdmPriceClose();return;}
+  var val=function(k){return ((document.getElementById(k)||{}).value||'').trim();};
+  var store=val('fdmPrStore'),price=Math.round((parseFloat(val('fdmPrPrice'))||0)*100)/100,size=Math.max(0,parseFloat(val('fdmPrSize'))||0);
+  if(!(price>0)){var pf=document.getElementById('fdmPrPrice');if(pf){try{pf.focus();}catch(err){}}if(typeof showToast==='function')showToast('Enter the price first');return;}
+  if(!Array.isArray(item.priceEntries))item.priceEntries=[];
+  var today=todayStr(),e=st.id?item.priceEntries.find(function(x){return fdmFoodSafe(x.id||'')===st.id;}):null;
+  // A new price on a later day is kept as a new line, so the row can say what it was before.
+  if(e&&parseFloat(e.price)!==price&&e.date&&e.date!==today)e=null;
+  if(!e){e={id:'pe-'+Date.now(),store:store,price:price,date:today};item.priceEntries.push(e);}
+  e.store=store;e.price=price;
+  if(size>0){e.size=size;e.unit=st.unit;}else{delete e.size;delete e.unit;}
+  item.price=price;if(store)item.store=store;
+  saveFoodDbData();
+  fdmPriceClose();renderFdmFood();
+  if(typeof showToast==='function')showToast('Price saved');
+}
+function fdmPriceRemove(){
+  var st=_fdmPrc,item=fdmFoodItem();
+  if(!st||!item||!st.id){fdmPriceClose();return;}
+  var e=fdmPriceFind(item,st.id);fdmPriceClose();if(!e)return;
+  var snap={entries:(item.priceEntries||[]).slice(),price:item.price,store:item.store};
+  var k=fhNorm(e.store);
+  item.priceEntries=(item.priceEntries||[]).filter(function(x){return fhNorm(x&&x.store)!==k;});
+  var left=fdmPriceEntries({priceEntries:item.priceEntries});
+  if(left.length){var last=left[left.length-1];item.price=parseFloat(last.price)||0;item.store=last.store||'';}
+  else{item.price=0;if(fhNorm(item.store)===k)item.store='';}
+  saveFoodDbData();renderFdmFood();
+  DELTED={restore:function(){item.priceEntries=snap.entries;item.price=snap.price;item.store=snap.store;saveFoodDbData();renderFdmFood();}};
+  showUndo('Price removed');
 }
 
 </script>
