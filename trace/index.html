@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#14121a">
+<title>Trace Studio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#14121a; --panel:rgba(20,18,26,.86); --line:rgba(255,255,255,.12);
+    --text:#f4efe6; --muted:#a59fb0; --accent:#e8b4c8; --accent2:#b9d7c9;
+    --safe-t:env(safe-area-inset-top,0px); --safe-b:env(safe-area-inset-bottom,0px);
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;height:100%;overflow:hidden;background:var(--ink);color:var(--text);
+    font-family:Inter,system-ui,sans-serif;touch-action:none;user-select:none;-webkit-user-select:none}
+  body.lightbox{background:#fff}
+
+  #video{position:fixed;inset:0;width:100%;height:100%;object-fit:cover;display:none;background:#000}
+  body.camera #video{display:block}
+
+  #stage{position:fixed;inset:0;overflow:hidden}
+  #overlay{position:absolute;left:50%;top:50%;transform-origin:center center;will-change:transform;
+    pointer-events:none;max-width:none}
+  #grid{position:fixed;inset:0;pointer-events:none;display:none}
+  body.show-grid #grid{display:block}
+
+  /* ---------- start screen ---------- */
+  #start{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    padding:calc(24px + var(--safe-t)) 24px calc(24px + var(--safe-b));text-align:center;gap:18px;z-index:20;
+    background:radial-gradient(120% 80% at 50% 0%,#2a2236 0%,var(--ink) 60%)}
+  #start h1{font-family:Fraunces,serif;font-weight:600;font-size:34px;margin:0;letter-spacing:.3px}
+  #start p{margin:0;color:var(--muted);max-width:320px;line-height:1.5;font-size:15px}
+  .bigbtn{appearance:none;border:0;border-radius:16px;padding:16px 26px;font:600 16px Inter,sans-serif;
+    background:var(--accent);color:#2a1a22;cursor:pointer;min-width:220px}
+  .ghost{background:transparent;color:var(--text);border:1px solid var(--line)}
+  .how{font-size:13px;color:var(--muted);max-width:330px;line-height:1.55;text-align:left;
+    border-top:1px solid var(--line);padding-top:14px;margin-top:6px}
+  .how b{color:var(--text);font-weight:600}
+
+  /* ---------- toolbar ---------- */
+  #ui{position:fixed;left:0;right:0;bottom:0;z-index:10;padding:10px 12px calc(12px + var(--safe-b));
+    background:var(--panel);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+    border-top:1px solid var(--line);display:none;flex-direction:column;gap:10px;transition:transform .25s}
+  body.ready #ui{display:flex}
+  body.ui-hidden #ui{transform:translateY(110%)}
+  .row{display:flex;gap:8px;align-items:center}
+  .row.scroll{overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
+  .row.scroll::-webkit-scrollbar{display:none}
+  .chip{flex:0 0 auto;appearance:none;border:1px solid var(--line);background:rgba(255,255,255,.06);
+    color:var(--text);border-radius:12px;padding:9px 12px;font:500 13px Inter,sans-serif;cursor:pointer;white-space:nowrap}
+  .chip.on{background:var(--accent);color:#2a1a22;border-color:transparent}
+  .chip.mint.on{background:var(--accent2);color:#14261e}
+  label.sl{display:flex;align-items:center;gap:10px;flex:1;font-size:12px;color:var(--muted)}
+  label.sl span{min-width:58px}
+  input[type=range]{flex:1;accent-color:var(--accent);height:28px}
+  #detailRow{display:none}
+  body.f-outline #detailRow{display:flex}
+
+  /* ---------- floating buttons ---------- */
+  .fab{position:fixed;z-index:11;width:46px;height:46px;border-radius:50%;border:1px solid var(--line);
+    background:var(--panel);color:var(--text);display:none;align-items:center;justify-content:center;
+    font-size:20px;cursor:pointer;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+  body.ready .fab{display:flex}
+  #lockBtn{top:calc(12px + var(--safe-t));right:12px}
+  #hideBtn{top:calc(12px + var(--safe-t));left:12px}
+  body.locked #lockBtn{background:var(--accent);color:#2a1a22;border-color:transparent}
+  body.locked #ui{transform:translateY(110%)}
+  body.locked #hideBtn{display:none}
+
+  #toast{position:fixed;left:50%;top:calc(70px + var(--safe-t));transform:translateX(-50%);z-index:30;
+    background:var(--panel);border:1px solid var(--line);padding:10px 14px;border-radius:12px;font-size:13px;
+    max-width:86vw;text-align:center;opacity:0;transition:opacity .25s;pointer-events:none;line-height:1.45}
+  #toast.show{opacity:1}
+  input[type=file]{display:none}
+  #pasteBox{min-width:220px;max-width:300px;padding:14px 16px;border:1.5px dashed var(--line);border-radius:14px;
+    color:var(--muted);font-size:13px;line-height:1.4;outline:none;-webkit-user-select:text;user-select:text;
+    caret-color:transparent;touch-action:auto}
+  #pasteBox:empty::before{content:attr(data-ph)}
+  #pasteBox:focus{border-color:var(--accent)}
+</style>
+</head>
+<body>
+
+<video id="video" playsinline muted autoplay></video>
+<div id="stage"><canvas id="overlay"></canvas></div>
+<canvas id="grid"></canvas>
+
+<!-- Start screen -->
+<div id="start">
+  <h1>Trace Studio</h1>
+  <p>Float a see-through photo over your paper and trace it.</p>
+  <label class="bigbtn" for="file">Choose a photo</label>
+  <input id="file" type="file" accept="image/*,.heic,.heif">
+  <div id="pasteBox" contenteditable="true" inputmode="none" data-ph="…or copy a photo, then long-press here and tap Paste"></div>
+  <div class="how">
+    <b>Lightbox:</b> lay thin paper right on the screen, lock it, trace. Turn brightness all the way up.<br><br>
+    <b>Camera AR:</b> prop the phone on a stand (a cup or stack of books) about a foot above the paper, point it down, and trace while watching the screen.
+  </div>
+</div>
+
+<!-- Floating -->
+<button class="fab" id="hideBtn" title="Hide controls">◐</button>
+<button class="fab" id="lockBtn" title="Lock">🔓</button>
+
+<!-- Toolbar -->
+<div id="ui">
+  <div class="row scroll">
+    <button class="chip mint on" data-mode="lightbox">Lightbox</button>
+    <button class="chip mint" data-mode="camera">Camera AR</button>
+    <button class="chip" id="torchBtn" style="display:none">Flashlight</button>
+    <button class="chip" id="zoomBtn" style="display:none">Zoom 1×</button>
+    <button class="chip" id="newPhoto">New photo</button>
+    <button class="chip" id="flipBtn">Flip ⇋</button>
+    <button class="chip" id="gridBtn">Grid</button>
+    <button class="chip" id="resetBtn">Reset</button>
+    <button class="chip" id="fsBtn">Full screen</button>
+  </div>
+  <div class="row scroll">
+    <button class="chip on" data-filter="original">Original</button>
+    <button class="chip" data-filter="gray">Grayscale</button>
+    <button class="chip" data-filter="contrast">High contrast</button>
+    <button class="chip" data-filter="outline">Outline</button>
+  </div>
+  <div class="row"><label class="sl"><span>See-through</span><input id="opacity" type="range" min="5" max="100" value="55"></label></div>
+  <div class="row" id="detailRow"><label class="sl"><span>Line detail</span><input id="detail" type="range" min="10" max="120" value="55"></label></div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+(() => {
+  const $ = s => document.querySelector(s);
+  const body = document.body, overlay = $('#overlay'), video = $('#video'), stage = $('#stage');
+  const fileIn = $('#file'), toastEl = $('#toast');
+  let srcCanvas = null;              // original image, downscaled
+  let filter = 'original', mode = 'lightbox';
+  let st = {x:0, y:0, s:1, r:0, flip:1};
+  let locked = false, stream = null, wakeLock = null;
+
+  const toast = (msg, ms=2600) => {
+    toastEl.textContent = msg; toastEl.classList.add('show');
+    clearTimeout(toast.t); toast.t = setTimeout(()=>toastEl.classList.remove('show'), ms);
+  };
+
+  /* ---------- load image ---------- */
+  // Try several ways to read the photo — some viewers block one or another.
+  const viaImg = src => new Promise((res, rej) => {
+    const img = new Image();
+    img.onload = () => res({src:img, w:img.naturalWidth, h:img.naturalHeight});
+    img.onerror = () => rej(new Error('img')); img.src = src;
+  });
+  const viaDataURL = blob => new Promise((res, rej) => {
+    const r = new FileReader(); r.onload = () => viaImg(r.result).then(res, rej); r.onerror = rej; r.readAsDataURL(blob);
+  });
+  async function decode(blob){
+    if (window.createImageBitmap) {
+      try { const b = await createImageBitmap(blob); return {src:b, w:b.width, h:b.height}; } catch {}
+    }
+    try { return await viaDataURL(blob); } catch {}
+    const url = URL.createObjectURL(blob);
+    try { return await viaImg(url); } finally { URL.revokeObjectURL(url); }
+  }
+  const loadScript = src => new Promise((res, rej) => {
+    const s = document.createElement('script'); s.src = src; s.onload = res; s.onerror = rej; document.head.appendChild(s);
+  });
+  async function heicToJpeg(blob){
+    if (!window.heic2any) await loadScript('https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js');
+    const out = await window.heic2any({blob, toType:'image/jpeg', quality:0.9});
+    return Array.isArray(out) ? out[0] : out;
+  }
+  async function loadFile(f){
+    if (!f) return;
+    toast('Opening photo…', 8000);
+    let img = null;
+    try { img = await decode(f); }
+    catch {
+      // iPhone photos are often HEIC — convert, then try again
+      try { toast('Converting iPhone photo…', 15000); img = await decode(await heicToJpeg(f)); }
+      catch { toast(`Couldn't open that one (${f.type || f.name || 'unknown type'}). Try the paste box, or a screenshot of the photo.`, 6000); return; }
+    }
+    const MAX = 1800, k = Math.min(1, MAX / Math.max(img.w, img.h));
+    srcCanvas = document.createElement('canvas');
+    srcCanvas.width = Math.round(img.w * k); srcCanvas.height = Math.round(img.h * k);
+    srcCanvas.getContext('2d').drawImage(img.src, 0, 0, srcCanvas.width, srcCanvas.height);
+    $('#start').style.display = 'none';
+    body.classList.add('ready');
+    if (!body.classList.contains('camera')) body.classList.add('lightbox');
+    fitToScreen(); render(); drawGrid(); keepAwake();
+    toastEl.classList.remove('show');
+    window.__autoCam && window.__autoCam();
+    fileIn.value = '';
+  }
+  fileIn.addEventListener('change', e => loadFile(e.target.files && e.target.files[0]));
+
+  // Paste: copy a photo in Photos, long-press the box, tap Paste
+  const pasteBox = $('#pasteBox');
+  pasteBox.addEventListener('paste', e => {
+    e.preventDefault();
+    const items = [...(e.clipboardData?.items || [])];
+    const it = items.find(i => i.type.startsWith('image/'));
+    if (it) loadFile(it.getAsFile());
+    else toast('No photo on the clipboard — in Photos, tap Share → Copy first.');
+    pasteBox.blur();
+  });
+  pasteBox.addEventListener('input', () => { pasteBox.innerHTML = ''; });
+  // drag & drop (computer)
+  addEventListener('dragover', e => e.preventDefault());
+  addEventListener('drop', e => { e.preventDefault(); loadFile(e.dataTransfer?.files?.[0]); });
+  $('#newPhoto').onclick = () => fileIn.click();
+
+  /* ---------- filters ---------- */
+  function render(){
+    if (!srcCanvas) return;
+    const w = srcCanvas.width, h = srcCanvas.height;
+    const out = document.createElement('canvas'); out.width = w; out.height = h;
+    const ctx = out.getContext('2d');
+    if (filter === 'original') { paint(srcCanvas); return; }
+    const data = srcCanvas.getContext('2d').getImageData(0,0,w,h);
+    const px = data.data, g = new Float32Array(w*h);
+    for (let i=0, j=0; i<px.length; i+=4, j++) g[j] = .299*px[i] + .587*px[i+1] + .114*px[i+2];
+
+    const o = ctx.createImageData(w,h), op = o.data;
+    if (filter === 'gray' || filter === 'contrast') {
+      for (let j=0; j<g.length; j++){
+        let v = g[j];
+        if (filter === 'contrast') v = Math.max(0, Math.min(255, (v-128)*2.2 + 128));
+        op[j*4]=op[j*4+1]=op[j*4+2]=v; op[j*4+3]=px[j*4+3];
+      }
+    } else { // outline (Sobel)
+      const thr = 140 - +$('#detail').value; // higher detail = lower threshold
+      for (let y=1; y<h-1; y++) for (let x=1; x<w-1; x++){
+        const i = y*w + x;
+        const gx = -g[i-w-1] - 2*g[i-1] - g[i+w-1] + g[i-w+1] + 2*g[i+1] + g[i+w+1];
+        const gy = -g[i-w-1] - 2*g[i-w] - g[i-w+1] + g[i+w-1] + 2*g[i+w] + g[i+w+1];
+        const m = Math.sqrt(gx*gx + gy*gy);
+        if (m > thr*2) { const a = Math.min(255, (m - thr*2) * 1.6 + 120);
+          op[i*4]=op[i*4+1]=op[i*4+2]=15; op[i*4+3]=a; }
+      }
+      // in camera mode, make lines bright so they show on paper
+      if (mode === 'camera') for (let i=0;i<op.length;i+=4) if (op[i+3]) { op[i]=255; op[i+1]=60; op[i+2]=140; }
+    }
+    ctx.putImageData(o,0,0);
+    paint(out);
+  }
+  function paint(c){
+    overlay.width = c.width; overlay.height = c.height;
+    const x = overlay.getContext('2d'); x.clearRect(0,0,c.width,c.height); x.drawImage(c,0,0);
+    overlay.style.width = c.width+'px'; overlay.style.height = c.height+'px'; apply();
+  }
+
+  let detailT; $('#detail').addEventListener('input', () => { clearTimeout(detailT); detailT = setTimeout(render, 120); });
+
+  document.querySelectorAll('[data-filter]').forEach(b => b.onclick = () => {
+    filter = b.dataset.filter;
+    document.querySelectorAll('[data-filter]').forEach(x => x.classList.toggle('on', x===b));
+    body.classList.toggle('f-outline', filter==='outline');
+    render();
+  });
+
+  /* ---------- transform ---------- */
+  function fitToScreen(){
+    const vw = innerWidth, vh = innerHeight * .78;
+    st = {x:0, y:-innerHeight*.06, s: Math.min(vw / srcCanvas.width, vh / srcCanvas.height) * .95, r:0, flip: st.flip||1};
+  }
+  function apply(){
+    overlay.style.transform =
+      `translate(-50%,-50%) translate(${st.x}px,${st.y}px) rotate(${st.r}rad) scale(${st.s}) scaleX(${st.flip})`;
+  }
+  $('#resetBtn').onclick = () => { st.flip = 1; fitToScreen(); apply(); };
+  $('#flipBtn').onclick = () => { st.flip *= -1; apply(); };
+
+  $('#opacity').addEventListener('input', e => overlay.style.opacity = e.target.value/100);
+  overlay.style.opacity = .55;
+
+  /* ---------- gestures: 1 finger move, 2 fingers pinch/rotate ---------- */
+  const ptrs = new Map(); let g0 = null;
+  const snapshot = () => {
+    const p = [...ptrs.values()];
+    if (p.length === 1) return {mode:1, x:p[0].x, y:p[0].y, st:{...st}};
+    if (p.length >= 2) {
+      const [a,b] = p;
+      return {mode:2, cx:(a.x+b.x)/2, cy:(a.y+b.y)/2, d:Math.hypot(b.x-a.x,b.y-a.y),
+              ang:Math.atan2(b.y-a.y,b.x-a.x), st:{...st}};
+    }
+    return null;
+  };
+  stage.addEventListener('pointerdown', e => {
+    if (locked || !srcCanvas) return;
+    stage.setPointerCapture(e.pointerId);
+    ptrs.set(e.pointerId, {x:e.clientX, y:e.clientY}); g0 = snapshot();
+  });
+  stage.addEventListener('pointermove', e => {
+    if (locked || !ptrs.has(e.pointerId)) return;
+    ptrs.set(e.pointerId, {x:e.clientX, y:e.clientY});
+    const p = [...ptrs.values()];
+    if (g0 && g0.mode === 1 && p.length === 1) {
+      st.x = g0.st.x + (p[0].x - g0.x); st.y = g0.st.y + (p[0].y - g0.y);
+    } else if (g0 && g0.mode === 2 && p.length >= 2) {
+      const [a,b] = p, cx=(a.x+b.x)/2, cy=(a.y+b.y)/2;
+      st.s = Math.max(.05, g0.st.s * Math.hypot(b.x-a.x,b.y-a.y) / g0.d);
+      st.r = g0.st.r + (Math.atan2(b.y-a.y,b.x-a.x) - g0.ang);
+      st.x = g0.st.x + (cx - g0.cx); st.y = g0.st.y + (cy - g0.cy);
+    }
+    apply();
+  });
+  const up = e => { ptrs.delete(e.pointerId); g0 = snapshot(); };
+  stage.addEventListener('pointerup', up); stage.addEventListener('pointercancel', up);
+  // desktop: wheel to zoom
+  stage.addEventListener('wheel', e => { if (locked) return; e.preventDefault();
+    st.s = Math.max(.05, st.s * (e.deltaY < 0 ? 1.06 : 1/1.06)); apply(); }, {passive:false});
+
+  /* ---------- lock / hide ---------- */
+  $('#lockBtn').onclick = () => {
+    locked = !locked; body.classList.toggle('locked', locked);
+    $('#lockBtn').textContent = locked ? '🔒' : '🔓';
+    ptrs.clear(); g0 = null;
+    toast(locked ? 'Locked — touches on the picture are ignored. Tap 🔒 to unlock.' : 'Unlocked');
+  };
+  $('#hideBtn').onclick = () => body.classList.toggle('ui-hidden');
+
+  /* ---------- grid ---------- */
+  function drawGrid(){
+    const c = $('#grid'), dpr = devicePixelRatio || 1;
+    c.width = innerWidth*dpr; c.height = innerHeight*dpr; c.style.width = innerWidth+'px'; c.style.height = innerHeight+'px';
+    const ctx = c.getContext('2d'); ctx.scale(dpr,dpr); ctx.clearRect(0,0,innerWidth,innerHeight);
+    const step = Math.round(Math.min(innerWidth, innerHeight) / 6);
+    ctx.strokeStyle = mode==='camera' ? 'rgba(232,180,200,.7)' : 'rgba(120,90,160,.45)'; ctx.lineWidth = 1;
+    for (let x = (innerWidth/2)%step; x < innerWidth; x += step){ ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,innerHeight); ctx.stroke(); }
+    for (let y = (innerHeight/2)%step; y < innerHeight; y += step){ ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(innerWidth,y); ctx.stroke(); }
+  }
+  $('#gridBtn').onclick = e => { body.classList.toggle('show-grid'); e.target.classList.toggle('on'); };
+  addEventListener('resize', drawGrid);
+
+  /* ---------- modes ---------- */
+  async function setMode(m){
+    if (m === 'camera') {
+      try {
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) throw new Error('nocam');
+        stream = await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'}, width:{ideal:1920}, height:{ideal:1080}}, audio:false});
+        video.srcObject = stream; await video.play().catch(()=>{});
+        setupCamExtras();
+      } catch (err) {
+        const top = (() => { try { return window.self === window.top; } catch { return false; } })();
+        toast(top
+          ? "Camera didn't start. In Safari tap aA → Website Settings → Camera → Allow, then try Camera AR again."
+          : "Camera is blocked inside Claude. Open Trace Studio from its own web link for Camera AR.", 6000);
+        return;
+      }
+    } else if (stream) { stream.getTracks().forEach(t=>t.stop()); stream = null; video.srcObject = null;
+      $('#torchBtn').style.display = 'none'; $('#zoomBtn').style.display = 'none'; }
+    mode = m;
+    body.classList.toggle('camera', m==='camera'); body.classList.toggle('lightbox', m==='lightbox');
+    document.querySelectorAll('[data-mode]').forEach(x => x.classList.toggle('on', x.dataset.mode===m));
+    if (filter==='outline') render();
+    drawGrid();
+  }
+  document.querySelectorAll('[data-mode]').forEach(b => b.onclick = () => setMode(b.dataset.mode));
+
+  /* ---------- flashlight + zoom (only where the phone allows) ---------- */
+  let torchOn = false, zoomSteps = [], zi = 0;
+  function setupCamExtras(){
+    const track = stream && stream.getVideoTracks()[0]; if (!track) return;
+    const caps = track.getCapabilities ? track.getCapabilities() : {};
+    const tb = $('#torchBtn'), zb = $('#zoomBtn');
+    torchOn = false; tb.classList.remove('on');
+    tb.style.display = caps.torch ? '' : 'none';
+    tb.onclick = async () => {
+      try { torchOn = !torchOn; await track.applyConstraints({advanced:[{torch:torchOn}]}); tb.classList.toggle('on', torchOn); }
+      catch { torchOn = false; toast('Flashlight isn’t available on this phone.'); }
+    };
+    if (caps.zoom && caps.zoom.max > caps.zoom.min) {
+      const {min, max} = caps.zoom;
+      zoomSteps = [min, 1, 1.5, 2, 3].filter((v,i,a) => v >= min && v <= max && a.indexOf(v) === i);
+      zi = Math.max(0, zoomSteps.indexOf(1));
+      zb.style.display = ''; zb.textContent = `Zoom ${zoomSteps[zi]}×`;
+      zb.onclick = async () => {
+        zi = (zi + 1) % zoomSteps.length;
+        try { await track.applyConstraints({advanced:[{zoom:zoomSteps[zi]}]}); zb.textContent = `Zoom ${zoomSteps[zi]}×`; }
+        catch { toast('Zoom isn’t available on this phone.'); }
+      };
+    } else zb.style.display = 'none';
+  }
+
+  // On its own web address (not inside Claude), start in Camera AR automatically
+  const standalone = (() => { try { return window.self === window.top; } catch { return false; } })();
+  window.__autoCam = () => { if (standalone && mode !== 'camera') setMode('camera'); };
+
+  /* ---------- full screen + keep awake ---------- */
+  $('#fsBtn').onclick = async () => {
+    try {
+      if (!document.fullscreenElement) await (document.documentElement.requestFullscreen?.() ?? Promise.reject());
+      else await document.exitFullscreen();
+    } catch { toast('Full screen isn’t available here — hide the controls with ◐ instead.'); }
+  };
+  async function keepAwake(){ try { wakeLock = await navigator.wakeLock?.request('screen'); } catch {} }
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState==='visible' && body.classList.contains('ready')) keepAwake(); });
+})();
+</script>
+</body>
+</html>
