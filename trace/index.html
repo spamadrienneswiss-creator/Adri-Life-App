@@ -7,7 +7,7 @@
 <meta name="theme-color" content="#14121a">
 <title>Trace Studio</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=Inter:wght@400;500;600&family=Great+Vibes&family=Pinyon+Script&family=Parisienne&family=Alex+Brush&family=Sacramento&family=Italianno&family=Monsieur+La+Doulaise&family=Dancing+Script:wght@500&family=Cinzel:wght@500&display=swap" rel="stylesheet">
 <style>
   :root{
     --ink:#14121a; --panel:rgba(20,18,26,.86); --line:rgba(255,255,255,.12);
@@ -81,6 +81,21 @@
     caret-color:transparent;touch-action:auto}
   #pasteBox:empty::before{content:attr(data-ph)}
   #pasteBox:focus{border-color:var(--accent)}
+  .bigbtn.alt{background:var(--accent2);color:#14261e}
+  #bottleRow{display:none;flex-direction:column;gap:6px}
+  body.show-bottle #bottleRow{display:flex}
+  #textPanel{position:fixed;left:0;right:0;bottom:0;z-index:15;max-height:62vh;overflow-y:auto;
+    padding:14px 14px calc(16px + var(--safe-b));background:rgba(20,18,26,.96);border-top:1px solid var(--line);
+    border-radius:18px 18px 0 0;display:none;flex-direction:column;gap:12px;touch-action:pan-y}
+  body.text-open #textPanel{display:flex}
+  body.text-open #ui{transform:translateY(110%)}
+  #textPanel h3{margin:0;font:600 15px Inter,sans-serif;display:flex;justify-content:space-between;align-items:center}
+  #textIn{width:100%;min-height:64px;resize:vertical;border-radius:12px;border:1px solid var(--line);background:rgba(255,255,255,.06);
+    color:var(--text);font:16px Inter,sans-serif;padding:10px 12px;outline:none;-webkit-user-select:text;user-select:text;touch-action:auto}
+  #fontRow .chip{font-size:19px;padding:6px 12px}
+  .ink{width:30px;height:30px;border-radius:50%;border:2px solid var(--line);flex:0 0 auto;cursor:pointer}
+  .ink.on{border-color:var(--text);box-shadow:0 0 0 2px var(--accent)}
+  .sec-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px}
 </style>
 </head>
 <body>
@@ -95,6 +110,7 @@
   <p>Float a see-through photo over your paper and trace it.</p>
   <label class="bigbtn" for="file">Choose a photo</label>
   <input id="file" type="file" accept="image/*,.heic,.heif">
+  <button class="bigbtn alt" id="startText">Write text (calligraphy)</button>
   <div id="pasteBox" contenteditable="true" inputmode="none" data-ph="…or copy a photo, then long-press here and tap Paste"></div>
   <a id="homeLink" href="../" style="display:none;color:var(--muted);font-size:13px">← Back to Life App</a>
   <div class="how">
@@ -116,6 +132,8 @@
     <button class="chip" id="torchBtn" style="display:none">Flashlight</button>
     <button class="chip" id="zoomBtn" style="display:none">Zoom 1×</button>
     <button class="chip" id="newPhoto">New photo</button>
+    <button class="chip" id="textBtn">✒︎ Text</button>
+    <button class="chip" id="bottleBtn">Bottle curve</button>
     <button class="chip" id="flipBtn">Flip ⇋</button>
     <button class="chip" id="gridBtn">Grid</button>
     <button class="chip" id="resetBtn">Reset</button>
@@ -128,7 +146,28 @@
     <button class="chip" data-filter="outline">Outline</button>
   </div>
   <div class="row"><label class="sl"><span>See-through</span><input id="opacity" type="range" min="5" max="100" value="55"></label></div>
+  <div id="bottleRow">
+    <div class="row"><label class="sl"><span>Wrap</span><input id="wrap" type="range" min="0" max="160" value="0"></label></div>
+    <div class="row"><label class="sl"><span>Arc ∩ ∪</span><input id="arc" type="range" min="-100" max="100" value="0"></label></div>
+  </div>
   <div class="row" id="detailRow"><label class="sl"><span>Line detail</span><input id="detail" type="range" min="10" max="120" value="55"></label></div>
+</div>
+
+<div id="textPanel">
+  <h3>Your lettering <button class="chip" id="textDone" style="background:var(--accent);color:#2a1a22;border:0">Done</button></h3>
+  <textarea id="textIn" rows="2" placeholder="Type your words — Enter for a new line">Cheers</textarea>
+  <div class="sec-label">Font</div>
+  <div class="row scroll" id="fontRow"></div>
+  <div class="sec-label">Ink color</div>
+  <div class="row" id="inkRow"></div>
+  <div class="row"><label class="sl"><span>Letter space</span><input id="tSpace" type="range" min="-10" max="60" value="0"></label></div>
+  <div class="row"><label class="sl"><span>Line space</span><input id="tLine" type="range" min="70" max="200" value="115"></label></div>
+  <div class="row scroll">
+    <button class="chip on" id="guidesBtn">Guidelines</button>
+    <button class="chip" id="slantBtn">Slant lines</button>
+    <button class="chip on" data-align="center">Center</button>
+    <button class="chip" data-align="left">Left</button>
+  </div>
 </div>
 
 <div id="toast"></div>
@@ -138,7 +177,8 @@
   const $ = s => document.querySelector(s);
   const body = document.body, overlay = $('#overlay'), video = $('#video'), stage = $('#stage');
   const fileIn = $('#file'), toastEl = $('#toast');
-  let srcCanvas = null;              // original image, downscaled
+  let srcCanvas = null;              // what the filters work on (after bottle curve)
+  let origCanvas = null, srcKind = 'photo';   // photo or text, before bottle curve
   let filter = 'original', mode = 'lightbox';
   let st = {x:0, y:0, s:1, r:0, flip:1};
   let locked = false, stream = null, wakeLock = null;
@@ -185,17 +225,115 @@
       catch { toast(`Couldn't open that one (${f.type || f.name || 'unknown type'}). Try the paste box, or a screenshot of the photo.`, 6000); return; }
     }
     const MAX = 1800, k = Math.min(1, MAX / Math.max(img.w, img.h));
-    srcCanvas = document.createElement('canvas');
-    srcCanvas.width = Math.round(img.w * k); srcCanvas.height = Math.round(img.h * k);
-    srcCanvas.getContext('2d').drawImage(img.src, 0, 0, srcCanvas.width, srcCanvas.height);
+    const c = document.createElement('canvas');
+    c.width = Math.round(img.w * k); c.height = Math.round(img.h * k);
+    c.getContext('2d').drawImage(img.src, 0, 0, c.width, c.height);
+    toastEl.classList.remove('show');
+    fileIn.value = '';
+    setSource(c, 'photo', true);
+  }
+  function setSource(c, kind, refit){
+    origCanvas = c; srcKind = kind;
     $('#start').style.display = 'none';
     body.classList.add('ready');
     if (!body.classList.contains('camera')) body.classList.add('lightbox');
-    fitToScreen(); render(); drawGrid(); keepAwake();
-    toastEl.classList.remove('show');
+    rebuild();
+    if (refit) fitToScreen(), apply();
+    drawGrid(); keepAwake();
     window.__autoCam && window.__autoCam();
-    fileIn.value = '';
   }
+
+  /* ---------- bottle curve: wrap (cylinder squeeze) + arc ---------- */
+  function warp(src){
+    const wrapDeg = +$('#wrap').value, arc = +$('#arc').value;
+    if (!wrapDeg && !arc) return src;
+    const W = src.width, H = src.height;
+    const m = Math.abs(arc) / 100 * W * 0.18;
+    const out = document.createElement('canvas'); out.width = W; out.height = Math.round(H + m);
+    const ctx = out.getContext('2d');
+    const A = wrapDeg / 2 * Math.PI / 180, sA = Math.sin(A);
+    for (let xo = 0; xo < W; xo++){
+      const t = (xo + .5) / W * 2 - 1;
+      const u = A ? Math.asin(t * sA) / A : t;
+      const xi = Math.min(W-1, Math.max(0, Math.floor((u + 1) / 2 * W)));
+      const dy = arc > 0 ? m * t * t : m * (1 - t * t);
+      ctx.drawImage(src, xi, 0, 1, H, xo, dy, 1, H);
+    }
+    return out;
+  }
+  function rebuild(){ if (!origCanvas) return; srcCanvas = warp(origCanvas); render(); }
+  let warpT; ['wrap','arc'].forEach(id => $('#'+id).addEventListener('input', () => { clearTimeout(warpT); warpT = setTimeout(rebuild, 60); }));
+  $('#bottleBtn').onclick = e => { body.classList.toggle('show-bottle'); e.currentTarget.classList.toggle('on'); };
+
+  /* ---------- text / calligraphy ---------- */
+  const FONTS = [
+    ['Great Vibes','Great Vibes'], ['Pinyon Script','Pinyon Script'], ['Parisienne','Parisienne'],
+    ['Alex Brush','Alex Brush'], ['Monsieur La Doulaise','Monsieur La Doulaise'], ['Italianno','Italianno'],
+    ['Sacramento','Sacramento'], ['Dancing Script','Dancing Script'], ['Cinzel','Cinzel']
+  ];
+  const INKS = ['#111111','#ffffff','#ff3d9a','#d9a520','#39e6a0'];
+  let tFont = 'Great Vibes', tInk = '#111111', tGuides = true, tSlant = false, tAlign = 'center';
+  const fontRow = $('#fontRow'), inkRow = $('#inkRow');
+  FONTS.forEach(([name, fam]) => {
+    const b = document.createElement('button'); b.className = 'chip' + (fam===tFont ? ' on' : '');
+    b.textContent = 'Aa ' + name.split(' ')[0]; b.style.fontFamily = `'${fam}', cursive`;
+    b.onclick = () => { tFont = fam; [...fontRow.children].forEach(x => x.classList.toggle('on', x===b)); buildText(); };
+    fontRow.appendChild(b);
+  });
+  INKS.forEach(c => {
+    const d = document.createElement('div'); d.className = 'ink' + (c===tInk ? ' on' : ''); d.style.background = c;
+    d.onclick = () => { tInk = c; [...inkRow.children].forEach(x => x.classList.toggle('on', x===d)); buildText(); };
+    inkRow.appendChild(d);
+  });
+
+  async function buildText(refit){
+    const text = $('#textIn').value.replace(/\s+$/,'') || ' ';
+    const fs = 160, fam = `'${tFont}', cursive`, font = `${fs}px ${fam}`;
+    try { await document.fonts.load(font, text); } catch {}
+    const spacing = +$('#tSpace').value / 100 * fs * .5;
+    const lh = fs * +$('#tLine').value / 100;
+    const m = document.createElement('canvas').getContext('2d'); m.font = font;
+    const lines = text.split('\n');
+    const widthOf = l => spacing ? [...l].reduce((w,ch) => w + m.measureText(ch).width + spacing, -spacing) : m.measureText(l).width;
+    const widths = lines.map(widthOf);
+    const mx = m.measureText('x'), mH = m.measureText('H'), mg = m.measureText('gjpy');
+    const xH = mx.actualBoundingBoxAscent || fs*.4, capH = mH.actualBoundingBoxAscent || fs*.7;
+    const desc = mg.actualBoundingBoxDescent || fs*.3, asc = Math.max(capH, m.measureText('bdfhklt').actualBoundingBoxAscent || fs*.8);
+    const pad = fs * .6;
+    const W = Math.ceil(Math.max(...widths, fs) + pad*2);
+    const H = Math.ceil(asc + desc + lh * (lines.length - 1) + pad*2);
+    const c = document.createElement('canvas'); c.width = W; c.height = H;
+    const ctx = c.getContext('2d'); ctx.font = font; ctx.fillStyle = tInk; ctx.textBaseline = 'alphabetic';
+    lines.forEach((l, i) => {
+      const base = pad + asc + i * lh;
+      if (tGuides) {
+        ctx.save(); ctx.strokeStyle = tInk; ctx.globalAlpha = .35; ctx.lineWidth = 2;
+        [[base,[ ]],[base - xH,[10,8]],[base - asc,[3,9]],[base + desc,[3,9]]].forEach(([y,dash]) => {
+          ctx.setLineDash(dash); ctx.beginPath(); ctx.moveTo(pad*.3, y); ctx.lineTo(W - pad*.3, y); ctx.stroke(); });
+        ctx.restore();
+      }
+      if (tSlant) {
+        ctx.save(); ctx.strokeStyle = tInk; ctx.globalAlpha = .22; ctx.lineWidth = 1.5;
+        const top = base - asc, bot = base + desc, dx = (bot - top) / Math.tan(55 * Math.PI/180);
+        for (let x = pad*.3; x < W; x += fs*.45){ ctx.beginPath(); ctx.moveTo(x + dx, top); ctx.lineTo(x, bot); ctx.stroke(); }
+        ctx.restore();
+      }
+      let x = tAlign === 'center' ? (W - widths[i]) / 2 : pad;
+      if (!spacing) ctx.fillText(l, x, base);
+      else for (const ch of l) { ctx.fillText(ch, x, base); x += ctx.measureText(ch).width + spacing; }
+    });
+    setSource(c, 'text', refit || srcKind !== 'text' || body.classList.contains('text-open'));
+  }
+  function openText(){ body.classList.add('text-open'); if (srcKind !== 'text' || !origCanvas) buildText(true); }
+  $('#startText').onclick = openText;
+  $('#textBtn').onclick = openText;
+  $('#textDone').onclick = () => { body.classList.remove('text-open'); $('#textIn').blur(); if (srcCanvas) { fitToScreen(); apply(); } };
+  let textT; $('#textIn').addEventListener('input', () => { clearTimeout(textT); textT = setTimeout(() => buildText(), 250); });
+  ['tSpace','tLine'].forEach(id => $('#'+id).addEventListener('input', () => { clearTimeout(textT); textT = setTimeout(() => buildText(), 80); }));
+  $('#guidesBtn').onclick = e => { tGuides = !tGuides; e.currentTarget.classList.toggle('on', tGuides); buildText(); };
+  $('#slantBtn').onclick = e => { tSlant = !tSlant; e.currentTarget.classList.toggle('on', tSlant); buildText(); };
+  document.querySelectorAll('[data-align]').forEach(b => b.onclick = () => {
+    tAlign = b.dataset.align; document.querySelectorAll('[data-align]').forEach(x => x.classList.toggle('on', x===b)); buildText(); });
   fileIn.addEventListener('change', e => loadFile(e.target.files && e.target.files[0]));
 
   // Paste: copy a photo in Photos, long-press the box, tap Paste
@@ -223,7 +361,7 @@
     if (filter === 'original') { paint(srcCanvas); return; }
     const data = srcCanvas.getContext('2d').getImageData(0,0,w,h);
     const px = data.data, g = new Float32Array(w*h);
-    for (let i=0, j=0; i<px.length; i+=4, j++) g[j] = .299*px[i] + .587*px[i+1] + .114*px[i+2];
+    for (let i=0, j=0; i<px.length; i+=4, j++) { const a = px[i+3]/255; g[j] = (.299*px[i] + .587*px[i+1] + .114*px[i+2])*a + 255*(1-a); }
 
     const o = ctx.createImageData(w,h), op = o.data;
     if (filter === 'gray' || filter === 'contrast') {
@@ -265,8 +403,11 @@
 
   /* ---------- transform ---------- */
   function fitToScreen(){
-    const vw = innerWidth, vh = innerHeight * .78;
-    st = {x:0, y:-innerHeight*.06, s: Math.min(vw / srcCanvas.width, vh / srcCanvas.height) * .95, r:0, flip: st.flip||1};
+    // fit into the space not covered by the controls
+    const top = 70, bottom = body.classList.contains('text-open') ? innerHeight * .62 : innerHeight * .24;
+    const avail = Math.max(120, innerHeight - top - bottom);
+    st = {x:0, y: top + avail/2 - innerHeight/2,
+          s: Math.min(innerWidth * .94 / srcCanvas.width, avail / srcCanvas.height), r:0, flip: st.flip||1};
   }
   function apply(){
     overlay.style.transform =
