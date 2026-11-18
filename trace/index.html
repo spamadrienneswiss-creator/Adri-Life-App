@@ -96,6 +96,74 @@
   .ink{width:30px;height:30px;border-radius:50%;border:2px solid var(--line);flex:0 0 auto;cursor:pointer}
   .ink.on{border-color:var(--text);box-shadow:0 0 0 2px var(--accent)}
   .sec-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px}
+
+  /* ---------- Letter Book ---------- */
+  #book{position:fixed;inset:0;z-index:25;background:#f6efe3;color:#2b2230;display:none;flex-direction:column;
+    touch-action:pan-y;user-select:text;-webkit-user-select:text}
+  body.book-open #book{display:flex}
+  .bk-head{display:flex;align-items:center;gap:8px;padding:calc(10px + var(--safe-t)) 12px 6px}
+  .bk-head h2{flex:1;margin:0;font:600 22px Fraunces,serif;text-align:center}
+  .bk-icon{width:40px;height:40px;border-radius:50%;border:1px solid #e2d6c4;background:#fffaf2;font-size:20px;color:#2b2230;cursor:pointer}
+  .bk-sub{display:flex;justify-content:space-between;align-items:center;padding:0 16px 8px;font-size:12px;color:#8a7d70}
+  .bk-link{background:none;border:0;color:#a2456f;font:600 13px Inter,sans-serif;cursor:pointer;padding:4px}
+  .bk-scroll{flex:1;overflow-y:auto;touch-action:pan-y;-webkit-overflow-scrolling:touch;padding:0 14px calc(24px + var(--safe-b))}
+  .bk-tabs{display:flex;gap:6px;margin:4px 0 12px}
+  .bk-tab{flex:1;padding:9px 6px;border-radius:12px;border:1px solid #e2d6c4;background:#fffaf2;font:600 13px Inter,sans-serif;color:#6b5f55;cursor:pointer}
+  .bk-tab.on{background:#2b2230;color:#f6efe3;border-color:#2b2230}
+  .bk-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(64px,1fr));gap:8px}
+  .bk-cell{position:relative;aspect-ratio:1;border-radius:14px;background:#fffaf2;border:1px solid #e8dccb;display:flex;
+    align-items:center;justify-content:center;cursor:pointer;overflow:hidden;font:600 30px Fraunces,serif;color:#cdbfae}
+  .bk-cell.has{color:#2b2230;border-color:#d9b9c8;background:#fff}
+  .bk-cell img{max-width:88%;max-height:88%;object-fit:contain}
+  .bk-cell .n{position:absolute;right:5px;bottom:3px;font:600 10px Inter,sans-serif;color:#a2456f}
+  .bk-cell.new{font:500 13px Inter,sans-serif;color:#a2456f;border-style:dashed;text-align:center;padding:4px}
+  .bk-hero{display:flex;align-items:center;gap:14px;margin:6px 0 12px}
+  .bk-hero .big{font:600 64px Fraunces,serif;line-height:1;min-width:60px;text-align:center}
+  .bk-add{flex:1;padding:14px;border-radius:14px;border:1.5px dashed #c99bb1;background:#fff5f9;color:#a2456f;font:600 14px Inter,sans-serif;cursor:pointer}
+  .bk-card{background:#fff;border:1px solid #e8dccb;border-radius:16px;padding:12px;margin-bottom:12px}
+  .bk-prev{height:150px;border-radius:12px;background:#fbf7f0;display:flex;align-items:center;justify-content:center;overflow:hidden;
+    font-size:110px;line-height:1;color:#2b2230}
+  .bk-prev img{max-width:100%;max-height:100%;object-fit:contain}
+  .bk-card h4{margin:10px 0 6px;font:600 16px Fraunces,serif;display:flex;justify-content:space-between;gap:8px}
+  .bk-card .fav{color:#d9a520}
+  .bk-card ol{margin:4px 0 6px;padding-left:22px;font-size:14px;line-height:1.5}
+  .bk-card .notes{font-size:13px;color:#6b5f55;line-height:1.5;white-space:pre-wrap;margin:4px 0 0}
+  .bk-card .meta{font-size:11px;color:#a0948a;margin-top:4px}
+  .bk-actions{display:flex;gap:8px;margin-top:10px}
+  .bk-btn{flex:1;padding:10px;border-radius:12px;border:1px solid #e2d6c4;background:#fffaf2;font:600 13px Inter,sans-serif;color:#2b2230;cursor:pointer}
+  .bk-btn.primary{background:#2b2230;color:#f6efe3;border-color:#2b2230}
+  .bk-btn.danger{color:#b4233c}
+  .bk-empty{color:#8a7d70;font-size:14px;text-align:center;padding:18px 8px;line-height:1.5}
+
+  #bkEditor{position:fixed;inset:0;z-index:26;background:rgba(43,34,48,.45);display:none;align-items:flex-end;touch-action:pan-y}
+  body.editor-open #bkEditor{display:flex}
+  .ed-sheet{width:100%;max-height:92vh;overflow-y:auto;touch-action:pan-y;background:#f6efe3;color:#2b2230;border-radius:20px 20px 0 0;
+    padding:16px 16px calc(18px + var(--safe-b));display:flex;flex-direction:column;gap:10px;-webkit-overflow-scrolling:touch}
+  .ed-sheet h3{margin:0;font:600 19px Fraunces,serif}
+  .ed-sheet label{font-size:11px;color:#8a7d70;text-transform:uppercase;letter-spacing:.6px;margin-top:4px}
+  .ed-sheet input[type=text],.ed-sheet textarea{width:100%;border-radius:12px;border:1px solid #e2d6c4;background:#fffaf2;color:#2b2230;
+    font:16px Inter,sans-serif;padding:10px 12px;outline:none;-webkit-user-select:text;user-select:text;touch-action:auto}
+  .ed-sheet textarea{min-height:84px;resize:vertical}
+  .ed-row{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none}
+  .ed-row::-webkit-scrollbar{display:none}
+  .ed-chip{flex:0 0 auto;padding:8px 12px;border-radius:12px;border:1px solid #e2d6c4;background:#fffaf2;color:#2b2230;font:500 14px Inter,sans-serif;cursor:pointer}
+  .ed-chip.on{background:#2b2230;color:#f6efe3;border-color:#2b2230}
+  .ed-fonts .ed-chip{font-size:22px;padding:4px 14px}
+  #printArea{display:none}
+  @media print{
+    html,body{height:auto!important;overflow:visible!important;background:#fff!important}
+    body>*:not(#printArea){display:none!important}
+    #printArea{display:block!important;color:#222;font-family:Inter,sans-serif}
+    #printArea h1{font:600 28px Fraunces,serif;text-align:center;margin:0 0 18px}
+    .pr-letter{break-inside:avoid;page-break-inside:avoid;border-top:1px solid #ccc;padding:10px 0 14px}
+    .pr-letter h2{font:600 40px Fraunces,serif;margin:0 0 6px}
+    .pr-var{display:flex;gap:14px;align-items:flex-start;margin:8px 0;break-inside:avoid}
+    .pr-img{width:150px;height:110px;flex:0 0 150px;display:flex;align-items:center;justify-content:center;font-size:84px;line-height:1;border:1px solid #eee;border-radius:8px}
+    .pr-img img{max-width:100%;max-height:100%}
+    .pr-var h3{margin:0 0 4px;font:600 15px Fraunces,serif}
+    .pr-var ol{margin:2px 0;padding-left:18px;font-size:12px}
+    .pr-var p{margin:3px 0;font-size:11.5px;color:#555;white-space:pre-wrap}
+  }
 </style>
 </head>
 <body>
@@ -111,6 +179,7 @@
   <label class="bigbtn" for="file">Choose a photo</label>
   <input id="file" type="file" accept="image/*,.heic,.heif">
   <button class="bigbtn alt" id="startText">Write text (calligraphy)</button>
+  <button class="bigbtn ghost" id="startBook">📖 My Letter Book</button>
   <div id="pasteBox" contenteditable="true" inputmode="none" data-ph="…or copy a photo, then long-press here and tap Paste"></div>
   <a id="homeLink" href="../" style="display:none;color:var(--muted);font-size:13px">← Back to Life App</a>
   <div class="how">
@@ -133,6 +202,7 @@
     <button class="chip" id="zoomBtn" style="display:none">Zoom 1×</button>
     <button class="chip" id="newPhoto">New photo</button>
     <button class="chip" id="textBtn">✒︎ Text</button>
+    <button class="chip" id="bookBtn">📖 Letters</button>
     <button class="chip" id="bottleBtn">Bottle curve</button>
     <button class="chip" id="flipBtn">Flip ⇋</button>
     <button class="chip" id="gridBtn">Grid</button>
@@ -169,6 +239,67 @@
     <button class="chip" data-align="left">Left</button>
   </div>
 </div>
+
+<!-- Letter Book -->
+<div id="book">
+  <div class="bk-head">
+    <button class="bk-icon" id="bkBack" title="Back">‹</button>
+    <h2 id="bkTitle">My Letter Book</h2>
+    <button class="bk-icon" id="bkClose" title="Close">✕</button>
+  </div>
+  <div class="bk-sub"><span id="bkSync">Loading…</span><button class="bk-link" id="bkPrint">Print / save PDF</button></div>
+  <div class="bk-scroll" id="bkScroll">
+    <div id="bkHome">
+      <div class="bk-tabs">
+        <button class="bk-tab on" data-g="upper">Capitals</button>
+        <button class="bk-tab" data-g="lower">Lowercase</button>
+        <button class="bk-tab" data-g="extra">Numbers &amp; extras</button>
+      </div>
+      <div class="bk-grid" id="bkGrid"></div>
+    </div>
+    <div id="bkLetter" style="display:none">
+      <div class="bk-hero"><div class="big" id="bkBig">A</div><button class="bk-add" id="bkAdd">＋ Add a way to write it</button></div>
+      <div id="bkList"></div>
+    </div>
+  </div>
+</div>
+
+<div id="bkEditor">
+  <div class="ed-sheet">
+    <h3 id="edTitle">New way to write A</h3>
+    <div id="edLabelWrap" style="display:none;flex-direction:column;gap:6px">
+      <label>What is it?</label>
+      <input type="text" id="edLabel" placeholder="e.g. th joiner, swash tail, flourish">
+    </div>
+    <label>Name this style</label>
+    <input type="text" id="edName" placeholder="e.g. Loopy entry A">
+    <label>Show it with</label>
+    <div class="ed-row">
+      <button class="ed-chip on" data-src="photo">📷 My own photo</button>
+      <button class="ed-chip" data-src="font">Aa A font</button>
+    </div>
+    <div id="edPhotoWrap" style="display:flex;flex-direction:column;gap:8px">
+      <div class="bk-prev" id="edPhotoPrev"><span style="font:500 13px Inter,sans-serif;color:#a0948a">No photo yet</span></div>
+      <button class="bk-btn" id="edPhotoPick">Choose photo</button>
+      <input type="file" id="edPhotoIn" accept="image/*,.heic,.heif">
+    </div>
+    <div id="edFontWrap" style="display:none;flex-direction:column;gap:8px">
+      <div class="bk-prev" id="edFontPrev">A</div>
+      <div class="ed-row ed-fonts" id="edFonts"></div>
+    </div>
+    <label>How to write it — one step per line</label>
+    <textarea id="edSteps" placeholder="Entry hairline up from the baseline&#10;Press down for the thick stem&#10;Release into a small loop"></textarea>
+    <label>Tips &amp; notes</label>
+    <textarea id="edNotes" placeholder="Pen or nib, angle, pressure, what to watch for…"></textarea>
+    <div class="ed-row"><button class="ed-chip" id="edFav">☆ Favorite</button></div>
+    <div class="bk-actions">
+      <button class="bk-btn" id="edCancel">Cancel</button>
+      <button class="bk-btn primary" id="edSave">Save</button>
+    </div>
+  </div>
+</div>
+
+<div id="printArea"></div>
 
 <div id="toast"></div>
 
@@ -535,6 +666,13 @@
     $('#homeBtn').onclick = () => { location.href = '../'; };
   }
   window.__autoCam = () => { if (standalone && mode !== 'camera') setMode('camera'); };
+  window.TS = {
+    FONTS, decode, toast, setSource,
+    traceFont(ch, fam){
+      tFont = fam; [...fontRow.children].forEach((x,i) => x.classList.toggle('on', FONTS[i][1] === fam));
+      $('#textIn').value = ch; buildText(true);
+    }
+  };
 
   /* ---------- full screen + keep awake ---------- */
   $('#fsBtn').onclick = async () => {
@@ -545,6 +683,238 @@
   };
   async function keepAwake(){ try { wakeLock = await navigator.wakeLock?.request('screen'); } catch {} }
   document.addEventListener('visibilitychange', () => { if (document.visibilityState==='visible' && body.classList.contains('ready')) keepAwake(); });
+})();
+</script>
+
+<script>
+/* ================= Letter Book ================= */
+(() => {
+  const $ = s => document.querySelector(s);
+  const body = document.body, TS = window.TS;
+  const esc = t => String(t ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const UPPER = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split(''), LOWER = 'abcdefghijklmnopqrstuvwxyz'.split('');
+  const EXTRA = '0123456789&!?'.split('');
+  const groupOf = ch => /^[A-Z]$/.test(ch) ? 'upper' : /^[a-z]$/.test(ch) ? 'lower' : 'extra';
+  let items = [];          // all variants (incl. soft-deleted)
+  let tab = 'upper', current = null, editing = null;
+
+  /* ---------- local storage (IndexedDB) ---------- */
+  const idb = {
+    db: null,
+    open(){ return this.db ? Promise.resolve(this.db) : new Promise((res, rej) => {
+      try {
+        const r = indexedDB.open('traceStudio', 1);
+        r.onupgradeneeded = () => r.result.createObjectStore('letters', {keyPath:'id'});
+        r.onsuccess = () => { this.db = r.result; res(this.db); }; r.onerror = () => rej(r.error);
+      } catch (e) { rej(e); }
+    }); },
+    async tx(mode, fn){ const db = await this.open(); return new Promise((res, rej) => {
+      const t = db.transaction('letters', mode), st = t.objectStore('letters'), out = fn(st);
+      t.oncomplete = () => res(out && out.result); t.onerror = () => rej(t.error); }); },
+    all(){ return this.tx('readonly', st => st.getAll()); },
+    put(it){ return this.tx('readwrite', st => st.put(it)); }
+  };
+
+  /* ---------- cloud (the Life App's Firebase) ---------- */
+  const cloud = { ok:false, fs:null, db:null };
+  const setSync = t => { $('#bkSync').textContent = t; };
+  async function cloudInit(){
+    try {
+      const A = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js');
+      const F = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
+      const app = A.initializeApp({
+        apiKey: "AIzaSyCIXYjO9C_VeSRWIsOSwoFFdOPLjKhoMo8", authDomain: "adri-s-life-app.firebaseapp.com",
+        projectId: "adri-s-life-app", storageBucket: "adri-s-life-app.firebasestorage.app",
+        messagingSenderId: "157970094030", appId: "1:157970094030:web:5db90dfcd5eb4174bbfd9f"
+      }, 'trace-studio');
+      cloud.fs = F; cloud.db = F.getFirestore(app);
+      let first = true;
+      F.onSnapshot(F.collection(cloud.db, 'letterbook'), snap => {
+        cloud.ok = true; setSync('☁︎ Synced with your Life App');
+        const remote = {}; snap.forEach(d => remote[d.id] = d.data());
+        const local = {}; items.forEach(i => local[i.id] = i);
+        if (first) { // push anything saved while offline
+          Object.values(local).forEach(i => { if (!remote[i.id] || (remote[i.id].updated||0) < (i.updated||0)) pushCloud(i); });
+          first = false;
+        }
+        Object.values(remote).forEach(r => { if (!local[r.id] || (local[r.id].updated||0) <= (r.updated||0)) { local[r.id] = r; idb.put(r).catch(()=>{}); } });
+        items = Object.values(local); refresh();
+      }, err => { cloud.ok = false; setSync('📱 Saved on this phone (sync unavailable)'); console.warn(err); });
+    } catch (e) { setSync('📱 Saved on this phone'); }
+  }
+  function pushCloud(it){
+    if (!cloud.db) return Promise.resolve();
+    return cloud.fs.setDoc(cloud.fs.doc(cloud.db, 'letterbook', it.id), it)
+      .catch(e => { console.warn(e); setSync('📱 Saved on this phone — cloud sync failed'); });
+  }
+  async function save(it){
+    it.updated = Date.now();
+    const i = items.findIndex(x => x.id === it.id); if (i >= 0) items[i] = it; else items.push(it);
+    try { await idb.put(it); } catch {}
+    pushCloud(it); refresh();
+  }
+  const live = () => items.filter(i => !i.deleted);
+  const forChar = ch => live().filter(i => i.ch === ch).sort((a,b) => (b.fav|0)-(a.fav|0) || (a.created||0)-(b.created||0));
+
+  /* ---------- rendering ---------- */
+  const glyph = (it, size) => it.kind === 'photo' && it.img
+    ? `<img src="${it.img}" alt="">`
+    : `<span style="font-family:'${esc(it.font)}',cursive;${size?`font-size:${size}px`:''}">${esc(it.ch)}</span>`;
+
+  function refresh(){ if (body.classList.contains('book-open')) current ? showLetter(current) : showHome(); }
+
+  function showHome(){
+    current = null;
+    $('#bkTitle').textContent = 'My Letter Book'; $('#bkBack').style.visibility = 'hidden';
+    $('#bkHome').style.display = ''; $('#bkLetter').style.display = 'none';
+    document.querySelectorAll('.bk-tab').forEach(b => b.classList.toggle('on', b.dataset.g === tab));
+    let chars = tab === 'upper' ? UPPER : tab === 'lower' ? LOWER : EXTRA.slice();
+    if (tab === 'extra') live().forEach(i => { if (i.group === 'extra' && !chars.includes(i.ch)) chars.push(i.ch); });
+    const g = $('#bkGrid');
+    g.innerHTML = chars.map(ch => {
+      const v = forChar(ch);
+      if (!v.length) return `<div class="bk-cell" data-ch="${esc(ch)}">${esc(ch)}</div>`;
+      const top = v[0], small = ch.length > 1;
+      return `<div class="bk-cell has" data-ch="${esc(ch)}">${small && top.kind!=='photo' ? `<span style="font:600 13px Inter">${esc(ch)}</span>` : glyph(top, 38)}<span class="n">${v.length}</span></div>`;
+    }).join('') + (tab === 'extra' ? `<div class="bk-cell new" id="bkNewExtra">＋ Joiner, flourish…</div>` : '');
+    g.querySelectorAll('[data-ch]').forEach(c => c.onclick = () => showLetter(c.dataset.ch));
+    const ne = $('#bkNewExtra'); if (ne) ne.onclick = () => openEditor(null, null);
+  }
+
+  function showLetter(ch){
+    current = ch;
+    $('#bkTitle').textContent = ch.length > 1 ? ch : `Letter ${ch}`; $('#bkBack').style.visibility = 'visible';
+    $('#bkHome').style.display = 'none'; $('#bkLetter').style.display = '';
+    $('#bkBig').textContent = ch.length > 2 ? '✒︎' : ch;
+    $('#bkAdd').textContent = `＋ Add a way to write ${ch.length > 2 ? 'it' : ch}`;
+    const v = forChar(ch);
+    $('#bkList').innerHTML = v.length ? v.map(it => {
+      const steps = (it.steps||'').split('\n').map(s => s.trim()).filter(Boolean);
+      return `<div class="bk-card" data-id="${it.id}">
+        <div class="bk-prev">${glyph(it)}</div>
+        <h4><span>${esc(it.name || 'Untitled style')}</span>${it.fav ? '<span class="fav">★</span>' : ''}</h4>
+        ${steps.length ? `<ol>${steps.map(s => `<li>${esc(s)}</li>`).join('')}</ol>` : ''}
+        ${it.notes ? `<p class="notes">${esc(it.notes)}</p>` : ''}
+        ${it.kind === 'font' ? `<div class="meta">Font: ${esc(it.font)}</div>` : ''}
+        <div class="bk-actions">
+          <button class="bk-btn primary" data-act="trace">✏️ Trace it</button>
+          <button class="bk-btn" data-act="edit">Edit</button>
+          <button class="bk-btn danger" data-act="del">Delete</button>
+        </div></div>`;
+    }).join('') : `<div class="bk-empty">No styles saved for ${esc(ch)} yet.<br>Add your favorite way to write it, with the steps so future-you remembers how.</div>`;
+    $('#bkList').querySelectorAll('.bk-card').forEach(card => {
+      const it = items.find(x => x.id === card.dataset.id);
+      card.querySelector('[data-act=trace]').onclick = () => traceIt(it);
+      card.querySelector('[data-act=edit]').onclick = () => openEditor(it.ch, it);
+      const del = card.querySelector('[data-act=del]');
+      del.onclick = () => {
+        if (del.dataset.armed) { save({...it, deleted:true}); TS.toast('Deleted'); }
+        else { del.dataset.armed = 1; del.textContent = 'Tap again'; setTimeout(() => { delete del.dataset.armed; del.textContent = 'Delete'; }, 2500); }
+      };
+    });
+    $('#bkScroll').scrollTop = 0;
+  }
+
+  async function traceIt(it){
+    closeBook();
+    if (it.kind === 'photo' && it.img) {
+      try {
+        const [head, b64] = it.img.split(','), bin = atob(b64), u8 = new Uint8Array(bin.length);
+        for (let i = 0; i < bin.length; i++) u8[i] = bin.charCodeAt(i);
+        const img = await TS.decode(new Blob([u8], {type: (head.match(/data:(.*?);/)||[])[1] || 'image/jpeg'}));
+        const c = document.createElement('canvas'); c.width = img.w; c.height = img.h;
+        c.getContext('2d').drawImage(img.src, 0, 0); TS.setSource(c, 'photo', true);
+      } catch { TS.toast("Couldn't open that photo to trace."); }
+    } else TS.traceFont(it.ch, it.font);
+  }
+
+  /* ---------- editor ---------- */
+  let edSrc = 'photo', edImg = null, edFont = TS.FONTS[0][1], edFavOn = false;
+  const edFonts = $('#edFonts');
+  TS.FONTS.forEach(([name, fam]) => {
+    const b = document.createElement('button'); b.className = 'ed-chip'; b.dataset.fam = fam;
+    b.textContent = 'Aa'; b.title = name; b.style.fontFamily = `'${fam}',cursive`;
+    b.onclick = () => { edFont = fam; paintEditor(); };
+    edFonts.appendChild(b);
+  });
+  function edChar(){ return current || $('#edLabel').value.trim() || '?'; }
+  function paintEditor(){
+    document.querySelectorAll('[data-src]').forEach(b => b.classList.toggle('on', b.dataset.src === edSrc));
+    $('#edPhotoWrap').style.display = edSrc === 'photo' ? 'flex' : 'none';
+    $('#edFontWrap').style.display = edSrc === 'font' ? 'flex' : 'none';
+    [...edFonts.children].forEach(b => b.classList.toggle('on', b.dataset.fam === edFont));
+    const fp = $('#edFontPrev'); fp.style.fontFamily = `'${edFont}',cursive`; fp.textContent = edChar();
+    $('#edPhotoPrev').innerHTML = edImg ? `<img src="${edImg}" alt="">` : '<span style="font:500 13px Inter,sans-serif;color:#a0948a">No photo yet</span>';
+    $('#edFav').textContent = edFavOn ? '★ Favorite' : '☆ Favorite'; $('#edFav').classList.toggle('on', edFavOn);
+  }
+  function openEditor(ch, it){
+    editing = it || null;
+    const isNewExtra = !ch && !it;
+    if (isNewExtra) current = null;
+    $('#edLabelWrap').style.display = isNewExtra ? 'flex' : 'none';
+    $('#edLabel').value = '';
+    $('#edTitle').textContent = it ? 'Edit style' : isNewExtra ? 'New joiner or flourish' : `New way to write ${ch}`;
+    $('#edName').value = it?.name || ''; $('#edSteps').value = it?.steps || ''; $('#edNotes').value = it?.notes || '';
+    edSrc = it?.kind || 'photo'; edImg = it?.img || null; edFont = it?.font || edFont; edFavOn = !!it?.fav;
+    paintEditor(); body.classList.add('editor-open');
+  }
+  $('#edLabel').addEventListener('input', paintEditor);
+  document.querySelectorAll('[data-src]').forEach(b => b.onclick = () => { edSrc = b.dataset.src; paintEditor(); });
+  $('#edFav').onclick = () => { edFavOn = !edFavOn; paintEditor(); };
+  $('#edPhotoPick').onclick = () => $('#edPhotoIn').click();
+  $('#edPhotoIn').addEventListener('change', async e => {
+    const f = e.target.files && e.target.files[0]; if (!f) return;
+    try {
+      const img = await TS.decode(f);
+      const MAX = 1000, k = Math.min(1, MAX / Math.max(img.w, img.h));
+      const c = document.createElement('canvas'); c.width = Math.round(img.w*k); c.height = Math.round(img.h*k);
+      const x = c.getContext('2d'); x.fillStyle = '#fff'; x.fillRect(0,0,c.width,c.height); x.drawImage(img.src, 0, 0, c.width, c.height);
+      edImg = c.toDataURL('image/jpeg', .74); paintEditor();
+    } catch { TS.toast("Couldn't open that photo — try a screenshot of it."); }
+    e.target.value = '';
+  });
+  $('#edCancel').onclick = () => body.classList.remove('editor-open');
+  $('#edSave').onclick = async () => {
+    const ch = editing ? editing.ch : (current || $('#edLabel').value.trim());
+    if (!ch) { TS.toast('Give it a name first (like “th joiner”).'); return; }
+    if (edSrc === 'photo' && !edImg) { TS.toast('Add a photo, or switch to “A font”.'); return; }
+    const it = {
+      ...(editing || {}), id: editing?.id || ('lb-' + Date.now().toString(36) + Math.random().toString(36).slice(2,6)),
+      ch, group: groupOf(ch), name: $('#edName').value.trim(), kind: edSrc,
+      img: edSrc === 'photo' ? edImg : null, font: edSrc === 'font' ? edFont : null,
+      steps: $('#edSteps').value.trim(), notes: $('#edNotes').value.trim(), fav: edFavOn,
+      created: editing?.created || Date.now(), deleted: false
+    };
+    if (it.fav) live().filter(x => x.ch === ch && x.id !== it.id && x.fav).forEach(x => save({...x, fav:false}));
+    body.classList.remove('editor-open');
+    current = ch; await save(it); showLetter(ch);
+    TS.toast('Saved to your Letter Book');
+  };
+
+  /* ---------- open / close / print ---------- */
+  function openBook(){ body.classList.add('book-open'); body.classList.remove('text-open'); current ? showLetter(current) : showHome(); }
+  function closeBook(){ body.classList.remove('book-open'); }
+  $('#startBook').onclick = openBook; $('#bookBtn').onclick = openBook;
+  $('#bkClose').onclick = () => { closeBook(); if (!body.classList.contains('ready')) $('#start').style.display = ''; };
+  $('#bkBack').onclick = showHome;
+  $('#bkAdd').onclick = () => openEditor(current, null);
+  document.querySelectorAll('.bk-tab').forEach(b => b.onclick = () => { tab = b.dataset.g; showHome(); });
+  $('#bkPrint').onclick = () => {
+    const order = [...UPPER, ...LOWER, ...EXTRA];
+    const chars = [...new Set(live().map(i => i.ch))].sort((a,b) => {
+      const ia = order.indexOf(a), ib = order.indexOf(b); return (ia<0?999:ia) - (ib<0?999:ib) || a.localeCompare(b); });
+    if (!chars.length) { TS.toast('Add a letter first — then you can print your book.'); return; }
+    $('#printArea').innerHTML = '<h1>My Letter Book</h1>' + chars.map(ch => `<div class="pr-letter"><h2>${esc(ch)}</h2>` +
+      forChar(ch).map(it => {
+        const steps = (it.steps||'').split('\n').map(s=>s.trim()).filter(Boolean);
+        return `<div class="pr-var"><div class="pr-img">${glyph(it)}</div><div><h3>${esc(it.name || 'Style')}${it.fav?' ★':''}</h3>
+          ${steps.length?`<ol>${steps.map(s=>`<li>${esc(s)}</li>`).join('')}</ol>`:''}${it.notes?`<p>${esc(it.notes)}</p>`:''}</div></div>`;
+      }).join('') + '</div>').join('');
+    try { window.print(); } catch { TS.toast('Printing isn’t available here — open Trace Studio from your Life App.'); }
+  };
+
+  /* ---------- start ---------- */
+  idb.all().then(all => { items = all || []; refresh(); }).catch(() => {}).finally(() => { setSync('📱 Saved on this phone'); cloudInit(); });
 })();
 </script>
 </body>
