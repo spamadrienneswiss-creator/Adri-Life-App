@@ -59,6 +59,9 @@
   input[type=range]{flex:1;accent-color:var(--accent);height:28px}
   #detailRow{display:none}
   body.f-outline #detailRow{display:flex}
+  #simplifyRow,#tonesRow{display:none}
+  body.f-simplify #simplifyRow{display:flex;flex-direction:column;gap:6px}
+  body.f-shapes #tonesRow{display:flex}
 
   /* ---------- floating buttons ---------- */
   .fab{position:fixed;z-index:11;width:46px;height:46px;border-radius:50%;border:1px solid var(--line);
@@ -214,12 +217,23 @@
     <button class="chip" data-filter="gray">Grayscale</button>
     <button class="chip" data-filter="contrast">High contrast</button>
     <button class="chip" data-filter="outline">Outline</button>
+    <button class="chip" data-filter="shapes">Shapes</button>
   </div>
   <div class="row"><label class="sl"><span>See-through</span><input id="opacity" type="range" min="5" max="100" value="55"></label></div>
   <div id="bottleRow">
     <div class="row"><label class="sl"><span>Wrap</span><input id="wrap" type="range" min="0" max="160" value="0"></label></div>
     <div class="row"><label class="sl"><span>Arc ∩ ∪</span><input id="arc" type="range" min="-100" max="100" value="0"></label></div>
   </div>
+  <div id="simplifyRow">
+    <div class="row scroll">
+      <span style="font-size:12px;color:var(--muted);flex:0 0 auto">Pass:</span>
+      <button class="chip" data-pass="85">1 · Big shapes</button>
+      <button class="chip" data-pass="50">2 · Medium</button>
+      <button class="chip" data-pass="12">3 · Details</button>
+    </div>
+    <div class="row"><label class="sl"><span>Simplify</span><input id="simplify" type="range" min="0" max="100" value="60"></label></div>
+  </div>
+  <div class="row" id="tonesRow"><label class="sl"><span>Tones</span><input id="tones" type="range" min="2" max="6" value="3"></label></div>
   <div class="row" id="detailRow"><label class="sl"><span>Line detail</span><input id="detail" type="range" min="10" max="120" value="55"></label></div>
 </div>
 
@@ -494,20 +508,47 @@
     const px = data.data, g = new Float32Array(w*h);
     for (let i=0, j=0; i<px.length; i+=4, j++) { const a = px[i+3]/255; g[j] = (.299*px[i] + .587*px[i+1] + .114*px[i+2])*a + 255*(1-a); }
 
+    // Simplify: blur away small detail so only the big shapes are left (like squinting)
+    if (filter === 'outline' || filter === 'shapes') {
+      const r = Math.round(+$('#simplify').value / 100 * Math.max(w, h) / 45);
+      if (r > 0) boxBlur(g, w, h, r);
+    }
     const o = ctx.createImageData(w,h), op = o.data;
-    if (filter === 'gray' || filter === 'contrast') {
+    if (filter === 'shapes') {
+      const n = +$('#tones').value, q = quantize(g, n);
+      const lineCol = mode === 'camera' ? [255,60,140] : [26,20,32];
+      for (let j=0; j<q.length; j++){
+        const tone = 70 + q[j] / Math.max(1, n-1) * 175;   // light fills so pencil lines show
+        op[j*4]=op[j*4+1]=op[j*4+2]=tone; op[j*4+3]=px[j*4+3];
+      }
+      // outline where one shape meets another
+      for (let y=0; y<h-1; y++) for (let x=0; x<w-1; x++){
+        const i = y*w + x;
+        if (q[i] !== q[i+1] || q[i] !== q[i+w]) for (const k of [i, i+1, i+w]) {
+          op[k*4]=lineCol[0]; op[k*4+1]=lineCol[1]; op[k*4+2]=lineCol[2]; op[k*4+3]=255; }
+      }
+    } else if (filter === 'gray' || filter === 'contrast') {
       for (let j=0; j<g.length; j++){
         let v = g[j];
         if (filter === 'contrast') v = Math.max(0, Math.min(255, (v-128)*2.2 + 128));
         op[j*4]=op[j*4+1]=op[j*4+2]=v; op[j*4+3]=px[j*4+3];
       }
+    } else if (+$('#simplify').value >= 5) { // outline of the simplified shapes
+      const n = 2 + Math.round((+$('#detail').value - 10) / 110 * 3), q = quantize(g, n);
+      const c = mode === 'camera' ? [255,60,140] : [15,15,15];
+      for (let y=0; y<h-1; y++) for (let x=0; x<w-1; x++){
+        const i = y*w + x;
+        if (q[i] !== q[i+1] || q[i] !== q[i+w]) for (const k of [i, i+1, i+w]) {
+          op[k*4]=c[0]; op[k*4+1]=c[1]; op[k*4+2]=c[2]; op[k*4+3]=255; }
+      }
     } else { // outline (Sobel)
       const thr = 140 - +$('#detail').value; // higher detail = lower threshold
+      const boost = Math.max(1, Math.round(+$('#simplify').value / 100 * Math.max(w, h) / 45) * 0.55);
       for (let y=1; y<h-1; y++) for (let x=1; x<w-1; x++){
         const i = y*w + x;
         const gx = -g[i-w-1] - 2*g[i-1] - g[i+w-1] + g[i-w+1] + 2*g[i+1] + g[i+w+1];
         const gy = -g[i-w-1] - 2*g[i-w] - g[i-w+1] + g[i+w-1] + 2*g[i+w] + g[i+w+1];
-        const m = Math.sqrt(gx*gx + gy*gy);
+        const m = Math.sqrt(gx*gx + gy*gy) * boost;
         if (m > thr*2) { const a = Math.min(255, (m - thr*2) * 1.6 + 120);
           op[i*4]=op[i*4+1]=op[i*4+2]=15; op[i*4+3]=a; }
       }
@@ -517,18 +558,58 @@
     ctx.putImageData(o,0,0);
     paint(out);
   }
+  // group every pixel into the n tones that best describe THIS photo (1-D k-means on a histogram)
+  function quantize(g, n){
+    // pick the n values that best describe THIS photo (1-D k-means on a histogram)
+  const q = new Uint8Array(g.length), hist = new Float64Array(256);
+    for (let j=0; j<g.length; j++) hist[Math.max(0, Math.min(255, g[j] | 0))]++;
+    let cum = 0; const total = g.length, cen = [];
+    for (let v=0, k=0; v<256 && k<n; v++){ cum += hist[v]; while (k < n && cum >= total * (k + .5) / n) { cen.push(v); k++; } }
+    while (cen.length < n) cen.push(255);
+    for (let it=0; it<12; it++){
+      const sum = new Float64Array(n), cnt = new Float64Array(n);
+      for (let v=0; v<256; v++){ if (!hist[v]) continue; let b=0; for (let k=1;k<n;k++) if (Math.abs(v-cen[k]) < Math.abs(v-cen[b])) b=k; sum[b]+=v*hist[v]; cnt[b]+=hist[v]; }
+      for (let k=0; k<n; k++) if (cnt[k]) cen[k] = sum[k]/cnt[k];
+    }
+    cen.sort((a,b) => a-b);
+    const lut = new Uint8Array(256);
+    for (let v=0; v<256; v++){ let b=0; for (let k=1;k<n;k++) if (Math.abs(v-cen[k]) < Math.abs(v-cen[b])) b=k; lut[v]=b; }
+    for (let j=0; j<g.length; j++) q[j] = lut[Math.max(0, Math.min(255, g[j] | 0))];
+    return q;
+  }
+  // fast blur (3 box passes ≈ gaussian), in place on a grayscale array
+  function boxBlur(a, w, h, r){
+    const t = new Float32Array(a.length);
+    const pass = (src, dst, len, count, stride, step) => {
+      for (let line = 0; line < count; line++){
+        const base = line * stride; let acc = 0;
+        for (let k = -r; k <= r; k++) acc += src[base + Math.min(len-1, Math.max(0,k)) * step];
+        for (let i = 0; i < len; i++){
+          dst[base + i*step] = acc / (2*r+1);
+          acc += src[base + Math.min(len-1, i+r+1) * step] - src[base + Math.max(0, i-r) * step];
+        }
+      }
+    };
+    for (let n = 0; n < 3; n++){ pass(a, t, w, h, w, 1); pass(t, a, h, w, 1, w); }
+  }
   function paint(c){
     overlay.width = c.width; overlay.height = c.height;
     const x = overlay.getContext('2d'); x.clearRect(0,0,c.width,c.height); x.drawImage(c,0,0);
     overlay.style.width = c.width+'px'; overlay.style.height = c.height+'px'; apply();
   }
 
-  let detailT; $('#detail').addEventListener('input', () => { clearTimeout(detailT); detailT = setTimeout(render, 120); });
+  let detailT; ['detail','simplify','tones'].forEach(id => $('#'+id).addEventListener('input', () => { clearTimeout(detailT); detailT = setTimeout(render, 120); }));
+  document.querySelectorAll('[data-pass]').forEach(b => b.onclick = () => {
+    $('#simplify').value = b.dataset.pass;
+    document.querySelectorAll('[data-pass]').forEach(x => x.classList.toggle('on', x===b)); render();
+  });
 
   document.querySelectorAll('[data-filter]').forEach(b => b.onclick = () => {
     filter = b.dataset.filter;
     document.querySelectorAll('[data-filter]').forEach(x => x.classList.toggle('on', x===b));
     body.classList.toggle('f-outline', filter==='outline');
+    body.classList.toggle('f-shapes', filter==='shapes');
+    body.classList.toggle('f-simplify', filter==='outline' || filter==='shapes');
     render();
   });
 
